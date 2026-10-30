@@ -140,7 +140,7 @@
     var root = $('.quizroot', art), prefix = 'ch-' + book.id + '-';
     var items = [];
     $$('article').forEach(function (a) {
-      if (a.id.indexOf(prefix) !== 0 || a.id === prefix + 'quiz') return;
+      if (a.id.indexOf(prefix) !== 0 || a.id === prefix + 'quiz' || a.id === prefix + 'bank') return;
       var cid = a.id.slice(prefix.length);
       var meta = book.chapters.filter(function (c) { return c.id === cid; })[0];
       $$('details.qa', a).forEach(function (d, i) {
@@ -185,7 +185,7 @@
       var found = BOOKS.filter(function (b) { return art.id.indexOf('ch-' + b.id + '-') === 0; }).sort(function (a, b) { return b.id.length - a.id.length; })[0];
       if (!found) return;
       var cid = art.id.slice(('ch-' + found.id + '-').length);
-      if (cid === 'quiz') return;
+      if (cid === 'quiz' || cid === 'bank') return;
       var c = found.chapters.filter(function (x) { return x.id === cid; })[0];
       var title = c ? c.title : cid;
       var sec = { book: found.id, id: found.id + '-' + cid, title: title, head: title, text: '' };

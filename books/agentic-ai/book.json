@@ -143,49 +143,49 @@
       "num": "18",
       "title": "MCP inside LangChain",
       "part": "Part F  Advanced",
-      "file": null
+      "file": "ch18.md"
     },
     {
       "id": "ch19",
       "num": "19",
       "title": "Multi-agent patterns",
       "part": "Part F  Advanced",
-      "file": null
+      "file": "ch19.md"
     },
     {
       "id": "ch20",
       "num": "20",
-      "title": "Meridian project overview",
+      "title": "Meridian AI project tour",
       "part": "Part F  Advanced",
-      "file": null
+      "file": "ch20.md"
     },
     {
       "id": "glossary",
       "num": "",
       "title": "Glossary",
       "part": "Back matter",
-      "file": null
+      "file": "glossary.md"
     },
     {
       "id": "bank",
       "num": "",
       "title": "Interview question bank",
       "part": "Back matter",
-      "file": null
+      "file": "@bank"
     },
     {
       "id": "cheat",
       "num": "",
       "title": "Cheat sheet",
       "part": "Back matter",
-      "file": null
+      "file": "cheat.md"
     },
     {
       "id": "projects",
       "num": "",
       "title": "Mini-project ideas",
       "part": "Back matter",
-      "file": null
+      "file": "projects.md"
     },
     {
       "id": "craft",

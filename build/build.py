@@ -192,6 +192,27 @@ def quiz_article(book, prev, nxt):
             '<div class="quizroot" data-book="%s"></div></article>' % (bid, bid))
 
 
+def make_bank(bdir, chapters):
+    """Collect every :::qa block from the written chapters into one searchable page."""
+    skip = {"home", "quiz", "bank", "glossary", "cheat", "projects", "craft"}
+    out, total = [], 0
+    for c in chapters:
+        if c["id"] in skip or not c.get("file") or c["file"].startswith("@"):
+            continue
+        text = open(os.path.join(bdir, "chapters", c["file"]), encoding="utf-8").read()
+        qas = re.findall(r"^:::qa (.*?)\n(.*?)\n:::[ \t]*$", text, flags=re.S | re.M)
+        if not qas:
+            continue
+        label = ("Chapter %s: " % c["num"]) if c.get("num") and c["num"] != "A" else ("Primer: " if c.get("num") == "A" else "")
+        out.append("## %s%s\n" % (label, c["title"]))
+        for q, a in qas:
+            out.append(":::qa %s\n%s\n:::\n" % (q.strip(), a.strip()))
+            total += 1
+    head = ("# Interview question bank\n> lead: Every interview question from every chapter in one place, in chapter order. "
+            "Tap a question to reveal the answer.\nmeta: %d questions | Rebuilt automatically from the chapters\n\n" % total)
+    return head + "\n".join(out)
+
+
 def build_book(root, bid):
     bdir = os.path.join(root, "books", bid)
     book = json.load(open(os.path.join(bdir, "book.json"), encoding="utf-8"))
@@ -207,6 +228,8 @@ def build_book(root, bid):
         nxt = ready[i + 1] if i + 1 < len(ready) else None
         if c["file"] == "@quiz":
             arts.append(quiz_article(book, prev, nxt))
+        elif c["file"] == "@bank":
+            arts.append(article(book, c, make_bank(bdir, chapters), prev, nxt))
         else:
             md = open(os.path.join(bdir, "chapters", c["file"]), encoding="utf-8").read()
             arts.append(article(book, c, md, prev, nxt))
