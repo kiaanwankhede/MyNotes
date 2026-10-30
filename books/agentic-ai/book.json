@@ -94,49 +94,49 @@
       "num": "11",
       "title": "Why MCP exists",
       "part": "Part E  MCP",
-      "file": null
+      "file": "ch11.md"
     },
     {
       "id": "ch12",
       "num": "12",
       "title": "MCP primitives, lifecycle, JSON-RPC",
       "part": "Part E  MCP",
-      "file": null
+      "file": "ch12.md"
     },
     {
       "id": "ch13",
       "num": "13",
-      "title": "Capability negotiation",
+      "title": "Capability negotiation and operation",
       "part": "Part E  MCP",
-      "file": null
+      "file": "ch13.md"
     },
     {
       "id": "ch14",
       "num": "14",
-      "title": "Shutdown and transports",
+      "title": "Shutdown, transports, first server",
       "part": "Part E  MCP",
-      "file": null
+      "file": "ch14.md"
     },
     {
       "id": "ch15",
       "num": "15",
-      "title": "Time Tracker project",
+      "title": "The Time Tracker project",
       "part": "Part E  MCP",
-      "file": null
+      "file": "ch15.md"
     },
     {
       "id": "ch16",
       "num": "16",
-      "title": "Deploying MCP servers",
+      "title": "Deploying servers, building a client",
       "part": "Part E  MCP",
-      "file": null
+      "file": "ch16.md"
     },
     {
       "id": "ch17",
       "num": "17",
       "title": "Legacy vs modern MCP",
       "part": "Part E  MCP",
-      "file": null
+      "file": "ch17.md"
     },
     {
       "id": "ch18",
