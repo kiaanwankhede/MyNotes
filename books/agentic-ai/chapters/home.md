@@ -57,7 +57,7 @@ flowchart LR
 ## What is in this draft
 
 :::note What is in this book
-All 20 course chapters are written. Chapter 10A and the sections titled **From the docs** inside other chapters come from LangChain documentation pages that were read in full (30 Oct 2026). Material from the Craft notes page will be added when the export is shared.
+All 20 course chapters are written. Chapter 10A and the sections titled **From the docs** inside other chapters come from LangChain documentation pages that were read in full (30 Oct 2026). The last page, **From the Craft notes**, indexes the instructor's Craft page.
 :::
 
 :::repo Gaps in the source repository
