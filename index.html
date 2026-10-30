@@ -8502,7 +8502,7 @@ async def run_agent(server) -&gt; dict:
 <h2 id="agentic-ai-ch18-from-the-docs-what-the-langchain-mcp-page-adds">From the docs: what the LangChain MCP page adds</h2>
 <p><em>Added from the LangChain "MCP tools" page (read 30 Oct 2026). <code>langchain.mcp</code> is beta and needs <code>langchain[mcp]&gt;=1.4.0</code>.</em></p>
 <ul>
-<li><strong>Lifetime</strong>: <code>MCPAdapter</code> is used as an async context manager and the tools hold the client, so the agent works <strong>only while the adapter context is open</strong>.</li>
+<li><strong>Lifetime</strong>: <code>MCPAdapter</code> is an async context manager. The tools it returns are <strong>reentrant</strong>: each call opens the client, runs the MCP call and releases it, whether or not a connection is already open. Keep the adapter context open around the agent call if you want one session held across several calls (see the connections section below).</li>
 <li><strong>Content</strong>: model-visible MCP content becomes standard content blocks (text, image, file).</li>
 <li><strong>Structured results</strong> are stored on the <code>ToolMessage</code> as an <strong>artifact</strong>, an <code>MCPToolArtifact</code> whose <code>structured_content</code> holds the data (or <code>None</code>), not in the text the model reads.</li>
 <li><strong>Errors</strong>: a server result with <code>isError=True</code> becomes a <code>ToolMessage</code> with <code>status="error"</code> so the model can recover; transport or session failures raise exceptions.</li>
@@ -8513,6 +8513,90 @@ async def run_agent(server) -&gt; dict:
 <aside class="callout trap"><div class="ct">Common trap<em>Resuming re-runs the tool from the start</em></div><p>After an elicitation answer the tool restarts, so work done before the question can repeat. Make that work <strong>idempotent</strong>.</p></aside>
 <aside class="callout trap"><div class="ct">Common trap<em>Sampling and roots raise errors</em></div><p>The sessionless protocol has no back-channel for sampling or roots requests, so they raise errors. Servers that push elicitation over a legacy handshake session cannot be answered this way. This matches the legacy versus modern split in Chapter 17.</p></aside>
 <!-- /docs-add -->
+
+<!-- docs-add2 -->
+<h2 id="agentic-ai-ch18-from-the-docs-mcp-connections-and-authentication">From the docs: MCP connections and authentication</h2>
+<p><em>Added from the LangChain MCP overview, Connections and Authentication pages (read 30 Oct 2026 from search excerpts; the full pages could not be fetched). <code>langchain.mcp</code> is beta and needs <code>langchain[mcp]&gt;=1.4.0</code>.</em></p>
+<h3 id="agentic-ai-ch18-transports-the-target-decides">Transports: the target decides</h3>
+<p><code>MCPAdapter</code> <strong>infers the transport from the target you give it</strong>, so only the target changes between a local script and a remote server:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Reached by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>An <code>http</code> or <code>https</code> URL (string)</td>
+<td>Streamable HTTP</td>
+</tr>
+<tr>
+<td>A script <code>Path</code></td>
+<td>Launched as a subprocess over stdio</td>
+</tr>
+<tr>
+<td>A transport object such as <code>StreamableTransport</code></td>
+<td>The pre-configured transport you built</td>
+</tr>
+<tr>
+<td>An in-process FastMCP server</td>
+<td>In memory, no subprocess or socket</td>
+</tr>
+<tr>
+<td>An <code>MCPConfig</code> dict <code>{"mcpServers": {...}}</code></td>
+<td>Several servers behind one adapter</td>
+</tr>
+</tbody>
+</table></div>
+<p>Strings that do not look like a URL are rejected, because strings often arrive from configuration or from a model.</p>
+<h3 id="agentic-ai-ch18-connection-lifecycle-and-fleets">Connection lifecycle and fleets</h3>
+<ul>
+<li><strong>Default lifecycle</strong> is enough for most uses: <code>async with MCPAdapter(target) as adapter:</code> then <code>await adapter.list_tools()</code>. Prefer it unless you connect to several servers or run many concurrent runs.</li>
+<li><strong>Reentrant tools</strong>: each tool call opens the client, runs, and releases it. If you keep the adapter context open while calling the agent, the existing connection is reused instead of opening a second.</li>
+<li><strong>Multiple servers</strong>: each backend is addressed independently, so a fleet can <strong>mix transports</strong> (one over stdio, another over HTTP).</li>
+<li><strong>Deployment scaling</strong>: by default each FastMCP client manages its own HTTP connections. Across a fleet, share one HTTP client pool so the deployment opens one set of connections for all servers instead of one per server.</li>
+<li><strong>Caching</strong>: FastMCP can cache the result of <code>list_tools</code> so repeated discovery avoids a network round trip.</li>
+<li>The page also covers "protocol eras" (legacy versus modern servers, as in Chapter 17).</li>
+</ul>
+<h3 id="agentic-ai-ch18-authentication-delegated-to-fastmcp">Authentication: delegated to FastMCP</h3>
+<p>Most remote MCP servers need authentication. <code>MCPAdapter</code> hands auth to FastMCP, so <strong>any credential a <code>fastmcp.Client</code> accepts works</strong>. You pass the credential on a prebuilt client and give that client to the adapter.</p>
+<pre><code class="language-python">from fastmcp.client import Client
+from langchain.mcp import MCPAdapter
+
+async def load_tools_with_bearer(url: str, token: str) -&gt; list:
+    async with MCPAdapter(Client(url, auth=token)) as adapter:
+        return await adapter.list_tools()
+</code></pre>
+<p>The <code>auth</code> argument accepts three things:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Value</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A bearer-token string</td>
+<td>Sent as <code>Authorization: Bearer &lt;token&gt;</code>. No discovery, no browser, no refresh</td>
+</tr>
+<tr>
+<td>The literal <code>"oauth"</code></td>
+<td>Full OAuth 2.1: discovery, <strong>dynamic client registration</strong> (the client registers itself at runtime, so you need not pre-provision a client id), browser redirect and token exchange</td>
+</tr>
+<tr>
+<td>Any <code>httpx.Auth</code></td>
+<td>Your own scheme</td>
+</tr>
+</tbody>
+</table></div>
+<aside class="callout trap"><div class="ct">Common trap<em>OAuth tokens are in memory by default</em></div><p>Each new run repeats the browser step. Pass a prebuilt provider with a <strong>token store</strong>, for example <code>OAuth(mcp_url=..., token_storage=...)</code>, to persist tokens across runs. FastMCP also ships providers for common identity providers (Auth0, WorkOS, Okta and more); the client flow is the same across them.</p></aside>
+<p><strong>Per-server auth.</strong> When one agent talks to several servers, give each its own client with its own <code>auth</code> and group them in a <code>ClientGroup</code>, so every server authenticates independently.</p>
+<p><strong>Per-user auth (deployments).</strong> Each run should reach the MCP server <strong>as the user who started it</strong>, not with one shared credential. The pattern is: authenticate the caller at the LangGraph server with a custom auth handler, read the identity off the run's runtime (<code>runtime.user.identity</code>, or "anonymous" if none), exchange it for a per-user token, and build the client with that token. In production the exchange is an OAuth gateway, or a FastMCP auth provider running the authorisation-code flow per identity.</p>
+<aside class="callout note"><div class="ct">Note<em>Older library, same idea</em></div><p>In the older <code>langchain-mcp-adapters</code> package, headers go in the connection config for <code>MultiServerMCPClient</code>. Only <code>sse</code> and <code>http</code> (streamable HTTP) transports support runtime headers; <strong>stdio does not</strong>. That library does not implement authentication itself and relies on the server and transport (HTTP and TLS).</p></aside>
+<p><strong>Interview line:</strong> "The adapter does not own auth: it delegates to FastMCP, so bearer, OAuth 2.1 and custom <code>httpx.Auth</code> all work, and for multi-user apps I resolve the caller's identity on the server and mint a per-user token for each run."</p>
+<!-- /docs-add2 -->
 
 <h2 id="agentic-ai-ch18-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
@@ -8907,7 +8991,7 @@ class RouterState(TypedDict, total=False):
 <p>The combined notebook defines a small test double, <code>ScriptedToolModel</code>, which plays back a scripted list of <code>AIMessage</code>s (some with <code>tool_calls</code>) in order. Everything downstream is real: <code>create_agent</code> runs its loop, tools execute, <code>Command</code> objects update real graph state, <code>StateGraph.invoke()</code> traverses real nodes, and <code>InMemorySaver</code> persists real checkpoints. Only <strong>which words the model chooses</strong> is scripted. A <code>DeterministicFakeEmbedding</code> stands in for real embeddings so a vector store can be built and queried with zero network calls. The point is that the interesting part (wiring, state transitions, tool dispatch, handoffs) does not depend on what a live model says. The student-facing notebooks, by contrast, need a real key.</p>
 <!-- docs-add -->
 <h2 id="agentic-ai-ch19-from-the-docs-what-the-multi-agent-pages-add">From the docs: what the multi-agent pages add</h2>
-<p><em>Added from the LangChain Subagents, Skills, Router and Handoffs pages (read 30 Oct 2026; the handoffs page from search excerpts only).</em></p>
+<p><em>Added from the LangChain Subagents, Skills and Router pages (read 30 Oct 2026). Choosing a pattern, handoffs, custom workflows and the tutorials follow in the next section.</em></p>
 <p><strong>Subagents (supervisor).</strong> Subagents are called as tools and are <strong>stateless by default</strong>, so the main agent holds all memory; each call runs in a clean context ("context isolation"). A supervisor is a full agent that keeps context across turns and can call several subagents in parallel; a router is usually one dispatch step.</p>
 <div class="tablewrap"><table>
 <thead>
@@ -8942,8 +9026,153 @@ class RouterState(TypedDict, total=False):
 <p>By default a subagent uses an inherited checkpointer (fresh each call, supports interrupts, safe in parallel); <code>checkpointer=True</code> gives it persistent history. Because subagents run inside tool functions, LangGraph cannot discover them statically, so <code>get_state</code> with subgraphs will not show their state; call the subagent from a node in a custom graph to inspect it. The <code>langgraph-supervisor</code> package is no longer maintained.</p>
 <p><strong>Skills.</strong> Skills are mainly <strong>specialised prompts</strong> loaded on demand: a <code>load_skill(skill_name)</code> tool whose docstring lists the available skills, plus a system prompt naming them. This is <strong>progressive disclosure</strong>, the same idea as Agent Skills and <code>llms.txt</code>. Use it when one agent needs many specialisations, you do not need constraints between skills, or several teams build capabilities independently. Extensions: loading a skill can also <strong>register new tools</strong> in state, skills can form a <strong>tree</strong> (a <code>data_science</code> skill with sub-skills), and a skill's prompt can point to files read only when needed.</p>
 <p><strong>Router.</strong> A routing step classifies input and sends it to specialised agents, zero or more in parallel, then results are synthesised. Use <code>Command</code> (with <code>goto</code>) for one target and <strong><code>Send</code></strong> for parallel fan-out (a list of <code>Send</code> objects each carrying a sub-query). Routers are <strong>stateless</strong> by default. For multi-turn, either wrap the router as a tool inside a conversational agent (simplest) or store history in the router yourself, which needs custom management and can feel disjointed if agents have different tones. When multi-turn conversation is central the docs recommend handoffs or subagents.</p>
-<p><strong>Handoffs</strong> (from excerpts). Tools update a state variable such as <code>current_step</code> or <code>active_agent</code> that persists across turns, and middleware reads it to change the prompt and tools. Two ways to build them: a <strong>single agent with middleware</strong> (simpler, recommended for most cases) or <strong>multiple agent subgraphs</strong> (use only when a node is itself a complex graph); subgraph handoffs need explicit decisions about which messages pass between agents, and need a checkpointer so <code>current_step</code> survives between turns.</p>
 <!-- /docs-add -->
+
+<!-- docs-add2 -->
+<h2 id="agentic-ai-ch19-from-the-docs-choosing-a-pattern-workflows-and-t">From the docs: choosing a pattern, workflows and the tutorials</h2>
+<p><em>Added from the LangChain multi-agent overview, Handoffs and Custom workflow pages and the two tutorials below (read 30 Oct 2026; the overview and custom workflow from search excerpts, handoffs in full).</em></p>
+<h3 id="agentic-ai-ch19-do-you-need-multi-agent-at-all">Do you need multi-agent at all?</h3>
+<p>The docs open with a warning: not every complex task needs it, and <strong>a single agent with the right (sometimes dynamic) tools and prompt can often do the job</strong>. Multi-agent earns its place when:</p>
+<ul>
+<li>a single agent has <strong>too many tools</strong> and picks badly,</li>
+<li>tasks need <strong>specialised knowledge with long context</strong> (long prompts, domain tools),</li>
+<li><strong>different teams</strong> must build and maintain parts independently.</li>
+</ul>
+<p>At the centre is <strong>context engineering</strong>: deciding what each agent sees (Chapter 6A). You can also <strong>mix patterns</strong>: a subagent can call tools that run workflows or routers, and subagents can use skills to load context on demand. For built-in support the docs point to <strong>Deep Agents</strong> (subagents, skills, planning, virtual filesystem, context management).</p>
+<h3 id="agentic-ai-ch19-the-comparison-table">The comparison table</h3>
+<p>Star ratings from the LangChain blog post that mirrors the docs table (5 is best, a dash means the pattern does not offer it):</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Distributed development</th>
+<th>Parallelisation</th>
+<th>Multi-hop</th>
+<th>Direct user interaction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Subagents</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Skills</td>
+<td>5</td>
+<td>3</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Handoffs</td>
+<td>-</td>
+<td>-</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Router</td>
+<td>3</td>
+<td>5</td>
+<td>-</td>
+<td>3</td>
+</tr>
+</tbody>
+</table></div>
+<p>Meaning of the columns: <em>distributed development</em> (can different teams maintain parts?), <em>parallelisation</em> (can agents run at once?), <em>multi-hop</em> (can it call several agents in series?), <em>direct user interaction</em> (can the specialist talk to the user?).</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Your need</th>
+<th>Pattern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Several independent domains, central control</td>
+<td>Subagents</td>
+</tr>
+<tr>
+<td>One agent with many specialisations, loaded on demand</td>
+<td>Skills</td>
+</tr>
+<tr>
+<td>Sequential steps, the agent converses with the user throughout</td>
+<td>Handoffs</td>
+</tr>
+<tr>
+<td>Distinct verticals, query many sources in parallel and merge</td>
+<td>Router</td>
+</tr>
+<tr>
+<td>None of the above, or you need loops and branches</td>
+<td>Custom workflow</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="agentic-ai-ch19-performance-calls-and-tokens">Performance: calls and tokens</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>What the docs found</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One-shot request</td>
+<td>Handoffs, Skills and Router take about 3 calls; <strong>Subagents add one</strong> because results flow back through the main agent (the price of central control). The coffee example takes 4 calls with subagents</td>
+</tr>
+<tr>
+<td>Repeat request in the same chat</td>
+<td><strong>Stateful</strong> patterns (Handoffs, Skills) save about <strong>40 to 50 percent</strong> of calls by keeping context. Subagents are stateless, so every request repeats the full flow</td>
+</tr>
+<tr>
+<td>Multi-domain request</td>
+<td>Patterns that run in parallel (<strong>Subagents, Router</strong>) win. Skills has fewer calls but <strong>high token use</strong> because loaded context accumulates. Handoffs is inefficient because it runs sequentially. The docs' example: 5 calls and about 9K tokens with subagents</td>
+</tr>
+</tbody>
+</table></div>
+<aside class="callout key"><div class="ct">Key idea<em>The trade-off in one line</em></div><p>Subagents give isolation and parallelism but are stateless; Handoffs and Skills remember but run one thing at a time; Routers are cheap and parallel but stateless.</p></aside>
+<h3 id="agentic-ai-ch19-handoffs-in-full">Handoffs, in full</h3>
+<p>The term comes from OpenAI, who used tool calls such as <code>transfer_to_sales_agent</code> to move control. The state-variable idea (<code>current_step</code> or <code>active_agent</code>) is the same one you met above.</p>
+<ul>
+<li><strong>Use when</strong> steps must happen in a fixed order, capabilities unlock only after preconditions (collect a warranty id before a refund), or you build a multi-stage conversation.</li>
+<li><strong>The tool must return a <code>ToolMessage</code>.</strong> A handoff tool returns a <code>Command</code> updating state, and when it also updates messages it <strong>must include a <code>ToolMessage</code> with the matching <code>tool_call_id</code></strong>, or the history is malformed.</li>
+<li><strong>Approach 1, single agent with middleware</strong> (recommended): a <code>wrap_model_call</code> reads <code>current_step</code> and overrides the system prompt and tools for that call. State extends <code>AgentState</code>; a checkpointer keeps it across turns.</li>
+<li><strong>Approach 2, agent subgraphs</strong>: each agent is a graph node; handoff tools return <code>Command(goto=..., graph=Command.PARENT)</code>; an <code>active_agent</code> field records who is in control; router functions end the run or hand over depending on <code>active_agent</code> and whether the last message has tool calls. Use it only when a node needs its own complex internals.</li>
+<li><strong>Context for subgraph handoffs</strong>: pass only <strong>two messages</strong>, the <code>AIMessage</code> holding the handoff tool call and a <code>ToolMessage</code> acknowledging the transfer, <strong>not</strong> the whole sub-agent history. That keeps the receiver focused and tokens low; if it needs more, <strong>summarise inside the <code>ToolMessage</code></strong>. When returning control to the user, the final message should be an <code>AIMessage</code>.</li>
+<li><strong>Decide</strong>: how much history each agent gets (full, filtered, summary), whether a handoff tool only routes or also has side effects (opening a ticket), and how you control token growth.</li>
+</ul>
+<h3 id="agentic-ai-ch19-custom-workflows">Custom workflows</h3>
+<p>When standard patterns do not fit, build your own graph with LangGraph. You control the structure: <strong>sequential steps, conditional branches, loops and parallel execution</strong>, and you mix deterministic logic with agentic behaviour. Each node can be a plain function, an LLM call or a <strong>whole agent with tools</strong>. The key trick is that you can call a LangChain agent directly inside any LangGraph node, and the router pattern is itself an example of a custom workflow.</p>
+<p>The docs' RAG example has three kinds of node: a <strong>model node</strong> (rewrite the query with structured output), a <strong>deterministic node</strong> (vector search, no LLM) and an <strong>agent node</strong> (reason over the retrieved context and fetch more through tools). LangGraph state passes data between nodes.</p>
+<h3 id="agentic-ai-ch19-tutorial-personal-assistant-with-subagents">Tutorial: personal assistant with subagents</h3>
+<p>A supervisor coordinates a <strong>calendar agent</strong> (parses "next Tuesday at 2pm" into an ISO time, checks availability, creates events) and an <strong>email agent</strong> (writes and sends messages). The steps:</p>
+<ol>
+<li>Define stub tools (<code>create_calendar_event</code>, <code>get_available_time_slots</code>, <code>send_email</code>).</li>
+<li>Make each specialist with <code>create_agent</code> and a focused system prompt.</li>
+<li><strong>Wrap each specialist as a high-level tool</strong> (<code>schedule_event</code>, <code>manage_email</code>). The supervisor sees these, not the low-level API tools.</li>
+<li>Create the supervisor. A request needing both runs <code>schedule_event</code> then <code>manage_email</code>; by default dispatch is sequential.</li>
+<li>Add human-in-the-loop on the sensitive tools inside the sub-agents (approve, edit or reject); the <strong>checkpointer goes only on the top-level agent</strong>.</li>
+<li>Control information flow: what the sub-agent receives, and what comes back to the supervisor (only its <strong>final response</strong>, since the supervisor does not need intermediate reasoning).</li>
+</ol>
+<p>Lessons the page states: write clear tool descriptions because they drive the supervisor's choices, start from clear domain boundaries, and test each layer on its own. If you are migrating from the <code>langgraph-supervisor</code> package (no longer maintained) there is a migration guide.</p>
+<h3 id="agentic-ai-ch19-tutorial-a-multi-source-router">Tutorial: a multi-source router</h3>
+<p>Three specialists (a <strong>GitHub</strong> agent searching code, issues and PRs, a <strong>Notion</strong> agent for docs, a <strong>Slack</strong> agent for threads) behind a router built with <code>StateGraph</code>:</p>
+<ol>
+<li><strong>Classify</strong>: a small model with <strong>structured output</strong> returns a list of <code>Classification</code> items, each with a <code>source</code> (<code>Literal["github", "notion", "slack"]</code>) and a targeted sub-question. Only relevant sources are returned.</li>
+<li><strong>Route</strong>: a function returns a list of <strong><code>Send</code></strong> objects, one per classification, used through <code>add_conditional_edges</code>, so the agent nodes run <strong>in parallel</strong>.</li>
+<li><strong>Query</strong>: each agent node receives a simple input and returns its answer.</li>
+<li><strong>Synthesize</strong>: combine results into one reply.</li>
+</ol>
+<p>Collecting parallel results needs a <strong>reducer</strong> on the state field: <code>results: Annotated[list[AgentOutput], operator.add]</code>. For "How do I authenticate API requests?" the router picked GitHub and Notion but not Slack. The three phases are decompose, route and synthesise.</p>
+<p><strong>Router vs subagents here:</strong> choose the router for independent knowledge sources, low latency and explicit routing logic; choose subagents when you want the model to decide dynamically which agents to call.</p>
+<aside class="callout note"><div class="ct">Note<em>Not read</em></div><p>The customer-support-with-handoffs tutorial and the SQL-assistant-with-skills tutorial were not read in this session, only the handoffs and skills concept pages.</p></aside>
+<!-- /docs-add2 -->
 
 <h2 id="agentic-ai-ch19-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>

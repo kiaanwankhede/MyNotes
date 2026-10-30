@@ -23,27 +23,29 @@
   "mcp/tools",
   "multi-agent/subagents",
   "multi-agent/skills",
-  "multi-agent/router"
+  "multi-agent/router",
+  "multi-agent/handoffs"
  ],
  "search_excerpts_only": [
   "context-engineering",
-  "multi-agent/handoffs",
   "test/index",
   "test/unit-testing",
   "studio",
   "observability",
   "deploy",
   "knowledge-base",
-  "sql-agent"
- ],
- "not_fetchable_in_session": [
-  "philosophy",
-  "component-architecture",
+  "sql-agent",
   "mcp/index",
   "mcp/connections",
   "mcp/auth",
   "multi-agent/index",
   "multi-agent/custom-workflow",
+  "multi-agent/subagents-personal-assistant",
+  "multi-agent/router-knowledge-base"
+ ],
+ "not_fetchable_in_session": [
+  "philosophy",
+  "component-architecture",
   "test/integration-testing",
   "test/evals",
   "voice-agent"
@@ -54,5 +56,9 @@
   "deep-agent-from-scratch",
   "multi-agent tutorials (4)"
  ],
- "note": "Re-check pages in not_fetchable and search_excerpts_only when a fetch is possible."
+ "note": "Re-check pages in not_fetchable and search_excerpts_only when a fetch is possible.",
+ "not_read": [
+  "multi-agent/handoffs-customer-support",
+  "multi-agent/skills-sql-assistant"
+ ]
 }
