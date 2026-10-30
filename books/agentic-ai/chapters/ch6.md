@@ -304,6 +304,20 @@ In the **store** (long-term memory), so every future conversation can use it. A 
 No. Only model calls consume tokens. A tool running on its own, with no model call, does not (though the tool's own API may have fees).
 :::
 
+<!-- assign-add -->
+### Assignment 2 questions (practice)
+
+*From `Assignment_2_Agents_and_Prebuilt_Middleware.ipynb` (Weekend 06, a "NovaBank" banking scenario). The repo ships the questions only, with **no answer key**, so I list them for practice and point to where this book answers them.*
+
+| Question (short form) | Where to find the answer |
+| --- | --- |
+| Describe the agent loop mechanically when a tool call is involved | Primer and Chapter 6, section 1 |
+| `thread_id` alone does not persist a conversation: what else is needed and what breaks without it | Chapter 6 (checkpointer) and Chapter 10 |
+| Distinguish `thread_id` from `context` and what data belongs in each | Chapter 10 |
+| Name the three practical `stream_mode` options and what each suits | Chapter 10A |
+| Why does naming an agent (`name=`) cost nothing now but matter later | Chapters 10A and 19 (`lc_agent_name`, subagents) |
+<!-- /assign-add -->
+
 ## Quick revision
 
 - [ ] I can restate the loop and say where the tool result goes

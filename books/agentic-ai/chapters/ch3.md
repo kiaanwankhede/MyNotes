@@ -368,6 +368,37 @@ Yes, for restoring genuine saved history or setting up a test, because the model
 No. Every route (raw Python, LangChain, OpenRouter, Claude) is a standard API request with parameters and a body, and a standard response. LangChain adds a consistent interface, not a different mechanism.
 :::
 
+<!-- assign-add -->
+### Course assignment questions
+
+*From `Assignment_LangChain_Fundamentals_Landscape_to_Tools.ipynb` and its answer-key notebook (Weekend 05, the GreenPlate restaurant scenario). Answers are condensed from the instructor's key.*
+
+
+:::qa Name four things an `AIMessage` carries besides `.content`.
+`.tool_calls` (tool requests), `.usage_metadata` (real token counts), `.id` (unique identifier), `.response_metadata` (provider extras such as the exact model that replied). `.content_blocks` is also acceptable.
+:::
+
+:::qa Why does streaming produce `AIMessageChunk` objects, not plain strings?
+A stream is a partial response that must later combine into a whole. Chunks can be added with `+` into a complete message and can carry structure (tool-call fragments, metadata) that a string fragment cannot.
+:::
+
+:::qa `.batch()` versus `.batch_as_completed()`?
+`.batch()` waits for all results and returns them in input order. `.batch_as_completed()` yields each result as soon as it finishes, possibly out of order, tagged with its input index. Use the second when you want to start on whichever result arrives first instead of waiting for the slowest.
+:::
+
+:::qa `ToolMessage` has `.content` and `.artifact`. What is the difference?
+`.content` is what the **model** reads; `.artifact` is extra data for the **application** that is never sent to the model. A retrieval tool uses it to attach a document id or citation link for the UI without bloating the model's input.
+:::
+
+:::qa Your prompt template contains a literal JSON example such as `{"status": "ok"}`. What breaks?
+LangChain reads the braces as more template variables and fails (`INVALID_PROMPT_INPUT`). Escape them by doubling: `{{` and `}}`.
+:::
+
+:::qa What does `MessagesPlaceholder` do that a string variable cannot?
+It injects a whole **list** of prior messages as one template variable. A string variable holds a single string and cannot represent a structured message history.
+:::
+<!-- /assign-add -->
+
 ## Quick revision
 
 - [ ] I know the six model parameters and which one is required

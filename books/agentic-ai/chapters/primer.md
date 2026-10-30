@@ -188,6 +188,73 @@ Interactive demo: edit JSON and validate it against a small Pydantic-style model
 :::
 <!-- /sites-add -->
 
+<!-- repo3-add -->
+## From the course repo: setup files and the Python agent projects
+
+*Added from files I had listed but not read: `PREREQUISITES.md`, the Weekend 01 and 02 Python and Project 0 scripts, and the Weekend 04 LangChain notebooks (read 30 Oct 2026). Python itself stays a primer here, as you asked.*
+
+### One-time setup (from `PREREQUISITES.md`)
+
+| Step | What the repo says |
+| --- | --- |
+| Python | 3.10 or newer; individual projects pin an exact version in `.python-version` (the course pins 3.13) |
+| `uv` | The package and project manager used all course long; each code folder ships `pyproject.toml` and `uv.lock`, so `uv sync` rebuilds the exact environment |
+| Windows | Use Git Bash or Windows Terminal, never plain CMD or PowerShell |
+| Editor | VS Code, because the course leans on `.py` scripts, a real terminal and proper debugging, not only notebooks |
+| LLM key | At least **one** provider key. Free: **Groq** and **OpenRouter** (its `openrouter/free` model name auto-routes to a free model so it never goes stale). Paid: OpenAI, Anthropic |
+| `.env` | Copy `.env.example` to `.env`, paste a real key (for example `GROQ_API_KEY=...`), then `uv run main.py`. `.env` is git-ignored at the repo root, so a real key cannot be committed by accident |
+
+The free model in the LangChain notebook is created with `init_chat_model("openrouter/free", model_provider="openrouter")` (the notebook also names one specific free model, `nvidia/nemotron-3-super-120b-a12b:free`).
+
+:::trap A real key is hard-coded in a notebook
+`Langchain (1).ipynb` (Weekend 04, Models) sets an OpenRouter key directly in a cell. I am not reproducing it. Treat any key that has been committed as compromised: revoke it and use `.env`. (Chapter 18 notes a similar case.)
+:::
+
+### Project 0: the agent built in seven files
+
+Weekend 02's `Project 0/` folder builds a complete agent with **no framework**, one idea per file. This is the same loop as the primer's, written out in code.
+
+| File | Idea |
+| --- | --- |
+| `_01_ai_model_vs_chatbot_vs_agent.py` | A model alone, a chatbot (history re-sent), an agent |
+| `_02_calling_the_ai_paid_and_free.py` | The same call against Groq, OpenRouter or OpenAI |
+| `_03_structuring_with_pydantic.py` | Ask for a fixed shape, validate it |
+| `_04_giving_it_a_tool.py` | A plain function that knows nothing about AI |
+| `_05_teaching_it_to_choose.py` | The tool schema, so the **model** chooses |
+| `_06_project_zero_agent.py` | The assembled loop with `max_turns` as a safety limit |
+| `_07_streamlit_app.py` | A chat UI with three tools (sample weather, a guarded calculator, currency conversion) |
+
+Three patterns worth stealing from them:
+
+- **A provider picker.** Groq, OpenRouter and OpenAI all speak the OpenAI-compatible API, so one client works for all three by changing `base_url` and the model name (`llama-3.3-70b-versatile` on Groq, `openrouter/free` on OpenRouter, `gpt-4o-mini` on OpenAI), and it raises a clear error if no key is set. Anthropic's tool-calling response has a different shape and is covered later in the course.
+- **`max_turns`.** The loop gives up after a fixed number of turns and returns "Reached max_turns without a final answer", so a confused model cannot loop forever (the same idea as `ModelCallLimitMiddleware` in Chapter 7).
+- **A guarded calculator.** Only digits, operators and parentheses are allowed through before `eval()` runs, so arbitrary code cannot be smuggled in through the expression.
+
+In `_07`, memory is `st.session_state.messages`, a plain list. The Python refresher's last files (`_10` to `_14`) build the same agent as a class: a tool that calls the model, an agent that only talks, an agent with one tool, with three tools (currency, weather, calculator), and finally with memory, whose docstring says memory "is just a Python list" that has been there since `_11` as `self.messages`.
+
+:::repo `_06_project_zero_agent.py` does not run as committed
+It parses, but it will fail on the first tool call. It defines `get_currency` twice (the second definition is just `pass`, so it returns `None` and replaces the first), lists only `get_weather` in `TOOL_SCHEMAS`, and has leftover live-coding scratch inside `run_agent`: a line that builds a `tool_calls` list using an undefined name `function` (a `NameError` when reached), plus `l1 = [1,2,3,4,5]` and some empty nested loops after the function. Use `_07_streamlit_app.py` for a version that is meant to run.
+:::
+<!-- /repo3-add -->
+
+<!-- refresher-add -->
+### The Python refresher files, in teaching order
+
+*From the Weekend 01 README. This is an index only; Python stays a primer.*
+
+| File | Covers |
+| --- | --- |
+| `_0` to `_4` | Basics recap, data structures (lists, dicts, tuples, list of dicts), OOP (a `BankAccount` and a `Book`), error handling (`try` and `except`), decorators (the generic wrapper pattern) |
+| `_5_calling_a_real_api.py` | `requests` against a real currency API, the first real API and no AI |
+| `_6_fake_ai_call.py` | The OpenAI-style call shape with zero dependencies, the first AI mention |
+| `_7_ai_call_free_and_paid.py` | Groq and OpenRouter (free), OpenAI (paid, shown not required) |
+| `_8_pydantic_with_ai.py` | The main Pydantic topic: `BaseModel`, `Field`, validators, nested models, validating LLM output |
+| `_9` and `_10` | The API call from `_5` now Pydantic-validated, then a validated tool plus an AI call side by side with a decorator applied for real |
+| `_11` to `_14` | The agent as a class: brain only, plus one tool (currency), plus weather and a calculator, plus memory |
+
+The class-03 write-up also gives the **five AI terms** to know before building an agent: an LLM predicts the next *token*, not the next word; tokens are the billing currency and output costs more than input; embeddings put similar meaning close together; the context window is a whiteboard of fixed size; parameters are billions of weights fixed at training time, not the same thing as tokens.
+<!-- /refresher-add -->
+
 ## Common mistakes
 
 | Mistake | Symptom | Fix |

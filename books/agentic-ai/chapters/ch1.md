@@ -451,6 +451,33 @@ A **chain** is a deterministic sequence of steps wired before runtime, running t
 Probably not. For narrow classification tasks (sentiment, named-entity recognition) a small purpose-built encoder model is commonly cited as faster, cheaper and more accurate than an LLM chain. Reach for an agent when the task needs reasoning across steps or tools, not for a single fixed label.
 :::
 
+<!-- assign-add -->
+### Course assignment questions
+
+*From `Assignment_LangChain_Fundamentals_Landscape_to_Tools.ipynb` and its answer-key notebook (Weekend 05, the GreenPlate restaurant scenario). Answers are condensed from the instructor's key.*
+
+
+:::qa An agent is "a model calling tools in a loop"; a harness is "everything around the loop". What counts as the harness?
+The system prompt (instructions), the tools the model can reach, and the middleware shaping behaviour at each step. `create_agent` is the harness: configuring it is most of what the course teaches.
+:::
+
+:::qa Name the four Lang products. Which is different in kind?
+LangGraph: low-level orchestration that everything else sits on. LangChain (`create_agent`): a configurable harness on LangGraph. Deep Agents: a batteries-included harness with planning, a filesystem and subagents pre-wired. **LangSmith is different in kind**: an observability platform that watches agents built with any of the others, because an agent's runtime decisions cannot be read from its code.
+:::
+
+:::qa A 2026 tutorial uses `AgentExecutor` or `initialize_agent`. What do you conclude?
+It predates LangChain v1.0 (October 2025). Those are the legacy pattern, now in the separate `langchain-classic` package. Use `create_agent`.
+:::
+
+:::qa Why does a `.env` file exist, and what goes wrong if you hard-code a key in a notebook?
+`.env` keeps the key out of the file you commit or share. A hard-coded key is exposed the moment the notebook reaches GitHub, and automated scanners often find and abuse it within minutes.
+:::
+
+:::qa Plain text, a message-object list, and a dictionary list: when is each natural?
+Plain text for one standalone request with no history. Message objects for multi-turn chats, multimodal content and explicit system instructions. Dictionaries do the same job and are natural when the conversation arrives from a database or JSON API.
+:::
+<!-- /assign-add -->
+
 ## Quick revision
 
 - [ ] I can state Agent = Model + Harness and explain it with an analogy

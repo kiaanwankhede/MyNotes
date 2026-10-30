@@ -332,6 +332,27 @@ Built-ins cannot cover every country. Define a custom detector with a regular ex
 When you need precise, deterministic control of internals such as checkpointers, stores and interrupts. For most agents, including simple RAG chatbots, LangChain with built-in middleware is enough.
 :::
 
+<!-- assign-add -->
+### Assignment 2: middleware questions (practice)
+
+*From `Assignment_2_Agents_and_Prebuilt_Middleware.ipynb`. No answer key ships in the repo. Part B and the capstone use **built-in middleware only**, so no custom hooks are needed.*
+
+| Question (short form) | Where this book covers it |
+| --- | --- |
+| The exact ordering rule for `before_*`, `after_*` and `wrap_*` hooks across several middleware | Chapter 9, "execution order" |
+| Four HITL decisions, with a realistic case for each on a `transfer_funds` tool | Chapter 10 |
+| `SummarizationMiddleware` versus `ContextEditingMiddleware` for simple tools but long chats | The reference table above |
+| Three distinct retry mechanisms, each with a case where only that one fits | Chapters 7 and 8 (tool retry, model retry, model fallback) |
+| `ToolCallLimitMiddleware` on one tool with a looser `ModelCallLimitMiddleware` overall | The reference table above |
+| Correct composition of `ToolErrorMiddleware` with `ToolRetryMiddleware`, and what the wrong order does | Chapters 8 and 10 (also note that HITL goes before retry middleware) |
+| A PII policy for account numbers using the three `apply_to_*` flags | Chapter 8 |
+| The documented discrepancy around `LLMToolEmulator`'s `model` parameter | Chapter 8; the reference table says its default is the agent's own model, so set `model=` explicitly |
+| `LLMToolSelectorMiddleware` versus `ProviderToolSearchMiddleware` for 15 tools | The reference table above (the second needs a supporting provider and model) |
+| Design a complete prebuilt-middleware stack for a production banking agent | Chapter 20's middleware stack is a worked example |
+
+The coding part (a banking agent with real memory across two calls on one `thread_id`, then built-in middleware exercises and a capstone) is a good lab to do after this chapter.
+<!-- /assign-add -->
+
 ## Quick revision
 
 - [ ] I can name the six hook points and the six built-in middlewares

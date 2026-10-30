@@ -351,6 +351,37 @@ In `result["structured_response"]`. With a `Union`, use `isinstance()` to see wh
 `handle_errors` on `ToolStrategy`: `True` retries with a default message, a string retries with your message, an exception type catches only that type, and `False` lets the error propagate.
 :::
 
+<!-- assign-add -->
+### Course assignment questions
+
+*From `Assignment_LangChain_Fundamentals_Landscape_to_Tools.ipynb` and its answer-key notebook (Weekend 05, the GreenPlate restaurant scenario). Answers are condensed from the instructor's key.*
+
+
+:::qa Why is "please reply in JSON" less reliable than `with_structured_output()`?
+Prompting relies on the model choosing to comply, so it can add commentary or produce invalid JSON. Structured output gives a schema that Pydantic validates before the result reaches your code; non-compliant output does not pass through as "close enough".
+:::
+
+:::qa What is `model.profile` and how is it used when no strategy is given?
+A dict describing what a model supports (for example `"structured_output": true`, `"tool_calling": true`). With no explicit strategy, LangChain checks it to pick `ProviderStrategy` if supported, otherwise `ToolStrategy`.
+:::
+
+:::qa Code review: `model.with_structured_output(BookingRequest, strategy=ProviderStrategy(BookingRequest))`. What is wrong?
+`strategy=` is not a real parameter. It is silently absorbed into `**kwargs` and does nothing, so the call quietly uses the default strategy. Wrap the schema instead: `with_structured_output(ProviderStrategy(BookingRequest))`.
+:::
+
+:::qa Model-level versus agent-level structured output?
+Model level (`with_structured_output`) knows nothing about tools or a loop and returns a parsed object directly. Agent level (`response_format` on `create_agent`) coexists with tools and returns `result["structured_response"]` next to the normal message trail. Most real work uses `create_agent`, so it uses the agent-level form.
+:::
+
+:::qa With `ToolStrategy(Union[NewReservation, CancelReservation])`, what happens on an ambiguous message?
+The model itself decides which member schema fits; LangChain does not pre-classify. If the message is genuinely ambiguous the model may try more than one schema before settling, which relates to self-correction.
+:::
+
+:::qa A field is `party_size: int = Field(ge=1, le=20)` and the user says "table for 50". Walk through the loop.
+The model proposes `party_size=50`; Pydantic rejects it; the validation error naming the violated constraint goes back to the model as a message; the unmodified agent loop lets the model retry with a valid value, until one passes or `handle_errors` gives up as configured.
+:::
+<!-- /assign-add -->
+
 ## Quick revision
 
 - [ ] I can explain why free text is not a contract and show the three-reply problem

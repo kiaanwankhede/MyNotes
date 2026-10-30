@@ -700,6 +700,140 @@ details.diagram-src pre { margin-top: 8px; }
 <div class="widget" data-w="pydantic-playground"><div class="wfb"><p>Interactive demo: edit JSON and validate it against a small Pydantic-style model.</p></div></div>
 <!-- /sites-add -->
 
+<!-- repo3-add -->
+<h2 id="agentic-ai-primer-from-the-course-repo-setup-files-and-the-python-">From the course repo: setup files and the Python agent projects</h2>
+<p><em>Added from files I had listed but not read: <code>PREREQUISITES.md</code>, the Weekend 01 and 02 Python and Project 0 scripts, and the Weekend 04 LangChain notebooks (read 30 Oct 2026). Python itself stays a primer here, as you asked.</em></p>
+<h3 id="agentic-ai-primer-one-time-setup-from-prerequisites-md">One-time setup (from <code>PREREQUISITES.md</code>)</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Step</th>
+<th>What the repo says</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python</td>
+<td>3.10 or newer; individual projects pin an exact version in <code>.python-version</code> (the course pins 3.13)</td>
+</tr>
+<tr>
+<td><code>uv</code></td>
+<td>The package and project manager used all course long; each code folder ships <code>pyproject.toml</code> and <code>uv.lock</code>, so <code>uv sync</code> rebuilds the exact environment</td>
+</tr>
+<tr>
+<td>Windows</td>
+<td>Use Git Bash or Windows Terminal, never plain CMD or PowerShell</td>
+</tr>
+<tr>
+<td>Editor</td>
+<td>VS Code, because the course leans on <code>.py</code> scripts, a real terminal and proper debugging, not only notebooks</td>
+</tr>
+<tr>
+<td>LLM key</td>
+<td>At least <strong>one</strong> provider key. Free: <strong>Groq</strong> and <strong>OpenRouter</strong> (its <code>openrouter/free</code> model name auto-routes to a free model so it never goes stale). Paid: OpenAI, Anthropic</td>
+</tr>
+<tr>
+<td><code>.env</code></td>
+<td>Copy <code>.env.example</code> to <code>.env</code>, paste a real key (for example <code>GROQ_API_KEY=...</code>), then <code>uv run main.py</code>. <code>.env</code> is git-ignored at the repo root, so a real key cannot be committed by accident</td>
+</tr>
+</tbody>
+</table></div>
+<p>The free model in the LangChain notebook is created with <code>init_chat_model("openrouter/free", model_provider="openrouter")</code> (the notebook also names one specific free model, <code>nvidia/nemotron-3-super-120b-a12b:free</code>).</p>
+<aside class="callout trap"><div class="ct">Common trap<em>A real key is hard-coded in a notebook</em></div><p><code>Langchain (1).ipynb</code> (Weekend 04, Models) sets an OpenRouter key directly in a cell. I am not reproducing it. Treat any key that has been committed as compromised: revoke it and use <code>.env</code>. (Chapter 18 notes a similar case.)</p></aside>
+<h3 id="agentic-ai-primer-project-0-the-agent-built-in-seven-files">Project 0: the agent built in seven files</h3>
+<p>Weekend 02's <code>Project 0/</code> folder builds a complete agent with <strong>no framework</strong>, one idea per file. This is the same loop as the primer's, written out in code.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>Idea</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_01_ai_model_vs_chatbot_vs_agent.py</code></td>
+<td>A model alone, a chatbot (history re-sent), an agent</td>
+</tr>
+<tr>
+<td><code>_02_calling_the_ai_paid_and_free.py</code></td>
+<td>The same call against Groq, OpenRouter or OpenAI</td>
+</tr>
+<tr>
+<td><code>_03_structuring_with_pydantic.py</code></td>
+<td>Ask for a fixed shape, validate it</td>
+</tr>
+<tr>
+<td><code>_04_giving_it_a_tool.py</code></td>
+<td>A plain function that knows nothing about AI</td>
+</tr>
+<tr>
+<td><code>_05_teaching_it_to_choose.py</code></td>
+<td>The tool schema, so the <strong>model</strong> chooses</td>
+</tr>
+<tr>
+<td><code>_06_project_zero_agent.py</code></td>
+<td>The assembled loop with <code>max_turns</code> as a safety limit</td>
+</tr>
+<tr>
+<td><code>_07_streamlit_app.py</code></td>
+<td>A chat UI with three tools (sample weather, a guarded calculator, currency conversion)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Three patterns worth stealing from them:</p>
+<ul>
+<li><strong>A provider picker.</strong> Groq, OpenRouter and OpenAI all speak the OpenAI-compatible API, so one client works for all three by changing <code>base_url</code> and the model name (<code>llama-3.3-70b-versatile</code> on Groq, <code>openrouter/free</code> on OpenRouter, <code>gpt-4o-mini</code> on OpenAI), and it raises a clear error if no key is set. Anthropic's tool-calling response has a different shape and is covered later in the course.</li>
+<li><strong><code>max_turns</code>.</strong> The loop gives up after a fixed number of turns and returns "Reached max_turns without a final answer", so a confused model cannot loop forever (the same idea as <code>ModelCallLimitMiddleware</code> in Chapter 7).</li>
+<li><strong>A guarded calculator.</strong> Only digits, operators and parentheses are allowed through before <code>eval()</code> runs, so arbitrary code cannot be smuggled in through the expression.</li>
+</ul>
+<p>In <code>_07</code>, memory is <code>st.session_state.messages</code>, a plain list. The Python refresher's last files (<code>_10</code> to <code>_14</code>) build the same agent as a class: a tool that calls the model, an agent that only talks, an agent with one tool, with three tools (currency, weather, calculator), and finally with memory, whose docstring says memory "is just a Python list" that has been there since <code>_11</code> as <code>self.messages</code>.</p>
+<aside class="callout repo"><div class="ct">Repo note<em>`_06_project_zero_agent.py` does not run as committed</em></div><p>It parses, but it will fail on the first tool call. It defines <code>get_currency</code> twice (the second definition is just <code>pass</code>, so it returns <code>None</code> and replaces the first), lists only <code>get_weather</code> in <code>TOOL_SCHEMAS</code>, and has leftover live-coding scratch inside <code>run_agent</code>: a line that builds a <code>tool_calls</code> list using an undefined name <code>function</code> (a <code>NameError</code> when reached), plus <code>l1 = [1,2,3,4,5]</code> and some empty nested loops after the function. Use <code>_07_streamlit_app.py</code> for a version that is meant to run.</p></aside>
+<!-- /repo3-add -->
+
+<!-- refresher-add -->
+<h3 id="agentic-ai-primer-the-python-refresher-files-in-teaching-order">The Python refresher files, in teaching order</h3>
+<p><em>From the Weekend 01 README. This is an index only; Python stays a primer.</em></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>Covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_0</code> to <code>_4</code></td>
+<td>Basics recap, data structures (lists, dicts, tuples, list of dicts), OOP (a <code>BankAccount</code> and a <code>Book</code>), error handling (<code>try</code> and <code>except</code>), decorators (the generic wrapper pattern)</td>
+</tr>
+<tr>
+<td><code>_5_calling_a_real_api.py</code></td>
+<td><code>requests</code> against a real currency API, the first real API and no AI</td>
+</tr>
+<tr>
+<td><code>_6_fake_ai_call.py</code></td>
+<td>The OpenAI-style call shape with zero dependencies, the first AI mention</td>
+</tr>
+<tr>
+<td><code>_7_ai_call_free_and_paid.py</code></td>
+<td>Groq and OpenRouter (free), OpenAI (paid, shown not required)</td>
+</tr>
+<tr>
+<td><code>_8_pydantic_with_ai.py</code></td>
+<td>The main Pydantic topic: <code>BaseModel</code>, <code>Field</code>, validators, nested models, validating LLM output</td>
+</tr>
+<tr>
+<td><code>_9</code> and <code>_10</code></td>
+<td>The API call from <code>_5</code> now Pydantic-validated, then a validated tool plus an AI call side by side with a decorator applied for real</td>
+</tr>
+<tr>
+<td><code>_11</code> to <code>_14</code></td>
+<td>The agent as a class: brain only, plus one tool (currency), plus weather and a calculator, plus memory</td>
+</tr>
+</tbody>
+</table></div>
+<p>The class-03 write-up also gives the <strong>five AI terms</strong> to know before building an agent: an LLM predicts the next <em>token</em>, not the next word; tokens are the billing currency and output costs more than input; embeddings put similar meaning close together; the context window is a whiteboard of fixed size; parameters are billions of weights fixed at training time, not the same thing as tokens.</p>
+<!-- /refresher-add -->
+
 <h2 id="agentic-ai-primer-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -1207,6 +1341,16 @@ agent.invoke({&quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;
 <h3 id="agentic-ai-ch1-from-the-course-s-interview-question-bank">From the course's interview question bank</h3>
 <details class="qa"><summary>What is the difference between a chain and an agent?</summary><div class="ans"><p>A <strong>chain</strong> is a deterministic sequence of steps wired before runtime, running the same way every time. An <strong>agent</strong> is non-deterministic: a model decides at runtime which tool to call next, looping until it decides the task is done.</p></div></details>
 <details class="qa"><summary>A team wants sentiment analysis on support tickets. Would you build a LangChain agent?</summary><div class="ans"><p>Probably not. For narrow classification tasks (sentiment, named-entity recognition) a small purpose-built encoder model is commonly cited as faster, cheaper and more accurate than an LLM chain. Reach for an agent when the task needs reasoning across steps or tools, not for a single fixed label.</p></div></details>
+<!-- assign-add -->
+<h3 id="agentic-ai-ch1-course-assignment-questions">Course assignment questions</h3>
+<p><em>From <code>Assignment_LangChain_Fundamentals_Landscape_to_Tools.ipynb</code> and its answer-key notebook (Weekend 05, the GreenPlate restaurant scenario). Answers are condensed from the instructor's key.</em></p>
+<details class="qa"><summary>An agent is &quot;a model calling tools in a loop&quot;; a harness is &quot;everything around the loop&quot;. What counts as the harness?</summary><div class="ans"><p>The system prompt (instructions), the tools the model can reach, and the middleware shaping behaviour at each step. <code>create_agent</code> is the harness: configuring it is most of what the course teaches.</p></div></details>
+<details class="qa"><summary>Name the four Lang products. Which is different in kind?</summary><div class="ans"><p>LangGraph: low-level orchestration that everything else sits on. LangChain (<code>create_agent</code>): a configurable harness on LangGraph. Deep Agents: a batteries-included harness with planning, a filesystem and subagents pre-wired. <strong>LangSmith is different in kind</strong>: an observability platform that watches agents built with any of the others, because an agent's runtime decisions cannot be read from its code.</p></div></details>
+<details class="qa"><summary>A 2026 tutorial uses <code>AgentExecutor</code> or <code>initialize_agent</code>. What do you conclude?</summary><div class="ans"><p>It predates LangChain v1.0 (October 2025). Those are the legacy pattern, now in the separate <code>langchain-classic</code> package. Use <code>create_agent</code>.</p></div></details>
+<details class="qa"><summary>Why does a <code>.env</code> file exist, and what goes wrong if you hard-code a key in a notebook?</summary><div class="ans"><p><code>.env</code> keeps the key out of the file you commit or share. A hard-coded key is exposed the moment the notebook reaches GitHub, and automated scanners often find and abuse it within minutes.</p></div></details>
+<details class="qa"><summary>Plain text, a message-object list, and a dictionary list: when is each natural?</summary><div class="ans"><p>Plain text for one standalone request with no history. Message objects for multi-turn chats, multimodal content and explicit system instructions. Dictionaries do the same job and are natural when the conversation arrives from a database or JSON API.</p></div></details>
+<!-- /assign-add -->
+
 <h2 id="agentic-ai-ch1-quick-revision">Quick revision</h2>
 <ul>
 <li class="task"><label><input type="checkbox"><span>I can state Agent = Model + Harness and explain it with an analogy</span></label></li>
@@ -1998,6 +2142,17 @@ free_model = init_chat_model(&quot;ollama:llama3.2&quot;)
 <details class="qa"><summary>How do you carry context across a multi-day project without huge token cost?</summary><div class="ans"><p>Maintain a summary file the AI updates after each session and load only that. State the trade-off: summaries can drop detail, so keep a human in the loop for complex work.</p></div></details>
 <details class="qa"><summary>Is it fine to insert an <code>AIMessage</code> you wrote yourself?</summary><div class="ans"><p>Yes, for restoring genuine saved history or setting up a test, because the model treats it as its own prior turn. It is not fine for fabricating agreement to steer the model dishonestly, because that misleads its later reasoning.</p></div></details>
 <details class="qa"><summary>Are LangChain calls different from raw API calls underneath?</summary><div class="ans"><p>No. Every route (raw Python, LangChain, OpenRouter, Claude) is a standard API request with parameters and a body, and a standard response. LangChain adds a consistent interface, not a different mechanism.</p></div></details>
+<!-- assign-add -->
+<h3 id="agentic-ai-ch3-course-assignment-questions">Course assignment questions</h3>
+<p><em>From <code>Assignment_LangChain_Fundamentals_Landscape_to_Tools.ipynb</code> and its answer-key notebook (Weekend 05, the GreenPlate restaurant scenario). Answers are condensed from the instructor's key.</em></p>
+<details class="qa"><summary>Name four things an <code>AIMessage</code> carries besides <code>.content</code>.</summary><div class="ans"><p><code>.tool_calls</code> (tool requests), <code>.usage_metadata</code> (real token counts), <code>.id</code> (unique identifier), <code>.response_metadata</code> (provider extras such as the exact model that replied). <code>.content_blocks</code> is also acceptable.</p></div></details>
+<details class="qa"><summary>Why does streaming produce <code>AIMessageChunk</code> objects, not plain strings?</summary><div class="ans"><p>A stream is a partial response that must later combine into a whole. Chunks can be added with <code>+</code> into a complete message and can carry structure (tool-call fragments, metadata) that a string fragment cannot.</p></div></details>
+<details class="qa"><summary><code>.batch()</code> versus <code>.batch_as_completed()</code>?</summary><div class="ans"><p><code>.batch()</code> waits for all results and returns them in input order. <code>.batch_as_completed()</code> yields each result as soon as it finishes, possibly out of order, tagged with its input index. Use the second when you want to start on whichever result arrives first instead of waiting for the slowest.</p></div></details>
+<details class="qa"><summary><code>ToolMessage</code> has <code>.content</code> and <code>.artifact</code>. What is the difference?</summary><div class="ans"><p><code>.content</code> is what the <strong>model</strong> reads; <code>.artifact</code> is extra data for the <strong>application</strong> that is never sent to the model. A retrieval tool uses it to attach a document id or citation link for the UI without bloating the model's input.</p></div></details>
+<details class="qa"><summary>Your prompt template contains a literal JSON example such as <code>{&quot;status&quot;: &quot;ok&quot;}</code>. What breaks?</summary><div class="ans"><p>LangChain reads the braces as more template variables and fails (<code>INVALID_PROMPT_INPUT</code>). Escape them by doubling: <code>{{</code> and <code>}}</code>.</p></div></details>
+<details class="qa"><summary>What does <code>MessagesPlaceholder</code> do that a string variable cannot?</summary><div class="ans"><p>It injects a whole <strong>list</strong> of prior messages as one template variable. A string variable holds a single string and cannot represent a structured message history.</p></div></details>
+<!-- /assign-add -->
+
 <h2 id="agentic-ai-ch3-quick-revision">Quick revision</h2>
 <ul>
 <li class="task"><label><input type="checkbox"><span>I know the six model parameters and which one is required</span></label></li>
@@ -2323,6 +2478,17 @@ agent = create_agent(model, tools=[...], response_format=ToolStrategy(Schema))
 <details class="qa"><summary>Any known problem combining the tool strategy with real tools?</summary><div class="ans"><p>Late-2025 community reports describe recursion limits or skipped tool calls on some models. I would test my exact model and use case before relying on it.</p></div></details>
 <details class="qa"><summary>With an agent, where is the structured result, and how do you handle a <code>Union</code>?</summary><div class="ans"><p>In <code>result["structured_response"]</code>. With a <code>Union</code>, use <code>isinstance()</code> to see which schema the model chose before reading its fields.</p></div></details>
 <details class="qa"><summary>How do you control what happens when validation fails?</summary><div class="ans"><p><code>handle_errors</code> on <code>ToolStrategy</code>: <code>True</code> retries with a default message, a string retries with your message, an exception type catches only that type, and <code>False</code> lets the error propagate.</p></div></details>
+<!-- assign-add -->
+<h3 id="agentic-ai-ch4-course-assignment-questions">Course assignment questions</h3>
+<p><em>From <code>Assignment_LangChain_Fundamentals_Landscape_to_Tools.ipynb</code> and its answer-key notebook (Weekend 05, the GreenPlate restaurant scenario). Answers are condensed from the instructor's key.</em></p>
+<details class="qa"><summary>Why is &quot;please reply in JSON&quot; less reliable than <code>with_structured_output()</code>?</summary><div class="ans"><p>Prompting relies on the model choosing to comply, so it can add commentary or produce invalid JSON. Structured output gives a schema that Pydantic validates before the result reaches your code; non-compliant output does not pass through as "close enough".</p></div></details>
+<details class="qa"><summary>What is <code>model.profile</code> and how is it used when no strategy is given?</summary><div class="ans"><p>A dict describing what a model supports (for example <code>"structured_output": true</code>, <code>"tool_calling": true</code>). With no explicit strategy, LangChain checks it to pick <code>ProviderStrategy</code> if supported, otherwise <code>ToolStrategy</code>.</p></div></details>
+<details class="qa"><summary>Code review: <code>model.with_structured_output(BookingRequest, strategy=ProviderStrategy(BookingRequest))</code>. What is wrong?</summary><div class="ans"><p><code>strategy=</code> is not a real parameter. It is silently absorbed into <code>**kwargs</code> and does nothing, so the call quietly uses the default strategy. Wrap the schema instead: <code>with_structured_output(ProviderStrategy(BookingRequest))</code>.</p></div></details>
+<details class="qa"><summary>Model-level versus agent-level structured output?</summary><div class="ans"><p>Model level (<code>with_structured_output</code>) knows nothing about tools or a loop and returns a parsed object directly. Agent level (<code>response_format</code> on <code>create_agent</code>) coexists with tools and returns <code>result["structured_response"]</code> next to the normal message trail. Most real work uses <code>create_agent</code>, so it uses the agent-level form.</p></div></details>
+<details class="qa"><summary>With <code>ToolStrategy(Union[NewReservation, CancelReservation])</code>, what happens on an ambiguous message?</summary><div class="ans"><p>The model itself decides which member schema fits; LangChain does not pre-classify. If the message is genuinely ambiguous the model may try more than one schema before settling, which relates to self-correction.</p></div></details>
+<details class="qa"><summary>A field is <code>party_size: int = Field(ge=1, le=20)</code> and the user says &quot;table for 50&quot;. Walk through the loop.</summary><div class="ans"><p>The model proposes <code>party_size=50</code>; Pydantic rejects it; the validation error naming the violated constraint goes back to the model as a message; the unmodified agent loop lets the model retry with a valid value, until one passes or <code>handle_errors</code> gives up as configured.</p></div></details>
+<!-- /assign-add -->
+
 <h2 id="agentic-ai-ch4-quick-revision">Quick revision</h2>
 <ul>
 <li class="task"><label><input type="checkbox"><span>I can explain why free text is not a contract and show the three-reply problem</span></label></li>
@@ -2655,6 +2821,18 @@ for call in reply.tool_calls:
 <details class="qa"><summary>What is <code>return_direct</code>, and can the model still verify the output?</summary><div class="ans"><p>It returns the tool's raw output to the user, skipping the model's final rewrite, for cases where rewording could change the meaning (a refund policy). No, it conflicts with verification, because verifying puts the model back in the loop.</p></div></details>
 <details class="qa"><summary>How do you stop non-premium users from using a premium tool?</summary><div class="ans"><p>Do not rely on the system prompt. A model can be talked around. Filter the tool list before the model sees it, with middleware reading runtime state or context, so the tool is not an option at all.</p></div></details>
 <details class="qa"><summary>Dynamic tool calling vs dynamic tool loading?</summary><div class="ans"><p>Calling is what the model already does: choose among available tools per request. Loading is choosing before the call which subset of many tools to expose, usually to keep the toolset small and decisions accurate. MCP is a packaging format for tools, not a substitute for loading.</p></div></details>
+<!-- assign-add -->
+<h3 id="agentic-ai-ch5-course-assignment-questions">Course assignment questions</h3>
+<p><em>From <code>Assignment_LangChain_Fundamentals_Landscape_to_Tools.ipynb</code> and its answer-key notebook (Weekend 05, the GreenPlate restaurant scenario). Answers are condensed from the instructor's key.</em></p>
+<details class="qa"><summary>The docstring is &quot;the tool&#x27;s entire pitch to the model&quot;. Defend or challenge it.</summary><div class="ans"><p>Largely right: the model reads the docstring to decide whether and when to call the tool. It matters least for a tool that is the only option and always needed, but even then a poor docstring can make the model second-guess calling it, so it is rarely irrelevant.</p></div></details>
+<details class="qa"><summary>What does <code>ToolRuntime</code> hide from the model, and how does LangChain know?</summary><div class="ans"><p>It hides <code>state</code>, <code>context</code>, <code>store</code>, <code>execution_info</code> and <code>server_info</code>; none appear in the tool schema. LangChain recognises the <code>ToolRuntime</code> <strong>type annotation</strong> on the parameter named <code>runtime</code> and excludes it when building what the model sees.</p></div></details>
+<details class="qa"><summary>Compare <code>runtime.state</code>, <code>runtime.context</code> and <code>runtime.store</code>.</summary><div class="ans"><p>State: this conversation only, mutable, gone when the thread ends (what the customer already said). Context: immutable, set per invocation and passed fresh every call (a user's membership tier for this request). Store: survives across any number of sessions (a saved dietary preference recalled weeks later).</p></div></details>
+<details class="qa"><summary>A tool declares a parameter named <code>config</code>. What happens?</summary><div class="ans"><p><code>config</code> is reserved for <code>RunnableConfig</code>. The framework intercepts it before the function body runs, typically producing a <code>TypeError</code> about a missing argument. It is an easy accident because <code>config</code> is an ordinary variable name.</p></div></details>
+<details class="qa"><summary>A plain string versus a <code>Command</code> return?</summary><div class="ans"><p>A string only answers. A <code>Command</code> can write to agent state. Example: a tool that upgrades a customer's loyalty tier after a large order must confirm the upgrade <strong>and</strong> store the new tier for later tools and turns, which a string cannot do.</p></div></details>
+<details class="qa"><summary>Why is <code>wrap_model_call</code> gating stronger than telling the model in the prompt not to use a tool?</summary><div class="ans"><p>A prompt instruction depends on the model choosing to comply and a persuasive message may talk it round. Gating removes the tool from <code>request.tools</code> before the call, so no tool definition exists to reference: a structural guarantee, not a request.</p></div></details>
+<details class="qa"><summary>What is a headless tool, and what could only be done that way?</summary><div class="ans"><p>Its schema is registered on the server so the model can call it, but it <strong>executes on the client</strong> (typically the browser) through an interrupt and resume handshake. Example: reading the user's live geolocation, which a Python server cannot access.</p></div></details>
+<!-- /assign-add -->
+
 <h2 id="agentic-ai-ch5-quick-revision">Quick revision</h2>
 <ul>
 <li class="task"><label><input type="checkbox"><span>I can write a tool and explain where its name and description come from</span></label></li>
@@ -3006,6 +3184,41 @@ agent_with_memory.invoke({&quot;messages&quot;: [...]}, config=config)
 <details class="qa"><summary>Why is loading hundreds of tools bad even if the user cannot use them?</summary><div class="ans"><p>Their definitions are loaded into context and sent to the model on every call, costing tokens and possibly causing wrong tool choices. Load only what is relevant.</p></div></details>
 <details class="qa"><summary>Where would you store &quot;I prefer Python&quot;?</summary><div class="ans"><p>In the <strong>store</strong> (long-term memory), so every future conversation can use it. A checkpointer is tied to one thread and would not carry it across chats.</p></div></details>
 <details class="qa"><summary>Does a tool call cost money like a model call?</summary><div class="ans"><p>No. Only model calls consume tokens. A tool running on its own, with no model call, does not (though the tool's own API may have fees).</p></div></details>
+<!-- assign-add -->
+<h3 id="agentic-ai-ch6-assignment-2-questions-practice">Assignment 2 questions (practice)</h3>
+<p><em>From <code>Assignment_2_Agents_and_Prebuilt_Middleware.ipynb</code> (Weekend 06, a "NovaBank" banking scenario). The repo ships the questions only, with </em><em>no answer key</em><em>, so I list them for practice and point to where this book answers them.</em></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Question (short form)</th>
+<th>Where to find the answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Describe the agent loop mechanically when a tool call is involved</td>
+<td>Primer and Chapter 6, section 1</td>
+</tr>
+<tr>
+<td><code>thread_id</code> alone does not persist a conversation: what else is needed and what breaks without it</td>
+<td>Chapter 6 (checkpointer) and Chapter 10</td>
+</tr>
+<tr>
+<td>Distinguish <code>thread_id</code> from <code>context</code> and what data belongs in each</td>
+<td>Chapter 10</td>
+</tr>
+<tr>
+<td>Name the three practical <code>stream_mode</code> options and what each suits</td>
+<td>Chapter 10A</td>
+</tr>
+<tr>
+<td>Why does naming an agent (<code>name=</code>) cost nothing now but matter later</td>
+<td>Chapters 10A and 19 (<code>lc_agent_name</code>, subagents)</td>
+</tr>
+</tbody>
+</table></div>
+<!-- /assign-add -->
+
 <h2 id="agentic-ai-ch6-quick-revision">Quick revision</h2>
 <ul>
 <li class="task"><label><input type="checkbox"><span>I can restate the loop and say where the tool result goes</span></label></li>
@@ -3409,6 +3622,62 @@ agent = create_agent(
 <details class="qa"><summary>In what order do multiple middlewares run?</summary><div class="ans"><p>Not randomly: by a defined priority or the order declared. They are designed not to collide.</p></div></details>
 <details class="qa"><summary>How do you handle country-specific ids like Aadhaar?</summary><div class="ans"><p>Built-ins cannot cover every country. Define a custom detector with a regular expression and pass it to <code>PIIMiddleware</code> with a strategy such as mask.</p></div></details>
 <details class="qa"><summary>When do you drop from LangChain middleware to LangGraph?</summary><div class="ans"><p>When you need precise, deterministic control of internals such as checkpointers, stores and interrupts. For most agents, including simple RAG chatbots, LangChain with built-in middleware is enough.</p></div></details>
+<!-- assign-add -->
+<h3 id="agentic-ai-ch7-assignment-2-middleware-questions-practice">Assignment 2: middleware questions (practice)</h3>
+<p><em>From <code>Assignment_2_Agents_and_Prebuilt_Middleware.ipynb</code>. No answer key ships in the repo. Part B and the capstone use </em><em>built-in middleware only</em><em>, so no custom hooks are needed.</em></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Question (short form)</th>
+<th>Where this book covers it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The exact ordering rule for <code>before_*</code>, <code>after_*</code> and <code>wrap_*</code> hooks across several middleware</td>
+<td>Chapter 9, "execution order"</td>
+</tr>
+<tr>
+<td>Four HITL decisions, with a realistic case for each on a <code>transfer_funds</code> tool</td>
+<td>Chapter 10</td>
+</tr>
+<tr>
+<td><code>SummarizationMiddleware</code> versus <code>ContextEditingMiddleware</code> for simple tools but long chats</td>
+<td>The reference table above</td>
+</tr>
+<tr>
+<td>Three distinct retry mechanisms, each with a case where only that one fits</td>
+<td>Chapters 7 and 8 (tool retry, model retry, model fallback)</td>
+</tr>
+<tr>
+<td><code>ToolCallLimitMiddleware</code> on one tool with a looser <code>ModelCallLimitMiddleware</code> overall</td>
+<td>The reference table above</td>
+</tr>
+<tr>
+<td>Correct composition of <code>ToolErrorMiddleware</code> with <code>ToolRetryMiddleware</code>, and what the wrong order does</td>
+<td>Chapters 8 and 10 (also note that HITL goes before retry middleware)</td>
+</tr>
+<tr>
+<td>A PII policy for account numbers using the three <code>apply_to_*</code> flags</td>
+<td>Chapter 8</td>
+</tr>
+<tr>
+<td>The documented discrepancy around <code>LLMToolEmulator</code>'s <code>model</code> parameter</td>
+<td>Chapter 8; the reference table says its default is the agent's own model, so set <code>model=</code> explicitly</td>
+</tr>
+<tr>
+<td><code>LLMToolSelectorMiddleware</code> versus <code>ProviderToolSearchMiddleware</code> for 15 tools</td>
+<td>The reference table above (the second needs a supporting provider and model)</td>
+</tr>
+<tr>
+<td>Design a complete prebuilt-middleware stack for a production banking agent</td>
+<td>Chapter 20's middleware stack is a worked example</td>
+</tr>
+</tbody>
+</table></div>
+<p>The coding part (a banking agent with real memory across two calls on one <code>thread_id</code>, then built-in middleware exercises and a capstone) is a good lab to do after this chapter.</p>
+<!-- /assign-add -->
+
 <h2 id="agentic-ai-ch7-quick-revision">Quick revision</h2>
 <ul>
 <li class="task"><label><input type="checkbox"><span>I can name the six hook points and the six built-in middlewares</span></label></li>
@@ -5008,6 +5277,20 @@ if __name__ == &quot;__main__&quot;:
 <details class="qa"><summary>A company already has 25 to 30 working APIs. Why build an MCP server on top?</summary><div class="ans"><p>AI hosts speak MCP natively. Without a server, every team wanting AI to use those APIs writes and maintains its own wrapper, the duplication MCP exists to remove.</p></div></details>
 <details class="qa"><summary>Do I need MCP for a small project?</summary><div class="ans"><p>Maybe not yet. One app and a handful of tools with nobody else reusing them is fine with plain function calling. MCP starts paying off once more than one app or team needs the same tool.</p></div></details>
 <details class="qa"><summary>Is MCP an Anthropic product I pay for?</summary><div class="ans"><p>No. It is a free, open specification, now governed by a multi-company foundation. OpenAI and Google support it even though Anthropic built it first. "Agreed" is the key word: a protocol is a shared agreement, a library only works if everyone adopts one company's code.</p></div></details>
+<!-- arch-add -->
+<h2 id="agentic-ai-ch11-from-the-architecture-and-primitives-notebooks">From the architecture and primitives notebooks</h2>
+<p><em>Added from <code>p2_MCP_Architecture.ipynb</code> and <code>v4a_primitives_notebook.ipynb</code> in the repo's <code>Complete MCP</code> folder (read 30 Oct 2026). They explain the same ideas as the sections above through one extra analogy and a few details.</em></p>
+<p><strong>The smart-home picture.</strong> A universal remote in a house full of gadgets, with an adapter behind each gadget that translates button presses into whatever signal that gadget expects. The <strong>host</strong> is the person holding the remote and never rewires a gadget; the <strong>server</strong> is the gadget itself and does not care which brand of remote points at it; the <strong>client</strong> is the adapter.</p>
+<ul>
+<li><strong>The host never talks to a server directly.</strong> It only needs to know how to <em>ask</em>, never how a server does its job, which is what lets one AI application use a tool it has never seen, built by a team it has never spoken to.</li>
+<li><strong>A good server does one job.</strong> It can be built by whoever understands that service best (often the company that owns it), and once a shared protocol exists a service builds its official server <strong>once</strong> for every AI application.</li>
+<li><strong>One client per server.</strong> A host connected to five servers runs five separate clients, each with its own dedicated 1:1 line, never one shared connection. The documentation's wording: local servers typically serve a single client, remote servers many at once.</li>
+<li><strong>Who holds the wheel for each primitive.</strong> A tool is the one primitive where <strong>the AI itself</strong> decides (a GitHub-connected server's <code>create_issue</code>, which the model calls when it judges a bug should be logged). A resource is read by the <strong>application</strong>, which hands the content in as context (a Drive file such as a style guide, so answers stay consistent without retyping it). A prompt is a ready-made template the server offers so a request is structured the same way every time (a "movie night" preset on the remote).</li>
+<li><strong>Two resource extras.</strong> <strong>Templates</strong> let one resource answer for a whole family (one template covering every customer record) and <strong>subscriptions</strong> notify a client the moment a specific resource changes instead of re-reading it on a timer. The notebook keeps to one plain file and points to the official docs for these.</li>
+<li><strong>How little code adds the other two primitives.</strong> Starting from the warm-up server with <code>greet</code> and <code>add</code> as tools, adding one <code>@mcp.resource("file://...")</code> and one <code>@mcp.prompt</code> (the customer-escalation template) is the whole step; the complete server is in the Chapter 12 lab.</li>
+</ul>
+<!-- /arch-add -->
+
 <h2 id="agentic-ai-ch11-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -7100,6 +7383,117 @@ async def slow_tool(ctx: Context) -&gt; str:
 
 if __name__ == &quot;__main__&quot;:
     mcp.run()
+</code></pre>
+<p><strong>Client 01: the raw, official-SDK client</strong></p>
+<p>The most explicit way: you build the stdio connection, wrap a session around the two streams, run the handshake, list tools and call one, all by hand. The file warns that <code>stdio_client()</code> <strong>hangs forever on macOS</strong> (SDK issue #1452). I ran it on Linux and it worked: it printed the handshake line, the seven tool names and the <code>list_projects</code> result. Note that it starts the server with the command <code>python3</code>, so run it in the environment where <code>fastmcp</code> is installed (I put my virtual environment first on <code>PATH</code>).</p>
+<pre><code class="language-python">&quot;&quot;&quot;
+01 -- THE RAW CLIENT
+=====================
+The most explicit, most verbose way to talk to an MCP server. Nothing
+here is hidden -- every step the protocol actually needs is written out
+by hand, so you can see exactly what happens.
+
+!! KNOWN BUG, PLEASE READ BEFORE RUNNING !!
+There is a real, currently open bug where the line `stdio_client(...)`
+below hangs FOREVER on macOS specifically (official SDK issue #1452).
+If this script just sits there and never prints anything, that is why --
+it is not a mistake in this code. Skip straight to 02, which does the
+exact same thing safely.
+
+SETUP:
+    pip install mcp
+
+RUN:
+    python3 01_raw_client.py
+&quot;&quot;&quot;
+import asyncio
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+
+# This describes HOW to start the server -- it does not start it yet.
+server_params = StdioServerParameters(
+    command=&quot;python3&quot;,
+    args=[&quot;../main.py&quot;],
+)
+
+
+async def main():
+    # STEP 1: open the connection.
+    async with stdio_client(server_params) as (read_stream, write_stream):
+        # STEP 2: wrap a &quot;session&quot; around those two raw streams.
+        async with ClientSession(read_stream, write_stream) as session:
+            # STEP 3: the handshake.
+            await session.initialize()
+            print(&quot;Connected! Handshake complete.&quot;)
+
+            # STEP 4: ask what tools exist.
+            tools_response = await session.list_tools()
+            tool_names = [t.name for t in tools_response.tools]
+            print(&quot;Tools this server offers:&quot;, tool_names)
+
+            # STEP 5: call one of them for real.
+            result = await session.call_tool(&quot;list_projects&quot;, arguments={})
+            print(&quot;Result of calling list_projects:&quot;, result)
+
+
+if __name__ == &quot;__main__&quot;:
+    asyncio.run(main())
+</code></pre>
+<p><strong>Client 05: <code>summarize_week</code>, where the server calls the model itself</strong></p>
+<p>Despite its file name this is <strong>not</strong> a sampling demo any more: sampling was removed (Chapter 17), so the server's <code>summarize_week</code> tool calls the Anthropic API directly and the client is an ordinary tool call. The one lesson worth keeping is the <strong>environment variable</strong>: the default stdio transport forwards only a minimal safe set of variables to the server subprocess, so <code>Client("../main.py")</code> would start the server <strong>without</strong> your <code>ANTHROPIC_API_KEY</code>. The file builds a <code>PythonStdioTransport</code> and passes the key by hand. (I checked its syntax only; running it needs a real key.)</p>
+<pre><code class="language-python">&quot;&quot;&quot;
+05 -- SUMMARIZE_WEEK: THE SERVER CALLS AN LLM DIRECTLY
+=======================================================
+main.py's &quot;summarize_week&quot; tool calls the Anthropic API itself to turn
+raw timesheet rows into a friendly two-sentence summary, then returns
+plain text like any other tool.
+
+A NOTE WORTH KNOWING: MCP used to support &quot;sampling&quot; -- a server tool
+could call ctx.sample(...) to PAUSE and ask the CONNECTED CLIENT to run
+the LLM call on its behalf (the client would supply a sampling_handler
+to answer it). That pattern is now deprecated in the MCP spec
+(SEP-2577), and FastMCP 4.x removed Context.sample() entirely -- there
+is no back-channel for it anymore. Tools are expected to call an LLM
+provider directly, which is what summarize_week does now. This client
+file is just a normal tool call; no sampling_handler needed.
+
+SETUP:
+    pip install fastmcp anthropic
+    export ANTHROPIC_API_KEY=your-key-here   # needed by the SERVER now, not the client
+
+RUN:
+    python3 05_sampling_demo.py
+
+A NOTE ON THE ENV VAR: the server runs as a stdio subprocess, and FastMCP's
+default stdio transport only forwards a minimal safe set of environment
+variables to it (PATH, HOME, etc.) -- NOT your whole shell environment. So
+we build an explicit PythonStdioTransport here and pass ANTHROPIC_API_KEY
+through by hand; just running Client(&quot;../main.py&quot;) would spawn the server
+without the key and it would fail to authenticate with Anthropic.
+&quot;&quot;&quot;
+import asyncio
+import os
+from fastmcp import Client
+from fastmcp.client.transports import PythonStdioTransport
+
+transport = PythonStdioTransport(
+    &quot;../main.py&quot;,
+    env={&quot;ANTHROPIC_API_KEY&quot;: os.environ.get(&quot;ANTHROPIC_API_KEY&quot;, &quot;&quot;)},
+)
+
+
+async def main():
+    async with Client(transport) as client:
+        result = await client.call_tool(
+            &quot;summarize_week&quot;,
+            {&quot;employee_name&quot;: &quot;Asha Patel&quot;, &quot;week_start&quot;: &quot;2026-09-08&quot;},
+        )
+        print(&quot;Summary, written by the server's own LLM call:&quot;)
+        print(result)
+
+
+if __name__ == &quot;__main__&quot;:
+    asyncio.run(main())
 </code></pre>
 <p><strong>Client 02: the same five steps, built up gradually</strong></p>
 <p><strong><code>client/02_fastmcp_client_explained.py</code></strong></p>
@@ -9444,6 +9838,594 @@ uvicorn api.main:app --app-dir backend --reload --port 8080
 <p>Each slide ends with an "In short" line and commands sit under a "Do it" box with a Copy button. The site also has a page of software and download links.</p>
 <!-- /sites-add -->
 
+<!-- repo2-add -->
+<h2 id="agentic-ai-ch20-update-from-the-current-meridian-learner-repo">Update from the current Meridian learner repo</h2>
+<p><em>Added from a fresh clone of <code>github.com/mayank953/meridian-ai-learner</code> (read 30 Oct 2026): its README, the 18-file <code>docs/</code> learner guide, and the backend code. This repo is </em><em>newer than the copy in the course folder</em><em> that the sections above were built from.</em></p>
+<aside class="callout trap"><div class="ct">Common trap<em>What changed since the earlier copy</em></div><p>The current repo adds an <strong><code>APP_MODE</code></strong> switch (local or cloud), writes the RAG chain as a plain <strong>LCEL pipeline</strong> instead of <code>create_retrieval_chain</code> from <code>langchain-classic</code>, and puts a <strong>middleware stack</strong> around all three agents. Where the sections above describe <code>create_retrieval_chain</code> or have no middleware, the current repo differs.</p></aside>
+<h3 id="agentic-ai-ch20-the-four-scenarios-to-try">The four scenarios to try</h3>
+<p>All work with the four sample PDFs in <code>sample_docs/</code>.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Do this</th>
+<th>Expect</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A. A policy question</td>
+<td>Ask for FY2024 revenue; also payment terms for servo-motor suppliers, duty on PLC controllers from Japan, depreciation of filling-line equipment</td>
+<td>About EUR 2.84 billion; Net-45 for suppliers with a credit score of 75 or more; 2.2 percent duty; 10 years straight line</td>
+<td>The answer comes from <strong>your documents</strong>, not the model's memory</td>
+</tr>
+<tr>
+<td>B. Not in the documents</td>
+<td>Ask "Who won the 2018 World Cup?"</td>
+<td>The app says it does not know</td>
+<td>The prompt says to answer only from context; "I don't know" beats inventing</td>
+</tr>
+<tr>
+<td>C. A normal audit</td>
+<td>200 PLC controllers, 480,000 EUR, a Netherlands supplier, made in Japan, <code>1 EUR = 163.5 JPY</code></td>
+<td>Cautious risk report for an unknown supplier, import VAT near 19 percent plus duty, CapEx needing a Department Head's sign-off (over EUR 250,000; over EUR 1,000,000 needs the CFO and Management Board), and a CFO memo</td>
+<td>Three specialist reports feed one memo</td>
+</tr>
+<tr>
+<td>D. A suspicious rate</td>
+<td>Same request with <code>1 EUR = 190 JPY</code></td>
+<td>The tax report flags <strong>FX ALERT</strong> (more than 5 percent from market) and the memo becomes <strong>CONDITIONAL HOLD</strong></td>
+<td>The decision follows written rules, not mood</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="agentic-ai-ch20-the-cfo-decision-rules">The CFO decision rules</h3>
+<p>The CFO step reads exact words in the three reports:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Word found</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RED ALERT</code></td>
+<td>REJECTED</td>
+</tr>
+<tr>
+<td><code>FX ALERT</code> or <code>HOLD FOR TREASURY AUDIT</code></td>
+<td>CONDITIONAL HOLD</td>
+</tr>
+<tr>
+<td>All <code>APPROVED</code> or <code>SUCCESS</code></td>
+<td>APPROVED TO PAY</td>
+</tr>
+</tbody>
+</table></div>
+<aside class="callout key"><div class="ct">Key idea<em>Fixed layouts are a contract</em></div><p>The CFO rules depend on those keywords, so each agent prompt ends with an exact output layout and a rename must be made in both places. Each agent prompt has the same four parts: a role, responsibilities, a decision framework and an output format.</p></aside>
+<h3 id="agentic-ai-ch20-what-the-app-does-not-do">What the app does not do</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Consequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Four of the five tools ask the model from general knowledge; only the exchange-rate check uses live data (and falls back to the model if the site is unreachable)</td>
+<td>A real system needs sanctions, credit and tax services</td>
+</tr>
+<tr>
+<td>Wording changes between runs</td>
+<td>A person reviews important decisions</td>
+</tr>
+<tr>
+<td>No sign-in and open access</td>
+<td>Never upload private documents to a public demo</td>
+</tr>
+<tr>
+<td>Upload history lives in memory</td>
+<td>A database would keep it</td>
+</tr>
+<tr>
+<td>Only text-based PDFs work</td>
+<td>Scanned images need OCR first</td>
+</tr>
+</tbody>
+</table></div>
+<p>A tool that fails returns a <code>SYSTEM WARNING ... Manual review required</code> text instead of crashing the audit, so errors can hide inside text: read the logs.</p>
+<h3 id="agentic-ai-ch20-local-mode-and-cloud-mode">Local mode and cloud mode</h3>
+<p>One line in <code>.env</code> decides where data lives: <code>APP_MODE=local</code> (a Gemini API key only, Chroma on disk) or <code>APP_MODE=cloud</code> (Vertex AI Vector Search and Cloud Storage).</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Local</th>
+<th>Cloud</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Embeddings</td>
+<td><code>gemini-embedding-001</code> (API key)</td>
+<td><code>text-embedding-005</code> (Vertex AI)</td>
+</tr>
+<tr>
+<td>Vector database</td>
+<td>Chroma in <code>.meridian/chroma</code></td>
+<td>Vertex AI Vector Search</td>
+</tr>
+<tr>
+<td>Original PDFs</td>
+<td><code>.meridian/uploads/</code></td>
+<td>A Cloud Storage bucket</td>
+</tr>
+<tr>
+<td>Log upload</td>
+<td>Skipped</td>
+<td>Copied to the bucket on shutdown</td>
+</tr>
+</tbody>
+</table></div>
+<p>Everything that needs storage asks one question (<code>settings.is_cloud</code>) and gets back a LangChain <code>VectorStore</code>, so ingestion and retrieval never know which database is behind them. This is the <strong>strategy pattern</strong>: same interface, swappable implementation. Both modes use 768-dimensional vectors, but the two databases are separate, so re-upload after switching. If <code>APP_MODE=cloud</code> but the index id is empty, the API answers <strong>503</strong> with the list of missing settings instead of a stack trace.</p>
+<h3 id="agentic-ai-ch20-the-rag-chain-as-lcel-and-the-three-retrieval-st">The RAG chain as LCEL, and the three retrieval strategies</h3>
+<pre><code class="language-python">def build_rag_chain(retriever_type: str = &quot;similarity&quot;):
+    &quot;&quot;&quot;question (str) -&gt; answer (str), written as one LCEL pipeline.&quot;&quot;&quot;
+    return (
+        {&quot;context&quot;: build_retriever(retriever_type) | format_docs, &quot;input&quot;: RunnablePassthrough()}
+        | ANSWER_PROMPT
+        | get_llm()
+        | StrOutputParser()
+    )
+</code></pre>
+<p>Each strategy is a plain function from a question to a list of documents:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Choice in the screen</th>
+<th><code>retriever_type</code></th>
+<th>What it does</th>
+<th>Trade-off</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Normal</td>
+<td><code>similarity</code></td>
+<td>The 3 closest chunks (<code>k=3</code>)</td>
+<td>Fastest</td>
+</tr>
+<tr>
+<td>Multi-Query</td>
+<td><code>multiquery</code></td>
+<td>The model writes 3 alternative phrasings with <strong>structured output</strong>, searches with all 4, and merges while dropping duplicates</td>
+<td>Finds more, slower</td>
+</tr>
+<tr>
+<td>Contextual Compression</td>
+<td><code>contextual</code></td>
+<td>Fetches 10 chunks, then the model copies only the relevant sentences from each (or replies <code>NO_OUTPUT</code>, which drops the chunk)</td>
+<td>Cleanest, slowest</td>
+</tr>
+</tbody>
+</table></div>
+<p>The legacy helpers moved to <code>langchain-classic</code> in LangChain v1, so the two advanced strategies are written out in a few lines each, which is also easier to explain in an interview.</p>
+<h3 id="agentic-ai-ch20-the-middleware-stack-around-the-agents">The middleware stack around the agents</h3>
+<pre><code class="language-python">def build_agent_middleware() -&gt; list[AgentMiddleware]:
+    return [
+        PIIMiddleware(&quot;email&quot;, strategy=&quot;redact&quot;, apply_to_input=True),
+        PIIMiddleware(&quot;credit_card&quot;, strategy=&quot;mask&quot;, apply_to_input=True),
+        ModelCallLimitMiddleware(run_limit=settings.agent_max_model_calls, exit_behavior=&quot;end&quot;),
+        ToolCallLimitMiddleware(run_limit=settings.agent_max_tool_calls, exit_behavior=&quot;continue&quot;),
+        ModelRetryMiddleware(max_retries=settings.agent_max_retries, initial_delay=1.0),
+        ToolRetryMiddleware(max_retries=settings.agent_max_retries, initial_delay=0.5),
+        log_tool_calls,
+    ]
+</code></pre>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Middleware</th>
+<th>Purpose here</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>PIIMiddleware</code> for e-mail (redact) and card numbers (mask)</td>
+<td>Hide contact details before Gemini sees the request</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>ModelCallLimitMiddleware</code></td>
+<td>End a phase after N model calls, a cost guard against loops</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>ToolCallLimitMiddleware</code></td>
+<td>Cap tool calls per phase</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>ModelRetryMiddleware</code></td>
+<td>Retry Gemini on transient errors (429 and 503) with backoff</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>ToolRetryMiddleware</code></td>
+<td>Retry flaky tools such as the live exchange-rate API</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>log_tool_calls</code> (custom)</td>
+<td>One JSON log line per tool call: name, arguments, duration, result preview</td>
+</tr>
+</tbody>
+</table></div>
+<p>The custom one is about ten lines with <code>@wrap_tool_call</code>: log "started", call <code>handler(request)</code>, log "finished" with the duration and a 200-character preview, or log the error and re-raise. It is the same shape as the middleware in Chapters 7 and 9, so it makes a good interview example.</p>
+<h3 id="agentic-ai-ch20-design-decisions-and-which-are-shortcuts">Design decisions, and which are shortcuts</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>Why</th>
+<th>Shortcut or trade-off</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Three specialist agents, not one</td>
+<td>Short, focused prompts and only the tools each needs</td>
+<td>More model calls: slower and costlier</td>
+</tr>
+<tr>
+<td>Plain-Python supervisor plus one summary call</td>
+<td>Control flow you can read and debug</td>
+<td>Less flexible than a self-organising graph</td>
+</tr>
+<tr>
+<td>Agents run one after another</td>
+<td>Easy to follow in logs</td>
+<td>Could run in parallel</td>
+</tr>
+<tr>
+<td><code>temperature = 0</code></td>
+<td>Same question, nearly the same answer, easier to debug</td>
+<td></td>
+</tr>
+<tr>
+<td>Models and connections created on first use (<code>lru_cache</code>)</td>
+<td>The app starts, and <code>/api/health</code> and tests work, before any cloud setup</td>
+<td></td>
+</tr>
+<tr>
+<td><code>/api/status</code> never calls the cloud</td>
+<td>It must work exactly when the cloud is misconfigured</td>
+<td></td>
+</tr>
+<tr>
+<td>Tests use fake settings</td>
+<td>Anyone can run them with no accounts</td>
+<td>They test wiring, not answer quality</td>
+</tr>
+<tr>
+<td>Docker with a two-stage build and <code>.dockerignore</code> hiding <code>.env</code></td>
+<td>Small image, secrets never packed</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--max-instances 3</code></td>
+<td>Limits cost and abuse</td>
+<td>Heavy traffic is limited</td>
+</tr>
+<tr>
+<td><code>--allow-unauthenticated</code>, a project-wide secret grant, a key file for the robot, and broad <code>editor</code> plus <code>projectIamAdmin</code> roles</td>
+<td>Simplest setup</td>
+<td><strong>Shortcuts</strong>: production uses sign-in, narrow roles and keyless sign-in</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>A production version would add:</strong> real data sources for sanctions, credit and tax; sign-in and tighter permissions; a database for history; automatic tests in the workflow; answer-quality measurement; real streamed progress for the audit; keyless sign-in from GitHub to Google Cloud.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Used here</th>
+<th>Alternatives the guide lists</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cloud</td>
+<td>Google Cloud</td>
+<td>AWS, Azure</td>
+</tr>
+<tr>
+<td>Web framework</td>
+<td>FastAPI</td>
+<td>Flask, Django, Express</td>
+</tr>
+<tr>
+<td>Vector database</td>
+<td>Vertex AI Vector Search</td>
+<td>Postgres with pgvector, Pinecone, Chroma</td>
+</tr>
+<tr>
+<td>Agents</td>
+<td>LangChain <code>create_agent</code></td>
+<td>LangGraph, Google ADK, CrewAI, AutoGen</td>
+</tr>
+<tr>
+<td>Hosting</td>
+<td>Cloud Run</td>
+<td>App Engine, Kubernetes, a virtual machine</td>
+</tr>
+<tr>
+<td>Cloud setup</td>
+<td><code>gcloud</code> in GitHub Actions</td>
+<td>Terraform (not used)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="agentic-ai-ch20-costs-and-accounts">Costs and accounts</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gemini API key</td>
+<td>Free tier with rate limits; free-tier content may be used by Google, so use only the sample documents</td>
+</tr>
+<tr>
+<td>Google Cloud</td>
+<td>$300 credit for new customers, 90 days, card required (a hold, not a charge)</td>
+</tr>
+<tr>
+<td><strong>Vector Search</strong></td>
+<td>Billed <strong>by the hour while deployed, even with no users</strong>; it is the main cost and the likeliest surprise bill. Delete it when you stop</td>
+</tr>
+<tr>
+<td>Cloud Run, Storage, Cloud Build, Secret Manager</td>
+<td>Usually inside free allowances</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="agentic-ai-ch20-the-most-common-errors">The most common errors</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>You see</th>
+<th>Do this</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ModuleNotFoundError: No module named 'api'</code></td>
+<td>Run from the main folder: <code>uvicorn api.main:app --app-dir backend --reload --port 8080</code></td>
+</tr>
+<tr>
+<td>Browser says blocked by CORS</td>
+<td>The backend is not reachable; start it on port 8080</td>
+</tr>
+<tr>
+<td><code>404 ... model ... not found</code></td>
+<td>The model was retired; set a current model name</td>
+</tr>
+<tr>
+<td><code>ImportError: cannot import name 'create_agent'</code></td>
+<td>An old <code>langchain</code>; reinstall requirements</td>
+</tr>
+<tr>
+<td>Tool results say <code>LLM_ERROR</code> or <code>SYSTEM WARNING</code></td>
+<td>A tool's own model call failed (key, quota, model); check the logs</td>
+</tr>
+<tr>
+<td><code>DefaultCredentialsError</code></td>
+<td><code>gcloud auth application-default login</code></td>
+</tr>
+<tr>
+<td>Searches return nothing right after upload</td>
+<td>New data takes about a minute to become searchable</td>
+</tr>
+<tr>
+<td>Container failed to listen on the port</td>
+<td>The app crashed or ignored <code>$PORT</code>; read the Cloud Run logs</td>
+</tr>
+</tbody>
+</table></div>
+<p>Exercises from the guide: set <code>AGENT_MAX_TOOL_CALLS=1</code> and see which report changes; add <code>PIIMiddleware("url", strategy="redact")</code> and paste a link; write a <code>@before_model</code> hook that logs the message count; switch to <code>APP_MODE=cloud</code> with an empty index id and read the 503; add a sixth tool and give it to the Control agent; change the <code>75</code> credit threshold in the risk prompt.</p>
+<h3 id="agentic-ai-ch20-the-frontend-in-one-page">The frontend in one page</h3>
+<p>React with Vite, TypeScript, Tailwind and a shadcn-style component set (49 generated UI files you can ignore). The real code is small: <code>pages/Index.tsx</code> (95 lines) hosts four tabs, <strong>System Status</strong>, <strong>Index Documents</strong>, <strong>RAG Q&amp;A</strong> and <strong>Procurement Audit</strong> (<code>components/*Tab.tsx</code>), and <code>lib/api.ts</code> (84 lines) is the only place that talks to the backend.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Function in <code>lib/api.ts</code></th>
+<th>Calls</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>uploadDocument(s)</code></td>
+<td><code>POST /api/rag/upload</code> (reports <code>status</code>, <code>pages</code>, <code>chunks</code> or a skip reason per file)</td>
+</tr>
+<tr>
+<td><code>listUploads</code></td>
+<td><code>GET /api/rag/uploads</code></td>
+</tr>
+<tr>
+<td><code>askQuestion(query, retrieverType)</code></td>
+<td><code>POST /api/rag/ask</code></td>
+</tr>
+<tr>
+<td><code>triggerStoreIngestion</code></td>
+<td><code>POST /api/rag/ingest</code> (import PDFs already in the bucket)</td>
+</tr>
+<tr>
+<td><code>runAudit(requestText)</code></td>
+<td><code>POST /api/agent/audit</code></td>
+</tr>
+<tr>
+<td><code>healthCheck</code>, <code>getSystemStatus</code></td>
+<td><code>GET /api/health</code>, <code>GET /api/status</code> (returns <code>local</code> or <code>cloud</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>The audit tab's progress steps run on <strong>timers</strong>; the real answer arrives only at the end, so "steps move but nothing arrives" means wait and read the terminal. Tests use Vitest and Playwright.</p>
+<!-- /repo2-add -->
+
+<!-- slides-add -->
+<h2 id="agentic-ai-ch20-what-the-meridian-slides-teach-module-by-module">What the Meridian slides teach, module by module</h2>
+<p><em>Added from the instructor's course-slides site (read 30 Oct 2026). I read each slide's "In short" summary for modules 1 and 3 to 7 (about 480 of the 600 slides) and the full text of the advanced-RAG chapter; module 2 (project basics, tools, packages, folders) I read only as a chapter list. These are digests, not copies.</em></p>
+<h3 id="agentic-ai-ch20-module-1-the-case-and-two-engineering-views">Module 1: the case and two engineering views</h3>
+<ul>
+<li><strong>The rule:</strong> nothing is paid until it is checked, always in the order risk, tax, control, then the CFO decides. Four pains: slow, rules hidden in PDFs, different answers from different people, and no record of why something was approved.</li>
+<li><strong>Why the obvious fixes fall short:</strong> reminder emails speed things a little but fix nothing else; a shared folder makes rules findable but someone must still apply them; a general chatbot has never seen your documents and cannot check a sanctions list. The mental model: an AI model alone is a brilliant new hire on day one, smart but with no files and no phone. Fix one is <strong>retrieval</strong> (give it the documents); fix two is <strong>tools</strong> (give it the phone).</li>
+<li><strong>The AI engineer's route</strong> (six steps): the problem, split it into jobs, one tool per job, build the smallest thing first, verify against known answers, watch time, cost and mistakes. Start with the problem as one sentence for the finance director, not with the model. <strong>One giant prompt</strong> is the classic mistake: hard to test, costly, shows no source. Use <strong>ordinary code for anything exact</strong> (the 5 percent exchange-rate comparison, removing e-mail addresses) and the model for judgement. AI work always looks good even when wrong, so check with automated tests (17 here, running in seconds with no key because the model is replaced by a stand-in) and by reading real outputs. An audit took roughly 70 to 150 seconds, so cap calls.</li>
+<li><strong>The forward-deployed engineer's route</strong> (six steps): observe, measure, roles, connect, pilot, hand over. Start with the people (sit with a buyer and ask what they did yesterday), <strong>measure the baseline first</strong> (days from request to payment, hand-offs, requests sent back) so "it feels faster" becomes "it took X days and now takes Y", decide where the system prepares and where people decide, and find where the real information lives (here the documents and a live exchange rate are real, sanctions, tax tables and credit data are simulated). In testing the tax tool said customs duty on the Japanese controllers was zero while the company's tariff document says 2.2 percent: <strong>take disagreements to the owner of the rule, do not pick one</strong>. Start narrow (one category, one team), work inside the customer's privacy and access rules, make it trusted by logging every tool call, and leave the team able to run and change it.</li>
+<li><strong>Two lenses:</strong> the AI engineer asks "does it work and can we prove it"; the forward-deployed engineer asks "will people use it and trust it".</li>
+</ul>
+<h3 id="agentic-ai-ch20-module-3-the-backbone-settings-errors-logging">Module 3: the backbone (settings, errors, logging)</h3>
+<ul>
+<li><strong>Three ways hard-coded values hurt:</strong> a key typed into a Python file is public for good once pushed; a model name typed everywhere is a pain to change; and secrets and settings are mixed. The fix is environment variables, held in a <code>.env</code> that Git ignores, with a <code>.env.example</code> template.</li>
+<li><strong><code>config/settings.py</code> in eight chunks:</strong> <code>BaseSettings</code> reads the environment and <code>.env</code>; each setting has a type and default; wrong values are refused with a clear error; <code>app_mode</code> is the local or cloud switch; <code>app_env</code> has an alias (<code>ENVIRONMENT</code> in <code>.env</code>); a <code>missing_cloud_settings</code> helper lists the empty cloud settings; and a small block sets Google credentials from a key file only on a laptop (on Cloud Run nothing is needed).</li>
+<li><strong>Custom errors:</strong> <code>MeridianError</code> is the base class; <code>ConfigurationError</code> becomes HTTP 503 and <code>IngestionError</code> becomes 422. The user should read one sentence saying what is wrong and what to do, not a stack trace.</li>
+<li><strong>Structured logging with <code>structlog</code>:</strong> a JSON line with fields beats a sentence. The only custom piece is <code>add_severity</code>, a processor that copies the level in upper case (Google's log viewer uses it). A console handler and a file handler write the same line; one shared <code>GLOBAL_LOGGER</code> is imported everywhere.</li>
+</ul>
+<h3 id="agentic-ai-ch20-module-4-document-q-amp-a-rag-chapter-by-chapter">Module 4: document Q&amp;A (RAG), chapter by chapter</h3>
+<ul>
+<li><strong>Ch 13, RAG explained:</strong> the model cannot know your documents; RAG is look up, then answer. Two stages: index once (read, chunk, embed, store), then per question (embed the question, find the closest chunks, prompt, answer). Keyword search misses what meaning search finds (for "who has to approve a very expensive order" they share no useful word). A "meaning map" shows 22 sentences as dots. Eight things go wrong, and a confident wrong answer usually means the right chunk was not retrieved.</li>
+<li><strong>Ch 14, the types of RAG:</strong> basic RAG hurts when the words differ, the answer is split across chunks, or the right chunk is not first. Improve it <strong>before</strong> the search (change the question), <strong>during</strong> (change what is searched or how), <strong>after</strong> (clean the results) or <strong>beyond</strong> it. The site compares <strong>thirteen variants</strong> (I saw these among them: multi-query, contextual compression, HyDE, query decomposition, follow-up rewrite, hybrid search and reranking) and names four bigger ideas, of which I saw three: corrective RAG grades the retrieved chunks and tries again if they are poor, agentic RAG lets an agent decide whether, what and how often to search, and graph RAG works from a graph of the documents. Which first: right chunk found but not first, try reranking; users phrase things differently, try multi-query or HyDE; several-part questions, decomposition. Meridian uses three: similarity, multiquery and contextual (first-run times 7.1, 12.0 and 9.7 seconds).</li>
+<li><strong>Ch 15, the tools behind RAG:</strong> a RAG system has <strong>eight parts</strong> (parse, chunk, embed, store, retrieve, rerank, generate, evaluate), each a decision. For embeddings check dimensions (768 here), languages, input length, hosted or open, and the rule that <strong>one model must index and search</strong>. Choosing a vector database: how many vectors, do you already run Postgres or Elasticsearch, filtering, managed or self-run, cost.</li>
+<li><strong>Ch 16, Gemini and embeddings:</strong> one shared model connection, created on first use with <code>lru_cache</code>. <code>extract_text</code> joins Gemini's content blocks because a reply may be a <strong>list of blocks</strong>. Real closeness scores sit in a narrow band (0.85 for the right sentence against 0.55 and 0.57 for the others), so unrelated is not zero. Numbers from two embedding models are like temperatures in two unknown units: they cannot be compared.</li>
+<li><strong>Ch 17, storing meaning:</strong> a vector store keeps numbers, text and source, and survives a restart because Chroma writes to a folder. <strong>Keep the originals</strong>: a new embedding model, chunk size or bug fix means re-indexing everything. <code>basename</code> keeps only the file name so an uploaded name cannot write outside the folder.</li>
+<li><strong>Ch 18, ingestion:</strong> three reasons to cut (a document is too big, one vector for a page describes everything and nothing, and a sentence can be lost). Chunk ids are a <code>sha1</code> of source, page and position, so <strong>indexing the same file twice replaces rather than duplicates</strong> (the count stays at one).</li>
+<li><strong>Ch 19, retrieval and the answer:</strong> three strategies with one signature (question in, documents out) chosen from a dictionary, wrapped in <code>RunnableLambda</code>, then the whole chain in sixteen lines. Contextual compression runs <code>batch</code> over the chunks in parallel. Similarity is one model call, multi-query two, contextual one plus one per chunk.</li>
+<li><strong>Ch 20, the lab:</strong> write the expected answers first, because a test without an expected answer is just a demo (EUR 2.84 billion, Net-45, 2.2 percent, 10 years, an honest refusal). All five matched in about 24 seconds. Ask the log, not memory: each question leaves a <code>RAG query received</code> line.</li>
+<li><strong>Ch 21, more RAG in code:</strong> see the next section.</li>
+</ul>
+<h3 id="agentic-ai-ch20-module-5-the-audit-team">Module 5: the audit team</h3>
+<ul>
+<li><strong>Ch 22:</strong> a chain is a path you write; in an agent the model chooses the path. A real message trail is human, AI (with a tool call as data, nothing has run yet), tool, AI: the loop turned once. LangChain is a family: <code>langchain-core</code> (messages, prompts, tools, runnables), <code>langchain</code> (<code>create_agent</code>, middleware) and <code>langgraph</code> (the runtime). Three narrow specialists with few tools each are easier to steer and test than one agent with five tools.</li>
+<li><strong>Ch 23, tools:</strong> <code>_ask_llm</code> turns any failure into the text <code>LLM_ERROR</code>, so a tool never crashes the agent. The tax tool asks for <strong>strict JSON</strong>, strips markdown fences, parses with <code>json.loads</code> and fills missing keys with defaults. <code>validate_fx_hedge</code> asks a real exchange-rate API first, swallows failures on purpose, falls back to the model only if needed, and applies the <strong>5 percent rule in code</strong>, so it never varies (<code>FX ALERT</code> and <code>FX SUCCESS</code> are keywords). <code>categorize_expense</code> has a conservative fallback if Gemini is down. Four of the five tools use the model's memory, so the sanctions tool is a hint, not a screening.</li>
+<li><strong>Ch 24, prompts are job descriptions:</strong> a four-part recipe (role, responsibilities, decision framework, output format). Sanctions come first because they are a hard blocker; credit is in three bands (75 or more low risk, 50 to 74 needs a deposit or letter of credit, below 50 needs prepayment and a guarantee or rejection). <strong>The keywords are the contract:</strong> <code>RED ALERT</code> is born in the sanctions tool, repeated in the Risk prompt and read by the CFO; the first matching rule wins, so <code>RED ALERT</code> beats a hold.</li>
+<li><strong>Ch 25, middleware:</strong> four concerns (privacy, cost, resilience, observability). A request passes privacy, the model call limit, the model retry, then Gemini; a tool call passes retry, call limit, your logging, then the tool. The lab shows two agents with the same question: without the guard the model repeats the e-mail address because it received it, with the guard it can only repeat the placeholder. An agent allowed one model call ends politely.</li>
+<li><strong>Ch 26, the supervisor:</strong> four ingredients per agent (model, tools, prompt, middleware). <code>_invoke_agent</code> sends the request as the first human message and keeps only the last message. Design choices said plainly: sequential on purpose (simple code and a readable log, 67 to 96 seconds per audit), no graph code because <code>create_agent</code> hides LangGraph.</li>
+<li><strong>Ch 27, the lab:</strong> predict first. Case one (20 servo motors, 38,000 euros, rate 176.5) is approved to pay; case two (200 controllers, 480,000 euros, 163.5 yen) is held because Tax saw a 7.8 percent FX variance and the credit score was 45; a third case is rejected on a sanctions hit. The FX check takes under a tenth of a second (a real API) while every model-backed tool takes 4 to 13 seconds. Say honestly that audits take 67 to 150 seconds, that the memo date is invented, and that anything over EUR 250,000 needs people.</li>
+</ul>
+<h3 id="agentic-ai-ch20-module-6-the-service-and-the-screen">Module 6: the service and the screen</h3>
+<ul>
+<li><strong>Ch 28, an API with FastAPI:</strong> a request is a method, a path and sometimes a body; a reply is a status and a body (200 worked, 422 FastAPI refused the input). A request passes Uvicorn, Starlette, FastAPI, Pydantic, then your function. FastAPI writes documentation at <code>/docs</code> with a Try it out button.</li>
+<li><strong>Ch 29, schemas and routes:</strong> refuse a bad request at the door, not halfway through a one-minute audit. Seven routes in four groups; the status route makes no Google call. Every route follows one pattern: validate, call the real code, return. The upload route keeps only the file name, skips non-PDFs, stores the original first and runs the slow indexing in a worker thread.</li>
+<li><strong>Ch 30, the server:</strong> a <code>lifespan</code> function logs at start and flushes the log on shutdown; <strong>CORS</strong> is the browser asking first because the screen (port 3000) and the API (port 8080) are different origins. A missing setting is a 503, bad input a 422, a bug a 500. After <code>npm run build</code> the same server also serves the screen, and API paths never fall through to the web page.</li>
+<li><strong>Ch 31, logging:</strong> three kinds of lines share the console (yours as JSON, Uvicorn's, libraries'); access lines go only to the console, so the file has no health-check lines. One command over the log answers "where did the minute go" by listing each tool's duration.</li>
+<li><strong>Ch 32, tests:</strong> a test must not call Google (slow, costs money, differs each time). <code>conftest.py</code> sets a fake environment first so a real key can never leak into a test. 17 tests run in about five seconds. They prove the plumbing, not answer quality; retrieval quality was judged by eye and the frontend has only a smoke test.</li>
+<li><strong>Ch 33, the screen:</strong> React, TypeScript, Vite, Tailwind and shadcn/ui. <code>api.ts</code> is the only file that talks to the server. Honest details: the <strong>progress steps are three timers</strong> (3, 6 and 9 seconds), so "Complete" can appear early; the Q&amp;A card says "Verified Answer" but nothing verifies it; the status tab polls every five seconds, which is why its route makes no Google call.</li>
+<li><strong>Ch 34, run it all:</strong> two terminals in development, or one server in single-server mode. It ends with seven honest limits: this shows how the pieces fit, it is not a compliance system.</li>
+</ul>
+<h3 id="agentic-ai-ch20-module-7-docker-and-google-cloud">Module 7: Docker and Google Cloud</h3>
+<ul>
+<li><strong>Ch 35, Docker:</strong> a Dockerfile is the recipe, an image is the sealed box, a container is the running image, a registry holds images. <strong>Two stages:</strong> stage one uses 843 MB of tools to produce a 436 kB screen, and only the screen crosses into the final image. Copy the package list first so Docker's cache makes rebuilds almost instant (218 seconds first build). <code>.dockerignore</code> keeps <code>.env</code> out; settings arrive at start-up through an env file. Containers forget: a volume keeps data.</li>
+<li><strong>Ch 36, Google Cloud in plain words:</strong> the $300 credit for 90 days. Cloud Run runs the container (deploy, visitors arrive, nobody arrives: scales to zero). Cloud Build makes the image. Cloud Storage keeps files, the embedding model makes 768 numbers, Vector Search finds closest meaning, Gemini writes. Secret Manager keeps the key, IAM decides who may do what (the roles here are broader than needed). A budget alert warns and never stops. <strong>Remember:</strong> a deployed Vector Search index bills by the hour whether or not anyone uses it.</li>
+<li><strong>Ch 37, prepare the cloud:</strong> the Gemini key, an account, a project, billing with a budget alert, and <code>gcloud</code>. Project ids are 6 to 30 characters of lowercase letters, numbers and hyphens.</li>
+<li><strong>Ch 38, the robot account:</strong> four ways of signing in (you, the robot with a key file, the robot keyless, the app itself). If key creation is refused, an organisation policy is blocking it: <strong>do not change a company's security policy without permission</strong>. The key is a password; keep it out of any Git folder.</li>
+<li><strong>Ch 39, GitHub and the first run:</strong> three GitHub secrets (project id, the robot's key, the Gemini key). <code>deploy.yml</code> is five ideas: a name, triggers, shared settings, jobs of steps, and two kinds of step. Every push to main deploys; one run goes at a time. The first run is long because it builds the index and endpoint.</li>
+<li><strong>Ch 40, deploy explained:</strong> six phases (switch on the cloud, make a place for files, build the search, hide the key, build the box, open the doors), the AWS and Azure equivalents, and what happens under load (instances fill, a queue forms, and 429 errors appear when the maximum instances are reached).</li>
+</ul>
+<h2 id="agentic-ai-ch20-the-advanced-rag-lab-seven-ways-to-change-retrie">The advanced-RAG lab: seven ways to change retrieval</h2>
+<p><em>From Chapter 21 of the slides, read in full. It runs seven retrieval variants on the same 22 sentences from the four sample PDFs (ids P procurement, A accounting, R annual report, T tariff) and one question: </em><em>when do we pay servo motor suppliers?</em><em> The right answer is P1 (Net-45); T2 ("Servo motors: 2.7 percent" duty) is a tempting distraction; P2 and P3 are the same page but the wrong risk class.</em></p>
+<pre><code class="language-python">def mmr(question, k=3):
+    return store.max_marginal_relevance_search(question, k=k, fetch_k=10)
+
+def hyde(question, k=3):
+    reply = get_llm().invoke(f&quot;Write one sentence that could answer this question: {question}&quot;)
+    imagined = extract_text(reply.content)      # a plain string; reply.text breaks the embedding client
+    return store.similarity_search(imagined, k=k)
+
+def hybrid(question, k=3):
+    by_meaning = [d.metadata[&quot;id&quot;] for d in store.similarity_search(question, k=len(DOCS))]
+    fused = {}
+    for ranking in (keyword_rank(question), by_meaning):
+        for position, id_ in enumerate(ranking):
+            fused[id_] = fused.get(id_, 0) + 1 / (60 + position)   # reciprocal rank fusion
+    return [BY_ID[i] for i in sorted(fused, key=fused.get, reverse=True)[:k]]
+
+def rerank(question, k=3):
+    candidates = store.similarity_search(question, k=8)            # over-fetch
+    # ask the model to score each candidate 0-10 (structured output), keep the best k
+</code></pre>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Variant</th>
+<th>Idea</th>
+<th>Cost</th>
+<th>What came back (one run)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Basic</td>
+<td>Plain similarity</td>
+<td>None</td>
+<td>P1, T2, P3: answer first, distractor and wrong class come along</td>
+</tr>
+<tr>
+<td>MMR</td>
+<td>Fetch 10, pick 3 that are relevant <strong>and different</strong></td>
+<td>None</td>
+<td>P1, T2, T4: more variety, but here that meant another unrelated sentence</td>
+</tr>
+<tr>
+<td>HyDE</td>
+<td>Search with an <strong>imagined answer</strong> instead of the question</td>
+<td>One model call</td>
+<td>P1, P4, T2 (other runs: P1, P2, P3): varies between runs</td>
+</tr>
+<tr>
+<td>Hybrid</td>
+<td>Keyword ranking plus meaning ranking, merged with <strong>reciprocal rank fusion</strong> (60 is the usual damping constant; needs no weights)</td>
+<td>None extra</td>
+<td>T2, P1, P2: the word "servo" pushed the tariff line to first. Worst here</td>
+</tr>
+<tr>
+<td>Rerank</td>
+<td>Over-fetch 8, the model scores each 0 to 10, keep the best 3</td>
+<td>One model call</td>
+<td>P1, P3, P2: removed T2 from the top three. <strong>Best here</strong></td>
+</tr>
+<tr>
+<td>Parent pages</td>
+<td>Search small pieces, hand over the <strong>whole page</strong></td>
+<td>None</td>
+<td>Whole procurement and tariff pages: answer with context, bigger prompt</td>
+</tr>
+<tr>
+<td>Decomposition</td>
+<td>Split a many-part question into simple ones, search each, merge by id</td>
+<td>One model call</td>
+<td>Found both parts: T2 (duty), P1 (terms), T1</td>
+</tr>
+<tr>
+<td>Follow-up rewrite</td>
+<td>Turn "And for moderate risk?" into a question that stands alone</td>
+<td>One model call</td>
+<td>"What terms do moderate risk vendors get?"</td>
+</tr>
+</tbody>
+</table></div>
+<p>The keyword side is a home-made ranking (shared words weighted by rarity, i.e. inverse document frequency); real systems use BM25 or a search engine. Run on 10 Oct 2026 with gemini-3.8-flash and gemini-embedding-001; the page itself calls it <strong>an illustration, not a benchmark</strong>.</p>
+<aside class="callout key"><div class="ct">Key idea<em>What to take away</em></div><p>No variant wins everywhere (hybrid made this question worse, reranking made it better, and on another question it could flip), and each has a price: extra model calls, a second index, bigger prompts. Start with basic RAG, add one variant at a time, and <strong>measure on your own list of real questions with known answers</strong>. MMR and parent pages change what is returned (variety and context, no model cost); HyDE, decomposition and the follow-up rewrite fix the question (one extra call each); hybrid helps with exact terms; reranking removed the distraction in this test.</p></aside>
+<p>Other numbers the slides record (verified by the instructor on 10 Oct 2026): the four sample PDFs are 645, 664, 845 and 950 characters and each becomes one chunk; on eight questions over the 22 sentences keyword search found a correct sentence in its top three for 2 and meaning search for 8 (the instructor's own judgement of "correct"); the chunk explorer is a JavaScript port of <code>RecursiveCharacterTextSplitter</code> that matched the library on 120 size and overlap combinations; the 2D meaning map keeps only about 26 percent of the variance, so the ranked list is the truth; library versions were langchain 1.2.11, langchain-core 1.2.18, langchain-chroma 1.1.0 and langchain-google-genai 4.2.1. Not tested: Windows PowerShell variants and cloud mode for any file.</p>
+<!-- /slides-add -->
+
 <h2 id="agentic-ai-ch20-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -10191,7 +11173,7 @@ uvicorn api.main:app --app-dir backend --reload --port 8080
 </tr>
 </tbody>
 </table></div><button class="readbtn" data-id="agentic-ai-glossary">Mark this chapter as read</button><div class="pager"><button data-id="agentic-ai-ch20"><small>Previous</small><b>Meridian AI project tour</b></button><button class="next" data-id="agentic-ai-bank"><small>Next</small><b>Interview question bank</b></button></div></article>
-<article id="ch-agentic-ai-bank" hidden><p class="crumb">Back matter</p><h1>Interview question bank</h1><p class="lead">Every interview question from every chapter in one place, in chapter order. Tap a question to reveal the answer.</p><div class="meta"><span class="chip">359 questions</span><span class="chip plain">Rebuilt automatically from the chapters</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="agentic-ai-bank-primer-primer-what-an-agent-is">Primer: Primer: what an agent is</h2>
+<article id="ch-agentic-ai-bank" hidden><p class="crumb">Back matter</p><h1>Interview question bank</h1><p class="lead">Every interview question from every chapter in one place, in chapter order. Tap a question to reveal the answer.</p><div class="meta"><span class="chip">383 questions</span><span class="chip plain">Rebuilt automatically from the chapters</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="agentic-ai-bank-primer-primer-what-an-agent-is">Primer: Primer: what an agent is</h2>
 <details class="qa"><summary>Why do LLMs need memory added to them?</summary><div class="ans"><p>Each API call is stateless. The app stores the messages and sends the <strong>full history</strong> on every call, so the model can use earlier turns.</p>
 <p><strong>Follow-up to expect:</strong> "What is the cost of that?" Tokens grow with every turn, which is why later chapters cover trimming and summarising history.</p></div></details>
 <details class="qa"><summary>Who actually executes a tool call?</summary><div class="ans"><p>My code does. The model only emits the tool name and arguments. That separation lets me validate arguments, log calls, require approval or block a call before anything runs.</p></div></details>
@@ -10229,6 +11211,11 @@ uvicorn api.main:app --app-dir backend --reload --port 8080
 <details class="qa"><summary>Should tool results be cached?</summary><div class="ans"><p>Only when it is safe. Cache by how quickly the data changes: never for stock prices, minutes for currency rates, hours for weather. Caching everything because it is easy gives stale answers.</p></div></details>
 <details class="qa"><summary>What is the difference between a chain and an agent?</summary><div class="ans"><p>A <strong>chain</strong> is a deterministic sequence of steps wired before runtime, running the same way every time. An <strong>agent</strong> is non-deterministic: a model decides at runtime which tool to call next, looping until it decides the task is done.</p></div></details>
 <details class="qa"><summary>A team wants sentiment analysis on support tickets. Would you build a LangChain agent?</summary><div class="ans"><p>Probably not. For narrow classification tasks (sentiment, named-entity recognition) a small purpose-built encoder model is commonly cited as faster, cheaper and more accurate than an LLM chain. Reach for an agent when the task needs reasoning across steps or tools, not for a single fixed label.</p></div></details>
+<details class="qa"><summary>An agent is &quot;a model calling tools in a loop&quot;; a harness is &quot;everything around the loop&quot;. What counts as the harness?</summary><div class="ans"><p>The system prompt (instructions), the tools the model can reach, and the middleware shaping behaviour at each step. <code>create_agent</code> is the harness: configuring it is most of what the course teaches.</p></div></details>
+<details class="qa"><summary>Name the four Lang products. Which is different in kind?</summary><div class="ans"><p>LangGraph: low-level orchestration that everything else sits on. LangChain (<code>create_agent</code>): a configurable harness on LangGraph. Deep Agents: a batteries-included harness with planning, a filesystem and subagents pre-wired. <strong>LangSmith is different in kind</strong>: an observability platform that watches agents built with any of the others, because an agent's runtime decisions cannot be read from its code.</p></div></details>
+<details class="qa"><summary>A 2026 tutorial uses <code>AgentExecutor</code> or <code>initialize_agent</code>. What do you conclude?</summary><div class="ans"><p>It predates LangChain v1.0 (October 2025). Those are the legacy pattern, now in the separate <code>langchain-classic</code> package. Use <code>create_agent</code>.</p></div></details>
+<details class="qa"><summary>Why does a <code>.env</code> file exist, and what goes wrong if you hard-code a key in a notebook?</summary><div class="ans"><p><code>.env</code> keeps the key out of the file you commit or share. A hard-coded key is exposed the moment the notebook reaches GitHub, and automated scanners often find and abuse it within minutes.</p></div></details>
+<details class="qa"><summary>Plain text, a message-object list, and a dictionary list: when is each natural?</summary><div class="ans"><p>Plain text for one standalone request with no history. Message objects for multi-turn chats, multimodal content and explicit system instructions. Dictionaries do the same job and are natural when the conversation arrives from a database or JSON API.</p></div></details>
 <h2 id="agentic-ai-bank-chapter-2-the-langchain-family-and-harness-engin">Chapter 2: The LangChain family and harness engineering</h2>
 <details class="qa"><summary>Define agent and harness.</summary><div class="ans"><p>An agent is a model calling tools in a loop until a task is complete. The harness is everything around that loop: system prompt, tools, middleware, memory and guardrails. The model supplies reasoning; the harness supplies capability and rules.</p></div></details>
 <details class="qa"><summary>Is LangChain built on LangGraph, or the other way round?</summary><div class="ans"><p>LangChain is built <strong>on top of</strong> LangGraph. A common wrong answer is that LangGraph sits on LangChain. LangChain's agents get durable execution, persistence and human-in-the-loop support from LangGraph.</p></div></details>
@@ -10260,6 +11247,12 @@ uvicorn api.main:app --app-dir backend --reload --port 8080
 <details class="qa"><summary>How do you carry context across a multi-day project without huge token cost?</summary><div class="ans"><p>Maintain a summary file the AI updates after each session and load only that. State the trade-off: summaries can drop detail, so keep a human in the loop for complex work.</p></div></details>
 <details class="qa"><summary>Is it fine to insert an <code>AIMessage</code> you wrote yourself?</summary><div class="ans"><p>Yes, for restoring genuine saved history or setting up a test, because the model treats it as its own prior turn. It is not fine for fabricating agreement to steer the model dishonestly, because that misleads its later reasoning.</p></div></details>
 <details class="qa"><summary>Are LangChain calls different from raw API calls underneath?</summary><div class="ans"><p>No. Every route (raw Python, LangChain, OpenRouter, Claude) is a standard API request with parameters and a body, and a standard response. LangChain adds a consistent interface, not a different mechanism.</p></div></details>
+<details class="qa"><summary>Name four things an <code>AIMessage</code> carries besides <code>.content</code>.</summary><div class="ans"><p><code>.tool_calls</code> (tool requests), <code>.usage_metadata</code> (real token counts), <code>.id</code> (unique identifier), <code>.response_metadata</code> (provider extras such as the exact model that replied). <code>.content_blocks</code> is also acceptable.</p></div></details>
+<details class="qa"><summary>Why does streaming produce <code>AIMessageChunk</code> objects, not plain strings?</summary><div class="ans"><p>A stream is a partial response that must later combine into a whole. Chunks can be added with <code>+</code> into a complete message and can carry structure (tool-call fragments, metadata) that a string fragment cannot.</p></div></details>
+<details class="qa"><summary><code>.batch()</code> versus <code>.batch_as_completed()</code>?</summary><div class="ans"><p><code>.batch()</code> waits for all results and returns them in input order. <code>.batch_as_completed()</code> yields each result as soon as it finishes, possibly out of order, tagged with its input index. Use the second when you want to start on whichever result arrives first instead of waiting for the slowest.</p></div></details>
+<details class="qa"><summary><code>ToolMessage</code> has <code>.content</code> and <code>.artifact</code>. What is the difference?</summary><div class="ans"><p><code>.content</code> is what the <strong>model</strong> reads; <code>.artifact</code> is extra data for the <strong>application</strong> that is never sent to the model. A retrieval tool uses it to attach a document id or citation link for the UI without bloating the model's input.</p></div></details>
+<details class="qa"><summary>Your prompt template contains a literal JSON example such as <code>{&quot;status&quot;: &quot;ok&quot;}</code>. What breaks?</summary><div class="ans"><p>LangChain reads the braces as more template variables and fails (<code>INVALID_PROMPT_INPUT</code>). Escape them by doubling: <code>{{</code> and <code>}}</code>.</p></div></details>
+<details class="qa"><summary>What does <code>MessagesPlaceholder</code> do that a string variable cannot?</summary><div class="ans"><p>It injects a whole <strong>list</strong> of prior messages as one template variable. A string variable holds a single string and cannot represent a structured message history.</p></div></details>
 <h2 id="agentic-ai-bank-chapter-4-structured-output">Chapter 4: Structured output</h2>
 <details class="qa"><summary>Why not just describe the output format in the prompt?</summary><div class="ans"><p>Prompts are requests, not contracts. The model chooses the format each time, so keys and nesting vary and your parsing breaks. A schema fixes the shape, and Pydantic validates it.</p></div></details>
 <details class="qa"><summary>Pydantic or TypedDict?</summary><div class="ans"><p>Pydantic validates types and constraints strictly, so use it where correctness matters. <code>TypedDict</code> has no validation, so it suits prototypes. Default to Pydantic if unsure.</p></div></details>
@@ -10274,6 +11267,12 @@ uvicorn api.main:app --app-dir backend --reload --port 8080
 <details class="qa"><summary>Any known problem combining the tool strategy with real tools?</summary><div class="ans"><p>Late-2025 community reports describe recursion limits or skipped tool calls on some models. I would test my exact model and use case before relying on it.</p></div></details>
 <details class="qa"><summary>With an agent, where is the structured result, and how do you handle a <code>Union</code>?</summary><div class="ans"><p>In <code>result["structured_response"]</code>. With a <code>Union</code>, use <code>isinstance()</code> to see which schema the model chose before reading its fields.</p></div></details>
 <details class="qa"><summary>How do you control what happens when validation fails?</summary><div class="ans"><p><code>handle_errors</code> on <code>ToolStrategy</code>: <code>True</code> retries with a default message, a string retries with your message, an exception type catches only that type, and <code>False</code> lets the error propagate.</p></div></details>
+<details class="qa"><summary>Why is &quot;please reply in JSON&quot; less reliable than <code>with_structured_output()</code>?</summary><div class="ans"><p>Prompting relies on the model choosing to comply, so it can add commentary or produce invalid JSON. Structured output gives a schema that Pydantic validates before the result reaches your code; non-compliant output does not pass through as "close enough".</p></div></details>
+<details class="qa"><summary>What is <code>model.profile</code> and how is it used when no strategy is given?</summary><div class="ans"><p>A dict describing what a model supports (for example <code>"structured_output": true</code>, <code>"tool_calling": true</code>). With no explicit strategy, LangChain checks it to pick <code>ProviderStrategy</code> if supported, otherwise <code>ToolStrategy</code>.</p></div></details>
+<details class="qa"><summary>Code review: <code>model.with_structured_output(BookingRequest, strategy=ProviderStrategy(BookingRequest))</code>. What is wrong?</summary><div class="ans"><p><code>strategy=</code> is not a real parameter. It is silently absorbed into <code>**kwargs</code> and does nothing, so the call quietly uses the default strategy. Wrap the schema instead: <code>with_structured_output(ProviderStrategy(BookingRequest))</code>.</p></div></details>
+<details class="qa"><summary>Model-level versus agent-level structured output?</summary><div class="ans"><p>Model level (<code>with_structured_output</code>) knows nothing about tools or a loop and returns a parsed object directly. Agent level (<code>response_format</code> on <code>create_agent</code>) coexists with tools and returns <code>result["structured_response"]</code> next to the normal message trail. Most real work uses <code>create_agent</code>, so it uses the agent-level form.</p></div></details>
+<details class="qa"><summary>With <code>ToolStrategy(Union[NewReservation, CancelReservation])</code>, what happens on an ambiguous message?</summary><div class="ans"><p>The model itself decides which member schema fits; LangChain does not pre-classify. If the message is genuinely ambiguous the model may try more than one schema before settling, which relates to self-correction.</p></div></details>
+<details class="qa"><summary>A field is <code>party_size: int = Field(ge=1, le=20)</code> and the user says &quot;table for 50&quot;. Walk through the loop.</summary><div class="ans"><p>The model proposes <code>party_size=50</code>; Pydantic rejects it; the validation error naming the violated constraint goes back to the model as a message; the unmodified agent loop lets the model retry with a valid value, until one passes or <code>handle_errors</code> gives up as configured.</p></div></details>
 <h2 id="agentic-ai-bank-chapter-5-tools-deep-dive">Chapter 5: Tools deep dive</h2>
 <details class="qa"><summary>What is a tool in LangChain?</summary><div class="ans"><p>A function wrapped (usually with <code>@tool</code>) so an agent can discover and call it. The function name becomes the tool name and the docstring becomes the description the model reads.</p></div></details>
 <details class="qa"><summary>How do you rename a tool or change its description?</summary><div class="ans"><p><code>@tool("book_seats", description="...")</code> overrides both without changing the function.</p></div></details>
@@ -10288,6 +11287,13 @@ uvicorn api.main:app --app-dir backend --reload --port 8080
 <details class="qa"><summary>What is <code>return_direct</code>, and can the model still verify the output?</summary><div class="ans"><p>It returns the tool's raw output to the user, skipping the model's final rewrite, for cases where rewording could change the meaning (a refund policy). No, it conflicts with verification, because verifying puts the model back in the loop.</p></div></details>
 <details class="qa"><summary>How do you stop non-premium users from using a premium tool?</summary><div class="ans"><p>Do not rely on the system prompt. A model can be talked around. Filter the tool list before the model sees it, with middleware reading runtime state or context, so the tool is not an option at all.</p></div></details>
 <details class="qa"><summary>Dynamic tool calling vs dynamic tool loading?</summary><div class="ans"><p>Calling is what the model already does: choose among available tools per request. Loading is choosing before the call which subset of many tools to expose, usually to keep the toolset small and decisions accurate. MCP is a packaging format for tools, not a substitute for loading.</p></div></details>
+<details class="qa"><summary>The docstring is &quot;the tool&#x27;s entire pitch to the model&quot;. Defend or challenge it.</summary><div class="ans"><p>Largely right: the model reads the docstring to decide whether and when to call the tool. It matters least for a tool that is the only option and always needed, but even then a poor docstring can make the model second-guess calling it, so it is rarely irrelevant.</p></div></details>
+<details class="qa"><summary>What does <code>ToolRuntime</code> hide from the model, and how does LangChain know?</summary><div class="ans"><p>It hides <code>state</code>, <code>context</code>, <code>store</code>, <code>execution_info</code> and <code>server_info</code>; none appear in the tool schema. LangChain recognises the <code>ToolRuntime</code> <strong>type annotation</strong> on the parameter named <code>runtime</code> and excludes it when building what the model sees.</p></div></details>
+<details class="qa"><summary>Compare <code>runtime.state</code>, <code>runtime.context</code> and <code>runtime.store</code>.</summary><div class="ans"><p>State: this conversation only, mutable, gone when the thread ends (what the customer already said). Context: immutable, set per invocation and passed fresh every call (a user's membership tier for this request). Store: survives across any number of sessions (a saved dietary preference recalled weeks later).</p></div></details>
+<details class="qa"><summary>A tool declares a parameter named <code>config</code>. What happens?</summary><div class="ans"><p><code>config</code> is reserved for <code>RunnableConfig</code>. The framework intercepts it before the function body runs, typically producing a <code>TypeError</code> about a missing argument. It is an easy accident because <code>config</code> is an ordinary variable name.</p></div></details>
+<details class="qa"><summary>A plain string versus a <code>Command</code> return?</summary><div class="ans"><p>A string only answers. A <code>Command</code> can write to agent state. Example: a tool that upgrades a customer's loyalty tier after a large order must confirm the upgrade <strong>and</strong> store the new tier for later tools and turns, which a string cannot do.</p></div></details>
+<details class="qa"><summary>Why is <code>wrap_model_call</code> gating stronger than telling the model in the prompt not to use a tool?</summary><div class="ans"><p>A prompt instruction depends on the model choosing to comply and a persuasive message may talk it round. Gating removes the tool from <code>request.tools</code> before the call, so no tool definition exists to reference: a structural guarantee, not a request.</p></div></details>
+<details class="qa"><summary>What is a headless tool, and what could only be done that way?</summary><div class="ans"><p>Its schema is registered on the server so the model can call it, but it <strong>executes on the client</strong> (typically the browser) through an interrupt and resume handshake. Example: reading the user's live geolocation, which a Python server cannot access.</p></div></details>
 <h2 id="agentic-ai-bank-chapter-6-agents-memory-and-middleware">Chapter 6: Agents, memory and middleware</h2>
 <details class="qa"><summary>Does a tool result go to the user?</summary><div class="ans"><p>No. It goes back to the model, which produces the final reply. The user sees only that. (<code>return_direct</code> is the deliberate exception.)</p></div></details>
 <details class="qa"><summary>What is the agentic loop?</summary><div class="ans"><p>Receive a message, the model decides whether a tool is needed, run it, append the result, and repeat until the model answers in plain text. It was called the ReAct pattern.</p></div></details>
@@ -11366,6 +12372,43 @@ app.mount(&quot;/mcp&quot;, mcp_app)
 </tr>
 </tbody>
 </table></div>
+<h2 id="agentic-ai-craft-the-colab-notebook-index-in-the-course-repo">The Colab notebook index in the course repo</h2>
+<p>The repo's <code>COLAB_NOTEBOOKS.md</code> lists every notebook shared "anyone with the link" in class, by class number, and most of the Colab links on the Craft page appear there. It matches the Craft entries: classes 07 and 08 (models, streaming, tools, structured output, messages, plus a revision notebook for parts 1 to 4), 09 (the CineBot structured-output notebook), 10 (the student reference for structured output and tools), 11 and 12 (all nine built-in middlewares worked live), 14 (shell tools, the six middleware hooks, decorator versus class middleware), and 15 (runtime and HITL). The same notebooks are checked into the repo as <code>.ipynb</code> files, which is what the middleware, runtime and structured-output chapters were built from. I did not open the Colab links themselves.</p>
+<h2 id="agentic-ai-craft-what-the-craft-pdfs-are">What the Craft PDFs are</h2>
+<p>I extracted the text of all 15 PDFs attached on Craft that are also in the repo. Most are <strong>single-page Excalidraw whiteboard exports</strong> (class diagrams such as the agent and middleware architecture, the MCP overview, runtime and HITL, structured output and tools), so the text is scattered labels and the information is already in the class write-ups and the chapters. The few small extras: tool use costs <strong>at least two model calls</strong> (one to choose the tool, one to summarise its output); a middleware slide shows the hook order (<code>before_agent</code>, <code>before_model</code>, <code>wrap_model_call</code>, the model call, <code>after_model</code>, <code>wrap_tool_call</code>, tool execution, <code>after_agent</code>); and the MCP slide frames the idea as "not more intelligence, but the ability to see more". The 22-page <strong>AI Industry Handbook</strong> is a separate business-audience handout from an "ET Masterclass" (industry-by-industry use cases and companies) and is marked "Not for redistribution", so I did not reproduce it.</p>
+<h2 id="agentic-ai-craft-the-agent-flow-repo">The agent-flow repo</h2>
+<p>The MCP section of the Craft page links <code>github.com/patoles/agent-flow</code>. It is a <strong>visualiser for agent runs</strong>: it shows Claude Code (and Codex) sessions as a live node graph of agents, tool calls, branches and returns. It is useful for seeing how an agent loop or subagents actually behave, which is the same thing Chapters 6 and 19 explain in text.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Quick start</td>
+<td><code>npx agent-flow-app</code> (opens in the browser; start a Claude Code session in another terminal; default port 3001)</td>
+</tr>
+<tr>
+<td>From source</td>
+<td><code>pnpm i</code>, <code>pnpm run setup</code> (configures Claude Code hooks, one time), <code>pnpm run dev</code> (web app on port 3000 plus an event relay)</td>
+</tr>
+<tr>
+<td>How it gets events</td>
+<td>Claude Code hooks post to a small HTTP server; Codex sessions are read from <code>~/.codex/sessions/</code> rollout files; any JSONL event log can be tailed or replayed</td>
+</tr>
+<tr>
+<td>Also</td>
+<td>A VS Code extension (Command Palette: Agent Flow: Open Agent Flow), multi-session tabs, a timeline and transcript panel, and a file-attention heatmap</td>
+</tr>
+<tr>
+<td>Needs</td>
+<td>Node 20+, pnpm and the Claude Code CLI</td>
+</tr>
+</tbody>
+</table></div>
+<p>I read its README and folder layout, not its source.</p>
 <h2 id="agentic-ai-craft-not-read">Not read</h2>
 <ul>
 <li>The PDFs, Colab notebooks and Excalidraw files attached on the page.</li>

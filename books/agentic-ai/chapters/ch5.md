@@ -362,6 +362,41 @@ Do not rely on the system prompt. A model can be talked around. Filter the tool 
 Calling is what the model already does: choose among available tools per request. Loading is choosing before the call which subset of many tools to expose, usually to keep the toolset small and decisions accurate. MCP is a packaging format for tools, not a substitute for loading.
 :::
 
+<!-- assign-add -->
+### Course assignment questions
+
+*From `Assignment_LangChain_Fundamentals_Landscape_to_Tools.ipynb` and its answer-key notebook (Weekend 05, the GreenPlate restaurant scenario). Answers are condensed from the instructor's key.*
+
+
+:::qa The docstring is "the tool's entire pitch to the model". Defend or challenge it.
+Largely right: the model reads the docstring to decide whether and when to call the tool. It matters least for a tool that is the only option and always needed, but even then a poor docstring can make the model second-guess calling it, so it is rarely irrelevant.
+:::
+
+:::qa What does `ToolRuntime` hide from the model, and how does LangChain know?
+It hides `state`, `context`, `store`, `execution_info` and `server_info`; none appear in the tool schema. LangChain recognises the `ToolRuntime` **type annotation** on the parameter named `runtime` and excludes it when building what the model sees.
+:::
+
+:::qa Compare `runtime.state`, `runtime.context` and `runtime.store`.
+State: this conversation only, mutable, gone when the thread ends (what the customer already said). Context: immutable, set per invocation and passed fresh every call (a user's membership tier for this request). Store: survives across any number of sessions (a saved dietary preference recalled weeks later).
+:::
+
+:::qa A tool declares a parameter named `config`. What happens?
+`config` is reserved for `RunnableConfig`. The framework intercepts it before the function body runs, typically producing a `TypeError` about a missing argument. It is an easy accident because `config` is an ordinary variable name.
+:::
+
+:::qa A plain string versus a `Command` return?
+A string only answers. A `Command` can write to agent state. Example: a tool that upgrades a customer's loyalty tier after a large order must confirm the upgrade **and** store the new tier for later tools and turns, which a string cannot do.
+:::
+
+:::qa Why is `wrap_model_call` gating stronger than telling the model in the prompt not to use a tool?
+A prompt instruction depends on the model choosing to comply and a persuasive message may talk it round. Gating removes the tool from `request.tools` before the call, so no tool definition exists to reference: a structural guarantee, not a request.
+:::
+
+:::qa What is a headless tool, and what could only be done that way?
+Its schema is registered on the server so the model can call it, but it **executes on the client** (typically the browser) through an interrupt and resume handshake. Example: reading the user's live geolocation, which a Python server cannot access.
+:::
+<!-- /assign-add -->
+
 ## Quick revision
 
 - [ ] I can write a tool and explain where its name and description come from

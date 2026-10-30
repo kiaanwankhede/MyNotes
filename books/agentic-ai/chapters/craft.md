@@ -110,6 +110,28 @@ Two good habits are visible. It checks before creating (the calendar event), so 
 | Open source AI | Free or paid, open or closed, what open means, Hugging Face, closing the gap, Ollama and LM Studio, hardware size, quantization, security cost time future, trade-offs, choosing |
 | Production readiness | Demo to restaurant, guardrails, red-teaming, evaluations, human in the loop, uptime, monitoring, fallbacks, audit logs, building it in n8n |
 
+## The Colab notebook index in the course repo
+
+The repo's `COLAB_NOTEBOOKS.md` lists every notebook shared "anyone with the link" in class, by class number, and most of the Colab links on the Craft page appear there. It matches the Craft entries: classes 07 and 08 (models, streaming, tools, structured output, messages, plus a revision notebook for parts 1 to 4), 09 (the CineBot structured-output notebook), 10 (the student reference for structured output and tools), 11 and 12 (all nine built-in middlewares worked live), 14 (shell tools, the six middleware hooks, decorator versus class middleware), and 15 (runtime and HITL). The same notebooks are checked into the repo as `.ipynb` files, which is what the middleware, runtime and structured-output chapters were built from. I did not open the Colab links themselves.
+
+## What the Craft PDFs are
+
+I extracted the text of all 15 PDFs attached on Craft that are also in the repo. Most are **single-page Excalidraw whiteboard exports** (class diagrams such as the agent and middleware architecture, the MCP overview, runtime and HITL, structured output and tools), so the text is scattered labels and the information is already in the class write-ups and the chapters. The few small extras: tool use costs **at least two model calls** (one to choose the tool, one to summarise its output); a middleware slide shows the hook order (`before_agent`, `before_model`, `wrap_model_call`, the model call, `after_model`, `wrap_tool_call`, tool execution, `after_agent`); and the MCP slide frames the idea as "not more intelligence, but the ability to see more". The 22-page **AI Industry Handbook** is a separate business-audience handout from an "ET Masterclass" (industry-by-industry use cases and companies) and is marked "Not for redistribution", so I did not reproduce it.
+
+## The agent-flow repo
+
+The MCP section of the Craft page links `github.com/patoles/agent-flow`. It is a **visualiser for agent runs**: it shows Claude Code (and Codex) sessions as a live node graph of agents, tool calls, branches and returns. It is useful for seeing how an agent loop or subagents actually behave, which is the same thing Chapters 6 and 19 explain in text.
+
+| Item | Detail |
+| --- | --- |
+| Quick start | `npx agent-flow-app` (opens in the browser; start a Claude Code session in another terminal; default port 3001) |
+| From source | `pnpm i`, `pnpm run setup` (configures Claude Code hooks, one time), `pnpm run dev` (web app on port 3000 plus an event relay) |
+| How it gets events | Claude Code hooks post to a small HTTP server; Codex sessions are read from `~/.codex/sessions/` rollout files; any JSONL event log can be tailed or replayed |
+| Also | A VS Code extension (Command Palette: Agent Flow: Open Agent Flow), multi-session tabs, a timeline and transcript panel, and a file-attention heatmap |
+| Needs | Node 20+, pnpm and the Claude Code CLI |
+
+I read its README and folder layout, not its source.
+
 ## Not read
 
 - The PDFs, Colab notebooks and Excalidraw files attached on the page.
