@@ -306,7 +306,7 @@ Only through an explicit, legitimate integration (an MCP connection or messaging
 
 **Middleware is not a separate runtime.** Hooks run inside the compiled LangGraph that `create_agent` returns, so the whole agent can be a node or subgraph in a bigger `StateGraph` (classify input then route, fan out in parallel, mix agent calls with deterministic steps).
 
-**Best practices from the page:** one job per middleware, handle errors so a hook does not crash the agent, node hooks for sequential logic and wrap hooks for control flow, document custom state, unit-test middleware separately (Chapter 19A), order matters, and prefer built-ins when they fit.
+**Best practices from the page:** one job per middleware, handle errors so a hook does not crash the agent, node hooks for sequential logic and wrap hooks for control flow, document custom state, unit-test middleware separately, order matters, and prefer built-ins when they fit.
 <!-- /docs-add -->
 
 ## Common mistakes

@@ -42,9 +42,7 @@ flowchart LR
     B --> C["Part C<br/>Agents and middleware<br/>memory, guardrails"]
     C --> D["Part D<br/>Runtime<br/>state, human approval"]
     D --> E["Part E<br/>MCP<br/>protocol to deployment"]
-    E --> F["Part F<br/>Advanced<br/>MCP in LangChain, multi-agent"]
-    F --> G["Part G<br/>Test and ship<br/>testing, tracing, deployment"]
-    G --> H["Part H<br/>Capstone<br/>full-stack project tour"]
+    E --> F["Part F<br/>Advanced<br/>multi-agent, full project"]
 ```
 
 | Part | Classes | You will be able to |
@@ -54,14 +52,12 @@ flowchart LR
 | C. Agents and middleware | 11 to 14 | Add memory, guardrails, retries, todo lists and shell tools; write custom middleware |
 | D. Runtime | 15 | Use runtime context and state, and pause for human approval |
 | E. MCP | 16 to 22 | Explain why MCP exists, its lifecycle and primitives, then build, deploy and compare versions |
-| F. Advanced | Weekends 13 to 14 | Use MCP inside LangChain and choose a multi-agent pattern |
-| G. Test and ship | From the docs | Test agents with fakes and evals, debug with Studio, trace with LangSmith, deploy |
-| H. Capstone | Weekend 14 | Tour a full-stack RAG and agents project |
+| F. Advanced | Weekends 13 to 14 | Use MCP inside LangChain, choose a multi-agent pattern, tour a full-stack project |
 
 ## What is in this draft
 
 :::note What is in this book
-All 20 course chapters are written, plus extra chapters and sections taken from the **LangChain documentation** (read 30 Oct 2026). Chapters labelled 5A, 6A, 10A, 19A and 19B are docs-only and sit where they belong in the study order. Sections titled **From the docs** inside other chapters add details the class did not cover. Material from the Craft notes page will be added when the export is shared.
+All 20 course chapters are written. Chapter 10A and the sections titled **From the docs** inside other chapters come from LangChain documentation pages that were read in full (30 Oct 2026). Material from the Craft notes page will be added when the export is shared.
 :::
 
 :::repo Gaps in the source repository

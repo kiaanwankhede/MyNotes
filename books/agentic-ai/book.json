@@ -55,25 +55,11 @@
    "file": "ch5.md"
   },
   {
-   "id": "ch5a",
-   "num": "5A",
-   "title": "Retrieval and the SQL agent (from the docs)",
-   "part": "Part B  LangChain core",
-   "file": "ch5a.md"
-  },
-  {
    "id": "ch6",
    "num": "6",
    "title": "Agents, memory and middleware",
    "part": "Part C  Agents and middleware",
    "file": "ch6.md"
-  },
-  {
-   "id": "ch6a",
-   "num": "6A",
-   "title": "Context engineering (from the docs)",
-   "part": "Part C  Agents and middleware",
-   "file": "ch6a.md"
   },
   {
    "id": "ch7",
@@ -174,24 +160,10 @@
    "file": "ch19.md"
   },
   {
-   "id": "ch19a",
-   "num": "19A",
-   "title": "Testing agents (from the docs)",
-   "part": "Part G  Test and ship",
-   "file": "ch19a.md"
-  },
-  {
-   "id": "ch19b",
-   "num": "19B",
-   "title": "Debug, trace and deploy (from the docs)",
-   "part": "Part G  Test and ship",
-   "file": "ch19b.md"
-  },
-  {
    "id": "ch20",
    "num": "20",
    "title": "Meridian AI project tour",
-   "part": "Part H  Capstone",
+   "part": "Part F  Advanced",
    "file": "ch20.md"
   },
   {

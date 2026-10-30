@@ -167,7 +167,7 @@ There is no single right answer. Think of Swiggy or Amazon's chatbot: if you do 
 <!-- docs-add -->
 ## From the docs: `create_agent` parameters and memory details
 
-*Added from the LangChain Agents, Short-term memory and Long-term memory pages (read 30 Oct 2026). For the context-engineering view, see Chapter 6A.*
+*Added from the LangChain Agents, Short-term memory and Long-term memory pages (read 30 Oct 2026).*
 
 **`create_agent` parameters**
 
