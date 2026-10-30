@@ -215,3 +215,32 @@ details.qa .ans > *:last-child { margin-bottom: 1em; }
   .pager button.next { text-align: left; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* additions: books, beyond callout, diagrams, jump menu, quiz */
+:root { --beyond: #1f6a8a; --beyond-soft: #e5f1f7; --diagram-bg: #ffffff; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --beyond: #7cc4e6; --beyond-soft: #112a38; } }
+:root[data-theme="dark"] { --beyond: #7cc4e6; --beyond-soft: #112a38; }
+.callout.beyond { --c: var(--beyond); --cs: var(--beyond-soft); border-left-style: dashed; }
+.booksel { height: 38px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit; font-size: 14px; padding: 0 8px; max-width: 150px; }
+.booksel[hidden] { display: none; }
+.diagram { background: var(--diagram-bg); color: #15202b; }
+.diagram svg { max-width: 100%; height: auto; }
+details.diagram-src { margin: 0 0 1.2em; border: 1px dashed var(--line); border-radius: 10px; padding: 8px 12px; }
+details.diagram-src pre { margin-top: 8px; }
+.jump { margin: 0 0 1.4em; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.jump summary { cursor: pointer; padding: 10px 14px; font-weight: 600; font-size: 15px; }
+.jump[hidden] { display: none; }
+.jump .jl { padding: 4px 14px 12px; display: grid; gap: 2px; }
+.jump .jl a { color: var(--ink); text-decoration: none; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.jump .jl a.l3 { padding-left: 16px; color: var(--muted); font-size: 14px; }
+@media (min-width: 1181px) { .jump { display: none; } }
+.qstats { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 14px; color: var(--muted); font-size: 15px; }
+.qstats select { height: 34px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; padding: 0 8px; max-width: 100%; }
+.qlink { margin-left: auto; border: 0; background: none; color: var(--accent); cursor: pointer; text-decoration: underline; font-size: 14px; }
+.qcard { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 20px 20px 16px; }
+.qtag { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.qq { font-size: 1.2rem; font-weight: 600; line-height: 1.45; margin: 0 0 16px; }
+.qans { border-top: 1px solid var(--line); padding-top: 14px; margin-bottom: 14px; }
+.qrow { display: flex; flex-wrap: wrap; gap: 10px; }
+.qbtn { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 600; }
+.qbtn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }

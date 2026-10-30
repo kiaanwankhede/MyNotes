@@ -75,6 +75,10 @@ flowchart TD
 | **LangGraph** | Raw vegetables | Low-level graph of steps, mixing deterministic and agentic logic | You need to wire every step yourself |
 | **LangSmith** | Flight recorder | Tracing and monitoring of what an agent did | You need to observe and debug (it does not build agents) |
 
+:::beyond From Class 07
+LangGraph is the **foundation** and LangChain is built **on top of** it, not the other way round. Class 06 only named the tiers; Class 07 explained how they relate. Also, **LangFuse** is not part of the LangChain family. It is an independent observability tool.
+:::
+
 :::note Version warning
 Everything before LangChain v1 is now called **LangChain Classic**. Most blog posts and videos still teach Classic. This course teaches v1 and later, so old snippets may not match.
 :::
@@ -107,8 +111,8 @@ load_dotenv()          # reads .env into the environment
 It happened live in class and the key had to be deleted. Anyone who sees a key in your history can use it. If it happens: **revoke the key first**, then clean up the repo.
 :::
 
-:::tip Environment variable names matter
-LangChain looks for the provider's standard name, for example `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`. If you rename it, or switch provider without setting the matching variable, you get an authentication error.
+:::beyond From Class 07
+LangChain looks for the provider's standard variable name, for example `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`. If you rename it, or switch provider without setting the matching variable, you get an authentication error. The instructor showed this live in the next class.
 :::
 
 ## How `create_agent()` works
@@ -177,6 +181,10 @@ You pass a plain function. LangChain reads its **name**, **type hints** and **do
 }
 ```
 
+:::beyond Illustration, not printed in class
+The JSON above is my sketch of roughly what LangChain generates, written to match the schema you hand-wrote in the primer. The class explained that the schema is inferred, but did not print it.
+:::
+
 The `@tool` decorator wraps the function so an agent can call it. Either way, the **docstring is the model's only guide** to when to use the tool.
 
 ```python
@@ -220,13 +228,52 @@ agent = create_agent(
 )
 ```
 
+:::repo Model names in these notes
+The repo scripts use `openai:gpt-5.5`. These notes use `gpt-4o-mini` as a placeholder. Use any model you have access to, with its matching API key. The repo script also prints `.content_blocks` (a standard list of content parts), while `.content` is enough for plain text.
+:::
+
 :::repo The repo example has a missing piece
 The example script passes `checkpointer=checkpointer`, but the file never defines it, so it fails as written. Create one first (next section).
+:::
+
+## A real example: the Gatsby research agent
+
+`langchain_basics.py` points the URL-fetching tool at a hard task: count exact lines in a real ~280 KB book from Project Gutenberg. A model cannot do that from memory, so it **must** use the tool. The prompt design is the lesson.
+
+```python
+SYSTEM_PROMPT = """You are a literary data assistant.
+
+## Capabilities
+- `fetch_text_from_url`: loads document text from a URL into the conversation.
+Do not guess line counts or positions. Ground them in tool results."""
+
+# ...and in the user message:
+# "If you cannot VERIFY an exact answer with your tools, do not fabricate numbers.
+#  Use null for that field and explain the limitation."
+```
+
+:::key Grounding beats guessing
+Three habits in one example, all of which come back as guardrails in Chapter 8:
+1. **Tell the agent what its tool is for** in the system prompt.
+2. **Forbid fabrication** and give it an honest way out (`null` plus an explanation).
+3. **Ask it to report errors** instead of hiding them.
+:::
+
+:::tip Try it yourself
+Run it, then count the lines yourself with a text editor or `grep -c Gatsby`. Does the agent's number match, or did it guess? This is the quickest way to feel the difference between a grounded and an ungrounded answer.
+:::
+
+:::repo Preview of the third tier
+The same file imports `create_deep_agent` from `deepagents` at the top and never uses it. It is a hint of the Deep Agents tier covered in Class 07.
 :::
 
 ## Memory: why the agent forgets
 
 In class, saying "Hi, I am Mayank" in one run and asking "Who am I?" in a second run got no answer. The history lived in the first process, and ended when the script ended.
+
+:::beyond Added to fix the repo example
+Class 06 made the point that memory is lost when the process ends and needs a store. The checkpointer code below is my addition, because the repo example uses a `checkpointer` it never defines. Later chapters cover memory properly.
+:::
 
 To keep a conversation, plug in a **checkpointer** and give each conversation a **thread id**:
 
@@ -336,6 +383,10 @@ By default the message history exists only in the running process. Adding a **ch
 Change the model string (for example `"anthropic:..."`) and make sure `ANTHROPIC_API_KEY` is set. The rest of the code stays the same. What can break: a missing or misnamed key, and model-specific features that the new model does not support.
 :::
 
+:::qa Is the number of loop turns the same in every framework?
+No. It varies. Some frameworks cap the loop at around 100 iterations. The hand-built loop in class used 4 as a sensible starting default. Whatever the framework, you want a cap so a confused model cannot loop forever.
+:::
+
 ### Tricky
 
 :::qa Isn't LangChain just a wrapper over the OpenAI API?
@@ -348,6 +399,10 @@ Extra abstraction: generating IDs, building message objects and internal bookkee
 
 :::qa When would you not use LangChain?
 When the task is a single model call, when I need tight control over latency or every step, or when the workflow is better expressed as an explicit graph (then I would use LangGraph directly). Knowing the raw loop lets me make that call.
+:::
+
+:::qa What did the Gatsby example teach about prompting?
+That an agent should be told what its tool is for, forbidden from fabricating, and given an honest fallback (`null` plus an explanation) when it cannot verify an answer. It is a guardrail pattern taught before guardrails had a name.
 :::
 
 :::qa Should tool results be cached?
@@ -363,3 +418,15 @@ Only when it is safe. Cache by how quickly the data changes: never for stock pri
 - [ ] I know why the docstring matters
 - [ ] I can add memory with a checkpointer and a thread id
 - [ ] I can keep API keys out of Git
+
+## Sources and further reading
+
+Everything above comes from these files in the course repository. Open them to see the real code and the full class write-ups.
+
+- [Class 06 full notes (from the transcript)]({{src:classes_transcription_summary/06 - 12 Jul - Introduction to LangChain.md}})
+- [Class 06 short summary]({{src:classes_summary/06 - 12 Jul - Introduction to LangChain.md}})
+- [Class 06 code folder]({{tree:Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain}})
+- [`langchain_agents.py`: the first `create_agent` call]({{src:Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/langchain_agents.py}})
+- [`langchain_basics.py`: the Gatsby research agent]({{src:Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/langchain_basics.py}})
+- [Opening slide for the class (PDF)]({{src:Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/Untitled-scene.pdf}})
+- [LangChain family and timeline: Class 07 notes]({{src:classes_transcription_summary/07 - 18 Jul - LangChain Family & Harness Engineering.md}})

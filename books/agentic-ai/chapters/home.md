@@ -20,9 +20,18 @@ Every chapter has the same shape, so you always know where to look:
 | **Hands-on lab** | A small exercise to make the idea stick |
 | **Interview corner** | A 30-second pitch, then questions with model answers (tap to reveal), including tricky ones |
 | **Quick revision** | A tickable checklist; your ticks are remembered on this device |
+| **Sources** | Links to the exact class notes and code files in the course repository |
 
 :::tip How to use the interview corner
 Cover the answer, say yours out loud, then open it and compare. Aim to match the structure of the model answer, not the exact words.
+:::
+
+:::beyond How to read the labels
+A box marked **Beyond the class** means the content comes from a different class than the chapter's own, or is my explanation added to fill a gap. Everything else comes from the class itself. Boxes marked **Repo note** point out problems or details in the course code.
+:::
+
+:::key Quiz me
+The **Quiz me** page in the sidebar pulls every interview question from the chapters that are written. It shows one at a time with the answer hidden. Mark the ones you knew and they stop appearing.
 :::
 
 ## The course at a glance

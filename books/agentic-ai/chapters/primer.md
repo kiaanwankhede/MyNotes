@@ -149,3 +149,10 @@ No. When the model wants a tool, `content` is empty and the useful data is in `t
 - [ ] I can write the loop from memory and say why it calls the model again
 - [ ] I know the model returns a request, not a result
 - [ ] I can explain why the tool description matters
+
+## Sources and further reading
+
+- [Class 04 notes: anatomy of an agent]({{src:classes_transcription_summary/04 - 5 Jul - Anatomy of an Agent.md}})
+- [Class 05 notes: the agentic loop]({{src:classes_transcription_summary/05 - 11 Jul - The Agentic Loop (Pure Python).md}})
+- [Project Zero code (files `_01` to `_07`)]({{tree:Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0}})
+- [Class 5 whiteboard slide (PDF)]({{src:Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/Agentic-Python.pdf}})
