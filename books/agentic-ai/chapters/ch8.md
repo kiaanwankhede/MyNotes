@@ -354,6 +354,10 @@ Testing. A model fabricates a plausible tool result without running the tool, so
 Not through the model. Use a headless tool: a secure payment page the user interacts with directly, outside the model's view.
 :::
 
+:::qa A production agent appears to hang. How do you debug it?
+Check tracing first (LangSmith or equivalent) and look at the last completed step. The usual causes are a tool blocked on a slow external call with **no timeout**, or an agent that never reaches a stopping condition because **no call cap** was set. The hardened fix is a tool and model call ceiling in middleware plus real timeouts on external calls, set up before an incident rather than discovered during one.
+:::
+
 ## Quick revision
 
 - [ ] I can explain run vs thread limits and why a limit is a tool message
@@ -372,3 +376,4 @@ Not through the model. Use a headless tool: a secure payment page the user inter
 - [Class 13 short summary]({{src:classes_summary/13 - 09 Aug - Guardrails, Todo Lists & Tool Resilience.md}})
 - [Weekend 07 overview]({{src:Weekend 07 - 8-9 Aug/README.md}})
 - [Weekend 07 middleware notebook]({{src:Weekend 07 - 8-9 Aug/MIddleware.ipynb}})
+- [Researched LangChain interview questions (PDF)]({{src:Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Assignment & Questions/LangChain_Interview_Questions_Researched.md.pdf}})

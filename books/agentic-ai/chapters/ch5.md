@@ -211,6 +211,25 @@ sequenceDiagram
 It is a dictionary in memory, so everything is lost when the process stops. Production uses a persistent store such as one backed by PostgreSQL. Store performance and scaling depend on the database underneath, not on LangChain, which only provides the read and write interface. Using LangGraph's store inside LangChain is not mixing frameworks, because LangChain is built on LangGraph.
 :::
 
+### 8b. Inspecting the store, and two quieter runtime parts
+
+Besides `.put()` and `.get()`, a store supports **`.search()`**: list everything saved under a namespace without knowing each key. Useful for debugging or an admin view.
+
+```python
+for item in loyalty_store.search(("priya_01", "preferences")):
+    print(item)
+
+@tool
+def log_booking_context(runtime: ToolRuntime) -> str:
+    """Log identity info about the current booking session."""
+    info = runtime.execution_info
+    print(f"thread={info.thread_id}, run={info.run_id}, attempt={info.node_attempt}")
+    print("server_info is None locally:", runtime.server_info is None)
+    return "Logged."
+```
+
+`server_info` is filled **only** when running on LangGraph Server. Locally it is `None`, which is expected, not a bug.
+
 ### 9. Return directly, and dynamic loading
 
 - **`return_direct`** sends a tool's raw output straight to the user and skips the model's final pass. Use it when rewording could dangerously change the meaning, such as a refund policy. You cannot also have the model double-check the output, because that puts the model back in the loop and reintroduces the risk.
@@ -323,3 +342,4 @@ Calling is what the model already does: choose among available tools per request
 - [Fundamentals assignment]({{src:Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Assignment & Questions/Assignment_LangChain_Fundamentals_Landscape_to_Tools.ipynb}})
 - [Researched LangChain interview questions (PDF)]({{src:Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Assignment & Questions/LangChain_Interview_Questions_Researched.md.pdf}})
 - [Weekend 05 code folder]({{tree:Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)}})
+- [Student reference notebook: structured output and tools]({{src:Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Assignment & Questions/Student_Reference_Structured_Output_and_Tools.ipynb}})

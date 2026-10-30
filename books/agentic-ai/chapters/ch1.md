@@ -409,6 +409,16 @@ That an agent should be told what its tool is for, forbidden from fabricating, a
 Only when it is safe. Cache by how quickly the data changes: never for stock prices, minutes for currency rates, hours for weather. Caching everything because it is easy gives stale answers.
 :::
 
+### From the course's interview question bank
+
+:::qa What is the difference between a chain and an agent?
+A **chain** is a deterministic sequence of steps wired before runtime, running the same way every time. An **agent** is non-deterministic: a model decides at runtime which tool to call next, looping until it decides the task is done.
+:::
+
+:::qa A team wants sentiment analysis on support tickets. Would you build a LangChain agent?
+Probably not. For narrow classification tasks (sentiment, named-entity recognition) a small purpose-built encoder model is commonly cited as faster, cheaper and more accurate than an LLM chain. Reach for an agent when the task needs reasoning across steps or tools, not for a single fixed label.
+:::
+
 ## Quick revision
 
 - [ ] I can state Agent = Model + Harness and explain it with an analogy
@@ -430,3 +440,4 @@ Everything above comes from these files in the course repository. Open them to s
 - [`langchain_basics.py`: the Gatsby research agent]({{src:Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/langchain_basics.py}})
 - [Opening slide for the class (PDF)]({{src:Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/Untitled-scene.pdf}})
 - [LangChain family and timeline: Class 07 notes]({{src:classes_transcription_summary/07 - 18 Jul - LangChain Family & Harness Engineering.md}})
+- [Researched LangChain interview questions (PDF)]({{src:Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Assignment & Questions/LangChain_Interview_Questions_Researched.md.pdf}})

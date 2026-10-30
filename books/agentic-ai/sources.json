@@ -178,7 +178,7 @@
     "ch15",
     "ch16"
    ],
-   "status": "not_read"
+   "status": "skimmed"
   },
   "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/08_timeout_and_cancellation.py": {
    "blob": "7eaae1f10b81eea359c715c394ca9c6f98080b5f",
@@ -187,7 +187,7 @@
     "ch16",
     "ch17"
    ],
-   "status": "not_read"
+   "status": "skimmed"
   },
   "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/09_progress_notifications.py": {
    "blob": "0541e991782b321ffe3cb3bcc534e68dfb9bd972",
@@ -196,7 +196,7 @@
     "ch16",
     "ch17"
    ],
-   "status": "not_read"
+   "status": "skimmed"
   },
   "Complete MCP/TimeTrackProject/mcp-client-and-advanced/database.py": {
    "blob": "0970095b1ab749df728d6f10ac729a7c8d124067",
@@ -212,7 +212,7 @@
     "ch15",
     "ch16"
    ],
-   "status": "not_read"
+   "status": "skimmed"
   },
   "Complete MCP/TimeTrackProject/mcp-client-and-advanced/pyproject.toml": {
    "blob": "5508469a6a932ce7444d8497732eca8bb3264e97",
@@ -1199,7 +1199,7 @@
     "ch2",
     "ch3"
    ],
-   "status": "not_read"
+   "status": "skimmed"
   },
   "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/README.md": {
    "blob": "c309c9b4d1d025264dab102f9493a9a2eee7c9e3",
@@ -1233,10 +1233,13 @@
   "Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Assignment & Questions/LangChain_Interview_Questions_Researched.md.pdf": {
    "blob": "e8e0d2f9a8a942ea5e2e4a9ca4c7ddbf9f68e8c5",
    "cited_in": [
+    "ch1",
+    "ch2",
     "ch4",
-    "ch5"
+    "ch5",
+    "ch8"
    ],
-   "status": "skimmed"
+   "status": "read"
   },
   "Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Assignment & Questions/Student_Reference_Structured_Output_and_Tools.ipynb": {
    "blob": "f1ad00cfd532d7b113198c8b886fe9dc7290cc79",
@@ -1244,7 +1247,7 @@
     "ch4",
     "ch5"
    ],
-   "status": "not_read"
+   "status": "skimmed"
   },
   "Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Langchain-2.pdf": {
    "blob": "2ffa5c2ec54daa6a27c288635f47ee0a3fee4790",
@@ -1276,7 +1279,7 @@
     "ch4",
     "ch5"
    ],
-   "status": "not_read"
+   "status": "skimmed"
   },
   "Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Langchain_Till_Agents.ipynb": {
    "blob": "664cca9c378ea8ec418272d25766e4bfa37d6a7b",
@@ -1284,7 +1287,7 @@
     "ch4",
     "ch5"
    ],
-   "status": "not_read"
+   "status": "skimmed"
   },
   "Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/README.md": {
    "blob": "6ad2be4ba652a01222c20fd45d2e24f612999e8b",
@@ -1332,14 +1335,14 @@
    "cited_in": [
     "ch6"
    ],
-   "status": "not_read"
+   "status": "read"
   },
   "Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/Middleware-Architecture-Sketch.ipynb": {
    "blob": "dccb46bd4f68139b3830ccd7607df8a9f8db08ce",
    "cited_in": [
     "ch6"
    ],
-   "status": "not_read"
+   "status": "read"
   },
   "Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/README.md": {
    "blob": "b1abd9e0822862bdd7ca9366c0516ecea6799096",
@@ -1380,7 +1383,7 @@
     "ch7",
     "ch8"
    ],
-   "status": "not_read"
+   "status": "read"
   },
   "Weekend 07 - 8-9 Aug/README.md": {
    "blob": "2528dcc92587e1e0858a4408c739da5a6c4a53be",
@@ -1757,7 +1760,7 @@
    "cited_in": [
     "ch14"
    ],
-   "status": "not_read"
+   "status": "read"
   },
   "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/first-mcp-server/uv.lock": {
    "blob": "d21579bf95cd0153c8c0d0a046ab35ddcb2f13c6",
@@ -3180,8 +3183,13 @@
   },
   "interview-questions/mcp.md": {
    "blob": "9bb8fb260797dbeddc490f18b1adb7a0d6f6549d",
-   "cited_in": [],
-   "status": "not_read"
+   "cited_in": [
+    "ch11",
+    "ch13",
+    "ch16",
+    "ch17"
+   ],
+   "status": "read"
   },
   "scripts/check_repo_paths.py": {
    "blob": "515adf7f66ddb2ad8a4198fb238c41e4a7bdd41f",

@@ -98,8 +98,8 @@ Check what a model can do with `model.profile`, which shows release date, pricin
 With the tool strategy you can set `tool_message_content="Booking details captured successfully."`. That text is logged into the conversation history after the structured output is produced, like a log entry that later LLM calls in the same conversation can read.
 :::
 
-:::repo The call signature differs between sources
-The class demo wrote `with_structured_output(Schema, strategy=ToolStrategy(...))`. The reference notebook writes `with_structured_output(ToolStrategy(Schema))`. LangChain's APIs move quickly, so check the docs for the version you install. The ideas are the same.
+:::trap Wrap the schema in the strategy. A `strategy=` keyword is ignored
+The class demo wrote `with_structured_output(Schema, strategy=ToolStrategy(...))`. The course's student reference notebook is explicit that this form **does not work and is silently ignored**. To force a strategy, wrap the schema: `with_structured_output(ToolStrategy(Schema))`, or `response_format=ToolStrategy(Schema)` on an agent. Silent failures like this are why you test the behaviour, not just that the code runs.
 :::
 
 :::trap Known caveat from the reference notebook
@@ -190,6 +190,32 @@ The first attempt returned 15, Pydantic raised a `ValidationError`, LangChain fe
 :::key Why this scales
 With 15 to 20 fields you cannot hand-write a check for every failure. Letting the model **see its own validation error and self-correct** is more scalable than defensive code per field. It also shows a prompt-injection attempt failing: the schema rule held even when the message said to override all instructions.
 :::
+
+### 7b. Controlling the retry: `handle_errors`
+
+On `ToolStrategy` you choose how validation failures are handled:
+
+| `handle_errors` value | Behaviour |
+| --- | --- |
+| `True` (default) | Catch all errors and retry with a default error message |
+| A custom string | Catch all errors and retry with **your** message |
+| A specific exception type | Catch only that type; anything else propagates |
+| `False` | No retry; the exception propagates immediately |
+
+```python
+strict_agent = create_agent(
+    model="openai:gpt-5-mini",
+    tools=[],
+    response_format=ToolStrategy(
+        SeatBooking,
+        handle_errors="Ticket count must be between 1 and 10. Please state a valid number.",
+    ),
+)
+result = strict_agent.invoke({"messages": [{"role": "user", "content": "Strictly book 15 tickets"}]})
+print(result["structured_response"])        # the agent's validated object lives here
+```
+
+With a `Union` schema, check which one you received with `isinstance(result["structured_response"], CancelBooking)` before using type-specific fields. Different models self-correct differently, so test the model you will ship.
 
 ### 8. The full pipeline
 
@@ -284,6 +310,14 @@ It sets the message logged to conversation history after the tool strategy produ
 Late-2025 community reports describe recursion limits or skipped tool calls on some models. I would test my exact model and use case before relying on it.
 :::
 
+:::qa With an agent, where is the structured result, and how do you handle a `Union`?
+In `result["structured_response"]`. With a `Union`, use `isinstance()` to see which schema the model chose before reading its fields.
+:::
+
+:::qa How do you control what happens when validation fails?
+`handle_errors` on `ToolStrategy`: `True` retries with a default message, a string retries with your message, an exception type catches only that type, and `False` lets the error propagate.
+:::
+
 ## Quick revision
 
 - [ ] I can explain why free text is not a contract and show the three-reply problem
@@ -302,3 +336,4 @@ Late-2025 community reports describe recursion limits or skipped tool calls on s
 - [Structured output Colab notebook]({{src:Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Langchain_Structured_OUTPUT_COLAB.ipynb}})
 - [Weekend 05 code folder]({{tree:Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)}})
 - [LangChain docs: structured output](https://docs.langchain.com/oss/python/langchain/structured-output#error-handling-strategies)
+- [Student reference notebook: structured output and tools]({{src:Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Assignment & Questions/Student_Reference_Structured_Output_and_Tools.ipynb}})

@@ -187,3 +187,16 @@ Default to one agent. Handoffs and skills are cheaper on repeats (about 5 vs 8 c
 - **Does shutdown use JSON-RPC?** No. It is the transport's job.
 - **Who calls the tool?** The client or agent. Never the model.
 - **When multi-agent?** Only when tools, context, teams or latency demand it.
+
+## Quick-fire warm-up
+
+From the course's interview question file. Answer each in one or two sentences, then check the linked chapter.
+
+1. What is the difference between `.invoke()`, `.stream()` and `.batch()`? ([Ch 3](#agentic-ai-ch3))
+2. Why does `init_chat_model("provider:model")` matter more than it looks? ([Ch 2](#agentic-ai-ch2))
+3. What is the difference between `model.with_structured_output()` and `create_agent(response_format=...)`? ([Ch 4](#agentic-ai-ch4))
+4. Name two retriever `search_type` options and how they differ. ([Ch 20](#agentic-ai-ch20))
+5. What is the difference between short-term and long-term memory in an agent? ([Ch 6](#agentic-ai-ch6))
+6. Why would you choose `TypedDict` over a Pydantic `BaseModel` for structured output? ([Ch 4](#agentic-ai-ch4))
+7. What does a checkpointer do, and what breaks if you forget it? ([Ch 6](#agentic-ai-ch6))
+8. Name one thing `ToolMessage.artifact` can carry that `.content` should not. ([Ch 3](#agentic-ai-ch3))

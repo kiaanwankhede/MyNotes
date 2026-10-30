@@ -66,6 +66,10 @@ You have seen this without realising: the "conversation has been compacted" beha
 Compressing a long history can drop detail, which is part of why models seem to "forget" or hallucinate as a conversation grows. Zero loss cannot be guaranteed. If something **must** be retained, save it separately into long-term memory instead of relying on the summary.
 :::
 
+:::note Summaries are text only
+Summarisation compresses **text**. It does not shrink images, audio or video. Recent messages kept by `keep` retain their original media, but older media that gets summarised survives only as the text summary. For image-heavy apps, store media in a file system or object store and pass URLs or references through the history.
+:::
+
 ### 2. Human-in-the-loop (HITL)
 
 Pause execution so a human can **approve, edit or reject** a proposed tool call before it runs. If an agent decided to spend a large sum, should it be allowed to without asking? This is what Claude and similar assistants do when they ask permission: you are the human in the loop.
@@ -111,6 +115,27 @@ One hundred model calls in a single run cost real money. This formalises the `ma
 :::tip Where should the number come from?
 From domain knowledge, not a framework default. A web-search agent probably needs 5 to 15 searches for most tasks. The developer who understands the use case sets the cap, rather than leaving it unbounded or guessing high.
 :::
+
+**In code**, from the course notebook:
+
+```python
+from langchain.agents.middleware import ModelCallLimitMiddleware
+
+call_limited_agent = create_agent(
+    model="openai:gpt-5-mini",
+    tools=cinebot_tools,
+    checkpointer=InMemorySaver(),        # needed for thread_limit to persist across calls
+    middleware=[
+        ModelCallLimitMiddleware(
+            thread_limit=5,              # across the whole conversation
+            run_limit=2,                 # per single .invoke()
+            exit_behavior="end",         # stop gracefully instead of raising an exception
+        ),
+    ],
+)
+```
+
+`exit_behavior="end"` makes the agent stop cleanly when the cap is hit, rather than throwing. The tool version (`ToolCallLimitMiddleware`) is in Chapter 8.
 
 ### 5. Model fallback
 
@@ -164,6 +189,10 @@ agent = create_agent(
 
 :::key Guardrail is the concept. Middleware is the mechanism.
 A **guardrail** is the goal of protecting an agent from doing something undesirable. **Middleware** is how you implement it. They are not two competing systems. This distinction came up repeatedly in class and is a common interview question.
+:::
+
+:::beyond Two more middlewares imported in the notebook
+The course notebook also imports `ModelRetryMiddleware` and `ContextEditingMiddleware` with `ClearToolUsesEdit`, without a full demo. From LangChain's documentation: **model retry** retries failed model calls with backoff (the model-side twin of tool retry in Chapter 8), and **context editing** with `ClearToolUsesEdit` clears older tool outputs from the context when it grows too large, a lighter alternative to summarising everything. Check your installed version's reference for exact parameters.
 :::
 
 ## Using several middlewares

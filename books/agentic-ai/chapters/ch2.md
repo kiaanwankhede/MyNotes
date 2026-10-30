@@ -291,6 +291,16 @@ Usually the `.env` is in a different folder, was created after the kernel starte
 Open weights when I need self-hosting, privacy, fine-tuning or no per-call cost, accepting I run the hardware. Closed models when I want top quality with no infrastructure, accepting per-use pricing and no fine-tuning.
 :::
 
+### From the course's interview question bank
+
+:::qa What is the ReAct pattern?
+Reasoning plus Acting. The model alternates a **thought** (reasoning), an **action** (usually a tool call) and an **observation** (reading the result), and repeats until it gives a final answer instead of another action. It is the ancestor of today's agentic loop.
+:::
+
+:::qa Do you know a real security vulnerability in langchain-core?
+Yes: **CVE-2025-68664**, disclosed December 2025, rated CVSS 9.3. It was a serialisation injection in `dumps()` and `dumpd()`: they failed to escape the reserved internal key `"lc"` in free-form dictionaries, so attacker-controlled data (reachable through prompt injection into fields such as model response metadata) could be treated as a trusted internal object when deserialised, potentially exposing secrets from environment variables. It is patched in `langchain-core` 0.3.81 and 1.2.5 or later. The interviewer is checking that you **track security advisories** for the frameworks you ship.
+:::
+
 ## Quick revision
 
 - [ ] I can quote the agent and harness definitions
@@ -308,3 +318,4 @@ Open weights when I need self-hosting, privacy, fine-tuning or no per-call cost,
 - [Environment, models and messages notebook]({{src:Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Notebook For Reference/02_03_environment_models_messages_student_notes.ipynb}})
 - [Class slides (Langchain.pdf)]({{src:Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain.pdf}})
 - [Weekend 04 code folder]({{tree:Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer}})
+- [Researched LangChain interview questions (PDF)]({{src:Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Assignment & Questions/LangChain_Interview_Questions_Researched.md.pdf}})
