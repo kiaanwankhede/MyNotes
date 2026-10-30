@@ -233,6 +233,21 @@ ticket = pipeline.invoke({"customer_message": "Hi, I'm Rina, my order arrived br
 
 No `if/else` for message formats and no string parsing: the structure does the work. The reference notebook's `SupportTicket` used `Literal` for category (`refund`, `delivery`, `product_defect`, `other`) and urgency (`low`, `medium`, `high`), so the model cannot invent a fifth category.
 
+<!-- docs-add -->
+## From the docs: what the structured output page adds
+
+*Added from the LangChain Structured output page (read 30 Oct 2026).*
+
+- `response_format` takes `ToolStrategy[...]`, `ProviderStrategy[...]`, a bare schema type (auto) or `None`. The result is under `result["structured_response"]`: a Pydantic instance for Pydantic schemas, a dict for dataclasses, `TypedDict` and JSON Schema.
+- **Auto-selection**: a bare schema uses `ProviderStrategy` when the model supports native structured output (the page names OpenAI, Anthropic Claude and xAI Grok) and `ToolStrategy` otherwise. With `langchain>=1.1` support is read from the model profile; if missing, set `profile={"structured_output": True}` on the model.
+- A **raw JSON Schema dict is not auto-detected**: wrap it in `ProviderStrategy` or `ToolStrategy`. For `ProviderStrategy`, a JSON Schema needs top-level `title` and `description`.
+- `ProviderStrategy(schema, strict=True)` asks for strict adherence on providers that support it (OpenAI, xAI); needs `langchain>=1.2`.
+- **Union types** (`Union[A, B]`) are shown only with `ToolStrategy`: the model picks the best-fitting schema.
+- `ToolStrategy(tool_message_content="Action item captured!")` replaces the default tool message in history. Without it, the tool message echoes the structured data.
+- If a model must use **tools and structured output together**, it must support both at once.
+- Validation errors feed back to the model, for example a Pydantic field with `ge=1, le=5` given `10` returns a message naming the field and limit, and the model corrects itself (see the `handle_errors` table above).
+<!-- /docs-add -->
+
 ## Common mistakes
 
 | Mistake | Symptom | Fix |

@@ -164,6 +164,60 @@ There is no single right answer. Think of Swiggy or Amazon's chatbot: if you do 
 
 "I like Python as a language" belongs in the **store**, not the saver, because it should be usable in other chats too. That is long-term memory. For caching: if "weather in Delhi" is asked a million times in an hour, cache it. API calls at scale are not cheap.
 
+<!-- docs-add -->
+## From the docs: `create_agent` parameters and memory details
+
+*Added from the LangChain Agents, Short-term memory and Long-term memory pages (read 30 Oct 2026). For the context-engineering view, see Chapter 6A.*
+
+**`create_agent` parameters**
+
+| Parameter | Role |
+| --- | --- |
+| `model` | `"provider:model"` string or a model instance |
+| `tools` | Callables, LangChain tools or tool dicts |
+| `system_prompt` | String or `SystemMessage` |
+| `response_format` | Validated schema for the final answer |
+| `state_schema` | `AgentState` subclass for extra state fields |
+| `context_schema` | Per-run data, read via `runtime.context` |
+| `checkpointer` | Needed for `thread_id` persistence locally |
+| `middleware` | The harness extensions |
+| `store` | Long-term memory store |
+| `name` | Identifier, useful when the agent is a sub-agent |
+
+On LangSmith Deployment a checkpointer is provisioned for you.
+
+**Short-term memory.** Memory is saved per `thread_id` by a checkpointer; state is read at the start of each step and updated after each step. Same id continues, a new id starts fresh. In production use a database checkpointer (for example `PostgresSaver` after `checkpointer.setup()`; SQLite and Azure Cosmos DB also exist). Extend state with `class MyState(AgentState): user_id: str` passed as `state_schema`.
+
+**Controlling long conversations**
+
+1. **Trim** with `@before_model`, returning `RemoveMessage(id=REMOVE_ALL_MESSAGES)` followed by the messages to keep.
+2. **Delete** specific messages with `RemoveMessage(id=m.id)`, or all of them. This needs a state key with the `add_messages` reducer, which the default `AgentState` has. Also available in `@after_model`.
+3. **Summarise** with `SummarizationMiddleware(model=..., trigger=("tokens", 4000), keep=("messages", 20))`.
+
+:::trap Keep the remaining history valid
+Some providers require history to start with a `user` message, and every tool-call message must be followed by its tool result. Deleting the wrong messages produces provider errors.
+:::
+
+**Where memory can be read or changed**
+
+| Place | How |
+| --- | --- |
+| Tool (read) | `runtime: ToolRuntime`, then `runtime.state["user_id"]` (hidden from the model) |
+| Tool (write) | Return `Command(update={...})` with a `ToolMessage(tool_call_id=runtime.tool_call_id)` |
+| Prompt | `@dynamic_prompt` reading `request.runtime.context` |
+| Before or after model | `@before_model` and `@after_model` get `state` and `runtime` |
+
+**Long-term memory.** It survives across threads and sessions and is built on a **store** that saves JSON documents under a **namespace** (a tuple such as `("users",)`) and a **key**.
+
+| Call | Does |
+| --- | --- |
+| `put(namespace, key, value)` | Save a JSON dict (replaces an existing key) |
+| `get(namespace, key)` | Item with `.value`, or `None` |
+| `search(namespace, filter=..., query=...)` | Filter by content; `query` ranks by vector similarity if an index exists |
+
+Semantic search needs `IndexConfig(embed=..., dims=...)` with `dims` matching the embedding size. Use `InMemoryStore` for development and `PostgresStore` (`from_conn_string`, then `setup()` once) in production; Redis and MongoDB stores exist. Tools reach it through `runtime.store` (check it is not `None`) and scope by `runtime.context.user_id`.
+<!-- /docs-add -->
+
 ## Common mistakes
 
 | Mistake | Symptom | Fix |

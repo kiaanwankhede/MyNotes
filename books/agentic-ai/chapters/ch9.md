@@ -277,6 +277,38 @@ No. Browsers are sandboxed and cannot reach your file system or terminal, which 
 Only through an explicit, legitimate integration (an MCP connection or messaging tool that accesses mail or messages with the user's knowledge). Never by simulating browser or screen automation to intercept an OTP. That is a serious security anti-pattern.
 :::
 
+<!-- docs-add -->
+## From the docs: custom middleware in detail
+
+*Added from the LangChain "Custom middleware" and "Middleware overview" pages (read 30 Oct 2026).*
+
+**Two hook styles.** *Node-style* hooks run at fixed points and return a dict or `None`: `before_agent`, `before_model`, `after_model`, `after_agent`. *Wrap-style* hooks surround a call and decide whether and how often the inner handler runs: `wrap_model_call` and `wrap_tool_call`. A wrap hook can call the handler **zero times** (short-circuit), once or several times (retry).
+
+**Decorators or classes.** Decorators suit one hook (`@before_model`, `@wrap_model_call`, `@wrap_tool_call`, plus `@dynamic_prompt`). A class (subclass `AgentMiddleware`) suits several hooks, configuration in `__init__`, or separate sync and async versions (async methods have an `a` prefix, such as `abefore_model`). Class attributes read at compile time: `state_schema`, `tools` (extra tools the middleware ships) and `transformers` (stream transformers, `langchain>=1.3.2`).
+
+**Execution order** with `middleware=[m1, m2, m3]`:
+
+| Hook | Order |
+| --- | --- |
+| `before_agent`, `before_model` | m1, m2, m3 |
+| `wrap_model_call` | nests: m1 outermost, then m2, m3, then the model |
+| `after_model`, `after_agent` | m3, m2, m1 (reverse) |
+
+**Jumping.** Return `"jump_to"` in the update to `"end"`, `"tools"` or `"model"`. The hook must declare its allowed targets with `can_jump_to=[...]` on the decorator, or `@hook_config(can_jump_to=[...])` on classes.
+
+**Custom state.** Subclass `AgentState`, mark extra fields `NotRequired`, and pass `state_schema=` (decorator) or set the class attribute.
+
+**State updates from wrap hooks.** For `wrap_model_call`, return `ExtendedModelResponse(model_response=..., command=Command(update=...))`; for `wrap_tool_call`, return a `Command`. Updates go through reducers (`messages` is additive); for fields without a reducer, inner commands apply first and outer ones override on a conflict. Commands from a **discarded retry attempt are dropped**, so retries are safe.
+
+**`ModelRequest`.** Fields include `messages`, `system_message`, `tools`, `model`, `state` and `runtime`. Change it immutably with `request.override(...)` and pass the result to `handler`. `system_message` is always a `SystemMessage`, even if you gave a string prompt, so append to `content_blocks` instead of replacing.
+
+**Tracing** (`langchain>=1.3.15`). Hook spans record inputs and outputs by default; a `TracePolicy` (`process_inputs`, `process_outputs`, `omit_payload`) set per middleware or globally with `configure_trace_policy(...)` changes that. A middleware's own policy overrides the global one.
+
+**Middleware is not a separate runtime.** Hooks run inside the compiled LangGraph that `create_agent` returns, so the whole agent can be a node or subgraph in a bigger `StateGraph` (classify input then route, fan out in parallel, mix agent calls with deterministic steps).
+
+**Best practices from the page:** one job per middleware, handle errors so a hook does not crash the agent, node hooks for sequential logic and wrap hooks for control flow, document custom state, unit-test middleware separately (Chapter 19A), order matters, and prefer built-ins when they fit.
+<!-- /docs-add -->
+
 ## Common mistakes
 
 | Mistake | Symptom | Fix |

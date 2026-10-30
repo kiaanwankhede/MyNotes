@@ -205,6 +205,40 @@ Middleware exists in LangGraph too; it is not unique to LangChain. Stay with Lan
 
 Tools like Claude Code or Cursor that build agents with MCP and plain instructions do essentially the same thing under another name (**hooks**). The difference: those agents are generally not deployable as standalone applications. They stay local developer tools.
 
+<!-- docs-add -->
+## From the docs: the full built-in middleware reference
+
+*Added from the LangChain "Prebuilt middleware" page (read 30 Oct 2026). Defaults are as the page states them.*
+
+| Middleware | What it does | Key parameters and defaults |
+| --- | --- | --- |
+| `ToolErrorMiddleware` (`langchain>=1.3.14`) | Turns tool exceptions into error `ToolMessage`s the model sees | `on_error` (return content, or `None` to propagate), `aon_error`, `tools` (default all) |
+| `ToolRetryMiddleware` | Retries failed tools with backoff | `max_retries=2`, `retry_on`, `on_failure="continue"` (or `"error"` or a callable), `backoff_factor=2.0`, `initial_delay=1.0`, `max_delay=60.0`, `jitter=True` (plus or minus 25%) |
+| `ModelRetryMiddleware` | Same for model calls | Same parameters; on failure returns an `AIMessage` with details by default |
+| `ModelFallbackMiddleware` | Switch models when one fails | `first_model` then more models, tried in order |
+| `SummarizationMiddleware` | Summarise old history | `model`, `trigger` (fraction, tokens or messages; a list means OR), `keep=("messages", 20)`, `trim_tokens_to_summarize=4000` |
+| `HumanInTheLoopMiddleware` | Pause for a decision | `interrupt_on`, see Chapter 10 additions. Needs a checkpointer |
+| `ModelCallLimitMiddleware` | Cap model calls | `thread_limit`, `run_limit`, `exit_behavior="end"` (or `"error"`) |
+| `ToolCallLimitMiddleware` | Cap tool calls, global or per tool | `tool_name`, `thread_limit`, `run_limit` (at least one), `exit_behavior="continue"`, `"error"` or `"end"` |
+| `PIIMiddleware` | Find and handle PII | `pii_type`, `strategy="redact"`, `detector`, `apply_to_input=True`, `apply_to_output=False`, `apply_to_tool_results=False` |
+| `TodoListMiddleware` | Adds `write_todos` and planning prompts | `system_prompt`, `tool_description` |
+| `LLMToolSelectorMiddleware` | An LLM picks relevant tools first | `model`, `system_prompt`, `max_tools`, `always_include` (not counted in `max_tools`) |
+| `ProviderToolSearchMiddleware` | Defer tools behind the provider's server-side tool search (Anthropic Claude 4 family, OpenAI gpt-5.5 and later) | `searchable_tools`; other providers raise `ValueError` |
+| `ShellToolMiddleware` | Persistent shell session; not yet compatible with interrupts | `workspace_root`, `startup_commands`, `execution_policy` (default `HostExecutionPolicy`, full host access; `DockerExecutionPolicy`, `CodexSandboxExecutionPolicy`), `redaction_rules`, `env` |
+| `FilesystemMiddleware` (`deepagents`) | `ls`, `read_file`, `write_file`, `edit_file` | `backend` (default `StateBackend`), `tools` allowlist |
+| `SubAgentMiddleware` (`deepagents`) | Adds a `task` tool for delegation; a `general-purpose` sub-agent always exists | `default_model`, `default_tools`, `subagents` |
+| `RubricMiddleware` (beta, `deepagents>=0.6.5`) | The agent grades itself against a rubric and iterates | `model` (judge), `max_iterations` |
+| `FilesystemFileSearchMiddleware` | Adds glob and grep | `root_path`, `use_ripgrep=True`, `max_file_size_mb=10` |
+| `ContextEditingMiddleware` | Clears old tool outputs when context grows | `edits=[ClearToolUsesEdit()]` with `trigger=100000`, `keep=3`, `clear_at_least=0`, `clear_tool_inputs=False`, `exclude_tools=()`, `placeholder="[cleared]"` |
+| `LLMToolEmulator` | Replaces tool execution with LLM-made responses, for testing | `tools` (`None` all, `[]` none), `model` |
+
+Provider-specific middleware also exists (Anthropic: prompt caching, bash tool, text editor, memory, file search; AWS: Bedrock prompt caching; OpenAI: content moderation). The page names them but gives no parameters.
+
+:::trap Two defaults that surprise people
+`ShellToolMiddleware` defaults to **full host access**, so use a Docker or sandbox policy for anything untrusted, and note that `redaction_rules` are applied after execution and are **not** a guard against secret exfiltration. `ToolCallLimitMiddleware` defaults to `exit_behavior="continue"`, which blocks extra calls with an error message but lets the run go on.
+:::
+<!-- /docs-add -->
+
 ## Common mistakes
 
 | Mistake | Symptom | Fix |

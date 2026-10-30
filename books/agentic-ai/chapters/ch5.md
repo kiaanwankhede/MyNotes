@@ -237,6 +237,24 @@ def log_booking_context(runtime: ToolRuntime) -> str:
 - A tool left out of the list is unavailable **no matter what the conversation says**. Mentioning VIP status in the system prompt does not unlock VIP-only tools. Acting on that kind of state needs middleware (Chapters 6 and 7).
 - **MCP is not an alternative to dynamic loading.** MCP is a packaged collection of tools. Loading decides which tools, MCP-based or not, get exposed.
 
+<!-- docs-add -->
+## From the docs: more on tools
+
+*Added from the LangChain Tools page (read 30 Oct 2026).*
+
+- **Naming**: `@tool("web_search")` sets the name (snake_case recommended) and `@tool("calculator", description="...")` replaces the description. Type hints are required because they define the schema.
+- **`args_schema`** takes a Pydantic model (with `Field(description=...)`, defaults, `Literal`) or a raw JSON Schema dict.
+- **Reserved names**: `config` and `runtime` cannot be tool arguments.
+- **`ToolRuntime`** attributes: `state`, `context`, `store`, `stream_writer`, `execution_info` (thread id, run id, node attempt), `server_info` (assistant id, graph id, user identity; `None` outside LangGraph Server), `config` and `tool_call_id`.
+- **Return types**: a `str` becomes a `ToolMessage`; a dict is serialised; a **list of content blocks** gives multimodal output (the model must support it); a **`Command`** updates state and, if it targets the current graph, must include a matching `ToolMessage` (parallel calls writing the same field need a reducer).
+- **`return_direct=True`** ends the loop and returns the tool output without another model call, but only when **every** tool call in that step has it. In a mixed batch all `ToolMessage`s go back to the model.
+- **`ToolNode`** (`langgraph.prebuilt`) runs tools in LangGraph workflows and raises `ValueError` if a `Command` update lacks the `ToolMessage`.
+- **Error handling** is a `@wrap_tool_call` middleware: `(request, handler) -> ToolMessage`, with try/except and a `ToolMessage` using `tool_call_id=request.tool_call["id"]`.
+- **Dynamic tools**: filter registered tools with `@wrap_model_call` and `request.override(tools=[...])`. To add tools that were never registered, also implement `wrap_tool_call` and route with `request.override(tool=...)`, or the agent cannot run them.
+- **Headless tools** (Python): `tool(name=..., description=..., args_schema=...)` creates a `HeadlessTool` with **no implementation**. On a call the graph interrupts with `{"type": "tool", "tool_call": {...}}`, your app does the action and resumes with the result. There is no `.implement()` in Python (that is JavaScript).
+- **Server-side tools** run on the provider and are enabled through the chat model integration, not defined by you.
+<!-- /docs-add -->
+
 ## Common mistakes
 
 | Mistake | Symptom | Fix |

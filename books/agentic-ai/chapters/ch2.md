@@ -215,6 +215,27 @@ The pirate instruction never mixes with the question. That separation is the who
 | Cost | Often free, plus your hardware | Pay per use |
 | Examples | GPT-OSS releases | Most flagship GPT and Claude models |
 
+<!-- docs-add -->
+## From the docs: what a harness is made of
+
+*Added from the LangChain agents page (read 30 Oct 2026).*
+
+The docs define an agent as **a model calling tools in a loop until the task is complete**, and the **harness** as everything around that loop: the prompt, the tools and the middleware. Its job is to get the model **the right context at the right time**.
+
+The agents page groups harness middleware like this, which is a good mental map for Chapters 7 to 9:
+
+| Concern | Middleware named on the page |
+| --- | --- |
+| Execution environment | `FilesystemMiddleware` (from `deepagents`) with a backend such as `StateBackend` |
+| Context management | `SummarizationMiddleware`, `MemoryMiddleware`, `SkillsMiddleware` |
+| Planning and delegation | `TodoListMiddleware`, `SubAgentMiddleware` (sub-agents with isolated context) |
+| Fault tolerance | `ModelRetryMiddleware`, `ToolRetryMiddleware` |
+| Guardrails | `PIIMiddleware` |
+| Steering (human in the loop) | `HumanInTheLoopMiddleware` |
+
+`create_deep_agent` pre-assembles a harness (filesystem, summarisation, sub-agents, prompt caching) for long-running tasks. Managed Deep Agents builds on `create_agent` with planning, file tools, sub-agents and memory preassembled.
+<!-- /docs-add -->
+
 ## Common mistakes
 
 | Mistake | Symptom | Fix |

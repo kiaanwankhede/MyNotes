@@ -1,198 +1,233 @@
 {
-  "id": "agentic-ai",
-  "title": "Agentic AI 3.0 Notes",
-  "short": "Agentic AI 3.0",
-  "source_base": "https://github.com/mayank953/Live-Class-2026/blob/main/",
-  "tree_base": "https://github.com/mayank953/Live-Class-2026/tree/main/",
-  "chapters": [
-    {
-      "id": "home",
-      "num": "",
-      "title": "Start here",
-      "part": "Welcome",
-      "file": "home.md"
-    },
-    {
-      "id": "primer",
-      "num": "A",
-      "title": "Primer: what an agent is",
-      "part": "Part A  Foundations",
-      "file": "primer.md"
-    },
-    {
-      "id": "ch1",
-      "num": "1",
-      "title": "Introduction to LangChain",
-      "part": "Part B  LangChain core",
-      "file": "ch1.md"
-    },
-    {
-      "id": "ch2",
-      "num": "2",
-      "title": "The LangChain family and harness engineering",
-      "part": "Part B  LangChain core",
-      "file": "ch2.md"
-    },
-    {
-      "id": "ch3",
-      "num": "3",
-      "title": "Inside the model",
-      "part": "Part B  LangChain core",
-      "file": "ch3.md"
-    },
-    {
-      "id": "ch4",
-      "num": "4",
-      "title": "Structured output",
-      "part": "Part B  LangChain core",
-      "file": "ch4.md"
-    },
-    {
-      "id": "ch5",
-      "num": "5",
-      "title": "Tools deep dive",
-      "part": "Part B  LangChain core",
-      "file": "ch5.md"
-    },
-    {
-      "id": "ch6",
-      "num": "6",
-      "title": "Agents, memory and middleware",
-      "part": "Part C  Agents and middleware",
-      "file": "ch6.md"
-    },
-    {
-      "id": "ch7",
-      "num": "7",
-      "title": "Mastering middleware",
-      "part": "Part C  Agents and middleware",
-      "file": "ch7.md"
-    },
-    {
-      "id": "ch8",
-      "num": "8",
-      "title": "Guardrails, todo lists, resilience",
-      "part": "Part C  Agents and middleware",
-      "file": "ch8.md"
-    },
-    {
-      "id": "ch9",
-      "num": "9",
-      "title": "Shell tools and custom middleware",
-      "part": "Part C  Agents and middleware",
-      "file": "ch9.md"
-    },
-    {
-      "id": "ch10",
-      "num": "10",
-      "title": "Runtime and human-in-the-loop",
-      "part": "Part D  Runtime",
-      "file": "ch10.md"
-    },
-    {
-      "id": "ch11",
-      "num": "11",
-      "title": "Why MCP exists",
-      "part": "Part E  MCP",
-      "file": "ch11.md"
-    },
-    {
-      "id": "ch12",
-      "num": "12",
-      "title": "MCP primitives, lifecycle, JSON-RPC",
-      "part": "Part E  MCP",
-      "file": "ch12.md"
-    },
-    {
-      "id": "ch13",
-      "num": "13",
-      "title": "Capability negotiation and operation",
-      "part": "Part E  MCP",
-      "file": "ch13.md"
-    },
-    {
-      "id": "ch14",
-      "num": "14",
-      "title": "Shutdown, transports, first server",
-      "part": "Part E  MCP",
-      "file": "ch14.md"
-    },
-    {
-      "id": "ch15",
-      "num": "15",
-      "title": "The Time Tracker project",
-      "part": "Part E  MCP",
-      "file": "ch15.md"
-    },
-    {
-      "id": "ch16",
-      "num": "16",
-      "title": "Deploying servers, building a client",
-      "part": "Part E  MCP",
-      "file": "ch16.md"
-    },
-    {
-      "id": "ch17",
-      "num": "17",
-      "title": "Legacy vs modern MCP",
-      "part": "Part E  MCP",
-      "file": "ch17.md"
-    },
-    {
-      "id": "ch18",
-      "num": "18",
-      "title": "MCP inside LangChain",
-      "part": "Part F  Advanced",
-      "file": "ch18.md"
-    },
-    {
-      "id": "ch19",
-      "num": "19",
-      "title": "Multi-agent patterns",
-      "part": "Part F  Advanced",
-      "file": "ch19.md"
-    },
-    {
-      "id": "ch20",
-      "num": "20",
-      "title": "Meridian AI project tour",
-      "part": "Part F  Advanced",
-      "file": "ch20.md"
-    },
-    {
-      "id": "glossary",
-      "num": "",
-      "title": "Glossary",
-      "part": "Back matter",
-      "file": "glossary.md"
-    },
-    {
-      "id": "bank",
-      "num": "",
-      "title": "Interview question bank",
-      "part": "Back matter",
-      "file": "@bank"
-    },
-    {
-      "id": "cheat",
-      "num": "",
-      "title": "Cheat sheet",
-      "part": "Back matter",
-      "file": "cheat.md"
-    },
-    {
-      "id": "projects",
-      "num": "",
-      "title": "Mini-project ideas",
-      "part": "Back matter",
-      "file": "projects.md"
-    },
-    {
-      "id": "craft",
-      "num": "",
-      "title": "From the Craft notes",
-      "part": "Back matter",
-      "file": null
-    }
-  ]
+ "id": "agentic-ai",
+ "title": "Agentic AI 3.0 Notes",
+ "short": "Agentic AI 3.0",
+ "source_base": "https://github.com/mayank953/Live-Class-2026/blob/main/",
+ "tree_base": "https://github.com/mayank953/Live-Class-2026/tree/main/",
+ "chapters": [
+  {
+   "id": "home",
+   "num": "",
+   "title": "Start here",
+   "part": "Welcome",
+   "file": "home.md"
+  },
+  {
+   "id": "primer",
+   "num": "A",
+   "title": "Primer: what an agent is",
+   "part": "Part A  Foundations",
+   "file": "primer.md"
+  },
+  {
+   "id": "ch1",
+   "num": "1",
+   "title": "Introduction to LangChain",
+   "part": "Part B  LangChain core",
+   "file": "ch1.md"
+  },
+  {
+   "id": "ch2",
+   "num": "2",
+   "title": "The LangChain family and harness engineering",
+   "part": "Part B  LangChain core",
+   "file": "ch2.md"
+  },
+  {
+   "id": "ch3",
+   "num": "3",
+   "title": "Inside the model",
+   "part": "Part B  LangChain core",
+   "file": "ch3.md"
+  },
+  {
+   "id": "ch4",
+   "num": "4",
+   "title": "Structured output",
+   "part": "Part B  LangChain core",
+   "file": "ch4.md"
+  },
+  {
+   "id": "ch5",
+   "num": "5",
+   "title": "Tools deep dive",
+   "part": "Part B  LangChain core",
+   "file": "ch5.md"
+  },
+  {
+   "id": "ch5a",
+   "num": "5A",
+   "title": "Retrieval and the SQL agent (from the docs)",
+   "part": "Part B  LangChain core",
+   "file": "ch5a.md"
+  },
+  {
+   "id": "ch6",
+   "num": "6",
+   "title": "Agents, memory and middleware",
+   "part": "Part C  Agents and middleware",
+   "file": "ch6.md"
+  },
+  {
+   "id": "ch6a",
+   "num": "6A",
+   "title": "Context engineering (from the docs)",
+   "part": "Part C  Agents and middleware",
+   "file": "ch6a.md"
+  },
+  {
+   "id": "ch7",
+   "num": "7",
+   "title": "Mastering middleware",
+   "part": "Part C  Agents and middleware",
+   "file": "ch7.md"
+  },
+  {
+   "id": "ch8",
+   "num": "8",
+   "title": "Guardrails, todo lists, resilience",
+   "part": "Part C  Agents and middleware",
+   "file": "ch8.md"
+  },
+  {
+   "id": "ch9",
+   "num": "9",
+   "title": "Shell tools and custom middleware",
+   "part": "Part C  Agents and middleware",
+   "file": "ch9.md"
+  },
+  {
+   "id": "ch10",
+   "num": "10",
+   "title": "Runtime and human-in-the-loop",
+   "part": "Part D  Runtime",
+   "file": "ch10.md"
+  },
+  {
+   "id": "ch10a",
+   "num": "10A",
+   "title": "Streaming agent output (from the docs)",
+   "part": "Part D  Runtime",
+   "file": "ch10a.md"
+  },
+  {
+   "id": "ch11",
+   "num": "11",
+   "title": "Why MCP exists",
+   "part": "Part E  MCP",
+   "file": "ch11.md"
+  },
+  {
+   "id": "ch12",
+   "num": "12",
+   "title": "MCP primitives, lifecycle, JSON-RPC",
+   "part": "Part E  MCP",
+   "file": "ch12.md"
+  },
+  {
+   "id": "ch13",
+   "num": "13",
+   "title": "Capability negotiation and operation",
+   "part": "Part E  MCP",
+   "file": "ch13.md"
+  },
+  {
+   "id": "ch14",
+   "num": "14",
+   "title": "Shutdown, transports, first server",
+   "part": "Part E  MCP",
+   "file": "ch14.md"
+  },
+  {
+   "id": "ch15",
+   "num": "15",
+   "title": "The Time Tracker project",
+   "part": "Part E  MCP",
+   "file": "ch15.md"
+  },
+  {
+   "id": "ch16",
+   "num": "16",
+   "title": "Deploying servers, building a client",
+   "part": "Part E  MCP",
+   "file": "ch16.md"
+  },
+  {
+   "id": "ch17",
+   "num": "17",
+   "title": "Legacy vs modern MCP",
+   "part": "Part E  MCP",
+   "file": "ch17.md"
+  },
+  {
+   "id": "ch18",
+   "num": "18",
+   "title": "MCP inside LangChain",
+   "part": "Part F  Advanced",
+   "file": "ch18.md"
+  },
+  {
+   "id": "ch19",
+   "num": "19",
+   "title": "Multi-agent patterns",
+   "part": "Part F  Advanced",
+   "file": "ch19.md"
+  },
+  {
+   "id": "ch19a",
+   "num": "19A",
+   "title": "Testing agents (from the docs)",
+   "part": "Part G  Test and ship",
+   "file": "ch19a.md"
+  },
+  {
+   "id": "ch19b",
+   "num": "19B",
+   "title": "Debug, trace and deploy (from the docs)",
+   "part": "Part G  Test and ship",
+   "file": "ch19b.md"
+  },
+  {
+   "id": "ch20",
+   "num": "20",
+   "title": "Meridian AI project tour",
+   "part": "Part H  Capstone",
+   "file": "ch20.md"
+  },
+  {
+   "id": "glossary",
+   "num": "",
+   "title": "Glossary",
+   "part": "Back matter",
+   "file": "glossary.md"
+  },
+  {
+   "id": "bank",
+   "num": "",
+   "title": "Interview question bank",
+   "part": "Back matter",
+   "file": "@bank"
+  },
+  {
+   "id": "cheat",
+   "num": "",
+   "title": "Cheat sheet",
+   "part": "Back matter",
+   "file": "cheat.md"
+  },
+  {
+   "id": "projects",
+   "num": "",
+   "title": "Mini-project ideas",
+   "part": "Back matter",
+   "file": "projects.md"
+  },
+  {
+   "id": "craft",
+   "num": "",
+   "title": "From the Craft notes",
+   "part": "Back matter",
+   "file": null
+  }
+ ]
 }

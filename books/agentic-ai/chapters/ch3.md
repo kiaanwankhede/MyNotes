@@ -220,6 +220,71 @@ Normally yes. By default the whole loop completes within a single `invoke`.
 No. They are different concepts.
 :::
 
+<!-- docs-add -->
+## From the docs: models in depth
+
+*Added from the LangChain Models page (read 30 Oct 2026).*
+
+**Initialising.** `init_chat_model("openai:gpt-5.5")` or `init_chat_model("gpt-5.5", model_provider="openai")`. Provider classes also exist (`ChatOpenAI`, `ChatAnthropic`, `ChatGoogleGenerativeAI`, `ChatBedrock`, `ChatHuggingFace`, `ChatOpenRouter`). Azure needs `azure_deployment`; Bedrock uses `model_provider="bedrock_converse"`.
+
+| Parameter | Meaning |
+| --- | --- |
+| `model` | Required, optionally prefixed by provider |
+| `temperature` | Higher is more varied, lower is more deterministic |
+| `max_tokens` | Caps reply length |
+| `timeout` | Seconds before a request is cancelled |
+| `max_retries` | **Default 6**, exponential backoff with jitter. Network errors, 429 and 5xx are retried; 401 and 404 are not. The docs suggest 10 to 15 for long agents on flaky networks |
+
+**Invocation methods**
+
+- `invoke()` returns one `AIMessage`. If you get a plain string, you are probably using a legacy LLM class, not a `Chat*` model.
+- `stream()` yields `AIMessageChunk`s you can add together (`full = full + chunk`). `astream_events()` emits `on_chat_model_start`, `on_chat_model_stream` and `on_chat_model_end`.
+- `batch()` runs independent requests in parallel on the client; `batch_as_completed()` yields results as they finish, out of order, with their input index. Limit parallelism with `config={"max_concurrency": 5}`. This is separate from a provider's own batch API.
+- Inside a LangGraph agent, `invoke()` quietly **streams under the hood** when the whole app is streamed, so token callbacks still fire.
+
+**Tool calling details.** `bind_tools` only advertises tools; calls appear in `response.tool_calls` (`name`, `args`, `id`) and your code or the agent loop runs them and returns `ToolMessage`s with the matching `tool_call_id`. `tool_choice="any"` forces some tool call and a tool name forces that tool. `parallel_tool_calls=False` turns off parallel calls on providers such as OpenAI and Anthropic. **Server-side tools** (for example `{"type": "web_search"}`) run on the provider; results arrive as `server_tool_call` and `server_tool_result` blocks and need no `ToolMessage`.
+
+**Structured output on a bare model.** `with_structured_output(schema, method=...)` with a Pydantic model, `TypedDict` or JSON Schema. Methods: `json_schema` (native), `function_calling` (a forced tool call) and `json_mode` (valid JSON, schema described in the prompt). `include_raw=True` returns `{"raw", "parsed", "parsing_error"}`, handy for token counts.
+
+**Model profiles** (`langchain>=1.1`, beta). `model.profile` lists capabilities such as `max_input_tokens`, `image_inputs`, `reasoning_output` and `tool_calling`; agents and middleware use them to choose behaviour. Override with `init_chat_model(..., profile={...})`.
+
+**Reasoning.** Read reasoning blocks from `content_blocks`. `reasoning_effort` is a standard parameter (set at construction or per call, for example `invoke(..., reasoning_effort="high")`) on several providers. Valid values are in `model.profile["reasoning_effort_levels"]`.
+
+**Prompt caching.** Some providers cache implicitly (OpenAI, Gemini). Explicit controls include `prompt_cache_key` (OpenAI), `cache_control` blocks (Anthropic) and `cachePoint` (Bedrock), plus `AnthropicPromptCachingMiddleware` and `BedrockPromptCachingMiddleware`. Caches often need a minimum token count, and hits show in usage metadata.
+
+**Exceptions** (`langchain_core.exceptions`). Each inherits both the LangChain base and the provider SDK's exception and has `is_retryable`. **Not retryable:** `ModelAuthenticationError`, `ModelPermissionDeniedError`, `ModelInvalidRequestError`, `ModelNotFoundError`, `ContextOverflowError`. **Retryable:** `ModelRateLimitError`, `ModelAPIError`, `ModelConnectionError`, `ModelTimeoutError`.
+
+**Rate limiting.** `InMemoryRateLimiter(requests_per_second=..., check_every_n_seconds=..., max_bucket_size=...)` passed as `rate_limiter=`. It is thread-safe in one process and limits request **count**, not request **size**.
+
+**Other settings.** `base_url` (with `model_provider="openai"`) targets OpenAI-compatible servers such as vLLM; for OpenRouter or LiteLLM use their own classes, because the generic path can drop provider-specific fields. `.bind(logprobs=True)` then read `response_metadata["logprobs"]`. Ollama is the suggested way to run models locally.
+
+**Token usage.** `response.usage_metadata` has input, output and total tokens plus detail fields such as `cache_read` and `reasoning`. `UsageMetadataCallbackHandler` (in `config={"callbacks": [...]}`) or the `get_usage_metadata_callback()` context manager aggregates per model.
+
+**Run config** (`RunnableConfig`): `run_name`, `tags`, `metadata`, `callbacks`, `max_concurrency`, `recursion_limit`. Tags and metadata propagate to sub-calls; `run_name` does not.
+
+**Configurable models.** `init_chat_model(temperature=0)` with no model makes `model` and `model_provider` configurable per call; `configurable_fields=(...)` and `config_prefix="first"` expose more. Pass values under `config={"configurable": {...}}`.
+
+:::trap Dynamic model choice and structured output
+When picking a model per call with `wrap_model_call`, pass **unbound** models. A model already passed through `bind_tools` does not work with structured output in that pattern.
+:::
+
+## From the docs: messages in depth
+
+*Added from the LangChain Messages page (read 30 Oct 2026).*
+
+- **Three input forms**: a plain string, a list of message objects, or OpenAI-style dicts with `role` and `content`.
+- **`HumanMessage`** can carry text, images, audio, files or video, with optional `name` and `id`. **`AIMessage`** has `text`, `content`, `content_blocks`, `tool_calls`, `id`, `usage_metadata` and `response_metadata`.
+- **`ToolMessage`** needs `content`, a matching `tool_call_id` and `name`. Its optional **`artifact`** holds data **for your application only** (for example document ids and page numbers), not sent to the model.
+- **`content`** can be a string, provider-native blocks, or standard blocks. **`content_blocks`** lazily converts it to a typed standard form; provider reasoning (Anthropic thinking, OpenAI reasoning items) maps to a standard `reasoning` block. To store standard blocks in `content`, set `LC_OUTPUT_VERSION=v1` or `output_version="v1"` on the model.
+- **Block types**: `text` (with `annotations`), `reasoning`, `image`, `audio`, `video`, `file`, `text-plain`, `tool_call`, `tool_call_chunk`, `invalid_tool_call` (malformed calls such as JSON parse failures), `server_tool_call`, `server_tool_call_chunk`, `server_tool_result` (with `status` of success or error) and `non_standard` (an escape hatch for provider-specific data).
+- **Multimodal sources** are `url`, `base64` (with a **required** `mime_type`) or `file_id`. File types and size limits depend on the provider.
+- **Serialisation**: `dumpd(message)` to a dict and `load(data)` back.
+
+:::trap Never `load()` untrusted data
+`load()` rebuilds objects and can trigger side effects. The docs warn against using it on untrusted or unauthenticated data. This links to the LangChain serialization vulnerability (CVE-2025-68664) noted in Chapter 1.
+:::
+<!-- /docs-add -->
+
 ## Common mistakes
 
 | Mistake | Symptom | Fix |

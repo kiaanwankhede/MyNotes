@@ -258,6 +258,19 @@ A model **invents** a plausible tool response; the tool is never executed. In th
 
 Two more built-ins were previewed: a shell tool giving the agent a persistent shell, and filesystem search tools. A live demo ran a real `mkdir`. They belong to Deep Agents, a later module. Chapter 9 covers shell tools.
 
+<!-- docs-add -->
+## From the docs: the guardrails page
+
+*Added from the LangChain Guardrails page (read 30 Oct 2026).*
+
+- **Two approaches.** **Deterministic** guardrails use rules (regex, keywords, explicit checks): fast, cheap and predictable but they miss nuance. **Model-based** guardrails use an LLM or classifier to judge meaning: they catch subtler issues but cost latency and money on every response.
+- **`PIIMiddleware` strategies**: `redact` (typed placeholder), `mask` (partial, for example last four digits), `hash` (deterministic hash) and `block` (raise an exception). Built-in types are `email`, `credit_card` (Luhn-validated), `ip`, `mac_address` and `url`; custom types use a regex `detector`, for example `PIIMiddleware("employee_id", detector=r"EMP-\d{6}", strategy="block")`.
+- **Where it applies**: `apply_to_input` (default on), `apply_to_output` (default off; with `langchain>=1.3.2` it also redacts streamed output, Chapter 10A) and `apply_to_tool_results` (default off).
+- **Custom guardrail hooks.** `before_agent` runs once at the start (input checks, authentication, rate limits). `after_agent` runs once on the final reply (model-based safety, quality, compliance). To stop early, declare `can_jump_to=["end"]` on the hook and return a message with `jump_to: "end"`.
+- **Stacking order** matters because middleware runs in list order. The page's typical stack: a deterministic input filter, then PII handling, then human approval for sensitive tools, then a model-based output check last.
+- **Judge model**: the safety example uses a smaller, cheaper model that answers `SAFE` or `UNSAFE`; if unsafe, the hook replaces the reply with a refusal.
+<!-- /docs-add -->
+
 ## Common mistakes
 
 | Mistake | Symptom | Fix |

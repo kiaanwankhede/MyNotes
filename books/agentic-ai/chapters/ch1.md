@@ -306,6 +306,38 @@ Not always. Match the cache time (TTL) to how fast the data changes.
 | Currency rate | Minutes | Moves slowly within a short window |
 | Weather | Hours to a day | Changes gradually |
 
+<!-- docs-add -->
+## From the docs: install, quickstart and choosing a framework
+
+*Added from the LangChain overview, install and quickstart pages (read 30 Oct 2026).*
+
+**Framing.** The overview describes `create_agent` as a minimal, highly configurable agent harness and sums it up as **Agent = Model + Harness**. You compose an agent from a model, tools, a prompt and middleware.
+
+**Which tool for which job** (the overview's own comparison):
+
+| Option | Use it when |
+| --- | --- |
+| **LangChain `create_agent`** | You want a customisable harness fitted to your data and use case |
+| **Deep Agents SDK** | You want a batteries-included harness (context compression, a virtual filesystem, sub-agents) that you self-host |
+| **Managed Deep Agents** | The same harness, run for you without managing infrastructure |
+| **LangGraph** | You need low-level orchestration mixing deterministic and agentic steps |
+| **LangSmith** | You need to trace, debug and evaluate agents built with any of the above |
+
+**Four benefits the docs list:** one standard interface across providers; a harness you extend step by step with middleware (guardrails, retries, routing, tool policies); built on LangGraph, so durable execution, human-in-the-loop and persistence come with it; and debugging through LangSmith traces.
+
+**Install.** `pip install -U langchain` or `uv add langchain`. Providers are separate packages, installed only when used, for example `langchain-openai` or `langchain-anthropic`. LangChain lists integrations for hundreds of models.
+
+:::trap The docs disagree on the Python version
+The install page says Python 3.10 or newer, the quickstart says 3.11 or newer, and the Studio setup (Chapter 19B) also asks for 3.11 or newer. Use **3.11 or newer** and you satisfy all three.
+:::
+
+**Credentials.** Each provider reads its own variable: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`, `OPENROUTER_API_KEY`, `FIREWORKS_API_KEY`, `BASETEN_API_KEY`, `OLLAMA_API_KEY`, `HUGGINGFACEHUB_API_TOKEN`. Azure needs `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_DEPLOYMENT_NAME`. AWS Bedrock needs `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_REGION`. A `.env` file loaded with `python-dotenv` (`load_dotenv()`) is the usual way.
+
+**The quickstart in one picture.** A model string in `"provider:model"` form, a plain function as a tool (the docstring is the description), a `system_prompt`, then `agent.invoke({"messages": [...]})` and read `result["messages"][-1]`. It then adds a `@tool`, `init_chat_model` settings, an `InMemorySaver` checkpointer scoped by `thread_id`, and compares `create_agent` with `create_deep_agent`: on the same research task the plain agent replied it had no way to count lines, while the deep agent used its file tools and `grep`. The docs add that results vary by model and run.
+
+**Tracing quickstart.** `LANGSMITH_TRACING=true` plus `LANGSMITH_API_KEY`, then run as normal (Chapter 19B).
+<!-- /docs-add -->
+
 ## Common mistakes
 
 | Mistake | Symptom | Fix |
