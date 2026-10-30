@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic AI 3.0 Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: three columns like a docs reader. Chapters list left, one chapter in the middle, "On this page" right. */
+:root {
+  --bg: #f6f8fa;
+  --surface: #ffffff;
+  --ink: #15202b;
+  --muted: #586776;
+  --line: #e0e6ec;
+  --accent: #0b7a75;
+  --accent-soft: #e2f3f1;
+  --accent-ink: #ffffff;
+  --key: #4338ca;      --key-soft: #eceefe;
+  --tip: #9a6700;      --tip-soft: #fff4d6;
+  --trap: #b42318;     --trap-soft: #fdeceb;
+  --analogy: #7a3ec4;  --analogy-soft: #f3ecfc;
+  --note: #475569;     --note-soft: #eef1f4;
+  --mark: #fff0a8;
+  --code-bg: #0f1b26;  --code-ink: #dbe6f0;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1620; --surface: #151f2b; --ink: #e6edf4; --muted: #9aa9b8; --line: #263444;
+    --accent: #3cc3b8; --accent-soft: #12332f; --accent-ink: #06201d;
+    --key: #a5b0ff; --key-soft: #1c2147;
+    --tip: #f2c14e; --tip-soft: #3a2f10;
+    --trap: #ff8f85; --trap-soft: #3b1815;
+    --analogy: #cfa8ff; --analogy-soft: #2a1d3d;
+    --note: #b4c0cc; --note-soft: #1d2937;
+    --mark: #5c4d00; --code-bg: #0a121a; --code-ink: #dbe6f0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1620; --surface: #151f2b; --ink: #e6edf4; --muted: #9aa9b8; --line: #263444;
+  --accent: #3cc3b8; --accent-soft: #12332f; --accent-ink: #06201d;
+  --key: #a5b0ff; --key-soft: #1c2147;
+  --tip: #f2c14e; --tip-soft: #3a2f10;
+  --trap: #ff8f85; --trap-soft: #3b1815;
+  --analogy: #cfa8ff; --analogy-soft: #2a1d3d;
+  --note: #b4c0cc; --note-soft: #1d2937;
+  --mark: #5c4d00; --code-bg: #0a121a; --code-ink: #dbe6f0;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 17px; line-height: 1.7;
+  -webkit-text-size-adjust: 100%;
+}
+a { color: var(--accent); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* top bar */
+.topbar {
+  position: sticky; top: 0; z-index: 30; height: 56px;
+  display: flex; align-items: center; gap: 12px; padding: 0 16px;
+  background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.menu-btn {
+  display: none; width: 40px; height: 40px; border: 1px solid var(--line);
+  background: var(--surface); border-radius: 8px; cursor: pointer; font-size: 20px; line-height: 1;
+}
+.brand { font-weight: 700; font-size: 16px; letter-spacing: .1px; white-space: nowrap; }
+.brand span { color: var(--accent); }
+.search { position: relative; flex: 1; max-width: 420px; margin-left: auto; }
+.search input {
+  width: 100%; height: 38px; padding: 0 12px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit; font-size: 15px;
+}
+.results {
+  position: absolute; top: 44px; left: 0; right: 0; max-height: 60vh; overflow: auto;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.18); display: none;
+}
+.results.open { display: block; }
+.result { display: block; width: 100%; text-align: left; padding: 10px 14px; border: 0; background: none; cursor: pointer; border-bottom: 1px solid var(--line); }
+.result:last-child { border-bottom: 0; }
+.result:hover { background: var(--accent-soft); }
+.result b { display: block; font-size: 14px; }
+.result small { color: var(--muted); font-size: 13px; line-height: 1.4; display: block; }
+.noresult { padding: 12px 14px; color: var(--muted); font-size: 14px; }
+
+/* columns */
+.layout { display: grid; grid-template-columns: 290px minmax(0, 1fr) 230px; align-items: start; }
+.sidebar {
+  position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto;
+  padding: 18px 12px 40px 16px; border-right: 1px solid var(--line); background: var(--surface);
+}
+.progress { padding: 0 8px 14px; }
+.progress .bar { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; margin-top: 6px; }
+.progress .bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+.progress small { color: var(--muted); font-size: 13px; }
+.part { margin: 18px 0 4px; padding: 0 8px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.navlink {
+  display: flex; align-items: baseline; gap: 8px; width: 100%; text-align: left;
+  padding: 8px 8px; border: 0; background: none; border-radius: 8px; cursor: pointer;
+  font-size: 15px; line-height: 1.35; color: var(--ink);
+}
+.navlink:hover { background: var(--bg); }
+.navlink.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.navlink .num { flex: none; min-width: 26px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.navlink.active .num { color: var(--accent); }
+.navlink .tick { margin-left: auto; color: var(--accent); font-weight: 700; visibility: hidden; }
+.navlink.done .tick { visibility: visible; }
+.navlink.soon { color: var(--muted); cursor: default; opacity: .75; }
+.navlink.soon:hover { background: none; }
+.soon-tag { margin-left: auto; font-size: 11px; border: 1px solid var(--line); border-radius: 99px; padding: 0 7px; color: var(--muted); }
+
+main { padding: 36px 40px 80px; min-width: 0; }
+article { max-width: 760px; margin: 0 auto; }
+article[hidden] { display: none; }
+
+.crumb { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 0 0 6px; }
+h1 { font-size: 2.1rem; line-height: 1.2; margin: 0 0 8px; text-wrap: balance; letter-spacing: -.01em; }
+.lead { font-size: 1.15rem; color: var(--muted); margin: 0 0 22px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 26px; }
+.chip { font-size: 12.5px; padding: 3px 10px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.chip.plain { background: var(--note-soft); color: var(--note); }
+h2 { font-size: 1.55rem; line-height: 1.3; margin: 2.4em 0 .6em; padding-top: .6em; border-top: 1px solid var(--line); text-wrap: balance; scroll-margin-top: 72px; }
+h3 { font-size: 1.2rem; line-height: 1.35; margin: 1.8em 0 .4em; scroll-margin-top: 72px; }
+h4 { font-size: 1rem; margin: 1.4em 0 .3em; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+p, ul, ol { margin: 0 0 1em; }
+li { margin: .3em 0; }
+strong { font-weight: 600; color: var(--ink); }
+mark { background: var(--mark); color: inherit; padding: 0 .2em; border-radius: 3px; }
+code { font-family: var(--font-mono); font-size: .88em; background: var(--note-soft); padding: .12em .38em; border-radius: 5px; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 2em 0; }
+
+pre { position: relative; margin: 0 0 1.2em; background: var(--code-bg); color: var(--code-ink); border-radius: 10px; overflow-x: auto; }
+pre code { display: block; background: none; padding: 16px 18px; font-size: 13.5px; line-height: 1.6; color: inherit; border-radius: 0; }
+.copy { position: absolute; top: 8px; right: 8px; font-size: 12px; padding: 3px 9px; border-radius: 6px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); color: #dbe6f0; cursor: pointer; }
+.copy:hover { background: rgba(255,255,255,.16); }
+.hljs-keyword, .hljs-built_in, .hljs-literal { color: #ff9e6d; }
+.hljs-string, .hljs-regexp { color: #8fe0a2; }
+.hljs-number { color: #f2c14e; }
+.hljs-comment, .hljs-quote { color: #7d93a8; font-style: italic; }
+.hljs-title, .hljs-function .hljs-title { color: #7cc4ff; }
+.hljs-params, .hljs-variable, .hljs-attr, .hljs-attribute { color: #dbe6f0; }
+.hljs-meta, .hljs-decorator { color: #d7a8ff; }
+
+.tablewrap { overflow-x: auto; margin: 0 0 1.3em; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: .93rem; line-height: 1.5; }
+th { text-align: left; background: var(--note-soft); font-weight: 600; white-space: nowrap; }
+th, td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+
+/* callouts */
+.callout { margin: 0 0 1.3em; padding: 14px 18px 4px; border-radius: 10px; border-left: 5px solid var(--c); background: var(--cs); }
+.callout > .ct { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--c); margin: 0 0 6px; }
+.callout > .ct em { font-style: normal; text-transform: none; letter-spacing: 0; font-size: 15px; color: var(--ink); margin-left: 8px; }
+.callout.key { --c: var(--key); --cs: var(--key-soft); }
+.callout.tip { --c: var(--tip); --cs: var(--tip-soft); }
+.callout.trap { --c: var(--trap); --cs: var(--trap-soft); }
+.callout.analogy { --c: var(--analogy); --cs: var(--analogy-soft); }
+.callout.note, .callout.repo { --c: var(--note); --cs: var(--note-soft); }
+.callout.pitch { --c: var(--accent); --cs: var(--accent-soft); border-left-width: 0; border: 2px solid var(--accent); }
+.callout.pitch p { font-size: 1.05rem; }
+
+/* interview Q&A */
+details.qa { margin: 0 0 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+details.qa summary { cursor: pointer; padding: 12px 16px; font-weight: 600; list-style: none; display: flex; gap: 10px; }
+details.qa summary::-webkit-details-marker { display: none; }
+details.qa summary::before { content: "Q"; flex: none; width: 24px; height: 24px; border-radius: 6px; background: var(--key); color: var(--surface); font-size: 13px; display: grid; place-items: center; margin-top: 2px; }
+details.qa[open] summary { border-bottom: 1px solid var(--line); }
+details.qa .ans { padding: 14px 18px 2px; }
+details.qa .ans > *:last-child { margin-bottom: 1em; }
+
+.task { list-style: none; margin-left: -1.3em; }
+.task label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.task input { margin-top: .45em; width: 18px; height: 18px; accent-color: var(--accent); flex: none; }
+
+.diagram { margin: 0 0 1.3em; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow-x: auto; text-align: center; }
+.diagram pre.mermaid { background: none; color: inherit; margin: 0; font-family: var(--font-mono); font-size: 13px; text-align: left; white-space: pre; }
+
+.pager { display: flex; gap: 12px; margin-top: 3em; }
+.pager button { flex: 1; text-align: left; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; }
+.pager button small { display: block; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+.pager button b { color: var(--accent); }
+.pager button.next { text-align: right; }
+.pager button:hover { border-color: var(--accent); }
+.readbtn { display: block; width: 100%; margin-top: 2em; padding: 12px; border-radius: 10px; border: 2px solid var(--accent); background: none; color: var(--accent); font-weight: 600; cursor: pointer; }
+.readbtn.on { background: var(--accent); color: var(--accent-ink); }
+
+.toc { position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; padding: 32px 16px 40px 0; font-size: 14px; }
+.toc h5 { margin: 0 0 8px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.toc a { display: block; padding: 4px 0 4px 12px; color: var(--muted); text-decoration: none; border-left: 2px solid var(--line); line-height: 1.35; }
+.toc a.l3 { padding-left: 24px; font-size: 13px; }
+.toc a.on { color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+.scrim { display: none; }
+
+@media (max-width: 1180px) {
+  .layout { grid-template-columns: 290px minmax(0, 1fr); }
+  .toc { display: none; }
+}
+@media (max-width: 820px) {
+  body { font-size: 16.5px; }
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .menu-btn { display: block; }
+  .sidebar {
+    position: fixed; z-index: 40; top: 56px; left: 0; bottom: 0; width: min(86vw, 330px); height: auto;
+    transform: translateX(-102%); transition: transform .22s; box-shadow: 8px 0 30px rgba(0,0,0,.25);
+  }
+  body.drawer .sidebar { transform: none; }
+  body.drawer .scrim { display: block; position: fixed; inset: 56px 0 0 0; z-index: 35; background: rgba(0,0,0,.4); }
+  main { padding: 24px 16px 70px; }
+  h1 { font-size: 1.7rem; }
+  h2 { font-size: 1.35rem; }
+  .brand { font-size: 15px; }
+  .pager { flex-direction: column; }
+  .pager button.next { text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <button class="menu-btn" id="menu" aria-label="Open chapter list">&#9776;</button>
+  <div class="brand">Agentic AI <span>3.0</span> Notes</div>
+  <div class="search">
+    <input id="q" type="search" placeholder="Search the notes" aria-label="Search the notes" autocomplete="off">
+    <div class="results" id="results"></div>
+  </div>
+</header>
+<div class="scrim" id="scrim"></div>
+<div class="layout">
+  <nav class="sidebar" aria-label="Chapters">
+    <div class="progress"><small id="pcount"></small><div class="bar"><i id="pbar"></i></div></div>
+    <div id="navlist"></div>
+  </nav>
+  <main>
+<article id="ch-home" hidden><p class="crumb">Welcome</p><h1>Agentic AI 3.0 Study Notes</h1><p class="lead">A chapter-by-chapter reader built from the live class code, notebooks, PDFs and class summaries, written so you can learn each topic and defend it in an interview.</p><div class="meta"><span class="chip">Draft for review</span><span class="chip plain">Primer and Chapter 1 ready</span></div><h2 id="home-how-to-read-this-book">How to read this book</h2>
+<aside class="callout key"><div class="ct">Key idea<em>Read in order</em></div><p>Each chapter builds on the one before it. Chapter 1 explains <code>create_agent()</code>, Chapter 6 adds memory and middleware, and Chapter 10 adds human approval. If you skip ahead, the later chapters will assume terms you have not seen.</p></aside>
+<p>Every chapter has the same shape, so you always know where to look:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Section</th>
+<th>What it gives you</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>The problem the topic solves, in a few lines</td>
+</tr>
+<tr>
+<td><strong>Core ideas</strong></td>
+<td>The concepts, with diagrams and analogies</td>
+</tr>
+<tr>
+<td><strong>Code</strong></td>
+<td>The key patterns, trimmed and explained line by line</td>
+</tr>
+<tr>
+<td><strong>Under the hood</strong></td>
+<td>What actually happens, so you can answer follow-up questions</td>
+</tr>
+<tr>
+<td><strong>Common mistakes</strong></td>
+<td>Mistake, symptom and fix in one table</td>
+</tr>
+<tr>
+<td><strong>Hands-on lab</strong></td>
+<td>A small exercise to make the idea stick</td>
+</tr>
+<tr>
+<td><strong>Interview corner</strong></td>
+<td>A 30-second pitch, then questions with model answers (tap to reveal), including tricky ones</td>
+</tr>
+<tr>
+<td><strong>Quick revision</strong></td>
+<td>A tickable checklist; your ticks are remembered on this device</td>
+</tr>
+</tbody>
+</table></div>
+<aside class="callout tip"><div class="ct">Pro tip<em>How to use the interview corner</em></div><p>Cover the answer, say yours out loud, then open it and compare. Aim to match the structure of the model answer, not the exact words.</p></aside>
+<h2 id="home-the-course-at-a-glance">The course at a glance</h2>
+<div class="diagram"><pre class="mermaid">flowchart LR
+    A[&quot;Part A&lt;br/&gt;Primer&lt;br/&gt;model, tools, loop&quot;] --&gt; B[&quot;Part B&lt;br/&gt;LangChain core&lt;br/&gt;models, output, tools&quot;]
+    B --&gt; C[&quot;Part C&lt;br/&gt;Agents and middleware&lt;br/&gt;memory, guardrails&quot;]
+    C --&gt; D[&quot;Part D&lt;br/&gt;Runtime&lt;br/&gt;state, human approval&quot;]
+    D --&gt; E[&quot;Part E&lt;br/&gt;MCP&lt;br/&gt;protocol to deployment&quot;]
+    E --&gt; F[&quot;Part F&lt;br/&gt;Advanced&lt;br/&gt;multi-agent, full project&quot;]</pre></div>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Classes</th>
+<th>You will be able to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A. Primer</td>
+<td>01 to 05</td>
+<td>Explain what an agent is and write the tool-calling loop from memory</td>
+</tr>
+<tr>
+<td>B. LangChain core</td>
+<td>06 to 10</td>
+<td>Build agents with <code>create_agent</code>, control models, get structured output, write good tools</td>
+</tr>
+<tr>
+<td>C. Agents and middleware</td>
+<td>11 to 14</td>
+<td>Add memory, guardrails, retries, todo lists and shell tools; write custom middleware</td>
+</tr>
+<tr>
+<td>D. Runtime</td>
+<td>15</td>
+<td>Use runtime context and state, and pause for human approval</td>
+</tr>
+<tr>
+<td>E. MCP</td>
+<td>16 to 22</td>
+<td>Explain why MCP exists, its lifecycle and primitives, then build, deploy and compare versions</td>
+</tr>
+<tr>
+<td>F. Advanced</td>
+<td>Weekends 13 to 14</td>
+<td>Use MCP inside LangChain, choose a multi-agent pattern, tour a full-stack project</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="home-what-is-in-this-draft">What is in this draft</h2>
+<aside class="callout note"><div class="ct">Note<em>Review status</em></div><p>This draft contains the <strong>Primer</strong> and <strong>Chapter 1</strong> only. Other chapters appear greyed out in the sidebar and will be added once the format is approved. Material from the Craft notes page will be added in the last section when the export is shared.</p></aside>
+<aside class="callout repo"><div class="ct">Repo note<em>Gaps in the source repository</em></div><p>Classes 13 to 15 have written summaries but no shared code. There is no Weekend 12 folder. The Oct 10 to 11 folder contains only two links, so there is no class content for that weekend yet.</p></aside><div class="pager"><span style='flex:1'></span><button class="next" data-id="primer"><small>Next</small><b>Primer: what an agent is</b></button></div></article>
+<article id="ch-primer" hidden><p class="crumb">Part A &middot; Foundations</p><h1>Primer: what an agent is</h1><p class="lead">An agent is an LLM that decides which tool to call, inside a loop, with its memory kept as a growing list of messages. Every later chapter is a better-engineered version of this loop.</p><div class="meta"><span class="chip">Part A</span><span class="chip plain">Classes 01 to 05 condensed</span><span class="chip plain">15 min read</span></div><h2 id="primer-why-it-matters">Why it matters</h2>
+<p>Frameworks change every year, but this loop does not. Interviewers who ask about LangChain, LangGraph or MCP are usually checking whether you understand what sits underneath. If you can write the loop on a whiteboard, every framework question becomes easier.</p>
+<h2 id="primer-core-ideas">Core ideas</h2>
+<h3 id="primer-1-llm-calls-are-stateless">1. LLM calls are stateless</h3>
+<aside class="callout key"><div class="ct">Key idea<em>The model remembers nothing</em></div><p>Each API call takes an input and returns an output. A chat app only <em>looks</em> like it remembers because it <strong>resends the whole conversation on every message</strong>. Memory is something you build around the model.</p></aside>
+<h3 id="primer-2-model-chatbot-agent">2. Model, chatbot, agent</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Model</th>
+<th>Chatbot</th>
+<th>Agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Has history</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Has tools</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Decides what to do next</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table></div>
+<p>An agent has three parts: a <strong>brain</strong> (the LLM), <strong>memory</strong> (the message list) and <strong>tools</strong> (functions it may call).</p>
+<h3 id="primer-3-the-model-never-runs-a-tool">3. The model never runs a tool</h3>
+<aside class="callout trap"><div class="ct">Common trap<em>&quot;The model calls the function&quot;</em></div><p>It does not. The model only returns a <strong>request</strong>: a tool name and its arguments. Your code runs the function and sends the result back as a new message. This is why you can validate, log, approve or block any call before it runs.</p></aside>
+<h3 id="primer-4-the-model-sees-a-description-not-your-function">4. The model sees a description, not your function</h3>
+<p>You give the model a schema for each tool: a name, a description and the parameters. The <strong>description</strong> is what it reads to decide when to use the tool, so write it like an instruction.</p>
+<pre><code class="language-python">get_weather_schema = {
+    &quot;type&quot;: &quot;function&quot;,
+    &quot;function&quot;: {
+        &quot;name&quot;: &quot;get_weather&quot;,
+        &quot;description&quot;: &quot;Get the current weather for a city. Use this whenever &quot;
+                       &quot;the user asks about weather in a specific place.&quot;,
+        &quot;parameters&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {&quot;city&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;description&quot;: &quot;e.g. 'Tokyo'&quot;}},
+            &quot;required&quot;: [&quot;city&quot;],
+        },
+    },
+}
+</code></pre>
+<p>One question can trigger <strong>several tool calls in a single reply</strong>. In class, a single question about capitals produced three calls at once.</p>
+<h2 id="primer-the-agentic-loop">The agentic loop</h2>
+<div class="diagram"><pre class="mermaid">sequenceDiagram
+    participant U as User
+    participant A as Your code (loop)
+    participant M as Model
+    participant T as Tool
+    U-&gt;&gt;A: &quot;Weather in Tokyo?&quot;
+    A-&gt;&gt;M: messages + tool schemas
+    M--&gt;&gt;A: tool request: get_weather(city=&quot;Tokyo&quot;)
+    A-&gt;&gt;T: run get_weather(&quot;Tokyo&quot;)
+    T--&gt;&gt;A: &quot;22C, partly cloudy&quot;
+    A-&gt;&gt;M: messages + tool result
+    M--&gt;&gt;A: &quot;It is 22C and partly cloudy in Tokyo.&quot;
+    A--&gt;&gt;U: final answer</pre></div>
+<pre><code class="language-python">def run_agent(messages, max_turns=4):
+    for _ in range(max_turns):
+        response = client.chat.completions.create(
+            model=model, messages=messages, tools=TOOL_SCHEMAS)
+        message = response.choices[0].message
+
+        if not message.tool_calls:               # plain text = final answer
+            messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: message.content})
+            return message.content
+
+        messages.append(message)                 # keep the model's tool request
+        for call in message.tool_calls:          # may be several in one reply
+            args = json.loads(call.function.arguments)
+            result = TOOLS_BY_NAME[call.function.name](**args)
+            messages.append({&quot;role&quot;: &quot;tool&quot;,
+                             &quot;tool_call_id&quot;: call.id,
+                             &quot;content&quot;: str(result)})
+    return &quot;Reached max_turns without a final answer.&quot;
+</code></pre>
+<aside class="callout key"><div class="ct">Key idea<em>Why the loop calls the model again</em></div><p>The model cannot see a tool's output until you <strong>append it as a message</strong>. So after every tool run, you call the model again. The loop ends when the model replies with plain text instead of a tool request.</p></aside>
+<h2 id="primer-under-the-hood">Under the hood</h2>
+<ul>
+<li><strong>Memory is a Python list.</strong> In the terminal chat, <code>conversation_memory</code> is one growing list. In Streamlit it lives in <code>st.session_state</code>, because plain variables reset on every rerun.</li>
+<li><strong><code>max_turns</code> is a safety cap.</strong> Without it, a confused model can loop forever and run up cost.</li>
+<li><strong>No tool means no tool call.</strong> Asked for a currency conversion with no currency tool defined, the model answered in plain text instead of inventing a call.</li>
+<li><strong>Providers share one shape.</strong> OpenAI, Groq and OpenRouter use the same chat format. Anthropic's SDK differs: <code>client.messages.create()</code> and <code>response.content[0].text</code>.</li>
+<li><strong>Structured output.</strong> To get reliable data, ask for JSON only, strip any code fences, then validate with Pydantic before trusting a field.</li>
+<li><strong>Safe <code>eval</code>.</strong> The calculator tool allowed only digits, operators and parentheses before running <code>eval()</code>.</li>
+</ul>
+<h2 id="primer-common-mistakes">Common mistakes</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Mistake</th>
+<th>Symptom</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Not appending the tool result</td>
+<td>Model asks for the same tool again</td>
+<td>Append a <code>tool</code> message with the matching <code>tool_call_id</code></td>
+</tr>
+<tr>
+<td>No turn cap</td>
+<td>Endless loop, surprise bill</td>
+<td>Always set <code>max_turns</code></td>
+</tr>
+<tr>
+<td>Trusting model JSON blindly</td>
+<td>Crash on a missing field</td>
+<td>Strip fences, parse, validate with Pydantic</td>
+</tr>
+<tr>
+<td>Memory in a local variable (Streamlit)</td>
+<td>Forgets after each interaction</td>
+<td>Use <code>st.session_state</code></td>
+</tr>
+<tr>
+<td>Vague tool description</td>
+<td>Wrong tool chosen, or none</td>
+<td>Write the description as an instruction</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="primer-interview-corner">Interview corner</h2>
+<aside class="callout pitch"><div class="ct">Say it in 30 seconds</div><p>An agent is an LLM in a loop. It reads the conversation, decides whether to answer or call a tool, my code runs the tool and returns the result as a message, and the loop repeats until the model answers in plain text. Memory is just the message list I keep resending.</p></aside>
+<details class="qa"><summary>Why do LLMs need memory added to them?</summary><div class="ans"><p>Each API call is stateless. The app stores the messages and sends the <strong>full history</strong> on every call, so the model can use earlier turns.</p>
+<p><strong>Follow-up to expect:</strong> "What is the cost of that?" Tokens grow with every turn, which is why later chapters cover trimming and summarising history.</p></div></details>
+<details class="qa"><summary>Who actually executes a tool call?</summary><div class="ans"><p>My code does. The model only emits the tool name and arguments. That separation lets me validate arguments, log calls, require approval or block a call before anything runs.</p></div></details>
+<details class="qa"><summary>How is an agent different from a chatbot?</summary><div class="ans"><p>A chatbot has history. An agent also has <strong>tools</strong> and a <strong>loop</strong> in which the model decides what to do next, including whether to stop.</p></div></details>
+<details class="qa"><summary>What stops an agent looping forever?</summary><div class="ans"><p>A turn cap such as <code>max_turns</code>, plus timeouts and clear tool descriptions. Production systems also add budgets and monitoring.</p></div></details>
+<details class="qa"><summary>The model returned an empty answer with a tool call. Is that a bug?</summary><div class="ans"><p>No. When the model wants a tool, <code>content</code> is empty and the useful data is in <code>tool_calls</code>. Your loop should check for <code>tool_calls</code> first.</p></div></details>
+<h2 id="primer-quick-revision">Quick revision</h2>
+<ul>
+<li class="task"><label><input type="checkbox"><span>I can explain statelessness in two sentences</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I can draw brain, memory and tools</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I can write the loop from memory and say why it calls the model again</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I know the model returns a request, not a result</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I can explain why the tool description matters</span></label></li>
+</ul><button class="readbtn" data-id="primer">Mark this chapter as read</button><div class="pager"><button data-id="home"><small>Previous</small><b>Start here</b></button><button class="next" data-id="ch1"><small>Next</small><b>Introduction to LangChain</b></button></div></article>
+<article id="ch-ch1" hidden><p class="crumb">Part B  LangChain core &middot; Chapter 1</p><h1>Introduction to LangChain</h1><p class="lead">LangChain packages the hand-written agent loop from the primer into one call, <code>create_agent()</code>, so you spend your time on tools and behaviour instead of plumbing.</p><div class="meta"><span class="chip">Class 06</span><span class="chip plain">12 July</span><span class="chip plain">25 min read</span><span class="chip plain">Code: Weekend 03</span></div><h2 id="ch1-why-it-matters">Why it matters</h2>
+<p>The raw-Python agent works, but it does not scale. For every project you would rewrite tool schemas, message formats, the loop, memory and provider switching. A framework gives you a tested <strong>harness</strong>: everything around the model that makes it useful.</p>
+<aside class="callout key"><div class="ct">Key idea<em>The one equation to remember</em></div><p><mark>Agent = Model + Harness</mark></p>
+<p>The <strong>model</strong> is the brain. The <strong>harness</strong> is the system prompt, tools, memory, loop and middleware around it. A smarter harness cannot fix a weak model, and a strong model is not much use without a harness.</p></aside>
+<aside class="callout analogy"><div class="ct">Analogy<em>A car and its engine</em></div><p>The model is a powerful engine. On its own it cannot go anywhere. Add steering, wheels, fuel lines and brakes (the harness) and you have a car you can drive. Claude and ChatGPT's apps are the same idea: a model wrapped in memory, tools and web search.</p></aside>
+<h2 id="ch1-raw-python-vs-langchain">Raw Python vs LangChain</h2>
+<p>You built the first column in the primer. The second column is what <code>create_agent()</code> replaces it with.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Raw Python (primer)</th>
+<th>LangChain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool schema</td>
+<td>Hand-written JSON</td>
+<td>Inferred from the function signature and docstring</td>
+</tr>
+<tr>
+<td>The loop</td>
+<td>You write <code>run_agent</code></td>
+<td><code>agent.invoke()</code> runs it</td>
+</tr>
+<tr>
+<td>Message format</td>
+<td>Dicts you manage</td>
+<td><code>HumanMessage</code>, <code>AIMessage</code>, <code>ToolMessage</code> objects</td>
+</tr>
+<tr>
+<td>Switch provider</td>
+<td>Different SDK per provider</td>
+<td>Change the model string</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>A list you maintain</td>
+<td>A checkpointer you plug in</td>
+</tr>
+<tr>
+<td>Visibility</td>
+<td>Total</td>
+<td>Less, because LangChain infers a lot</td>
+</tr>
+<tr>
+<td>Speed</td>
+<td>Fastest</td>
+<td>Slightly slower (extra IDs and bookkeeping)</td>
+</tr>
+</tbody>
+</table></div>
+<pre><code class="language-python"># Raw: ~25 lines of loop plus a hand-written JSON schema per tool.
+
+# LangChain: the same weather agent
+from langchain.agents import create_agent
+
+def get_weather(city: str) -&gt; str:
+    &quot;&quot;&quot;Get weather for a given city.&quot;&quot;&quot;
+    return f&quot;It's always sunny in {city}!&quot;
+
+agent = create_agent(
+    model=&quot;openai:gpt-4o-mini&quot;,      # provider:model, use any model you have access to
+    tools=[get_weather],             # a plain function is enough
+    system_prompt=&quot;You are a helpful assistant&quot;,
+)
+
+result = agent.invoke(
+    {&quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Weather in San Francisco?&quot;}]}
+)
+print(result[&quot;messages&quot;][-1].content)
+</code></pre>
+<aside class="callout tip"><div class="ct">Pro tip<em>Say this in an interview</em></div><p>"I built the loop by hand first, so I know what <code>create_agent</code> is doing for me. I use the framework for speed and standard behaviour, and I drop lower when I need control." Interviewers like hearing fundamentals before frameworks.</p></aside>
+<h2 id="ch1-three-levels-of-control">Three levels of control</h2>
+<p>LangChain sits in the middle of a family of tools. Pick the level that matches how much control you need.</p>
+<div class="diagram"><pre class="mermaid">flowchart TD
+    DA[&quot;Deep Agents&lt;br/&gt;Food delivery&lt;br/&gt;Batteries included, least control&quot;]
+    LC[&quot;LangChain&lt;br/&gt;Home cooking&lt;br/&gt;Configurable harness (this course starts here)&quot;]
+    LG[&quot;LangGraph&lt;br/&gt;Raw vegetables&lt;br/&gt;Low-level orchestration, most control&quot;]
+    DA --&gt; LC --&gt; LG</pre></div>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Analogy</th>
+<th>What you get</th>
+<th>Use it when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Deep Agents</strong></td>
+<td>Food delivery</td>
+<td>Context compression, a virtual file system and sub-agents out of the box</td>
+<td>You want a capable agent fast and can accept less control</td>
+</tr>
+<tr>
+<td><strong>LangChain</strong></td>
+<td>Home-cooked meal</td>
+<td><code>create_agent</code>, tools, middleware, memory</td>
+<td>You are building real software and want control over behaviour</td>
+</tr>
+<tr>
+<td><strong>LangGraph</strong></td>
+<td>Raw vegetables</td>
+<td>Low-level graph of steps, mixing deterministic and agentic logic</td>
+<td>You need to wire every step yourself</td>
+</tr>
+<tr>
+<td><strong>LangSmith</strong></td>
+<td>Flight recorder</td>
+<td>Tracing and monitoring of what an agent did</td>
+<td>You need to observe and debug (it does not build agents)</td>
+</tr>
+</tbody>
+</table></div>
+<aside class="callout note"><div class="ct">Note<em>Version warning</em></div><p>Everything before LangChain v1 is now called <strong>LangChain Classic</strong>. Most blog posts and videos still teach Classic. This course teaches v1 and later, so old snippets may not match.</p></aside>
+<h2 id="ch1-setting-up-a-project">Setting up a project</h2>
+<pre><code class="language-bash">uv init langchain_course
+cd langchain_course
+uv add langchain langchain-openai langchain-anthropic
+uv sync
+</code></pre>
+<p>Installing three packages pulled in about 45 dependencies. That is normal, because each provider integration brings its own.</p>
+<p>Keep secrets out of Git with three files:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+<th>Commit it?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.env</code></td>
+<td>Your real API keys</td>
+<td><strong>Never</strong></td>
+</tr>
+<tr>
+<td><code>.gitignore</code></td>
+<td>Lists <code>.env</code> and <code>.venv</code> so Git skips them</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>.env.example</code></td>
+<td>Same keys with placeholder values, as a template</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table></div>
+<pre><code class="language-python">from dotenv import load_dotenv
+load_dotenv()          # reads .env into the environment
+</code></pre>
+<aside class="callout trap"><div class="ct">Common trap<em>A real key pushed to GitHub</em></div><p>It happened live in class and the key had to be deleted. Anyone who sees a key in your history can use it. If it happens: <strong>revoke the key first</strong>, then clean up the repo.</p></aside>
+<aside class="callout tip"><div class="ct">Pro tip<em>Environment variable names matter</em></div><p>LangChain looks for the provider's standard name, for example <code>OPENAI_API_KEY</code> or <code>ANTHROPIC_API_KEY</code>. If you rename it, or switch provider without setting the matching variable, you get an authentication error.</p></aside>
+<h2 id="ch1-how-create-agent-works">How <code>create_agent()</code> works</h2>
+<h3 id="ch1-the-inputs-you-used">The inputs you used</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>model</code></td>
+<td>A <code>"provider:model"</code> string, or a model object from <code>init_chat_model</code></td>
+</tr>
+<tr>
+<td><code>tools</code></td>
+<td>A list of functions or <code>@tool</code>-decorated functions</td>
+</tr>
+<tr>
+<td><code>system_prompt</code></td>
+<td>Instructions that shape behaviour</td>
+</tr>
+<tr>
+<td><code>checkpointer</code></td>
+<td>Where conversation state is saved (memory)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Later chapters add more: structured output in Chapter 4, middleware in Chapters 6 and 7.</p>
+<h3 id="ch1-what-invoke-returns">What <code>invoke()</code> returns</h3>
+<p><code>agent.invoke()</code> runs the whole loop and returns a dictionary. The part you care about is <code>result["messages"]</code>, the full conversation in order. A simplified view of the weather example:</p>
+<pre><code class="language-python">[
+  HumanMessage(content=&quot;Weather in San Francisco?&quot;),
+  AIMessage(content=&quot;&quot;, tool_calls=[
+      {&quot;name&quot;: &quot;get_weather&quot;, &quot;args&quot;: {&quot;city&quot;: &quot;San Francisco&quot;}, &quot;id&quot;: &quot;call_abc&quot;}]),
+  ToolMessage(content=&quot;It's always sunny in San Francisco!&quot;, tool_call_id=&quot;call_abc&quot;),
+  AIMessage(content=&quot;It's currently sunny in San Francisco.&quot;),
+]
+</code></pre>
+<div class="diagram"><pre class="mermaid">sequenceDiagram
+    participant U as You
+    participant A as Agent
+    participant M as Model
+    participant T as get_weather
+    U-&gt;&gt;A: invoke(messages)
+    A-&gt;&gt;M: HumanMessage + tool schema
+    M--&gt;&gt;A: AIMessage (empty content, tool_calls)
+    A-&gt;&gt;T: run with city=&quot;San Francisco&quot;
+    T--&gt;&gt;A: ToolMessage
+    A-&gt;&gt;M: messages + ToolMessage
+    M--&gt;&gt;A: AIMessage (final answer)
+    A--&gt;&gt;U: result[&quot;messages&quot;]</pre></div>
+<aside class="callout key"><div class="ct">Key idea<em>Read the trace like a transcript</em></div><p>Message 2 has <strong>empty content</strong>, because the model is asking for a tool, not answering. Message 3 shares the same <code>tool_call_id</code> so the model can match result to request. This ran the model <strong>twice</strong>, exactly like the hand-built loop. Each message also carries prompt, completion and total token counts.</p></aside>
+<h3 id="ch1-how-a-function-becomes-a-tool">How a function becomes a tool</h3>
+<p>You pass a plain function. LangChain reads its <strong>name</strong>, <strong>type hints</strong> and <strong>docstring</strong> and builds a schema, roughly the same JSON you wrote by hand in the primer:</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;function&quot;,
+  &quot;function&quot;: {
+    &quot;name&quot;: &quot;get_weather&quot;,
+    &quot;description&quot;: &quot;Get weather for a given city.&quot;,
+    &quot;parameters&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {&quot;city&quot;: {&quot;type&quot;: &quot;string&quot;}},
+      &quot;required&quot;: [&quot;city&quot;]
+    }
+  }
+}
+</code></pre>
+<p>The <code>@tool</code> decorator wraps the function so an agent can call it. Either way, the <strong>docstring is the model's only guide</strong> to when to use the tool.</p>
+<pre><code class="language-python">from langchain.tools import tool
+
+@tool
+def fetch_text_from_url(url: str) -&gt; str:
+    &quot;&quot;&quot;Fetch the plain text of a web page. Use when the user gives a URL.&quot;&quot;&quot;
+    ...
+</code></pre>
+<aside class="callout trap"><div class="ct">Common trap<em>A vague docstring</em></div><p>A docstring like "Fetch the document" tells the model very little. The agent may skip the tool, or use it for the wrong job. Say <strong>what it does</strong> and <strong>when to use it</strong>.</p></aside>
+<h3 id="ch1-the-five-step-build-pattern">The five-step build pattern</h3>
+<p>LangChain's quickstart, followed in class, builds an agent in five steps.</p>
+<ol>
+<li>Write a <strong>detailed system prompt</strong> (what the agent is, which tools it has, what not to guess).</li>
+<li>Create <strong>tools</strong> with <code>@tool</code>.</li>
+<li>Configure the <strong>model</strong> with <code>init_chat_model</code>.</li>
+<li>Add <strong>memory</strong>.</li>
+<li>Assemble with <code>create_agent</code> and run.</li>
+</ol>
+<pre><code class="language-python">from langchain.chat_models import init_chat_model
+
+model = init_chat_model(
+    &quot;openai:gpt-4o-mini&quot;,
+    temperature=0.5,      # randomness
+    timeout=300,          # seconds to wait
+    max_tokens=25000,     # cap on output length
+)
+
+agent = create_agent(
+    model=model,
+    tools=[fetch_text_from_url],
+    system_prompt=SYSTEM_PROMPT,
+    checkpointer=checkpointer,
+)
+</code></pre>
+<aside class="callout repo"><div class="ct">Repo note<em>The repo example has a missing piece</em></div><p>The example script passes <code>checkpointer=checkpointer</code>, but the file never defines it, so it fails as written. Create one first (next section).</p></aside>
+<h2 id="ch1-memory-why-the-agent-forgets">Memory: why the agent forgets</h2>
+<p>In class, saying "Hi, I am Mayank" in one run and asking "Who am I?" in a second run got no answer. The history lived in the first process, and ended when the script ended.</p>
+<p>To keep a conversation, plug in a <strong>checkpointer</strong> and give each conversation a <strong>thread id</strong>:</p>
+<pre><code class="language-python">from langgraph.checkpoint.memory import InMemorySaver
+
+agent = create_agent(
+    model=&quot;openai:gpt-4o-mini&quot;,
+    tools=[get_weather],
+    system_prompt=&quot;You are a helpful assistant&quot;,
+    checkpointer=InMemorySaver(),
+)
+
+cfg = {&quot;configurable&quot;: {&quot;thread_id&quot;: &quot;user-1&quot;}}
+agent.invoke({&quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Hi, I am Mayank&quot;}]}, cfg)
+agent.invoke({&quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Who am I?&quot;}]}, cfg)   # remembers
+</code></pre>
+<aside class="callout note"><div class="ct">Note<em>Still not permanent</em></div><p><code>InMemorySaver</code> keeps state only while the Python process runs. For real persistence you need a database-backed checkpointer. Chapters 6 and 10 cover this properly.</p></aside>
+<h3 id="ch1-should-you-cache-tool-results">Should you cache tool results?</h3>
+<p>Not always. Match the cache time (TTL) to how fast the data changes.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Cache?</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stock price</td>
+<td>Never</td>
+<td>Changes every second</td>
+</tr>
+<tr>
+<td>Currency rate</td>
+<td>Minutes</td>
+<td>Moves slowly within a short window</td>
+</tr>
+<tr>
+<td>Weather</td>
+<td>Hours to a day</td>
+<td>Changes gradually</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="ch1-common-mistakes">Common mistakes</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Mistake</th>
+<th>Symptom</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Thinking LangChain replaces the API key</td>
+<td>Authentication error</td>
+<td>LangChain is free, but you still need a provider key</td>
+</tr>
+<tr>
+<td>Wrong env variable name</td>
+<td>Auth error after switching provider</td>
+<td>Use the standard name for that provider</td>
+</tr>
+<tr>
+<td>Vague docstring</td>
+<td>Wrong tool or no tool call</td>
+<td>Say what it does and when to use it</td>
+</tr>
+<tr>
+<td>Following Classic tutorials</td>
+<td>Imports fail, APIs missing</td>
+<td>Check the tutorial targets LangChain v1 or later</td>
+</tr>
+<tr>
+<td>Committing <code>.env</code></td>
+<td>Leaked key</td>
+<td>Use <code>.gitignore</code> and <code>.env.example</code></td>
+</tr>
+<tr>
+<td>Expecting memory across runs</td>
+<td>Agent forgets</td>
+<td>Add a checkpointer and reuse the <code>thread_id</code></td>
+</tr>
+<tr>
+<td>Caching volatile data</td>
+<td>Stale answers</td>
+<td>Set TTL by how fast the data changes</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="ch1-hands-on-lab">Hands-on lab</h2>
+<p>Do this once, with your own hands.</p>
+<ol>
+<li>Create a fresh <code>uv</code> project and install the three packages. Add <code>.env</code>, <code>.gitignore</code> and <code>.env.example</code>.</li>
+<li>Write <code>get_weather</code> and build the agent with <code>create_agent</code>.</li>
+<li>Run it and print <code>result["messages"]</code>.</li>
+<li>Map each message back to the primer: which is the user request, the tool request, the tool result, the final answer?</li>
+<li>Add <code>InMemorySaver</code> and a <code>thread_id</code>, then prove the agent remembers your name across two <code>invoke</code> calls.</li>
+<li>Rewrite the docstring badly, rerun, and see what changes.</li>
+</ol>
+<h2 id="ch1-interview-corner">Interview corner</h2>
+<aside class="callout pitch"><div class="ct">Say it in 30 seconds</div><p>LangChain is a harness around the model loop. <code>create_agent</code> handles tool schemas, message formatting, the call-execute-repeat loop and provider switching, so I can focus on tools, prompts and middleware. I would drop to LangGraph if I needed full control over the workflow, and I understand the raw loop because I built it by hand first.</p></aside>
+<h3 id="ch1-basics">Basics</h3>
+<details class="qa"><summary>What is LangChain and why would you use it?</summary><div class="ans"><p>It is an open-source framework (free to use; you only pay your model provider) that supplies the <strong>harness</strong> around an LLM: tool handling, message objects, the agent loop, memory hooks and middleware, behind a provider-independent interface.</p>
+<p><strong>Why:</strong> you stop rewriting plumbing and can swap providers by changing a string.</p></div></details>
+<details class="qa"><summary>What does &quot;Agent = Model + Harness&quot; mean?</summary><div class="ans"><p>The model is the reasoning engine. The harness is everything around it: system prompt, tools, memory, context and middleware. Agent quality depends on <strong>both</strong>. A weak model in a perfect harness is still weak, and the reverse is also true.</p></div></details>
+<details class="qa"><summary>LangChain vs LangGraph vs Deep Agents vs LangSmith?</summary><div class="ans"><ul>
+<li><strong>Deep Agents:</strong> highest level, batteries included (context compression, virtual file system, sub-agents), least control.</li>
+<li><strong>LangChain:</strong> configurable agent harness built on LangGraph.</li>
+<li><strong>LangGraph:</strong> low-level orchestration for custom stateful workflows, most control.</li>
+<li><strong>LangSmith:</strong> observability and tracing, not for building agents.</li>
+</ul>
+<p><strong>Trap:</strong> LangFuse is <strong>not</strong> part of this family. It is a separate observability tool.</p></div></details>
+<details class="qa"><summary>What does `agent.invoke()` return?</summary><div class="ans"><p>A dictionary whose <code>messages</code> list holds the whole conversation: the human message, the AI message requesting a tool, the tool message with the result, and the final AI message. The last message is normally the answer.</p></div></details>
+<h3 id="ch1-intermediate">Intermediate</h3>
+<details class="qa"><summary>Walk me through what happens when a user asks &quot;weather in Tokyo?&quot;</summary><div class="ans"><ol>
+<li><code>invoke</code> sends the user message plus the tool schemas to the model.</li>
+<li>The model replies with an <code>AIMessage</code> that has empty content and a <code>tool_calls</code> entry.</li>
+<li>The agent runs <code>get_weather("Tokyo")</code>.</li>
+<li>The result goes back as a <code>ToolMessage</code> with the same <code>tool_call_id</code>.</li>
+<li>The model is called again and returns the final text.</li>
+<li>The loop ends because there are no more tool calls.</li>
+</ol></div></details>
+<details class="qa"><summary>How does LangChain turn a function into a tool?</summary><div class="ans"><p>It reads the function's name, type hints and docstring and generates a JSON schema. The model sees only that schema, never the code. This is why the docstring acts like a prompt.</p></div></details>
+<details class="qa"><summary>How do you add memory, and why does the agent forget between runs?</summary><div class="ans"><p>By default the message history exists only in the running process. Adding a <strong>checkpointer</strong> (such as <code>InMemorySaver</code>) and invoking with a <strong><code>thread_id</code></strong> lets the agent reload that thread's history. <code>InMemorySaver</code> still disappears when the process ends, so production needs a database-backed one.</p></div></details>
+<details class="qa"><summary>How would you switch from OpenAI to Anthropic?</summary><div class="ans"><p>Change the model string (for example <code>"anthropic:..."</code>) and make sure <code>ANTHROPIC_API_KEY</code> is set. The rest of the code stays the same. What can break: a missing or misnamed key, and model-specific features that the new model does not support.</p></div></details>
+<h3 id="ch1-tricky">Tricky</h3>
+<details class="qa"><summary>Isn&#x27;t LangChain just a wrapper over the OpenAI API?</summary><div class="ans"><p>No. It does wrap provider APIs behind one interface, but it also adds the agent loop, tool schema generation, message types, memory hooks and a middleware system. The honest trade-off: you give up some visibility and some speed in exchange for development speed and standard behaviour.</p></div></details>
+<details class="qa"><summary>Why might a LangChain agent be slower than raw Python?</summary><div class="ans"><p>Extra abstraction: generating IDs, building message objects and internal bookkeeping on every step. For most apps it is negligible, but in latency-sensitive systems it can matter, which is a reason some teams write their own loop.</p></div></details>
+<details class="qa"><summary>When would you not use LangChain?</summary><div class="ans"><p>When the task is a single model call, when I need tight control over latency or every step, or when the workflow is better expressed as an explicit graph (then I would use LangGraph directly). Knowing the raw loop lets me make that call.</p></div></details>
+<details class="qa"><summary>Should tool results be cached?</summary><div class="ans"><p>Only when it is safe. Cache by how quickly the data changes: never for stock prices, minutes for currency rates, hours for weather. Caching everything because it is easy gives stale answers.</p></div></details>
+<h2 id="ch1-quick-revision">Quick revision</h2>
+<ul>
+<li class="task"><label><input type="checkbox"><span>I can state Agent = Model + Harness and explain it with an analogy</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I can compare Deep Agents, LangChain, LangGraph and LangSmith in one line each</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I can write a minimal <code>create_agent</code> call with one tool</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I can map the four messages in <code>result["messages"]</code> to the raw loop</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I know why the docstring matters</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I can add memory with a checkpointer and a thread id</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I can keep API keys out of Git</span></label></li>
+</ul><button class="readbtn" data-id="ch1">Mark this chapter as read</button><div class="pager"><button data-id="primer"><small>Previous</small><b>Primer: what an agent is</b></button></div></article>
+  </main>
+  <aside class="toc" id="toc"></aside>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+window.__CHAPTERS__ = [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "primer", "num": "A", "title": "Primer: what an agent is", "part": "Part A  Foundations", "ready": true}, {"id": "ch1", "num": "1", "title": "Introduction to LangChain", "part": "Part B  LangChain core", "ready": true}, {"id": "ch2", "num": "2", "title": "The LangChain family and harness engineering", "part": "Part B  LangChain core", "ready": false}, {"id": "ch3", "num": "3", "title": "Inside the model", "part": "Part B  LangChain core", "ready": false}, {"id": "ch4", "num": "4", "title": "Structured output", "part": "Part B  LangChain core", "ready": false}, {"id": "ch5", "num": "5", "title": "Tools deep dive", "part": "Part B  LangChain core", "ready": false}, {"id": "ch6", "num": "6", "title": "Agents, memory and middleware", "part": "Part C  Agents and middleware", "ready": false}, {"id": "ch7", "num": "7", "title": "Mastering middleware", "part": "Part C  Agents and middleware", "ready": false}, {"id": "ch8", "num": "8", "title": "Guardrails, todo lists, resilience", "part": "Part C  Agents and middleware", "ready": false}, {"id": "ch9", "num": "9", "title": "Shell tools and custom middleware", "part": "Part C  Agents and middleware", "ready": false}, {"id": "ch10", "num": "10", "title": "Runtime and human-in-the-loop", "part": "Part D  Runtime", "ready": false}, {"id": "ch11", "num": "11", "title": "Why MCP exists", "part": "Part E  MCP", "ready": false}, {"id": "ch12", "num": "12", "title": "MCP primitives, lifecycle, JSON-RPC", "part": "Part E  MCP", "ready": false}, {"id": "ch13", "num": "13", "title": "Capability negotiation", "part": "Part E  MCP", "ready": false}, {"id": "ch14", "num": "14", "title": "Shutdown and transports", "part": "Part E  MCP", "ready": false}, {"id": "ch15", "num": "15", "title": "Time Tracker project", "part": "Part E  MCP", "ready": false}, {"id": "ch16", "num": "16", "title": "Deploying MCP servers", "part": "Part E  MCP", "ready": false}, {"id": "ch17", "num": "17", "title": "Legacy vs modern MCP", "part": "Part E  MCP", "ready": false}, {"id": "ch18", "num": "18", "title": "MCP inside LangChain", "part": "Part F  Advanced", "ready": false}, {"id": "ch19", "num": "19", "title": "Multi-agent patterns", "part": "Part F  Advanced", "ready": false}, {"id": "ch20", "num": "20", "title": "Meridian project overview", "part": "Part F  Advanced", "ready": false}, {"id": "glossary", "num": "", "title": "Glossary", "part": "Back matter", "ready": false}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": false}, {"id": "cheat", "num": "", "title": "Cheat sheet", "part": "Back matter", "ready": false}, {"id": "projects", "num": "", "title": "Mini-project ideas", "part": "Back matter", "ready": false}, {"id": "craft", "num": "", "title": "From the Craft notes", "part": "Back matter", "ready": false}];
+(function () {
+  var CH = window.__CHAPTERS__; // [{id,num,title,part,ready}]
+  var ready = CH.filter(function (c) { return c.ready; });
+  var current = null;
+  var store = {
+    get: function (k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  };
+  var done = store.get('a3-done') || {};
+
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+
+  /* sidebar */
+  function renderNav() {
+    var html = '', lastPart = null;
+    CH.forEach(function (c) {
+      if (c.part !== lastPart) { html += '<div class="part">' + c.part + '</div>'; lastPart = c.part; }
+      var cls = 'navlink' + (c.ready ? '' : ' soon') + (done[c.id] ? ' done' : '') + (c.id === current ? ' active' : '');
+      html += '<button class="' + cls + '" data-id="' + c.id + '"' + (c.ready ? '' : ' disabled aria-disabled="true"') + '>' +
+        '<span class="num">' + (c.num || '') + '</span><span>' + c.title + '</span>' +
+        (c.ready ? '<span class="tick">&#10003;</span>' : '<span class="soon-tag">soon</span>') + '</button>';
+    });
+    $('#navlist').innerHTML = html;
+    var total = ready.filter(function (c) { return c.id !== 'home'; }).length;
+    var n = ready.filter(function (c) { return c.id !== 'home' && done[c.id]; }).length;
+    $('#pcount').textContent = n + ' of ' + total + ' ready chapters read';
+    $('#pbar').style.width = (total ? (100 * n / total) : 0) + '%';
+  }
+  $('#navlist').addEventListener('click', function (e) {
+    var b = e.target.closest('.navlink');
+    if (b && !b.disabled) { go(b.getAttribute('data-id')); document.body.classList.remove('drawer'); }
+  });
+
+  /* routing */
+  function go(id) { if (location.hash.slice(1) === id) show(id); else location.hash = id; }
+  function show(id) {
+    if (!ready.some(function (c) { return c.id === id; })) id = 'home';
+    current = id;
+    $$('article').forEach(function (a) { a.hidden = a.id !== 'ch-' + id; });
+    renderNav();
+    var art = $('#ch-' + id);
+    buildToc(art);
+    window.scrollTo(0, 0);
+    drawMermaid(art);
+    document.title = (id === 'home' ? '' : $('h1', art).textContent + ' | ') + 'Agentic AI 3.0 Notes';
+    var act = $('.navlink.active'); if (act && act.scrollIntoView) { try { act.scrollIntoView({ block: 'nearest' }); } catch (e) {} }
+  }
+  window.addEventListener('hashchange', function () { show(location.hash.slice(1) || 'home'); });
+
+  /* on this page */
+  var tocObserver = null;
+  function buildToc(art) {
+    var hs = $$('h2, h3', art);
+    var html = '<h5>On this page</h5>';
+    hs.forEach(function (h) { html += '<a href="#" class="' + (h.tagName === 'H3' ? 'l3' : 'l2') + '" data-t="' + h.id + '">' + h.textContent + '</a>'; });
+    $('#toc').innerHTML = hs.length ? html : '';
+    if (tocObserver) tocObserver.disconnect();
+    if ('IntersectionObserver' in window) {
+      tocObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) {
+            $$('#toc a').forEach(function (a) { a.classList.toggle('on', a.getAttribute('data-t') === en.target.id); });
+          }
+        });
+      }, { rootMargin: '-70px 0px -70% 0px' });
+      hs.forEach(function (h) { tocObserver.observe(h); });
+    }
+  }
+  $('#toc').addEventListener('click', function (e) {
+    var a = e.target.closest('a'); if (!a) return; e.preventDefault();
+    var t = document.getElementById(a.getAttribute('data-t')); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  /* code: highlight + copy */
+  function prepCode() {
+    $$('pre code').forEach(function (c) {
+      var pre = c.parentNode;
+      if (pre.classList.contains('mermaid')) return;
+      if (window.hljs) { try { window.hljs.highlightElement(c); } catch (e) {} }
+      var b = document.createElement('button'); b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+      b.addEventListener('click', function () {
+        var text = c.textContent;
+        var ok = function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1400); };
+        try { navigator.clipboard.writeText(text).then(ok, function () { b.textContent = 'Press and hold to select'; }); }
+        catch (e) { b.textContent = 'Select and copy'; }
+      });
+      pre.appendChild(b);
+    });
+  }
+
+  /* mermaid */
+  var mermaidReady = false;
+  function drawMermaid(art) {
+    if (!window.mermaid) return;
+    if (!mermaidReady) {
+      var dark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+        (!document.documentElement.getAttribute('data-theme') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      try { window.mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'neutral', flowchart: { useMaxWidth: true } }); mermaidReady = true; } catch (e) { return; }
+    }
+    var nodes = $$('pre.mermaid:not([data-processed])', art);
+    if (nodes.length) { try { window.mermaid.run({ nodes: nodes }); } catch (e) {} }
+  }
+  window.addEventListener('load', function () { drawMermaid($('article:not([hidden])')); });
+
+  /* checklists */
+  function prepTasks() {
+    $$('article').forEach(function (art) {
+      $$('input[type=checkbox]', art).forEach(function (cb, i) {
+        var key = 'a3-chk-' + art.id + '-' + i;
+        cb.checked = !!store.get(key);
+        cb.addEventListener('change', function () { store.set(key, cb.checked); });
+      });
+    });
+  }
+
+  /* mark as read + pager */
+  document.addEventListener('click', function (e) {
+    var r = e.target.closest('.readbtn');
+    if (r) { var id = r.getAttribute('data-id'); done[id] = !done[id]; store.set('a3-done', done); r.classList.toggle('on', !!done[id]); r.textContent = done[id] ? 'Marked as read' : 'Mark this chapter as read'; renderNav(); return; }
+    var p = e.target.closest('.pager button'); if (p) go(p.getAttribute('data-id'));
+  });
+
+  /* search */
+  var index = [];
+  function buildIndex() {
+    $$('article').forEach(function (art) {
+      var cid = art.id.slice(3);
+      var c = CH.filter(function (x) { return x.id === cid; })[0];
+      var title = c ? c.title : cid;
+      var sec = { id: cid, title: title, head: title, text: '' };
+      Array.prototype.forEach.call(art.children, function (el) {
+        if (el.tagName === 'H2' || el.tagName === 'H3') {
+          index.push(sec); sec = { id: cid, title: title, head: el.textContent, text: '', anchor: el.id };
+        } else { sec.text += ' ' + el.textContent; }
+      });
+      index.push(sec);
+    });
+  }
+  var input = $('#q'), box = $('#results');
+  input.addEventListener('input', function () {
+    var q = input.value.trim().toLowerCase();
+    if (q.length < 2) { box.classList.remove('open'); box.innerHTML = ''; return; }
+    var hits = [];
+    index.forEach(function (s) {
+      var h = (s.head + ' ' + s.text).toLowerCase(), i = h.indexOf(q);
+      if (i >= 0) hits.push({ s: s, score: s.head.toLowerCase().indexOf(q) >= 0 ? 0 : 1, i: i });
+    });
+    hits.sort(function (a, b) { return a.score - b.score; });
+    var html = hits.slice(0, 8).map(function (h, n) {
+      var full = (h.s.head + ' ' + h.s.text).replace(/\s+/g, ' ');
+      var at = Math.max(0, full.toLowerCase().indexOf(q) - 40);
+      var snip = full.substr(at, 120).replace(/</g, '&lt;');
+      return '<button class="result" data-n="' + n + '"><b>' + h.s.title + (h.s.anchor ? ' &rsaquo; ' + h.s.head : '') + '</b><small>' + snip + '</small></button>';
+    }).join('');
+    box.innerHTML = html || '<div class="noresult">Nothing found for "' + q.replace(/</g, '&lt;') + '"</div>';
+    box.classList.add('open');
+    box._hits = hits;
+  });
+  box.addEventListener('click', function (e) {
+    var b = e.target.closest('.result'); if (!b) return;
+    var h = box._hits[+b.getAttribute('data-n')].s;
+    box.classList.remove('open'); input.value = '';
+    go(h.id);
+    if (h.anchor) setTimeout(function () { var t = document.getElementById(h.anchor); if (t) t.scrollIntoView({ block: 'start' }); }, 60);
+  });
+  document.addEventListener('click', function (e) { if (!e.target.closest('.search')) box.classList.remove('open'); });
+
+  /* mobile drawer */
+  $('#menu').addEventListener('click', function () { document.body.classList.toggle('drawer'); });
+  $('#scrim').addEventListener('click', function () { document.body.classList.remove('drawer'); });
+
+  buildIndex();
+  prepCode();
+  prepTasks();
+  // restore read buttons
+  $$('.readbtn').forEach(function (r) { var id = r.getAttribute('data-id'); if (done[id]) { r.classList.add('on'); r.textContent = 'Marked as read'; } });
+  show(location.hash.slice(1) || 'home');
+})();
+
+</script>
+</body>
+</html>
