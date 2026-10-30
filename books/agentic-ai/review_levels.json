@@ -322,19 +322,63 @@
   "level": "read"
  },
  {
-  "prefix": "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/08_timeout_and_cancellation.py",
-  "level": "skimmed"
+  "prefix": "Complete MCP/TimeTrackProject/mcp-client-and-advanced/main.py",
+  "level": "read",
+  "note": "printed in full in the chapter labs"
  },
  {
-  "prefix": "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/09_progress_notifications.py",
-  "level": "skimmed"
+  "prefix": "Complete MCP/TimeTrackProject/mcp-client-and-advanced/database.py",
+  "level": "read",
+  "note": "printed in full in the chapter labs"
+ },
+ {
+  "prefix": "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/02_fastmcp_client_explained.py",
+  "level": "read",
+  "note": "printed in full in the chapter labs"
+ },
+ {
+  "prefix": "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/03_fastmcp_client_http.py",
+  "level": "read",
+  "note": "printed in full in the chapter labs"
+ },
+ {
+  "prefix": "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/04_agent_loop.py",
+  "level": "read",
+  "note": "printed in full in the chapter labs"
+ },
+ {
+  "prefix": "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/06_elicitation_demo.py",
+  "level": "read",
+  "note": "printed in full in the chapter labs"
  },
  {
   "prefix": "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/07_ping_and_errors.py",
-  "level": "skimmed"
+  "level": "read",
+  "note": "printed in full in the chapter labs"
  },
  {
-  "prefix": "Complete MCP/TimeTrackProject/mcp-client-and-advanced/main.py",
-  "level": "skimmed"
+  "prefix": "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/08_timeout_and_cancellation.py",
+  "level": "read",
+  "note": "printed in full in the chapter labs"
+ },
+ {
+  "prefix": "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/09_progress_notifications.py",
+  "level": "read",
+  "note": "printed in full in the chapter labs"
+ },
+ {
+  "prefix": "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/mcp-warmup-primitives/server.py",
+  "level": "read",
+  "note": "printed in full in the chapter labs"
+ },
+ {
+  "prefix": "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/mcp-warmup-primitives/server_with_auth.py",
+  "level": "read",
+  "note": "printed in full in the chapter labs"
+ },
+ {
+  "prefix": "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/mcp-warmup-primitives/mcp_server_with_primitives.py",
+  "level": "read",
+  "note": "printed in full in the chapter labs"
  }
 ]

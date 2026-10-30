@@ -250,6 +250,27 @@ def log_booking_context(runtime: ToolRuntime) -> str:
 | Using `InMemoryStore` in production | Memory lost on restart | Use a persistent store |
 | Gating tools through the system prompt | Model may still offer them | Filter the tool list with middleware |
 
+<!-- runlab -->
+## Spot the bug
+
+```python
+# BROKEN: bind_tools only ADVERTISES the tools; this never runs anything
+model_with_tools = model.bind_tools([check_showtimes, book_seats])
+reply = model_with_tools.invoke("Book 2 seats for Dune")
+print(reply.content)   # often empty: the answer is in reply.tool_calls
+```
+
+```python
+# FIXED: read the requested calls, run them yourself, and send the results back
+for call in reply.tool_calls:
+    result = {"check_showtimes": check_showtimes,
+              "book_seats": book_seats}[call["name"]].invoke(call["args"])
+    # append a ToolMessage with the result, then invoke the model again
+```
+
+An agent (`create_agent`) does this loop for you; `bind_tools` alone does not.
+<!-- /runlab -->
+
 ## Hands-on lab
 
 1. Write a `@tool` function with a clear docstring and confirm the model uses it.

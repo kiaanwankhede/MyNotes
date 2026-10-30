@@ -136,7 +136,7 @@
     "ch15",
     "ch16"
    ],
-   "status": "not_read"
+   "status": "read"
   },
   "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/03_fastmcp_client_http.py": {
    "blob": "41366122893c19a1875f32bcedffdb304048330f",
@@ -144,7 +144,7 @@
     "ch15",
     "ch16"
    ],
-   "status": "not_read"
+   "status": "read"
   },
   "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/04_agent_loop.py": {
    "blob": "a5de068d8f9ca630d06c37f0c8d3a284ecf32c3d",
@@ -152,7 +152,7 @@
     "ch15",
     "ch16"
    ],
-   "status": "not_read"
+   "status": "read"
   },
   "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/05_sampling_demo.py": {
    "blob": "c395e575745b543c06b5bbc16df478eb3cc51a0c",
@@ -170,7 +170,7 @@
     "ch16",
     "ch17"
    ],
-   "status": "not_read"
+   "status": "read"
   },
   "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/07_ping_and_errors.py": {
    "blob": "ecb3f33b4d3e5ff5cc4caddadad9c3044e771061",
@@ -178,7 +178,7 @@
     "ch15",
     "ch16"
    ],
-   "status": "skimmed"
+   "status": "read"
   },
   "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/08_timeout_and_cancellation.py": {
    "blob": "7eaae1f10b81eea359c715c394ca9c6f98080b5f",
@@ -187,7 +187,7 @@
     "ch16",
     "ch17"
    ],
-   "status": "skimmed"
+   "status": "read"
   },
   "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/09_progress_notifications.py": {
    "blob": "0541e991782b321ffe3cb3bcc534e68dfb9bd972",
@@ -196,7 +196,7 @@
     "ch16",
     "ch17"
    ],
-   "status": "skimmed"
+   "status": "read"
   },
   "Complete MCP/TimeTrackProject/mcp-client-and-advanced/database.py": {
    "blob": "0970095b1ab749df728d6f10ac729a7c8d124067",
@@ -204,7 +204,7 @@
     "ch15",
     "ch16"
    ],
-   "status": "not_read"
+   "status": "read"
   },
   "Complete MCP/TimeTrackProject/mcp-client-and-advanced/main.py": {
    "blob": "cad3e3d0b167a0da8cd6bbfdb1636fd2c52382a7",
@@ -212,7 +212,7 @@
     "ch15",
     "ch16"
    ],
-   "status": "skimmed"
+   "status": "read"
   },
   "Complete MCP/TimeTrackProject/mcp-client-and-advanced/pyproject.toml": {
    "blob": "5508469a6a932ce7444d8497732eca8bb3264e97",
@@ -1798,7 +1798,7 @@
    "cited_in": [
     "ch14"
    ],
-   "status": "not_read"
+   "status": "read"
   },
   "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/mcp-warmup-primitives/pyproject.toml": {
    "blob": "ddc3cacebe9c9df1db2dbf45e0ece3ed0f0e1e45",
@@ -1813,14 +1813,14 @@
    "cited_in": [
     "ch14"
    ],
-   "status": "not_read"
+   "status": "read"
   },
   "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/mcp-warmup-primitives/server_with_auth.py": {
    "blob": "db273542a275aeb4506ac0d006874e74c1eb5469",
    "cited_in": [
     "ch14"
    ],
-   "status": "not_read"
+   "status": "read"
   },
   "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/mcp-warmup-primitives/src/mcp_warmup/__init__.py": {
    "blob": "dd35d98d9c9c9f55a7b14e6a90f9be1ab4262591",

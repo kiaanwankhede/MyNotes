@@ -245,6 +245,24 @@ No `if/else` for message formats and no string parsing: the structure does the w
 | Expecting new intents to appear on their own | Unhandled requests | Define a schema for each intent |
 | Trusting the tool strategy plus real tools blindly | Recursion limits | Test your model first |
 
+<!-- runlab -->
+## Spot the bug
+
+```python
+# BROKEN: the strategy= keyword is silently ignored, so you get the default behaviour
+structured = model.with_structured_output(Schema, strategy=ToolStrategy(Schema))
+```
+
+```python
+# FIXED: wrap the schema in the strategy
+structured = model.with_structured_output(ToolStrategy(Schema))
+# or on an agent
+agent = create_agent(model, tools=[...], response_format=ToolStrategy(Schema))
+```
+
+Why it matters: nothing crashes, so the only way to catch it is to test what actually came back.
+<!-- /runlab -->
+
 ## Hands-on lab
 
 1. Send three differently-worded extraction requests with no structure and note the inconsistency.

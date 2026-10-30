@@ -1876,6 +1876,19 @@ ticket = pipeline.invoke({&quot;customer_message&quot;: &quot;Hi, I'm Rina, my o
 </tr>
 </tbody>
 </table></div>
+<!-- runlab -->
+<h2 id="agentic-ai-ch4-spot-the-bug">Spot the bug</h2>
+<pre><code class="language-python"># BROKEN: the strategy= keyword is silently ignored, so you get the default behaviour
+structured = model.with_structured_output(Schema, strategy=ToolStrategy(Schema))
+</code></pre>
+<pre><code class="language-python"># FIXED: wrap the schema in the strategy
+structured = model.with_structured_output(ToolStrategy(Schema))
+# or on an agent
+agent = create_agent(model, tools=[...], response_format=ToolStrategy(Schema))
+</code></pre>
+<p>Why it matters: nothing crashes, so the only way to catch it is to test what actually came back.</p>
+<!-- /runlab -->
+
 <h2 id="agentic-ai-ch4-hands-on-lab">Hands-on lab</h2>
 <ol>
 <li>Send three differently-worded extraction requests with no structure and note the inconsistency.</li>
@@ -2174,6 +2187,22 @@ def log_booking_context(runtime: ToolRuntime) -&gt; str:
 </tr>
 </tbody>
 </table></div>
+<!-- runlab -->
+<h2 id="agentic-ai-ch5-spot-the-bug">Spot the bug</h2>
+<pre><code class="language-python"># BROKEN: bind_tools only ADVERTISES the tools; this never runs anything
+model_with_tools = model.bind_tools([check_showtimes, book_seats])
+reply = model_with_tools.invoke(&quot;Book 2 seats for Dune&quot;)
+print(reply.content)   # often empty: the answer is in reply.tool_calls
+</code></pre>
+<pre><code class="language-python"># FIXED: read the requested calls, run them yourself, and send the results back
+for call in reply.tool_calls:
+    result = {&quot;check_showtimes&quot;: check_showtimes,
+              &quot;book_seats&quot;: book_seats}[call[&quot;name&quot;]].invoke(call[&quot;args&quot;])
+    # append a ToolMessage with the result, then invoke the model again
+</code></pre>
+<p>An agent (<code>create_agent</code>) does this loop for you; <code>bind_tools</code> alone does not.</p>
+<!-- /runlab -->
+
 <h2 id="agentic-ai-ch5-hands-on-lab">Hands-on lab</h2>
 <ol>
 <li>Write a <code>@tool</code> function with a clear docstring and confirm the model uses it.</li>
@@ -3742,6 +3771,27 @@ conditional_agent = create_agent(
 </tr>
 </tbody>
 </table></div>
+<!-- runlab -->
+<h2 id="agentic-ai-ch10-spot-the-bug">Spot the bug</h2>
+<pre><code class="language-python"># BROKEN: no checkpointer, so there is nothing to pause into or resume from
+agent = create_agent(
+    model, tools=[send_email],
+    middleware=[HumanInTheLoopMiddleware(interrupt_on={&quot;send_email&quot;: True})],
+)
+</code></pre>
+<pre><code class="language-python"># FIXED: add a checkpointer and always pass the same thread_id when resuming
+agent = create_agent(
+    model, tools=[send_email],
+    middleware=[HumanInTheLoopMiddleware(interrupt_on={&quot;send_email&quot;: True})],
+    checkpointer=InMemorySaver(),
+)
+config = {&quot;configurable&quot;: {&quot;thread_id&quot;: &quot;t1&quot;}}
+agent.invoke({&quot;messages&quot;: [...]}, config)
+agent.invoke(Command(resume={&quot;decisions&quot;: [{&quot;type&quot;: &quot;approve&quot;}]}), config)
+</code></pre>
+<p>A different <code>thread_id</code> on resume starts a fresh run instead of continuing the paused one.</p>
+<!-- /runlab -->
+
 <h2 id="agentic-ai-ch10-hands-on-lab">Hands-on lab</h2>
 <ol>
 <li>Build <code>CineBotContext</code>, pass <code>context=</code> at invoke time and confirm it is usable without being in the conversation.</li>
@@ -4028,6 +4078,37 @@ if __name__ == &quot;__main__&quot;:
 </tr>
 </tbody>
 </table></div>
+<!-- runlab -->
+<h2 id="agentic-ai-ch11-run-it-yourself-the-warm-up-server">Run it yourself: the warm-up server</h2>
+<p>The smallest complete MCP server from the course, copied unchanged from the repo (<code>mcp-warmup-primitives/server.py</code>). Save it, run it, and connect Inspector.</p>
+<p><strong><code>server.py</code></strong></p>
+<pre><code class="language-python">from fastmcp import FastMCP
+
+mcp = FastMCP(&quot;Warm-Up Server&quot;)
+
+@mcp.tool
+def greet(name: str) -&gt; str:
+    &quot;&quot;&quot;Greet someone by name.&quot;&quot;&quot;
+    return f&quot;Hello, {name}! Welcome to MCP.&quot;
+
+@mcp.tool
+def query_db(a: int, b: int,c:int) -&gt; int:
+    &quot;&quot;&quot;Query the database with three parameters.&quot;&quot;&quot;
+
+    return a + b + c
+
+if __name__ == &quot;__main__&quot;:
+    mcp.run()
+
+# uv run python server.py
+# npx -y @modelcontextprotocol/inspector uv run python server.py
+</code></pre>
+<pre><code class="language-bash">pip install fastmcp
+npx -y @modelcontextprotocol/inspector python server.py
+</code></pre>
+<aside class="callout tip"><div class="ct">Pro tip<em>What to look for in Inspector</em></div><p>Open <strong>Tools</strong>, run <code>greet</code> with a name, then <code>query_db</code> with three numbers. Watch the <strong>History</strong> pane: you will see <code>initialize</code>, <code>notifications/initialized</code>, <code>tools/list</code> and <code>tools/call</code>, which are the lifecycle from Chapter 12 happening for real.</p></aside>
+<!-- /runlab -->
+
 <h2 id="agentic-ai-ch11-hands-on-lab">Hands-on lab</h2>
 <ol>
 <li>Install <code>uv</code>, create <code>mcp-warmup</code>, add <code>fastmcp</code> and build the <code>greet</code> and <code>add</code> server.</li>
@@ -4303,6 +4384,78 @@ Recommended Next Action: Escalate to logistics team, offer expedited replacement
 </tr>
 </tbody>
 </table></div>
+<!-- runlab -->
+<h2 id="agentic-ai-ch12-run-it-yourself-all-three-primitives">Run it yourself: all three primitives</h2>
+<p>The repo's <code>mcp_server_with_primitives.py</code> adds a resource and a prompt to the warm-up server. It reads <code>server-notes.txt</code> from the current folder, so create that file first (the repo version of this folder does not ship one, which makes the resource fail with a file-not-found error until you add it).</p>
+<p><strong><code>mcp_server_with_primitives.py</code></strong></p>
+<pre><code class="language-python">from fastmcp import FastMCP
+
+mcp = FastMCP(&quot;Warm-Up Server&quot;)
+
+@mcp.tool
+def greet(name: str) -&gt; str:
+    &quot;&quot;&quot;Greet someone by name.&quot;&quot;&quot;
+    return f&quot;Hello, {name}! Welcome to MCP.&quot;
+
+@mcp.resource(&quot;file://server-notes&quot;)
+def server_notes() -&gt; str:
+    &quot;&quot;&quot;Read-only notes about this server, straight from a local file.&quot;&quot;&quot;
+    with open(&quot;server-notes.txt&quot;) as f:
+        return f.read()
+
+@mcp.tool
+def add(a: int, b: int) -&gt; int:
+    &quot;&quot;&quot;Add two numbers together.&quot;&quot;&quot;
+    return a + b
+
+@mcp.prompt
+def structured_escalation(issue_summary: str, what_was_tried: str, customer_sentiment: str) -&gt; str:
+    &quot;&quot;&quot;Guides the AI to log a customer escalation with every required field, in order.&quot;&quot;&quot;
+    return f&quot;&quot;&quot;Log this customer escalation with the following structure:
+Issue Summary: {issue_summary}
+What Was Already Tried: {what_was_tried}
+Customer Sentiment: {customer_sentiment}
+Recommended Next Action: [determine this from the details above]
+&quot;&quot;&quot;
+
+if __name__ == &quot;__main__&quot;:
+    mcp.run()
+</code></pre>
+<p>Then a small checker client. This one is <strong>my own example</strong> (it follows the pattern of the repo's <code>02</code> client); it lists all three primitives and uses each once.</p>
+<p><strong><code>check_primitives.py</code></strong></p>
+<pre><code class="language-python">&quot;&quot;&quot;Connect to mcp_server_with_primitives.py and list all three primitives.&quot;&quot;&quot;
+import asyncio
+from fastmcp import Client
+
+
+async def main():
+    async with Client(&quot;mcp_server_with_primitives.py&quot;) as client:
+        tools = await client.list_tools()
+        resources = await client.list_resources()
+        prompts = await client.list_prompts()
+        print(&quot;tools    :&quot;, [t.name for t in tools])
+        print(&quot;resources:&quot;, [str(r.uri) for r in resources])
+        print(&quot;prompts  :&quot;, [p.name for p in prompts])
+
+        print(&quot;greet    :&quot;, (await client.call_tool(&quot;greet&quot;, {&quot;name&quot;: &quot;Hitesh&quot;})).data)
+        notes = await client.read_resource(&quot;file://server-notes&quot;)
+        print(&quot;resource :&quot;, notes[0].text.strip())
+        msg = await client.get_prompt(
+            &quot;structured_escalation&quot;,
+            {&quot;issue_summary&quot;: &quot;Login fails&quot;, &quot;what_was_tried&quot;: &quot;Reset password&quot;,
+             &quot;customer_sentiment&quot;: &quot;Frustrated&quot;},
+        )
+        print(&quot;prompt   :&quot;, msg.messages[0].content.text.splitlines()[0])
+
+
+asyncio.run(main())
+</code></pre>
+<pre><code class="language-bash">echo &quot;Notes for the warm-up server.&quot; &gt; server-notes.txt
+python check_primitives.py
+</code></pre>
+<p>Expected output (verified with fastmcp 4.1.4): tools <code>['greet', 'add']</code>, one resource <code>file://server-notes</code>, one prompt <code>structured_escalation</code>, then the greeting, the file text and the first line of the rendered prompt.</p>
+<!-- /runlab -->
+
 <h2 id="agentic-ai-ch12-hands-on-lab">Hands-on lab</h2>
 <ol>
 <li>Redraw host, client and server from memory, marking where 1:1 applies.</li>
@@ -5543,6 +5696,801 @@ async def run_agent(user_message: str):
 </tr>
 </tbody>
 </table></div>
+<!-- runlab -->
+<h2 id="agentic-ai-ch16-run-it-yourself-the-full-timetrack-project">Run it yourself: the full TimeTrack project</h2>
+<p>These are the <strong>complete, unmodified files</strong> from <code>Complete MCP/TimeTrackProject/mcp-client-and-advanced/</code>. Put <code>database.py</code> and <code>main.py</code> in one folder and the client files in a <code>client/</code> subfolder, because the clients start the server with the path <code>"../main.py"</code>.</p>
+<pre><code class="language-bash">pip install fastmcp anthropic
+cd client
+python 02_fastmcp_client_explained.py
+</code></pre>
+<aside class="callout note"><div class="ct">Note<em>Verified</em></div><p>I ran <code>02</code>, <code>06</code>, <code>07</code>, <code>08</code> and <code>09</code> against this server with fastmcp 4.1.4 and each behaved as described. <code>03</code> needs internet and <code>04</code> needs an <code>ANTHROPIC_API_KEY</code>, so those two I checked for syntax only.</p></aside>
+<p><strong>The persistence layer</strong></p>
+<p><strong><code>database.py</code></strong></p>
+<pre><code class="language-python">&quot;&quot;&quot;
+TimeTrack's persistence layer -- SQLite, shared by every tool in this
+project. Same tested file from the Persistence video, unchanged.
+&quot;&quot;&quot;
+import sqlite3
+from pathlib import Path
+
+DB_PATH = Path(__file__).parent / &quot;timetrack.db&quot;
+
+
+def get_connection():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def init_db():
+    conn = get_connection()
+    conn.execute(&quot;&quot;&quot;
+        CREATE TABLE IF NOT EXISTS time_entries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            employee_name TEXT NOT NULL,
+            project TEXT NOT NULL,
+            entry_date TEXT NOT NULL,
+            hours REAL NOT NULL,
+            description TEXT NOT NULL DEFAULT ''
+        )
+    &quot;&quot;&quot;)
+    count = conn.execute(&quot;SELECT COUNT(*) FROM time_entries&quot;).fetchone()[0]
+    if count == 0:
+        seed = [
+            (&quot;Asha Patel&quot;, &quot;Website Redesign&quot;, &quot;2026-09-08&quot;, 6.5, &quot;Homepage layout&quot;),
+            (&quot;Asha Patel&quot;, &quot;Website Redesign&quot;, &quot;2026-09-09&quot;, 7.0, &quot;Mobile responsive fixes&quot;),
+            (&quot;Asha Patel&quot;, &quot;Client Onboarding&quot;, &quot;2026-09-10&quot;, 3.0, &quot;Kickoff call + notes&quot;),
+            (&quot;Rahul Mehta&quot;, &quot;Website Redesign&quot;, &quot;2026-09-08&quot;, 5.5, &quot;API integration&quot;),
+            (&quot;Rahul Mehta&quot;, &quot;Internal Tools&quot;, &quot;2026-09-09&quot;, 8.0, &quot;Dashboard bug fixes&quot;),
+        ]
+        conn.executemany(
+            &quot;INSERT INTO time_entries (employee_name, project, entry_date, hours, description) &quot;
+            &quot;VALUES (?, ?, ?, ?, ?)&quot;,
+            seed,
+        )
+        conn.commit()
+    conn.close()
+
+
+def _row_to_dict(row) -&gt; dict:
+    return {
+        &quot;id&quot;: row[&quot;id&quot;],
+        &quot;employee_name&quot;: row[&quot;employee_name&quot;],
+        &quot;project&quot;: row[&quot;project&quot;],
+        &quot;entry_date&quot;: row[&quot;entry_date&quot;],
+        &quot;hours&quot;: row[&quot;hours&quot;],
+        &quot;description&quot;: row[&quot;description&quot;],
+    }
+
+
+def list_all_entries() -&gt; list[dict]:
+    conn = get_connection()
+    rows = conn.execute(&quot;SELECT * FROM time_entries ORDER BY entry_date DESC, id DESC&quot;).fetchall()
+    conn.close()
+    return [_row_to_dict(r) for r in rows]
+
+
+def log_time(employee_name: str, project: str, entry_date: str, hours: float, description: str = &quot;&quot;) -&gt; dict:
+    if hours &lt;= 0:
+        raise ValueError(&quot;hours must be a positive number&quot;)
+    conn = get_connection()
+    cursor = conn.execute(
+        &quot;INSERT INTO time_entries (employee_name, project, entry_date, hours, description) &quot;
+        &quot;VALUES (?, ?, ?, ?, ?)&quot;,
+        (employee_name, project, entry_date, hours, description),
+    )
+    conn.commit()
+    new_id = cursor.lastrowid
+    row = conn.execute(&quot;SELECT * FROM time_entries WHERE id = ?&quot;, (new_id,)).fetchone()
+    conn.close()
+    return _row_to_dict(row)
+
+
+def get_timesheet(employee_name: str, start_date: str | None = None, end_date: str | None = None) -&gt; list[dict]:
+    conn = get_connection()
+    query = &quot;SELECT * FROM time_entries WHERE employee_name = ?&quot;
+    params: list = [employee_name]
+    if start_date:
+        query += &quot; AND entry_date &gt;= ?&quot;
+        params.append(start_date)
+    if end_date:
+        query += &quot; AND entry_date &lt;= ?&quot;
+        params.append(end_date)
+    query += &quot; ORDER BY entry_date&quot;
+    rows = conn.execute(query, params).fetchall()
+    conn.close()
+    return [_row_to_dict(r) for r in rows]
+
+
+def list_projects() -&gt; list[str]:
+    conn = get_connection()
+    rows = conn.execute(&quot;SELECT DISTINCT project FROM time_entries ORDER BY project&quot;).fetchall()
+    conn.close()
+    return [r[&quot;project&quot;] for r in rows]
+
+
+def get_project_summary(project: str) -&gt; dict:
+    conn = get_connection()
+    rows = conn.execute(
+        &quot;SELECT employee_name, SUM(hours) as total_hours FROM time_entries &quot;
+        &quot;WHERE project = ? GROUP BY employee_name ORDER BY employee_name&quot;,
+        (project,),
+    ).fetchall()
+    conn.close()
+    if not rows:
+        raise ValueError(f&quot;No time logged against project '{project}'&quot;)
+    by_employee = {r[&quot;employee_name&quot;]: r[&quot;total_hours&quot;] for r in rows}
+    return {
+        &quot;project&quot;: project,
+        &quot;total_hours&quot;: sum(by_employee.values()),
+        &quot;by_employee&quot;: by_employee,
+    }
+</code></pre>
+<p><strong>The server</strong> (note <code>slow_tool</code>, <code>log_time_with_confirmation</code> and <code>summarize_week</code>, which Chapter 17 uses)</p>
+<p><strong><code>main.py</code></strong></p>
+<pre><code class="language-python">&quot;&quot;&quot;
+main.py -- the COMPLETE TimeTrack server used by every file in client/.
+
+This is one file with everything already in it: the four original tools,
+the resource, the prompt, and the two &quot;advanced&quot; tools (summarize_week and
+log_time_with_confirmation) plus one deliberately slow tool for the
+timeout/progress demos. You do not need to copy anything into this file --
+it already has it all.
+
+Run it on its own to sanity-check it starts:
+    python3 main.py
+(it will just sit there waiting for a client -- that's correct. Ctrl+C to stop.)
+&quot;&quot;&quot;
+import os
+from fastmcp import FastMCP, Context
+from anthropic import Anthropic
+import database as db
+
+# Make sure the database file and its table exist before anything else runs
+db.init_db()
+
+mcp = FastMCP(&quot;TimeTrack&quot;)
+anthropic_client = Anthropic(api_key=os.environ.get(&quot;ANTHROPIC_API_KEY&quot;, &quot;&quot;))
+
+
+# ============================================================
+# THE ORIGINAL FOUR TOOLS -- unchanged from the Persistence video
+# ============================================================
+
+@mcp.tool
+def log_time(employee_name: str, project: str, entry_date: str, hours: float, description: str = &quot;&quot;) -&gt; dict:
+    &quot;&quot;&quot;Log a time entry. entry_date must be YYYY-MM-DD.&quot;&quot;&quot;
+    return db.log_time(employee_name, project, entry_date, hours, description)
+
+
+@mcp.tool
+def get_timesheet(employee_name: str, start_date: str = &quot;&quot;, end_date: str = &quot;&quot;) -&gt; list[dict]:
+    &quot;&quot;&quot;Get one employee's logged entries, optionally filtered to a date range (YYYY-MM-DD).&quot;&quot;&quot;
+    return db.get_timesheet(employee_name, start_date or None, end_date or None)
+
+
+@mcp.tool
+def get_project_summary(project: str) -&gt; dict:
+    &quot;&quot;&quot;Get total hours logged against a project, broken down by employee.&quot;&quot;&quot;
+    return db.get_project_summary(project)
+
+
+@mcp.tool
+def list_projects() -&gt; list[str]:
+    &quot;&quot;&quot;List every project that has at least one logged time entry.&quot;&quot;&quot;
+    return db.list_projects()
+
+
+@mcp.resource(&quot;timesheet://projects&quot;)
+def known_projects() -&gt; list[str]:
+    &quot;&quot;&quot;The current set of projects with logged time.&quot;&quot;&quot;
+    return db.list_projects()
+
+
+@mcp.prompt
+def generate_weekly_report(employee_name: str, week_start: str) -&gt; str:
+    &quot;&quot;&quot;Guides the AI to build a structured weekly hours report.&quot;&quot;&quot;
+    return f&quot;&quot;&quot;Build a weekly report for {employee_name}, starting {week_start}.
+
+1. Call get_timesheet with employee_name='{employee_name}', start_date='{week_start}'
+2. Group the results by project
+3. Present it as a clean report with a total
+
+If no entries are found for that week, say so plainly instead of inventing data.
+&quot;&quot;&quot;
+
+
+# ============================================================
+# NEW: a tool that generates a natural-language summary by
+# calling an LLM provider directly. (MCP client-side &quot;sampling&quot;
+# -- where the server borrows the CONNECTED CLIENT's LLM via
+# ctx.sample() -- was deprecated in the MCP spec (SEP-2577) and
+# FastMCP 4.x removed Context.sample() entirely. Tools now talk
+# to a provider themselves instead of routing through the client.)
+# ============================================================
+
+@mcp.tool
+async def summarize_week(employee_name: str, week_start: str) -&gt; str:
+    &quot;&quot;&quot;Summarize one employee's week in plain language, using an LLM.&quot;&quot;&quot;
+    # Step 1: get the real data, same as any other tool would
+    entries = db.get_timesheet(employee_name, start_date=week_start)
+    if not entries:
+        return f&quot;No entries found for {employee_name} starting {week_start}.&quot;
+
+    # Step 2: turn the raw rows into readable lines for the prompt
+    entries_text = &quot;\n&quot;.join(
+        f&quot;- {e['project']}: {e['hours']}h ({e['description']})&quot; for e in entries
+    )
+
+    # Step 3: call the LLM provider directly to generate the text.
+    response = anthropic_client.messages.create(
+        model=&quot;claude-sonnet-4-5&quot;,
+        max_tokens=256,
+        messages=[{
+            &quot;role&quot;: &quot;user&quot;,
+            &quot;content&quot;: f&quot;Summarize this week's work for {employee_name} in two friendly sentences:\n\n{entries_text}&quot;,
+        }],
+    )
+    text = &quot;&quot;.join(block.text for block in response.content if block.type == &quot;text&quot;)
+    return text or &quot;Could not generate a summary.&quot;
+
+
+# ============================================================
+# NEW: a tool that uses ELICITATION -- the server pauses and
+# asks the human, through the client, before doing something
+# that looks unusual.
+# ============================================================
+
+@mcp.tool
+async def log_time_with_confirmation(
+    employee_name: str, project: str, entry_date: str, hours: float, description: str, ctx: Context
+) -&gt; dict:
+    &quot;&quot;&quot;Log time, but pause to confirm first if the hours look unusually high.&quot;&quot;&quot;
+    # Only ask when something actually looks worth double-checking --
+    # this is a deliberate choice, not every tool call should interrupt
+    if hours &gt; 10:
+        # This PAUSES the tool and waits for a real answer from whoever
+        # is on the other end of the connection.
+        result = await ctx.elicit(
+            f&quot;{hours} hours in one day is unusually high -- log it anyway?&quot;,
+            response_type=bool,
+        )
+        if result.action != &quot;accept&quot; or not result.data:
+            # The user said no (or didn't answer) -- stop here, log nothing
+            return {&quot;status&quot;: &quot;cancelled&quot;, &quot;reason&quot;: &quot;not confirmed by user&quot;}
+    return db.log_time(employee_name, project, entry_date, hours, description)
+
+
+# ============================================================
+# NEW: one deliberately slow tool, used ONLY to demonstrate
+# timeouts, cancellation, and progress notifications for real.
+# ============================================================
+
+@mcp.tool
+async def slow_tool(ctx: Context) -&gt; str:
+    &quot;&quot;&quot;Takes about 5 seconds on purpose, reporting progress the whole way -- for demoing timeouts and progress.&quot;&quot;&quot;
+    import asyncio
+    total_steps = 5
+    for step in range(1, total_steps + 1):
+        await asyncio.sleep(1)
+        await ctx.report_progress(progress=step, total=total_steps, message=f&quot;Step {step} of {total_steps}&quot;)
+    return &quot;Finished all 5 steps.&quot;
+
+
+if __name__ == &quot;__main__&quot;:
+    mcp.run()
+</code></pre>
+<p><strong>Client 02: the same five steps, built up gradually</strong></p>
+<p><strong><code>client/02_fastmcp_client_explained.py</code></strong></p>
+<pre><code class="language-python">&quot;&quot;&quot;
+02 -- THE EASY CLIENT, EXPLAINED STEP BY STEP
+================================================
+Before jumping into the one-line pattern you'll see everywhere in this
+course -- &quot;async with Client(...) as client:&quot; -- let's break down
+exactly what a client needs to do, in plain English, one step at a time.
+
+WHAT A CLIENT ACTUALLY NEEDS TO DO (five steps, nothing more):
+  1. START the server (or connect to one already running)
+  2. SAY HELLO -- the handshake from the Lifecycle video
+  3. ASK what tools exist
+  4. USE one of them
+  5. SAY GOODBYE -- close the connection cleanly, even if something broke
+
+That's the whole job. Everything below is just two different ways of
+writing those same five steps.
+
+WHY DOES THE CODE LOOK LIKE &quot;async with Client(...) as client:&quot;?
+--------------------------------------------------------------------
+You could write this the &quot;manual&quot; way, spelling out every step:
+
+    client = Client(&quot;../main.py&quot;)
+    await client.__aenter__()          # steps 1 + 2: start + handshake
+    try:
+        ... use the client here ...     # steps 3 + 4
+    finally:
+        await client.__aexit__(None, None, None)   # step 5 -- ALWAYS runs
+
+That works. But it's easy to get wrong -- forget that &quot;finally&quot; block,
+and a script that crashes halfway through leaves the server subprocess
+running in the background forever, with nobody around to close it.
+
+Python's &quot;async with&quot; does exactly that manual version FOR you,
+automatically, and it GUARANTEES step 5 happens no matter what:
+
+    async with Client(&quot;../main.py&quot;) as client:
+        ... use the client here ...
+    # step 5 already happened here automatically, even if something above failed
+
+So &quot;async with&quot; isn't a new concept to learn -- it's just &quot;always clean
+up properly,&quot; written in one line instead of five. Both versions below
+do the identical five steps. Run this file and watch them do the same
+thing, two different ways.
+&quot;&quot;&quot;
+import asyncio
+from fastmcp import Client
+
+
+async def the_manual_way():
+    &quot;&quot;&quot;Not how you'll normally write this -- shown once, so 'async with' stops looking like magic.&quot;&quot;&quot;
+    print(&quot;--- THE MANUAL WAY (for understanding only) ---&quot;)
+    client = Client(&quot;../main.py&quot;)
+
+    await client.__aenter__()  # steps 1 + 2: start the server, do the handshake
+    try:
+        tools = await client.list_tools()  # step 3: ask what's available
+        print(&quot;Tools:&quot;, [t.name for t in tools])
+
+        result = await client.call_tool(&quot;list_projects&quot;, {})  # step 4: use one
+        print(&quot;Result:&quot;, result)
+    finally:
+        await client.__aexit__(None, None, None)  # step 5: ALWAYS runs, even on error
+        print(&quot;Cleaned up properly -- even without 'async with'.&quot;)
+
+
+async def the_real_way():
+    &quot;&quot;&quot;This is what you'll actually write, every time, from here on in this course.&quot;&quot;&quot;
+    print(&quot;\n--- THE REAL WAY (what every later file actually uses) ---&quot;)
+    async with Client(&quot;../main.py&quot;) as client:  # steps 1, 2, AND 5 (cleanup), handled for you
+        tools = await client.list_tools()  # step 3
+        print(&quot;Tools:&quot;, [t.name for t in tools])
+
+        result = await client.call_tool(&quot;list_projects&quot;, {})  # step 4
+        print(&quot;Result:&quot;, result)
+    # step 5 (cleanup) already happened here, automatically, the instant the block ended
+
+
+async def main():
+    await the_manual_way()
+    await the_real_way()
+
+
+if __name__ == &quot;__main__&quot;:
+    asyncio.run(main())
+</code></pre>
+<p><strong>Client 03: the same client pointed at a deployed server</strong></p>
+<p><strong><code>client/03_fastmcp_client_http.py</code></strong></p>
+<pre><code class="language-python">&quot;&quot;&quot;
+03 -- CONNECTING TO A REAL, DEPLOYED SERVER OVER HTTP
+========================================================
+Every file so far launched main.py as a LOCAL subprocess over stdio.
+This file connects to the EXACT SAME TimeTrack server -- except this one
+is already running, permanently, on the actual internet. It was deployed
+earlier in this course and is live right now at the URL below.
+
+THE ONLY THING THAT CHANGES: you pass a URL instead of a file path.
+FastMCP detects the difference automatically and switches from stdio to
+Streamable HTTP -- same tools, same behavior, completely different road,
+exactly like the Transport Layer video explained.
+
+No local server to start. No subprocess. Just a URL, reachable from
+anywhere, by anyone -- not just you.
+
+SETUP:
+    pip install fastmcp
+
+RUN:
+    python3 03_fastmcp_client_http.py
+&quot;&quot;&quot;
+import asyncio
+from fastmcp import Client
+
+# This exact URL is live -- verified directly before this file was
+# written by calling it for real:
+#   list_projects()        -&gt; [&quot;Client Onboarding&quot;, &quot;Internal Tools&quot;, &quot;Website Redesign&quot;]
+#   get_project_summary(&quot;Website Redesign&quot;)
+#                           -&gt; total_hours: 19.0, Asha Patel: 13.5, Rahul Mehta: 5.5
+SERVER_URL = &quot;https://time-track-mcp-server.vercel.app/mcp&quot;
+
+
+async def main():
+    # Same five steps as every previous file -- start, handshake, ask,
+    # use, clean up. The ONLY difference from 02's &quot;the_real_way()&quot; is
+    # what's inside Client(...): a URL instead of &quot;../main.py&quot;.
+    async with Client(SERVER_URL) as client:
+        print(f&quot;Connected to {SERVER_URL}&quot;)
+        print(&quot;(over the real internet -- no subprocess was started)&quot;)
+
+        tools = await client.list_tools()
+        print(&quot;\nTools this remote server offers:&quot;, [t.name for t in tools])
+
+        projects = await client.call_tool(&quot;list_projects&quot;, {})
+        print(&quot;\nProjects, straight from the live deployment:&quot;, projects)
+
+        summary = await client.call_tool(&quot;get_project_summary&quot;, {&quot;project&quot;: &quot;Website Redesign&quot;})
+        print(&quot;Live project summary:&quot;, summary)
+
+
+if __name__ == &quot;__main__&quot;:
+    asyncio.run(main())
+</code></pre>
+<p><strong>Client 04: a real agent loop with no framework</strong></p>
+<p>Read this one slowly. It is the whole agent idea in about 60 lines: ask the model, check <code>stop_reason</code>, run the tool <strong>yourself</strong> through MCP, append the result, repeat. The model never runs anything.</p>
+<p><strong><code>client/04_agent_loop.py</code></strong></p>
+<pre><code class="language-python">&quot;&quot;&quot;
+04 -- A REAL AGENT LOOP, NO FRAMEWORK
+=======================================
+This is what &quot;an AI agent using MCP&quot; actually is, underneath every
+framework that promises to do it for you. No LangChain, nothing hidden --
+just: ask the LLM, check if it wants a tool, call it for real through
+MCP, hand the result back, repeat.
+
+SETUP:
+    pip install fastmcp anthropic
+    export ANTHROPIC_API_KEY=your-key-here
+
+RUN:
+    python3 04_agent_loop.py
+&quot;&quot;&quot;
+import asyncio
+import os
+from fastmcp import Client
+from anthropic import Anthropic
+
+
+def mcp_tools_to_anthropic_format(mcp_tools) -&gt; list[dict]:
+    &quot;&quot;&quot;
+    MCP describes a tool one way. Anthropic's API wants it described a
+    slightly different way. This is the ONLY translation a framework-free
+    agent loop actually needs to do by hand.
+    &quot;&quot;&quot;
+    return [
+        {
+            &quot;name&quot;: tool.name,
+            &quot;description&quot;: tool.description or &quot;&quot;,
+            &quot;input_schema&quot;: tool.inputSchema,
+        }
+        for tool in mcp_tools
+    ]
+
+
+async def run_one_tool_call(mcp_client: Client, block) -&gt; dict:
+    &quot;&quot;&quot;Actually calls one tool through MCP, and packages the result the
+    way Anthropic's API expects it to come back.&quot;&quot;&quot;
+    print(f&quot;  -&gt; calling {block.name} with {block.input}&quot;)
+    result = await mcp_client.call_tool(block.name, block.input)
+    return {
+        &quot;type&quot;: &quot;tool_result&quot;,
+        &quot;tool_use_id&quot;: block.id,
+        &quot;content&quot;: str(result),
+    }
+
+
+async def run_agent_loop(user_message: str):
+    anthropic_client = Anthropic(api_key=os.environ[&quot;ANTHROPIC_API_KEY&quot;])
+
+    async with Client(&quot;../main.py&quot;) as mcp_client:
+        mcp_tools = await mcp_client.list_tools()
+        anthropic_tools = mcp_tools_to_anthropic_format(mcp_tools)
+
+        # This list is the entire &quot;memory&quot; of the conversation. Every
+        # question, every tool result, gets appended here and sent back
+        # on the NEXT request -- the LLM itself remembers nothing between
+        # calls; this list is doing all the remembering.
+        messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: user_message}]
+
+        while True:
+            response = anthropic_client.messages.create(
+                model=&quot;claude-sonnet-4-5&quot;,
+                max_tokens=1024,
+                tools=anthropic_tools,
+                messages=messages,
+            )
+
+            if response.stop_reason != &quot;tool_use&quot;:
+                final_text = &quot;&quot;.join(
+                    block.text for block in response.content if block.type == &quot;text&quot;
+                )
+                print(&quot;\nFinal answer:&quot;, final_text)
+                return
+
+            messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: response.content})
+
+            tool_results = [
+                await run_one_tool_call(mcp_client, block)
+                for block in response.content
+                if block.type == &quot;tool_use&quot;
+            ]
+
+            messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: tool_results})
+
+
+if __name__ == &quot;__main__&quot;:
+    asyncio.run(run_agent_loop(
+        &quot;Hi.&quot;
+    ))
+</code></pre>
+<h2 id="agentic-ai-ch16-run-it-yourself-scopes-and-roles-auth">Run it yourself: scopes and roles (auth)</h2>
+<p>The warm-up folder also has <code>server_with_auth.py</code>, which uses a development-only <code>StaticTokenVerifier</code> with three fixed tokens (<code>user-token</code>, <code>analyst-token</code>, <code>admin-token</code>) and per-tool <code>require_scopes(...)</code>. Here is the complete file.</p>
+<p><strong><code>server_with_auth.py</code></strong></p>
+<pre><code class="language-python">from fastmcp import FastMCP
+from fastmcp.server.auth import require_scopes
+from fastmcp.server.auth.providers.jwt import StaticTokenVerifier
+from fastmcp.server.dependencies import get_access_token
+
+
+# ---------------------------------------------------------
+# AUTHENTICATION
+# ---------------------------------------------------------
+
+# DEVELOPMENT ONLY
+#
+# Each token represents a different user/role.
+#
+# user-token    -&gt; user role
+# analyst-token -&gt; analyst role
+# admin-token   -&gt; admin role
+
+auth = StaticTokenVerifier(
+    tokens={
+        &quot;user-token&quot;: {
+            &quot;client_id&quot;: &quot;normal-user&quot;,
+            &quot;scopes&quot;: [&quot;user&quot;],
+        },
+
+        &quot;analyst-token&quot;: {
+            &quot;client_id&quot;: &quot;data-analyst&quot;,
+            &quot;scopes&quot;: [&quot;user&quot;, &quot;analyst&quot;],
+        },
+
+        &quot;admin-token&quot;: {
+            &quot;client_id&quot;: &quot;administrator&quot;,
+            &quot;scopes&quot;: [&quot;user&quot;, &quot;analyst&quot;, &quot;admin&quot;],
+        },
+    }
+)
+
+
+mcp = FastMCP(
+    &quot;Warm-Up Server&quot;,
+    auth=auth
+)
+
+
+# =========================================================
+# USER TOOLS
+# =========================================================
+
+@mcp.tool(auth=require_scopes(&quot;user&quot;))
+def greet(name: str) -&gt; str:
+    &quot;&quot;&quot;
+    Greet someone by name.
+
+    Role:
+        user
+        analyst
+        admin
+    &quot;&quot;&quot;
+
+    return f&quot;Hello, {name}! Welcome to MCP.&quot;
+
+
+@mcp.tool(auth=require_scopes(&quot;user&quot;))
+def add_numbers(a: int, b: int) -&gt; int:
+    &quot;&quot;&quot;
+    Add two numbers.
+
+    Role:
+        user
+        analyst
+        admin
+    &quot;&quot;&quot;
+
+    return a + b
+
+
+# =========================================================
+# ANALYST TOOLS
+# =========================================================
+
+@mcp.tool(auth=require_scopes(&quot;analyst&quot;))
+def query_db(a: int, b: int, c: int) -&gt; int:
+    &quot;&quot;&quot;
+    Query database example.
+
+    Role:
+        analyst
+        admin
+    &quot;&quot;&quot;
+
+    return a + b + c
+
+
+@mcp.tool(auth=require_scopes(&quot;analyst&quot;))
+def calculate_average(numbers: list[float]) -&gt; float:
+    &quot;&quot;&quot;
+    Calculate average of numbers.
+
+    Role:
+        analyst
+        admin
+    &quot;&quot;&quot;
+
+    if not numbers:
+        return 0
+
+    return sum(numbers) / len(numbers)
+
+
+@mcp.tool(auth=require_scopes(&quot;analyst&quot;))
+def sales_report(month: str) -&gt; dict:
+    &quot;&quot;&quot;
+    Return a mock sales report.
+
+    Role:
+        analyst
+        admin
+    &quot;&quot;&quot;
+
+    return {
+        &quot;month&quot;: month,
+        &quot;revenue&quot;: 125000,
+        &quot;orders&quot;: 430,
+        &quot;customers&quot;: 310,
+    }
+
+
+# =========================================================
+# ADMIN TOOLS
+# =========================================================
+
+@mcp.tool(auth=require_scopes(&quot;admin&quot;))
+def list_users() -&gt; list[dict]:
+    &quot;&quot;&quot;
+    List users.
+
+    Role:
+        admin only
+    &quot;&quot;&quot;
+
+    return [
+        {
+            &quot;id&quot;: 1,
+            &quot;name&quot;: &quot;Mayank&quot;,
+            &quot;role&quot;: &quot;admin&quot;,
+        },
+        {
+            &quot;id&quot;: 2,
+            &quot;name&quot;: &quot;Alice&quot;,
+            &quot;role&quot;: &quot;analyst&quot;,
+        },
+        {
+            &quot;id&quot;: 3,
+            &quot;name&quot;: &quot;Bob&quot;,
+            &quot;role&quot;: &quot;user&quot;,
+        },
+    ]
+
+
+@mcp.tool(auth=require_scopes(&quot;admin&quot;))
+def delete_user(user_id: int) -&gt; str:
+    &quot;&quot;&quot;
+    Delete a user.
+
+    Role:
+        admin only
+    &quot;&quot;&quot;
+
+    return f&quot;User {user_id} deleted successfully.&quot;
+
+
+# =========================================================
+# OPTIONAL TOOL - SEE CURRENT AUTH USER
+# =========================================================
+
+@mcp.tool(auth=require_scopes(&quot;user&quot;))
+def who_am_i() -&gt; dict:
+    &quot;&quot;&quot;
+    Show information about the authenticated client.
+    &quot;&quot;&quot;
+
+    token = get_access_token()
+
+    return {
+        &quot;client_id&quot;: token.client_id,
+        &quot;scopes&quot;: token.scopes,
+    }
+
+
+# ---------------------------------------------------------
+# RUN SERVER
+# ---------------------------------------------------------
+
+if __name__ == &quot;__main__&quot;:
+
+
+    mcp.run(
+        transport=&quot;http&quot;,
+        host=&quot;127.0.0.1&quot;,
+        port=8000,
+    )
+</code></pre>
+<p>Start it with <code>python server_with_auth.py</code>, then run this checker. It is <strong>my own example</strong>, and I ran it against the server above.</p>
+<p><strong><code>check_auth.py</code></strong></p>
+<pre><code class="language-python">&quot;&quot;&quot;Start server_with_auth.py first:  python server_with_auth.py
+Then run this file. Each token carries different scopes.&quot;&quot;&quot;
+import asyncio
+from fastmcp import Client
+
+URL = &quot;http://127.0.0.1:8000/mcp&quot;
+
+
+async def try_role(token: str):
+    async with Client(URL, auth=token) as client:
+        names = [t.name for t in await client.list_tools()]
+        print(f&quot;{token:14} sees:&quot;, names)
+        print(f&quot;{'':14} who_am_i:&quot;, (await client.call_tool(&quot;who_am_i&quot;, {})).data)
+        try:
+            await client.call_tool(&quot;delete_user&quot;, {&quot;user_id&quot;: 3})
+            print(f&quot;{'':14} delete_user: ALLOWED&quot;)
+        except Exception as e:
+            print(f&quot;{'':14} delete_user: refused ({type(e).__name__})&quot;)
+
+
+async def main():
+    for token in (&quot;user-token&quot;, &quot;analyst-token&quot;, &quot;admin-token&quot;):
+        await try_role(token)
+
+
+asyncio.run(main())
+</code></pre>
+<p>What it shows (verified): the <code>user-token</code> sees only <code>greet</code>, <code>add_numbers</code> and <code>who_am_i</code>; the analyst adds the three analyst tools; the admin also sees <code>list_users</code> and <code>delete_user</code>. A scope does not only block a call, it <strong>hides the tool from <code>tools/list</code></strong>, so the model never even learns that a forbidden tool exists. <code>delete_user</code> was refused for user and analyst and allowed for admin.</p>
+<aside class="callout trap"><div class="ct">Common trap<em>Static tokens are for demos only</em></div><p>Fixed strings in source code are not authentication you can ship. In production you verify real signed tokens (JWT or OAuth) from an identity provider, and you keep scopes narrow, as in the production section above.</p></aside>
+<h2 id="agentic-ai-ch16-spot-the-bug-deployment-mistakes">Spot the bug: deployment mistakes</h2>
+<p>Each pair is a mistake from this chapter and the fix. Cover the right side and try to find the problem first.</p>
+<p><strong>1. Doubled path</strong></p>
+<pre><code class="language-python"># BROKEN: the URL becomes /mcp/mcp and clients get 404
+mcp_app = mcp.http_app(path=&quot;/mcp&quot;)
+app = FastAPI(lifespan=mcp_app.lifespan)
+app.mount(&quot;/mcp&quot;, mcp_app)
+</code></pre>
+<pre><code class="language-python"># FIXED: the mount supplies /mcp, so the inner app lives at &quot;/&quot;
+mcp_app = mcp.http_app(path=&quot;/&quot;)
+app = FastAPI(lifespan=mcp_app.lifespan)
+app.mount(&quot;/mcp&quot;, mcp_app)
+</code></pre>
+<p><strong>2. Lifespan attached too late</strong></p>
+<pre><code class="language-python"># BROKEN: the MCP app's startup never runs, so sessions fail on the first request
+app = FastAPI()
+app.router.lifespan_context = mcp_app.lifespan   # set after construction
+</code></pre>
+<pre><code class="language-python"># FIXED: pass it when you construct the app
+app = FastAPI(lifespan=mcp_app.lifespan)
+</code></pre>
+<p><strong>3. Treating the model as the one that runs tools</strong></p>
+<pre><code class="language-python"># BROKEN: the response is only a REQUEST to call a tool; nothing has run
+response = client.messages.create(model=..., tools=tools, messages=messages)
+print(response.content)          # tool_use block, no result
+</code></pre>
+<pre><code class="language-python"># FIXED: run it through MCP, send the result back, loop until stop_reason != &quot;tool_use&quot;
+if response.stop_reason == &quot;tool_use&quot;:
+    result = await mcp_client.call_tool(block.name, block.input)
+    messages.append({&quot;role&quot;: &quot;user&quot;,
+                     &quot;content&quot;: [{&quot;type&quot;: &quot;tool_result&quot;,
+                                  &quot;tool_use_id&quot;: block.id,
+                                  &quot;content&quot;: str(result)}]})
+</code></pre>
+<!-- /runlab -->
+
 <h2 id="agentic-ai-ch16-hands-on-lab">Hands-on lab</h2>
 <ol>
 <li>Run the same <code>main.py</code> with <code>fastmcp run</code> and then <code>uvicorn</code> and note what each starts.</li>
@@ -5852,6 +6800,218 @@ async with Client(&quot;../main.py&quot;, progress_handler=on_progress) as clien
 </tr>
 </tbody>
 </table></div>
+<!-- runlab -->
+<h2 id="agentic-ai-ch17-run-it-yourself-the-four-advanced-clients">Run it yourself: the four advanced clients</h2>
+<p>Complete, unmodified files from the repo. Run them from the <code>client/</code> folder next to <code>../main.py</code> (the server and <code>database.py</code> are printed in Chapter 16). I ran all four against fastmcp 4.1.4.</p>
+<p><strong>06: elicitation</strong> (<code>mode="legacy"</code> and a handler). With 4 hours no question is asked; with 14 hours the server asks "log it anyway?" and the handler answers.</p>
+<p><strong><code>client/06_elicitation_demo.py</code></strong></p>
+<pre><code class="language-python">&quot;&quot;&quot;
+06 -- ELICITATION: THE SERVER ASKS A REAL QUESTION
+=====================================================
+main.py's &quot;log_time_with_confirmation&quot; tool calls ctx.elicit(...)
+whenever hours look unusually high. That call PAUSES the tool, mid-way
+through, and waits for a real answer from the client. This file
+provides that answer.
+
+A NOTE WORTH KNOWING: the newest MCP protocol revision (2026-07-28) is
+stateless -- it has no back-channel at all for server-initiated requests,
+so ctx.elicit() raises an error on a connection negotiated at that
+version. Elicitation itself isn't gone (there's a modern &quot;return an
+InputRequiredResult and get re-invoked&quot; pattern for it), but the simple
+imperative ctx.elicit() this demo relies on only works on the classic,
+session-based handshake. So we pin the client to mode=&quot;legacy&quot; below to
+force that older handshake and keep this demo working as written.
+
+SETUP:
+    pip install fastmcp
+
+RUN:
+    python3 06_elicitation_demo.py
+&quot;&quot;&quot;
+import asyncio
+from fastmcp import Client
+
+
+async def elicitation_handler(message: str, response_type, params, context):
+    &quot;&quot;&quot;
+    Called BY the server, through the client, whenever a tool calls
+    ctx.elicit(). In a real app with a UI, this is where you'd show a
+    real dialog box. For this demo, we print the question and auto-confirm.
+    &quot;&quot;&quot;
+    print(f&quot;\n[The server is asking]: {message}&quot;)
+    print(&quot;[Auto-confirming for this demo -- swap this for real input() or a UI in your own client]&quot;)
+    return True
+
+
+async def main():
+    async with Client(
+        &quot;../main.py&quot;, elicitation_handler=elicitation_handler, mode=&quot;legacy&quot;
+    ) as client:
+        print(&quot;--- Logging 4 hours (normal -- watch: NO question gets asked) ---&quot;)
+        normal_result = await client.call_tool(
+            &quot;log_time_with_confirmation&quot;,
+            {&quot;employee_name&quot;: &quot;Asha Patel&quot;, &quot;project&quot;: &quot;Website Redesign&quot;,
+             &quot;entry_date&quot;: &quot;2026-09-12&quot;, &quot;hours&quot;: 4.0, &quot;description&quot;: &quot;A normal day&quot;},
+        )
+        print(&quot;Result:&quot;, normal_result)
+
+        print(&quot;\n--- Logging 14 hours (unusual -- watch: a real question appears) ---&quot;)
+        high_result = await client.call_tool(
+            &quot;log_time_with_confirmation&quot;,
+            {&quot;employee_name&quot;: &quot;Asha Patel&quot;, &quot;project&quot;: &quot;Website Redesign&quot;,
+             &quot;entry_date&quot;: &quot;2026-09-12&quot;, &quot;hours&quot;: 14.0, &quot;description&quot;: &quot;Crunch day&quot;},
+        )
+        print(&quot;Result:&quot;, high_result)
+
+
+if __name__ == &quot;__main__&quot;:
+    asyncio.run(main())
+</code></pre>
+<p>Verified output shape: the 4-hour call returns a new row straight away; the 14-hour call prints <code>[The server is asking]: 14.0 hours in one day is unusually high -- log it anyway?</code>, auto-confirms, and then logs the row.</p>
+<p><strong>07: ping and a real error</strong></p>
+<p><strong><code>client/07_ping_and_errors.py</code></strong></p>
+<pre><code class="language-python">&quot;&quot;&quot;
+07 -- PING AND A REAL ERROR
+=============================
+Two of the &quot;special cases&quot; from the Lifecycle video, now actually
+happening instead of being a JSON example on a slide.
+
+A NOTE WORTH KNOWING: `ping` is removed as of the newest MCP protocol
+revision (2026-07-28) -- it only works under the classic, session-based
+handshake. So, same as the elicitation demo, we pin mode=&quot;legacy&quot; here
+to keep client.ping() working as written.
+
+RUN:
+    python3 07_ping_and_errors.py
+&quot;&quot;&quot;
+import asyncio
+from fastmcp import Client
+
+
+async def demo_ping():
+    print(&quot;--- PING: just checking the connection is alive ---&quot;)
+    async with Client(&quot;../main.py&quot;, mode=&quot;legacy&quot;) as client:
+        result = await client.ping()
+        print(&quot;Server responded:&quot;, result)
+
+
+async def demo_real_error():
+    print(&quot;\n--- A REAL ERROR, TRIGGERED ON PURPOSE ---&quot;)
+    async with Client(&quot;../main.py&quot;, mode=&quot;legacy&quot;) as client:
+        try:
+            # &quot;Nonexistent Project&quot; was never logged against -- this makes
+            # get_project_summary's own ValueError fire for real, surfacing
+            # back to us as a genuine protocol error.
+            await client.call_tool(&quot;get_project_summary&quot;, {&quot;project&quot;: &quot;Nonexistent Project&quot;})
+        except Exception as e:
+            print(&quot;Caught a real error response:&quot;, e)
+
+
+async def main():
+    await demo_ping()
+    await demo_real_error()
+
+
+if __name__ == &quot;__main__&quot;:
+    asyncio.run(main())
+</code></pre>
+<p>Verified: ping succeeds, and the missing project comes back as an error that the client catches (<code>No time logged against project 'Nonexistent Project'</code>). Remember the server also prints a long traceback to its own stderr; that noise is the server's log, not your client failing.</p>
+<p><strong>08: timeout and cancellation</strong></p>
+<p><strong><code>client/08_timeout_and_cancellation.py</code></strong></p>
+<pre><code class="language-python">&quot;&quot;&quot;
+08 -- TIMEOUT, WHICH TRIGGERS A REAL CANCELLATION
+====================================================
+main.py's &quot;slow_tool&quot; deliberately takes about 5 seconds. Here, we
+connect with a much shorter timeout on purpose, so it actually times
+out -- and watch what that triggers.
+
+NOTE: &quot;timeout&quot; is set when you CREATE the Client, not as an argument
+to call_tool() itself -- verified against FastMCP's own current
+documentation.
+
+RUN:
+    python3 08_timeout_and_cancellation.py
+&quot;&quot;&quot;
+import asyncio
+from fastmcp import Client
+
+
+async def main():
+    print(&quot;--- Connecting with a 1-second timeout, calling a ~5-second tool ---&quot;)
+    async with Client(&quot;../main.py&quot;, timeout=1.0) as client:
+        try:
+            await client.call_tool(&quot;slow_tool&quot;, {})
+        except Exception as e:
+            print(&quot;Timed out and was cancelled, exactly as expected:&quot;, e)
+
+
+if __name__ == &quot;__main__&quot;:
+    asyncio.run(main())
+</code></pre>
+<p>Verified: the 5-second <code>slow_tool</code> is cut off by the 1-second client timeout and the client reports <code>Request 'tools/call' timed out</code>.</p>
+<p><strong>09: progress notifications</strong></p>
+<p><strong><code>client/09_progress_notifications.py</code></strong></p>
+<pre><code class="language-python">&quot;&quot;&quot;
+09 -- PROGRESS NOTIFICATIONS, WATCHED LIVE
+=============================================
+main.py's &quot;slow_tool&quot; reports its progress as it works. Here we give the
+client a progress_handler, so every update prints the moment it arrives
+-- instead of the client just sitting there for 5 seconds wondering if
+anything is happening.
+
+NOTE: &quot;progress_handler&quot; is also set when you CREATE the Client, not
+per-call -- same rule as timeout in the previous file.
+
+RUN:
+    python3 09_progress_notifications.py
+&quot;&quot;&quot;
+import asyncio
+from fastmcp import Client
+
+
+async def on_progress(progress: float, total: float | None, message: str | None):
+    print(f&quot;  progress update: {progress}/{total} -- {message}&quot;)
+
+
+async def main():
+    print(&quot;--- Calling the 5-second tool, watching progress arrive live ---&quot;)
+    async with Client(&quot;../main.py&quot;, progress_handler=on_progress) as client:
+        result = await client.call_tool(&quot;slow_tool&quot;, {})
+        print(&quot;Final result:&quot;, result)
+
+
+if __name__ == &quot;__main__&quot;:
+    asyncio.run(main())
+</code></pre>
+<p>Verified: five updates arrive as <code>1.0/5.0 -- Step 1 of 5</code> up to <code>5.0/5.0</code>, then the final result.</p>
+<h2 id="agentic-ai-ch17-spot-the-bug-client-mistakes">Spot the bug: client mistakes</h2>
+<p><strong>1. Elicitation with no handler or legacy mode</strong></p>
+<pre><code class="language-python"># BROKEN: no handler, so the client has no way to answer the server's question
+async with Client(&quot;../main.py&quot;) as client:
+    await client.call_tool(&quot;log_time_with_confirmation&quot;, {...})
+</code></pre>
+<pre><code class="language-python"># FIXED: give the client a handler and the legacy mode the demo needs
+async with Client(&quot;../main.py&quot;, elicitation_handler=handler, mode=&quot;legacy&quot;) as client:
+    ...
+</code></pre>
+<p><strong>2. Expecting sampling to still work</strong></p>
+<pre><code class="language-python"># BROKEN on current fastmcp: ctx.sample() was removed
+summary = await ctx.sample(&quot;Summarise this week&quot;)
+</code></pre>
+<pre><code class="language-python"># FIXED: call your model provider directly from the tool
+msg = anthropic_client.messages.create(model=&quot;claude-sonnet-4-5&quot;, max_tokens=500, messages=[...])
+</code></pre>
+<p><strong>3. Progress handler with the wrong signature</strong></p>
+<pre><code class="language-python"># BROKEN: the client passes progress, total and message, so a one-argument handler does not match
+async def on_progress(progress):
+    print(progress)
+</code></pre>
+<pre><code class="language-python"># FIXED: match the signature the repo uses
+async def on_progress(progress: float, total: float | None, message: str | None):
+    print(f&quot;{progress}/{total} -- {message}&quot;)
+</code></pre>
+<!-- /runlab -->
+
 <h2 id="agentic-ai-ch17-hands-on-lab">Hands-on lab</h2>
 <ol>
 <li>Recreate the <code>curl</code> <code>initialize</code> against your local server and find the <code>Mcp-Session-Id</code>.</li>
