@@ -59,35 +59,35 @@
       "num": "6",
       "title": "Agents, memory and middleware",
       "part": "Part C  Agents and middleware",
-      "file": null
+      "file": "ch6.md"
     },
     {
       "id": "ch7",
       "num": "7",
       "title": "Mastering middleware",
       "part": "Part C  Agents and middleware",
-      "file": null
+      "file": "ch7.md"
     },
     {
       "id": "ch8",
       "num": "8",
       "title": "Guardrails, todo lists, resilience",
       "part": "Part C  Agents and middleware",
-      "file": null
+      "file": "ch8.md"
     },
     {
       "id": "ch9",
       "num": "9",
       "title": "Shell tools and custom middleware",
       "part": "Part C  Agents and middleware",
-      "file": null
+      "file": "ch9.md"
     },
     {
       "id": "ch10",
       "num": "10",
       "title": "Runtime and human-in-the-loop",
       "part": "Part D  Runtime",
-      "file": null
+      "file": "ch10.md"
     },
     {
       "id": "ch11",
