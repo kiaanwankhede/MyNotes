@@ -118,6 +118,18 @@ The repo's `COLAB_NOTEBOOKS.md` lists every notebook shared "anyone with the lin
 
 I extracted the text of all 15 PDFs attached on Craft that are also in the repo. Most are **single-page Excalidraw whiteboard exports** (class diagrams such as the agent and middleware architecture, the MCP overview, runtime and HITL, structured output and tools), so the text is scattered labels and the information is already in the class write-ups and the chapters. The few small extras: tool use costs **at least two model calls** (one to choose the tool, one to summarise its output); a middleware slide shows the hook order (`before_agent`, `before_model`, `wrap_model_call`, the model call, `after_model`, `wrap_tool_call`, tool execution, `after_agent`); and the MCP slide frames the idea as "not more intelligence, but the ability to see more". The 22-page **AI Industry Handbook** is a separate business-audience handout from an "ET Masterclass" (industry-by-industry use cases and companies) and is marked "Not for redistribution", so I did not reproduce it.
 
+## The Craft Colab notebooks I opened
+
+I opened five of the Colabs linked on the Craft page in the desktop browser (their cells and outputs are visible as text). The LangChain Colabs (18 to 19 July, 25 to 26 July, 1 Aug, 16 Aug, 22 Aug) match the notebooks checked into the repo, which the chapters already use, so I did not open those links.
+
+| Colab | What it is | What I took from it |
+| --- | --- | --- |
+| LangChain MCP (MCP section) | A CineBot FastMCP server plus an `MCPAdapter` demo | The `pip install langchain.mcp` trap and the destructive-hint example, in Chapter 18 |
+| 12 July, "verbose tool agent" | The no-framework tool agent from Project 0 with very clear printing (it prints the message list at each step) | Nothing new beyond the primer's loop. It sets a **Groq API key in a cell**; I am not reproducing it and it should be treated as compromised |
+| 11 July, "Python and Agents" | Scratch from the live class: an email-reply schema (`Subject` defaulting to `Reply`, a `Body`) and a `TOOLS_BY_NAME` dictionary called with `add` and `subtract` | The same ideas as the primer |
+| Class 2, "Python Refresher and Pydantic" | Dictionaries, `.get()` and loops | Python only |
+| Class 3 and 4, "Pydantic From Scratch" | The same notebook as `Pydantic_From_Scratch.ipynb` in the repo: why unchecked types let `age = 10000` produce a birth year of -7974 | The primer's Pydantic section |
+
 ## The agent-flow repo
 
 The MCP section of the Craft page links `github.com/patoles/agent-flow`. It is a **visualiser for agent runs**: it shows Claude Code (and Codex) sessions as a live node graph of agents, tool calls, branches and returns. It is useful for seeing how an agent loop or subagents actually behave, which is the same thing Chapters 6 and 19 explain in text.

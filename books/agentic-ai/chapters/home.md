@@ -54,6 +54,28 @@ flowchart LR
 | E. MCP | 16 to 22 | Explain why MCP exists, its lifecycle and primitives, then build, deploy and compare versions |
 | F. Advanced | Weekends 13 to 14 | Use MCP inside LangChain, choose a multi-agent pattern, tour a full-stack project |
 
+<!-- induction-add -->
+## The course roadmap, from the induction session
+
+*From `classes_transcription_summary/00 - 21 June - Course Induction & Roadmap.md` (the batch induction with the founder and the lead mentor).*
+
+| | Agentic 2.0 | Agentic 3.0 |
+| --- | --- | --- |
+| Focus | Understanding agents | **Using and deploying** agents |
+| Frameworks | Older LangChain and LangGraph | Latest LangChain, MCP, A2A, the Claude Agent SDK |
+| Tools | Basic | Claude Code and other coding agents |
+| Projects | Simpler builds | Production-grade, multi-agent, CI/CD-driven |
+| New roles | None | Harness engineering, forward-deployed engineer |
+
+2.0 comes free with 3.0 enrolment but is not a prerequisite. Azure AI Foundry, Bedrock and Vertex AI each get dedicated sessions.
+
+**The curriculum flow:** foundations (LLMs and providers), core frameworks and protocols (LangChain, LangGraph, MCP, A2A, RAG, context engineering), mini-projects, interim projects deployed on cloud and a VPS, the coding-agent ecosystem, extended frameworks (ADK, Claude Agent SDK), and about nine production capstone projects. **Format:** Saturdays and Sundays 8 to 11 AM IST for five to six months, recordings within 24 hours, two years of access, and about two hours a week of self-practice.
+
+**Two featured demos:** a document-intelligence RAG agent for a US client (Dockerised, with a chunking pipeline that divides data by update relevance) and a multi-agent procurement and finance system on Google Cloud Run with a risk agent, a tax agent, a control agent and a supervisor. The second is the Meridian project in Chapter 20.
+
+**The four post-production KPIs** (the mentor's "golden rules", and a good interview answer to "how do you judge an agent in production"): **cost** (including tokens), **failure rate** (should trend to zero), **latency**, and **quality** (is the output actually useful?). His engineering philosophy: *simple is scalable*; minimise external, API and LLM calls because every hop costs time and money; prefer the simplest system that solves the problem instead of over-engineering for scale that never comes; use multiple LLMs only when the problem demands it (for example failover), because calling models in parallel by default just doubles cost.
+<!-- /induction-add -->
+
 ## What is in this draft
 
 :::note What is in this book

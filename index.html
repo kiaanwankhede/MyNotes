@@ -412,6 +412,51 @@ details.diagram-src pre { margin-top: 8px; }
 </tr>
 </tbody>
 </table></div>
+<!-- induction-add -->
+<h2 id="agentic-ai-home-the-course-roadmap-from-the-induction-session">The course roadmap, from the induction session</h2>
+<p><em>From <code>classes_transcription_summary/00 - 21 June - Course Induction &amp; Roadmap.md</code> (the batch induction with the founder and the lead mentor).</em></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Agentic 2.0</th>
+<th>Agentic 3.0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Focus</td>
+<td>Understanding agents</td>
+<td><strong>Using and deploying</strong> agents</td>
+</tr>
+<tr>
+<td>Frameworks</td>
+<td>Older LangChain and LangGraph</td>
+<td>Latest LangChain, MCP, A2A, the Claude Agent SDK</td>
+</tr>
+<tr>
+<td>Tools</td>
+<td>Basic</td>
+<td>Claude Code and other coding agents</td>
+</tr>
+<tr>
+<td>Projects</td>
+<td>Simpler builds</td>
+<td>Production-grade, multi-agent, CI/CD-driven</td>
+</tr>
+<tr>
+<td>New roles</td>
+<td>None</td>
+<td>Harness engineering, forward-deployed engineer</td>
+</tr>
+</tbody>
+</table></div>
+<p>2.0 comes free with 3.0 enrolment but is not a prerequisite. Azure AI Foundry, Bedrock and Vertex AI each get dedicated sessions.</p>
+<p><strong>The curriculum flow:</strong> foundations (LLMs and providers), core frameworks and protocols (LangChain, LangGraph, MCP, A2A, RAG, context engineering), mini-projects, interim projects deployed on cloud and a VPS, the coding-agent ecosystem, extended frameworks (ADK, Claude Agent SDK), and about nine production capstone projects. <strong>Format:</strong> Saturdays and Sundays 8 to 11 AM IST for five to six months, recordings within 24 hours, two years of access, and about two hours a week of self-practice.</p>
+<p><strong>Two featured demos:</strong> a document-intelligence RAG agent for a US client (Dockerised, with a chunking pipeline that divides data by update relevance) and a multi-agent procurement and finance system on Google Cloud Run with a risk agent, a tax agent, a control agent and a supervisor. The second is the Meridian project in Chapter 20.</p>
+<p><strong>The four post-production KPIs</strong> (the mentor's "golden rules", and a good interview answer to "how do you judge an agent in production"): <strong>cost</strong> (including tokens), <strong>failure rate</strong> (should trend to zero), <strong>latency</strong>, and <strong>quality</strong> (is the output actually useful?). His engineering philosophy: <em>simple is scalable</em>; minimise external, API and LLM calls because every hop costs time and money; prefer the simplest system that solves the problem instead of over-engineering for scale that never comes; use multiple LLMs only when the problem demands it (for example failover), because calling models in parallel by default just doubles cost.</p>
+<!-- /induction-add -->
+
 <h2 id="agentic-ai-home-what-is-in-this-draft">What is in this draft</h2>
 <aside class="callout note"><div class="ct">Note<em>What is in this book</em></div><p>All 20 course chapters are written. Chapter 10A and the sections titled <strong>From the docs</strong> inside other chapters come from LangChain documentation pages that were read in full (30 Oct 2026). The last page, <strong>From the Craft notes</strong>, indexes the instructor's Craft page.</p></aside>
 <aside class="callout repo"><div class="ct">Repo note<em>Gaps in the source repository</em></div><p>Classes 13 to 15 have written summaries but no shared code. There is no Weekend 12 folder. The Oct 10 to 11 folder contains only two links, so there is no class content for that weekend yet.</p></aside><div class="pager"><span style='flex:1'></span><button class="next" data-id="agentic-ai-quiz"><small>Next</small><b>Quiz me</b></button></div></article>
@@ -698,6 +743,23 @@ details.diagram-src pre { margin-top: 8px; }
 <h3 id="agentic-ai-primer-pydantic-reference-map">Pydantic reference map</h3>
 <p>The instructor's Pydantic site is a ten-part reference. Its sections, in order: why Pydantic exists (type hints are documentation, not enforcement), your first model (<code>BaseModel</code> versus dataclass versus plain class, coercion, <code>model_dump()</code>), field constraints and custom validators (<code>Field()</code>, <code>Annotated</code>, <code>field_validator</code>, <code>model_validator</code>), computed fields and serialization control, nested models, Pydantic Settings (<code>BaseSettings</code>, <code>.env</code>, <code>SecretStr</code>), Pydantic with FastAPI, the AI bridge (validating what an LLM returns, OpenAI and Claude structured outputs, <code>Literal</code> and the retry pattern), where Pydantic goes next, and a final project that triages AI support tickets. Try its validation idea here:</p>
 <div class="widget" data-w="pydantic-playground"><div class="wfb"><p>Interactive demo: edit JSON and validate it against a small Pydantic-style model.</p></div></div>
+<!-- pyd-body -->
+<h3 id="agentic-ai-primer-pydantic-section-by-section-from-the-full-site-t">Pydantic, section by section (from the full site text)</h3>
+<p><strong>Why validate at the door.</strong> Python does not enforce type hints at runtime: <code>age: int = "x"</code> runs fine. A function that does <code>2026 - age</code> crashes deep inside when <code>age</code> arrives as <code>"unknown"</code>, far from where the bad data entered. Hints are read by humans, IDEs and Pydantic. <code>Optional[str]</code> and <code>str | None</code> mean the same; <code>Literal["low","medium","high"]</code> limits a value to a fixed set, which later constrains what an LLM may return.</p>
+<p><strong>BaseModel vs dataclass vs plain class.</strong> A plain class with only hints takes no constructor arguments. A <code>@dataclass</code> builds <code>__init__</code> but validates nothing, so <code>age="not a number"</code> is accepted. A <code>BaseModel</code> validates, coerces safe values (<code>"30"</code> becomes <code>30</code>, called lax mode) and raises <code>ValidationError</code> before the object exists. Strict mode is <code>ConfigDict(strict=True)</code>.</p>
+<aside class="callout trap"><div class="ct">Common trap</div><p>Coercion is not symmetric: <code>"25"</code> becomes <code>25</code> for an <code>int</code> field, but <code>12345</code> is <strong>not</strong> turned into <code>"12345"</code> for a <code>str</code> field. It is rejected.</p></aside>
+<p><strong>Creating and dumping.</strong> <code>Model(**data)</code> and <code>Model.model_validate(data)</code> validate the same way; use <code>model_validate</code> when you need options such as <code>strict=True</code>. Fields with no default are required, and one error lists every problem field. That structured error is what powers the retry-with-error pattern. <code>model_dump()</code> gives a dict (for a database or another function); <code>model_dump_json(indent=2)</code> gives a JSON string.</p>
+<p><strong>Constraints.</strong> <code>Field()</code> takes <code>gt, ge, lt, le</code> for numbers and <code>min_length, max_length, pattern</code> for strings. The <code>Annotated[int, Field(gt=0, le=120)]</code> form separates the type from its metadata and is preferred in production. Special types: <code>EmailStr</code> (needs <code>pip install pydantic[email]</code>), <code>HttpUrl</code>, <code>SecretStr</code> (masked in print and logs; read with <code>.get_secret_value()</code>).</p>
+<p><strong>Validators.</strong> <code>@field_validator</code> works on one field. <code>mode="after"</code> (default) receives the coerced value; <code>mode="before"</code> receives raw input, handy for cleaning <code>"5 years"</code> to <code>5</code>. Return the value to accept or raise <code>ValueError</code> to reject. <code>@model_validator(mode="after")</code> sees the whole model for cross-field rules such as <code>password == confirm_password</code>. Order is fixed: every field validator runs before any model validator.</p>
+<p><strong>Computed fields and dump control.</strong> <code>@computed_field</code> stacked on <code>@property</code> is read-only, appears in <code>model_dump()</code> and the JSON schema, and never goes stale. Because LLMs are unreliable at arithmetic, derive values such as an SLA from the fields the model classified, instead of asking it to calculate. Dump flags: <code>exclude</code>, <code>include</code>, <code>exclude_none</code>, and <code>exclude_unset=True</code>, the one for PATCH-style partial updates.</p>
+<p><strong>Nested models.</strong> A model as a field type validates every layer, and errors report the exact path such as <code>address.state</code>. A whole nested object can be optional (<code>Discount | None = None</code>). No practical depth limit.</p>
+<p><strong>Settings.</strong> <code>os.getenv()</code> always returns a string or <code>None</code>, so <code>DEBUG="false"</code> is truthy. <code>BaseSettings</code> (separate <code>pydantic-settings</code> package) maps <code>api_key</code> to <code>API_KEY</code>, reads <code>.env</code> via <code>SettingsConfigDict(env_file=".env")</code>, applies the same <code>Field</code> constraints and keeps secrets masked.</p>
+<p><strong>FastAPI.</strong> A model as a parameter type means FastAPI validates and coerces the body before your function runs. <code>response_model=</code> actively filters what you return, a guard against leaking extra fields. <code>model_json_schema()</code> feeds the auto-generated <code>/docs</code> page.</p>
+<p><strong>The AI bridge.</strong> Raw LLM text may carry a code fence, a chatty preamble, or a string where a number belongs. Ask the provider to guarantee the shape. OpenAI: <code>client.responses.parse(text_format=Model)</code> gives <code>response.output_parsed</code>. Anthropic: <code>client.messages.parse(output_format=Model)</code> gives <code>response.parsed_output</code>. Add <code>ConfigDict(extra="forbid")</code> to models handed to a provider, so no surprise keys appear. The lower-level route is <code>Model.model_json_schema()</code> as a tool <code>input_schema</code> plus a forced <code>tool_choice</code>. The retry loop is: ask, validate, on <code>ValidationError</code> feed the error text into the next prompt, up to a limit. Libraries like Instructor automate exactly that.</p>
+<aside class="callout key"><div class="ct">Key idea</div><p>Structured output guarantees <strong>shape, not correctness</strong>. A well-formed answer can still be confidently wrong; validation catches malformed data, not hallucination.</p></aside>
+<p><strong>Where it goes next.</strong> Instructor patches a client to validate and retry. PydanticAI, LangChain and CrewAI use Pydantic for tool schemas and structured outputs and add orchestration on top.</p>
+<p><strong>Final project: support-ticket triage.</strong> <code>POST /triage</code> takes a messy message and returns a validated result: category, priority, sentiment, a computed SLA, redacted customer info. <code>IncomingTicket</code> redacts emails in a <code>mode="before"</code> validator. <code>TriagedTicket</code> uses <code>Literal</code> fields, a computed <code>sla_hours</code> (high 4, medium 24, low 72), a nested <code>CustomerInfo</code>, and a model validator rejecting <code>high</code> priority with <code>general_question</code>. Settings pick Anthropic, then OpenAI, then a free OpenRouter model, whichever key exists.</p>
+<!-- /pyd-body -->
 <!-- /sites-add -->
 
 <!-- repo3-add -->
@@ -739,7 +801,7 @@ details.diagram-src pre { margin-top: 8px; }
 </tbody>
 </table></div>
 <p>The free model in the LangChain notebook is created with <code>init_chat_model("openrouter/free", model_provider="openrouter")</code> (the notebook also names one specific free model, <code>nvidia/nemotron-3-super-120b-a12b:free</code>).</p>
-<aside class="callout trap"><div class="ct">Common trap<em>A real key is hard-coded in a notebook</em></div><p><code>Langchain (1).ipynb</code> (Weekend 04, Models) sets an OpenRouter key directly in a cell. I am not reproducing it. Treat any key that has been committed as compromised: revoke it and use <code>.env</code>. (Chapter 18 notes a similar case.)</p></aside>
+<aside class="callout trap"><div class="ct">Common trap<em>A real key is hard-coded in a notebook</em></div><p><code>Langchain (1).ipynb</code> (Weekend 04, Models) sets an OpenRouter key directly in a cell, and the shared 12 July Colab sets a Groq key in a cell. I am not reproducing either. Treat any key that has been committed or shared as compromised: revoke it and use <code>.env</code> or Colab Secrets. (Chapter 18 notes a similar case.)</p></aside>
 <h3 id="agentic-ai-primer-project-0-the-agent-built-in-seven-files">Project 0: the agent built in seven files</h3>
 <p>Weekend 02's <code>Project 0/</code> folder builds a complete agent with <strong>no framework</strong>, one idea per file. This is the same loop as the primer's, written out in code.</p>
 <div class="tablewrap"><table>
@@ -833,6 +895,16 @@ details.diagram-src pre { margin-top: 8px; }
 </table></div>
 <p>The class-03 write-up also gives the <strong>five AI terms</strong> to know before building an agent: an LLM predicts the next <em>token</em>, not the next word; tokens are the billing currency and output costs more than input; embeddings put similar meaning close together; the context window is a whiteboard of fixed size; parameters are billions of weights fixed at training time, not the same thing as tokens.</p>
 <!-- /refresher-add -->
+
+<!-- class45-add -->
+<h3 id="agentic-ai-primer-from-the-class-4-and-5-write-ups-four-small-poin">From the class 4 and 5 write-ups: four small points</h3>
+<ul>
+<li><strong>Brain, memory, tools.</strong> An agent is just an orchestrator of three things: a brain (an LLM), memory (chat history, in a database or in memory) and tools. The intern analogy: a great brain with no tools cannot act in the world, and a weak brain with a laptop and every tool still fails on complex tasks. <strong>The brain's capability is a hard ceiling</strong>, and the agent code is plumbing; only the model makes decisions. The mentor's line: once you understand this without a framework, LangChain, LangGraph and CrewAI all become easy because "they are all doing exactly this".</li>
+<li><strong>Three message roles.</strong> The system message ("You are a helpful assistant...") is optional but good practice, and it is <strong>resent on every call</strong> because the model is stateless. Sending a single "hi" still transmits system plus user plus the assistant reply so far, which you can see in a raw request payload.</li>
+<li><strong>Knowledge cutoff.</strong> Every model card lists a cutoff date; a raw model cannot browse, so asked about yesterday's match it admits it cannot know. A web app can browse only because it layers search on top. This is exactly why agents need tools.</li>
+<li><strong>Web app versus API.</strong> A web subscription is an all-you-can-eat buffet (flat price, usage not shown per token); the API is à la carte (pay per token, full transparency). OpenRouter gives one key for models from every major provider, with the exact input and output token counts visible in its dashboard.</li>
+</ul>
+<!-- /class45-add -->
 
 <h2 id="agentic-ai-primer-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
@@ -8908,6 +8980,14 @@ async def run_agent(server) -&gt; dict:
 <aside class="callout trap"><div class="ct">Common trap<em>Sampling and roots raise errors</em></div><p>The sessionless protocol has no back-channel for sampling or roots requests, so they raise errors. Servers that push elicitation over a legacy handshake session cannot be answered this way. This matches the legacy versus modern split in Chapter 17.</p></aside>
 <!-- /docs-add -->
 
+<!-- colab-add -->
+<h2 id="agentic-ai-ch18-from-the-craft-langchain-mcp-colab-notebook">From the Craft "LangChain MCP" Colab notebook</h2>
+<p><em>I opened the Colab linked on the Craft page's MCP section in the desktop browser (read 30 Oct 2026; its cell outputs were visible). It is a short notebook, and its most useful content is a real install trap.</em></p>
+<p><strong>The CineBot server in the notebook</strong> is a three-tool FastMCP server: <code>check_showtimes</code> (a lookup in a small dict), <code>cancel_booking</code> marked with <code>ToolAnnotations(destructiveHint=True)</code> ("Irreversible"), and <code>get_seat_map</code>, which returns <strong>structured data</strong> (a dict with available and sold-out rows) instead of text. The destructive hint is exactly what the MCP-tools page uses to decide which tools need human approval (see the docs section above).</p>
+<p><strong>The adapter in one line.</strong> The notebook's own comment: "one adapter, a universal translator: it figures out on its own whether it is talking to a local MCP or an HTTP MCP". Its last cell opens <code>MCPAdapter("https://docs.langchain.com/mcp")</code> and calls <code>list_tools()</code>, which connects to <strong>LangChain's own documentation MCP server</strong> over a URL.</p>
+<aside class="callout trap"><div class="ct">Common trap<em>`pip install langchain.mcp` installs the wrong package</em></div><p>The notebook runs <code>pip install "langchain[mcp]"</code> first, and pip warns <strong><code>langchain 1.3.18 does not provide the extra 'mcp'</code></strong> (the extra arrives with <code>langchain&gt;=1.4.0</code>, matching the docs). It then runs <code>pip install langchain.mcp</code>, which resolves to an <strong>older, unrelated package, <code>langchain-mcp</code> 0.2.1</strong>. That package pins <code>langchain-core~=0.3</code> and <code>mcp~=1.0</code>, so pip <strong>downgrades</strong> <code>langchain-core</code> to 0.3.86 and <code>mcp</code> to 1.30, and prints conflicts against <code>langgraph</code>, <code>langchain</code> and <code>langgraph-sdk</code>, which all need <code>langchain-core</code> 1.4 or newer. Running <code>pip install fastmcp langchain</code> afterwards restores <code>langchain-core</code> 1.6.5 and <code>mcp</code> 2.2.0 but leaves <code>langchain-mcp</code> complaining. Lesson: the namespace <code>langchain.mcp</code> is imported from the <strong><code>langchain</code></strong> package (via its <code>mcp</code> extra); it is <strong>not</strong> a separate PyPI package called <code>langchain.mcp</code>. Upgrade <code>langchain</code> to 1.4 or newer, or use the older <code>langchain-mcp-adapters</code> package, and check <code>pip list</code> after any install that prints a resolver error.</p></aside>
+<!-- /colab-add -->
+
 <h2 id="agentic-ai-ch18-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -12376,6 +12456,44 @@ app.mount(&quot;/mcp&quot;, mcp_app)
 <p>The repo's <code>COLAB_NOTEBOOKS.md</code> lists every notebook shared "anyone with the link" in class, by class number, and most of the Colab links on the Craft page appear there. It matches the Craft entries: classes 07 and 08 (models, streaming, tools, structured output, messages, plus a revision notebook for parts 1 to 4), 09 (the CineBot structured-output notebook), 10 (the student reference for structured output and tools), 11 and 12 (all nine built-in middlewares worked live), 14 (shell tools, the six middleware hooks, decorator versus class middleware), and 15 (runtime and HITL). The same notebooks are checked into the repo as <code>.ipynb</code> files, which is what the middleware, runtime and structured-output chapters were built from. I did not open the Colab links themselves.</p>
 <h2 id="agentic-ai-craft-what-the-craft-pdfs-are">What the Craft PDFs are</h2>
 <p>I extracted the text of all 15 PDFs attached on Craft that are also in the repo. Most are <strong>single-page Excalidraw whiteboard exports</strong> (class diagrams such as the agent and middleware architecture, the MCP overview, runtime and HITL, structured output and tools), so the text is scattered labels and the information is already in the class write-ups and the chapters. The few small extras: tool use costs <strong>at least two model calls</strong> (one to choose the tool, one to summarise its output); a middleware slide shows the hook order (<code>before_agent</code>, <code>before_model</code>, <code>wrap_model_call</code>, the model call, <code>after_model</code>, <code>wrap_tool_call</code>, tool execution, <code>after_agent</code>); and the MCP slide frames the idea as "not more intelligence, but the ability to see more". The 22-page <strong>AI Industry Handbook</strong> is a separate business-audience handout from an "ET Masterclass" (industry-by-industry use cases and companies) and is marked "Not for redistribution", so I did not reproduce it.</p>
+<h2 id="agentic-ai-craft-the-craft-colab-notebooks-i-opened">The Craft Colab notebooks I opened</h2>
+<p>I opened five of the Colabs linked on the Craft page in the desktop browser (their cells and outputs are visible as text). The LangChain Colabs (18 to 19 July, 25 to 26 July, 1 Aug, 16 Aug, 22 Aug) match the notebooks checked into the repo, which the chapters already use, so I did not open those links.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Colab</th>
+<th>What it is</th>
+<th>What I took from it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LangChain MCP (MCP section)</td>
+<td>A CineBot FastMCP server plus an <code>MCPAdapter</code> demo</td>
+<td>The <code>pip install langchain.mcp</code> trap and the destructive-hint example, in Chapter 18</td>
+</tr>
+<tr>
+<td>12 July, "verbose tool agent"</td>
+<td>The no-framework tool agent from Project 0 with very clear printing (it prints the message list at each step)</td>
+<td>Nothing new beyond the primer's loop. It sets a <strong>Groq API key in a cell</strong>; I am not reproducing it and it should be treated as compromised</td>
+</tr>
+<tr>
+<td>11 July, "Python and Agents"</td>
+<td>Scratch from the live class: an email-reply schema (<code>Subject</code> defaulting to <code>Reply</code>, a <code>Body</code>) and a <code>TOOLS_BY_NAME</code> dictionary called with <code>add</code> and <code>subtract</code></td>
+<td>The same ideas as the primer</td>
+</tr>
+<tr>
+<td>Class 2, "Python Refresher and Pydantic"</td>
+<td>Dictionaries, <code>.get()</code> and loops</td>
+<td>Python only</td>
+</tr>
+<tr>
+<td>Class 3 and 4, "Pydantic From Scratch"</td>
+<td>The same notebook as <code>Pydantic_From_Scratch.ipynb</code> in the repo: why unchecked types let <code>age = 10000</code> produce a birth year of -7974</td>
+<td>The primer's Pydantic section</td>
+</tr>
+</tbody>
+</table></div>
 <h2 id="agentic-ai-craft-the-agent-flow-repo">The agent-flow repo</h2>
 <p>The MCP section of the Craft page links <code>github.com/patoles/agent-flow</code>. It is a <strong>visualiser for agent runs</strong>: it shows Claude Code (and Codex) sessions as a live node graph of agents, tool calls, branches and returns. It is useful for seeing how an agent loop or subagents actually behave, which is the same thing Chapters 6 and 19 explain in text.</p>
 <div class="tablewrap"><table>

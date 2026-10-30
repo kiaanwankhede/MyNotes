@@ -186,6 +186,42 @@ The instructor's Pydantic site is a ten-part reference. Its sections, in order: 
 :::widget pydantic-playground
 Interactive demo: edit JSON and validate it against a small Pydantic-style model.
 :::
+
+<!-- pyd-body -->
+### Pydantic, section by section (from the full site text)
+
+**Why validate at the door.** Python does not enforce type hints at runtime: `age: int = "x"` runs fine. A function that does `2026 - age` crashes deep inside when `age` arrives as `"unknown"`, far from where the bad data entered. Hints are read by humans, IDEs and Pydantic. `Optional[str]` and `str | None` mean the same; `Literal["low","medium","high"]` limits a value to a fixed set, which later constrains what an LLM may return.
+
+**BaseModel vs dataclass vs plain class.** A plain class with only hints takes no constructor arguments. A `@dataclass` builds `__init__` but validates nothing, so `age="not a number"` is accepted. A `BaseModel` validates, coerces safe values (`"30"` becomes `30`, called lax mode) and raises `ValidationError` before the object exists. Strict mode is `ConfigDict(strict=True)`.
+
+:::trap
+Coercion is not symmetric: `"25"` becomes `25` for an `int` field, but `12345` is **not** turned into `"12345"` for a `str` field. It is rejected.
+:::
+
+**Creating and dumping.** `Model(**data)` and `Model.model_validate(data)` validate the same way; use `model_validate` when you need options such as `strict=True`. Fields with no default are required, and one error lists every problem field. That structured error is what powers the retry-with-error pattern. `model_dump()` gives a dict (for a database or another function); `model_dump_json(indent=2)` gives a JSON string.
+
+**Constraints.** `Field()` takes `gt, ge, lt, le` for numbers and `min_length, max_length, pattern` for strings. The `Annotated[int, Field(gt=0, le=120)]` form separates the type from its metadata and is preferred in production. Special types: `EmailStr` (needs `pip install pydantic[email]`), `HttpUrl`, `SecretStr` (masked in print and logs; read with `.get_secret_value()`).
+
+**Validators.** `@field_validator` works on one field. `mode="after"` (default) receives the coerced value; `mode="before"` receives raw input, handy for cleaning `"5 years"` to `5`. Return the value to accept or raise `ValueError` to reject. `@model_validator(mode="after")` sees the whole model for cross-field rules such as `password == confirm_password`. Order is fixed: every field validator runs before any model validator.
+
+**Computed fields and dump control.** `@computed_field` stacked on `@property` is read-only, appears in `model_dump()` and the JSON schema, and never goes stale. Because LLMs are unreliable at arithmetic, derive values such as an SLA from the fields the model classified, instead of asking it to calculate. Dump flags: `exclude`, `include`, `exclude_none`, and `exclude_unset=True`, the one for PATCH-style partial updates.
+
+**Nested models.** A model as a field type validates every layer, and errors report the exact path such as `address.state`. A whole nested object can be optional (`Discount | None = None`). No practical depth limit.
+
+**Settings.** `os.getenv()` always returns a string or `None`, so `DEBUG="false"` is truthy. `BaseSettings` (separate `pydantic-settings` package) maps `api_key` to `API_KEY`, reads `.env` via `SettingsConfigDict(env_file=".env")`, applies the same `Field` constraints and keeps secrets masked.
+
+**FastAPI.** A model as a parameter type means FastAPI validates and coerces the body before your function runs. `response_model=` actively filters what you return, a guard against leaking extra fields. `model_json_schema()` feeds the auto-generated `/docs` page.
+
+**The AI bridge.** Raw LLM text may carry a code fence, a chatty preamble, or a string where a number belongs. Ask the provider to guarantee the shape. OpenAI: `client.responses.parse(text_format=Model)` gives `response.output_parsed`. Anthropic: `client.messages.parse(output_format=Model)` gives `response.parsed_output`. Add `ConfigDict(extra="forbid")` to models handed to a provider, so no surprise keys appear. The lower-level route is `Model.model_json_schema()` as a tool `input_schema` plus a forced `tool_choice`. The retry loop is: ask, validate, on `ValidationError` feed the error text into the next prompt, up to a limit. Libraries like Instructor automate exactly that.
+
+:::key
+Structured output guarantees **shape, not correctness**. A well-formed answer can still be confidently wrong; validation catches malformed data, not hallucination.
+:::
+
+**Where it goes next.** Instructor patches a client to validate and retry. PydanticAI, LangChain and CrewAI use Pydantic for tool schemas and structured outputs and add orchestration on top.
+
+**Final project: support-ticket triage.** `POST /triage` takes a messy message and returns a validated result: category, priority, sentiment, a computed SLA, redacted customer info. `IncomingTicket` redacts emails in a `mode="before"` validator. `TriagedTicket` uses `Literal` fields, a computed `sla_hours` (high 4, medium 24, low 72), a nested `CustomerInfo`, and a model validator rejecting `high` priority with `general_question`. Settings pick Anthropic, then OpenAI, then a free OpenRouter model, whichever key exists.
+<!-- /pyd-body -->
 <!-- /sites-add -->
 
 <!-- repo3-add -->
@@ -207,7 +243,7 @@ Interactive demo: edit JSON and validate it against a small Pydantic-style model
 The free model in the LangChain notebook is created with `init_chat_model("openrouter/free", model_provider="openrouter")` (the notebook also names one specific free model, `nvidia/nemotron-3-super-120b-a12b:free`).
 
 :::trap A real key is hard-coded in a notebook
-`Langchain (1).ipynb` (Weekend 04, Models) sets an OpenRouter key directly in a cell. I am not reproducing it. Treat any key that has been committed as compromised: revoke it and use `.env`. (Chapter 18 notes a similar case.)
+`Langchain (1).ipynb` (Weekend 04, Models) sets an OpenRouter key directly in a cell, and the shared 12 July Colab sets a Groq key in a cell. I am not reproducing either. Treat any key that has been committed or shared as compromised: revoke it and use `.env` or Colab Secrets. (Chapter 18 notes a similar case.)
 :::
 
 ### Project 0: the agent built in seven files
@@ -254,6 +290,15 @@ It parses, but it will fail on the first tool call. It defines `get_currency` tw
 
 The class-03 write-up also gives the **five AI terms** to know before building an agent: an LLM predicts the next *token*, not the next word; tokens are the billing currency and output costs more than input; embeddings put similar meaning close together; the context window is a whiteboard of fixed size; parameters are billions of weights fixed at training time, not the same thing as tokens.
 <!-- /refresher-add -->
+
+<!-- class45-add -->
+### From the class 4 and 5 write-ups: four small points
+
+- **Brain, memory, tools.** An agent is just an orchestrator of three things: a brain (an LLM), memory (chat history, in a database or in memory) and tools. The intern analogy: a great brain with no tools cannot act in the world, and a weak brain with a laptop and every tool still fails on complex tasks. **The brain's capability is a hard ceiling**, and the agent code is plumbing; only the model makes decisions. The mentor's line: once you understand this without a framework, LangChain, LangGraph and CrewAI all become easy because "they are all doing exactly this".
+- **Three message roles.** The system message ("You are a helpful assistant...") is optional but good practice, and it is **resent on every call** because the model is stateless. Sending a single "hi" still transmits system plus user plus the assistant reply so far, which you can see in a raw request payload.
+- **Knowledge cutoff.** Every model card lists a cutoff date; a raw model cannot browse, so asked about yesterday's match it admits it cannot know. A web app can browse only because it layers search on top. This is exactly why agents need tools.
+- **Web app versus API.** A web subscription is an all-you-can-eat buffet (flat price, usage not shown per token); the API is à la carte (pay per token, full transparency). OpenRouter gives one key for models from every major provider, with the exact input and output token counts visible in its dashboard.
+<!-- /class45-add -->
 
 ## Common mistakes
 
