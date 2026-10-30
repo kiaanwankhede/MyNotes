@@ -104,6 +104,90 @@ The model cannot see a tool's output until you **append it as a message**. So af
 - **Structured output.** To get reliable data, ask for JSON only, strip any code fences, then validate with Pydantic before trusting a field.
 - **Safe `eval`.** The calculator tool allowed only digits, operators and parentheses before running `eval()`.
 
+<!-- sites-add -->
+## From the instructor's interactive sites
+
+*Added from the instructor's Netlify sites linked on the Craft page (read 30 Oct 2026): AI terms, the context-window simulator, Pydantic reference and "Agents, with just Python". The widgets below are rebuilt from those sites' own logic, not copied pages.*
+
+### See tokens
+
+:::widget tokenizer
+Interactive demo (needs JavaScript): type a sentence and see it split into token-like pieces.
+:::
+
+### Watch the loop
+
+:::widget agent-loop
+Interactive demo: perceive, reason, act, observe, repeat.
+:::
+
+### Play with the context window
+
+:::widget ctx-window
+Interactive demo: a conversation that forgets its oldest messages when the window is full.
+:::
+
+:::widget ctx-memory
+Interactive demo: save a fact, flood the window, and see a hallucinated answer appear.
+:::
+
+### AI terms in plain words (21 terms)
+
+The instructor's glossary site groups 21 terms in six groups and gives each one an analogy.
+
+| Group | Term | One line and the analogy |
+| --- | --- | --- |
+| Foundation | Large language model | A next-word predictor wearing the costume of understanding: a friend who read everything but was never told what any of it means |
+| Foundation | Tokens | Lego bricks, not whole words. Prices are counted in tokens, so unusual long words cost more |
+| Foundation | Vectors (embeddings) | A GPS coordinate for meaning: similar meanings sit close together, so distance between ideas can be measured |
+| Foundation | Context window | A whiteboard of fixed size: once full, the oldest writing is erased whether or not it mattered |
+| Foundation | Parameters | Billions of tiny mixing-console sliders, none meaningful alone. Size is only a rough proxy for capability |
+| Reads you | Attention | Each word decides which neighbours matter ("bank" plus "deposited" means money), for every word at once |
+| Reads you | Transformer | The engine; the LLM is the car. GPT, Claude, Gemini and Llama all run a version of it |
+| Learns | Training | Millions of fill-in-the-blank quizzes where the real text is its own answer key |
+| Learns | Fine-tuning | A focused residency after a general degree; it also teaches what not to say |
+| Learns | RLHF | Puppy training at scale: humans pick the better answer, nudging behaviour. Raters can reward a confident tone over honesty |
+| Talking to it | Prompting | Zero-shot is a one-line instruction; few-shot adds worked examples and makes output far more consistent |
+| Talking to it | Temperature | A dial between the safe answer and the adventurous one. Low for facts and code, higher for brainstorming |
+| Talking to it | Hallucination | A confident guess wearing the costume of a fact; the matching tone is what makes it dangerous |
+| Getting smarter | RAG | An open-book exam: fetch relevant documents first, then answer. Only as good as what is retrieved |
+| Getting smarter | Context engineering | Deciding what is already on the table before the model speaks: history summary, documents, preferences |
+| Getting smarter | MCP | One universal port (USB-C) instead of a drawer of custom cables |
+| Beyond chat | AI agents | Hands, not just a mouth: a goal, steps, tools, observe, loop until done |
+| Beyond chat | Multimodal | More than one sense: images, audio and video as well as text |
+| Beyond chat | Reasoning models | Trained to think step by step before the final answer |
+| Beyond chat | Small language models | A tutor for a few subjects, often distilled from a large model: faster and cheaper |
+| Beyond chat | AGI vs ASI | AGI matches a skilled human at any task; ASI exceeds human ability broadly. Neither exists today |
+
+### Agents, with just Python: the concept path
+
+The instructor's site builds an agent in 16 small ideas, always with the "windowless room" analogy (a brilliant reader with no phone). This is the same loop as above.
+
+| Step | Idea in one line |
+| --- | --- |
+| AI model, chatbot, agent | A model guesses the next words; a chatbot is the same model handed the whole transcript each turn; an agent is the same model handed a phone and **deciding itself** when to use it |
+| Calling a real model | One plain function call: text in, text out; everything else is a layer around it |
+| Paid vs free providers | The shape of the call barely changes between providers (one difference in how the reply is unpacked) |
+| Failing loudly | With no working provider, raise a clear error; a confidently fake answer is far worse |
+| Structured output | Ask for a fixed JSON shape so code can read the reply |
+| Validation | Check the shape the moment the reply arrives and reject anything that does not match |
+| What is a tool | An ordinary function with no awareness of AI |
+| Manual tool calling | We still decide and call it; the model decides nothing yet |
+| The tool schema | A menu, not the kitchen: the model only sees the description, so the wording carries the weight |
+| The model chooses | Given a question and the schema, it states which tool and arguments it wants, before any code runs: this is the moment it becomes an agent |
+| The agent loop | Decide, act, observe, repeat; the number and order of steps are decided fresh each time |
+| Memory | A growing list of messages and tool results re-sent on every call; no hidden memory system |
+| The complete agent and why no framework first | Every piece in plain code; a framework later is the same loop with less repetition |
+
+### Pydantic reference map
+
+The instructor's Pydantic site is a ten-part reference. Its sections, in order: why Pydantic exists (type hints are documentation, not enforcement), your first model (`BaseModel` versus dataclass versus plain class, coercion, `model_dump()`), field constraints and custom validators (`Field()`, `Annotated`, `field_validator`, `model_validator`), computed fields and serialization control, nested models, Pydantic Settings (`BaseSettings`, `.env`, `SecretStr`), Pydantic with FastAPI, the AI bridge (validating what an LLM returns, OpenAI and Claude structured outputs, `Literal` and the retry pattern), where Pydantic goes next, and a final project that triages AI support tickets. Try its validation idea here:
+
+:::widget pydantic-playground
+Interactive demo: edit JSON and validate it against a small Pydantic-style model.
+:::
+<!-- /sites-add -->
+
 ## Common mistakes
 
 | Mistake | Symptom | Fix |

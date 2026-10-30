@@ -107,7 +107,16 @@ def render(text, book):
     while i < len(lines):
         ln = lines[i]
         d = re.match(r"^:::(\w+)\s*(.*)$", ln)
-        if d and d.group(1) in list(LABELS) + ["qa"]:
+        if d and d.group(1) == "widget":
+            name = d.group(2).strip()
+            body = []
+            i += 1
+            while i < len(lines) and lines[i].strip() != ":::":
+                body.append(lines[i])
+                i += 1
+            inner = render("\n".join(body), book)
+            out.append(keep('<div class="widget" data-w="%s"><div class="wfb">%s</div></div>' % (H.escape(name), inner)))
+        elif d and d.group(1) in list(LABELS) + ["qa"]:
             kind, title = d.group(1), d.group(2).strip()
             body = []
             i += 1
@@ -249,7 +258,7 @@ def main():
         arts.extend(a)
     tpl = open(os.path.join(HERE, "template.html"), encoding="utf-8").read()
     css = open(os.path.join(HERE, "style.css"), encoding="utf-8").read()
-    js = open(os.path.join(HERE, "app.js"), encoding="utf-8").read()
+    js = open(os.path.join(HERE, "widgets.js"), encoding="utf-8").read() + "\n" + open(os.path.join(HERE, "app.js"), encoding="utf-8").read()
     page = (tpl.replace("/*CSS*/", css).replace("/*JS*/", js)
             .replace("<!--ARTICLES-->", "\n".join(arts))
             .replace("/*BOOKS*/", "window.__BOOKS__ = " + json.dumps(metas) + ";"))

@@ -4,7 +4,7 @@
 meta: Craft page "Agentic 3.0" | read 30 Oct 2026 | 10 min read
 
 :::note What this page is
-The Craft page is an **index of links and files**, not written lessons. I opened the home page and all 13 class and project sub-pages. The PDFs, notebooks and linked websites are **not read** here: this page lists them so you can find them. Items unrelated to learning (job posts, Udemy coupons, a referral link) and a local Inspector link that carries an access token are left out on purpose.
+The Craft page is an **index of links and files**, not written lessons. I opened the home page and all 13 class and project sub-pages. The attached PDFs and Colab notebooks are **not read** here. The instructor's linked websites **were read**, and are summarised in the next-but-one section and in the chapters named there. Items unrelated to learning (job posts, Udemy coupons, a referral link) and a local Inspector link that carries an access token are left out on purpose.
 :::
 
 ## The instructor's own guidance ("Best Practice")
@@ -84,10 +84,37 @@ The page has an **AI newsletter project** with two parts: a request, then the lo
 Two good habits are visible. It checks before creating (the calendar event), so a daily run never makes duplicates, and it drafts instead of sending (the Gmail step), so a human reviews it first. Both are the same safety ideas as human-in-the-loop in Chapter 10.
 :::
 
+## The instructor's websites (read) and where they went
+
+| Site | What it is | Where it went in this book |
+| --- | --- | --- |
+| `mcp-lifecycle` | A 15-page MCP lifecycle guide with tabs | Chapters 12 to 14 (version negotiation, errors, servers, shutdown) |
+| `mcp-lifecycle-simulator` | A message-by-message MCP conversation player | An interactive widget in Chapter 12 |
+| `mcp-legacy-vs-modern` | Legacy versus modern MCP, with a toggle and an OTP walk-through | An interactive widget in Chapter 17 (the rest was already there) |
+| `ai-terms-with-mayank` | 21 AI terms with analogies and mini demos | A table in the primer, plus tokenizer and agent-loop widgets |
+| `context-with-mayank` | Context window, memory types, hallucination and temperature simulators | Two widgets in the primer |
+| `pydantic-with-mayank` | A ten-part Pydantic reference with a validation playground | A reference map and a playground widget in the primer |
+| `python-agents-with-mayank` | An agent built in 16 small ideas | A concept table in the primer |
+| `ai-automation-with-mayank` | A seven-part interactive series (below) | The multi-agent guide in Chapter 19; the others are mapped below |
+| `meridian-ai-course` | The Meridian course slides, 40 chapters in 7 modules | A chapter map in Chapter 20 |
+
+**The seven-part series, by topic.** I read the multi-agent guide in full (six patterns, a supervisor example, and a pattern chooser). For the other six I read only the section names:
+
+| Guide | Sections |
+| --- | --- |
+| APIs, properly explained | The big idea, Claude and connectors, JSON, endpoints and params, HTTP methods, headers, authentication, Postman, a real call, response codes, scale, docs and versioning |
+| AI web vs API economics | The numbers, buffet versus a la carte, why a $20 plan does not travel, the ladder of AI apps, design versus run, the real cost, model pricing, when budgets blow, the open kitchen, choosing |
+| MCP, properly explained | What a model is, context and tools, wiring APIs by hand, MCP in a sentence, tools, resources and prompts, host client server, before versus after, search, where it lives, popular servers, build your own, draft versus send, build a real tool |
+| RAG, properly explained | A real problem, closed versus open book, the library, setting it up, using it, handing over the answer, contextual retrieval, the whole diagram, do you need RAG, vector databases, RAG with Claude |
+| Multi-agent systems | One agent every job, the kitchen brigade, then the six patterns, a supervisor example, choosing a pattern |
+| Open source AI | Free or paid, open or closed, what open means, Hugging Face, closing the gap, Ollama and LM Studio, hardware size, quantization, security cost time future, trade-offs, choosing |
+| Production readiness | Demo to restaurant, guardrails, red-teaming, evaluations, human in the loop, uptime, monitoring, fallbacks, audit logs, building it in n8n |
+
 ## Not read
 
 - The PDFs, Colab notebooks and Excalidraw files attached on the page.
-- The linked interactive websites and the Meridian repo and site (Chapter 20 covers the Meridian code from the course repo instead).
+- The Meridian slides themselves (only the chapter list), the Meridian GitHub repo, and the contents of six of the seven series guides beyond their section names.
+- For the AI terms and Python-agents sites I read the opening of each page (about the first 800 to 1,250 characters), not every paragraph; the Pydantic site I read as a section map plus its playground.
 - The clipped tail of the newsletter prompt.
 
 ## Sources

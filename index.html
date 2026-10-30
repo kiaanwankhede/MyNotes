@@ -255,6 +255,49 @@ details.diagram-src pre { margin-top: 8px; }
 .qbtn { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 600; }
 .qbtn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 
+/* interactive widgets */
+.widget { margin: 0 0 1.4em; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 14px 16px; }
+.widget .wfb { color: var(--muted); font-size: 15px; }
+.widget.wlive .wfb { display: none; }
+.whead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; margin-bottom: 10px; }
+.whint { color: var(--muted); font-size: 13px; }
+.wrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0; }
+.wbtn { padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; font: inherit; font-size: 14px; font-weight: 600; }
+.wbtn:hover { border-color: var(--accent); }
+.wbtn.primary, .wbtn.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.wtabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.wbadge { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--note-soft); color: var(--note); }
+.wbadge.ph-init { background: var(--key-soft); color: var(--key); }
+.wbadge.ph-operation { background: var(--accent-soft); color: var(--accent); }
+.wbadge.ph-shutdown { background: var(--trap-soft); color: var(--trap); }
+.mlog { max-height: 340px; overflow: auto; display: grid; gap: 8px; margin: 8px 0; padding: 4px 2px; }
+.msg { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; cursor: default; max-width: 92%; }
+.msg.client { background: var(--key-soft); justify-self: start; }
+.msg.server { background: var(--accent-soft); justify-self: end; }
+.msg.event { background: var(--trap-soft); }
+.msg.gone { opacity: .45; text-decoration: line-through; }
+.mlbl { font-size: 12px; font-weight: 700; color: var(--muted); }
+.mcap { font-size: 14px; }
+.mjson { margin: 6px 0 0; font-size: 12px; white-space: pre-wrap; word-break: break-word; background: var(--code-bg); color: var(--code-ink); border-radius: 8px; padding: 8px; }
+.wcard, .wnote { margin: 8px 0; padding: 10px 12px; border-radius: 10px; font-size: 14.5px; }
+.wcard { background: var(--note-soft); }
+.wnote { color: var(--muted); }
+.wsub { margin: 14px 0 4px; font-weight: 700; }
+.winput, .wtext { flex: 1 1 220px; min-width: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit; font-size: 14px; }
+.wtext { width: 100%; font-family: var(--font-mono); margin: 8px 0; }
+.wslider { flex: 1 1 140px; accent-color: var(--accent); }
+.cbar { display: flex; flex-wrap: wrap; gap: 3px; margin: 6px 0; }
+.cbar i { width: 14px; height: 10px; border-radius: 2px; background: var(--line); }
+.cbar i.f { background: var(--accent); }
+.tokrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.tok { padding: 4px 8px; border-radius: 6px; background: var(--analogy-soft); color: var(--analogy); font-family: var(--font-mono); font-size: 14px; }
+.loopbox, .pstage { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+.lstep, .pnode { flex: 1 1 130px; border: 1px solid var(--line); border-radius: 10px; padding: 12px; text-align: center; background: var(--bg); transition: background .25s, border-color .25s; }
+.lstep.on, .pnode.on { background: var(--accent-soft); border-color: var(--accent); }
+.pnode.bad { background: var(--trap-soft); border-color: var(--trap); }
+.wcode { margin: 8px 0; padding: 10px; border-radius: 8px; background: var(--code-bg); color: var(--code-ink); font-size: 13px; white-space: pre-wrap; overflow: auto; }
+.wq { flex: 1 1 240px; font-size: 14.5px; }
+
 </style>
 </head>
 <body>
@@ -460,6 +503,203 @@ details.diagram-src pre { margin-top: 8px; }
 <li><strong>Structured output.</strong> To get reliable data, ask for JSON only, strip any code fences, then validate with Pydantic before trusting a field.</li>
 <li><strong>Safe <code>eval</code>.</strong> The calculator tool allowed only digits, operators and parentheses before running <code>eval()</code>.</li>
 </ul>
+<!-- sites-add -->
+<h2 id="agentic-ai-primer-from-the-instructor-s-interactive-sites">From the instructor's interactive sites</h2>
+<p><em>Added from the instructor's Netlify sites linked on the Craft page (read 30 Oct 2026): AI terms, the context-window simulator, Pydantic reference and "Agents, with just Python". The widgets below are rebuilt from those sites' own logic, not copied pages.</em></p>
+<h3 id="agentic-ai-primer-see-tokens">See tokens</h3>
+<div class="widget" data-w="tokenizer"><div class="wfb"><p>Interactive demo (needs JavaScript): type a sentence and see it split into token-like pieces.</p></div></div>
+<h3 id="agentic-ai-primer-watch-the-loop">Watch the loop</h3>
+<div class="widget" data-w="agent-loop"><div class="wfb"><p>Interactive demo: perceive, reason, act, observe, repeat.</p></div></div>
+<h3 id="agentic-ai-primer-play-with-the-context-window">Play with the context window</h3>
+<div class="widget" data-w="ctx-window"><div class="wfb"><p>Interactive demo: a conversation that forgets its oldest messages when the window is full.</p></div></div>
+<div class="widget" data-w="ctx-memory"><div class="wfb"><p>Interactive demo: save a fact, flood the window, and see a hallucinated answer appear.</p></div></div>
+<h3 id="agentic-ai-primer-ai-terms-in-plain-words-21-terms">AI terms in plain words (21 terms)</h3>
+<p>The instructor's glossary site groups 21 terms in six groups and gives each one an analogy.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Term</th>
+<th>One line and the analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Foundation</td>
+<td>Large language model</td>
+<td>A next-word predictor wearing the costume of understanding: a friend who read everything but was never told what any of it means</td>
+</tr>
+<tr>
+<td>Foundation</td>
+<td>Tokens</td>
+<td>Lego bricks, not whole words. Prices are counted in tokens, so unusual long words cost more</td>
+</tr>
+<tr>
+<td>Foundation</td>
+<td>Vectors (embeddings)</td>
+<td>A GPS coordinate for meaning: similar meanings sit close together, so distance between ideas can be measured</td>
+</tr>
+<tr>
+<td>Foundation</td>
+<td>Context window</td>
+<td>A whiteboard of fixed size: once full, the oldest writing is erased whether or not it mattered</td>
+</tr>
+<tr>
+<td>Foundation</td>
+<td>Parameters</td>
+<td>Billions of tiny mixing-console sliders, none meaningful alone. Size is only a rough proxy for capability</td>
+</tr>
+<tr>
+<td>Reads you</td>
+<td>Attention</td>
+<td>Each word decides which neighbours matter ("bank" plus "deposited" means money), for every word at once</td>
+</tr>
+<tr>
+<td>Reads you</td>
+<td>Transformer</td>
+<td>The engine; the LLM is the car. GPT, Claude, Gemini and Llama all run a version of it</td>
+</tr>
+<tr>
+<td>Learns</td>
+<td>Training</td>
+<td>Millions of fill-in-the-blank quizzes where the real text is its own answer key</td>
+</tr>
+<tr>
+<td>Learns</td>
+<td>Fine-tuning</td>
+<td>A focused residency after a general degree; it also teaches what not to say</td>
+</tr>
+<tr>
+<td>Learns</td>
+<td>RLHF</td>
+<td>Puppy training at scale: humans pick the better answer, nudging behaviour. Raters can reward a confident tone over honesty</td>
+</tr>
+<tr>
+<td>Talking to it</td>
+<td>Prompting</td>
+<td>Zero-shot is a one-line instruction; few-shot adds worked examples and makes output far more consistent</td>
+</tr>
+<tr>
+<td>Talking to it</td>
+<td>Temperature</td>
+<td>A dial between the safe answer and the adventurous one. Low for facts and code, higher for brainstorming</td>
+</tr>
+<tr>
+<td>Talking to it</td>
+<td>Hallucination</td>
+<td>A confident guess wearing the costume of a fact; the matching tone is what makes it dangerous</td>
+</tr>
+<tr>
+<td>Getting smarter</td>
+<td>RAG</td>
+<td>An open-book exam: fetch relevant documents first, then answer. Only as good as what is retrieved</td>
+</tr>
+<tr>
+<td>Getting smarter</td>
+<td>Context engineering</td>
+<td>Deciding what is already on the table before the model speaks: history summary, documents, preferences</td>
+</tr>
+<tr>
+<td>Getting smarter</td>
+<td>MCP</td>
+<td>One universal port (USB-C) instead of a drawer of custom cables</td>
+</tr>
+<tr>
+<td>Beyond chat</td>
+<td>AI agents</td>
+<td>Hands, not just a mouth: a goal, steps, tools, observe, loop until done</td>
+</tr>
+<tr>
+<td>Beyond chat</td>
+<td>Multimodal</td>
+<td>More than one sense: images, audio and video as well as text</td>
+</tr>
+<tr>
+<td>Beyond chat</td>
+<td>Reasoning models</td>
+<td>Trained to think step by step before the final answer</td>
+</tr>
+<tr>
+<td>Beyond chat</td>
+<td>Small language models</td>
+<td>A tutor for a few subjects, often distilled from a large model: faster and cheaper</td>
+</tr>
+<tr>
+<td>Beyond chat</td>
+<td>AGI vs ASI</td>
+<td>AGI matches a skilled human at any task; ASI exceeds human ability broadly. Neither exists today</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="agentic-ai-primer-agents-with-just-python-the-concept-path">Agents, with just Python: the concept path</h3>
+<p>The instructor's site builds an agent in 16 small ideas, always with the "windowless room" analogy (a brilliant reader with no phone). This is the same loop as above.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Idea in one line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI model, chatbot, agent</td>
+<td>A model guesses the next words; a chatbot is the same model handed the whole transcript each turn; an agent is the same model handed a phone and <strong>deciding itself</strong> when to use it</td>
+</tr>
+<tr>
+<td>Calling a real model</td>
+<td>One plain function call: text in, text out; everything else is a layer around it</td>
+</tr>
+<tr>
+<td>Paid vs free providers</td>
+<td>The shape of the call barely changes between providers (one difference in how the reply is unpacked)</td>
+</tr>
+<tr>
+<td>Failing loudly</td>
+<td>With no working provider, raise a clear error; a confidently fake answer is far worse</td>
+</tr>
+<tr>
+<td>Structured output</td>
+<td>Ask for a fixed JSON shape so code can read the reply</td>
+</tr>
+<tr>
+<td>Validation</td>
+<td>Check the shape the moment the reply arrives and reject anything that does not match</td>
+</tr>
+<tr>
+<td>What is a tool</td>
+<td>An ordinary function with no awareness of AI</td>
+</tr>
+<tr>
+<td>Manual tool calling</td>
+<td>We still decide and call it; the model decides nothing yet</td>
+</tr>
+<tr>
+<td>The tool schema</td>
+<td>A menu, not the kitchen: the model only sees the description, so the wording carries the weight</td>
+</tr>
+<tr>
+<td>The model chooses</td>
+<td>Given a question and the schema, it states which tool and arguments it wants, before any code runs: this is the moment it becomes an agent</td>
+</tr>
+<tr>
+<td>The agent loop</td>
+<td>Decide, act, observe, repeat; the number and order of steps are decided fresh each time</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>A growing list of messages and tool results re-sent on every call; no hidden memory system</td>
+</tr>
+<tr>
+<td>The complete agent and why no framework first</td>
+<td>Every piece in plain code; a framework later is the same loop with less repetition</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="agentic-ai-primer-pydantic-reference-map">Pydantic reference map</h3>
+<p>The instructor's Pydantic site is a ten-part reference. Its sections, in order: why Pydantic exists (type hints are documentation, not enforcement), your first model (<code>BaseModel</code> versus dataclass versus plain class, coercion, <code>model_dump()</code>), field constraints and custom validators (<code>Field()</code>, <code>Annotated</code>, <code>field_validator</code>, <code>model_validator</code>), computed fields and serialization control, nested models, Pydantic Settings (<code>BaseSettings</code>, <code>.env</code>, <code>SecretStr</code>), Pydantic with FastAPI, the AI bridge (validating what an LLM returns, OpenAI and Claude structured outputs, <code>Literal</code> and the retry pattern), where Pydantic goes next, and a final project that triages AI support tickets. Try its validation idea here:</p>
+<div class="widget" data-w="pydantic-playground"><div class="wfb"><p>Interactive demo: edit JSON and validate it against a small Pydantic-style model.</p></div></div>
+<!-- /sites-add -->
+
 <h2 id="agentic-ai-primer-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -5074,6 +5314,56 @@ Recommended Next Action: Escalate to logistics team, offer expedited replacement
 <details class="qa"><summary>How does a client know which server to connect to?</summary><div class="ans"><p>The address is given when the client is configured (like pasting a URL into "Add custom connector"). It is not discovered dynamically at connection time.</p></div></details>
 <details class="qa"><summary>How does a server know which client a request came from?</summary><div class="ans"><p>That is resolved inside the transport layer: once connected, both sides keep session details internally, like any client-server connection, abstracted from the user.</p></div></details>
 <details class="qa"><summary>How do I make my own email domain MCP compatible?</summary><div class="ans"><p>You cannot make an existing product inherently compatible. You build a normal MCP server for it exposing the tools, resources and prompts that make sense.</p></div></details>
+<!-- sites-add -->
+<h2 id="agentic-ai-ch12-from-the-instructor-s-lifecycle-guide-and-simula">From the instructor's lifecycle guide and simulator</h2>
+<p><em>Added from the MCP Lifecycle guide and the Conversation Simulator on the instructor's Netlify sites (read 30 Oct 2026). The simulator below is rebuilt from the site's own message script.</em></p>
+<div class="widget" data-w="mcp-sim"><div class="wfb"><p>Interactive demo (needs JavaScript): a play-through of the full MCP conversation, from initialize to shutdown.</p></div></div>
+<p><strong>Version negotiation is one counter-offer, not a retry loop.</strong> The client asks for one version; if the server answers with another, the client checks it once against the list it supports. If it is on the list, it continues; if not, it disconnects. The guide's sketch: a <code>SUPPORTED_PROTOCOL_VERSIONS</code> list, send <code>initialized</code> if the server's version is in it, otherwise disconnect.</p>
+<p><strong>Six situations that produce errors:</strong> a protocol version mismatch during initialisation, calling a method that was never negotiated, invalid arguments to a real tool, an internal failure on the server, a timeout being exceeded, and a malformed JSON-RPC message. An error is not a crash: it is the same envelope as a success carrying different news.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Name</th>
+<th>Cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-32700</td>
+<td>Parse error</td>
+<td>Unreadable JSON</td>
+</tr>
+<tr>
+<td>-32600</td>
+<td>Invalid request</td>
+<td>Well-formed but not valid</td>
+</tr>
+<tr>
+<td>-32601</td>
+<td>Method not found</td>
+<td>Never advertised</td>
+</tr>
+<tr>
+<td>-32602</td>
+<td>Invalid params</td>
+<td>Wrong or missing arguments</td>
+</tr>
+<tr>
+<td>-32603</td>
+<td>Internal error</td>
+<td>Server logic failed</td>
+</tr>
+<tr>
+<td>-32000 and below</td>
+<td>Server-defined</td>
+<td>Custom to that server</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Ping, timeouts, cancellation and progress.</strong> A ping carries no information; its value is keeping a quiet connection from being dropped by a firewall or proxy. Every request should have a timeout; on timeout send a cancellation notification and stop waiting. A progress notification may reset the clock, but a hard maximum should still apply. A progress token rides in <code>_meta</code> on the original call, and the cancellation names the original <code>requestId</code>.</p>
+<!-- /sites-add -->
+
 <h2 id="agentic-ai-ch12-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -5430,6 +5720,65 @@ python check_primitives.py
 <details class="qa"><summary>Does MCP have built-in caching?</summary><div class="ans"><p>Not by default as far as could be confirmed live. If you want caching, build it separately.</p></div></details>
 <details class="qa"><summary>Are Claude&#x27;s &quot;connectors&quot; the same as MCP servers?</summary><div class="ans"><p>Yes. Claude uses friendlier words ("connectors", "tools") for a general audience to avoid confusing non-technical users.</p></div></details>
 <details class="qa"><summary>Should I claim a &quot;production-grade&quot; AI project on my resume if it was not deployed at scale?</summary><div class="ans"><p>Describe it honestly and frame it around the real problem it solved, not the technology. Interviewers care about problem-solving depth, and shallow claims are exposed quickly under questioning.</p></div></details>
+<!-- sites-add -->
+<h2 id="agentic-ai-ch13-from-the-instructor-s-lifecycle-guide-live-demo-">From the instructor's lifecycle guide: live demo setup and real servers</h2>
+<p><em>Added from the MCP Lifecycle guide (read 30 Oct 2026).</em></p>
+<p><strong>Watching traffic in Claude Desktop.</strong> The desktop app's own log shows only a one-line summary per message (method, id, whether params or result are present), not the full JSON. The guide's corrected command tails every connected server's log and tags each line with its server and direction (macOS, <code>tail -n0 -f "$HOME/Library/Logs/Claude"/mcp-server-*.log | awk '...'</code>). The log file appears only after Claude Desktop actually connects to a server with that name, so <strong>fully quit</strong> (Cmd+Q, not just close the window) and reopen after saving the config. With no log setup at all, MCP Inspector (<code>npx @modelcontextprotocol/inspector</code>) shows the same traffic in a browser, with full JSON bodies.</p>
+<p><strong>Servers you can actually connect to</strong> (from the guide's reference page):</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Server</th>
+<th>Run it or URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Local (stdio)</td>
+<td>Filesystem</td>
+<td><code>npx -y @modelcontextprotocol/server-filesystem &lt;dir&gt;</code></td>
+</tr>
+<tr>
+<td>Local</td>
+<td>Everything (all three primitives)</td>
+<td><code>npx -y @modelcontextprotocol/server-everything</code></td>
+</tr>
+<tr>
+<td>Local</td>
+<td>Git</td>
+<td><code>uvx mcp-server-git</code></td>
+</tr>
+<tr>
+<td>Local</td>
+<td>Memory (knowledge graph across sessions)</td>
+<td><code>npx -y @modelcontextprotocol/server-memory</code></td>
+</tr>
+<tr>
+<td>Local</td>
+<td>Fetch (URL to markdown)</td>
+<td><code>uvx mcp-server-fetch</code></td>
+</tr>
+<tr>
+<td>Local</td>
+<td>Time (timezones)</td>
+<td><code>uvx mcp-server-time</code></td>
+</tr>
+<tr>
+<td>Remote (HTTP)</td>
+<td>DeepWiki, free, no signup</td>
+<td><code>https://mcp.deepwiki.com/mcp</code> (and a legacy <code>/sse</code> URL for the same service)</td>
+</tr>
+<tr>
+<td>Remote</td>
+<td>Semgrep, none for the public surface</td>
+<td><code>https://mcp.semgrep.ai/mcp</code></td>
+</tr>
+</tbody>
+</table></div>
+<aside class="callout tip"><div class="ct">Pro tip<em>A free transport comparison</em></div><p>DeepWiki publishes both the old SSE URL and the new Streamable HTTP URL for the same service, so you can point at both and watch the transport migration side by side.</p></aside>
+<!-- /sites-add -->
+
 <h2 id="agentic-ai-ch13-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -5730,6 +6079,36 @@ def plan_weekly_meals() -&gt; str:
 <details class="qa"><summary>Should I name frameworks like FastMCP in an interview?</summary><div class="ans"><p>Concepts first. Knowing why MCP is structured as it is, and the legacy vs modern history, separates real understanding from the many who can define an MCP server but cannot explain what happens underneath.</p></div></details>
 <details class="qa"><summary>Does the language (Python or Node) matter for a good MCP server?</summary><div class="ans"><p>No. The protocol does not care. The choice comes from your team's stack.</p></div></details>
 <aside class="callout tip"><div class="ct">Pro tip<em>Interview feedback from this class</em></div><p>Two learners forwarded for interviews were strong on concepts but weaker on coding. A direct signal: practise writing code, not only explaining it.</p></aside>
+<!-- sites-add -->
+<h2 id="agentic-ai-ch14-from-the-instructor-s-lifecycle-guide-transports">From the instructor's lifecycle guide: transports and shutdown</h2>
+<p><em>Added from the MCP Lifecycle guide (read 30 Oct 2026).</em></p>
+<p><strong>stdio is just a subprocess and two pipes.</strong> The client launches the server, the server reads stdin and writes stdout, messages are newline-delimited, and stderr is free for logging. There is no separate auth layer: credentials come from the environment. The guide proves it with a few lines of plain Python: start <code>server.py</code> with <code>subprocess.Popen</code> (stdin and stdout piped), write one <code>initialize</code> request as a JSON line, flush, and read one line back.</p>
+<p><strong>Streamable HTTP</strong> uses one endpoint (commonly <code>/mcp</code>) with POST and GET, plain JSON or an upgrade to SSE for long calls, and an optional <code>Mcp-Session-Id</code> header. It replaces the older, deprecated HTTP+SSE transport.</p>
+<p><strong>Shutdown has no JSON-RPC message at all.</strong> The transport closing is the goodbye.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Transport</th>
+<th>Client-initiated (common)</th>
+<th>Server-initiated (rare)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>stdio</td>
+<td>Close stdin and wait; send <code>SIGTERM</code> if it does not exit; <code>SIGKILL</code> as the last resort</td>
+<td>The server closes its output stream and exits</td>
+</tr>
+<tr>
+<td>Streamable HTTP</td>
+<td>Close the HTTP connection</td>
+<td>The server closes unexpectedly, so the client should reconnect gracefully</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>SIGTERM</code> is a polite knock ("please finish up and leave"); <code>SIGKILL</code> forces the door with no chance to clean up.</p>
+<!-- /sites-add -->
+
 <h2 id="agentic-ai-ch14-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -7490,6 +7869,13 @@ async with Client(&quot;../main.py&quot;, progress_handler=on_progress) as clien
 <details class="qa"><summary>Does LangChain&#x27;s MCP support let me create servers?</summary><div class="ans"><p>No. It only consumes existing servers as a tool source for an agent. Creating servers is for libraries like FastMCP.</p></div></details>
 <details class="qa"><summary>Does LangChain-as-host still do the handshake?</summary><div class="ans"><p>Yes. The adapter builds the harness and client for you, but the same handshake and discovery happen underneath.</p></div></details>
 <details class="qa"><summary>Will an OpenRouter key work for the client exercises?</summary><div class="ans"><p>Yes, with a small change to point at the right endpoint and model string. The pattern does not change.</p></div></details>
+<!-- sites-add -->
+<h2 id="agentic-ai-ch17-try-it-remember-me-or-tell-me-every-time">Try it: remember me, or tell me every time</h2>
+<p><em>From the instructor's "What is actually changing" site (read 30 Oct 2026). Its timeline and the removed-versus-deprecated points are already in the sections above; this adds the toggle and the OTP walk-through.</em></p>
+<div class="widget" data-w="legacy-modern"><div class="wfb"><p>Interactive demo (needs JavaScript): switch between the legacy and modern models and play the confirm-and-continue sequence.</p></div></div>
+<p>The site adds one more way to tell the two fixes apart. If Python says the method does not exist at all (an <code>AttributeError</code>), it is <strong>Class A, genuinely gone</strong> (sampling): rewrite the tool. If the method exists but complains about the connection type when called, it is <strong>Class B, still there but asleep</strong> (elicitation and ping): ask for the old connection with <code>mode="legacy"</code>. Its one-line mental model: the modern protocol has <strong>no back-channel</strong>, so a server can no longer interrupt a client mid-task, and everything that depended on that was either removed or sits behind the legacy counter.</p>
+<!-- /sites-add -->
+
 <h2 id="agentic-ai-ch17-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -8572,6 +8958,56 @@ class RouterState(TypedDict, total=False):
 </ul>
 <!-- /docs-add2 -->
 
+<!-- sites-add -->
+<h2 id="agentic-ai-ch19-try-it-six-patterns-in-a-kitchen">Try it: six patterns in a kitchen</h2>
+<p><em>Added from the instructor's "Multi-Agent Systems" guide, part of his seven-part interactive series (read 30 Oct 2026). The guide explains six patterns with a restaurant analogy; the widgets are rebuilt from its descriptions.</em></p>
+<div class="widget" data-w="agent-patterns"><div class="wfb"><p>Interactive demo (needs JavaScript): chain, parallel, controller, feedback loop, hierarchical and planner-executor, each with a Run button.</p></div></div>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>What it is</th>
+<th>Where you meet it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Chain</strong></td>
+<td>Agents run in a fixed order, each output feeding the next</td>
+<td>Draft a post, then fact-check, then format</td>
+</tr>
+<tr>
+<td><strong>Parallel</strong></td>
+<td>Independent agents run at once and a merge step combines results</td>
+<td>Claude's Research feature: a lead agent starts several subagents on independent threads</td>
+</tr>
+<tr>
+<td><strong>Controller (router)</strong></td>
+<td>One agent only decides who handles a request</td>
+<td>A support inbox that forwards billing, technical and general questions to different specialists</td>
+</tr>
+<tr>
+<td><strong>Reactive (feedback loop)</strong></td>
+<td>A second agent checks the first's output and sends it back if it is not good enough</td>
+<td>Code checked by a test-running agent, an email checked by a tone reviewer</td>
+</tr>
+<tr>
+<td><strong>Hierarchical</strong></td>
+<td>An orchestrator calls specialist agents as tools ("agent as a tool")</td>
+<td>A lead researcher that calls specialised subagents and synthesises the results</td>
+</tr>
+<tr>
+<td><strong>Planner-Executor</strong></td>
+<td>One agent turns a vague goal into steps, another works through them</td>
+<td>"Plan and book my trip to Lisbon"</td>
+</tr>
+</tbody>
+</table></div>
+<p>The guide also walks through a <strong>supervisor example</strong>: asked "what does our policy say about expense reimbursement, and is Priya free tomorrow afternoon to discuss an exception?", a supervisor splits the request, a knowledge agent searches the policy documents, an action agent checks the calendar, and the supervisor combines both answers. It quotes figures for Claude's own Research feature (from the guide, not checked against a primary source): 3 to 5 parallel subagents, 90.2 percent better than a single agent on broad research, at roughly 15 times the token cost.</p>
+<div class="widget" data-w="pattern-chooser"><div class="wfb"><p>Interactive demo: answer four yes or no questions to see which pattern to start with.</p></div></div>
+<aside class="callout note"><div class="ct">Note<em>How this maps to LangChain&#x27;s names</em></div><p>The guide's names differ from the LangChain docs. Roughly, its <strong>hierarchical</strong> pattern corresponds to what the docs call <strong>subagents</strong> (a supervisor calling agents as tools) and its <strong>controller</strong> to a <strong>router</strong>, while <strong>chain</strong> and <strong>planner-executor</strong> are closest to custom workflows (my mapping). Chapter 19 above uses the LangChain names.</p></aside>
+<!-- /sites-add -->
+
 <h2 id="agentic-ai-ch19-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -8956,6 +9392,58 @@ uvicorn api.main:app --app-dir backend --reload --port 8080
 <li><strong>Structured logging</strong> writes JSON log lines (<code>structlog</code>): "the kitchen's diary". The audit logs each phase start and result, which is how you trace a slow or wrong audit.</li>
 <li><strong>Settings</strong> are read from outside the code via a <code>Settings</code> class with environment variable aliases (for example <code>VERTEX_LLM_MODEL_NAME</code> and <code>VERTEX_EMBEDDING_MODEL_NAME</code>). Keys live in <code>.env</code> and Secret Manager, never in Git, as in Chapter 1.</li>
 </ul>
+<!-- sites-add -->
+<h2 id="agentic-ai-ch20-the-meridian-slides-a-map-of-all-40-chapters">The Meridian slides: a map of all 40 chapters</h2>
+<p><em>Added from the instructor's course-slides site, <code>meridian-ai-course.netlify.app</code> (read 30 Oct 2026: the module and chapter list only, not the individual slides, about 600 in total). It builds a procurement assistant for a fictional manufacturer, Aldermoor Industries, that answers from documents, audits a purchase with a team of agents, and runs on a laptop and in the cloud.</em></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Theme</th>
+<th>Chapters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>The case (no code)</td>
+<td>1 Meet Aldermoor Industries; 2 Why this is a bigger problem than it looks; 3 What we are going to build; 4 The AI engineer's view; 5 The forward-deployed engineer's view</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Set up from scratch</td>
+<td>6 What is in a project; 7 Your tools and the new project; 8 Packages and the environment; 9 The folder structure</td>
+</tr>
+<tr>
+<td>3</td>
+<td>The backbone</td>
+<td>10 Settings; 11 <code>config/settings.py</code> chunk by chunk; 12 Errors and logging</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Document question and answer (RAG)</td>
+<td>13 RAG explained; 14 Types of RAG; 15 Embeddings, vector databases and frameworks; 16 Talking to Gemini and turning text into numbers; 17 Storing meaning and keeping the originals; 18 Ingestion; 19 Retrieval and the answer; 20 Lab: ask the four documents; 21 More RAG in code: HyDE, MMR, hybrid search, reranking, parent pages, decomposition</td>
+</tr>
+<tr>
+<td>5</td>
+<td>The audit team</td>
+<td>22 Agents with LangChain; 23 Tools; 24 Prompts are job descriptions; 25 Middleware; 26 The audit team; 27 Lab: three audits</td>
+</tr>
+<tr>
+<td>6</td>
+<td>The service and the screen</td>
+<td>28 An API with FastAPI; 29 Request shapes and routes; 30 The server; 31 Logging; 32 Tests; 33 The screen; 34 Run it all, locally</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Ship it: Docker and Google Cloud</td>
+<td>35 Docker; 36 Google Cloud in plain words; 37 Prepare the cloud; 38 The robot account and its key; 39 GitHub and the first run; 40 Deploy it, explained</td>
+</tr>
+</tbody>
+</table></div>
+<p>Each slide ends with an "In short" line and commands sit under a "Do it" box with a Copy button. The site also has a page of software and download links.</p>
+<!-- /sites-add -->
+
 <h2 id="agentic-ai-ch20-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -10590,7 +11078,7 @@ app.mount(&quot;/mcp&quot;, mcp_app)
 <li>Add one stretch item.</li>
 <li>Update your story with what failed. That detail is what makes it sound real.</li>
 </ol><button class="readbtn" data-id="agentic-ai-projects">Mark this chapter as read</button><div class="pager"><button data-id="agentic-ai-cheat"><small>Previous</small><b>Cheat sheet</b></button><button class="next" data-id="agentic-ai-craft"><small>Next</small><b>From the Craft notes</b></button></div></article>
-<article id="ch-agentic-ai-craft" hidden><p class="crumb">Back matter</p><h1>From the Craft notes</h1><p class="lead">What the instructor&#x27;s Craft page contains: the course expectations, a date-by-date map of every shared resource (Colab notebooks, PDFs, interactive sites, videos), and the AI newsletter project. Use it as an index into the course material.</p><div class="meta"><span class="chip">Craft page &quot;Agentic 3.0&quot;</span><span class="chip plain">read 30 Oct 2026</span><span class="chip plain">10 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><aside class="callout note"><div class="ct">Note<em>What this page is</em></div><p>The Craft page is an <strong>index of links and files</strong>, not written lessons. I opened the home page and all 13 class and project sub-pages. The PDFs, notebooks and linked websites are <strong>not read</strong> here: this page lists them so you can find them. Items unrelated to learning (job posts, Udemy coupons, a referral link) and a local Inspector link that carries an access token are left out on purpose.</p></aside>
+<article id="ch-agentic-ai-craft" hidden><p class="crumb">Back matter</p><h1>From the Craft notes</h1><p class="lead">What the instructor&#x27;s Craft page contains: the course expectations, a date-by-date map of every shared resource (Colab notebooks, PDFs, interactive sites, videos), and the AI newsletter project. Use it as an index into the course material.</p><div class="meta"><span class="chip">Craft page &quot;Agentic 3.0&quot;</span><span class="chip plain">read 30 Oct 2026</span><span class="chip plain">10 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><aside class="callout note"><div class="ct">Note<em>What this page is</em></div><p>The Craft page is an <strong>index of links and files</strong>, not written lessons. I opened the home page and all 13 class and project sub-pages. The attached PDFs and Colab notebooks are <strong>not read</strong> here. The instructor's linked websites <strong>were read</strong>, and are summarised in the next-but-one section and in the chapters named there. Items unrelated to learning (job posts, Udemy coupons, a referral link) and a local Inspector link that carries an access token are left out on purpose.</p></aside>
 <h2 id="agentic-ai-craft-the-instructor-s-own-guidance-best-practice">The instructor's own guidance ("Best Practice")</h2>
 <p>The page opens with "First 20 minutes (quick points)". The parts that matter for study:</p>
 <div class="tablewrap"><table>
@@ -10782,10 +11270,107 @@ app.mount(&quot;/mcp&quot;, mcp_app)
 </tbody>
 </table></div>
 <aside class="callout trap"><div class="ct">Common trap<em>Why this prompt is built this way</em></div><p>Two good habits are visible. It checks before creating (the calendar event), so a daily run never makes duplicates, and it drafts instead of sending (the Gmail step), so a human reviews it first. Both are the same safety ideas as human-in-the-loop in Chapter 10.</p></aside>
+<h2 id="agentic-ai-craft-the-instructor-s-websites-read-and-where-they-we">The instructor's websites (read) and where they went</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Site</th>
+<th>What it is</th>
+<th>Where it went in this book</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mcp-lifecycle</code></td>
+<td>A 15-page MCP lifecycle guide with tabs</td>
+<td>Chapters 12 to 14 (version negotiation, errors, servers, shutdown)</td>
+</tr>
+<tr>
+<td><code>mcp-lifecycle-simulator</code></td>
+<td>A message-by-message MCP conversation player</td>
+<td>An interactive widget in Chapter 12</td>
+</tr>
+<tr>
+<td><code>mcp-legacy-vs-modern</code></td>
+<td>Legacy versus modern MCP, with a toggle and an OTP walk-through</td>
+<td>An interactive widget in Chapter 17 (the rest was already there)</td>
+</tr>
+<tr>
+<td><code>ai-terms-with-mayank</code></td>
+<td>21 AI terms with analogies and mini demos</td>
+<td>A table in the primer, plus tokenizer and agent-loop widgets</td>
+</tr>
+<tr>
+<td><code>context-with-mayank</code></td>
+<td>Context window, memory types, hallucination and temperature simulators</td>
+<td>Two widgets in the primer</td>
+</tr>
+<tr>
+<td><code>pydantic-with-mayank</code></td>
+<td>A ten-part Pydantic reference with a validation playground</td>
+<td>A reference map and a playground widget in the primer</td>
+</tr>
+<tr>
+<td><code>python-agents-with-mayank</code></td>
+<td>An agent built in 16 small ideas</td>
+<td>A concept table in the primer</td>
+</tr>
+<tr>
+<td><code>ai-automation-with-mayank</code></td>
+<td>A seven-part interactive series (below)</td>
+<td>The multi-agent guide in Chapter 19; the others are mapped below</td>
+</tr>
+<tr>
+<td><code>meridian-ai-course</code></td>
+<td>The Meridian course slides, 40 chapters in 7 modules</td>
+<td>A chapter map in Chapter 20</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>The seven-part series, by topic.</strong> I read the multi-agent guide in full (six patterns, a supervisor example, and a pattern chooser). For the other six I read only the section names:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Guide</th>
+<th>Sections</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>APIs, properly explained</td>
+<td>The big idea, Claude and connectors, JSON, endpoints and params, HTTP methods, headers, authentication, Postman, a real call, response codes, scale, docs and versioning</td>
+</tr>
+<tr>
+<td>AI web vs API economics</td>
+<td>The numbers, buffet versus a la carte, why a $20 plan does not travel, the ladder of AI apps, design versus run, the real cost, model pricing, when budgets blow, the open kitchen, choosing</td>
+</tr>
+<tr>
+<td>MCP, properly explained</td>
+<td>What a model is, context and tools, wiring APIs by hand, MCP in a sentence, tools, resources and prompts, host client server, before versus after, search, where it lives, popular servers, build your own, draft versus send, build a real tool</td>
+</tr>
+<tr>
+<td>RAG, properly explained</td>
+<td>A real problem, closed versus open book, the library, setting it up, using it, handing over the answer, contextual retrieval, the whole diagram, do you need RAG, vector databases, RAG with Claude</td>
+</tr>
+<tr>
+<td>Multi-agent systems</td>
+<td>One agent every job, the kitchen brigade, then the six patterns, a supervisor example, choosing a pattern</td>
+</tr>
+<tr>
+<td>Open source AI</td>
+<td>Free or paid, open or closed, what open means, Hugging Face, closing the gap, Ollama and LM Studio, hardware size, quantization, security cost time future, trade-offs, choosing</td>
+</tr>
+<tr>
+<td>Production readiness</td>
+<td>Demo to restaurant, guardrails, red-teaming, evaluations, human in the loop, uptime, monitoring, fallbacks, audit logs, building it in n8n</td>
+</tr>
+</tbody>
+</table></div>
 <h2 id="agentic-ai-craft-not-read">Not read</h2>
 <ul>
 <li>The PDFs, Colab notebooks and Excalidraw files attached on the page.</li>
-<li>The linked interactive websites and the Meridian repo and site (Chapter 20 covers the Meridian code from the course repo instead).</li>
+<li>The Meridian slides themselves (only the chapter list), the Meridian GitHub repo, and the contents of six of the seven series guides beyond their section names.</li>
+<li>For the AI terms and Python-agents sites I read the opening of each page (about the first 800 to 1,250 characters), not every paragraph; the Pydantic site I read as a section map plus its playground.</li>
 <li>The clipped tail of the newsletter prompt.</li>
 </ul>
 <h2 id="agentic-ai-craft-sources">Sources</h2>
@@ -10800,6 +11385,317 @@ app.mount(&quot;/mcp&quot;, mcp_app)
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script>
 window.__BOOKS__ = [{"id": "agentic-ai", "title": "Agentic AI 3.0 Notes", "short": "Agentic AI 3.0", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "primer", "num": "A", "title": "Primer: what an agent is", "part": "Part A  Foundations", "ready": true}, {"id": "ch1", "num": "1", "title": "Introduction to LangChain", "part": "Part B  LangChain core", "ready": true}, {"id": "ch2", "num": "2", "title": "The LangChain family and harness engineering", "part": "Part B  LangChain core", "ready": true}, {"id": "ch3", "num": "3", "title": "Inside the model", "part": "Part B  LangChain core", "ready": true}, {"id": "ch4", "num": "4", "title": "Structured output", "part": "Part B  LangChain core", "ready": true}, {"id": "ch5", "num": "5", "title": "Tools deep dive", "part": "Part B  LangChain core", "ready": true}, {"id": "ch6", "num": "6", "title": "Agents, memory and middleware", "part": "Part C  Agents and middleware", "ready": true}, {"id": "ch7", "num": "7", "title": "Mastering middleware", "part": "Part C  Agents and middleware", "ready": true}, {"id": "ch8", "num": "8", "title": "Guardrails, todo lists, resilience", "part": "Part C  Agents and middleware", "ready": true}, {"id": "ch9", "num": "9", "title": "Shell tools and custom middleware", "part": "Part C  Agents and middleware", "ready": true}, {"id": "ch10", "num": "10", "title": "Runtime and human-in-the-loop", "part": "Part D  Runtime", "ready": true}, {"id": "ch10a", "num": "10A", "title": "Streaming agent output (from the docs)", "part": "Part D  Runtime", "ready": true}, {"id": "ch11", "num": "11", "title": "Why MCP exists", "part": "Part E  MCP", "ready": true}, {"id": "ch12", "num": "12", "title": "MCP primitives, lifecycle, JSON-RPC", "part": "Part E  MCP", "ready": true}, {"id": "ch13", "num": "13", "title": "Capability negotiation and operation", "part": "Part E  MCP", "ready": true}, {"id": "ch14", "num": "14", "title": "Shutdown, transports, first server", "part": "Part E  MCP", "ready": true}, {"id": "ch15", "num": "15", "title": "The Time Tracker project", "part": "Part E  MCP", "ready": true}, {"id": "ch16", "num": "16", "title": "Deploying servers, building a client", "part": "Part E  MCP", "ready": true}, {"id": "ch17", "num": "17", "title": "Legacy vs modern MCP", "part": "Part E  MCP", "ready": true}, {"id": "ch18", "num": "18", "title": "MCP inside LangChain", "part": "Part F  Advanced", "ready": true}, {"id": "ch19", "num": "19", "title": "Multi-agent patterns", "part": "Part F  Advanced", "ready": true}, {"id": "ch20", "num": "20", "title": "Meridian AI project tour", "part": "Part F  Advanced", "ready": true}, {"id": "glossary", "num": "", "title": "Glossary", "part": "Back matter", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}, {"id": "cheat", "num": "", "title": "Cheat sheet", "part": "Back matter", "ready": true}, {"id": "projects", "num": "", "title": "Mini-project ideas", "part": "Back matter", "ready": true}, {"id": "craft", "num": "", "title": "From the Craft notes", "part": "Back matter", "ready": true}]}];
+/* Interactive widgets for the reader. A chapter writes ":::widget name" and this file builds it.
+   Each widget is plain DOM, no libraries, and works with the page's colour variables. */
+(function () {
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function btn(label, fn, cls) {
+    var b = el('button', 'wbtn' + (cls ? ' ' + cls : ''), label);
+    b.type = 'button';
+    b.addEventListener('click', fn);
+    return b;
+  }
+  function frame(root, title, hint) {
+    root.textContent = '';
+    root.classList.add('wlive');
+    var h = el('div', 'whead');
+    h.appendChild(el('strong', null, title));
+    if (hint) h.appendChild(el('span', 'whint', hint));
+    root.appendChild(h);
+    var body = el('div', 'wbody');
+    root.appendChild(body);
+    return body;
+  }
+  function tabs(body, names, onPick) {
+    var bar = el('div', 'wtabs'), btns = [];
+    names.forEach(function (n, i) {
+      var b = btn(n, function () { btns.forEach(function (x) { x.classList.remove('on'); }); b.classList.add('on'); onPick(i); }, 'wtab');
+      btns.push(b); bar.appendChild(b);
+    });
+    body.appendChild(bar);
+    btns[0].classList.add('on');
+    return bar;
+  }
+
+  var W = {};
+
+  /* ---------- MCP conversation simulator ---------- */
+  var MCP_STEPS = [
+    ['init', 'client', 'Step 1 · initialize request', 'Client speaks first: version, capabilities, identity.', { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-11-25', capabilities: { roots: { listChanged: true } }, clientInfo: { name: 'RecipeBoxDesktopClient', version: '1.0.0' } } }],
+    ['init', 'server', 'Step 2 · initialize response', 'Server answers with its own version, capabilities, identity.', { jsonrpc: '2.0', id: 1, result: { protocolVersion: '2025-11-25', capabilities: { tools: { listChanged: true } }, serverInfo: { name: 'RecipeBox', version: '1.0.0' } } }],
+    ['init', 'client', 'Step 3 · initialized notification', 'No id: an announcement, not a question. Handshake sealed.', { jsonrpc: '2.0', method: 'notifications/initialized' }],
+    ['operation', 'client', 'Discovery · tools/list', 'Fires automatically the instant the handshake completes.', { jsonrpc: '2.0', id: 2, method: 'tools/list' }],
+    ['operation', 'server', 'Discovery response', 'The host quietly stores this for later matching.', { jsonrpc: '2.0', id: 2, result: { tools: [{ name: 'list_recipes', description: 'List every recipe' }, { name: 'get_recipe', description: "Get one recipe's detail" }, { name: 'search_recipes', description: 'Search by tag' }] } }],
+    ['operation', 'client', 'tools/call · search_recipes', 'A real question finally arrives.', { jsonrpc: '2.0', id: 3, method: 'tools/call', params: { name: 'search_recipes', arguments: { tag: 'quick' } } }],
+    ['operation', 'server', 'Tool call response', 'Placing the order, after reading the menu.', { jsonrpc: '2.0', id: 3, result: { content: [{ type: 'text', text: 'Weeknight Pasta, Five-Minute Salsa' }] } }],
+    ['operation', 'client', 'A request for something never negotiated', 'The host asks for prompts anyway. This genuinely happens.', { jsonrpc: '2.0', id: 4, method: 'prompts/list' }],
+    ['operation', 'server', 'Error · Method not found', "Not a crash, just an honest \"we don't have that\".", { jsonrpc: '2.0', id: 4, error: { code: -32601, message: 'Method not found' } }],
+    ['operation', 'client', 'A long-running call, tagged for progress', 'A progressToken lets the server report back mid-task.', { jsonrpc: '2.0', id: 7, method: 'tools/call', params: { name: 'search_recipes', arguments: { tag: 'sunday' }, _meta: { progressToken: 'tok-7' } } }],
+    ['operation', 'server', 'notifications/progress', 'No id: a status update, not a reply yet.', { jsonrpc: '2.0', method: 'notifications/progress', params: { progressToken: 'tok-7', progress: 60, total: 100, message: 'Searching 60 of 100 recipes' } }],
+    ['operation', 'client', 'notifications/cancelled', 'A decision already made, announced, not a request for permission.', { jsonrpc: '2.0', method: 'notifications/cancelled', params: { requestId: '7', reason: 'Timeout exceeded (30s)' } }],
+    ['operation', 'client', 'ping', 'Carries no information at all, just proves the line is open.', { jsonrpc: '2.0', id: 42, method: 'ping' }],
+    ['operation', 'server', 'ping response', 'An empty result is the entire point.', { jsonrpc: '2.0', id: 42, result: {} }],
+    ['shutdown', 'event', 'EVENT, not a JSON-RPC message', 'Shutdown has no message format of its own. The transport closing IS the goodbye.', null, 'Server transport closed { metadata: undefined }']
+  ];
+  W['mcp-sim'] = function (root) {
+    var body = frame(root, 'MCP conversation simulator', 'press Play, or step one message at a time; tap a message to show or hide its JSON');
+    var bar = el('div', 'wrow'), badge = el('span', 'wbadge', 'Initialization'), log = el('div', 'mlog');
+    var idx = 0, timer = null, playBtn;
+    var LBL = { init: 'Initialization', operation: 'Operation', shutdown: 'Shutdown' };
+    function stepOnce() {
+      if (idx >= MCP_STEPS.length) { pause(); return; }
+      var s = MCP_STEPS[idx++], m = el('div', 'msg ' + s[1]);
+      m.appendChild(el('div', 'mlbl', (s[1] === 'client' ? 'Client → Server' : s[1] === 'server' ? 'Server → Client' : 'Event') + ' · ' + s[2]));
+      m.appendChild(el('div', 'mcap', s[3]));
+      var pre = el('pre', 'mjson', s[4] ? JSON.stringify(s[4], null, 2) : s[5]);
+      m.appendChild(pre);
+      m.addEventListener('click', function () { pre.hidden = !pre.hidden; });
+      Array.prototype.forEach.call(log.querySelectorAll('.mjson'), function (p) { p.hidden = true; });
+      log.appendChild(m);
+      badge.textContent = LBL[s[0]]; badge.className = 'wbadge ph-' + s[0];
+      log.scrollTop = log.scrollHeight;
+      if (idx >= MCP_STEPS.length) pause();
+    }
+    function play() { playBtn.textContent = 'Pause'; timer = setInterval(stepOnce, 1400); }
+    function pause() { playBtn.textContent = 'Play'; clearInterval(timer); timer = null; }
+    function reset() { pause(); idx = 0; log.textContent = ''; badge.textContent = 'Initialization'; badge.className = 'wbadge ph-init'; }
+    playBtn = btn('Play', function () { timer ? pause() : play(); }, 'primary');
+    bar.appendChild(playBtn); bar.appendChild(btn('Step', stepOnce)); bar.appendChild(btn('Reset', reset)); bar.appendChild(badge);
+    body.appendChild(bar); body.appendChild(log);
+  };
+
+  /* ---------- Legacy vs modern MCP ---------- */
+  W['legacy-modern'] = function (root) {
+    var body = frame(root, 'Remember me, or tell me every time?', 'toggle the two models, then play the confirm-and-continue sequence');
+    var view = el('div', 'wcard'), on = false;
+    var texts = {
+      legacy: ['Legacy: remember me', 'You shake hands once. The server keeps a session (the Mcp-Session-Id header), so one specific server remembers who you are. If that server is busy or gone, the next one knows nothing about you, which makes it hard to add more servers behind the scenes.'],
+      modern: ['Modern: tell me every time', 'No handshake and no session id. Every request carries everything about itself (who is asking, which version, what is needed), so any server can handle any request. Slightly more data per request, but servers can be added freely.']
+    };
+    function paint() { var t = texts[on ? 'modern' : 'legacy']; view.textContent = ''; view.appendChild(el('strong', null, t[0])); view.appendChild(el('p', null, t[1])); }
+    var sw = btn('Switch to modern', function () { on = !on; sw.textContent = on ? 'Switch to legacy' : 'Switch to modern'; paint(); }, 'primary');
+    body.appendChild(sw); body.appendChild(view); paint();
+    body.appendChild(el('div', 'wsub', 'Confirming and continuing (the OTP example)'));
+    var seq = el('div', 'mlog'), STEPS = [
+      ['client', 'You → Server', '"Confirm my order for 3 items."'],
+      ['server', 'Server → You', 'Order total looks unusually high. Please enter the OTP sent to your phone. [+ a sealed order reference]'],
+      ['client', 'You → Server', 'OTP: 482913 [+ the same sealed order reference]'],
+      ['server', 'Server → You', 'Confirmed! Your order is on its way.']
+    ], t = null, i = 0;
+    function play() { clearInterval(t); seq.textContent = ''; i = 0; t = setInterval(function () { if (i >= STEPS.length) { clearInterval(t); return; } var s = STEPS[i++], m = el('div', 'msg ' + s[0]); m.appendChild(el('div', 'mlbl', s[1])); m.appendChild(el('div', 'mcap', s[2])); seq.appendChild(m); }, 1000); }
+    var row = el('div', 'wrow'); row.appendChild(btn('Play the sequence', play)); row.appendChild(btn('Reset', function () { clearInterval(t); seq.textContent = ''; }));
+    body.appendChild(row); body.appendChild(seq);
+    body.appendChild(el('div', 'wnote', 'Because the sealed reference carries everything, the server that asked the question can go and do other work while it waits, and whichever server is free can pick up your answer.'));
+  };
+
+  /* ---------- Context window ---------- */
+  function estTokens(t) { return Math.ceil(t.trim().split(/\s+/).length * 1.3); }
+  W['ctx-window'] = function (root) {
+    var body = frame(root, 'Context window simulator', 'messages are counted in rough tokens (words x 1.3); the oldest fall off when the window is full');
+    var msgs = [{ r: 'user', t: 'Hi! My name is Rahul and I love football.' }, { r: 'assistant', t: "Nice to meet you Rahul! I'll remember that." }];
+    var LIMIT = 120;
+    var row = el('div', 'wrow'), lab = el('span', 'wlab'), sl = document.createElement('input');
+    sl.type = 'range'; sl.min = 40; sl.max = 300; sl.value = LIMIT; sl.className = 'wslider';
+    row.appendChild(el('span', null, 'Window size')); row.appendChild(sl); row.appendChild(lab);
+    var barEl = el('div', 'cbar'), chat = el('div', 'mlog'), stat = el('div', 'wnote');
+    var inp = document.createElement('input'); inp.type = 'text'; inp.className = 'winput'; inp.placeholder = 'Type a message...';
+    var r2 = el('div', 'wrow');
+    function add(r) { if (!inp.value.trim()) return; msgs.push({ r: r, t: inp.value }); inp.value = ''; paint(); }
+    r2.appendChild(inp); r2.appendChild(btn('Send as user', function () { add('user'); }, 'primary')); r2.appendChild(btn('Send as AI', function () { add('assistant'); })); r2.appendChild(btn('Reset', function () { msgs = []; paint(); }));
+    function paint() {
+      lab.textContent = LIMIT + ' tokens'; chat.textContent = ''; barEl.textContent = '';
+      var tot = 0, run = 0, keep = {};
+      msgs.forEach(function (m) { m.k = estTokens(m.t); tot += m.k; });
+      for (var i = msgs.length - 1; i >= 0; i--) { run += msgs[i].k; if (run <= LIMIT) keep[i] = 1; }
+      msgs.forEach(function (m, i) {
+        var d = el('div', 'msg ' + (m.r === 'user' ? 'client' : 'server') + (keep[i] ? '' : ' gone'));
+        d.appendChild(el('div', 'mcap', m.t)); d.appendChild(el('div', 'mlbl', m.k + ' tokens' + (keep[i] ? '' : ' · forgotten')));
+        chat.appendChild(d);
+      });
+      var blocks = Math.ceil(LIMIT / 5), fill = Math.ceil(tot / 5);
+      for (var b = 0; b < blocks; b++) barEl.appendChild(el('i', b < fill ? 'f' : ''));
+      var kept = Object.keys(keep).length;
+      stat.textContent = 'Total ' + tot + ' tokens. The model still sees ' + kept + ' of ' + msgs.length + ' messages.';
+      chat.scrollTop = chat.scrollHeight;
+    }
+    sl.addEventListener('input', function () { LIMIT = +sl.value; paint(); });
+    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') add('user'); });
+    body.appendChild(row); body.appendChild(barEl); body.appendChild(chat); body.appendChild(r2); body.appendChild(stat); paint();
+  };
+
+  W['ctx-memory'] = function (root) {
+    var body = frame(root, 'Why the model "forgets", and how it hallucinates', 'save a fact, flood the window with noise, then ask');
+    var LIMIT = 60, msgs = [], fact = '', longMem = [];
+    var inp = document.createElement('input'); inp.type = 'text'; inp.className = 'winput'; inp.placeholder = 'e.g. My favourite city is Kyoto.';
+    var status = el('div', 'wnote', 'No fact saved yet.'), ans = el('div', 'wcard', 'AI has no answer yet.');
+    var lm = el('div', 'wnote'), mem = document.createElement('input'); mem.type = 'text'; mem.className = 'winput'; mem.placeholder = 'Save to long-term memory (kept even after overflow)';
+    function inWindow() { var run = 0, ok = []; for (var i = msgs.length - 1; i >= 0; i--) { run += estTokens(msgs[i]); if (run <= LIMIT) ok.unshift(msgs[i]); } return ok; }
+    function paint() { status.textContent = fact ? ('Fact saved: "' + fact + '". Messages now: ' + msgs.length + '. Still inside the window: ' + inWindow().length + '.') : 'No fact saved yet.'; lm.textContent = longMem.length ? 'Long-term memory: ' + longMem.join(' | ') : 'Long-term memory is empty.'; }
+    var r1 = el('div', 'wrow');
+    r1.appendChild(inp);
+    r1.appendChild(btn('Save fact', function () { if (!inp.value.trim()) return; fact = inp.value.trim(); msgs.push(fact); inp.value = ''; paint(); }, 'primary'));
+    r1.appendChild(btn('Flood the window', function () { for (var i = 0; i < 6; i++) msgs.push('Unrelated chatter message number ' + (msgs.length + 1) + ' about nothing important.'); paint(); }));
+    r1.appendChild(btn('Ask: what was my fact?', function () {
+      if (!fact) { ans.textContent = 'Save a fact first.'; return; }
+      var known = inWindow().indexOf(fact) >= 0 || longMem.some(function (m) { return m === fact; });
+      if (known) { ans.textContent = 'AI answers correctly: ' + fact; }
+      else { var fake = ['I think it was Paris.', 'Maybe London?', 'Possibly New York.', 'Could be Singapore.']; ans.textContent = 'Hallucinated answer: ' + fake[Math.floor(Math.random() * fake.length)] + '  (the fact fell out of the window)'; }
+    }));
+    r1.appendChild(btn('Reset', function () { msgs = []; fact = ''; ans.textContent = 'AI has no answer yet.'; paint(); }));
+    var r2 = el('div', 'wrow'); r2.appendChild(mem); r2.appendChild(btn('Save to long-term memory', function () { if (!mem.value.trim()) return; longMem.push(mem.value.trim()); mem.value = ''; paint(); }));
+    body.appendChild(r1); body.appendChild(status); body.appendChild(ans); body.appendChild(r2); body.appendChild(lm);
+    body.appendChild(el('div', 'wnote', 'Tip: save the same text to long-term memory as your fact, flood the window, and ask again. Long-term memory survives because it lives outside the window and is fed back in.'));
+    paint();
+  };
+
+  /* ---------- Tokenizer illustration ---------- */
+  W['tokenizer'] = function (root) {
+    var body = frame(root, 'Tokens: puzzle pieces, not words', 'an illustration with a simple rule, not a real tokenizer');
+    var inp = document.createElement('input'); inp.type = 'text'; inp.className = 'winput'; inp.value = 'unbelievable things happen';
+    var out = el('div', 'tokrow'), stat = el('div', 'wnote');
+    function piece(w) { if (w.length <= 5) return [w]; var parts = [], i = 0; while (i < w.length) { var n = Math.min(w.length - i, i === 0 ? 4 : 4); parts.push(w.substr(i, n)); i += n; } return parts; }
+    function paint() {
+      out.textContent = ''; var n = 0;
+      inp.value.split(/(\s+)/).forEach(function (w) { if (!w) return; if (/^\s+$/.test(w)) return; piece(w).forEach(function (p) { n++; out.appendChild(el('span', 'tok', p)); }); });
+      stat.textContent = n + ' tokens · ' + inp.value.length + ' characters. Short everyday words stay whole; long or unusual words are split, which is why they cost more.';
+    }
+    inp.addEventListener('input', paint);
+    body.appendChild(inp); body.appendChild(out); body.appendChild(stat); paint();
+  };
+
+  /* ---------- Agent loop ---------- */
+  W['agent-loop'] = function (root) {
+    var body = frame(root, 'The agent loop', 'perceive, reason, act, observe, repeat until the goal is met');
+    var names = ['1. Perceive', '2. Reason', '3. Act', '4. Observe'], notes = [
+      'Read the goal and everything seen so far.',
+      'Decide: can I answer now, or do I need a tool?',
+      'Call the chosen tool (this is the model asking; your code runs it).',
+      'Feed the tool result back into the message list.'
+    ];
+    var boxes = [], row = el('div', 'loopbox');
+    names.forEach(function (n) { var b = el('div', 'lstep'); b.appendChild(el('strong', null, n)); row.appendChild(b); boxes.push(b); });
+    var caption = el('div', 'wnote', 'Press Run to watch one goal go round the loop twice, then answer.'), t = null;
+    function run() {
+      clearInterval(t); var i = 0, lap = 0;
+      t = setInterval(function () {
+        boxes.forEach(function (b) { b.classList.remove('on'); });
+        if (lap >= 2) { clearInterval(t); caption.textContent = 'No more tools needed: the model gives the final answer. The loop ended because the model stopped asking for tools.'; return; }
+        boxes[i].classList.add('on'); caption.textContent = 'Lap ' + (lap + 1) + ' · ' + names[i] + ': ' + notes[i];
+        i++; if (i === 4) { i = 0; lap++; }
+      }, 900);
+    }
+    body.appendChild(row); body.appendChild(caption); body.appendChild(btn('Run', run, 'primary'));
+  };
+
+  /* ---------- Pydantic validation playground ---------- */
+  W['pydantic-playground'] = function (root) {
+    var body = frame(root, 'Live validation playground', 'a JavaScript imitation of the Pydantic rules below; edit the JSON or try a preset');
+    var code = el('pre', 'wcode', 'class JobApplication(BaseModel):\n    full_name: str = Field(min_length=2, max_length=100)\n    email: EmailStr\n    years_experience: int = Field(ge=0, le=50)');
+    var P = {
+      'Valid data': '{\n  "full_name": "Aditi Sharma",\n  "email": "aditi@example.com",\n  "years_experience": "6"\n}',
+      'Missing field': '{\n  "full_name": "Rohan Mehta"\n}',
+      'Wrong types': '{\n  "full_name": "Meera Iyer",\n  "email": "not-an-email",\n  "years_experience": "a lot"\n}',
+      'Out of range': '{\n  "full_name": "K",\n  "email": "karan@example.com",\n  "years_experience": 75\n}'
+    };
+    var ta = document.createElement('textarea'); ta.className = 'wtext'; ta.rows = 6; ta.value = P['Valid data'];
+    var res = el('pre', 'wcode');
+    var presets = el('div', 'wrow'); Object.keys(P).forEach(function (k) { presets.appendChild(btn(k, function () { ta.value = P[k]; res.textContent = ''; })); });
+    function validate() {
+      var t, errs = [];
+      try { t = JSON.parse(ta.value); } catch (e) { res.textContent = 'Invalid JSON: check quotes, commas and brackets.'; return; }
+      if (!('full_name' in t)) errs.push('full_name: Field required'); else if (typeof t.full_name !== 'string') errs.push('full_name: Input should be a valid string'); else if (t.full_name.length < 2) errs.push('full_name: String should have at least 2 characters'); else if (t.full_name.length > 100) errs.push('full_name: String should have at most 100 characters');
+      if (!('email' in t)) errs.push('email: Field required'); else if (typeof t.email !== 'string') errs.push('email: Input should be a valid string'); else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.email)) errs.push('email: value is not a valid email address');
+      var y = t.years_experience;
+      if (!('years_experience' in t)) errs.push('years_experience: Field required');
+      else {
+        if (typeof y === 'string') { var n = Number(y); if (isFinite(n) && y.trim() !== '') y = n; else { errs.push('years_experience: Input should be a valid integer, unable to parse string as an integer'); y = undefined; } }
+        if (y !== undefined) { if (typeof y !== 'number' || y % 1 !== 0) errs.push('years_experience: Input should be a valid integer'); else if (y < 0) errs.push('years_experience: Input should be greater than or equal to 0'); else if (y > 50) errs.push('years_experience: Input should be less than or equal to 50'); }
+      }
+      res.textContent = errs.length ? errs.length + ' validation error(s)\n' + errs.join('\n') : 'Valid. Note that the string "6" was coerced to the integer 6.';
+    }
+    body.appendChild(code); body.appendChild(presets); body.appendChild(ta); body.appendChild(btn('Validate', validate, 'primary')); body.appendChild(res);
+  };
+
+  /* ---------- Multi-agent patterns ---------- */
+  W['agent-patterns'] = function (root) {
+    var body = frame(root, 'Six multi-agent patterns, in a kitchen', 'pick a pattern, then press Run');
+    var names = ['Chain', 'Parallel', 'Controller', 'Feedback loop', 'Hierarchical', 'Planner-Executor'];
+    var stage = el('div', 'pstage'), cap = el('div', 'wnote'), controls = el('div', 'wrow'), cur = 0, timer = null;
+    function nodes(list) { stage.textContent = ''; return list.map(function (l) { var n = el('div', 'pnode', l); stage.appendChild(n); return n; }); }
+    function off(ns) { ns.forEach(function (n) { n.classList.remove('on', 'bad'); }); }
+    function stop() { clearInterval(timer); }
+    var info = [
+      'Chain: agents run one after another and each output feeds the next. Best when the order is part of the job (draft, fact-check, format).',
+      'Parallel: independent agents run at the same time and a merge step combines the results. Faster, but only if the pieces do not depend on each other. Anthropic reports its Research feature beats a single agent by over 90 percent on broad research, at about 15 times the token cost.',
+      'Controller (router): one agent only decides who handles a request and hands it to exactly one specialist. It is often the cheapest agent in the system.',
+      'Feedback loop: a second agent checks the first one\'s work and sends it back if it is not good enough, before anything goes out.',
+      'Hierarchical: an orchestrator treats specialist agents as tools and combines their work ("agent as a tool"). This is the shape of Anthropic\'s multi-agent Research system.',
+      'Planner-Executor: one agent only plans (a big vague goal into small steps), another only executes the list. The planner never executes and the executor never plans.'
+    ];
+    function setup(i) {
+      stop(); cur = i; controls.textContent = ''; cap.textContent = info[i];
+      var ns, run;
+      if (i === 0) { ns = nodes(['Prep Cook', 'Sauce Station', 'Grill Station', 'Plating']); run = function () { off(ns); var k = 0; timer = setInterval(function () { off(ns); if (k >= ns.length) { stop(); return; } ns[k++].classList.add('on'); }, 800); }; }
+      else if (i === 1) { ns = nodes(['Grill', 'Sauce', 'Vegetables', 'Garnish', 'Merge step']); run = function () { off(ns); ns.slice(0, 4).forEach(function (n) { n.classList.add('on'); }); setTimeout(function () { ns[4].classList.add('on'); }, 1000); }; }
+      else if (i === 2) {
+        var tickets = ['A rare ribeye, please.', 'Just the seasonal salad.', 'The chocolate tart for dessert.'], target = [1, 2, 3];
+        ns = nodes(['Expediter (router)', 'Grill', 'Cold Station', 'Pastry']);
+        tickets.forEach(function (t, j) { controls.appendChild(btn(t, function () { off(ns); ns[0].classList.add('on'); setTimeout(function () { ns[target[j]].classList.add('on'); }, 700); })); });
+        run = null;
+      }
+      else if (i === 3) {
+        ns = nodes(['Cook', 'Evaluator', 'Table']); var loopOn = true;
+        controls.appendChild(btn('Feedback loop: ON (click to switch)', function () { loopOn = !loopOn; this.textContent = 'Feedback loop: ' + (loopOn ? 'ON' : 'OFF') + ' (click to switch)'; }));
+        run = function () { off(ns); ns[0].classList.add('on'); setTimeout(function () { off(ns); ns[1].classList.add('on'); }, 700); setTimeout(function () { off(ns); if (loopOn) { ns[1].classList.add('bad'); cap.textContent = 'Undercooked: sent back to the cook for another pass, nothing left the kitchen.'; } else { ns[2].classList.add('bad'); cap.textContent = 'No check: the undercooked plate reached the table.'; } }, 1500); };
+      }
+      else if (i === 4) {
+        ns = nodes(['Executive Chef (orchestrator)', 'Grill Chef', 'Pastry Chef', 'Sauce Chef']);
+        ['Grill Chef', 'Pastry Chef', 'Sauce Chef'].forEach(function (s, j) { controls.appendChild(btn('Call ' + s, function () { off(ns); ns[0].classList.add('on'); setTimeout(function () { ns[j + 1].classList.add('on'); }, 500); })); });
+        run = null;
+      }
+      else { ns = nodes(['Planner: Cook Sunday dinner', '1 Shop for ingredients', '2 Prep the vegetables', '3 Cook the mains', '4 Plate and garnish']); run = function () { off(ns); var k = 0; timer = setInterval(function () { off(ns); if (k >= ns.length) { stop(); return; } ns[k++].classList.add('on'); }, 800); }; }
+      if (run) controls.appendChild(btn('Run', function () { stop(); run(); }, 'primary'));
+    }
+    tabs(body, names, setup); body.appendChild(stage); body.appendChild(controls); body.appendChild(cap); setup(0);
+  };
+
+  W['pattern-chooser'] = function (root) {
+    var body = frame(root, 'Which pattern does your task need?', 'answer four questions (the recommendation rules are a simple reading of the guide, not an official algorithm)');
+    var Q = [
+      ['Do the steps have to happen in a strict order?', 'Chain of agents'],
+      ['Could the pieces be worked on at the same time, independently?', 'Parallel agents'],
+      ['Does it mainly need deciding who should handle it, not doing the work?', 'Controller (router) agent'],
+      ['Does the output need a second check before it goes out?', 'Feedback loop (reactive agent)']
+    ], ans = [null, null, null, null], out = el('div', 'wcard', 'Answer the questions above.');
+    function paint() {
+      var picks = []; Q.forEach(function (q, i) { if (ans[i]) picks.push(q[1]); });
+      out.textContent = ans.every(function (a) { return a === null; }) ? 'Answer the questions above.' : (picks.length ? 'Start with: ' + picks.join(' + ') + '. Real systems often combine patterns, for example a hierarchical supervisor whose subagents are small chains, with a feedback loop around the riskiest step.' : 'None of the four apply, so start with a single agent. Add a pattern only when you hit its limits.');
+    }
+    Q.forEach(function (q, i) {
+      var r = el('div', 'wrow'); r.appendChild(el('span', 'wq', q[0]));
+      var y = btn('Yes', function () { ans[i] = true; y.classList.add('on'); n.classList.remove('on'); paint(); }), n = btn('No', function () { ans[i] = false; n.classList.add('on'); y.classList.remove('on'); paint(); });
+      r.appendChild(y); r.appendChild(n); body.appendChild(r);
+    });
+    body.appendChild(out);
+    body.appendChild(el('div', 'wnote', 'Start with the simplest pattern that fits, and add more only once you hit its limits.'));
+  };
+
+  window.__initWidgets = function (art) {
+    Array.prototype.forEach.call(art.querySelectorAll('.widget[data-w]'), function (root) {
+      if (root.getAttribute('data-ready')) return;
+      var f = W[root.getAttribute('data-w')];
+      if (!f) return;
+      root.setAttribute('data-ready', '1');
+      try { f(root); } catch (e) { root.setAttribute('data-ready', ''); }
+    });
+  };
+})();
+
 (function () {
   var BOOKS = window.__BOOKS__;
   var book = BOOKS[0], chId = 'home';
@@ -10863,6 +11759,7 @@ window.__BOOKS__ = [{"id": "agentic-ai", "title": "Agentic AI 3.0 Notes", "short
     var art = $('#ch-' + book.id + '-' + chId);
     renderBrand(); renderNav(); buildToc(art);
     if (chId === 'quiz') startQuiz(art);
+    if (window.__initWidgets) window.__initWidgets(art);
     window.scrollTo(0, 0);
     var h1 = $('h1', art).textContent;
     document.title = (chId === 'home' ? '' : h1 + ' | ') + book.title;

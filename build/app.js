@@ -61,6 +61,7 @@
     var art = $('#ch-' + book.id + '-' + chId);
     renderBrand(); renderNav(); buildToc(art);
     if (chId === 'quiz') startQuiz(art);
+    if (window.__initWidgets) window.__initWidgets(art);
     window.scrollTo(0, 0);
     var h1 = $('h1', art).textContent;
     document.title = (chId === 'home' ? '' : h1 + ' | ') + book.title;
