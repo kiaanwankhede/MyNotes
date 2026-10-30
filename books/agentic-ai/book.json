@@ -5,32 +5,194 @@
   "source_base": "https://github.com/mayank953/Live-Class-2026/blob/main/",
   "tree_base": "https://github.com/mayank953/Live-Class-2026/tree/main/",
   "chapters": [
-    {"id": "home", "num": "", "title": "Start here", "part": "Welcome", "file": "home.md"},
-    {"id": "primer", "num": "A", "title": "Primer: what an agent is", "part": "Part A  Foundations", "file": "primer.md"},
-    {"id": "ch1", "num": "1", "title": "Introduction to LangChain", "part": "Part B  LangChain core", "file": "ch1.md"},
-    {"id": "ch2", "num": "2", "title": "The LangChain family and harness engineering", "part": "Part B  LangChain core", "file": null},
-    {"id": "ch3", "num": "3", "title": "Inside the model", "part": "Part B  LangChain core", "file": null},
-    {"id": "ch4", "num": "4", "title": "Structured output", "part": "Part B  LangChain core", "file": null},
-    {"id": "ch5", "num": "5", "title": "Tools deep dive", "part": "Part B  LangChain core", "file": null},
-    {"id": "ch6", "num": "6", "title": "Agents, memory and middleware", "part": "Part C  Agents and middleware", "file": null},
-    {"id": "ch7", "num": "7", "title": "Mastering middleware", "part": "Part C  Agents and middleware", "file": null},
-    {"id": "ch8", "num": "8", "title": "Guardrails, todo lists, resilience", "part": "Part C  Agents and middleware", "file": null},
-    {"id": "ch9", "num": "9", "title": "Shell tools and custom middleware", "part": "Part C  Agents and middleware", "file": null},
-    {"id": "ch10", "num": "10", "title": "Runtime and human-in-the-loop", "part": "Part D  Runtime", "file": null},
-    {"id": "ch11", "num": "11", "title": "Why MCP exists", "part": "Part E  MCP", "file": null},
-    {"id": "ch12", "num": "12", "title": "MCP primitives, lifecycle, JSON-RPC", "part": "Part E  MCP", "file": null},
-    {"id": "ch13", "num": "13", "title": "Capability negotiation", "part": "Part E  MCP", "file": null},
-    {"id": "ch14", "num": "14", "title": "Shutdown and transports", "part": "Part E  MCP", "file": null},
-    {"id": "ch15", "num": "15", "title": "Time Tracker project", "part": "Part E  MCP", "file": null},
-    {"id": "ch16", "num": "16", "title": "Deploying MCP servers", "part": "Part E  MCP", "file": null},
-    {"id": "ch17", "num": "17", "title": "Legacy vs modern MCP", "part": "Part E  MCP", "file": null},
-    {"id": "ch18", "num": "18", "title": "MCP inside LangChain", "part": "Part F  Advanced", "file": null},
-    {"id": "ch19", "num": "19", "title": "Multi-agent patterns", "part": "Part F  Advanced", "file": null},
-    {"id": "ch20", "num": "20", "title": "Meridian project overview", "part": "Part F  Advanced", "file": null},
-    {"id": "glossary", "num": "", "title": "Glossary", "part": "Back matter", "file": null},
-    {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "file": null},
-    {"id": "cheat", "num": "", "title": "Cheat sheet", "part": "Back matter", "file": null},
-    {"id": "projects", "num": "", "title": "Mini-project ideas", "part": "Back matter", "file": null},
-    {"id": "craft", "num": "", "title": "From the Craft notes", "part": "Back matter", "file": null}
+    {
+      "id": "home",
+      "num": "",
+      "title": "Start here",
+      "part": "Welcome",
+      "file": "home.md"
+    },
+    {
+      "id": "primer",
+      "num": "A",
+      "title": "Primer: what an agent is",
+      "part": "Part A  Foundations",
+      "file": "primer.md"
+    },
+    {
+      "id": "ch1",
+      "num": "1",
+      "title": "Introduction to LangChain",
+      "part": "Part B  LangChain core",
+      "file": "ch1.md"
+    },
+    {
+      "id": "ch2",
+      "num": "2",
+      "title": "The LangChain family and harness engineering",
+      "part": "Part B  LangChain core",
+      "file": "ch2.md"
+    },
+    {
+      "id": "ch3",
+      "num": "3",
+      "title": "Inside the model",
+      "part": "Part B  LangChain core",
+      "file": "ch3.md"
+    },
+    {
+      "id": "ch4",
+      "num": "4",
+      "title": "Structured output",
+      "part": "Part B  LangChain core",
+      "file": "ch4.md"
+    },
+    {
+      "id": "ch5",
+      "num": "5",
+      "title": "Tools deep dive",
+      "part": "Part B  LangChain core",
+      "file": "ch5.md"
+    },
+    {
+      "id": "ch6",
+      "num": "6",
+      "title": "Agents, memory and middleware",
+      "part": "Part C  Agents and middleware",
+      "file": null
+    },
+    {
+      "id": "ch7",
+      "num": "7",
+      "title": "Mastering middleware",
+      "part": "Part C  Agents and middleware",
+      "file": null
+    },
+    {
+      "id": "ch8",
+      "num": "8",
+      "title": "Guardrails, todo lists, resilience",
+      "part": "Part C  Agents and middleware",
+      "file": null
+    },
+    {
+      "id": "ch9",
+      "num": "9",
+      "title": "Shell tools and custom middleware",
+      "part": "Part C  Agents and middleware",
+      "file": null
+    },
+    {
+      "id": "ch10",
+      "num": "10",
+      "title": "Runtime and human-in-the-loop",
+      "part": "Part D  Runtime",
+      "file": null
+    },
+    {
+      "id": "ch11",
+      "num": "11",
+      "title": "Why MCP exists",
+      "part": "Part E  MCP",
+      "file": null
+    },
+    {
+      "id": "ch12",
+      "num": "12",
+      "title": "MCP primitives, lifecycle, JSON-RPC",
+      "part": "Part E  MCP",
+      "file": null
+    },
+    {
+      "id": "ch13",
+      "num": "13",
+      "title": "Capability negotiation",
+      "part": "Part E  MCP",
+      "file": null
+    },
+    {
+      "id": "ch14",
+      "num": "14",
+      "title": "Shutdown and transports",
+      "part": "Part E  MCP",
+      "file": null
+    },
+    {
+      "id": "ch15",
+      "num": "15",
+      "title": "Time Tracker project",
+      "part": "Part E  MCP",
+      "file": null
+    },
+    {
+      "id": "ch16",
+      "num": "16",
+      "title": "Deploying MCP servers",
+      "part": "Part E  MCP",
+      "file": null
+    },
+    {
+      "id": "ch17",
+      "num": "17",
+      "title": "Legacy vs modern MCP",
+      "part": "Part E  MCP",
+      "file": null
+    },
+    {
+      "id": "ch18",
+      "num": "18",
+      "title": "MCP inside LangChain",
+      "part": "Part F  Advanced",
+      "file": null
+    },
+    {
+      "id": "ch19",
+      "num": "19",
+      "title": "Multi-agent patterns",
+      "part": "Part F  Advanced",
+      "file": null
+    },
+    {
+      "id": "ch20",
+      "num": "20",
+      "title": "Meridian project overview",
+      "part": "Part F  Advanced",
+      "file": null
+    },
+    {
+      "id": "glossary",
+      "num": "",
+      "title": "Glossary",
+      "part": "Back matter",
+      "file": null
+    },
+    {
+      "id": "bank",
+      "num": "",
+      "title": "Interview question bank",
+      "part": "Back matter",
+      "file": null
+    },
+    {
+      "id": "cheat",
+      "num": "",
+      "title": "Cheat sheet",
+      "part": "Back matter",
+      "file": null
+    },
+    {
+      "id": "projects",
+      "num": "",
+      "title": "Mini-project ideas",
+      "part": "Back matter",
+      "file": null
+    },
+    {
+      "id": "craft",
+      "num": "",
+      "title": "From the Craft notes",
+      "part": "Back matter",
+      "file": null
+    }
   ]
 }
