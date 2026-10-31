@@ -458,5 +458,61 @@
   "prefix": "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/05_sampling_demo.py",
   "level": "read",
   "note": "syntax-checked only"
+ },
+ {
+  "prefix": "classes_transcription_summary/00 - ",
+  "level": "read"
+ },
+ {
+  "prefix": "classes_transcription_summary/03 - ",
+  "level": "read"
+ },
+ {
+  "prefix": "classes_transcription_summary/04 - ",
+  "level": "read"
+ },
+ {
+  "prefix": "classes_transcription_summary/05 - ",
+  "level": "read"
+ },
+ {
+  "prefix": "classes_transcription_summary/01 - ",
+  "level": "read"
+ },
+ {
+  "prefix": "classes_transcription_summary/02 - ",
+  "level": "read"
+ },
+ {
+  "prefix": "Weekend 00",
+  "level": "read"
+ },
+ {
+  "prefix": "Weekend 08 - 15-16 Aug/README.md",
+  "level": "read"
+ },
+ {
+  "prefix": "Weekend 13 - 27th Sep/README.md",
+  "level": "read"
+ },
+ {
+  "prefix": "Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/.env.example",
+  "level": "read"
+ },
+ {
+  "prefix": "Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/main.py",
+  "level": "read"
+ },
+ {
+  "prefix": "Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/test.py",
+  "level": "read"
+ },
+ {
+  "prefix": ".github/workflows/path-audit.yml",
+  "level": "read"
+ },
+ {
+  "prefix": "scripts/check_repo_paths.py",
+  "level": "read"
  }
 ]
