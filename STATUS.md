@@ -30,8 +30,8 @@ Updated 2026-10-31 by `build/status.py`. This file is regenerated after every pr
 
 | Source | What is measured | Done | Share | Notes |
 |---|---|---:|---:|---|
-| LangChain docs | Pages in scope | 41 of 41 | 100% | 23 read earlier plus the 18 that were blocked, all read in full on 31 Oct 2026 through the desktop browser. Out of scope by your request: frontend pages, Agent Chat UI, Deep Agents from scratch, four multi-agent tutorials. |
-| Pydantic docs | Pages read | 19 of 19 | 100% | All 19 pages read (the settings page about 96%, the rest in full; the last 7 on 31 Oct 2026): get started, models, fields, validators, serialization, strict mode, types, JSON schema, settings, error handling, the LLM article, the Pydantic AI example, unions, alias, configuration, dataclasses, TypeAdapter, performance, and FastAPI (5 tutorial pages: body, response model, extra models, body updates, query parameter models; other FastAPI pages not read). A few tabbed code examples did not come through in the text, noted in the chapters. |
+| LangChain docs | Pages in scope | 41 of 41 | 100% | The LangChain section of the docs has 68 pages. Out of scope by your request: 20 frontend pages, Agent Chat UI, Deep Agents from scratch and 4 multi-agent tutorials, leaving about 42; I recorded 41 as read in full. Gaps: only 23 docs pages are linked as sources in the book, so the rest are not traceable page by page; about 12 related pages outside that folder were not read (concepts: memory, context, human-in-the-loop, products, providers-and-models; migration guides; v1 release notes; common errors; versioning). The wider Python docs have 234 build pages (LangGraph, Deep Agents and Managed Deep Agents are out of scope for now). |
+| Pydantic docs | Teaching pages read (of 54; API reference not counted) | 17 of 54 | 31% | Corrected 31 Oct: the earlier '19 of 19' counted a list I made, not the site. The docs have 91 pages: Get started 8, Concepts 19, Internals 2, Examples 8, Errors 4, Integrations 13 (54 teaching pages) plus 36 API-reference pages and 1 people page. Read: 14 of 19 Concepts (not read: Conversion Table, Experimental Features, Forward Annotations, JSON, Validation Decorator), the Get started page, Error Handling (1 of 4), the Pydantic AI example (1 of 8), nothing from Internals or Integrations. Outside the 91: the Pydantic LLM article and 5 FastAPI tutorial pages, read in full. |
 | Instructor sites | Sites read in full | 15 of 15 | 100% | All 15 read in full: 3 MCP sites, Pydantic, all 7 series guides, AI terms, Python agents, the context-window simulator (all 4 tabs and its script), Meridian slides (7 of 7 modules). |
 | Meridian slides | Modules read in full | 7 of 7 | 100% | All 7 modules read in full (about 500 slides). Caveat: the text I extracted leaves out the code boxes, so exact command lines come from the repo files (deploy.yml, DEPLOY.md), not from the slides. |
 | Craft page | Index pages read | 14 of 14 | 100% | All index pages read. |
@@ -39,6 +39,8 @@ Updated 2026-10-31 by `build/status.py`. This file is regenerated after every pr
 | Meridian learner repo | Repo reviewed | 1 of 1 | 100% | README, code and a frontend digest read; not every file individually. |
 | agent-flow repo | Repo reviewed | 0 of 1 | 0% | README and folder layout only, source not read. |
 | Code run | Automated checks (count, not coverage) | 73 of 73 | 100% | Pydantic claims 47 of 47 (build/pydantic_claims_test.py), key-free Foundations and RAG checks 9 of 9 (build/rag_foundations_test.py), Meridian's own backend tests 17 of 17; TimeTrack lab run earlier. 100% here means every check written passes, not that every chapter's code was run. |
+| MCP official docs (2026-07-28) | Docs pages read | 1 of 26 | 4% | Only the intro page has been read. Not yet read: Learn 4, Develop 6, SDKs 1, Security tutorials 3, Inspector and debugging 11. Planned for the MCP book once you approve. |
+| MCP official docs (2026-07-28) | Specification pages read | 0 of 31 | 0% | Not read yet. Plus 9 extension pages and 33 community pages, which I would skip unless you want them. |
 
 ## 3. Skipped on purpose
 
@@ -56,6 +58,7 @@ Updated 2026-10-31 by `build/status.py`. This file is regenerated after every pr
 
 ## 5. Change log (newest first)
 
+- 2026-10-31: Coverage corrected: Pydantic docs are 17 of 54 teaching pages (not 19 of 19); LangChain docs gaps stated; MCP official docs added (1 of 26 docs, 0 of 31 spec). No book content changed
 - 2026-10-31: Self-review: 2 more Pydantic checks (wrap-validator order, settings priority; now 47 of 47), review finding 8 corrected, new pages render-checked
 - 2026-10-31: Glossaries and cheat sheets added to Foundations, Pydantic and RAG; Pydantic claims (45), key-free RAG/Foundations checks (9) and Meridian tests (17) run and passing; LangChain chapter order reviewed (REVIEW file, nothing reordered)
 - 2026-10-31: Craft attachments: 3 MCP PDFs not in the repo and all 10 Colabs opened (now 31 of 40); mini-contra checked; keys in Colab flagged
