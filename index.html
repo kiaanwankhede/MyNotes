@@ -3745,6 +3745,75 @@ print(model.invoke(messages).content)     # a pirate-flavoured answer
 <li class="task"><label><input type="checkbox"><span>I can explain the four message types</span></label></li>
 <li class="task"><label><input type="checkbox"><span>I can compare open and closed models</span></label></li>
 </ul>
+<!-- docs31a -->
+<h2 id="agentic-ai-ch2-from-the-docs-philosophy-components-langsmith-an">From the docs: philosophy, components, LangSmith and deployment</h2>
+<p><em>From five LangChain docs pages read in full on 31 Oct 2026: <a href="https://docs.langchain.com/oss/python/langchain/philosophy" target="_blank" rel="noopener">Philosophy</a>, <a href="https://docs.langchain.com/oss/python/langchain/component-architecture" target="_blank" rel="noopener">Component architecture</a>, <a href="https://docs.langchain.com/oss/python/langchain/observability" target="_blank" rel="noopener">LangSmith Observability</a>, <a href="https://docs.langchain.com/oss/python/langchain/studio" target="_blank" rel="noopener">LangSmith Studio</a> and <a href="https://docs.langchain.com/oss/python/langchain/deploy" target="_blank" rel="noopener">Deployment</a>.</em></p>
+<p><strong>What LangChain believes.</strong> LLMs are powerful, better when combined with external data, and applications will become more agentic, but it is early, and a prototype is easy while a reliable production agent is hard. Two focuses: build with the best models (standardise differing provider APIs, parameters and message formats so you can switch models without lock-in), and make it easy to use models to orchestrate flows over other data and computation (tools, parsing and access to unstructured data). You can build with LangChain for maximum control, or with <strong>Deep Agents</strong>, an opinionated harness with built-in planning, filesystem tools, subagents and context management. Both sit on LangGraph.</p>
+<p><strong>A short history, as the page tells it.</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>When</th>
+<th>What happened</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Oct 2022</td>
+<td>v0.0.1, a month before ChatGPT: LLM abstractions plus "chains" (fixed steps, such as retrieve then generate). The name is Language plus Chain</td>
+</tr>
+<tr>
+<td>Dec 2022</td>
+<td>First general-purpose agents, based on the ReAct paper: the model emitted JSON that was parsed into tool calls</td>
+</tr>
+<tr>
+<td>Jan 2023</td>
+<td>OpenAI's Chat Completions API moves models from strings to lists of messages; a JavaScript version is released</td>
+</tr>
+<tr>
+<td>Mar 2023</td>
+<td>OpenAI function calling: the API itself returns tool-call payloads, so LangChain stops parsing JSON</td>
+</tr>
+<tr>
+<td>Jun 2023</td>
+<td>LangSmith released (observability and evals), since the main problem is reliability</td>
+</tr>
+<tr>
+<td>Jan 2024</td>
+<td>v0.1.0, the first non-0.0.x</td>
+</tr>
+<tr>
+<td>Feb 2024</td>
+<td>LangGraph released: the missing low-level orchestration layer (streaming, durable execution, short-term memory, human-in-the-loop)</td>
+</tr>
+<tr>
+<td>Jun 2024</td>
+<td>700+ integrations, split into partner packages or <code>langchain-community</code></td>
+</tr>
+<tr>
+<td>Oct 2024</td>
+<td>LangGraph becomes the preferred way for anything beyond one LLM call; most old chains and agents deprecated</td>
+</tr>
+<tr>
+<td>Apr 2025</td>
+<td>Multimodal inputs; the message format is extended</td>
+</tr>
+<tr>
+<td>20 Oct 2025</td>
+<td><strong>v1.0:</strong> all old chains and agents replaced by one agent abstraction built on LangGraph; a standard content format for reasoning blocks, citations and server-side tool calls; old code stays available as <code>langchain-classic</code></td>
+</tr>
+<tr>
+<td>Mar 2026</td>
+<td>Deep Agents released as an open-source harness on LangGraph</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Component architecture.</strong> Five layers build on each other: input processing (raw data to documents), embedding and storage, retrieval, generation (models, optionally with tools) and orchestration (agents and memory). The page's category table: models, tools, agents, memory, retrievers, document processing (loaders, splitters, transformers) and vector stores (Chroma, Pinecone, FAISS). Common patterns: RAG, an agent with tools, a multi-agent system.</p>
+<p><strong>LangSmith tracing.</strong> Agents from <code>create_agent</code> support tracing with no extra code once you set the environment: <code>LANGSMITH_TRACING=true</code> and <code>LANGSMITH_API_KEY</code>, plus, in an agent-based workspace, <code>LANGSMITH_AGENT_ID</code> and <code>LANGSMITH_AGENT_ENVIRONMENT</code> (or <code>LANGSMITH_PROJECT</code> in a project-based workspace or self-hosted). A trace records every step: input, model calls, tool calls, decisions and the final response. Trace only some calls with <code>ls.tracing_context(enabled=True)</code>, and attach <code>tags</code> and <code>metadata</code> (user id, session id) either in <code>config</code> or in <code>tracing_context</code>.</p>
+<p><strong>LangSmith Studio.</strong> A free visual interface for running and debugging a local agent. Install <code>langgraph-cli[inmem]</code> (Python 3.11 or newer), put your agent in a file, create a <code>.env</code> (not committed) with the LangSmith key, write a <code>langgraph.json</code> whose <code>graphs</code> key points at your agent (<code>create_agent</code> returns a compiled LangGraph graph, which is what the key expects), install dependencies and run <code>langgraph dev</code>. The agent is then served at <code>http://127.0.0.1:2024</code> and opens in Studio, showing prompts, tool arguments and results, tokens, latency and exceptions with their state; the dev server hot-reloads, and you can re-run a thread from any step. Setting <code>LANGSMITH_TRACING=false</code> keeps data local. Safari blocks localhost connections to Studio, so add <code>--tunnel</code>.</p>
+<p><strong>Deployment.</strong> For production the page offers LangSmith Cloud (managed infrastructure for stateful, long-running agents with persistent state and background execution), plus hybrid, standalone and self-hosted options. The Cloud steps: push a LangGraph-compatible app to GitHub (public or private), create a New Deployment under Deployments in LangSmith and link the repository (about 15 minutes), open it in Studio, copy the API URL, and call it with <code>langgraph-sdk</code> (<code>client.runs.stream(None, "agent", input=..., stream_mode="updates")</code>) or with REST at <code>/runs/stream</code> and an <code>X-Api-Key</code> header. The agent name comes from <code>langgraph.json</code>.</p>
+<!-- /docs31a -->
+
 <h2 id="agentic-ai-ch2-sources-and-further-reading">Sources and further reading</h2>
 <ul>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/07%20-%2018%20Jul%20-%20LangChain%20Family%20%26%20Harness%20Engineering.md" target="_blank" rel="noopener">Class 07 full notes</a></li>
@@ -5755,6 +5824,51 @@ agent = create_agent(
 <li class="task"><label><input type="checkbox"><span>I can separate guardrail from middleware</span></label></li>
 <li class="task"><label><input type="checkbox"><span>I can say when LangGraph is worth it</span></label></li>
 </ul>
+<!-- docs31b -->
+<h2 id="agentic-ai-ch7-from-the-docs-context-engineering-in-agents">From the docs: context engineering in agents</h2>
+<p><em>From the LangChain docs page <a href="https://docs.langchain.com/oss/python/langchain/context-engineering" target="_blank" rel="noopener">Context engineering in agents</a>, read in full on 31 Oct 2026.</em></p>
+<p><strong>The claim.</strong> When an agent fails, either the model was not capable enough or the right context was not passed to it, and the page says it is more often the second. Context engineering means providing the right information and tools in the right format, and the page calls it the number one job of AI engineers.</p>
+<p><strong>The loop and what you control.</strong> An agent is a model call, then tool execution, repeated until the model finishes. You control three kinds of context:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Context</th>
+<th>What you control</th>
+<th>Lasts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Model context</td>
+<td>What goes into each model call: instructions, message history, tools, model, response format</td>
+<td>Transient (per call)</td>
+</tr>
+<tr>
+<td>Tool context</td>
+<td>What tools can read and write (state, store, runtime context)</td>
+<td>Persistent</td>
+</tr>
+<tr>
+<td>Life-cycle context</td>
+<td>What happens between model and tool calls: summarisation, guardrails, logging</td>
+<td>Persistent</td>
+</tr>
+</tbody>
+</table></div>
+<p>It draws on three data sources: <strong>runtime context</strong> (static, conversation-scoped configuration such as user id, keys, permissions), <strong>state</strong> (short-term memory: messages, uploaded files, auth status, tool results) and the <strong>store</strong> (long-term, cross-conversation memory such as preferences). Middleware is the mechanism: it can update context or jump to a different step.</p>
+<p><strong>Model context, with the middleware that does it.</strong></p>
+<ul>
+<li><strong>System prompt:</strong> <code>@dynamic_prompt</code> builds the prompt from state (for example, be concise once the chat passes ten messages), the store (user preferences) or runtime context (role and environment).</li>
+<li><strong>Messages:</strong> <code>@wrap_model_call</code> injects extra messages for one call (uploaded-file summaries from state, writing style from the store, compliance rules from runtime context). The page appends them at the end because models pay more attention to final messages. These changes are transient; to persist them, return an <code>ExtendedModelResponse</code> carrying a <code>Command</code>, or use <code>before_model</code>, <code>after_model</code> or <code>wrap_tool_call</code>.</li>
+<li><strong>Tools:</strong> each needs a clear name, description and argument descriptions (<code>@tool(parse_docstring=True)</code> reads an <code>Args:</code> section). Too many tools overload the model; select dynamically with <code>request.override(tools=...)</code> by authentication state, conversation stage, store feature flags or role.</li>
+<li><strong>Model:</strong> pick a model per call (a larger-context model for long chats, a cheaper one for short ones, a user's preferred model, or by cost tier), created once outside the middleware.</li>
+<li><strong>Response format:</strong> a schema makes the final response conform; choose it dynamically (a simple schema early, a detailed one later, or by role).</li>
+</ul>
+<p><strong>Tool context.</strong> Tools read state, store and runtime context through <code>ToolRuntime</code>, and write by returning <code>Command(update={...})</code> for state or <code>store.put(...)</code> for the store.</p>
+<p><strong>Life-cycle example.</strong> <code>SummarizationMiddleware(model=..., trigger={"tokens": 4000}, keep=("messages", 20))</code> summarises old messages with a separate call and <strong>permanently</strong> replaces them in state, unlike the transient trimming above.</p>
+<p><strong>Best practices from the page.</strong> Start with static prompts and tools; add dynamic behaviour only when needed; test one context feature at a time; monitor model calls, tokens and latency; use built-in middleware (<code>SummarizationMiddleware</code>, <code>LLMToolSelectorMiddleware</code>); document what context is passed and why; and remember model-context changes are transient while life-cycle changes persist.</p>
+<!-- /docs31b -->
+
 <h2 id="agentic-ai-ch7-sources-and-further-reading">Sources and further reading</h2>
 <ul>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/12%20-%2008%20Aug%20-%20LangChain%20-%20Mastering%20Middleware.md" target="_blank" rel="noopener">Class 12 full notes</a></li>
@@ -6166,6 +6280,37 @@ emulated_agent = create_agent(
 <p><strong>In n8n:</strong> an input guardrails node, the AI Agent node, then an output guardrails node; run your risky prompts through the finished workflow; and use the AI Agent's built-in human-review setting on a tool (approval through Telegram or Slack) instead of building an approval workflow by hand.</p>
 <aside class="callout key"><div class="ct">Key idea<em>How this maps onto this book</em></div><p>Guardrails and resilience are chapters 7 and 8, human approval is chapter 10, streaming is 10A, and the four production KPIs from the induction (cost, failure rate, latency, quality) are on the start page.</p></aside>
 <!-- /prodguide -->
+
+<!-- docs31c -->
+<h2 id="agentic-ai-ch8-from-the-docs-testing-agents">From the docs: testing agents</h2>
+<p><em>From four LangChain docs pages read in full on 31 Oct 2026: <a href="https://docs.langchain.com/oss/python/langchain/test" target="_blank" rel="noopener">Test</a>, <a href="https://docs.langchain.com/oss/python/langchain/test/unit-testing" target="_blank" rel="noopener">Unit testing</a>, <a href="https://docs.langchain.com/oss/python/langchain/test/integration-testing" target="_blank" rel="noopener">Integration testing</a> and <a href="https://docs.langchain.com/oss/python/langchain/test/evals" target="_blank" rel="noopener">Evals</a>.</em></p>
+<p>Because the model decides its own next steps, one tweak can change behaviour elsewhere, so testing has three layers, and agentic apps lean more on integration tests because components chain together and LLMs are flaky.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit tests</td>
+<td>Small deterministic pieces, with a fake model: fast, free, no keys</td>
+</tr>
+<tr>
+<td>Integration tests</td>
+<td>Real model and service calls, to confirm the parts work together, credentials and schemas line up, and latency is acceptable</td>
+</tr>
+<tr>
+<td>Evals</td>
+<td>Score the agent's <strong>trajectory</strong> (messages and tool calls), by deterministic match or an LLM judge</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Unit tests.</strong> <code>GenericFakeChatModel(messages=iter([...]))</code> returns one scripted response per call (strings or <code>AIMessage</code>s, including tool calls); <code>FakeListChatModel(responses=[...])</code> is simpler for text only and cycles. <code>GenericFakeChatModel</code> has no <code>bind_tools</code>, which <code>create_agent</code> calls, so subclass it with a <code>bind_tools</code> that returns <code>self</code>. Script a tool-calling loop with two responses (a tool call, then the final answer) and assert on the tool call and the final text. The iterator cannot be reused, so share the fake through a pytest fixture at the default function scope. Use <code>InMemorySaver()</code> with a <code>thread_id</code> to test multi-turn behaviour.</p>
+<p><strong>Integration tests.</strong> Mark them (<code>@pytest.mark.integration</code>) and exclude them by default (<code>addopts = -m "not integration"</code>), run with <code>pytest -m integration</code>. Load keys from environment variables (skip the test if a key is missing; <code>.env</code> stays out of Git; CI uses secrets). Assert on <strong>structure, not content</strong>: message types, tool-call names, argument shapes, message count. To cut cost: use a smaller model, cap <code>max_tokens</code>, test one behaviour per test, and run selectively. For frequently run CI, record HTTP calls with <code>vcrpy</code> and <code>pytest-recording</code> (<code>@pytest.mark.vcr()</code>, <code>--record-mode=once</code>, filter <code>authorization</code> and <code>x-api-key</code> headers); delete stale cassettes when prompts or tools change.</p>
+<p><strong>Evals with AgentEvals.</strong> An evaluator takes outputs (and optionally reference outputs) and returns a score. <code>create_trajectory_match_evaluator</code> has four modes: <strong>strict</strong> (same messages and tool calls in the same order, content may differ), <strong>unordered</strong> (same tool calls in any order), <strong>subset</strong> (no tools beyond the reference) and <strong>superset</strong> (at least the reference tools). <code>create_trajectory_llm_as_judge</code> needs no reference and uses a prompt such as <code>TRAJECTORY_ACCURACY_PROMPT</code> (there is a with-reference variant). Add <code>async</code> after <code>create_</code> for async versions. To track results over time, log to LangSmith with the pytest integration (<code>@pytest.mark.langsmith</code>) or <code>client.evaluate(...)</code> over a dataset whose rows have <code>input</code> and <code>output</code> message lists.</p>
+<!-- /docs31c -->
 
 <h2 id="agentic-ai-ch8-sources-and-further-reading">Sources and further reading</h2>
 <ul>
@@ -6997,6 +7142,20 @@ agent.invoke(Command(resume={&quot;decisions&quot;: [{&quot;type&quot;: &quot;ap
 </ul>
 <!-- /proj5 -->
 
+<!-- docs31d -->
+<h2 id="agentic-ai-ch10-from-the-docs-a-sql-agent-with-human-review">From the docs: a SQL agent with human review</h2>
+<p><em>From the LangChain tutorial <a href="https://docs.langchain.com/oss/python/langchain/sql-agent" target="_blank" rel="noopener">Build a SQL agent</a>, read in full on 31 Oct 2026.</em></p>
+<p>The agent fetches the tables, decides which are relevant, fetches their schemas, writes a query, double-checks it with an LLM, runs it, corrects database errors until it works, then answers. The page warns that running model-written SQL is inherently risky: scope database permissions as narrowly as possible, and the demo tools are explicitly not secure or for production.</p>
+<ul>
+<li><strong>Setup:</strong> <code>pip install langchain langgraph</code>, a model that supports tool calling, and the Chinook sample database (a digital media store) in SQLite.</li>
+<li><strong>Four tools</strong> (thin <code>@tool</code> wrappers over <code>sqlite3</code>): <code>sql_db_list_tables</code>, <code>sql_db_schema</code> (schema plus three sample rows, after checking the table exists), <code>sql_db_query</code> (returns an error string on failure so the model can rewrite and retry) and <code>sql_db_query_checker</code> (an LLM call that reviews the query for common mistakes: <code>NOT IN</code> with NULLs, <code>UNION</code> instead of <code>UNION ALL</code>, <code>BETWEEN</code> on exclusive ranges, type mismatches, identifier quoting, wrong join columns).</li>
+<li><strong>System prompt:</strong> create a correct <code>{dialect}</code> query, limit to <code>{top_k}</code> results, select only the relevant columns, always double-check before executing, <strong>never run DML</strong> (INSERT, UPDATE, DELETE, DROP), always look at the tables first, then the schema of the relevant ones.</li>
+<li><strong>Run:</strong> <code>agent.stream_events(..., version="v3")</code> and <code>stream.interleave("messages", "tool_calls")</code>. The sample question "Which genre on average has the longest tracks?" lists tables, reads <code>Track</code> and <code>Genre</code>, checks, queries, and answers "Sci Fi &amp; Fantasy". Feeding errors back to the model is called very powerful on the page.</li>
+<li><strong>Human review:</strong> <code>HumanInTheLoopMiddleware(interrupt_on={"sql_db_query": True}, description_prefix="Tool execution pending approval")</code> plus <code>checkpointer=InMemorySaver()</code>. The run pauses (<code>stream.interrupted</code>, <code>stream.interrupts[0].value["action_requests"]</code>) and resumes with <code>Command(resume={"decisions": [{"type": "approve"}]})</code>.</li>
+<li><strong>Studio:</strong> a <code>langgraph.json</code> listing the agent file lets you chat with it; a separate tutorial builds the same agent directly with LangGraph primitives.</li>
+</ul>
+<!-- /docs31d -->
+
 <h2 id="agentic-ai-ch10-sources-and-further-reading">Sources and further reading</h2>
 <ul>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/15%20-%2022%20Aug%20-%20LangChain%20-%20Runtime%20%26%20Human-in-loop.md" target="_blank" rel="noopener">Class 15 full notes</a></li>
@@ -7237,6 +7396,45 @@ final_state = stream.output
 <li class="task"><label><input type="checkbox"><span>I can stream sub-agents and identify the speaker</span></label></li>
 <li class="task"><label><input type="checkbox"><span>I can explain why output PII redaction needs a stream transformer</span></label></li>
 </ul>
+<!-- docs31e -->
+<h2 id="agentic-ai-ch10a-from-the-docs-a-voice-agent-built-on-streaming">From the docs: a voice agent built on streaming</h2>
+<p><em>From the LangChain tutorial <a href="https://docs.langchain.com/oss/python/langchain/voice-agent" target="_blank" rel="noopener">Build a voice agent with LangChain</a>, read in full on 31 Oct 2026.</em></p>
+<p>Every voice agent does three things: <strong>listen</strong> (capture and transcribe audio), <strong>think</strong> (interpret and reason) and <strong>speak</strong> (generate audio and stream it back). Two architectures:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Sandwich (STT, agent, TTS)</th>
+<th>Speech-to-speech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Idea</td>
+<td>Speech-to-text, a text LangChain agent, then text-to-speech</td>
+<td>One multimodal model takes audio in and gives audio out</td>
+</tr>
+<tr>
+<td>Good</td>
+<td>Full control of each part, swap providers, newest text-model features, transparent</td>
+<td>Simpler, often lower latency for simple turns, captures tone</td>
+</tr>
+<tr>
+<td>Bad</td>
+<td>Orchestrating several services, and speech to text loses tone and emotion</td>
+<td>Few model options, lock-in risk, features lag, less control</td>
+</tr>
+</tbody>
+</table></div>
+<p>The page builds the sandwich (it says it can reach under 700 ms latency with some providers) for a sandwich-shop order agent, with AssemblyAI for speech-to-text and Cartesia for text-to-speech; a full reference app is in the <code>voice-sandwich-demo</code> repository. A browser captures microphone audio as PCM and streams it over a WebSocket to a Python server (the same design adapts to telephony such as Twilio or to WebRTC).</p>
+<ul>
+<li><strong>Speech-to-text stage:</strong> a producer-consumer pattern. One task pumps audio chunks to the provider while another yields events: <code>stt_chunk</code> (partial) and <code>stt_output</code> (final transcript, which triggers the agent).</li>
+<li><strong>Agent stage:</strong> a normal <code>create_agent</code> with two tools (<code>add_to_order</code>, <code>confirm_order</code>), an <code>InMemorySaver</code> and a fresh thread id per call for memory. The system prompt says to avoid emojis, special characters and markdown because a speech engine reads the reply. It streams with <code>agent.astream_events(..., version="v3")</code> and <code>stream.messages</code>, yielding each token as an <code>agent_chunk</code> so synthesis can start at once.</li>
+<li><strong>Text-to-speech stage:</strong> merges two async streams, the upstream events (sending agent text to the provider) and the audio chunks coming back. Cartesia starts synthesising as soon as it gets text, so playback begins before the agent finishes.</li>
+<li><strong>Composition:</strong> the three stages are <code>RunnableGenerator</code>s chained with <code>|</code>, and <code>pipeline.atransform(audio_stream)</code> runs them concurrently inside a FastAPI WebSocket endpoint. Each stage starts as soon as its input arrives, which is where the low latency comes from.</li>
+</ul>
+<!-- /docs31e -->
+
 <h2 id="agentic-ai-ch10a-sources-and-further-reading">Sources and further reading</h2>
 <ul>
 <li><a href="https://docs.langchain.com/oss/python/langchain/streaming" target="_blank" rel="noopener">Streaming (LangChain docs)</a></li>
@@ -11285,6 +11483,65 @@ async def run_agent(server) -&gt; dict:
 </ul>
 <!-- /proj7 -->
 
+<!-- docs31f -->
+<h2 id="agentic-ai-ch18-from-the-docs-mcpadapter-connections-and-authent">From the docs: MCPAdapter, connections and authentication</h2>
+<p><em>From three LangChain docs pages read in full on 31 Oct 2026: <a href="https://docs.langchain.com/oss/python/langchain/mcp" target="_blank" rel="noopener">MCP</a>, <a href="https://docs.langchain.com/oss/python/langchain/mcp/connections" target="_blank" rel="noopener">Connections</a> and <a href="https://docs.langchain.com/oss/python/langchain/mcp/auth" target="_blank" rel="noopener">Authentication</a>. This extends the section above that came from the MCP tools page.</em></p>
+<p><strong>Basics.</strong> <code>MCPAdapter</code> is built on FastMCP, which handles transport inference, protocol negotiation, connection management and auth; LangChain adds the layer that adapts a server's tools into LangChain tools for <code>create_agent</code>. The <code>langchain.mcp</code> namespace needs <code>langchain[mcp]&gt;=1.4.0</code>, is in beta and warns once per process. If you used MCP before 1.4.0 there is a migration guide from <code>langchain-mcp-adapters</code>. The adapter infers the transport from its target:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Transport</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>An <code>http(s)</code> URL string</td>
+<td>Streamable HTTP</td>
+</tr>
+<tr>
+<td>A <code>Path</code> to a script</td>
+<td>Launched as a subprocess over stdio</td>
+</tr>
+<tr>
+<td>An in-process FastMCP server</td>
+<td>In memory, no subprocess or socket (ideal for tests)</td>
+</tr>
+<tr>
+<td>A transport object, a prebuilt <code>fastmcp.Client</code>, or an <code>MCPConfig</code> dict</td>
+<td>As configured (the dict puts several servers behind one adapter)</td>
+</tr>
+</tbody>
+</table></div>
+<p>A plain string must look like an http or https URL. FastMCP would otherwise treat a string that names an existing <code>.py</code> or <code>.js</code> file as a script to launch, and strings often arrive from config or from a model, so the adapter rejects non-URL strings. The LangChain docs themselves are available as a public MCP server at <code>https://docs.langchain.com/mcp</code> (no key; tools to search the docs, read them through a virtual filesystem, and submit feedback).</p>
+<p><strong>Lifecycle.</strong> <code>MCPAdapter</code> is an async context manager. Discover tools inside <code>async with</code> and build the agent there; the returned tools hold the client, so they stay callable after the context exits. They are also <strong>reentrant</strong>: each tool call opens the client, runs the call and releases it, so a run uses one session per tool call and a long-running agent does not pin an idle connection. To hold one session across several calls, keep the adapter's context open around the agent call.</p>
+<p><strong>Several servers.</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Use</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Many servers behind one connection</td>
+<td><code>MCPConfig</code> dict (<code>{"mcpServers": {...}}</code>)</td>
+<td>Tools are prefixed with the config key (<code>weather_...</code>); servers can mix transports, but the fleet shares <strong>one</strong> negotiated protocol era, so a legacy-only member drops the whole fleet to legacy</td>
+</tr>
+<tr>
+<td>Separate auth, protocol eras or pools per server</td>
+<td><code>ClientGroup</code></td>
+<td>Each member keeps its own era, auth and handlers; tools are namespaced <code>{server}_{tool}</code>; calls route back to the client that advertised the tool</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Scaling a deployment.</strong> Discover per run but reuse connections underneath: build the agent in a <code>langgraph dev</code> graph factory, use <code>list_tools(cache_mode="use")</code> to serve a cached tool list within the server's TTL (modes: <code>use</code>, <code>refresh</code>, <code>bypass</code>; caching is opt-in and only works with modern-era servers that advertise hints), and share one HTTP connection pool across clients through an <code>httpx_client_factory</code>. In a graph factory the annotated types must be importable at runtime, not only under <code>TYPE_CHECKING</code>, because langgraph-api reads them with <code>get_type_hints()</code>.</p>
+<p><strong>Protocol eras.</strong> The legacy era starts every connection with an <code>initialize</code> handshake; the modern era (protocol version 2026-07-28 and later) discovers support by probing a <code>server/discover</code> endpoint. FastMCP negotiates per connection (<code>mode="legacy"</code> pins the handshake era; <code>mode="auto"</code>, the default, picks the newest the server understands).</p>
+<p><strong>Authentication.</strong> Any credential a <code>fastmcp.Client</code> accepts works: a <strong>bearer token</strong> string (<code>Client(url, auth=token)</code>), the literal <code>"oauth"</code> for the full OAuth 2.1 flow (discovery, dynamic client registration, browser redirect, token exchange; tokens are in memory by default, so pass an <code>OAuth(..., token_storage=...)</code> provider to persist them), or any <code>httpx.Auth</code>. For several servers, give each client its own <code>auth</code> inside a <code>ClientGroup</code>. For a deployment, use <strong>per-user authentication</strong>: authenticate the caller at the LangGraph server with a custom auth handler, then in the graph factory read <code>runtime.user.identity</code> and build the client with a per-user token (for example an OAuth gateway exchanging the session). Isolate any cached responses per user so one user never sees another's cached tool list.</p>
+<!-- /docs31f -->
+
 <h2 id="agentic-ai-ch18-sources-and-further-reading">Sources and further reading</h2>
 <ul>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2014%20-%20Oct%203%20%26%20Oct%204/MCP%20in%20Langchain/MCP_in_Langchain.ipynb" target="_blank" rel="noopener">MCP in LangChain notebook</a></li>
@@ -11827,6 +12084,80 @@ class RouterState(TypedDict, total=False):
 <h2 id="agentic-ai-ch19-repo-note-the-multi-agent-sketch-in-test-py">Repo note: the multi-agent sketch in <code>test.py</code></h2>
 <p><code>Weekend 14.../Multi Agents in Langchain/test.py</code> is a short, <strong>non-runnable sketch</strong> of the subagents idea: three <code>create_agent</code> specialists built from one model (<code>init_chat_model("openai:gpt-5.5")</code>), each with its own tools and a one-line system prompt: a GitHub expert (<code>search_code</code>, <code>search_issues</code>, <code>search_prs</code>), a Notion expert (<code>search_notion</code>, <code>get_page</code>) and a Slack expert (<code>search_slack</code>, <code>get_thread</code>). The tool functions are never defined, so it will not run as committed, and the file ends by invoking only the Slack agent with a time-off question. Read it as the shape of the pattern, one narrowly scoped agent per knowledge source, which a supervisor would then route between.</p>
 <!-- /testpy -->
+
+<!-- docs31g -->
+<h2 id="agentic-ai-ch19-from-the-docs-choosing-a-pattern-and-the-custom-">From the docs: choosing a pattern, and the custom workflow</h2>
+<p><em>From two LangChain docs pages read in full on 31 Oct 2026: <a href="https://docs.langchain.com/oss/python/langchain/multi-agent" target="_blank" rel="noopener">Multi-agent</a> and <a href="https://docs.langchain.com/oss/python/langchain/multi-agent/custom-workflow" target="_blank" rel="noopener">Custom workflow</a>.</em></p>
+<p><strong>Do you need multi-agent at all?</strong> Not every complex task does: a single agent with the right (sometimes dynamic) tools and prompt can often do the same. People usually mean one of three needs: <strong>context management</strong> (specialised knowledge without overflowing the window), <strong>distributed development</strong> (teams own capabilities independently) or <strong>parallelisation</strong>. Patterns pay off when one agent has too many tools and picks badly, when tasks need specialised knowledge with long prompts, or when you need sequential constraints that unlock capabilities. At the centre is context engineering: what each agent sees. For built-in support the page points to managed Deep Agents (subagents, skills, planning, a virtual filesystem and context management).</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>How it works</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Subagents</td>
+<td>A main agent coordinates subagents as tools; all routing passes through it</td>
+</tr>
+<tr>
+<td>Handoffs</td>
+<td>State changes (set by tool calls) switch the active agent or its tools and prompt</td>
+</tr>
+<tr>
+<td>Skills</td>
+<td>One agent stays in control and loads specialised prompts and knowledge on demand</td>
+</tr>
+<tr>
+<td>Router</td>
+<td>A routing step classifies input, sends it to one or more agents, and synthesises their results</td>
+</tr>
+<tr>
+<td>Custom workflow</td>
+<td>A bespoke LangGraph flow mixing deterministic logic and agents; other patterns can be nodes</td>
+</tr>
+</tbody>
+</table></div>
+<p>The page also rates each pattern with stars on four criteria: distributed development (can teams maintain parts independently), parallelisation, multi-hop (calling several subagents in series) and direct user interaction (can subagents talk to the user). Handoffs have no rating for distributed development or parallelisation, and routers have none for multi-hop; the per-column star counts did not come through in the page text I read, so use the table's own page for the exact ratings. Patterns can be mixed.</p>
+<p><strong>Performance, from the page's three scenarios</strong> (model calls, tokens):</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Subagents</th>
+<th>Handoffs</th>
+<th>Skills</th>
+<th>Router</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One-shot ("Buy coffee")</td>
+<td>4 calls</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Repeat request (two turns)</td>
+<td>8 (4+4)</td>
+<td>5 (3+2)</td>
+<td>5 (3+2)</td>
+<td>6 (3+3)</td>
+</tr>
+<tr>
+<td>Multi-domain (compare three languages, about 2,000 tokens of docs each)</td>
+<td>5 calls, about 9K tokens</td>
+<td>7+ calls, 14K+ tokens</td>
+<td>3 calls, about 15K tokens</td>
+<td>5 calls, about 9K tokens</td>
+</tr>
+</tbody>
+</table></div>
+<p>Why: subagents add a call because results flow back through the main agent, and they are stateless, so a repeat costs the full flow again (strong context isolation, repeated cost). Handoffs and skills are stateful, so a repeat skips the hand-off or the skill load and saves roughly 40 to 50 percent of calls. Routers are stateless, and each request needs a routing call (wrap one as a tool in a stateful agent to optimise). For multi-domain work, parallel patterns (subagents, router) win; skills have fewer calls but accumulate context (every later call re-reads all the loaded skill text, about 67 percent more tokens than subagents here); handoffs run sequentially and cannot parallelise. Handoffs and skills are best for repeat requests, subagents and router for parallel execution, subagents and skills for large-context domains.</p>
+<p><strong>Custom workflow.</strong> Define the graph yourself with LangGraph: sequential steps, conditional branches, loops and parallel execution. Each node can be a plain function, an LLM call or a whole agent, and you can call <code>create_agent(...).invoke(...)</code> directly inside a node. The page's example is a RAG pipeline for a WNBA assistant with three node types: a <strong>model node</strong> (rewrite the query with structured output), a <strong>deterministic node</strong> (vector retrieval, no LLM) and an <strong>agent node</strong> (answer from the retrieved context, with a news tool), passing a <code>TypedDict</code> state between them. The router pattern is itself a custom workflow; a tutorial builds a router over GitHub, Notion and Slack in parallel. In production, swap the in-memory vector store for a persistent one.</p>
+<!-- /docs31g -->
 
 <h2 id="agentic-ai-ch19-sources-and-further-reading">Sources and further reading</h2>
 <ul>
@@ -12565,6 +12896,26 @@ uvicorn api.main:app --app-dir backend --reload --port 8080
 <li><strong>Ch 8, packages and the environment.</strong> <code>requirements.txt</code> lists nineteen pinned packages in three groups. Web service: fastapi and uvicorn (framework and server), python-multipart (file uploads), pydantic and pydantic-settings (request shapes, <code>.env</code>), structlog (JSON logs), requests (the one live exchange-rate call). AI toolkit: langchain (<code>create_agent</code> and middleware), langchain-core (prompts, tools, pipe syntax), langchain-community (PDF loader), langchain-text-splitters, langchain-google-genai (Gemini chat and embeddings), and langgraph (the engine under <code>create_agent</code>; no graph code is written). Storage and documents: chromadb and langchain-chroma (local vector database), langchain-google-vertexai, google-cloud-aiplatform and google-cloud-storage (cloud mode), pypdf. <code>requirements-dev.txt</code> adds pytest 8.4.2 and httpx 0.28.1 because the live server should not carry test tools. <code>uv add -r requirements.txt</code> reads the file, resolves 157 packages in total (the nineteen bring their own dependencies), installs into <code>.venv</code>, and records <code>pyproject.toml</code> and <code>uv.lock</code>. <strong>Commit</strong> <code>pyproject.toml</code> (what you asked for) and <code>uv.lock</code> (exactly what was installed, about 4,200 lines, never edited by hand); <strong>never commit</strong> <code>.venv</code> (about 590 MB; <code>uv sync</code> recreates it). Dev tools go in a separate <code>[dependency-groups] dev</code> section. <code>uv run</code> runs a command inside the environment from any folder, because it looks upward for <code>pyproject.toml</code>; plain <code>python</code> would not see the packages. Common problems: <code>uv: command not found</code> (reopen the terminal), <code>No module named 'fastapi'</code> (you ran plain <code>python</code>), a Python version error (install 3.12 and check <code>.python-version</code>), a slow first install (the AI packages are large).</li>
 <li><strong>Ch 9, the folder structure.</strong> Twenty-four backend files (six are empty <code>__init__.py</code>; <code>tests/</code> has none), each with one job: <code>api/</code> (main, endpoints, schemas), <code>agent/</code> (tools, prompts, middleware, agents), <code>rag/</code> (llm, embeddings, vector_store, document_store, data_ingestion, retrieval), plus <code>config/settings.py</code>, <code>logger/custom_logger.py</code>, <code>exceptions/</code> and <code>tests/</code> (three files, 17 tests). <strong>Dependency rule:</strong> a layer may use the layers below it, never above: api uses agent and rag; agent borrows rag's Gemini connection; everything may use the shared basics. That gives a safe <strong>build order</strong>: backbone (settings, exceptions, logger), document Q&amp;A, audit team, then server and tests, so every step runs. Create the folders with <code>mkdir -p backend/{...}</code> and the empty files with <code>touch</code>; the checkpoint is <code>find backend -type f | wc -l</code> giving 24. Add <code>.env</code>, <code>.meridian/</code>, <code>logs/</code> and <code>node_modules/</code> to <code>.gitignore</code> first, then commit "Project skeleton" and check <code>.env</code> is not tracked.</li>
 <li><strong>Reference slides.</strong> The verification run used uv 0.8.22, Python 3.12.11 and Git 2.39.5 on macOS (10 Oct 2026); the first install took about 40 seconds; 17 tests passed in about 6.5 seconds once the reference backend was copied in. Windows PowerShell variants and the uv installer itself are marked "not tested" on the slides.</li>
+</ul>
+<!-- slides-full13 -->
+<h3 id="agentic-ai-ch20-modules-1-and-3-read-in-full-extra-detail">Modules 1 and 3, read in full (extra detail)</h3>
+<p><em>All 60 slides of module 1 and all 42 of module 3 were read in full on 31 Oct 2026, replacing the earlier "In short" digests. This adds the details the digests left out.</em></p>
+<p><strong>Module 1, the case.</strong></p>
+<ul>
+<li><strong>The business rules the software must apply.</strong> Risk: screen against sanctions lists (the prompt names EU, US OFAC, UN, UK and German export-control lists); credit score 75 or more is low risk, 50 to 74 is moderate (a 25 to 50 percent deposit or a confirmed letter of credit), below 50 is high (escalate to the Head of Global Procurement and the CFO; consider rejection, or full prepayment with a bank guarantee). Tax: 19 percent German import VAT plus customs duty by tariff code; intra-EU business-to-business supply with a valid VAT ID is 0 percent (reverse charge). Treasury: the quoted exchange rate must be within 5 percent of the market rate. Control: asset (CapEx) versus running cost (OpEx), above EUR 250,000 a department head signs, above EUR 1,000,000 the CFO and management board; a single running-cost line above EUR 50,000 is flagged as a possible misclassification.</li>
+<li><strong>The sample request.</strong> 200 touchscreen controllers (PLC controllers), EUR 480,000, from a fictional Dutch supplier, goods made in Japan, quoted at 163.5 yen to the euro. The live rate at test time was about 177, so the quote was about 7.8 percent away and the check correctly flagged it.</li>
+<li><strong>Three audits, one per outcome.</strong> 20 spare servo motors for EUR 38,000 from a known supplier: approved to pay. The EUR 480,000 order: conditional hold (FX alert, high credit risk, amount above EUR 250,000). The same order from a sanctioned supplier: rejected on a red alert. Each took roughly 70 to 150 seconds. The case notes say "five minutes"; the slide says to say "minutes later". Even a perfect large order cannot be approved outright because anything above EUR 250,000 is flagged for a department head, which produces a hold.</li>
+<li><strong>Decision keywords, in order of precedence.</strong> <code>RED ALERT</code> in any report means rejected; <code>FX ALERT</code> or <code>HOLD FOR TREASURY AUDIT</code> means conditional hold; all three clear means approved to pay (the memo confirms the cost centre and ledger account). Red beats hold, and hold beats approval. The rule lives inside the CFO prompt; a production system would check the keywords in code.</li>
+<li><strong>The four users and four tabs.</strong> Buyer (Procurement Audit), policy owner (Index Documents), anyone with a question (RAG Q&amp;A) and IT (System Status).</li>
+<li><strong>What is real and what is simulated.</strong> Real: the policy documents and a live exchange rate (with a model estimate as a backup). Simulated by the model from general knowledge: sanctions lists, tax and tariff tables, credit data. The asset-or-running-cost check is model-based with a rule-based fallback. In testing, the tax tool reported customs duty of 0.00 EUR while the tariff PDF says 2.2 percent: take the disagreement to the tax team, then connect the audit to the document.</li>
+<li><strong>Honest limits.</strong> Four of five checks use the model's general knowledge; the audit does not read the uploaded documents (the two helpers are separate); wording varies; no sign-in; upload history resets on restart; only text PDFs work.</li>
+<li><strong>The two views in detail.</strong> AI engineer, six steps: problem, jobs, tools, build, verify, watch. Six jobs: find the right rule (<code>rag/</code>), check from several angles (<code>agent/</code>), decide by written rules (<code>agent/prompts.py</code>), let people use it (<code>api/</code>, <code>frontend/</code>), make it trustworthy (<code>logger/</code>, errors, tests), reach other people (<code>Dockerfile</code>, <code>.github/workflows/deploy.yml</code>). Build the smallest thing first: notebook, function, named file, settings outside, safety layer. Exact rules in code (the 5 percent FX comparison is <code>validate_fx_hedge</code> in <code>agent/tools.py</code>; e-mail and card-number redaction is in <code>agent/middleware.py</code>), judgement in the model. Verify with 17 automated tests that run in seconds with no key or internet (the model is a stand-in), and with known-answer questions: revenue about EUR 2.84 billion, Net-45, 2.2 percent, 10 years straight line, and "I don't know" for who won the 2018 World Cup. Forward-deployed engineer, six steps: observe, measure, roles, connect, pilot, hand over. Measure a baseline first (days from request to payment, hand-offs, requests sent back, decisions nobody can explain; the blanks belong to the customer). Start narrow (one category, one team), widen only with evidence. Work inside the customer's rules (privacy, access, cost). Hand over so the team can run it, change a prompt, read the logs and switch it off.</li>
+</ul>
+<p><strong>Module 3, the backbone.</strong></p>
+<ul>
+<li><strong>Settings (chapter 10).</strong> <code>.env.example</code> has seven rows: <code>APP_MODE</code> (<code>local</code> default, or <code>cloud</code>), <code>GOOGLE_API_KEY</code> (always needed), <code>VERTEX_LLM_MODEL_NAME</code> (default <code>gemini-3.8-flash</code>), <code>LLM_TEMPERATURE</code> (0 is the most repeatable), <code>LOCAL_EMBEDDING_MODEL_NAME</code> (default <code>gemini-embedding-001</code>), the agent limits <code>AGENT_MAX_MODEL_CALLS</code>, <code>_TOOL_CALLS</code> and <code>_RETRIES</code> (defaults 8, 6 and 2), and the Google Cloud block (<code>GCP_PROJECT_ID</code>, <code>GCS_BUCKET_NAME</code>, <code>VECTOR_SEARCH_*</code>) for cloud mode. Local mode uses the Gemini API with your key, Chroma in <code>.meridian/chroma</code> and PDFs in <code>.meridian/uploads/</code>; cloud mode uses the key from Secret Manager, Vertex AI embeddings (<code>text-embedding-005</code>), Vertex AI Vector Search and a Cloud Storage bucket. Get a free key at <code>aistudio.google.com/apikey</code>, copy it once, paste it with no quotes and no spaces around the equals sign, and use a throw-away key; free-tier content may be used by Google.</li>
+<li><strong><code>config/settings.py</code> (117 lines), chunk by chunk.</strong> Imports and <code>PROJECT_ROOT</code> (two parents up from <code>backend/config/</code>, so <code>.env</code> is found from any folder); the <code>Settings</code> class with typed fields, defaults and an alias (<code>app_env</code> in Python, <code>ENVIRONMENT</code> in <code>.env</code>); <code>app_mode</code> as a <code>Literal</code> so <code>APP_MODE=hybrid</code> fails at start-up; both embedding models produce 768 numbers; the cloud block is empty by default; <code>model_config</code> with <code>env_file</code> built from <code>PROJECT_ROOT</code> and <code>extra="ignore"</code>; a validator that makes the bucket prefix end with a slash; helper properties (<code>is_cloud</code>, <code>chroma_dir</code>, <code>local_upload_dir</code>); <code>missing_cloud_settings</code> listing the empty required cloud settings; one shared <code>settings = Settings()</code>; and a small block that points Google's libraries at a key file on a laptop (on Cloud Run nothing happens, because the service has its own identity). Four checks prove it: default mode is local, a wrong value is refused, the missing list names the two cloud settings still empty, and the validator adds the slash. A real call to Gemini proves the chain (it uses <code>.text</code> because Gemini can return its reply as blocks).</li>
+<li><strong>Errors and logs (chapter 12).</strong> <code>exceptions/__init__.py</code> (17 lines): <code>MeridianError</code> as the base, <code>ConfigurationError</code> (becomes HTTP 503) and <code>IngestionError</code> (becomes 422); anything else is 500 and also logged. The logger (<code>logger/__init__.py</code>, 5 lines, and <code>custom_logger.py</code>, 106 lines) uses <code>structlog</code> with a processor pipeline: UTC ISO timestamp, level, <code>severity</code> (the only custom piece, <code>add_severity</code>, a copy of the level in upper case because Cloud Logging reads that name), exception formatting, the message renamed <code>event</code>, and JSON rendering. It makes a <code>logs/</code> folder in the folder you run from with a new file per run named by date and time, writes each line to both a file handler and a console handler, and in cloud mode <code>flush_to_gcs</code> uploads the log file to the bucket when the server stops. One shared <code>GLOBAL_LOGGER</code> is imported everywhere. The backbone commit holds four files, 246 lines.</li>
 </ul>
 <h3 id="agentic-ai-ch20-module-3-the-backbone-settings-errors-logging">Module 3: the backbone (settings, errors, logging)</h3>
 <ul>
@@ -14224,6 +14575,20 @@ app.mount(&quot;/mcp&quot;, mcp_app)
 </tbody>
 </table></div>
 <p>Everything that needs storage asks one question (<code>settings.is_cloud</code>) and receives a LangChain <code>VectorStore</code>, so ingestion and retrieval never know which database is behind them. This is the <strong>strategy pattern</strong>: same interface, swappable implementation. Both modes use 768-dimensional vectors, but the two databases are separate, so re-upload after switching. The deployment side of <code>APP_MODE</code> is in the last chapter of the LangChain book.</p>
+<!-- docs31h -->
+<h2 id="rag-r2-from-the-docs-a-semantic-search-engine-in-langch">From the docs: a semantic search engine in LangChain primitives</h2>
+<p><em>From the LangChain tutorial <a href="https://docs.langchain.com/oss/python/langchain/knowledge-base" target="_blank" rel="noopener">Build a semantic search engine</a>, read in full on 31 Oct 2026. It is the generic version of what Meridian does.</em></p>
+<ol>
+<li><strong>Document.</strong> LangChain's unit of text: <code>page_content</code>, a <code>metadata</code> dict (source, relations) and an optional <code>id</code>. A document is often one chunk of a bigger file.</li>
+<li><strong>Embeddings.</strong> Vector search stores numeric vectors and compares a query vector of the <strong>same dimension</strong> by cosine or similar. The page lists many providers (OpenAI, Azure, Google Gemini, Vertex, Bedrock, HuggingFace, Ollama, Cohere, Mistral and others) behind one interface, and a deterministic fake for tests.</li>
+<li><strong>Vector store.</strong> Add and query <code>Document</code>s with similarity metrics. Choices span in-memory (<code>InMemoryVectorStore</code>), hosted and self-run stores (Chroma, Pinecone, Qdrant, Milvus, PGVector, MongoDB and others), all behind the same methods.</li>
+<li><strong>Load and split a PDF.</strong> A page is often too coarse, so split it. <code>RecursiveCharacterTextSplitter</code> splits recursively on common separators until chunks reach the target size and is the recommended splitter for generic text; the page uses <code>chunk_size=1000, chunk_overlap=200, add_start_index=True</code> (which keeps each chunk's character offset in <code>start_index</code>). A 107-page filing became 516 chunks.</li>
+<li><strong>Index and query.</strong> <code>add_documents</code> indexes the chunks. Query by string (<code>similarity_search</code>), async (<code>asimilarity_search</code>), with scores (<code>similarity_search_with_score</code>; here the score is a distance, so lower means closer, and meaning varies by provider) or by vector (<code>similarity_search_by_vector</code>). Search by similarity or by maximal marginal relevance.</li>
+<li><strong>Retrievers.</strong> A vector store is not a Runnable; a <strong>retriever</strong> is, so it supports <code>invoke</code> and <code>batch</code> sync and async. Wrap a function with <code>@chain</code>, or use <code>vector_store.as_retriever(search_type=..., search_kwargs={"k": 1})</code>. Search types: <code>"similarity"</code> (default), <code>"mmr"</code> and <code>"similarity_score_threshold"</code> (filter by score). Retrievers can also wrap non-vector sources. The next step is a RAG app that combines question and retrieved context in a prompt.</li>
+</ol>
+<p>The Meridian code compares with this directly: it uses the same splitter with 1,000-character chunks and 100 overlap, and its three retrieval strategies are functions built on the same retriever idea.</p>
+<!-- /docs31h -->
+
 <h2 id="rag-r2-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>

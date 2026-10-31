@@ -363,6 +363,38 @@ The coding part (a banking agent with real memory across two calls on one `threa
 - [ ] I can separate guardrail from middleware
 - [ ] I can say when LangGraph is worth it
 
+<!-- docs31b -->
+## From the docs: context engineering in agents
+
+*From the LangChain docs page [Context engineering in agents](https://docs.langchain.com/oss/python/langchain/context-engineering), read in full on 31 Oct 2026.*
+
+**The claim.** When an agent fails, either the model was not capable enough or the right context was not passed to it, and the page says it is more often the second. Context engineering means providing the right information and tools in the right format, and the page calls it the number one job of AI engineers.
+
+**The loop and what you control.** An agent is a model call, then tool execution, repeated until the model finishes. You control three kinds of context:
+
+| Context | What you control | Lasts |
+| --- | --- | --- |
+| Model context | What goes into each model call: instructions, message history, tools, model, response format | Transient (per call) |
+| Tool context | What tools can read and write (state, store, runtime context) | Persistent |
+| Life-cycle context | What happens between model and tool calls: summarisation, guardrails, logging | Persistent |
+
+It draws on three data sources: **runtime context** (static, conversation-scoped configuration such as user id, keys, permissions), **state** (short-term memory: messages, uploaded files, auth status, tool results) and the **store** (long-term, cross-conversation memory such as preferences). Middleware is the mechanism: it can update context or jump to a different step.
+
+**Model context, with the middleware that does it.**
+
+- **System prompt:** `@dynamic_prompt` builds the prompt from state (for example, be concise once the chat passes ten messages), the store (user preferences) or runtime context (role and environment).
+- **Messages:** `@wrap_model_call` injects extra messages for one call (uploaded-file summaries from state, writing style from the store, compliance rules from runtime context). The page appends them at the end because models pay more attention to final messages. These changes are transient; to persist them, return an `ExtendedModelResponse` carrying a `Command`, or use `before_model`, `after_model` or `wrap_tool_call`.
+- **Tools:** each needs a clear name, description and argument descriptions (`@tool(parse_docstring=True)` reads an `Args:` section). Too many tools overload the model; select dynamically with `request.override(tools=...)` by authentication state, conversation stage, store feature flags or role.
+- **Model:** pick a model per call (a larger-context model for long chats, a cheaper one for short ones, a user's preferred model, or by cost tier), created once outside the middleware.
+- **Response format:** a schema makes the final response conform; choose it dynamically (a simple schema early, a detailed one later, or by role).
+
+**Tool context.** Tools read state, store and runtime context through `ToolRuntime`, and write by returning `Command(update={...})` for state or `store.put(...)` for the store.
+
+**Life-cycle example.** `SummarizationMiddleware(model=..., trigger={"tokens": 4000}, keep=("messages", 20))` summarises old messages with a separate call and **permanently** replaces them in state, unlike the transient trimming above.
+
+**Best practices from the page.** Start with static prompts and tools; add dynamic behaviour only when needed; test one context feature at a time; monitor model calls, tokens and latency; use built-in middleware (`SummarizationMiddleware`, `LLMToolSelectorMiddleware`); document what context is passed and why; and remember model-context changes are transient while life-cycle changes persist.
+<!-- /docs31b -->
+
 ## Sources and further reading
 
 - [Class 12 full notes]({{src:classes_transcription_summary/12 - 08 Aug - LangChain - Mastering Middleware.md}})

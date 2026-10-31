@@ -331,6 +331,39 @@ Yes: **CVE-2025-68664**, disclosed December 2025, rated CVSS 9.3. It was a seria
 - [ ] I can explain the four message types
 - [ ] I can compare open and closed models
 
+<!-- docs31a -->
+## From the docs: philosophy, components, LangSmith and deployment
+
+*From five LangChain docs pages read in full on 31 Oct 2026: [Philosophy](https://docs.langchain.com/oss/python/langchain/philosophy), [Component architecture](https://docs.langchain.com/oss/python/langchain/component-architecture), [LangSmith Observability](https://docs.langchain.com/oss/python/langchain/observability), [LangSmith Studio](https://docs.langchain.com/oss/python/langchain/studio) and [Deployment](https://docs.langchain.com/oss/python/langchain/deploy).*
+
+**What LangChain believes.** LLMs are powerful, better when combined with external data, and applications will become more agentic, but it is early, and a prototype is easy while a reliable production agent is hard. Two focuses: build with the best models (standardise differing provider APIs, parameters and message formats so you can switch models without lock-in), and make it easy to use models to orchestrate flows over other data and computation (tools, parsing and access to unstructured data). You can build with LangChain for maximum control, or with **Deep Agents**, an opinionated harness with built-in planning, filesystem tools, subagents and context management. Both sit on LangGraph.
+
+**A short history, as the page tells it.**
+
+| When | What happened |
+| --- | --- |
+| Oct 2022 | v0.0.1, a month before ChatGPT: LLM abstractions plus "chains" (fixed steps, such as retrieve then generate). The name is Language plus Chain |
+| Dec 2022 | First general-purpose agents, based on the ReAct paper: the model emitted JSON that was parsed into tool calls |
+| Jan 2023 | OpenAI's Chat Completions API moves models from strings to lists of messages; a JavaScript version is released |
+| Mar 2023 | OpenAI function calling: the API itself returns tool-call payloads, so LangChain stops parsing JSON |
+| Jun 2023 | LangSmith released (observability and evals), since the main problem is reliability |
+| Jan 2024 | v0.1.0, the first non-0.0.x |
+| Feb 2024 | LangGraph released: the missing low-level orchestration layer (streaming, durable execution, short-term memory, human-in-the-loop) |
+| Jun 2024 | 700+ integrations, split into partner packages or `langchain-community` |
+| Oct 2024 | LangGraph becomes the preferred way for anything beyond one LLM call; most old chains and agents deprecated |
+| Apr 2025 | Multimodal inputs; the message format is extended |
+| 20 Oct 2025 | **v1.0:** all old chains and agents replaced by one agent abstraction built on LangGraph; a standard content format for reasoning blocks, citations and server-side tool calls; old code stays available as `langchain-classic` |
+| Mar 2026 | Deep Agents released as an open-source harness on LangGraph |
+
+**Component architecture.** Five layers build on each other: input processing (raw data to documents), embedding and storage, retrieval, generation (models, optionally with tools) and orchestration (agents and memory). The page's category table: models, tools, agents, memory, retrievers, document processing (loaders, splitters, transformers) and vector stores (Chroma, Pinecone, FAISS). Common patterns: RAG, an agent with tools, a multi-agent system.
+
+**LangSmith tracing.** Agents from `create_agent` support tracing with no extra code once you set the environment: `LANGSMITH_TRACING=true` and `LANGSMITH_API_KEY`, plus, in an agent-based workspace, `LANGSMITH_AGENT_ID` and `LANGSMITH_AGENT_ENVIRONMENT` (or `LANGSMITH_PROJECT` in a project-based workspace or self-hosted). A trace records every step: input, model calls, tool calls, decisions and the final response. Trace only some calls with `ls.tracing_context(enabled=True)`, and attach `tags` and `metadata` (user id, session id) either in `config` or in `tracing_context`.
+
+**LangSmith Studio.** A free visual interface for running and debugging a local agent. Install `langgraph-cli[inmem]` (Python 3.11 or newer), put your agent in a file, create a `.env` (not committed) with the LangSmith key, write a `langgraph.json` whose `graphs` key points at your agent (`create_agent` returns a compiled LangGraph graph, which is what the key expects), install dependencies and run `langgraph dev`. The agent is then served at `http://127.0.0.1:2024` and opens in Studio, showing prompts, tool arguments and results, tokens, latency and exceptions with their state; the dev server hot-reloads, and you can re-run a thread from any step. Setting `LANGSMITH_TRACING=false` keeps data local. Safari blocks localhost connections to Studio, so add `--tunnel`.
+
+**Deployment.** For production the page offers LangSmith Cloud (managed infrastructure for stateful, long-running agents with persistent state and background execution), plus hybrid, standalone and self-hosted options. The Cloud steps: push a LangGraph-compatible app to GitHub (public or private), create a New Deployment under Deployments in LangSmith and link the repository (about 15 minutes), open it in Studio, copy the API URL, and call it with `langgraph-sdk` (`client.runs.stream(None, "agent", input=..., stream_mode="updates")`) or with REST at `/runs/stream` and an `X-Api-Key` header. The agent name comes from `langgraph.json`.
+<!-- /docs31a -->
+
 ## Sources and further reading
 
 - [Class 07 full notes]({{src:classes_transcription_summary/07 - 18 Jul - LangChain Family & Harness Engineering.md}})

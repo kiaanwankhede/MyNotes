@@ -1,0 +1,77 @@
+{
+ "items": [
+  {
+   "group": "LangChain docs",
+   "name": "Pages in scope",
+   "done": 41,
+   "total": 41,
+   "note": "23 read earlier plus the 18 that were blocked, all read in full on 31 Oct 2026 through the desktop browser. Out of scope by your request: frontend pages, Agent Chat UI, Deep Agents from scratch, four multi-agent tutorials."
+  },
+  {
+   "group": "Pydantic docs",
+   "name": "Pages read",
+   "done": 12,
+   "total": 19,
+   "note": "Read: get started, models, fields, validators, serialization, strict mode, types, JSON schema, settings (about 96%), error handling, the LLM article, the Pydantic AI example. Not read: unions, alias, configuration, dataclasses, TypeAdapter, performance, FastAPI docs."
+  },
+  {
+   "group": "Instructor sites",
+   "name": "Sites read in full",
+   "done": 13,
+   "total": 15,
+   "note": "Full: 3 MCP sites, Pydantic, all 7 series guides, AI terms, Python agents. Partial: the context-window site (widgets only) and the Meridian slides (see below)."
+  },
+  {
+   "group": "Meridian slides",
+   "name": "Modules read in full",
+   "done": 3,
+   "total": 7,
+   "note": "Modules 1, 2 and 3 read in full (149 slides). Modules 4 to 7 are digests from the \"In short\" lines; chapter 21 of module 4 was read in full. Remaining about 430K characters."
+  },
+  {
+   "group": "Craft page",
+   "name": "Index pages read",
+   "done": 14,
+   "total": 14,
+   "note": "All index pages read."
+  },
+  {
+   "group": "Craft page",
+   "name": "Attachments opened",
+   "done": 20,
+   "total": 40,
+   "note": "15 PDFs text-extracted and 5 Colabs opened (counts approximate). Not opened: Excalidraw files, videos, the other Colab links (same notebooks as in the repo), tail of the newsletter prompt, the AI Industry Handbook (not for redistribution)."
+  },
+  {
+   "group": "Meridian learner repo",
+   "name": "Repo reviewed",
+   "done": 1,
+   "total": 1,
+   "note": "README, code and a frontend digest read; not every file individually."
+  },
+  {
+   "group": "agent-flow repo",
+   "name": "Repo reviewed",
+   "done": 0,
+   "total": 1,
+   "note": "README and folder layout only, source not read."
+  }
+ ],
+ "skipped_on_purpose": [
+  "Frontend material (you asked to drop it)",
+  "LangGraph (lectures not started; no book yet)",
+  "AI Industry Handbook (marked not for redistribution)",
+  "Search-excerpt content (removed after you objected)",
+  "API keys found in a notebook and a Colab (flagged in the notes, never reproduced)"
+ ],
+ "structure_gaps": [
+  "Foundations, Pydantic and RAG books have no glossary or cheat sheet",
+  "RAG book is built only from Meridian; no course RAG classes exist yet",
+  "Chapter order inside the LangChain book has not been reviewed",
+  "Only the TimeTrack lab was run; SDK snippets in the Pydantic book were not run"
+ ],
+ "log": [
+  "2026-10-31: Meridian modules 1 and 3 read in full (now 3 of 7); STATUS.md and CLAUDE.md added",
+  "2026-10-31: Read the 18 blocked LangChain docs pages (now 41 of 41), Meridian module 2, AI terms and Python-agents sites, class 1-2 write-ups and the last unread repo files"
+ ]
+}

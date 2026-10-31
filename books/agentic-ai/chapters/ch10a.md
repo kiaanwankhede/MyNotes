@@ -217,6 +217,27 @@ When you need a projection the built-ins do not offer, for example retrieval pro
 - [ ] I can stream sub-agents and identify the speaker
 - [ ] I can explain why output PII redaction needs a stream transformer
 
+<!-- docs31e -->
+## From the docs: a voice agent built on streaming
+
+*From the LangChain tutorial [Build a voice agent with LangChain](https://docs.langchain.com/oss/python/langchain/voice-agent), read in full on 31 Oct 2026.*
+
+Every voice agent does three things: **listen** (capture and transcribe audio), **think** (interpret and reason) and **speak** (generate audio and stream it back). Two architectures:
+
+| | Sandwich (STT, agent, TTS) | Speech-to-speech |
+| --- | --- | --- |
+| Idea | Speech-to-text, a text LangChain agent, then text-to-speech | One multimodal model takes audio in and gives audio out |
+| Good | Full control of each part, swap providers, newest text-model features, transparent | Simpler, often lower latency for simple turns, captures tone |
+| Bad | Orchestrating several services, and speech to text loses tone and emotion | Few model options, lock-in risk, features lag, less control |
+
+The page builds the sandwich (it says it can reach under 700 ms latency with some providers) for a sandwich-shop order agent, with AssemblyAI for speech-to-text and Cartesia for text-to-speech; a full reference app is in the `voice-sandwich-demo` repository. A browser captures microphone audio as PCM and streams it over a WebSocket to a Python server (the same design adapts to telephony such as Twilio or to WebRTC).
+
+- **Speech-to-text stage:** a producer-consumer pattern. One task pumps audio chunks to the provider while another yields events: `stt_chunk` (partial) and `stt_output` (final transcript, which triggers the agent).
+- **Agent stage:** a normal `create_agent` with two tools (`add_to_order`, `confirm_order`), an `InMemorySaver` and a fresh thread id per call for memory. The system prompt says to avoid emojis, special characters and markdown because a speech engine reads the reply. It streams with `agent.astream_events(..., version="v3")` and `stream.messages`, yielding each token as an `agent_chunk` so synthesis can start at once.
+- **Text-to-speech stage:** merges two async streams, the upstream events (sending agent text to the provider) and the audio chunks coming back. Cartesia starts synthesising as soon as it gets text, so playback begins before the agent finishes.
+- **Composition:** the three stages are `RunnableGenerator`s chained with `|`, and `pipeline.atransform(audio_stream)` runs them concurrently inside a FastAPI WebSocket endpoint. Each stage starts as soon as its input arrives, which is where the low latency comes from.
+<!-- /docs31e -->
+
 ## Sources and further reading
 
 - [Streaming (LangChain docs)](https://docs.langchain.com/oss/python/langchain/streaming)

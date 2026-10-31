@@ -410,6 +410,26 @@ Guardrails and resilience are chapters 7 and 8, human approval is chapter 10, st
 :::
 <!-- /prodguide -->
 
+<!-- docs31c -->
+## From the docs: testing agents
+
+*From four LangChain docs pages read in full on 31 Oct 2026: [Test](https://docs.langchain.com/oss/python/langchain/test), [Unit testing](https://docs.langchain.com/oss/python/langchain/test/unit-testing), [Integration testing](https://docs.langchain.com/oss/python/langchain/test/integration-testing) and [Evals](https://docs.langchain.com/oss/python/langchain/test/evals).*
+
+Because the model decides its own next steps, one tweak can change behaviour elsewhere, so testing has three layers, and agentic apps lean more on integration tests because components chain together and LLMs are flaky.
+
+| Layer | What it does |
+| --- | --- |
+| Unit tests | Small deterministic pieces, with a fake model: fast, free, no keys |
+| Integration tests | Real model and service calls, to confirm the parts work together, credentials and schemas line up, and latency is acceptable |
+| Evals | Score the agent's **trajectory** (messages and tool calls), by deterministic match or an LLM judge |
+
+**Unit tests.** `GenericFakeChatModel(messages=iter([...]))` returns one scripted response per call (strings or `AIMessage`s, including tool calls); `FakeListChatModel(responses=[...])` is simpler for text only and cycles. `GenericFakeChatModel` has no `bind_tools`, which `create_agent` calls, so subclass it with a `bind_tools` that returns `self`. Script a tool-calling loop with two responses (a tool call, then the final answer) and assert on the tool call and the final text. The iterator cannot be reused, so share the fake through a pytest fixture at the default function scope. Use `InMemorySaver()` with a `thread_id` to test multi-turn behaviour.
+
+**Integration tests.** Mark them (`@pytest.mark.integration`) and exclude them by default (`addopts = -m "not integration"`), run with `pytest -m integration`. Load keys from environment variables (skip the test if a key is missing; `.env` stays out of Git; CI uses secrets). Assert on **structure, not content**: message types, tool-call names, argument shapes, message count. To cut cost: use a smaller model, cap `max_tokens`, test one behaviour per test, and run selectively. For frequently run CI, record HTTP calls with `vcrpy` and `pytest-recording` (`@pytest.mark.vcr()`, `--record-mode=once`, filter `authorization` and `x-api-key` headers); delete stale cassettes when prompts or tools change.
+
+**Evals with AgentEvals.** An evaluator takes outputs (and optionally reference outputs) and returns a score. `create_trajectory_match_evaluator` has four modes: **strict** (same messages and tool calls in the same order, content may differ), **unordered** (same tool calls in any order), **subset** (no tools beyond the reference) and **superset** (at least the reference tools). `create_trajectory_llm_as_judge` needs no reference and uses a prompt such as `TRAJECTORY_ACCURACY_PROMPT` (there is a with-reference variant). Add `async` after `create_` for async versions. To track results over time, log to LangSmith with the pytest integration (`@pytest.mark.langsmith`) or `client.evaluate(...)` over a dataset whose rows have `input` and `output` message lists.
+<!-- /docs31c -->
+
 ## Sources and further reading
 
 - [Class 13 full notes]({{src:classes_transcription_summary/13 - 09 Aug - LangChain - Middlware & Tools.md}})
