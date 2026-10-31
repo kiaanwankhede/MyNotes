@@ -111,7 +111,57 @@ def ask_groq(question: str) -> str:
     return response.choices[0].message.content
 ```
 
-The course also uses a fourth provider, OpenRouter (see the code folder table in the [Pydantic book](../pydantic/05-validating-llm-output.md) and the LLM book). A helper, `ask_ai()`, picks whichever key is set in `.env`, free providers first. That pattern is reused for the rest of the course.
+### A fake client with the same shape (`_6_fake_ai_call.py`)
+
+Before any real call, the class builds a stand-in with no dependencies that has exactly the shape of the real client, so the real call in the next file feels familiar. `FakeAIClient` has a `chat` object with `completions`, whose `create(...)` takes `model`, `max_tokens` and `messages` and returns an object with `choices[0].message.content`. It answers by simple rules on the last user message: a question mentioning currency or convert says it would reach for a currency tool, one mentioning weather says it would reach for a weather tool, and anything else says it is only a stand-in.
+
+```python
+client = FakeAIClient()
+response = client.chat.completions.create(
+    model="fake-model", max_tokens=200,
+    messages=[{"role": "user", "content": "Convert 50 dollars to euros."}],
+)
+print(response.choices[0].message.content)
+# Shape: client.chat.completions.create(...) -> .choices[0].message.content
+```
+
+That shape is what Groq, OpenRouter and OpenAI all actually use. (Anthropic's SDK, shown above, is the exception.)
+
+The same file also has a second, plain-dictionary version of the fake with no classes: `fake_ai(model, max_tokens, messages)` returns `{"choices": [{"message": {"content": reply}}]}`, read as `response['choices'][0]['message']['content']`. **Pitfall:** the file runs this second version at module level, outside its `if __name__ == "__main__":` block. When another file imports `_6_fake_ai_call` (as `_7` does), the second version runs too and prints its extra lines. I saw this when running `_7` without keys.
+
+*Source: code file `_6_fake_ai_call.py`. Run offline; output matches the description.*
+
+### Free and paid providers in one file (`_7_ai_call_free_and_paid.py`)
+
+The real version of the fake client. The shape is the same every time and only the client set-up changes. Three providers, from free to paid:
+
+| Provider | Cost | Set-up |
+|---|---|---|
+| Groq | Free, email sign-up, no card | OpenAI SDK with `base_url="https://api.groq.com/openai/v1"` |
+| OpenRouter | Free tier too | OpenAI SDK with `base_url="https://openrouter.ai/api/v1"` and `model="openrouter/free"`, which routes to whichever free model is available now, so the code does not go stale when free model names change |
+| OpenAI | Paid, shown for completeness and not run automatically | OpenAI SDK with no `base_url` override |
+
+Set-up: `uv add openai python-dotenv`, then put `GROQ_API_KEY` and/or `OPENROUTER_API_KEY` in a `.env` file. The file loads it with `load_dotenv()` and reads keys with `os.environ`. Each provider has its own small function (`call_groq`, `call_openrouter`, `call_openai_paid`).
+
+**Fall-back.** If a key is missing, or the call raises an error, the file uses the fake client from `_6` instead, so it always runs:
+
+```python
+def call_fallback(question: str) -> str:
+    from _6_fake_ai_call import FakeAIClient
+    client = FakeAIClient()
+    response = client.chat.completions.create(
+        model="fallback", max_tokens=200, messages=[{"role": "user", "content": question}]
+    )
+    return response.choices[0].message.content
+```
+
+I ran `_7` with no keys set. It printed "No GROQ_API_KEY set. Stand-in: ..." and "No OPENROUTER_API_KEY set. Stand-in: ..." and a note that the paid OpenAI call is not made. The real calls were not run because they need keys.
+
+The OpenRouter walk-through from the live class (create a key, call a free model, read the token counts) is in the LLM book.
+
+*Source: code file `_7_ai_call_free_and_paid.py`.*
+
+In the agent class a helper, `ask_ai()`, picks whichever key is set in `.env`, free providers first. That pattern is reused for the rest of the course.
 
 **Check before you copy:** model names such as `claude-3-5-haiku-20241022` and `gpt-4o-mini` were current when the class ran in July 2026 and may have been retired since. Look up the current names before running.
 
@@ -160,5 +210,6 @@ The line `return get_weather(extracted.city)` is the "we decided" step. The next
 - Live-Class-2026, `classes_summary/04 - 5 Jul - Anatomy of an Agent.md`
 - Live-Class-2026, `classes_transcription_summary/04 - 5 Jul - Anatomy of an Agent.md`
 - Live-Class-2026, code folder `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - .../Project 0/`
+- Live-Class-2026, code files `_6_fake_ai_call.py` and `_7_ai_call_free_and_paid.py` in the class 02-03 folder
 
 Previous: [Chapter 2](02-python-refresher.md)
