@@ -157,6 +157,10 @@ The mentor's own notes and tools, from the course repo:
 
 *Source: transcription folder `Readme.md` and root `README.md`. I did not open these links.*
 
+**The AI Industry Handbook.** The repo also holds a PDF, the *Industry-Ready AI Handbook* (2026 edition), a business-oriented companion to an ET Masterclass. It is a 22-page guide that walks through ten industries (manufacturing, healthcare, banking, retail, hospitality, FMCG, real estate, media and marketing, IT and consulting, energy) plus a fashion bonus, giving example companies for each and a closing question for the reader. It also has a section on India's AI market, a list of AI uses by job role, a tool list, and a 30-day plan for getting started. It may be the handbook of AI opportunities across industries that the class 01 Q&A promised, but I could not confirm that. The PDF is marked "Not for redistribution", so these notes contain none of its figures or company claims. Open the PDF itself if you need them.
+
+*Source: `Weekend 01 - 27-28 Jun/AI_Industry_Handbook_2026.pdf`, read in full.*
+
 ## Practice
 
 1. Place yourself on the three paths and say why 3.0 fits (or does not).

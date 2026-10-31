@@ -71,4 +71,4 @@ The chat web apps are like an all-you-can-eat buffet: a flat subscription and no
 
 Previous: [Chapter 2](02-the-agentic-loop-in-pure-python.md) · Next: [Chapter 4, Glossary](04-glossary.md)
 
-*Status: partly written. Class 08 (Inside the Model: parameters, streaming, tools, structured output) has not been processed yet.*
+*Class 08 (Inside the Model: parameters, streaming, tools, structured output) is written up in the Langchain book, [Chapters 3 to 5](../langchain/03-models-messages-and-parameters.md), because all of its code uses LangChain.*
