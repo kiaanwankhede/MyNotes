@@ -1,5 +1,7 @@
 # Notes
 
+Read them as a site: https://kiaanwankhede.github.io/MyNotes/ (left: chapters, right: outline, light and dark mode).
+
 Study notes as separate books. Each book is a folder under `books/` with its own `README.md` and `SUMMARY.md`, so it can be opened as its own GitBook space.
 
 * [Python](books/python/README.md)
