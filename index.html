@@ -1419,7 +1419,7 @@ details.diagram-src pre { margin-top: 8px; }
 </tbody>
 </table></div>
 <aside class="callout key"><div class="ct">Key idea<em>Sources</em></div><p>Each chapter names its sources at the end. In short, the book is built from: the official Pydantic documentation (models, fields, validators, serialization, strict mode, types, JSON schema, settings, error handling, and the get-started page), the class 03 write-up, the <code>Pydantic_From_Scratch</code> notebook in the course repo, Pydantic's article on LLMs, and the instructor's Pydantic site. The analogies come from the instructor's site, the repo notes flag problems in the notebook, and code samples are short examples of my own.</p></aside>
-<aside class="callout beyond"><div class="ct">Beyond the class<em>Not read</em></div><p>The settings docs page was read up to about 100,000 of its roughly 103,900 characters. The docs pages on unions, dataclasses, type adapters, performance and the Pydantic AI framework itself were not read. The FastAPI chapter comes from the instructor's site only.</p></aside>
+<aside class="callout beyond"><div class="ct">Beyond the class<em>Not read</em></div><p>The settings docs page was read up to about 100,000 of its roughly 103,900 characters. The pages on unions, alias, configuration, dataclasses, type adapters and performance were read in full on 31 Oct 2026, together with five FastAPI tutorial pages (body, response model, extra models, body updates, query parameter models). Some tabbed code examples did not come through in the text; the chapters say which. The Pydantic AI framework itself and other FastAPI pages were not read.</p></aside>
 <p>Try the idea straight away. Edit the JSON, break a rule, and read the error:</p>
 <div class="widget" data-w="pydantic-playground"><div class="wfb"><p>Interactive demo: edit JSON and validate it against a small Pydantic-style model.</p></div></div>
 <!-- res -->
@@ -1598,6 +1598,22 @@ except ValidationError as e:
 <li>A custom <code>__init__</code> is discouraged; use an after-validator or <code>model_post_init</code> instead.</li>
 </ul>
 <aside class="callout repo"><div class="ct">Repo note<em>In the notebook</em></div><p>The notebook's <code>years_experience</code> and <code>age</code> demos are the same ideas as above, with <code>"True"</code> coerced to <code>True</code> and <code>age=28.5</code> rejected.</p></aside>
+<!-- docs-config -->
+<h3 id="pydantic-p2-configuration-in-depth-from-the-official-configu">Configuration in depth (from the official Configuration page)</h3>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>Pydantic docs, <a href="https://pydantic.dev/docs/validation/latest/concepts/config/" target="_blank" rel="noopener">Configuration</a>, read in full on 31 Oct 2026.</p></aside>
+<p>Behaviour is controlled by <code>ConfigDict</code> values. Where you can set them:</p>
+<ul>
+<li><strong>Models:</strong> <code>model_config = ConfigDict(...)</code> (a plain dict also works) or class arguments such as <code>class Model(BaseModel, frozen=True)</code>. Type checkers understand class arguments, so <code>frozen=True</code> makes mutation a type error. The old V1 <code>Config</code> class still works but is deprecated.</li>
+<li><strong>Pydantic dataclasses:</strong> <code>@dataclass(config=ConfigDict(...))</code>.</li>
+<li><strong><code>TypeAdapter</code>:</strong> <code>TypeAdapter(list[str], config=ConfigDict(coerce_numbers_to_str=True))</code>. Passing config when the adapter wraps a type that already has its own config is a usage error.</li>
+<li><strong>Stdlib dataclasses and <code>TypedDict</code>:</strong> a <code>__pydantic_config__</code> attribute, or the <code>@with_config</code> decorator (which avoids type-checking errors on <code>TypedDict</code>).</li>
+<li><strong><code>@validate_call</code></strong> also accepts config.</li>
+<li><strong>Inheritance.</strong> Subclass config is merged with the parent's, so one custom parent class can change behaviour globally. With several base classes Pydantic does not currently follow the method resolution order (the docs link an open issue).</li>
+<li><strong><code>plugin_settings</code></strong> passes options to plugins, keyed by plugin name; the main one is Logfire, for example <code>{'logfire': {'record': 'failure'}}</code> to record only failures.</li>
+<li><strong>Propagation, the surprise.</strong> Pydantic models and Pydantic dataclasses are each a <strong>configuration boundary</strong>: a parent's <code>str_to_lower=True</code> does not reach a nested <code>User</code> model. Stdlib dataclasses and <code>TypedDict</code> <strong>do</strong> inherit the parent's config unless they set their own.</li>
+</ul>
+<!-- /docs-config -->
+
 <h2 id="pydantic-p2-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -1638,6 +1654,7 @@ except ValidationError as e:
 </ul>
 <h2 id="pydantic-p2-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li><a href="https://pydantic.dev/docs/validation/latest/concepts/config/" target="_blank" rel="noopener">Pydantic docs: Configuration</a></li>
 <li><a href="https://pydantic.dev/docs/validation/latest/concepts/models/" target="_blank" rel="noopener">Pydantic docs: Models</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/03%20-%204%20Jul%20-%20Pydantic%20Deep%20Dive.md" target="_blank" rel="noopener">Class 03 notes</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2001%20-%2027-28%20Jun/02-03%20-%2028%20Jun%20%26%204%20Jul%20-%20Python%20Refresher%20%26%20Pydantic%20Deep%20Dive/8_Pydantic/Pydantic_From_Scratch.ipynb" target="_blank" rel="noopener">Pydantic From Scratch notebook</a></li>
@@ -1722,6 +1739,20 @@ years: Annotated[int, Field(ge=0, le=50)]          # Annotated
 </table></div>
 <p>The class singled out <code>SecretStr</code> as underused but important in this course, since API keys are handled constantly. In the notebook, <code>account.model_dump(mode="json")</code> is what gets written to a JSON file.</p>
 <aside class="callout beyond"><div class="ct">Beyond the class<em>Collection helpers</em></div><p><code>OnErrorOmit</code> drops invalid items from a collection instead of rejecting the whole thing, and <code>FailFast</code> stops at the first bad item. (Docs "Types".)</p></aside>
+<!-- docs-alias -->
+<h3 id="pydantic-p3-aliases-in-depth-from-the-official-alias-page">Aliases in depth (from the official Alias page)</h3>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>Pydantic docs, <a href="https://pydantic.dev/docs/validation/latest/concepts/alias/" target="_blank" rel="noopener">Alias</a>, read in full on 31 Oct 2026.</p></aside>
+<p>An alias is an alternative name for a field. There are four ways to set one: <code>alias</code>, <code>validation_alias</code> (a <code>str</code>, <code>AliasPath</code> or <code>AliasChoices</code>), <code>serialization_alias</code>, and <code>alias_generator</code> in the config.</p>
+<ul>
+<li><strong><code>AliasPath</code></strong> reads a value from inside nested data: <code>AliasPath('names', 0)</code> takes <code>names[0]</code>, and <code>AliasPath('contact', 'address')</code> takes <code>contact['address']</code>.</li>
+<li><strong><code>AliasChoices</code></strong> accepts several input names; <strong>earlier choices win</strong>. If both <code>first_name</code> and <code>fname</code> are sent, <code>first_name</code> is used. Choices can mix plain names and <code>AliasPath</code>.</li>
+<li><strong>Alias generators</strong> name every field at once. Three are built in: <code>to_pascal</code>, <code>to_camel</code>, <code>to_snake</code>. A plain callable works (<code>lambda name: name.upper()</code>), and <code>AliasGenerator</code> lets validation and serialization use different generators.</li>
+<li><strong>Precedence.</strong> An explicit <code>alias</code> on a <code>Field</code> beats the generator by default. <code>alias_priority=2</code> means the generator never overrides it; <code>alias_priority=1</code> means the generator does.</li>
+<li><strong>Config switches.</strong> <code>validate_by_alias</code> is <code>True</code> and <code>validate_by_name</code> is <code>False</code> by default; setting both to <code>False</code> is an error. <code>serialize_by_alias</code> is off by default, and the docs say they expect to change that in V3. The same switches exist per call: <code>by_alias</code> and <code>by_name</code> on <code>model_validate</code>, <code>model_validate_json</code>, <code>model_validate_strings</code> and <code>TypeAdapter</code>, and <code>by_alias</code> on <code>model_dump</code>, <code>model_dump_json</code> (default <code>False</code>).</li>
+<li>Not captured: the other tabs of the config and runtime examples; only one example per group was readable.</li>
+</ul>
+<!-- /docs-alias -->
+
 <h2 id="pydantic-p3-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -1760,6 +1791,7 @@ years: Annotated[int, Field(ge=0, le=50)]          # Annotated
 </ul>
 <h2 id="pydantic-p3-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li><a href="https://pydantic.dev/docs/validation/latest/concepts/alias/" target="_blank" rel="noopener">Pydantic docs: Alias</a></li>
 <li><a href="https://pydantic.dev/docs/validation/latest/concepts/fields/" target="_blank" rel="noopener">Pydantic docs: Fields</a> and <a href="https://pydantic.dev/docs/validation/latest/concepts/types/" target="_blank" rel="noopener">Types</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/03%20-%204%20Jul%20-%20Pydantic%20Deep%20Dive.md" target="_blank" rel="noopener">Class 03 notes</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2001%20-%2027-28%20Jun/02-03%20-%2028%20Jun%20%26%204%20Jul%20-%20Python%20Refresher%20%26%20Pydantic%20Deep%20Dive/8_Pydantic/Pydantic_From_Scratch.ipynb" target="_blank" rel="noopener">Pydantic From Scratch notebook</a></li>
@@ -2042,6 +2074,37 @@ a.address.city          # dot-chain access, fully typed
 <p>From the class Q&amp;A: a model can extend another (<code>class Applicant(Address)</code> inherits its fields and validators) with ordinary Python inheritance. Prefer composition (a field of type <code>Address</code>) when the data really is "has an", and inheritance only when it is "is a".</p>
 <h3 id="pydantic-p6-self-referencing-data-and-forward-references">Self-referencing data and forward references</h3>
 <p>Data that refers to itself (a parent that points back to a child) is detected and reported as a <code>ValidationError</code> instead of recursing forever. A model that mentions a class defined later uses a string annotation, and you call <code>model_rebuild()</code> once the names exist.</p>
+<!-- docs-unions-dc -->
+<h3 id="pydantic-p6-unions-from-the-official-unions-page">Unions (from the official Unions page)</h3>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>Pydantic docs, <a href="https://pydantic.dev/docs/validation/latest/concepts/unions/" target="_blank" rel="noopener">Unions</a>, read in full on 31 Oct 2026.</p></aside>
+<p>A union is different from every other type: only <strong>one</strong> member has to validate. Three approaches exist.</p>
+<ul>
+<li><strong>Left to right</strong> (<code>Field(union_mode='left_to_right')</code>): members are tried in order, the first success wins. Order matters: with <code>id: int | str</code>, the string <code>'456'</code> becomes the integer <code>456</code>, because lax mode lets it pass <code>int</code> first. If all members fail, you get one error per member.</li>
+<li><strong>Smart mode</strong> (the default in V2). It tries all members and picks the best match using two scores: the <strong>number of valid fields set</strong> (for models, dataclasses and <code>TypedDict</code>, added in v2.8.0; nested fields count too) and then <strong>exactness</strong> (exact type match, then success in strict mode, then success in lax mode). The algorithm may change in minor releases, so use left to right or a discriminator if you rely on exact behaviour.</li>
+<li><strong>Discriminated (tagged) unions:</strong> only one member is tried, chosen by a tag, so validation is faster and errors are shorter. Use <code>Field(discriminator='pet_type')</code> on a union of models that each have a <code>Literal</code> field, or the <code>Discriminator</code> class with <code>Tag</code> for a <strong>callable</strong> discriminator (it must handle both dicts and model instances, and returning <code>None</code> gives a <code>union_tag_not_found</code> error). Only one discriminator per field is allowed, so nest <code>Annotated</code> unions for two levels. The generated JSON Schema carries the OpenAPI <code>discriminator</code>.</li>
+<li><strong>Errors.</strong> Plain unions give verbose errors, especially for recursive models. <code>Discriminator</code> accepts <code>custom_error_type</code>, <code>custom_error_message</code> and <code>custom_error_context</code>, and <code>Tag</code> names make error locations readable.</li>
+<li>Not captured: the "all other types" tab of the smart-mode steps, so only the model steps are confirmed.</li>
+</ul>
+<h3 id="pydantic-p6-dataclasses-and-typeadapter-from-two-official-pa">Dataclasses and TypeAdapter (from two official pages)</h3>
+<aside class="callout note"><div class="ct">Note<em>Sources</em></div><p>Pydantic docs, <a href="https://pydantic.dev/docs/validation/latest/concepts/dataclasses/" target="_blank" rel="noopener">Dataclasses</a> and <a href="https://pydantic.dev/docs/validation/latest/concepts/type_adapter/" target="_blank" rel="noopener">Type Adapter</a>, both read in full on 31 Oct 2026.</p></aside>
+<p><strong>Pydantic dataclasses.</strong> <code>@pydantic.dataclasses.dataclass</code> adds validation to a standard dataclass, so <code>User(id='42', signup_ts='2032-06-21T12:00')</code> converts the values. The docs say they are <strong>not a replacement</strong> for models.</p>
+<ul>
+<li>Same as models: configuration (but no <code>model_config</code> attribute), nested classes, and <code>Field()</code> or <code>dataclasses.field()</code>.</li>
+<li>Different: no <code>model_validate</code>, <code>model_dump</code> or JSON Schema methods (wrap the class in <code>TypeAdapter</code>); extra data is dropped from serialization; generics are supported but a parameterised class like <code>Foo[int]</code> is treated as <code>Foo[Any]</code>, so wrap it in <code>TypeAdapter</code>.</li>
+<li>Config: the <code>config=</code> argument or a <code>__pydantic_config__</code> attribute. <code>rebuild_dataclass()</code> rebuilds the schema.</li>
+<li>Stdlib dataclasses can be inherited, and used as fields in a model; for Pydantic to <strong>revalidate</strong> an existing instance the model needs <code>revalidate_instances='always'</code>. Arbitrary types need <code>arbitrary_types_allowed</code>. <code>is_pydantic_dataclass()</code> tells the two kinds apart.</li>
+<li>Validators work. <code>__post_init__</code> runs between the before and after model validators, and in a before validator the input is an <code>ArgsKwargs</code> object, not a dict.</li>
+</ul>
+<p><strong>TypeAdapter</strong> validates, serializes and builds JSON Schema for any type without a model. <code>TypeAdapter(list[User])</code> validates a list of <code>TypedDict</code>s, and <code>validate_python</code>, <code>dump_python</code>, <code>dump_json</code> and <code>json_schema</code> are the main methods.</p>
+<ul>
+<li><code>dump_json</code> returns <strong>bytes</strong>, while <code>model_dump_json</code> returns a <code>str</code> (a V1 compatibility leftover).</li>
+<li>Do not use <code>TypeAdapter</code> as a field type.</li>
+<li>Building it has noticeable cost, so <strong>create it once and reuse it</strong>.</li>
+<li><code>defer_build=True</code> (v2.10) postpones the build; <code>rebuild()</code> builds it later, which helps with forward references.</li>
+<li>Not captured: the Python 3.12 tab of the generic dataclass example.</li>
+</ul>
+<!-- /docs-unions-dc -->
+
 <h2 id="pydantic-p6-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -2074,6 +2137,7 @@ a.address.city          # dot-chain access, fully typed
 </ul>
 <h2 id="pydantic-p6-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li><a href="https://pydantic.dev/docs/validation/latest/concepts/unions/" target="_blank" rel="noopener">Pydantic docs: Unions</a>, <a href="https://pydantic.dev/docs/validation/latest/concepts/dataclasses/" target="_blank" rel="noopener">Dataclasses</a>, <a href="https://pydantic.dev/docs/validation/latest/concepts/type_adapter/" target="_blank" rel="noopener">Type Adapter</a></li>
 <li><a href="https://pydantic.dev/docs/validation/latest/concepts/models/" target="_blank" rel="noopener">Pydantic docs: Models</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/03%20-%204%20Jul%20-%20Pydantic%20Deep%20Dive.md" target="_blank" rel="noopener">Class 03 notes</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2001%20-%2027-28%20Jun/02-03%20-%2028%20Jun%20%26%204%20Jul%20-%20Python%20Refresher%20%26%20Pydantic%20Deep%20Dive/8_Pydantic/Pydantic_From_Scratch.ipynb" target="_blank" rel="noopener">Pydantic From Scratch notebook</a></li>
@@ -2371,7 +2435,7 @@ except ValidationError as e:
 <ul>
 <li><a href="https://pydantic.dev/docs/validation/dev/errors/errors/" target="_blank" rel="noopener">Pydantic docs: Error handling</a></li>
 </ul><button class="readbtn" data-id="pydantic-p9">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p8"><small>Previous</small><b>Settings and secrets</b></button><button class="next" data-id="pydantic-p10"><small>Next</small><b>Pydantic with FastAPI</b></button></div></article>
-<article id="ch-pydantic-p10" hidden><p class="crumb">Pydantic &middot; Chapter 10</p><h1>Pydantic with FastAPI</h1><p class="lead">FastAPI uses your model as the request validator, the response filter and the source of the API docs, all from one class.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Instructor&#x27;s site</span><span class="chip plain">8 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><aside class="callout beyond"><div class="ct">Beyond the class<em>Source for this chapter</em></div><p>The official Pydantic docs pages I read do not cover FastAPI. This chapter comes from the instructor's Pydantic site, plus the <code>model_json_schema()</code> behaviour from the JSON Schema docs (chapter 7). The FastAPI docs themselves were not read.</p></aside>
+<article id="ch-pydantic-p10" hidden><p class="crumb">Pydantic &middot; Chapter 10</p><h1>Pydantic with FastAPI</h1><p class="lead">FastAPI uses your model as the request validator, the response filter and the source of the API docs, all from one class.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Instructor&#x27;s site</span><span class="chip plain">8 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><aside class="callout beyond"><div class="ct">Beyond the class<em>Source for this chapter</em></div><p>The core of this chapter comes from the instructor's Pydantic site, plus the <code>model_json_schema()</code> behaviour from the JSON Schema docs (chapter 7). The section "From the FastAPI documentation" below comes from five FastAPI tutorial pages read in full; other FastAPI pages were not read.</p></aside>
 <h2 id="pydantic-p10-why-it-matters">Why it matters</h2>
 <p>This is where Pydantic is "everywhere": an endpoint that takes a model is validated before your function body runs.</p>
 <h2 id="pydantic-p10-core-ideas">Core ideas</h2>
@@ -2397,6 +2461,20 @@ def apply(a: Applicant) -&gt; Receipt:
 <li><strong>Docs.</strong> The model's JSON Schema feeds the <code>/docs</code> page, so every <code>Field()</code> constraint becomes a documented API constraint.</li>
 </ul>
 <aside class="callout analogy"><div class="ct">Analogy<em>One scanner at the terminal entrance</em></div><p>Instead of each gate building its own detector, the terminal has one scanner everyone passes. Your model is that scanner. (Instructor's site.)</p></aside>
+<!-- docs-fastapi -->
+<h3 id="pydantic-p10-from-the-fastapi-documentation">From the FastAPI documentation</h3>
+<aside class="callout note"><div class="ct">Note<em>Sources</em></div><p>FastAPI tutorial pages: <a href="https://fastapi.tiangolo.com/tutorial/body/" target="_blank" rel="noopener">Request Body</a>, <a href="https://fastapi.tiangolo.com/tutorial/response-model/" target="_blank" rel="noopener">Response Model</a>, <a href="https://fastapi.tiangolo.com/tutorial/extra-models/" target="_blank" rel="noopener">Extra Models</a>, <a href="https://fastapi.tiangolo.com/tutorial/body-updates/" target="_blank" rel="noopener">Body - Updates</a> and <a href="https://fastapi.tiangolo.com/tutorial/query-param-models/" target="_blank" rel="noopener">Query Parameter Models</a>, all read in full on 31 Oct 2026. Other FastAPI pages were not read.</p></aside>
+<ul>
+<li><strong>Request body.</strong> Declare a parameter whose type is a Pydantic model and FastAPI reads the JSON body, converts, validates (a bad body gives a clear error naming the place), gives you a model instance and adds the schema to the docs. Resolution rule: a name in the path is a path parameter, a simple type is a query parameter, a Pydantic model is the body. A field is optional because of its <strong>default</strong>, not because of <code>| None</code>. Bodies on <code>GET</code> are discouraged.</li>
+<li><strong>Response model.</strong> A return annotation (<code>-&gt; Item</code>) or <code>response_model=</code> validates the output (invalid output is a server error, because your code is wrong), adds a JSON Schema, serializes with Pydantic, and <strong>filters</strong> the output to the declared fields. If both are given, <code>response_model</code> wins; <code>response_model=None</code> turns it off.</li>
+<li><strong>Two models, one for input and one for output</strong> keeps secrets out: <code>UserIn</code> has <code>password</code>, <code>UserOut</code> does not. A parent/child pair (<code>BaseUser</code> returned, <code>UserIn</code> actually returned) keeps editor support and still filters.</li>
+<li><strong>Encoding switches:</strong> <code>response_model_exclude_unset</code>, <code>_exclude_defaults</code>, <code>_exclude_none</code>, <code>_include</code>, <code>_exclude</code>. Fields explicitly set to a default value are still kept by <code>exclude_unset</code>.</li>
+<li><strong>Extra models:</strong> share fields through a base class (<code>UserBase</code>, <code>UserIn</code>, <code>UserOut</code>, <code>UserInDB</code>). Never store plaintext passwords. A union response (<code>anyOf</code> in OpenAPI) should list the most specific type first. The page also has a note about writing the union as a value on Python 3.10, which I could not confirm from the text I got, so check it before relying on it.</li>
+<li><strong>Updates.</strong> <code>PUT</code> replaces, so omitted fields fall back to defaults and overwrite stored values. For <code>PATCH</code>, use <code>model_dump(exclude_unset=True)</code> and <code>model_copy(update=...)</code>.</li>
+<li><strong>Query parameter models</strong> (FastAPI 0.115.0 and later): group query parameters in a model with <code>Query()</code>; <code>extra='forbid'</code> rejects unknown parameters with an <code>extra_forbidden</code> error; several models can be combined, and <code>Model | None = None</code> makes a group optional.</li>
+</ul>
+<!-- /docs-fastapi -->
+
 <h2 id="pydantic-p10-see-it-at-project-scale">See it at project scale</h2>
 <p>The Meridian capstone (Agentic AI with LangChain, last chapter, "Module 6") shows this pattern in a real service: four small request and reply classes in <code>schemas.py</code>, seven thin routes, error handlers that turn your own exceptions into 503 and 422 replies, and the <code>/docs</code> page generated from the same code.</p>
 <h2 id="pydantic-p10-common-mistakes">Common mistakes</h2>
@@ -2425,6 +2503,7 @@ def apply(a: Applicant) -&gt; Receipt:
 </ul>
 <h2 id="pydantic-p10-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li>FastAPI docs: <a href="https://fastapi.tiangolo.com/tutorial/body/" target="_blank" rel="noopener">Request Body</a>, <a href="https://fastapi.tiangolo.com/tutorial/response-model/" target="_blank" rel="noopener">Response Model</a>, <a href="https://fastapi.tiangolo.com/tutorial/extra-models/" target="_blank" rel="noopener">Extra Models</a>, <a href="https://fastapi.tiangolo.com/tutorial/body-updates/" target="_blank" rel="noopener">Body - Updates</a>, <a href="https://fastapi.tiangolo.com/tutorial/query-param-models/" target="_blank" rel="noopener">Query Parameter Models</a></li>
 <li>Instructor's site: <a href="https://pydantic-with-mayank.netlify.app/" target="_blank" rel="noopener">Mastering Pydantic</a></li>
 <li>Meridian uses this pattern: see the capstone chapter in the LangChain book</li>
 </ul><button class="readbtn" data-id="pydantic-p10">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p9"><small>Previous</small><b>Reading validation errors</b></button><button class="next" data-id="pydantic-p11"><small>Next</small><b>Validating what an LLM gives you back</b></button></div></article>
@@ -2528,6 +2607,24 @@ def apply(a: Applicant) -&gt; Receipt:
 <li>The docs say around 8,000 PyPI packages use Pydantic, with FastAPI, SQLModel and LangChain among them.</li>
 </ul>
 <aside class="callout beyond"><div class="ct">Beyond the class<em>Out of scope here</em></div><p>LangChain is taught in the next book. This book does not teach Instructor, Pydantic AI or CrewAI.</p></aside>
+<!-- docs-perf -->
+<h3 id="pydantic-p12-performance-tips-from-the-official-performance-p">Performance tips (from the official Performance page)</h3>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>Pydantic docs, <a href="https://pydantic.dev/docs/validation/latest/concepts/performance/" target="_blank" rel="noopener">Performance</a>, read in full on 31 Oct 2026.</p></aside>
+<p>The page opens with a warning: in most cases Pydantic won't be your bottleneck, so only apply these when you are sure it is needed.</p>
+<ol>
+<li>Use <code>model_validate_json()</code> instead of <code>model_validate(json.loads(...))</code> (exception: with a <code>before</code> or <code>wrap</code> validator the two-step way may be faster).</li>
+<li>Create a <code>TypeAdapter</code> once, not inside a function that runs repeatedly.</li>
+<li>Use <code>list</code>, <code>tuple</code> or <code>dict</code> rather than <code>Sequence</code> or <code>Mapping</code> when you know the input type.</li>
+<li>Use <code>Any</code> for values you do not need to validate.</li>
+<li>Avoid primitive subclasses that add extra information.</li>
+<li>Prefer tagged (discriminated) unions to plain unions.</li>
+<li>Prefer <code>TypedDict</code> to nested models: about 2.5 times faster in the docs' own benchmark.</li>
+<li>Avoid wrap validators; they force data into Python during validation.</li>
+<li><code>FailFast</code> on a sequence stops at the first bad item (v2.8+), trading error visibility for speed.</li>
+</ol>
+<p>Not captured: the "good" tabs for tips 2 and 5.</p>
+<!-- /docs-perf -->
+
 <h2 id="pydantic-p12-final-project-support-ticket-triage">Final project: support-ticket triage</h2>
 <p><code>POST /triage</code> takes a messy support message and returns a validated result: category, priority, sentiment, a computed SLA and redacted customer info.</p>
 <div class="tablewrap"><table>
@@ -2591,6 +2688,7 @@ def apply(a: Applicant) -&gt; Receipt:
 </ul>
 <h2 id="pydantic-p12-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li><a href="https://pydantic.dev/docs/validation/latest/concepts/performance/" target="_blank" rel="noopener">Pydantic docs: Performance</a></li>
 <li><a href="https://pydantic.dev/docs/validation/latest/get-started/" target="_blank" rel="noopener">Pydantic docs: Get started</a></li>
 <li>Instructor's site: <a href="https://pydantic-with-mayank.netlify.app/" target="_blank" rel="noopener">Mastering Pydantic</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2001%20-%2027-28%20Jun/02-03%20-%2028%20Jun%20%26%204%20Jul%20-%20Python%20Refresher%20%26%20Pydantic%20Deep%20Dive/8_Pydantic/Pydantic_From_Scratch.ipynb" target="_blank" rel="noopener">Pydantic From Scratch notebook</a></li>

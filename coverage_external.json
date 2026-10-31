@@ -10,9 +10,9 @@
   {
    "group": "Pydantic docs",
    "name": "Pages read",
-   "done": 12,
+   "done": 19,
    "total": 19,
-   "note": "Read: get started, models, fields, validators, serialization, strict mode, types, JSON schema, settings (about 96%), error handling, the LLM article, the Pydantic AI example. Not read: unions, alias, configuration, dataclasses, TypeAdapter, performance, FastAPI docs."
+   "note": "All 19 pages read (the settings page about 96%, the rest in full; the last 7 on 31 Oct 2026): get started, models, fields, validators, serialization, strict mode, types, JSON schema, settings, error handling, the LLM article, the Pydantic AI example, unions, alias, configuration, dataclasses, TypeAdapter, performance, and FastAPI (5 tutorial pages: body, response model, extra models, body updates, query parameter models; other FastAPI pages not read). A few tabbed code examples did not come through in the text, noted in the chapters."
   },
   {
    "group": "Instructor sites",
@@ -71,6 +71,7 @@
   "Only the TimeTrack lab was run; SDK snippets in the Pydantic book were not run"
  ],
  "log": [
+  "2026-10-31: Read the 7 unread Pydantic docs pages (unions, alias, config, dataclasses, TypeAdapter, performance, FastAPI x5); now 19 of 19",
   "2026-10-31: Coverage wording made plainer: Read properly, Looked through, Not opened",
   "2026-10-31: Meridian module 7 (Docker and Google Cloud) read in full, now 7 of 7 modules; costs added to RAG r5",
   "2026-10-31: Meridian module 6 (service and screen) read in full, now 6 of 7 modules",

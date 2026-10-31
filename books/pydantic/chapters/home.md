@@ -26,7 +26,7 @@ Each chapter names its sources at the end. In short, the book is built from: the
 :::
 
 :::beyond Not read
-The settings docs page was read up to about 100,000 of its roughly 103,900 characters. The docs pages on unions, dataclasses, type adapters, performance and the Pydantic AI framework itself were not read. The FastAPI chapter comes from the instructor's site only.
+The settings docs page was read up to about 100,000 of its roughly 103,900 characters. The pages on unions, alias, configuration, dataclasses, type adapters and performance were read in full on 31 Oct 2026, together with five FastAPI tutorial pages (body, response model, extra models, body updates, query parameter models). Some tabbed code examples did not come through in the text; the chapters say which. The Pydantic AI framework itself and other FastAPI pages were not read.
 :::
 
 Try the idea straight away. Edit the JSON, break a rule, and read the error:
