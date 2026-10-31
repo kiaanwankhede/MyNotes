@@ -218,6 +218,19 @@ Some providers require history to start with a `user` message, and every tool-ca
 Semantic search needs `IndexConfig(embed=..., dims=...)` with `dims` matching the embedding size. Use `InMemoryStore` for development and `PostgresStore` (`from_conn_string`, then `setup()` once) in production; Redis and MongoDB stores exist. Tools reach it through `runtime.store` (check it is not `None`) and scope by `runtime.context.user_id`.
 <!-- /docs-add -->
 
+<!-- docs-memory-concept -->
+### Memory, the concept (from the conceptual overview)
+
+:::note Source
+LangChain docs, [Memory overview](https://docs.langchain.com/oss/python/concepts/memory), read on 31 Oct 2026 from the docs source on GitHub (text and tables of every section; long code samples skimmed).
+:::
+
+- **Short-term memory** is the conversation inside one thread, kept as agent state and saved by a thread-scoped checkpointer. Long histories can overflow the context window or distract the model, so trim or forget stale messages.
+- **Long-term memory** lasts across threads and lives in a store, organised by **namespace** (like a folder) and **key** (like a file name).
+- **Three kinds, borrowed from people.** *Semantic* memory holds facts, either as one continuously updated **profile** (a JSON document) or a **collection** of small documents (easier to extend, less likely to lose information, harder to keep consistent). *Episodic* memory holds past experiences, often as few-shot examples. *Procedural* memory holds the rules for doing tasks, often by updating the agent's own instructions.
+- **When to write.** *In the hot path*: the agent decides during the conversation, so memories are available at once and users can see them, but it adds latency and complexity. *In the background*: a separate job writes memories, with no added latency, but you must decide when it runs (after a delay, on a schedule, or on demand).
+<!-- /docs-memory-concept -->
+
 ## Common mistakes
 
 | Mistake | Symptom | Fix |
@@ -352,6 +365,7 @@ The 8 to 9 August Craft entry is empty apart from its title, so there is nothing
 
 ## Sources and further reading
 
+- LangChain docs: [Memory overview](https://docs.langchain.com/oss/python/concepts/memory)
 - [Class 11 full notes]({{src:classes_transcription_summary/11 - 01 Aug - LangChain - Agents, Memory, Middleware.md}})
 - [Class 11 short summary]({{src:classes_summary/11 - 01 Aug - Agents, Middleware & Memory.md}})
 - [Middleware notebook]({{src:Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/MIddleware.ipynb}})

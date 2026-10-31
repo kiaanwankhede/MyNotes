@@ -1882,7 +1882,7 @@ uv run main.py               # .env is git-ignored, so the key cannot be committ
 <p>On 31 Oct 2026 I ran this book's code and checked its claims against a real install (Pydantic 2.14.2, pydantic-settings 2.16.2, FastAPI 0.162.0, Python 3.13).</p>
 <ul>
 <li>All 13 code blocks in the chapters run. Three needed small additions first (chapter 3's comparison was a fragment; chapter 7's and chapter 9's examples lacked imports or the model they use), and I added them.</li>
-<li>A test script (<code>build/pydantic_claims_test.py</code>) checks <strong>47 behaviours</strong> the chapters state, from coercion and extra keys to validator order, unions, aliases, configuration, dataclasses, <code>TypeAdapter</code>, settings, JSON Schema, error structure and the FastAPI patterns. <strong>All 47 pass.</strong> The docs' "about 2.5 times faster" claim for <code>TypedDict</code> over nested models measured 2.2 to 2.8 times on my machine.</li>
+<li>A test script (<code>build/pydantic_claims_test.py</code>) checks <strong>55 behaviours</strong> the chapters state, from coercion and extra keys to validator order, unions, aliases, configuration, dataclasses, <code>TypeAdapter</code>, settings, JSON Schema, error structure and the FastAPI patterns. <strong>All 55 pass.</strong> The docs' "about 2.5 times faster" claim for <code>TypedDict</code> over nested models measured 2.2 to 2.8 times on my machine.</li>
 <li><strong>Not run:</strong> the OpenAI and Anthropic SDK calls in chapter 11 (they need paid keys), and the notebook's own cells.</li>
 <li>The test is mine, written from the chapters' statements. A pass means the statement is true for that version, not that the chapter covers everything.</li>
 </ul>
@@ -2079,6 +2079,21 @@ except ValidationError as e:
 </ul>
 <!-- /docs-config -->
 
+<!-- docs-v1 -->
+<h3 id="pydantic-p2-coming-from-pydantic-v1-from-the-migration-guide">Coming from Pydantic V1 (from the Migration Guide)</h3>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>Pydantic docs, <a href="https://pydantic.dev/docs/validation/latest/get-started/migration/" target="_blank" rel="noopener">Migration Guide (V1 to V2)</a>, read on 31 Oct 2026 from the docs source on GitHub, which tracks the main branch (text and tables read; long code samples skimmed).</p></aside>
+<ul>
+<li><strong>Method renames.</strong> Every non-deprecated <code>BaseModel</code> method is now <code>model_*</code> or <code>__pydantic_*__</code>: <code>dict()</code> is <code>model_dump()</code>, <code>json()</code> is <code>model_dump_json()</code>, <code>parse_obj()</code> is <code>model_validate()</code>, <code>copy()</code> is <code>model_copy()</code>, <code>construct()</code> is <code>model_construct()</code>, <code>update_forward_refs()</code> is <code>model_rebuild()</code>, <code>__fields__</code> is <code>model_fields</code>. The old names still work but emit a <code>DeprecationWarning</code>. <code>parse_raw</code> and <code>parse_file</code> are deprecated: use <code>model_validate_json</code>, or load the data and call <code>model_validate</code>. <code>from_orm</code> is replaced by <code>model_validate</code> with <code>from_attributes=True</code>.</li>
+<li><strong>Equality is stricter.</strong> A model equals only another model of the same type with the same field values, extra values and private attribute values; it no longer equals a dict.</li>
+<li><strong><code>__root__</code> became <code>RootModel</code>.</strong> <code>RootModel</code> does not support <code>arbitrary_types_allowed</code>.</li>
+<li><strong>Required versus optional matches dataclasses.</strong> <code>f: Optional[str]</code> is <strong>required but may be <code>None</code></strong>; <code>f: Optional[str] = None</code> is optional. A field annotated <code>Any</code> no longer defaults to <code>None</code>.</li>
+<li><strong>Floats to integers.</strong> V1 accepted any float for an <code>int</code> field and lost the decimals; V2 accepts a float only when its decimal part is zero.</li>
+<li><strong>Input types are not preserved.</strong> V1 tried to keep, say, a <code>Counter</code> passed for a <code>Mapping[str, int]</code>; V2 does not, for speed and consistency.</li>
+<li><strong>Numbers are not coerced to strings</strong> by default (turn on <code>coerce_numbers_to_str</code>).</li>
+<li><strong>Tools.</strong> <code>bump-pydantic</code> (beta) rewrites V1 code; the V1 API remains importable as <code>pydantic.v1</code>. <code>BaseSettings</code> moved to <code>pydantic-settings</code>, <code>Color</code> and payment-card types to <code>pydantic-extra-types</code>.</li>
+</ul>
+<!-- /docs-v1 -->
+
 <h2 id="pydantic-p2-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -2119,6 +2134,7 @@ except ValidationError as e:
 </ul>
 <h2 id="pydantic-p2-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li><a href="https://pydantic.dev/docs/validation/latest/get-started/migration/" target="_blank" rel="noopener">Pydantic docs: Migration Guide</a></li>
 <li><a href="https://pydantic.dev/docs/validation/latest/concepts/config/" target="_blank" rel="noopener">Pydantic docs: Configuration</a></li>
 <li><a href="https://pydantic.dev/docs/validation/latest/concepts/models/" target="_blank" rel="noopener">Pydantic docs: Models</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/03%20-%204%20Jul%20-%20Pydantic%20Deep%20Dive.md" target="_blank" rel="noopener">Class 03 notes</a></li>
@@ -2212,7 +2228,7 @@ class B(BaseModel):
 <aside class="callout beyond"><div class="ct">Beyond the class<em>Collection helpers</em></div><p><code>OnErrorOmit</code> drops invalid items from a collection instead of rejecting the whole thing, and <code>FailFast</code> stops at the first bad item. (Docs "Types".)</p></aside>
 <!-- docs-alias -->
 <h3 id="pydantic-p3-aliases-in-depth-from-the-official-alias-page">Aliases in depth (from the official Alias page)</h3>
-<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>Pydantic docs, <a href="https://pydantic.dev/docs/validation/latest/concepts/alias/" target="_blank" rel="noopener">Alias</a>, read in full on 31 Oct 2026.</p></aside>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>Pydantic docs, <a href="https://pydantic.dev/docs/validation/latest/concepts/alias/" target="_blank" rel="noopener">Alias</a>, read on 31 Oct 2026 (text and tables; long code samples skimmed).</p></aside>
 <p>An alias is an alternative name for a field. There are four ways to set one: <code>alias</code>, <code>validation_alias</code> (a <code>str</code>, <code>AliasPath</code> or <code>AliasChoices</code>), <code>serialization_alias</code>, and <code>alias_generator</code> in the config.</p>
 <ul>
 <li><strong><code>AliasPath</code></strong> reads a value from inside nested data: <code>AliasPath('names', 0)</code> takes <code>names[0]</code>, and <code>AliasPath('contact', 'address')</code> takes <code>contact['address']</code>.</li>
@@ -2223,6 +2239,11 @@ class B(BaseModel):
 <li>Not captured: the other tabs of the config and runtime examples; only one example per group was readable.</li>
 </ul>
 <!-- /docs-alias -->
+
+<!-- docs-constrained -->
+<h3 id="pydantic-p3-constrained-types-are-gone-from-the-migration-gu">Constrained types are gone (from the Migration Guide)</h3>
+<p>The V1 <code>Constrained*</code> classes were removed. Write <code>Annotated[int, Field(ge=0)]</code> instead, and use <code>StringConstraints</code> for what <code>ConstrainedStr</code> did. See also <a href="https://pydantic.dev/docs/validation/latest/get-started/migration/" target="_blank" rel="noopener">Migration Guide</a>, read on 31 Oct 2026 (text and tables; long code samples skimmed).</p>
+<!-- /docs-constrained -->
 
 <h2 id="pydantic-p3-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
@@ -2338,6 +2359,24 @@ class SignupForm(BaseModel):
 <h3 id="pydantic-p4-reusable-validators">Reusable validators</h3>
 <p>With the Annotated pattern, <code>AfterValidator(fn)</code> and friends attach to a type, so you can define something like an "even number" type once. With the decorator, one function can target several fields, or all of them with <code>'*'</code>.</p>
 <aside class="callout repo"><div class="ct">Repo note<em>Duplicate method names in the notebook</em></div><p>In the notebook's <code>SignupForm</code>, two <code>field_validator</code> methods are both named <code>reject_disposable_domains</code>. In Python the second definition replaces the first, so only one validator survives. The bodies also <code>raise ValidationError</code>, which is not how you reject a value; they should <code>raise ValueError(...)</code>. And they lower-case the password, which would silently change the user's password. Treat that cell as a sketch.</p></aside>
+<!-- docs-validatecall -->
+<h3 id="pydantic-p4-validate-call-validating-function-arguments-from"><code>validate_call</code>: validating function arguments (from the Validation Decorator page)</h3>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>Pydantic docs, <a href="https://pydantic.dev/docs/validation/latest/concepts/validation_decorator/" target="_blank" rel="noopener">Validation Decorator</a>, read on 31 Oct 2026 from the docs source on GitHub, which tracks the main branch (text and tables read; long code samples skimmed).</p></aside>
+<p><code>@validate_call</code> checks a function's arguments against its type hints before the function runs, using the same machinery as models. It works with positional, keyword-only, positional-only, <code>*args</code> and <code>**kwargs</code> parameters (and <code>Unpack</code> of a <code>TypedDict</code> for <code>**kwargs</code>, v2.10).</p>
+<ul>
+<li>Types come from the annotations (<code>Any</code> if missing) and are <strong>coerced</strong> as elsewhere: a date string becomes a <code>date</code>. Pass <code>config=ConfigDict(strict=True)</code> for strict mode.</li>
+<li>The return value is <strong>not</strong> validated unless you set <code>validate_return=True</code>.</li>
+<li><code>Field()</code> works on parameters, best in the <code>Annotated</code> form, including aliases.</li>
+<li><code>raw_function</code> gives the undecorated function for trusted inputs. Async functions work. Type checkers keep the signature but will not see <code>raw_function</code>.</li>
+<li>Failure raises the standard <code>ValidationError</code>, including for missing arguments (Python would raise <code>TypeError</code>).</li>
+<li>To validate arguments now and call later, return an inner function from a decorated outer one.</li>
+</ul>
+<h3 id="pydantic-p4-the-experimental-pipeline-api-from-the-experimen">The experimental pipeline API (from the Experimental page)</h3>
+<p>Since v2.8 an experimental <code>validate_as</code> pipeline composes validation, transformation, constraints and predicates in a type-safe chain (steps joined with <code>|</code> or <code>&amp;</code>). It is a typed alternative to <code>BeforeValidator</code>, <code>AfterValidator</code> and <code>WrapValidator</code>, and may change or be removed. The docs themselves advise plain code (separate <code>UserIn</code> and <code>UserOut</code> models) unless the saving is significant.</p>
+<h3 id="pydantic-p4-from-v1-validators">From V1: validators</h3>
+<p><code>@validator</code> and <code>@root_validator</code> are deprecated in favour of <code>@field_validator</code> and <code>@model_validator</code>. There is no <code>each_item</code>; annotate the item type instead (<code>list[Annotated[int, Field(ge=0)]]</code>). A <code>TypeError</code> raised in a validator is <strong>no longer</strong> turned into a <code>ValidationError</code>. <code>allow_reuse</code> is no longer needed, and <code>@validate_arguments</code> is now <code>@validate_call</code>.</p>
+<!-- /docs-validatecall -->
+
 <h2 id="pydantic-p4-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -2387,6 +2426,7 @@ class SignupForm(BaseModel):
 </ul>
 <h2 id="pydantic-p4-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li><a href="https://pydantic.dev/docs/validation/latest/concepts/validation_decorator/" target="_blank" rel="noopener">Pydantic docs: Validation Decorator</a>, <a href="https://pydantic.dev/docs/validation/latest/concepts/experimental/" target="_blank" rel="noopener">Experimental Features</a></li>
 <li><a href="https://pydantic.dev/docs/validation/latest/concepts/validators/" target="_blank" rel="noopener">Pydantic docs: Validators</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/03%20-%204%20Jul%20-%20Pydantic%20Deep%20Dive.md" target="_blank" rel="noopener">Class 03 notes</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2001%20-%2027-28%20Jun/02-03%20-%2028%20Jun%20%26%204%20Jul%20-%20Python%20Refresher%20%26%20Pydantic%20Deep%20Dive/8_Pydantic/Pydantic_From_Scratch.ipynb" target="_blank" rel="noopener">Pydantic From Scratch notebook</a></li>
@@ -2576,6 +2616,19 @@ a.address.city          # dot-chain access, fully typed
 </ul>
 <!-- /docs-unions-dc -->
 
+<!-- docs-forward -->
+<h3 id="pydantic-p6-forward-annotations-and-cyclic-imports-from-the-">Forward annotations and cyclic imports (from the Forward Annotations page)</h3>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>Pydantic docs, <a href="https://pydantic.dev/docs/validation/latest/concepts/forward_annotations/" target="_blank" rel="noopener">Forward Annotations</a>, read on 31 Oct 2026 from the docs source on GitHub, which tracks the main branch (text and tables read; long code samples skimmed).</p></aside>
+<ul>
+<li><strong>Python 3.14 and later</strong> no longer evaluates annotations eagerly, so you can refer to names defined later without quotes.</li>
+<li><strong>Python 3.13 and earlier:</strong> quote the annotation (<code>'MyInt'</code>) or add <code>from __future__ import annotations</code>. Self-referencing models need a quoted name, for example <code>sibling: 'Foo | None' = None</code>, because the class is not defined while its own body runs.</li>
+<li><strong>Cyclic imports</strong> (two models in two modules referring to each other): import one only under <code>if TYPE_CHECKING:</code> and quote the annotation; Python 3.15 adds <code>lazy</code> imports.</li>
+<li>Pydantic resolves these names when the model is created, or later with <code>model_rebuild()</code>.</li>
+</ul>
+<h3 id="pydantic-p6-unions-what-changed-from-v1">Unions: what changed from V1</h3>
+<p>In V1 a union tried members left to right and returned the first that validated. V2 keeps the input's type when it already matches a member: with <code>float | int</code>, the <code>int</code> 1 stays an <code>int</code>. Annotate with <code>Field(union_mode='left_to_right')</code> to get the V1 behaviour back.</p>
+<!-- /docs-forward -->
+
 <h2 id="pydantic-p6-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -2608,6 +2661,7 @@ a.address.city          # dot-chain access, fully typed
 </ul>
 <h2 id="pydantic-p6-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li><a href="https://pydantic.dev/docs/validation/latest/concepts/forward_annotations/" target="_blank" rel="noopener">Pydantic docs: Forward Annotations</a></li>
 <li><a href="https://pydantic.dev/docs/validation/latest/concepts/unions/" target="_blank" rel="noopener">Pydantic docs: Unions</a>, <a href="https://pydantic.dev/docs/validation/latest/concepts/dataclasses/" target="_blank" rel="noopener">Dataclasses</a>, <a href="https://pydantic.dev/docs/validation/latest/concepts/type_adapter/" target="_blank" rel="noopener">Type Adapter</a></li>
 <li><a href="https://pydantic.dev/docs/validation/latest/concepts/models/" target="_blank" rel="noopener">Pydantic docs: Models</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/03%20-%204%20Jul%20-%20Pydantic%20Deep%20Dive.md" target="_blank" rel="noopener">Class 03 notes</a></li>
@@ -3038,6 +3092,18 @@ def apply(a: Applicant) -&gt; Receipt:
 <h3 id="pydantic-p11-context-aware-validators">Context-aware validators</h3>
 <p>A validator can check against data supplied at call time through <code>model_validate(..., context=...)</code> (chapter 4), which is how an app can enforce "country must be one of these" without telling the model the list.</p>
 <aside class="callout key"><div class="ct">Key idea<em>Shape, not correctness</em></div><p>Structured output guarantees the <strong>shape</strong>. A well-formed answer can still be confidently wrong. Pydantic's article says the same: structurally valid output does not guarantee correct content, and validation catches type and shape problems, not semantic ones.</p></aside>
+<!-- docs-json -->
+<h3 id="pydantic-p11-json-parsing-and-partial-json-from-the-json-and-">JSON parsing and partial JSON (from the JSON and Experimental pages)</h3>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>Pydantic docs, <a href="https://pydantic.dev/docs/validation/latest/concepts/json/" target="_blank" rel="noopener">JSON</a>, read on 31 Oct 2026 from the docs source on GitHub, which tracks the main branch (text and tables read; long code samples skimmed).</p></aside>
+<ul>
+<li><strong>Built-in JSON parsing.</strong> <code>model_validate_json</code> and <code>TypeAdapter.validate_json</code> parse in Rust (the <code>jiter</code> parser, v2.5 and later), which is faster than <code>json.loads</code> followed by <code>model_validate</code>, supports custom errors and honours <code>strict</code>. With strict mode on, JSON strings are still accepted for dates and arrays for tuples, because JSON has no such types. A repeated key keeps the last value.</li>
+<li><strong>Partial JSON, v2.7.</strong> <code>pydantic_core.from_json(text, allow_partial=True)</code> returns the parts of an incomplete document that parsed (a cut-off list keeps its finished items; a cut-off object keeps its finished keys). Without the flag an incomplete document is an error. For models, fields should have defaults so a half-received object validates.</li>
+<li><strong>Partial validation, v2.10 (experimental).</strong> Pass <code>experimental_allow_partial=True</code> to <code>TypeAdapter.validate_json</code>, <code>validate_python</code> or <code>validate_strings</code> to validate incomplete input, which suits streamed LLM output you want to show while it arrives. The docs call it a proof of concept with limitations.</li>
+<li><strong>String caching.</strong> <code>cache_strings</code> (default on) caches repeated short strings (under 64 characters, cache of 16,384 entries) to speed parsing and use a little more memory; turn it off when strings rarely repeat.</li>
+<li><strong>Conversion table.</strong> The docs include a generated table of which input types convert to which field types in lax and strict mode; it is built when the site is built, so its contents were not in the source I read.</li>
+</ul>
+<!-- /docs-json -->
+
 <h2 id="pydantic-p11-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -3076,6 +3142,7 @@ def apply(a: Applicant) -&gt; Receipt:
 </ul>
 <h2 id="pydantic-p11-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li><a href="https://pydantic.dev/docs/validation/latest/concepts/json/" target="_blank" rel="noopener">Pydantic docs: JSON</a></li>
 <li><a href="https://pydantic.dev/articles/llm-intro" target="_blank" rel="noopener">Pydantic: How to use Pydantic for LLMs</a></li>
 <li><a href="https://pydantic.dev/docs/validation/dev/examples/pydantic_ai/" target="_blank" rel="noopener">Pydantic docs: Agent libraries (Pydantic AI)</a></li>
 <li>Instructor's site: <a href="https://pydantic-with-mayank.netlify.app/" target="_blank" rel="noopener">Mastering Pydantic</a></li>
@@ -4742,6 +4809,59 @@ print(model.invoke(messages).content)     # a pirate-flavoured answer
 <p><code>create_deep_agent</code> pre-assembles a harness (filesystem, summarisation, sub-agents, prompt caching) for long-running tasks. Managed Deep Agents builds on <code>create_agent</code> with planning, file tools, sub-agents and memory preassembled.</p>
 <!-- /docs-add -->
 
+<!-- docs-v1-concepts -->
+<h2 id="agentic-ai-ch2-langchain-v1-what-changed-and-the-version-policy">LangChain v1: what changed, and the version policy (from the docs)</h2>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>LangChain docs, <a href="https://docs.langchain.com/oss/python/releases/langchain-v1" target="_blank" rel="noopener">What's new in LangChain v1</a>, read on 31 Oct 2026 from the docs source on GitHub (text and tables of every section; long code samples skimmed).</p></aside>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>LangChain docs, <a href="https://docs.langchain.com/oss/python/migrate/langchain-v1" target="_blank" rel="noopener">LangChain v1 migration guide</a>, read on 31 Oct 2026 from the docs source on GitHub (text and tables of every section; long code samples skimmed).</p></aside>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>LangChain docs, <a href="https://docs.langchain.com/oss/python/versioning" target="_blank" rel="noopener">Versioning</a>, read on 31 Oct 2026 from the docs source on GitHub (text and tables of every section; long code samples skimmed).</p></aside>
+<p><strong>Three ideas in v1.</strong> <code>create_agent</code> is the standard way to build an agent and replaces <code>langgraph.prebuilt.create_react_agent</code>; <strong>standard content blocks</strong> (<code>message.content_blocks</code>) give provider-agnostic access to reasoning, citations and built-in tools (supported at first for Anthropic, AWS, OpenAI, Google GenAI and Ollama); and a <strong>smaller <code>langchain</code> package</strong> focused on agents, messages, tools, chat models and embeddings. Structured output now comes from the main loop with no extra model call, and the agent is built on LangGraph, so it gets persistence, streaming and human approval for free.</p>
+<p><strong>Migrating from the old agent API.</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Old</th>
+<th>New</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>langgraph.prebuilt.create_react_agent</code></td>
+<td><code>langchain.agents.create_agent</code></td>
+</tr>
+<tr>
+<td><code>prompt=</code></td>
+<td><code>system_prompt=</code> (a string, not a <code>SystemMessage</code>)</td>
+</tr>
+<tr>
+<td><code>pre_model_hook</code>, <code>post_model_hook</code>, <code>state_modifier</code></td>
+<td>middleware: <code>before_model</code>, <code>after_model</code>, <code>@wrap_model_call</code>, <code>@wrap_tool_call</code>, <code>@dynamic_prompt</code></td>
+</tr>
+<tr>
+<td>Prompted structured output</td>
+<td>removed; use <code>ToolStrategy</code> or <code>ProviderStrategy</code></td>
+</tr>
+<tr>
+<td>Streamed node name <code>"agent"</code></td>
+<td><code>"model"</code></td>
+</tr>
+<tr>
+<td><code>config["configurable"]</code> for static data</td>
+<td>the <code>context=</code> argument and <code>context_schema=</code></td>
+</tr>
+<tr>
+<td>Legacy chains, retrievers, indexing, hub, <code>CacheBackedEmbeddings</code></td>
+<td>the <code>langchain-classic</code> package</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Breaking changes.</strong> Python 3.10 or newer is required; chat models return <code>AIMessage</code> instead of <code>BaseMessage</code>; <code>langchain-openai</code> stores Responses-API items in <code>content</code> by default (<code>LC_OUTPUT_VERSION=v0</code> restores the old way); <code>langchain-anthropic</code> no longer defaults <code>max_tokens</code> to 1024; <code>.text()</code> became the property <code>.text</code>; <code>AIMessage</code> lost its <code>example</code> parameter; deprecated APIs slated for 1.0 were removed.</p>
+<p><strong>Versioning.</strong> Versions are <code>MAJOR.MINOR.PATCH</code> (semantic versioning). APIs are stable (no prefix), <strong>beta</strong> (feature-complete, may change slightly), <strong>alpha</strong> (experimental) or <strong>deprecated</strong>; names with a leading underscore are internal. LangChain and LangGraph 1.0 are long-term-support releases: the previous major version keeps security and critical fixes for at least 12 months after the next major release. <code>deepagents</code> was still pre-1.0. Pre-releases are <code>a</code>, <code>b</code> and <code>rc</code> versions.</p>
+<h3 id="agentic-ai-ch2-frameworks-runtimes-and-harnesses-from-the-conce">Frameworks, runtimes and harnesses (from the conceptual overview)</h3>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>LangChain docs, <a href="https://docs.langchain.com/oss/python/concepts/products" target="_blank" rel="noopener">Runtimes, frameworks, and harnesses</a>, read on 31 Oct 2026 from the docs source on GitHub (text and tables of every section; long code samples skimmed).</p></aside>
+<p>Three layers answer different needs. An <strong>agent framework</strong> (LangChain) gives abstractions to start quickly: content blocks, the agent loop, middleware. An <strong>agent runtime</strong> (LangGraph) provides what production needs: durable execution, streaming, human-in-the-loop and persistence, with low-level control. An <strong>agent harness</strong> (Deep Agents) is opinionated and batteries-included, with planning, subagents and a file system for long-running, complex tasks. Pick LangChain for straightforward agents, LangGraph for fine-grained orchestration and long-running state, Deep Agents for autonomous, multi-step work.</p>
+<p><strong>Errors page.</strong> LangChain and LangGraph errors carry an <code>lc_error_code</code> such as <code>GRAPH_RECURSION_LIMIT</code>, <code>INVALID_CHAT_HISTORY</code>, <code>INVALID_TOOL_RESULTS</code>, <code>MESSAGE_COERCION_FAILURE</code>, <code>MISSING_CHECKPOINTER</code>, <code>MODEL_AUTHENTICATION</code>, <code>MODEL_NOT_FOUND</code>, <code>MODEL_RATE_LIMIT</code>, <code>OUTPUT_PARSING_FAILURE</code>; the docs have a page for each code.</p>
+<!-- /docs-v1-concepts -->
+
 <h2 id="agentic-ai-ch2-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -4896,6 +5016,7 @@ print(model.invoke(messages).content)     # a pirate-flavoured answer
 
 <h2 id="agentic-ai-ch2-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li>LangChain docs: <a href="https://docs.langchain.com/oss/python/releases/langchain-v1" target="_blank" rel="noopener">What's new in v1</a>, <a href="https://docs.langchain.com/oss/python/migrate/langchain-v1" target="_blank" rel="noopener">v1 migration guide</a>, <a href="https://docs.langchain.com/oss/python/versioning" target="_blank" rel="noopener">Versioning</a>, <a href="https://docs.langchain.com/oss/python/concepts/products" target="_blank" rel="noopener">Runtimes, frameworks and harnesses</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/07%20-%2018%20Jul%20-%20LangChain%20Family%20%26%20Harness%20Engineering.md" target="_blank" rel="noopener">Class 07 full notes</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_summary/07%20-%2018%20Jul%20-%20LangChain%20Family%20%26%20Harness%20Engineering.md" target="_blank" rel="noopener">Class 07 short summary</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2004%20-%2018-19%20Jul/07-08%20-%2018-19%20Jul%20-%20LangChain%20Family%20%26%20the%20Model%20Layer/Notebook%20For%20Reference/01_landscape_student_notes.ipynb" target="_blank" rel="noopener">Landscape reference notebook</a></li>
@@ -5191,6 +5312,12 @@ free_model = init_chat_model(&quot;ollama:llama3.2&quot;)
 <aside class="callout trap"><div class="ct">Common trap<em>Never `load()` untrusted data</em></div><p><code>load()</code> rebuilds objects and can trigger side effects. The docs warn against using it on untrusted or unauthenticated data. This links to the LangChain serialization vulnerability (CVE-2025-68664) noted in Chapter 1.</p></aside>
 <!-- /docs-add -->
 
+<!-- docs-providers -->
+<h3 id="agentic-ai-ch3-providers-and-models-in-one-idea-from-the-concep">Providers and models, in one idea (from the conceptual overview)</h3>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>LangChain docs, <a href="https://docs.langchain.com/oss/python/concepts/providers-and-models" target="_blank" rel="noopener">Providers and models</a>, read on 31 Oct 2026 from the docs source on GitHub (text and tables of every section; long code samples skimmed).</p></aside>
+<p>Every LangChain chat model implements the same interface, so you can swap providers, compare models with identical code, and use tool calling, structured output and streaming everywhere. A <strong>provider</strong> hosts models behind an API and has an <strong>integration package</strong> (<code>langchain-openai</code>, <code>langchain-anthropic</code>). With <code>init_chat_model("provider:model")</code> LangChain resolves the provider and loads the package. Model names are passed straight to the provider, so a new model works the day it is released if your provider package supports its API. <strong>Routers</strong> (gateways such as OpenRouter) give many providers through one credential, with fallbacks and load balancing. Many vendors offer <strong>OpenAI-compatible endpoints</strong>; use <code>ChatOpenAI</code> with a custom <code>base_url</code>, but note it keeps only fields in OpenAI's official specification, so third-party extras are dropped.</p>
+<!-- /docs-providers -->
+
 <h2 id="agentic-ai-ch3-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -5311,6 +5438,7 @@ free_model = init_chat_model(&quot;ollama:llama3.2&quot;)
 
 <h2 id="agentic-ai-ch3-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li>LangChain docs: <a href="https://docs.langchain.com/oss/python/concepts/providers-and-models" target="_blank" rel="noopener">Providers and models</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/08%20-%2019%20Jul%20-%20LangChain%20-%20Inside%20the%20Model.md" target="_blank" rel="noopener">Class 08 full notes</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_summary/08%20-%2019%20Jul%20-%20Inside%20the%20Model.md" target="_blank" rel="noopener">Class 08 short summary</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2004%20-%2018-19%20Jul/07-08%20-%2018-19%20Jul%20-%20LangChain%20Family%20%26%20the%20Model%20Layer/Notebook%20For%20Reference/02_03_environment_models_messages_student_notes.ipynb" target="_blank" rel="noopener">Environment, models and messages notebook</a></li>
@@ -6291,6 +6419,17 @@ agent_with_memory.invoke({&quot;messages&quot;: [...]}, config=config)
 <p>Semantic search needs <code>IndexConfig(embed=..., dims=...)</code> with <code>dims</code> matching the embedding size. Use <code>InMemoryStore</code> for development and <code>PostgresStore</code> (<code>from_conn_string</code>, then <code>setup()</code> once) in production; Redis and MongoDB stores exist. Tools reach it through <code>runtime.store</code> (check it is not <code>None</code>) and scope by <code>runtime.context.user_id</code>.</p>
 <!-- /docs-add -->
 
+<!-- docs-memory-concept -->
+<h3 id="agentic-ai-ch6-memory-the-concept-from-the-conceptual-overview">Memory, the concept (from the conceptual overview)</h3>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>LangChain docs, <a href="https://docs.langchain.com/oss/python/concepts/memory" target="_blank" rel="noopener">Memory overview</a>, read on 31 Oct 2026 from the docs source on GitHub (text and tables of every section; long code samples skimmed).</p></aside>
+<ul>
+<li><strong>Short-term memory</strong> is the conversation inside one thread, kept as agent state and saved by a thread-scoped checkpointer. Long histories can overflow the context window or distract the model, so trim or forget stale messages.</li>
+<li><strong>Long-term memory</strong> lasts across threads and lives in a store, organised by <strong>namespace</strong> (like a folder) and <strong>key</strong> (like a file name).</li>
+<li><strong>Three kinds, borrowed from people.</strong> <em>Semantic</em> memory holds facts, either as one continuously updated <strong>profile</strong> (a JSON document) or a <strong>collection</strong> of small documents (easier to extend, less likely to lose information, harder to keep consistent). <em>Episodic</em> memory holds past experiences, often as few-shot examples. <em>Procedural</em> memory holds the rules for doing tasks, often by updating the agent's own instructions.</li>
+<li><strong>When to write.</strong> <em>In the hot path</em>: the agent decides during the conversation, so memories are available at once and users can see them, but it adds latency and complexity. <em>In the background</em>: a separate job writes memories, with no added latency, but you must decide when it runs (after a delay, on a schedule, or on demand).</li>
+</ul>
+<!-- /docs-memory-concept -->
+
 <h2 id="agentic-ai-ch6-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -6448,6 +6587,7 @@ agent_with_memory.invoke({&quot;messages&quot;: [...]}, config=config)
 
 <h2 id="agentic-ai-ch6-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li>LangChain docs: <a href="https://docs.langchain.com/oss/python/concepts/memory" target="_blank" rel="noopener">Memory overview</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/11%20-%2001%20Aug%20-%20LangChain%20-%20Agents%2C%20Memory%2C%20Middleware.md" target="_blank" rel="noopener">Class 11 full notes</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_summary/11%20-%2001%20Aug%20-%20Agents%2C%20Middleware%20%26%20Memory.md" target="_blank" rel="noopener">Class 11 short summary</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2006%20-%201%20Aug/11-12%20-%201-8%20Aug%20-%20Agents%2C%20Memory%20%26%20Middleware/MIddleware.ipynb" target="_blank" rel="noopener">Middleware notebook</a></li>
@@ -6762,6 +6902,12 @@ agent = create_agent(
 <aside class="callout trap"><div class="ct">Common trap<em>Two defaults that surprise people</em></div><p><code>ShellToolMiddleware</code> defaults to <strong>full host access</strong>, so use a Docker or sandbox policy for anything untrusted, and note that <code>redaction_rules</code> are applied after execution and are <strong>not</strong> a guard against secret exfiltration. <code>ToolCallLimitMiddleware</code> defaults to <code>exit_behavior="continue"</code>, which blocks extra calls with an error message but lets the run go on.</p></aside>
 <!-- /docs-add -->
 
+<!-- docs-context-concept -->
+<h3 id="agentic-ai-ch7-context-the-concept-from-the-conceptual-overview">Context, the concept (from the conceptual overview)</h3>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>LangChain docs, <a href="https://docs.langchain.com/oss/python/concepts/context" target="_blank" rel="noopener">Context overview</a>, read on 31 Oct 2026 from the docs source on GitHub (text and tables of every section; long code samples skimmed).</p></aside>
+<p>Context engineering means giving the model the right information and tools in the right format. Context varies on two axes. By <strong>mutability</strong>: <em>static</em> (does not change during a run, such as user metadata, connections, tools) or <em>dynamic</em> (evolves, such as conversation history and tool results). By <strong>lifetime</strong>: <em>runtime</em> (one run) or <em>cross-conversation</em> (persists). That gives three kinds: <strong>static runtime context</strong> passed in at the start through the <code>context</code> argument; <strong>dynamic runtime context</strong>, the state that acts as short-term memory; and <strong>dynamic cross-conversation context</strong>, the store that acts as long-term memory. Config (<code>configurable</code>) is for immutable values such as API keys.</p>
+<!-- /docs-context-concept -->
+
 <h2 id="agentic-ai-ch7-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -6951,6 +7097,7 @@ agent = create_agent(
 
 <h2 id="agentic-ai-ch7-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li>LangChain docs: <a href="https://docs.langchain.com/oss/python/concepts/context" target="_blank" rel="noopener">Context overview</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/12%20-%2008%20Aug%20-%20LangChain%20-%20Mastering%20Middleware.md" target="_blank" rel="noopener">Class 12 full notes</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_summary/12%20-%2008%20Aug%20-%20Mastering%20Middleware.md" target="_blank" rel="noopener">Class 12 short summary</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2007%20-%208-9%20Aug/MIddleware.ipynb" target="_blank" rel="noopener">Weekend 07 middleware notebook</a></li>
@@ -11479,6 +11626,21 @@ asyncio.run(main())
 </code></pre>
 <p>What it shows (verified): the <code>user-token</code> sees only <code>greet</code>, <code>add_numbers</code> and <code>who_am_i</code>; the analyst adds the three analyst tools; the admin also sees <code>list_users</code> and <code>delete_user</code>. A scope does not only block a call, it <strong>hides the tool from <code>tools/list</code></strong>, so the model never even learns that a forbidden tool exists. <code>delete_user</code> was refused for user and analyst and allowed for admin.</p>
 <aside class="callout trap"><div class="ct">Common trap<em>Static tokens are for demos only</em></div><p>Fixed strings in source code are not authentication you can ship. In production you verify real signed tokens (JWT or OAuth) from an identity provider, and you keep scopes narrow, as in the production section above.</p></aside>
+<!-- docs-develop-security -->
+<h2 id="agentic-ai-ch16-from-the-mcp-docs-connecting-security-and-the-sd">From the MCP docs: connecting, security and the SDKs</h2>
+<aside class="callout note"><div class="ct">Note<em>Source and what was read</em></div><p>Docs source <code>docs/2026-07-28</code> in the MCP repository on GitHub, read on 31 Oct 2026: <strong>headings and the opening text of every section</strong> of <code>connect-local-servers</code>, <code>connect-remote-servers</code>, <code>build-with-agent-skills</code>, <code>sdk</code>, and the tutorials <code>authorization</code>, <code>security_best_practices</code> and <code>local-server-security</code>. The step-by-step commands, the Keycloak walk-through and the diagrams were <strong>not</strong> read, so nothing below goes beyond the section openings.</p></aside>
+<ul>
+<li><strong>Connecting a local server (Claude Desktop example).</strong> Needs the client and Node.js. A local server is a program on your machine that exposes tools; you register it in a JSON configuration file so the client starts it at launch, and the client asks your approval before each file-system operation.</li>
+<li><strong>Connecting a remote server.</strong> Remote servers are hosted on the internet and expose tools, prompts and resources like local ones. In Claude you add a <strong>Custom Connector</strong>. Guidance: verify a remote server is authentic before connecting, and watch what it can reach.</li>
+<li><strong>Agent skills for building servers.</strong> The <code>mcp-server-dev</code> plugin provides three composing skills that interview you about the use case (deployment model, tool patterns, authorization) and scaffold one of four deployment paths; <strong>remote Streamable HTTP</strong> is the default for anything wrapping a cloud API (no install friction, one deployment serves everyone).</li>
+<li><strong>SDKs.</strong> Official SDKs are sorted into tiers by feature completeness, protocol support and maintenance; each follows its language's idioms and adopts new protocol revisions on its own schedule, so check which revision your SDK supports.</li>
+<li><strong>Authorization tutorial.</strong> Authorization is optional but strongly recommended when the server touches user data, you need an audit trail of who did what, or it performs administrative actions. A protected server answers <code>401 Unauthorized</code> and points the client at its authorization server; the tutorial uses a local Keycloak in Docker and VS Code as the client.</li>
+<li><strong>Security best practices.</strong> Two named attacks. <strong>Confused deputy:</strong> an MCP proxy server that uses one static client ID with a third-party authorization server and lets clients register dynamically can be abused to obtain authorization codes without the user's consent; the fix is per-client consent. <strong>Token passthrough:</strong> accepting a token from the client without checking it was issued to <em>this</em> server and forwarding it downstream is explicitly forbidden.</li>
+<li><strong>Local server security.</strong> A local server is an ordinary OS process with your privileges, not a sandboxed plugin; with stdio the client and server trust each other. The guide's defences, in its own order: ask whether it needs to run locally at all, check provenance before installing (a registry listing is not an endorsement), treat tool names and descriptions as untrusted input because the model reads them as instructions, run the server in an isolated environment (called the highest-leverage step), and isolate its credentials.</li>
+</ul>
+<aside class="callout trap"><div class="ct">Common trap<em>Tool descriptions are an injection surface</em></div><p>A server you trusted at install time can still change what its tool descriptions say at runtime. Treat them as untrusted input, the same way you treat user text.</p></aside>
+<!-- /docs-develop-security -->
+
 <h2 id="agentic-ai-ch16-spot-the-bug-deployment-mistakes">Spot the bug: deployment mistakes</h2>
 <p>Each pair is a mistake from this chapter and the fix. Cover the right side and try to find the problem first.</p>
 <p><strong>1. Doubled path</strong></p>
@@ -11572,6 +11734,7 @@ if response.stop_reason == &quot;tool_use&quot;:
 
 <h2 id="agentic-ai-ch16-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li><a href="https://github.com/modelcontextprotocol/modelcontextprotocol/tree/main/docs/docs/2026-07-28" target="_blank" rel="noopener">MCP docs: connect local and remote servers, build with agent skills, SDKs, authorization and security tutorials (source on GitHub, headings and section openings read 31 Oct 2026)</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/21%20-%2019%20Sep%20-%20MCP%20Deployment.md" target="_blank" rel="noopener">Class 21 full notes</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Complete%20MCP/TimeTrackProject/mcp-client-and-advanced/README.md" target="_blank" rel="noopener">Client project README</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/tree/main/Complete%20MCP/TimeTrackProject/mcp-client-and-advanced/client" target="_blank" rel="noopener">Client files 01 to 09</a></li>
@@ -11765,6 +11928,145 @@ async with Client(&quot;../main.py&quot;, progress_handler=on_progress) as clien
     await client.call_tool(&quot;slow_tool&quot;, {})
 </code></pre>
 <p>On the server, a tool reports progress with <code>await ctx.report_progress(progress=step, total=total_steps, message=...)</code>.</p>
+<!-- spec-2026-changes -->
+<h2 id="agentic-ai-ch17-from-the-2026-07-28-spec-the-changes-one-by-one">From the 2026-07-28 spec: the changes, one by one</h2>
+<aside class="callout note"><div class="ct">Note<em>Source and what was read</em></div><p>Spec source <code>specification/2026-07-28</code> in the MCP repository on GitHub, read on 31 Oct 2026. <strong>Read in full:</strong> Key Changes (changelog), the deprecated registry, <code>server/discover</code>, cancellation, progress, the multi round-trip page through its server requirements, and the compatibility matrix in the versioning page. <strong>Read in part:</strong> subscriptions (to the notification section), Streamable HTTP (headings and the header rules), stdio (the backward-compatibility section). <strong>Not read yet:</strong> authorization, sampling, elicitation, tools, resources, prompts, caching, completion, logging and pagination pages of the spec, and the schema.</p></aside>
+<h3 id="agentic-ai-ch17-the-nine-major-changes">The nine major changes</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Change</th>
+<th>What it means for you</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>No protocol sessions, no <code>Mcp-Session-Id</code> header</td>
+<td>List endpoints no longer vary per connection. State you need across calls travels as an explicit handle your server mints and the model passes as a normal tool argument.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>No <code>initialize</code> / <code>notifications/initialized</code>; stateless</td>
+<td>Every request carries <code>io.modelcontextprotocol/protocolVersion</code> and <code>.../clientCapabilities</code> in <code>_meta</code>; clients should add <code>.../clientInfo</code>, servers add <code>.../serverInfo</code> in the result <code>_meta</code>. A wrong version returns <code>UnsupportedProtocolVersionError</code>.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>server/discover</code></td>
+<td>Servers must implement it. Returns <code>supportedVersions</code>, <code>capabilities</code>, optional <code>instructions</code>, identity in <code>_meta</code>, plus <code>ttlMs</code> and <code>cacheScope</code>. Optional for clients.</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>subscriptions/listen</code></td>
+<td>One long-lived stream replaces the HTTP GET endpoint and <code>resources/subscribe</code>/<code>unsubscribe</code>.</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>ping</code>, <code>logging/setLevel</code>, <code>notifications/roots/list_changed</code> removed</td>
+<td>Log level is set per request with <code>io.modelcontextprotocol/logLevel</code> in <code>_meta</code>; a server must not send <code>notifications/message</code> for a request that omitted it.</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Tasks move out of the core</td>
+<td>Now the extension <code>io.modelcontextprotocol/tasks</code>: poll with <code>tasks/get</code>, send input with <code>tasks/update</code>, <code>tasks/result</code> and <code>tasks/list</code> removed, and servers may return task handles unsolicited.</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Multi round-trip requests (MRTR)</td>
+<td>Server-initiated requests (<code>roots/list</code>, <code>sampling/createMessage</code>, <code>elicitation/create</code>) are replaced by an interim result the client answers by retrying. Breaking change.</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Every result has <code>resultType</code></td>
+<td><code>"complete"</code> or <code>"input_required"</code>. Clients treat a missing field from an older server as <code>"complete"</code>.</td>
+</tr>
+<tr>
+<td>9</td>
+<td>No SSE resumability</td>
+<td><code>Last-Event-ID</code> and event IDs are gone. A broken response stream loses the in-flight request; the client re-issues it with a new request ID.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="agentic-ai-ch17-the-twelve-minor-changes-grouped">The twelve minor changes, grouped</h3>
+<ul>
+<li><strong>Extensibility and tracing:</strong> an <code>extensions</code> field in client and server capabilities; OpenTelemetry trace context in <code>_meta</code> (<code>traceparent</code>, <code>tracestate</code>, <code>baggage</code>).</li>
+<li><strong>Caching and ordering:</strong> <code>tools/list</code> should come back in a deterministic order (helps client caches and LLM prompt caches); <code>ttlMs</code> and <code>cacheScope</code> (<code>"public"</code> or <code>"private"</code>) are required on <code>tools/list</code>, <code>prompts/list</code>, <code>resources/list</code>, <code>resources/read</code> and <code>resources/templates/list</code>, complementing <code>listChanged</code>.</li>
+<li><strong>HTTP headers:</strong> <code>Mcp-Method</code> (every request) and <code>Mcp-Name</code> (<code>tools/call</code>, <code>resources/read</code>, <code>prompts/get</code>) are required on POST, and <code>x-mcp-header</code> on a tool parameter makes the client copy that value into an <code>Mcp-Param-&lt;Name&gt;</code> header, so gateways can route without parsing the body.</li>
+<li><strong>Errors:</strong> resource-not-found is now <code>-32602</code> (was <code>-32002</code>). The server-error range is split: <code>-32000</code> to <code>-32019</code> stays implementation-defined, <code>-32020</code> to <code>-32099</code> is reserved for the spec (<code>HeaderMismatch</code> <code>-32020</code>, <code>MissingRequiredClientCapability</code> <code>-32021</code>, <code>UnsupportedProtocolVersion</code> <code>-32022</code>).</li>
+<li><strong>Authorization hardening:</strong> authorization servers should send the <code>iss</code> parameter (RFC 9207) and clients must check it; clients must say an <code>application_type</code> when registering dynamically; saved client credentials are keyed by issuer and never reused with another authorization server.</li>
+<li><strong>Schemas:</strong> <code>inputSchema</code> and <code>outputSchema</code> accept any JSON Schema 2020-12 keywords; <code>structuredContent</code> may be any JSON value.</li>
+<li><strong>Elicitation:</strong> <code>notifications/elicitation/complete</code> and <code>elicitationId</code> are removed, because under MRTR the client learns the outcome by retrying; a server that must correlate encodes its own id in <code>requestState</code>.</li>
+</ul>
+<h3 id="agentic-ai-ch17-multi-round-trip-requests-step-by-step">Multi round-trip requests, step by step</h3>
+<ol>
+<li>The client calls <code>tools/call</code>, <code>resources/read</code> or <code>prompts/get</code> (the only three requests that may get an interim result).</li>
+<li>The server needs more information and answers with <code>resultType: "input_required"</code>, carrying <code>inputRequests</code> (a map of server-chosen keys to <code>elicitation/create</code>, <code>sampling/createMessage</code> or <code>roots/list</code> requests), <code>requestState</code> (an opaque string) or both. At least one is required.</li>
+<li>The first request is finished. The client gathers the answers and <strong>retries the same request</strong> with <code>inputResponses</code> (same keys) and the echoed <code>requestState</code>.</li>
+<li>The server rebuilds what it needs from the retry alone and returns the final result.</li>
+</ol>
+<p>Why this design: no shared storage and no sticky load balancing, because each request is self-contained.</p>
+<aside class="callout trap"><div class="ct">Common trap<em>Treat requestState as attacker input</em></div><p>The client holds <code>requestState</code>, so it can alter it. If it influences authorization, access or business logic the server must protect its integrity (HMAC or AEAD) and reject failures. To limit replay, put the authenticated principal, a short expiry and an identifier of the original request inside the protected payload. These bound replay but do not make it single-use; a one-time redemption must be enforced on the server. A server must also never ask for something the client did not declare in its capabilities, and must not assume the client will retry.</p></aside>
+<h3 id="agentic-ai-ch17-discovery-subscriptions-cancellation-progress">Discovery, subscriptions, cancellation, progress</h3>
+<ul>
+<li><strong><code>server/discover</code></strong> is a single request that returns versions, capabilities and identity. A client may skip it and just call a method, handling <code>UnsupportedProtocolVersionError</code>. Use it to show server info in one call, or as the <strong>stdio probe</strong>: send it first; a <code>DiscoverResult</code> means modern, a modern error such as <code>UnsupportedProtocolVersionError</code> means modern with another version (do not fall back), anything else or silence means legacy, so fall back to <code>initialize</code>. The spec warns the fallback must not depend on one specific error code. <code>serverInfo</code> is self-reported and must not drive security decisions.</li>
+<li><strong><code>subscriptions/listen</code></strong> takes a <code>notifications</code> filter (<code>toolsListChanged</code>, <code>promptsListChanged</code>, <code>resourcesListChanged</code>, <code>resourceSubscriptions</code> as a list of URIs). The server must not send anything the client did not ask for, and sends <code>notifications/subscriptions/acknowledged</code> first, listing the subset it will honour. Every notification then carries <code>io.modelcontextprotocol/subscriptionId</code>, the id of the listen request. Progress and log messages stay on the stream of their own request.</li>
+<li><strong>Cancellation:</strong> on Streamable HTTP, closing the response stream is the cancellation and the server must treat a disconnect that way; on stdio the client sends <code>notifications/cancelled</code> with the request id and an optional reason. A server sends <code>notifications/cancelled</code> only to tear down a <code>subscriptions/listen</code> stream. Set a timeout on every request, configurable per request.</li>
+<li><strong>Progress:</strong> the client puts a unique string-or-integer <code>progressToken</code> in <code>_meta</code>; the server may send <code>notifications/progress</code> with <code>progress</code>, optional <code>total</code> and <code>message</code>.</li>
+</ul>
+<h3 id="agentic-ai-ch17-compatibility-between-eras">Compatibility between eras</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Client</th>
+<th>Server</th>
+<th>Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Modern</td>
+<td>Modern</td>
+<td>Works; <code>server/discover</code> optional; mismatches surface as <code>UnsupportedProtocolVersionError</code> and the client retries.</td>
+</tr>
+<tr>
+<td>Modern</td>
+<td>Legacy</td>
+<td>Fails (implementation-defined behaviour).</td>
+</tr>
+<tr>
+<td>Dual-era</td>
+<td>Modern or Legacy</td>
+<td>Works: probe on stdio, or try a modern request on HTTP and fall back on a 4xx without a modern error body.</td>
+</tr>
+<tr>
+<td>Legacy</td>
+<td>Modern</td>
+<td>Fails (<code>initialize</code> is unknown).</td>
+</tr>
+<tr>
+<td>Legacy</td>
+<td>Dual-era</td>
+<td>Works under the negotiated legacy revision.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="agentic-ai-ch17-deprecated-and-how-long-it-lasts">Deprecated, and how long it lasts</h3>
+<p>The registry lists six items: <strong>Roots</strong>, <strong>Sampling</strong>, <strong>Logging</strong> (SEP-2577), <strong>Dynamic Client Registration</strong> (replaced by Client ID Metadata Documents), the <code>includeContext</code> values <code>"thisServer"</code> and <code>"allServers"</code>, and the <strong>HTTP+SSE transport</strong>. Suggested migrations: pass directories or files as tool parameters, resource URIs or configuration instead of Roots; call the LLM provider directly instead of Sampling; log to <code>stderr</code> (stdio) or use OpenTelemetry instead of Logging; use Streamable HTTP. A deprecated feature keeps working for at least twelve months under the feature lifecycle policy, and nothing has been removed yet.</p>
+<aside class="callout tip"><div class="ct">Pro tip<em>Reading the chapters in this light</em></div><p>Sampling and elicitation in the earlier chapters still teach correctly how the features work. The change is how the server asks: not by a request of its own, but by returning <code>input_required</code> and letting the client retry.</p></aside>
+<!-- /spec-2026-changes -->
+
+<!-- docs-client-practices -->
+<h2 id="agentic-ai-ch17-from-the-mcp-docs-client-best-practices-for-many">From the MCP docs: client best practices for many tools</h2>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p><code>develop/clients/client-best-practices.mdx</code>, <strong>headings and the opening of each section</strong> read on 31 Oct 2026; the implementation-guidelines table and the caching section were cut off and not read.</p></aside>
+<ul>
+<li><strong>The problem.</strong> A host connected to many servers can accumulate hundreds or thousands of tool definitions. Loading all of them into the context up front wastes tokens, adds latency and degrades the model's choices; passing big intermediate results through the model between sequential calls makes it worse.</li>
+<li><strong>Progressive discovery</strong> controls <em>when</em> tool definitions enter context. The host exposes a small catalog of meta-tools (for example <code>search_tools</code>), the model searches, and only the matching definitions are loaded. Search strategies include keyword matching (BM25, regex). It pays off when definitions take a large part of the window; with a few tools, loading everything is fine.</li>
+<li><strong>Dynamic server management</strong> goes further: keep a registry of servers with short descriptions and connect only when needed.</li>
+<li><strong>Programmatic tool calling</strong> controls <em>how</em> tools are invoked, so intermediate results need not pass through the model.</li>
+</ul>
+<!-- /docs-client-practices -->
+
 <h2 id="agentic-ai-ch17-key-pointers-to-remember">Key pointers to remember</h2>
 <ul>
 <li>Nothing you built breaks. Modern MCP is opt-in.</li>
@@ -12102,6 +12404,8 @@ async def on_progress(progress: float, total: float | None, message: str | None)
 
 <h2 id="agentic-ai-ch17-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li><a href="https://github.com/modelcontextprotocol/modelcontextprotocol/tree/main/docs/docs/2026-07-28/develop/clients/client-best-practices" target="_blank" rel="noopener">MCP docs: client best practices (progressive discovery; headings and section openings read 31 Oct 2026)</a></li>
+<li><a href="https://github.com/modelcontextprotocol/modelcontextprotocol/tree/main/docs/specification/2026-07-28" target="_blank" rel="noopener">MCP specification 2026-07-28: Key Changes, deprecated registry, discovery, patterns, versioning (source on GitHub, read 31 Oct 2026)</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/22%20-%2020%20Sep%20-%20Legacy%20vs%20Modern%20MCP.md" target="_blank" rel="noopener">Class 22 full notes</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Complete%20MCP/TimeTrackProject/mcp-client-and-advanced/MCP_PROTOCOL_CHANGES_SUMMARY.txt" target="_blank" rel="noopener">Protocol changes summary (root causes and fixes)</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Complete%20MCP/TimeTrackProject/mcp-client-and-advanced/README.md" target="_blank" rel="noopener">Client project README</a></li>
@@ -12448,6 +12752,84 @@ async def run_agent(server) -&gt; dict:
 <aside class="callout trap"><div class="ct">Common trap<em>`pip install langchain.mcp` installs the wrong package</em></div><p>In the notebook, <code>pip install "langchain[mcp]"</code> printed that the installed LangChain (1.3.18) "does not provide the extra 'mcp'". Then <code>pip install langchain.mcp</code> installed an unrelated package (<code>langchain-mcp</code> 0.2.1), which downgraded <code>langchain-core</code> to 0.3.86 and produced dependency-conflict errors; reinstalling <code>fastmcp langchain</code> swung <code>langchain-core</code> back to 1.6.5 and left the conflicts. The MCP adapter in the docs needs <code>langchain[mcp]</code> at version 1.4.0 or later (a beta feature), so check the version before installing.</p></aside>
 <!-- /craftcolab-mcp -->
 
+<!-- docs-migrate-mcp -->
+<h2 id="agentic-ai-ch18-migrating-from-langchain-mcp-adapters-and-mcp-au">Migrating from <code>langchain-mcp-adapters</code>, and MCP authentication (from the docs)</h2>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>LangChain docs, <a href="https://docs.langchain.com/oss/python/migrate/langchain-mcp-adapters" target="_blank" rel="noopener">Migrate from langchain-mcp-adapters</a>, read on 31 Oct 2026 from the docs source on GitHub (text and tables of every section; long code samples skimmed).</p></aside>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p>LangChain docs, <a href="https://docs.langchain.com/oss/python/langchain/mcp/auth" target="_blank" rel="noopener">MCP authentication</a>, read on 31 Oct 2026 from the docs source on GitHub (text and tables of every section; long code samples skimmed).</p></aside>
+<p>MCP support now lives inside LangChain as <code>langchain.mcp</code>, built on FastMCP, and replaces the standalone <code>langchain-mcp-adapters</code> package. It needs <code>langchain[mcp]&gt;=1.4.0</code> and is in beta. <code>MultiServerMCPClient</code> collapses into one <strong><code>MCPAdapter</code></strong> class: an async context manager that infers the transport from its target.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Before (<code>langchain-mcp-adapters</code>)</th>
+<th>After (<code>langchain.mcp</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MultiServerMCPClient(connections)</code></td>
+<td><code>MCPAdapter(target)</code>; the target is a URL, a <code>Path</code>, an in-process server, an <code>MCPConfig</code> dict (<code>mcpServers</code>), a prebuilt <code>fastmcp.Client</code> or a <code>ClientGroup</code></td>
+</tr>
+<tr>
+<td><code>get_tools()</code>, <code>load_mcp_tools</code></td>
+<td><code>MCPAdapter(...).list_tools()</code></td>
+</tr>
+<tr>
+<td><code>tool_name_prefix</code></td>
+<td>automatic (<code>{server}_{tool}</code>) for several servers</td>
+</tr>
+<tr>
+<td><code>handle_tool_errors</code> flag</td>
+<td>removed: <code>isError=True</code> becomes a <code>ToolMessage(status="error")</code>, transport failures raise</td>
+</tr>
+<tr>
+<td><code>Callbacks(on_elicitation=...)</code></td>
+<td>automatic, as a LangGraph interrupt; answer by resuming with <code>Command(resume={"responses": {key: answer}})</code></td>
+</tr>
+<tr>
+<td><code>on_progress</code>, <code>on_logging_message</code></td>
+<td><code>progress_handler=</code> and <code>log_handler=</code> on a <code>fastmcp.Client</code></td>
+</tr>
+<tr>
+<td><code>tool_interceptors</code></td>
+<td>LangChain <code>@wrap_tool_call</code> middleware</td>
+</tr>
+<tr>
+<td><code>convert_mcp_tool_to_langchain_tool</code></td>
+<td><code>as_langchain_tool</code> (now a coroutine)</td>
+</tr>
+<tr>
+<td>prompts, resources, <code>to_fastmcp</code></td>
+<td><strong>not supported yet</strong></td>
+</tr>
+<tr>
+<td>sampling, roots</td>
+<td><strong>not answered</strong>: a tool call that needs either raises <code>NotImplementedError</code>, because the modern sessionless protocol has no back-channel</td>
+</tr>
+<tr>
+<td>HTTP+SSE</td>
+<td>deprecated in the protocol but still works through FastMCP's <code>SSETransport</code>; WebSocket has no transport</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Four authentication patterns.</strong> <em>Bearer token</em>: pass the token string as <code>auth</code>. <em>OAuth</em>: pass the literal <code>"oauth"</code> and FastMCP runs the OAuth 2.1 flow (discovery, dynamic client registration, browser redirect, token exchange). <em>Per-server</em>: give each server its own client in a <code>ClientGroup</code> with its own <code>auth</code>. <em>Per-user</em>: authenticate the caller at the LangGraph server with a custom auth handler, then mint or exchange that user's credential inside the graph factory so each run reaches the server as its own user. <code>auth</code> also accepts any <code>httpx.Auth</code>.</p>
+<!-- /docs-migrate-mcp -->
+
+<!-- class23-mcp -->
+<h2 id="agentic-ai-ch18-what-class-23-adds-on-the-mcp-adapter-read-in-fu">What class 23 adds on the MCP adapter (read in full)</h2>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p><code>classes_transcription_summary/23 - 27 Sep - MCP In LangChain.md</code>, read in full on 31 Oct 2026. The repo gained this file after my first snapshot of it.</p></aside>
+<ul>
+<li><strong>Where the course is.</strong> The MCP detour was deliberately long so MCP would be understood in depth; the class returns to LangChain with two topics, MCP in LangChain and multi-agent systems, and the next weekend is a LangChain project on GCP (learners were asked to open a Google Cloud free-trial account, about $300 of credit). The live adapter demo hit a version problem, because LangChain's MCP package was in beta and needed a newer LangChain than the notebook had; the concepts were taught, the notebook was promised later.</li>
+<li><strong>An agent only needs tools.</strong> MCP changes where tools come from, not how the agent loop works. The agent reads each tool's name and description and decides.</li>
+<li><strong>The adapter is a universal translator</strong> between a LangChain agent (messages, tools, tool messages) and any MCP server, local or remote. It sits on the <strong>FastMCP client</strong>, which handles four jobs: inferring the transport (STDIO or HTTP), negotiating the protocol version (legacy or modern), managing the connection and authentication.</li>
+<li><strong><code>adapter.list_tools()</code>, not <code>client.list_tools()</code></strong>, when tools must be LangChain-compatible: the plain client returns tools but not necessarily in a form LangChain can use. The class described the adapter as a decorator wrapped around the MCP client.</li>
+<li><strong>What gets translated.</strong> A tool result becomes LangChain content (text, image or audio); structured content becomes an <strong>artifact</strong> on the tool message; an error becomes a tool-message <strong>status</strong> that tells a server-reported error from a transport failure; an elicitation request becomes a <strong>LangGraph interrupt</strong>.</li>
+<li><strong>Three ways to connect.</strong> One server (a URL, a script path, or an in-memory FastMCP server object), several servers behind one config dictionary, or a <strong>client group</strong> for servers that each need their own connection, credentials or protocol mode. The group routes each call to the client that advertises the tool and namespaces tools so identical names do not collide; a legacy and a modern server can run side by side.</li>
+<li><strong>Per-user credentials, the trap.</strong> One shared token for a deployed app means everyone reaches the first person's account (the example: authorize Gmail once and every visitor can reach it). Authorize per user: authenticate the caller at the LangGraph server, then mint or exchange a credential for that user inside the graph factory. Claude itself authorizes per user and per server.</li>
+<li><strong>Why elicitation must be a LangGraph interrupt.</strong> A LangChain agent stops only for its own kind of interrupt; a generic one might be caught but the agent would keep working (the class used a language analogy: telling someone "stop" in a language they do not speak).</li>
+<li><strong>Q&amp;A worth keeping.</strong> FastMCP and the official SDK are now very similar, so you do not need FastMCP's internals in depth. Interviews ask for depth, not definitions ("what is an agent" is unlikely; middleware is less known, so explain it properly).</li>
+</ul>
+<!-- /class23-mcp -->
+
 <h2 id="agentic-ai-ch18-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -12656,6 +13038,8 @@ async def run_agent(server) -&gt; dict:
 
 <h2 id="agentic-ai-ch18-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li>LangChain docs: <a href="https://docs.langchain.com/oss/python/migrate/langchain-mcp-adapters" target="_blank" rel="noopener">Migrate from langchain-mcp-adapters</a>, <a href="https://docs.langchain.com/oss/python/langchain/mcp/auth" target="_blank" rel="noopener">MCP authentication</a></li>
+<li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/23%20-%2027%20Sep%20-%20MCP%20In%20LangChain.md" target="_blank" rel="noopener">Class 23 notes</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2014%20-%20Oct%203%20%26%20Oct%204/MCP%20in%20Langchain/MCP_in_Langchain.ipynb" target="_blank" rel="noopener">MCP in LangChain notebook</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2014%20-%20Oct%203%20%26%20Oct%204/MCP%20in%20Langchain/MCP_MultiServer_Live_Demo.ipynb" target="_blank" rel="noopener">Multi-server live demo notebook</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2014%20-%20Oct%203%20%26%20Oct%204/MCP%20in%20Langchain/cinebot_mcp_server.py" target="_blank" rel="noopener"><code>cinebot_mcp_server.py</code></a></li>
@@ -13054,6 +13438,63 @@ class RouterState(TypedDict, total=False):
 <aside class="callout note"><div class="ct">Note<em>How this maps to LangChain&#x27;s names</em></div><p>The guide's names differ from the LangChain docs. Roughly, its <strong>hierarchical</strong> pattern corresponds to what the docs call <strong>subagents</strong> (a supervisor calling agents as tools) and its <strong>controller</strong> to a <strong>router</strong>, while <strong>chain</strong> and <strong>planner-executor</strong> are closest to custom workflows (my mapping). Chapter 19 above uses the LangChain names.</p></aside>
 <!-- /sites-add -->
 
+<!-- class23-multi -->
+<h2 id="agentic-ai-ch19-why-multi-agent-from-class-23-read-in-full">Why multi-agent, from class 23 (read in full)</h2>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p><code>classes_transcription_summary/23 - 27 Sep - MCP In LangChain.md</code>, second half, read in full on 31 Oct 2026. The class introduced multi-agent <strong>without a framework first</strong>.</p></aside>
+<ul>
+<li><strong>The problem: one agent juggling every job.</strong> With fifteen or more tools competing, an agent asked to "reply to Sarah confirming Thursday at 2 p.m." may answer "sounds good" without checking the calendar it had. People work in teams for the same reason: dividing work is faster and easier on each person's context.</li>
+<li><strong>Context isolation, shown with Agent Flow.</strong> Agent Flow is a hook-based visualiser that reads a Claude Code session's local files and draws agents, tools and token use. A main agent that reads a whole codebase grew from about <strong>5K</strong> tokens through 8K, 15K, 71K, 85K and 101K to about <strong>178K</strong>, and every later call, even an unrelated one, carried it. Asking a <strong>sub-agent</strong> to read the code and return only a summary kept the main agent near <strong>10 to 11K</strong>. The sub-agent still spends tokens reading; the parent only sees the summary. Summaries lose detail, but the files can be re-read on demand. The drop came from architecture, not from a smaller model.</li>
+<li><strong>Other benefits.</strong> Independent tasks can run in parallel, and each agent can use the right model (an expensive one for design, a cheap one for summaries). Multi-agent is not automatically cheaper: more agents can use more tokens.</li>
+<li><strong>Common patterns (no framework).</strong></li>
+</ul>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>How it works</th>
+<th>Fits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chain</td>
+<td>One agent's output feeds the next</td>
+<td>Steps that depend on each other</td>
+</tr>
+<tr>
+<td>Parallel</td>
+<td>Same request to several agents, then merge (often plain async code)</td>
+<td>Independent tasks</td>
+</tr>
+<tr>
+<td>Controller / router</td>
+<td>One agent only decides who handles it; the result does <strong>not</strong> come back</td>
+<td>Sorting requests to specialists</td>
+</tr>
+<tr>
+<td>Reactive / feedback loop</td>
+<td>A worker and an evaluator loop</td>
+<td>Work that needs review</td>
+</tr>
+<tr>
+<td>Hierarchical</td>
+<td>An orchestrator delegates and <strong>uses the results</strong></td>
+<td>The most common in practice</td>
+</tr>
+<tr>
+<td>Planner-executor</td>
+<td>A planner splits a job, others execute</td>
+<td>Larger jobs split into steps</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Router vs hierarchical:</strong> a router hands off and is done; a hierarchical orchestrator gets the sub-agent's result back. In LangChain's docs, sub-agents match hierarchical, handoffs resemble routing, and a custom workflow is the third option. A2A is a separate topic: a protocol for agents from different frameworks to talk to each other.</li>
+<li><strong>How an orchestrator chooses.</strong> Each agent has a name and a description; the orchestrator reads them as it reads tools. Routing quality equals description quality, and overlapping agents ("secondary school maths" vs "high school maths") get confused. For ambiguous requests, tell it to ask a follow-up; if nothing matches, it may route to the closest agent, which replies that it cannot help.</li>
+<li><strong>Q&amp;A worth keeping.</strong> Compressing the main chat instead can let a code-heavy summary crowd out the earlier conversation. There is no lossless method against "lost in the middle": keep relevant context available and check where the loss happens (models favour the start and end). Context bloat is material no longer needed sitting in the history. Agent Flow makes no model calls of its own; it reads session files through hooks, and it works with Claude Code (and Codex), not GitHub Copilot. OpenRouter is a catalogue of many models, not itself a router.</li>
+</ul>
+<!-- /class23-multi -->
+
 <h2 id="agentic-ai-ch19-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -13273,6 +13714,7 @@ class RouterState(TypedDict, total=False):
 
 <h2 id="agentic-ai-ch19-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/23%20-%2027%20Sep%20-%20MCP%20In%20LangChain.md" target="_blank" rel="noopener">Class 23 notes</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2014%20-%20Oct%203%20%26%20Oct%204/Multi%20Agents%20in%20Langchain/00_Multi_Agent_Overview.ipynb" target="_blank" rel="noopener">Multi-agent overview notebook</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2014%20-%20Oct%203%20%26%20Oct%204/Multi%20Agents%20in%20Langchain/01_Subagents_Personal_Assistant.ipynb" target="_blank" rel="noopener">Subagents: personal assistant</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2014%20-%20Oct%203%20%26%20Oct%204/Multi%20Agents%20in%20Langchain/02_Handoffs_Customer_Support.ipynb" target="_blank" rel="noopener">Handoffs: customer support</a></li>

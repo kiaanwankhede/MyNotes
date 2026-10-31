@@ -239,6 +239,16 @@ Provider-specific middleware also exists (Anthropic: prompt caching, bash tool, 
 :::
 <!-- /docs-add -->
 
+<!-- docs-context-concept -->
+### Context, the concept (from the conceptual overview)
+
+:::note Source
+LangChain docs, [Context overview](https://docs.langchain.com/oss/python/concepts/context), read on 31 Oct 2026 from the docs source on GitHub (text and tables of every section; long code samples skimmed).
+:::
+
+Context engineering means giving the model the right information and tools in the right format. Context varies on two axes. By **mutability**: *static* (does not change during a run, such as user metadata, connections, tools) or *dynamic* (evolves, such as conversation history and tool results). By **lifetime**: *runtime* (one run) or *cross-conversation* (persists). That gives three kinds: **static runtime context** passed in at the start through the `context` argument; **dynamic runtime context**, the state that acts as short-term memory; and **dynamic cross-conversation context**, the store that acts as long-term memory. Config (`configurable`) is for immutable values such as API keys.
+<!-- /docs-context-concept -->
+
 ## Common mistakes
 
 | Mistake | Symptom | Fix |
@@ -397,6 +407,7 @@ It draws on three data sources: **runtime context** (static, conversation-scoped
 
 ## Sources and further reading
 
+- LangChain docs: [Context overview](https://docs.langchain.com/oss/python/concepts/context)
 - [Class 12 full notes]({{src:classes_transcription_summary/12 - 08 Aug - LangChain - Mastering Middleware.md}})
 - [Class 12 short summary]({{src:classes_summary/12 - 08 Aug - Mastering Middleware.md}})
 - [Weekend 07 middleware notebook]({{src:Weekend 07 - 8-9 Aug/MIddleware.ipynb}})

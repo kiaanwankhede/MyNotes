@@ -236,6 +236,48 @@ The agents page groups harness middleware like this, which is a good mental map 
 `create_deep_agent` pre-assembles a harness (filesystem, summarisation, sub-agents, prompt caching) for long-running tasks. Managed Deep Agents builds on `create_agent` with planning, file tools, sub-agents and memory preassembled.
 <!-- /docs-add -->
 
+<!-- docs-v1-concepts -->
+## LangChain v1: what changed, and the version policy (from the docs)
+
+:::note Source
+LangChain docs, [What's new in LangChain v1](https://docs.langchain.com/oss/python/releases/langchain-v1), read on 31 Oct 2026 from the docs source on GitHub (text and tables of every section; long code samples skimmed).
+:::
+:::note Source
+LangChain docs, [LangChain v1 migration guide](https://docs.langchain.com/oss/python/migrate/langchain-v1), read on 31 Oct 2026 from the docs source on GitHub (text and tables of every section; long code samples skimmed).
+:::
+:::note Source
+LangChain docs, [Versioning](https://docs.langchain.com/oss/python/versioning), read on 31 Oct 2026 from the docs source on GitHub (text and tables of every section; long code samples skimmed).
+:::
+
+**Three ideas in v1.** `create_agent` is the standard way to build an agent and replaces `langgraph.prebuilt.create_react_agent`; **standard content blocks** (`message.content_blocks`) give provider-agnostic access to reasoning, citations and built-in tools (supported at first for Anthropic, AWS, OpenAI, Google GenAI and Ollama); and a **smaller `langchain` package** focused on agents, messages, tools, chat models and embeddings. Structured output now comes from the main loop with no extra model call, and the agent is built on LangGraph, so it gets persistence, streaming and human approval for free.
+
+**Migrating from the old agent API.**
+
+| Old | New |
+| --- | --- |
+| `langgraph.prebuilt.create_react_agent` | `langchain.agents.create_agent` |
+| `prompt=` | `system_prompt=` (a string, not a `SystemMessage`) |
+| `pre_model_hook`, `post_model_hook`, `state_modifier` | middleware: `before_model`, `after_model`, `@wrap_model_call`, `@wrap_tool_call`, `@dynamic_prompt` |
+| Prompted structured output | removed; use `ToolStrategy` or `ProviderStrategy` |
+| Streamed node name `"agent"` | `"model"` |
+| `config["configurable"]` for static data | the `context=` argument and `context_schema=` |
+| Legacy chains, retrievers, indexing, hub, `CacheBackedEmbeddings` | the `langchain-classic` package |
+
+**Breaking changes.** Python 3.10 or newer is required; chat models return `AIMessage` instead of `BaseMessage`; `langchain-openai` stores Responses-API items in `content` by default (`LC_OUTPUT_VERSION=v0` restores the old way); `langchain-anthropic` no longer defaults `max_tokens` to 1024; `.text()` became the property `.text`; `AIMessage` lost its `example` parameter; deprecated APIs slated for 1.0 were removed.
+
+**Versioning.** Versions are `MAJOR.MINOR.PATCH` (semantic versioning). APIs are stable (no prefix), **beta** (feature-complete, may change slightly), **alpha** (experimental) or **deprecated**; names with a leading underscore are internal. LangChain and LangGraph 1.0 are long-term-support releases: the previous major version keeps security and critical fixes for at least 12 months after the next major release. `deepagents` was still pre-1.0. Pre-releases are `a`, `b` and `rc` versions.
+
+### Frameworks, runtimes and harnesses (from the conceptual overview)
+
+:::note Source
+LangChain docs, [Runtimes, frameworks, and harnesses](https://docs.langchain.com/oss/python/concepts/products), read on 31 Oct 2026 from the docs source on GitHub (text and tables of every section; long code samples skimmed).
+:::
+
+Three layers answer different needs. An **agent framework** (LangChain) gives abstractions to start quickly: content blocks, the agent loop, middleware. An **agent runtime** (LangGraph) provides what production needs: durable execution, streaming, human-in-the-loop and persistence, with low-level control. An **agent harness** (Deep Agents) is opinionated and batteries-included, with planning, subagents and a file system for long-running, complex tasks. Pick LangChain for straightforward agents, LangGraph for fine-grained orchestration and long-running state, Deep Agents for autonomous, multi-step work.
+
+**Errors page.** LangChain and LangGraph errors carry an `lc_error_code` such as `GRAPH_RECURSION_LIMIT`, `INVALID_CHAT_HISTORY`, `INVALID_TOOL_RESULTS`, `MESSAGE_COERCION_FAILURE`, `MISSING_CHECKPOINTER`, `MODEL_AUTHENTICATION`, `MODEL_NOT_FOUND`, `MODEL_RATE_LIMIT`, `OUTPUT_PARSING_FAILURE`; the docs have a page for each code.
+<!-- /docs-v1-concepts -->
+
 ## Common mistakes
 
 | Mistake | Symptom | Fix |
@@ -366,6 +408,7 @@ Yes: **CVE-2025-68664**, disclosed December 2025, rated CVSS 9.3. It was a seria
 
 ## Sources and further reading
 
+- LangChain docs: [What's new in v1](https://docs.langchain.com/oss/python/releases/langchain-v1), [v1 migration guide](https://docs.langchain.com/oss/python/migrate/langchain-v1), [Versioning](https://docs.langchain.com/oss/python/versioning), [Runtimes, frameworks and harnesses](https://docs.langchain.com/oss/python/concepts/products)
 - [Class 07 full notes]({{src:classes_transcription_summary/07 - 18 Jul - LangChain Family & Harness Engineering.md}})
 - [Class 07 short summary]({{src:classes_summary/07 - 18 Jul - LangChain Family & Harness Engineering.md}})
 - [Landscape reference notebook]({{src:Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Notebook For Reference/01_landscape_student_notes.ipynb}})

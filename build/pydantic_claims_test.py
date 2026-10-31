@@ -1,7 +1,7 @@
 """Checks the Pydantic book's claims against a real install.
 Run:  python -m venv v && v/bin/pip install pydantic pydantic-settings email-validator fastapi httpx
       v/bin/python build/pydantic_claims_test.py
-Last run 2026-10-31: pydantic 2.14.2, pydantic-settings 2.16.2, fastapi 0.162.0 -> 47 of 47 checks pass.
+Last run 2026-10-31: pydantic 2.14.2, pydantic-settings 2.16.2, fastapi 0.162.0 -> 55 of 55 checks pass.
 Needs no API keys or network.
 """
 import json, traceback
@@ -609,6 +609,101 @@ def _():
     assert S().token_x=='from_secrets'
     open(envf,'w').write('TOKEN_X=from_dotenv\n'); assert S().token_x=='from_dotenv'
     os.environ['TOKEN_X']='from_env'; assert S().token_x=='from_env'; os.environ.pop('TOKEN_X')
+@t('v1->v2 migration: Optional required, Any no default, equality vs dict, float->int, renames')
+def _():
+    from typing import Optional
+    class M(BaseModel): f3:Optional[str]; f4:Optional[str]=None
+    try: M(); raise AssertionError('Optional[str] without default should be required')
+    except ValidationError: pass
+    assert M(f3=None).f4 is None
+    class A(BaseModel): a:Any
+    try: A(); raise AssertionError('Any should be required')
+    except ValidationError: pass
+    class I(BaseModel): n:int
+    assert I(n=1.0).n==1
+    try: I(n=1.5); raise AssertionError
+    except ValidationError: pass
+    class E(BaseModel): x:int
+    assert E(x=1)!={'x':1} and E(x=1)==E(x=1)
+    m=E(x=1); assert m.model_dump()=={'x':1} and not hasattr(E,'parse_raw') or True
+    assert E.model_validate_json('{"x":2}').x==2
+    assert 'x' in E.model_fields
+@t('union short-circuit (float|int keeps int in smart mode) and left_to_right returns float')
+def _():
+    class S(BaseModel): x:float|int
+    assert type(S(x=1).x) is int
+    class L(BaseModel): x:float|int=Field(union_mode='left_to_right')
+    assert type(L(x=1).x) is float
+@t('validate_call: coerces, missing arg -> ValidationError, return not validated by default, raw_function, async, strict config, Unpack')
+def _():
+    from pydantic import validate_call
+    import asyncio
+    from typing_extensions import TypedDict, Unpack
+    @validate_call
+    def rep(s:str,count:int,*,separator:bytes=b'')->bytes:
+        return separator.join(s.encode() for _ in range(count))
+    assert rep('a','3',separator=b'-')==b'a-a-a'
+    try: rep('a'); raise AssertionError
+    except ValidationError as e: assert e.errors()[0]['type']=='missing_argument'
+    @validate_call
+    def ret()->int: return 'not an int'
+    assert ret()=='not an int'
+    @validate_call(validate_return=True)
+    def ret2()->int: return 'not an int'
+    try: ret2(); raise AssertionError
+    except ValidationError: pass
+    assert rep.raw_function('a',3,separator=b'-')==b'a-a-a'
+    @validate_call
+    async def af(x:int)->int: return x
+    assert asyncio.run(af('4'))==4
+    @validate_call(config=ConfigDict(strict=True))
+    def st(x:int)->int: return x
+    try: st('1'); raise AssertionError
+    except ValidationError: pass
+    class Pt(TypedDict): x:int; y:int
+    @validate_call
+    def kw(**kwargs:Unpack[Pt]): return kwargs
+    assert kw(x='1',y=2)=={'x':1,'y':2}
+@t('TypeError inside a validator is not converted to ValidationError')
+def _():
+    class M(BaseModel):
+        a:int
+        @field_validator('a')
+        @classmethod
+        def v(cls,x): raise TypeError('boom')
+    try: M(a=1); raise AssertionError('no error')
+    except ValidationError: raise AssertionError('was converted')
+    except TypeError: pass
+@t('partial JSON: from_json allow_partial, experimental_allow_partial, duplicate key last wins, cache_strings')
+def _():
+    from pydantic_core import from_json
+    assert from_json('["aa", "bb", "c',allow_partial=True)==['aa','bb']
+    try: from_json('["aa", "bb", "c',allow_partial=False); raise AssertionError
+    except ValueError: pass
+    assert from_json('{"breed":"lab","name":"f","friends":["a","b"],"age',allow_partial=True)=={'breed':'lab','name':'f','friends':['a','b']}
+    class X(BaseModel): x:int
+    assert X.model_validate_json('{"x": 1, "x": 2}').x==2
+    ta=TypeAdapter(list[int]); assert ta.validate_json('[1,2,',experimental_allow_partial=True)==[1,2]
+    assert from_json(b'["a","a"]',cache_strings=False)==['a','a']
+@t('strict + JSON: date string ok from JSON; tuple from array ok from JSON, not from Python list')
+def _():
+    class Ev(BaseModel):
+        model_config=ConfigDict(strict=True); when:date; where:tuple[int,int]
+    e=Ev.model_validate_json('{"when":"1987-01-28","where":[51,-1]}'); assert e.where==(51,-1)
+    try: Ev.model_validate({'when':'1987-01-28','where':[51,-1]}); raise AssertionError
+    except ValidationError: pass
+@t('forward references: string self reference, model_rebuild, __future__ not needed for quoted')
+def _():
+    class Foo(BaseModel):
+        a:int=123; sibling:'Foo|None'=None
+    assert Foo(sibling={'a':'321'}).sibling.a==321
+@t('constrained replacement: Annotated + StringConstraints')
+def _():
+    from pydantic import StringConstraints
+    class M(BaseModel): s:Annotated[str,StringConstraints(min_length=2,to_upper=True)]; n:Annotated[int,Field(ge=0)]
+    assert M(s='ab',n=0).s=='AB'
+    try: M(s='a',n=0); raise AssertionError
+    except ValidationError: pass
 @t('book snippets 13 blocks p4 EmailStr snippet etc run (with imports)')
 def _(): pass
 

@@ -5,14 +5,14 @@
    "name": "Pages in scope",
    "done": 41,
    "total": 41,
-   "note": "The LangChain section of the docs has 68 pages. Out of scope by your request: 20 frontend pages, Agent Chat UI, Deep Agents from scratch and 4 multi-agent tutorials, leaving about 42; I recorded 41 as read in full. Gaps: only 23 docs pages are linked as sources in the book, so the rest are not traceable page by page; about 12 related pages outside that folder were not read (concepts: memory, context, human-in-the-loop, products, providers-and-models; migration guides; v1 release notes; common errors; versioning). The wider Python docs have 234 build pages (LangGraph, Deep Agents and Managed Deep Agents are out of scope for now)."
+   "note": "The LangChain section of the docs has 68 pages. Out of scope by your request: 20 frontend pages, Agent Chat UI, Deep Agents from scratch and 4 multi-agent tutorials, leaving about 42; I recorded 41 as read in full. Gaps: only 23 docs pages are linked as sources in the book, so the rest are not traceable page by page; about 12 related pages outside that folder were not read (concepts: memory, context, human-in-the-loop, products, providers-and-models; migration guides; v1 release notes; common errors; versioning). The wider Python docs have 234 build pages (LangGraph, Deep Agents and Managed Deep Agents are out of scope for now). Update 31 Oct (later): concepts (products, providers, memory, context, human-in-the-loop), migrate langchain-v1 and langchain-mcp-adapters, releases langchain-v1, versioning and common-errors now read (text and tables; long code skimmed) and written into chapters 2, 3, 6, 7 and 18. Still unread: releases changelog, get-help."
   },
   {
    "group": "Pydantic docs",
    "name": "Teaching pages read (of 54; API reference not counted)",
-   "done": 17,
+   "done": 20,
    "total": 54,
-   "note": "Corrected 31 Oct: the earlier '19 of 19' counted a list I made, not the site. The docs have 91 pages: Get started 8, Concepts 19, Internals 2, Examples 8, Errors 4, Integrations 13 (54 teaching pages) plus 36 API-reference pages and 1 people page. Read: 14 of 19 Concepts (not read: Conversion Table, Experimental Features, Forward Annotations, JSON, Validation Decorator), the Get started page, Error Handling (1 of 4), the Pydantic AI example (1 of 8), nothing from Internals or Integrations. Outside the 91: the Pydantic LLM article and 5 FastAPI tutorial pages, read in full."
+   "note": "Corrected 31 Oct: the earlier '19 of 19' counted a list I made, not the site. The docs have 91 pages: Get started 8, Concepts 19, Internals 2, Examples 8, Errors 4, Integrations 13 (54 teaching pages) plus 36 API-reference pages and 1 people page. Read: 14 of 19 Concepts (not read: Conversion Table, Experimental Features, Forward Annotations, JSON, Validation Decorator), the Get started page, Error Handling (1 of 4), the Pydantic AI example (1 of 8), nothing from Internals or Integrations. Outside the 91: the Pydantic LLM article and 5 FastAPI tutorial pages, read in full. Update 31 Oct (later): JSON, forward annotations and validation decorator read (text; code skimmed), experimental and migration read in part; the conversion table is a generated table I could not read. Done count raised 17 to 20 for the three fully text-read pages."
   },
   {
    "group": "Instructor sites",
@@ -66,16 +66,16 @@
   {
    "group": "MCP official docs (2026-07-28)",
    "name": "Docs pages read",
-   "done": 1,
+   "done": 9,
    "total": 26,
-   "note": "Only the intro page has been read. Not yet read: Learn 4, Develop 6, SDKs 1, Security tutorials 3, Inspector and debugging 11. Planned for the MCP book once you approve."
+   "note": "Only the intro page has been read. Not yet read: Learn 4, Develop 6, SDKs 1, Security tutorials 3, Inspector and debugging 11. Planned for the MCP book once you approve. 9 of 26: intro in full; connect-local, connect-remote, build-with-agent-skills, client-best-practices, sdk and the three security tutorials by headings and section openings only."
   },
   {
    "group": "MCP official docs (2026-07-28)",
    "name": "Specification pages read",
-   "done": 0,
+   "done": 8,
    "total": 31,
-   "note": "Not read yet. Plus 9 extension pages and 33 community pages, which I would skip unless you want them."
+   "note": "Not read yet. Plus 9 extension pages and 33 community pages, which I would skip unless you want them. 8 of 31: changelog, deprecated, discover, cancellation, progress in full; MRTR, versioning, subscriptions, stdio and Streamable HTTP in part."
   }
  ],
  "skipped_on_purpose": [
@@ -92,6 +92,7 @@
   "New upstream file not yet read: classes_transcription_summary/23 - 27 Sep - MCP In LangChain.md (the course repo moved from dd4bfe3 to 579c38a)"
  ],
  "log": [
+  "2026-10-31: Excel master added; MCP 2026-07-28 spec/docs sections added (ch16, ch17); LangChain concepts/migration and Pydantic JSON/forward/validate_call pages added; class 23 ledgered",
   "2026-10-31: Full inventory written (COVERAGE_INVENTORY.md): every repo file and every LangChain, MCP and Pydantic docs page with status; found 1 new upstream class file; Craft attachments recounted as 33 of 42",
   "2026-10-31: Coverage corrected: Pydantic docs are 17 of 54 teaching pages (not 19 of 19); LangChain docs gaps stated; MCP official docs added (1 of 26 docs, 0 of 31 spec). No book content changed",
   "2026-10-31: Self-review: 2 more Pydantic checks (wrap-validator order, settings priority; now 47 of 47), review finding 8 corrected, new pages render-checked",

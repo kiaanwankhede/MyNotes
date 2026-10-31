@@ -10,6 +10,7 @@ These come from the owner (Hitesh) and apply to every session.
 6. **After every prompt, update the coverage table.** Run these, in order, before replying:
    - `python3 -I build/sources.py snapshot <book> /path/to/Live-Class-2026` for each book, if any repo file's review level changed (edit `books/*/review_levels.json` first);
    - edit `coverage_external.json` if any outside source (docs, sites, slides, Craft) was read or skipped;
+   - regenerate the Excel master (`MASTER_COVERAGE.xlsx`): `python3 -I build/master_analyze.py /path/to/Live-Class-2026 /path/to/docsrc`, then `python3 -I build/master_xlsx.py`, then recalc it; manual changes go in `build/master_overrides.json`;
    - `python3 -I build/status.py --log "one line of what changed"` to regenerate `STATUS.md` and add the change-log line;
    - rebuild with `python3 -I build/build.py .`, then commit `STATUS.md` with the rest.
    Tell the owner in the reply what moved in the table.

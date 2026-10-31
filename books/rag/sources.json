@@ -1,6 +1,6 @@
 {
  "course_repo": "https://github.com/mayank953/Live-Class-2026",
- "commit": "dd4bfe38d167aac8a7f1ce63034f802c1eadf6b1",
+ "commit": "579c38a40af828d7eb587b2676b9757e05888cbe",
  "generated": "2026-10-31",
  "files": {
   ".gitattributes": {
@@ -2396,6 +2396,11 @@
    "blob": "90c55b83d89b2c7f1672f3afe80ad0d9bb5b578f",
    "cited_in": [],
    "status": "read"
+  },
+  "classes_transcription_summary/23 - 27 Sep - MCP In LangChain.md": {
+   "blob": "82cc2d08d593f12f56c886aeef912d7fbea120d9",
+   "cited_in": [],
+   "status": "not_read"
   },
   "classes_transcription_summary/Readme.md": {
    "blob": "54486fab1922a29310820cecd53d44a713bb7e01",

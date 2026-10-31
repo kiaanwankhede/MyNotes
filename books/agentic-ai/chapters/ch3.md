@@ -285,6 +285,16 @@ When picking a model per call with `wrap_model_call`, pass **unbound** models. A
 :::
 <!-- /docs-add -->
 
+<!-- docs-providers -->
+### Providers and models, in one idea (from the conceptual overview)
+
+:::note Source
+LangChain docs, [Providers and models](https://docs.langchain.com/oss/python/concepts/providers-and-models), read on 31 Oct 2026 from the docs source on GitHub (text and tables of every section; long code samples skimmed).
+:::
+
+Every LangChain chat model implements the same interface, so you can swap providers, compare models with identical code, and use tool calling, structured output and streaming everywhere. A **provider** hosts models behind an API and has an **integration package** (`langchain-openai`, `langchain-anthropic`). With `init_chat_model("provider:model")` LangChain resolves the provider and loads the package. Model names are passed straight to the provider, so a new model works the day it is released if your provider package supports its API. **Routers** (gateways such as OpenRouter) give many providers through one credential, with fallbacks and load balancing. Many vendors offer **OpenAI-compatible endpoints**; use `ChatOpenAI` with a custom `base_url`, but note it keeps only fields in OpenAI's official specification, so third-party extras are dropped.
+<!-- /docs-providers -->
+
 ## Common mistakes
 
 | Mistake | Symptom | Fix |
@@ -419,6 +429,7 @@ It injects a whole **list** of prior messages as one template variable. A string
 
 ## Sources and further reading
 
+- LangChain docs: [Providers and models](https://docs.langchain.com/oss/python/concepts/providers-and-models)
 - [Class 08 full notes]({{src:classes_transcription_summary/08 - 19 Jul - LangChain - Inside the Model.md}})
 - [Class 08 short summary]({{src:classes_summary/08 - 19 Jul - Inside the Model.md}})
 - [Environment, models and messages notebook]({{src:Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Notebook For Reference/02_03_environment_models_messages_student_notes.ipynb}})

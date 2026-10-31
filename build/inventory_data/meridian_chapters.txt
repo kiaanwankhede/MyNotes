@@ -1,0 +1,40 @@
+1|1|Meet Aldermoor Industries|9|
+1|2|A bigger problem than it looks|10|sample_docs
+1|3|What we are going to build|11|
+1|4|The AI engineer's view: from problem to a working check|13|market_rate rate_used validate_fx_hedge
+1|5|The forward-deployed engineer's view: from working check to trusted tool|14|validate_fx_hedge currency_pair rate_used duration_ms
+2|6|What is in a project? Basics for newcomers|11|sample_docs langchain_google_genai app_mode google_api_key
+2|7|Your tools, and the new project|11|sample_docs
+2|8|Packages and the environment|13|create_agent
+2|9|The folder structure: one file, one job|10|vector_store document_store data_ingestion custom_logger test_api test_modes_and_middleware
+3|10|Settings: the idea, the template and your key|9|app_mode google_api_key gcp_project_id
+3|11|config/settings.py, chunk by chunk|15|validation_alias app_mode gcs_prefix is_cloud model_validator local_data_dir vector_search_index_id chroma_dir local_upload_dir
+3|12|Errors and logging|16|custom_logger event_dict file_handler console_handler flush_to_gcs get_logger meridianerror add_severity
+4|13|RAG explained: give a model your documents|12|data_ingestion retriever_type embed_query get_llm chunk_size chunk_overlap get_embeddings similarity_search answer_prompt
+4|14|The types of RAG, in plain words|14|retriever_type
+4|15|The tools behind RAG: embeddings, vector databases|10|vector_store add_documents similarity_search vectorsearchvectorstore
+4|16|Talking to Gemini, and turning text into numbers|16|get_llm lru_cache extract_text get_embeddings output_dimensionality configurationerror embed_query embed_documents
+4|17|Storing meaning, and keeping the originals|15|document_store vector_store get_vector_store is_cloud blob_name local_upload_dir similarity_search chroma_dir
+4|18|Ingestion: cutting documents into pieces|13|ingest_pdf ingest_stored_pdfs get_vector_store split_documents chunk_size chunk_overlap
+4|19|Retrieval and the answer|15|retriever_type page_content ask_question build_retriever format_docs build_rag_chain answer_prompt with_structured_output
+4|20|Lab: ask the four documents|9|ask_question retriever_type ingest_stored_pdfs
+4|21|More RAG in code: HyDE, MMR, hybrid search, rerank|17|variants_lab similarity_search extract_text parent_page keyword_rank by_meaning with_structured_output follow_up
+5|22|Agents with LangChain: a refresher, and what an agent is|11|create_agent amount_eur approval_needed system_prompt tool_calls
+5|23|Tools: functions the model can call|14|validate_fx_hedge rate_used market_rate currency_pair tax_amount tax_rate _ask_llm llm_error check_sanctions_list categorize_expense
+5|24|Prompts are job descriptions|12|check_sanctions_list get_vendor_credit_score risk_agent_prompt calculate_cross_border_tax validate_fx_hedge
+5|25|Middleware: guard-rails around the agent|11|run_limit exit_behavior max_retries initial_delay log_tool_calls apply_to_input agent_max_retries modelcalllimitmiddleware
+5|26|The audit team|11|create_agent risk_result tax_result control_result create_specialized_agent cfo_memo system_prompt risk_agent tax_agent control_agent synthesis_prompt
+5|27|Lab: three audits|11|run_audit procurementsupervisor risk_result tax_result control_result cfo_memo duration_ms
+6|28|An API with FastAPI|12|response_model basemodel orderresponse orderrequest status_code ask_question
+6|29|Request shapes and routes|14|retriever_type rag_router queryrequest response_model ask_question status_router agent_router get_supervisor uptime_seconds
+6|30|The server: assemble it, run it|16|frontend_dist include_router exception_handler cfo_memo configuration_error ingestion_error status_code
+6|31|Reading the log|10|duration_ms retriever_type check_sanctions_list categorize_expense app_mode llm_model_name
+6|32|Tests that need no key|11|test_modes_and_middleware test_api ask_question offline_local_store test_ask_returns_answer test_audit_returns_all_four_sections test_upload_skips_non_pdf
+6|33|The screen: a React frontend|13|retriever_type runaudit documentuploadtab ragqatab audittab systemstatustab vite_api_url
+6|34|Run it all, locally|12|http_code content_type sample_docs
+7|35|Docker: from your laptop to a container|15|node_modules sample_docs project_id app_mode google_api_key python_version
+7|36|Google Cloud, in plain words|12|project_id google_api_key workflow_dispatch app_mode index_metadata stream_update serviceaccount is_cloud
+7|37|Prepare the cloud|7|project_id my_robot_account
+7|38|The robot account and its key|7|client_email projectiamadmin policyadmin disableserviceaccountkeycreation
+7|39|GitHub and the first run|12|project_id endpoint_id index_id google_api_key deployed_financial_docs init_0001 project_number gcp_project_id workflow_dispatch serviceaccount index_metadata
+7|40|Deploy it, explained|6|project_id serviceaccount index_metadata google_api_key project_number deployed_financial_docs index_id init_0001 generate_json init_embeddings algorithm_config endpoint_id gcp_credentials_json
