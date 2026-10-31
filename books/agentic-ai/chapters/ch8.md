@@ -384,12 +384,31 @@ Check tracing first (LangSmith or equivalent) and look at the last completed ste
 - [ ] I can say what the emulator is for
 
 <!-- res -->
-## The instructor's guide: "Production readiness"
 
-The Craft page links an interactive guide with these sections. I read the section names only, not the body, so use it as a map of what the guide covers:
-
-Demo to restaurant, guardrails, red-teaming, evaluations, human in the loop, uptime, monitoring, fallbacks, audit logs, building it in n8n.
 <!-- /res -->
+
+<!-- prodguide -->
+## The instructor's production-readiness guide
+
+*From "Production Readiness", part 7 of the instructor's series (read in full). It is a checklist of habits between a demo and a system strangers can rely on; it ends with an n8n wiring example.*
+
+| Habit | The idea |
+| --- | --- |
+| **Guardrails** | Checks on the way in (before the model sees the message) and on the way out (before the user sees the answer): keywords, PII detection, jailbreak detection, topical alignment. No single guardrail catches everything, so use layers; fast cheap filters first, slower smarter checks behind them |
+| **Red-teaming** | Deliberately try to break it before real users do: ignore-your-instructions prompts, hot-button topics, personal data. Prompt injection is LLM01 in the OWASP Top 10 for LLM applications. A prompt caught in red-teaming becomes a guardrail rule. The guide names Garak, PyRIT and HarmBench |
+| **Evaluations** | A small batch (the guide suggests 5 to 8 real questions with an agreed good-answer bar) run through the system and graded, re-run whenever the prompt, model or tools change. A second model call can act as judge with a rubric that returns scores as JSON (helpfulness, correctness, tone). Run offline before shipping and on a sample of live traffic afterwards |
+| **Human in the loop** | Match the wait for approval to the risk: seconds for a routine draft, minutes for personal data, longer for money, deletes or public posts. If nobody answers in time, fall back to a safe default (pause and flag), not silent proceeding |
+| **Uptime** | Availability is "nines": 99.9 percent allows about 43 minutes down a month. No provider promises zero downtime, so decide in advance what happens in a bad hour |
+| **Monitoring** | Record every request, guardrail decision, response, latency and cost. Sample a small share of live traffic (the guide says 1 to 5 percent), run the pre-launch evaluators on it, and alert when quality drops. A confusing real conversation becomes tomorrow's red-team prompt and next week's eval question. Tools named: Langfuse, LangSmith |
+| **Fallbacks** | Route to a secondary model or a cached safe response when the primary is down, and log it, instead of returning an error |
+| **Audit logs** | A permanent record of who asked what, what was decided, who approved it, when. The guide points to OWASP LLM Top 10, NIST AI RMF and the EU AI Act as standards enterprise buyers reference |
+
+**In n8n:** an input guardrails node, the AI Agent node, then an output guardrails node; run your risky prompts through the finished workflow; and use the AI Agent's built-in human-review setting on a tool (approval through Telegram or Slack) instead of building an approval workflow by hand.
+
+:::key How this maps onto this book
+Guardrails and resilience are chapters 7 and 8, human approval is chapter 10, streaming is 10A, and the four production KPIs from the induction (cost, failure rate, latency, quality) are on the start page.
+:::
+<!-- /prodguide -->
 
 ## Sources and further reading
 

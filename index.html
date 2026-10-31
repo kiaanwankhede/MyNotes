@@ -574,7 +574,160 @@ details.diagram-src pre { margin-top: 8px; }
 <ul>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/PREREQUISITES.md" target="_blank" rel="noopener"><code>PREREQUISITES.md</code></a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2001%20-%2027-28%20Jun/02-03%20-%2028%20Jun%20%26%204%20Jul%20-%20Python%20Refresher%20%26%20Pydantic%20Deep%20Dive/README.md" target="_blank" rel="noopener">Weekend 01 README (refresher index)</a></li>
-</ul><button class="readbtn" data-id="foundations-f1">Mark this chapter as read</button><div class="pager"><button data-id="foundations-quiz"><small>Previous</small><b>Quiz me</b></button><button class="next" data-id="foundations-f2"><small>Next</small><b>LLM basics in plain words</b></button></div></article>
+</ul><button class="readbtn" data-id="foundations-f1">Mark this chapter as read</button><div class="pager"><button data-id="foundations-quiz"><small>Previous</small><b>Quiz me</b></button><button class="next" data-id="foundations-f1a"><small>Next</small><b>APIs, JSON and HTTP in plain words</b></button></div></article>
+<article id="ch-foundations-f1a" hidden><p class="crumb">Foundations &middot; Chapter 1A</p><h1>APIs, JSON and HTTP in plain words</h1><p class="lead">Every AI call is an API call. This chapter explains requests, JSON, endpoints, the five HTTP verbs, headers, authentication and status codes with a restaurant analogy, using real Tavily, Apify and Claude requests as examples.</p><div class="meta"><span class="chip">Foundations</span><span class="chip plain">Class 01 and the instructor&#x27;s guide &quot;APIs, Properly Explained&quot;</span><span class="chip plain">15 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="foundations-f1a-why-it-matters">Why it matters</h2>
+<p>Class 01 of the course is "Python setup and API basics" for a reason: an LLM, a search tool and a connector are all reached the same way. If you can read a request and a status code, most integration failures stop being mysterious.</p>
+<h2 id="foundations-f1a-core-ideas">Core ideas</h2>
+<h3 id="foundations-f1a-an-api-is-a-waiter">An API is a waiter</h3>
+<p>You do not cook in the restaurant kitchen. You tell a waiter what you want, the waiter takes it to the kitchen, and food comes back. Ask, do the work, hand back the result: that round trip is every API, including the ones behind ChatGPT and Claude. Your app sends a message to Claude's API, Claude's servers do the thinking, and text comes back; your app never touches a GPU.</p>
+<p>Claude's <strong>connectors</strong> are the same trip. When you ask what is on your calendar, Claude sends a real request to the Calendar API using a token you approved, gets JSON back, and turns it into a sentence. It never sees your Google password.</p>
+<h3 id="foundations-f1a-json-is-a-labeled-box">JSON is a labeled box</h3>
+<p>Almost every request and response is JSON: curly braces, labels, values. Text goes in quotes; numbers and <code>true</code>/<code>false</code> do not.</p>
+<pre><code class="language-json">{ &quot;dish&quot;: &quot;Pizza&quot;, &quot;size&quot;: &quot;Large&quot;, &quot;extraCheese&quot;: true }
+</code></pre>
+<p>When your code sends <code>role: "user", content: "Hi!"</code> to Claude, that one labeled box is the whole message.</p>
+<h3 id="foundations-f1a-endpoints-and-query-parameters">Endpoints and query parameters</h3>
+<p>An <strong>endpoint</strong> is a fixed URL that always means the same thing (Tavily search is always <code>api.tavily.com/search</code>). <strong>Parameters</strong> customise a call without a new endpoint: after a <code>?</code> in a URL, or in a request body (<code>max_results</code>, <code>search_depth</code>). Same endpoint, same shape; only the parameters move.</p>
+<h3 id="foundations-f1a-the-five-http-verbs">The five HTTP verbs</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Verb</th>
+<th>Meaning</th>
+<th>Restaurant version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td>Read</td>
+<td>Check on your order</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>Create</td>
+<td>Place a new order</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td>Replace the whole thing</td>
+<td>Swap the whole order</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td>Change one detail</td>
+<td>Tweak one detail</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>Remove</td>
+<td>Cancel it</td>
+</tr>
+</tbody>
+</table></div>
+<p>With Apify you POST to start a scraper run, GET its status, and DELETE a schedule you no longer need.</p>
+<h3 id="foundations-f1a-body-versus-headers">Body versus headers</h3>
+<p>The <strong>body</strong> is the order itself (the JSON). <strong>Headers</strong> ride alongside: the format you send (<code>Content-Type: application/json</code>), who you are (<code>Authorization: Bearer ...</code>). A GET has no body. Calls to Claude carry a content-type header and an <code>x-api-key</code>; leave one out and the call fails before Claude sees your message.</p>
+<aside class="callout tip"><div class="ct">Pro tip<em>Header habits</em></div><p>Never put a key in the URL (URLs get logged and pasted). Always set <code>Content-Type</code> when sending a body. Keep keys in environment variables, and use a separate key per project so one leak does not mean rotating everything.</p></aside>
+<h3 id="foundations-f1a-authentication-ladder">Authentication ladder</h3>
+<p>From weaker to stronger: no auth, an API key, a bearer token, OAuth 2.0. API keys and bearer tokens are what modern AI tools use. OAuth is the "sign in once, get a token" flow behind connectors. Others you may meet: Basic and Digest auth, OAuth 1.0, custom or query-string auth (avoid the last).</p>
+<h3 id="foundations-f1a-testing-a-call">Testing a call</h3>
+<p><strong>Postman</strong> is a visual form for building a request, a friendly first stop before putting a call into n8n or code, and it can show the equivalent cURL command. <strong>cURL</strong> makes the same request from a terminal, like phoning the kitchen directly. The three real shapes in the guide (Tavily, Apify, Claude) all follow the same pattern: bearer token, content-type header, JSON body, JSON response.</p>
+<h3 id="foundations-f1a-status-codes">Status codes</h3>
+<p>Only the first digit matters at first: <strong>2xx</strong> good news, <strong>4xx</strong> you slipped up, <strong>5xx</strong> they did.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200 / 201 / 204</td>
+<td>OK / created / done, nothing to return</td>
+</tr>
+<tr>
+<td>400</td>
+<td>Bad request (malformed)</td>
+</tr>
+<tr>
+<td>401</td>
+<td>Unauthorized (missing or wrong key)</td>
+</tr>
+<tr>
+<td>403</td>
+<td>Forbidden (known, but not allowed)</td>
+</tr>
+<tr>
+<td>404</td>
+<td>Not found</td>
+</tr>
+<tr>
+<td>405</td>
+<td>Method not allowed</td>
+</tr>
+<tr>
+<td>429</td>
+<td>Too many requests (slow down)</td>
+</tr>
+<tr>
+<td>500 / 502 / 503 / 504</td>
+<td>Server error / bad gateway / unavailable / gateway timeout</td>
+</tr>
+</tbody>
+</table></div>
+<p>Whose fault it is tells you what to do: fix your request (4xx) or wait and retry (5xx). A 401 from Tavily means a wrong or expired key; a 429 means add a delay.</p>
+<h3 id="foundations-f1a-when-it-gets-real">When it gets real</h3>
+<p>Rate limiting (a cap on how fast you may ask), pagination (big answers one page at a time), webhooks (the kitchen calls you), and error handling. The guide names these without detail. <strong>Docs and versioning:</strong> read the provider's docs first, and pin a version; Claude requires an <code>anthropic-version</code> header so integrations keep working as new features arrive.</p>
+<h2 id="foundations-f1a-common-mistakes">Common mistakes</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Mistake</th>
+<th>Symptom</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Key in the URL</td>
+<td>Key in logs and chat</td>
+<td>Put it in a header</td>
+</tr>
+<tr>
+<td>Forgetting <code>Content-Type</code></td>
+<td>Valid JSON read as garbage</td>
+<td>Set <code>application/json</code></td>
+</tr>
+<tr>
+<td>Hammering an API</td>
+<td>429</td>
+<td>Add a delay or backoff</td>
+</tr>
+<tr>
+<td>Treating every error alike</td>
+<td>Retrying a 401 forever</td>
+<td>4xx: fix the request; 5xx: retry later</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="foundations-f1a-interview-corner">Interview corner</h2>
+<details class="qa"><summary>What is the difference between a header and the body?</summary><div class="ans"><p>The body is the data you are sending (the order). Headers are metadata about it: the format, who you are, how to handle it.</p></div></details>
+<details class="qa"><summary>What do 401, 403 and 429 mean?</summary><div class="ans"><p>401: not authenticated (missing or wrong key). 403: authenticated but not allowed. 429: you are sending requests faster than the limit.</p></div></details>
+<details class="qa"><summary>How does a Claude connector work?</summary><div class="ans"><p>Claude makes a normal API request to the service (for example Gmail) with a token you approved via OAuth, receives JSON, and summarises it. It never sees your password.</p></div></details>
+<h2 id="foundations-f1a-quick-revision">Quick revision</h2>
+<ul>
+<li class="task"><label><input type="checkbox"><span>I can name the five verbs and what each does</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I can say what goes in a header and what goes in a body</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I can read a status code by its first digit</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I know why a key never goes in a URL</span></label></li>
+</ul>
+<h2 id="foundations-f1a-sources-and-further-reading">Sources and further reading</h2>
+<ul>
+<li>Instructor's guide: <a href="https://ai-automation-with-mayank.netlify.app/" target="_blank" rel="noopener">Claude and AI, properly explained</a> (part 1, APIs). The guide's text was read in full from its 13 sections.</li>
+<li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/01%20-%2027%20June%20-%20Python%20Setup%20%26%20API%20Basics.md" target="_blank" rel="noopener">Class 01 notes</a></li>
+</ul><button class="readbtn" data-id="foundations-f1a">Mark this chapter as read</button><div class="pager"><button data-id="foundations-f1"><small>Previous</small><b>Set up your machine and refresh Python</b></button><button class="next" data-id="foundations-f2"><small>Next</small><b>LLM basics in plain words</b></button></div></article>
 <article id="ch-foundations-f2" hidden><p class="crumb">Foundations &middot; Chapter 2</p><h1>LLM basics in plain words</h1><p class="lead">What an LLM actually is, what tokens, context windows and embeddings mean, and why a model remembers nothing, explained with the instructor&#x27;s analogies before any agent code appears.</p><div class="meta"><span class="chip">Foundations</span><span class="chip plain">Classes 03 to 05</span><span class="chip plain">15 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="foundations-f2-why-it-matters">Why it matters</h2>
 <p>Every later topic (cost, memory, RAG, guardrails) is a consequence of a few basic facts about how models work. If these are clear, the rest reads as common sense instead of jargon.</p>
 <h2 id="foundations-f2-core-ideas">Core ideas</h2>
@@ -709,7 +862,37 @@ details.diagram-src pre { margin-top: 8px; }
 <h2 id="foundations-f2-play-with-the-context-window">Play with the context window</h2>
 <div class="widget" data-w="ctx-window"><div class="wfb"><p>Interactive demo: a conversation that forgets its oldest messages when the window is full.</p></div></div>
 <div class="widget" data-w="ctx-memory"><div class="wfb"><p>Interactive demo: save a fact, flood the window, and see a hallucinated answer appear.</p></div></div>
+<!-- guides -->
+<h2 id="foundations-f2-what-ai-costs-subscription-versus-api">What AI costs: subscription versus API</h2>
+<p><em>From the instructor's guide "AI Web vs. API Economics" (read in full). Its figures are reported 2026 industry numbers, quoted as the guide gives them; check current prices before budgeting.</em></p>
+<p><strong>Buffet versus à la carte.</strong> A chat subscription (Claude Pro, ChatGPT Plus) is a buffet ticket: one flat price, one human, one seat, fair-use limits. The API is à la carte: you pay for exactly what you order, and software can order, not just people. Three reasons a $20 login cannot power your app: the licence is for a human in a browser, flat pricing assumes humans pause while software does not, and the providers' terms separate the chat app from programmatic access.</p>
+<p><strong>Design it versus run it.</strong> You can ask Claude in a normal chat to design an n8n workflow or write code. The moment it must run unattended (on a schedule, on a webhook), it needs its own API key.</p>
+<p><strong>The ladder.</strong> Asking a question fits the subscription. A chat widget on your site, an automated support agent, or a full agentic system needs the API.</p>
+<p><strong>Why bills surprise people: the multiplication, not the price.</strong></p>
+<ul>
+<li>The API is stateless, so every turn resends the whole conversation, plus the system prompt and tool definitions, plus raw tool results, plus any retry. A demo with one message is the cheapest possible use.</li>
+<li>The guide reports: an agent handling a request costing about $1.20 in 2026 versus about $0.04 for a 2023 chatbot reply; agentic tasks using on the order of 1,000 times the tokens of a simple reply; and 73 percent of enterprises exceeding their AI budget while per-token prices fell. Falling price per token and rising total spend are not a contradiction.</li>
+<li>Its case study: Uber reportedly spent its 2026 AI budget in about four months after rolling out token-billed coding tools to roughly 5,000 engineers, then capped spending per employee per tool.</li>
+</ul>
+<p><strong>Model pricing.</strong> Prices are per million tokens, billed separately for input and output. The guide's July 2026 table spans about 71 times on input price between the cheapest open-weight model and the most expensive premium one, in four tiers: premium (frontier reasoning), mid-tier, budget (classification, extraction, routing: the workhorse for high volume) and open-weight.</p>
+<p><strong>Open and self-hosted.</strong> Cheaper open-weight models can be called through a low-cost API or run on your own hardware. Self-hosting trades a metered bill for GPUs, engineers and uptime; the guide puts the crossover in the tens of millions of tokens a month for budget models, lower for premium ones. Data that legally cannot leave the building is another reason.</p>
+<p><strong>Three questions to choose.</strong> Does a person click send every time? Could it run thousands of times a day? Tens of millions of calls a month? Real projects mix all three: a subscription for team chat, an API for the customer bot, an open model for the highest-volume low-stakes task.</p>
+<aside class="callout trap"><div class="ct">Common trap<em>Do not confuse the two products</em></div><p>A subscription login is not an API key. Using a consumer login to drive your own app is outside what it is licensed for.</p></aside>
+<h2 id="foundations-f2-open-source-and-open-weight-models">Open-source and open-weight models</h2>
+<p><em>From the instructor's guide "Open Source AI" (read in full). Benchmark figures are the guide's 2026 snapshot and shift with every release.</em></p>
+<p><strong>Two separate questions.</strong> Free versus paid is about money. Open versus closed is about whether the trained model itself is published for anyone to download. They are independent: Claude Pro is paid and closed, a free chatbot tier is free and closed, and an open model can be run by you for free or by someone else for a fee.</p>
+<p><strong>What "open" means.</strong> Open-weight means the trained parameters are released. Licences differ: some (Apache 2.0, MIT) have no real restrictions on use or selling products; others (the guide puts Llama 4 here) add rules; check the licence before shipping commercially.</p>
+<p><strong>Where models live.</strong> Hugging Face is the shared public library for models, with model cards describing what each does. Ollama's library and LM Studio's search are friendlier windows into it.</p>
+<p><strong>Closing the gap.</strong> The guide reports the best open models trail the closed frontier by months, not years, on many benchmarks, and that closed models still hold an edge on the hardest reasoning, multimodal and safety-critical work.</p>
+<p><strong>Running one yourself.</strong> Ollama (command line; <code>ollama pull</code> then <code>ollama run</code>) and LM Studio (a graphical app) both run models on your computer through the same engine, <code>llama.cpp</code>, and expose a local server (the guide gives <code>localhost:11434</code> for Ollama), so a local model answers like any other API.</p>
+<p><strong>Model size and memory.</strong> Size is in billions of parameters (7B, 32B, 70B); bigger needs more memory. A graphics card speeds things up a lot, and a plain laptop can run smaller models slowly.</p>
+<p><strong>Quantization.</strong> Rounding a model's numbers to be less precise shrinks the file a lot for a small quality loss. Most local models are quantized; the tools pick a sensible default.</p>
+<p><strong>Why companies do it.</strong> Security (nothing leaves your machine; works air-gapped), cost at volume, and speed (no network round trip). <strong>Honest trade-offs:</strong> you own maintenance and updates, hardware costs money up front, the closed frontier still leads at the very top, and you build the guardrails and polish yourself. Many real systems route routine high-volume work to an open model and keep a frontier model for the hard questions.</p>
+<p><strong>Three questions to choose a path.</strong> Is the data sensitive or regulated? Is the volume high? Does the task need the single best reasoning available?</p>
+<!-- /guides -->
+
 <h2 id="foundations-f2-interview-corner">Interview corner</h2>
+<details class="qa"><summary>Why can a $20 subscription not power my app?</summary><div class="ans"><p>It is licensed for one human in a browser, flat pricing assumes humans pause, and providers' terms separate the chat app from programmatic access. Apps use the metered API instead, where cost grows with the tokens you send, including the whole conversation resent each turn.</p></div></details>
 <details class="qa"><summary>Why do LLMs need memory added to them?</summary><div class="ans"><p>Each API call is stateless. The app stores the messages and sends the <strong>full history</strong> on every call, so the model can use earlier turns.</p>
 <p><strong>Follow-up to expect:</strong> "What is the cost of that?" Tokens grow with every turn, which is why later chapters cover trimming and summarising history.</p></div></details>
 <h2 id="foundations-f2-common-mistakes">Common mistakes</h2>
@@ -761,15 +944,6 @@ details.diagram-src pre { margin-top: 8px; }
 </tr>
 </tbody>
 </table></div>
-<h2 id="foundations-f2-the-instructor-s-guide-apis-properly-explained">The instructor's guide: "APIs, properly explained"</h2>
-<p>The Craft page links an interactive guide with these sections. I read the section names only, not the body, so use it as a map of what the guide covers:</p>
-<p>The big idea, Claude and connectors, JSON, endpoints and params, HTTP methods, headers, authentication, Postman, a real call, response codes, scale, docs and versioning.</p>
-<h2 id="foundations-f2-the-instructor-s-guide-ai-web-vs-api-economics">The instructor's guide: "AI web vs API economics"</h2>
-<p>The Craft page links an interactive guide with these sections. I read the section names only, not the body, so use it as a map of what the guide covers:</p>
-<p>The numbers, buffet versus a la carte, why a $20 plan does not travel, the ladder of AI apps, design versus run, the real cost, model pricing, when budgets blow, the open kitchen, choosing.</p>
-<h2 id="foundations-f2-the-instructor-s-guide-open-source-ai">The instructor's guide: "Open source AI"</h2>
-<p>The Craft page links an interactive guide with these sections. I read the section names only, not the body, so use it as a map of what the guide covers:</p>
-<p>Free or paid, open or closed, what open means, Hugging Face, closing the gap, Ollama and LM Studio, hardware size, quantization, security cost time future, trade-offs, choosing.</p>
 <!-- /res -->
 
 <h2 id="foundations-f2-sources-and-further-reading">Sources and further reading</h2>
@@ -777,7 +951,7 @@ details.diagram-src pre { margin-top: 8px; }
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/03%20-%204%20Jul%20-%20Pydantic%20Deep%20Dive.md" target="_blank" rel="noopener">Class 03 notes</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/05%20-%2011%20Jul%20-%20The%20Agentic%20Loop%20%28Pure%20Python%29.md" target="_blank" rel="noopener">Class 05 notes</a></li>
 <li>Instructor's site: <a href="https://ai-terms-with-mayank.netlify.app/" target="_blank" rel="noopener">AI terms</a> and <a href="https://context-with-mayank.netlify.app/" target="_blank" rel="noopener">context window</a></li>
-</ul><button class="readbtn" data-id="foundations-f2">Mark this chapter as read</button><div class="pager"><button data-id="foundations-f1"><small>Previous</small><b>Set up your machine and refresh Python</b></button><button class="next" data-id="foundations-f3"><small>Next</small><b>What an agent is</b></button></div></article>
+</ul><button class="readbtn" data-id="foundations-f2">Mark this chapter as read</button><div class="pager"><button data-id="foundations-f1a"><small>Previous</small><b>APIs, JSON and HTTP in plain words</b></button><button class="next" data-id="foundations-f3"><small>Next</small><b>What an agent is</b></button></div></article>
 <article id="ch-foundations-f3" hidden><p class="crumb">Foundations &middot; Chapter 3</p><h1>What an agent is</h1><p class="lead">An agent is an LLM that decides which tool to call, inside a loop, with its memory kept as a growing list of messages. Every later chapter is a better-engineered version of this loop.</p><div class="meta"><span class="chip">Foundations</span><span class="chip plain">Classes 04 and 05</span><span class="chip plain">15 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="foundations-f3-why-it-matters">Why it matters</h2>
 <p>Frameworks change every year, but this loop does not. Interviewers who ask about LangChain, LangGraph or MCP are usually checking whether you understand what sits underneath. If you can write the loop on a whiteboard, every framework question becomes easier.</p>
 <h2 id="foundations-f3-core-ideas">Core ideas</h2>
@@ -1093,7 +1267,12 @@ details.diagram-src pre { margin-top: 8px; }
 <li><a href="https://github.com/mayank953/Live-Class-2026/tree/main/Weekend%2002%20-%204-5%20Jul/04-05%20-%205%20Jul%20%26%2011%20Jul%20-%20Anatomy%20of%20an%20Agent%20%26%20The%20Agentic%20Loop/Project%200" target="_blank" rel="noopener">Project Zero code (files <code>_01</code> to <code>_07</code>)</a></li>
 <li>Instructor's site: <a href="https://python-agents-with-mayank.netlify.app/" target="_blank" rel="noopener">Agents, with just Python</a></li>
 </ul><button class="readbtn" data-id="foundations-f4">Mark this chapter as read</button><div class="pager"><button data-id="foundations-f3"><small>Previous</small><b>What an agent is</b></button><button class="next" data-id="foundations-bank"><small>Next</small><b>Interview question bank</b></button></div></article>
-<article id="ch-foundations-bank" hidden><p class="crumb">Back matter</p><h1>Interview question bank</h1><p class="lead">Every interview question from every chapter in one place, in chapter order. Tap a question to reveal the answer.</p><div class="meta"><span class="chip">6 questions</span><span class="chip plain">Rebuilt automatically from the chapters</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="foundations-bank-chapter-2-llm-basics-in-plain-words">Chapter 2: LLM basics in plain words</h2>
+<article id="ch-foundations-bank" hidden><p class="crumb">Back matter</p><h1>Interview question bank</h1><p class="lead">Every interview question from every chapter in one place, in chapter order. Tap a question to reveal the answer.</p><div class="meta"><span class="chip">10 questions</span><span class="chip plain">Rebuilt automatically from the chapters</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="foundations-bank-chapter-1a-apis-json-and-http-in-plain-words">Chapter 1A: APIs, JSON and HTTP in plain words</h2>
+<details class="qa"><summary>What is the difference between a header and the body?</summary><div class="ans"><p>The body is the data you are sending (the order). Headers are metadata about it: the format, who you are, how to handle it.</p></div></details>
+<details class="qa"><summary>What do 401, 403 and 429 mean?</summary><div class="ans"><p>401: not authenticated (missing or wrong key). 403: authenticated but not allowed. 429: you are sending requests faster than the limit.</p></div></details>
+<details class="qa"><summary>How does a Claude connector work?</summary><div class="ans"><p>Claude makes a normal API request to the service (for example Gmail) with a token you approved via OAuth, receives JSON, and summarises it. It never sees your password.</p></div></details>
+<h2 id="foundations-bank-chapter-2-llm-basics-in-plain-words">Chapter 2: LLM basics in plain words</h2>
+<details class="qa"><summary>Why can a $20 subscription not power my app?</summary><div class="ans"><p>It is licensed for one human in a browser, flat pricing assumes humans pause, and providers' terms separate the chat app from programmatic access. Apps use the metered API instead, where cost grows with the tokens you send, including the whole conversation resent each turn.</p></div></details>
 <details class="qa"><summary>Why do LLMs need memory added to them?</summary><div class="ans"><p>Each API call is stateless. The app stores the messages and sends the <strong>full history</strong> on every call, so the model can use earlier turns.</p>
 <p><strong>Follow-up to expect:</strong> "What is the cost of that?" Tokens grow with every turn, which is why later chapters cover trimming and summarising history.</p></div></details>
 <h2 id="foundations-bank-chapter-3-what-an-agent-is">Chapter 3: What an agent is</h2>
@@ -2586,7 +2765,7 @@ def apply(a: Applicant) -&gt; Receipt:
 <li>The Excalidraw files attached on the Craft page, and the LangChain Colab links themselves (the same notebooks are checked into the repo and were read from there).</li>
 <li>The clipped tail of the newsletter prompt.</li>
 <li>The 22-page AI Industry Handbook, which is marked "Not for redistribution" and is a business handout, not course content.</li>
-<li>The bodies of the instructor's series guides on APIs, AI web versus API economics, open source AI, production readiness and MCP, and of the RAG guide (I read their section names only; they are listed in the matching chapters).</li>
+<li>The seven instructor series guides are now read in full (APIs and the economics and open source guides in Foundations chapters 1A and 2, MCP in chapter 11, RAG in the RAG book, production readiness in chapter 8, multi-agent in chapter 19). Their statistics are the guide's own reported 2026 figures and I have not verified them independently.</li>
 <li>For the AI terms and Python-agents sites, only the first part of each page; the Pydantic site was read in full.</li>
 </ul>
 <!-- /craftnotes -->
@@ -5860,10 +6039,57 @@ emulated_agent = create_agent(
 <li class="task"><label><input type="checkbox"><span>I can say what the emulator is for</span></label></li>
 </ul>
 <!-- res -->
-<h2 id="agentic-ai-ch8-the-instructor-s-guide-production-readiness">The instructor's guide: "Production readiness"</h2>
-<p>The Craft page links an interactive guide with these sections. I read the section names only, not the body, so use it as a map of what the guide covers:</p>
-<p>Demo to restaurant, guardrails, red-teaming, evaluations, human in the loop, uptime, monitoring, fallbacks, audit logs, building it in n8n.</p>
+
 <!-- /res -->
+
+<!-- prodguide -->
+<h2 id="agentic-ai-ch8-the-instructor-s-production-readiness-guide">The instructor's production-readiness guide</h2>
+<p><em>From "Production Readiness", part 7 of the instructor's series (read in full). It is a checklist of habits between a demo and a system strangers can rely on; it ends with an n8n wiring example.</em></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Habit</th>
+<th>The idea</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Guardrails</strong></td>
+<td>Checks on the way in (before the model sees the message) and on the way out (before the user sees the answer): keywords, PII detection, jailbreak detection, topical alignment. No single guardrail catches everything, so use layers; fast cheap filters first, slower smarter checks behind them</td>
+</tr>
+<tr>
+<td><strong>Red-teaming</strong></td>
+<td>Deliberately try to break it before real users do: ignore-your-instructions prompts, hot-button topics, personal data. Prompt injection is LLM01 in the OWASP Top 10 for LLM applications. A prompt caught in red-teaming becomes a guardrail rule. The guide names Garak, PyRIT and HarmBench</td>
+</tr>
+<tr>
+<td><strong>Evaluations</strong></td>
+<td>A small batch (the guide suggests 5 to 8 real questions with an agreed good-answer bar) run through the system and graded, re-run whenever the prompt, model or tools change. A second model call can act as judge with a rubric that returns scores as JSON (helpfulness, correctness, tone). Run offline before shipping and on a sample of live traffic afterwards</td>
+</tr>
+<tr>
+<td><strong>Human in the loop</strong></td>
+<td>Match the wait for approval to the risk: seconds for a routine draft, minutes for personal data, longer for money, deletes or public posts. If nobody answers in time, fall back to a safe default (pause and flag), not silent proceeding</td>
+</tr>
+<tr>
+<td><strong>Uptime</strong></td>
+<td>Availability is "nines": 99.9 percent allows about 43 minutes down a month. No provider promises zero downtime, so decide in advance what happens in a bad hour</td>
+</tr>
+<tr>
+<td><strong>Monitoring</strong></td>
+<td>Record every request, guardrail decision, response, latency and cost. Sample a small share of live traffic (the guide says 1 to 5 percent), run the pre-launch evaluators on it, and alert when quality drops. A confusing real conversation becomes tomorrow's red-team prompt and next week's eval question. Tools named: Langfuse, LangSmith</td>
+</tr>
+<tr>
+<td><strong>Fallbacks</strong></td>
+<td>Route to a secondary model or a cached safe response when the primary is down, and log it, instead of returning an error</td>
+</tr>
+<tr>
+<td><strong>Audit logs</strong></td>
+<td>A permanent record of who asked what, what was decided, who approved it, when. The guide points to OWASP LLM Top 10, NIST AI RMF and the EU AI Act as standards enterprise buyers reference</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>In n8n:</strong> an input guardrails node, the AI Agent node, then an output guardrails node; run your risky prompts through the finished workflow; and use the AI Agent's built-in human-review setting on a tool (approval through Telegram or Slack) instead of building an approval workflow by hand.</p>
+<aside class="callout key"><div class="ct">Key idea<em>How this maps onto this book</em></div><p>Guardrails and resilience are chapters 7 and 8, human approval is chapter 10, streaming is 10A, and the four production KPIs from the induction (cost, failure rate, latency, quality) are on the start page.</p></aside>
+<!-- /prodguide -->
 
 <h2 id="agentic-ai-ch8-sources-and-further-reading">Sources and further reading</h2>
 <ul>
@@ -7292,10 +7518,25 @@ npx -y @modelcontextprotocol/inspector python server.py
 </tr>
 </tbody>
 </table></div>
-<h2 id="agentic-ai-ch11-the-instructor-s-guide-mcp-properly-explained">The instructor's guide: "MCP, properly explained"</h2>
-<p>The Craft page links an interactive guide with these sections. I read the section names only, not the body, so use it as a map of what the guide covers:</p>
-<p>What a model is, context and tools, wiring APIs by hand, MCP in a sentence, tools, resources and prompts, host client server, before versus after, search, where it lives, popular servers, build your own, draft versus send, build a real tool.</p>
 <!-- /res -->
+
+<!-- mcpguide -->
+<h2 id="agentic-ai-ch11-the-instructor-s-plain-language-mcp-guide">The instructor's plain-language MCP guide</h2>
+<p><em>From "MCP, Properly Explained", part 3 of the instructor's series (read in full). It is a beginner's walk-through that comes before this chapter's protocol detail.</em></p>
+<ul>
+<li><strong>A model has no hands.</strong> An LLM predicts text; it can write an email but not send it. Two ingredients turn talk into action: <strong>context</strong> (real, current information such as what is in your inbox) and <strong>tools</strong> (a button it may press). Context plus tools lets a model finish what it starts.</li>
+<li><strong>The N times M problem.</strong> Wiring every AI app to every API by hand means N apps times M tools of custom wrapper code, each fragile when an API changes. MCP is a shared, standard way to find and use tools, so you build the connector once as a server and any MCP-speaking app uses it: N plus M instead of N times M. The guide's pitch to a non-technical person is a shared toolbox, or a standard plug.</li>
+<li><strong>The honest comparison.</strong> Good: easy to define once, scales across apps, no redundant wrappers, less breakage. Trade-offs: a bit more setup, many servers still run locally, the end goal is less obvious at first. For a one-off script that calls one API, wiring it by hand is still reasonable.</li>
+<li><strong>Three primitives.</strong> Tools (actions with side effects, such as <code>send_email</code>), resources (information to read, such as the current thread) and prompts (ready-made templates, such as "summarise this thread").</li>
+<li><strong>Host, client, server.</strong> The host is the app you use (Claude Desktop, Cursor, n8n). It runs a client that speaks the protocol to a server exposing tools, resources and prompts. Transports: stdio (local) or Streamable HTTP (remote), over JSON-RPC 2.0. The guide notes Streamable HTTP replaced the older SSE-based transport in the November 2025 spec update.</li>
+<li><strong>Search is just a tool.</strong> A search server offers one tool with a query in and results out, the same shape as <code>send_email</code>. Tavily commonly appears as an MCP server for this reason.</li>
+<li><strong>Where it lives.</strong> The same handshake connects Claude to Gmail, Slack, GitHub, Notion, Stripe, Figma and more. The guide reports MCP Apps (January 2026), where a server can render a real UI in Claude's chat.</li>
+<li><strong>Popular servers.</strong> GitHub, Playwright (drives a browser) and Context7 (current docs) are examples; the guide suggests a small, purposeful set (most setups run five to nine), since too many can slow tool choice.</li>
+<li><strong>Be the server.</strong> Companies expose their product as an MCP server once so every MCP app can use it. A tiny project tracker needs three tools (<code>create_task</code>, <code>list_tasks</code>, <code>update_status</code>).</li>
+<li><strong>Draft versus send.</strong> The built-in Gmail connector can create a draft but deliberately stops short of sending. A custom server you control can choose differently, in about ten lines with FastMCP: a function with <code>@mcp.tool()</code>, a docstring the model reads, and the line that calls the API. This is the motivating example for the TimeTrack project later in this book.</li>
+</ul>
+<aside class="callout trap"><div class="ct">Common trap<em>Draft-only is a safety choice, not a limitation</em></div><p>If you build a <code>send_email</code> tool, you own the permission and safeguards. Pair it with human approval (chapter 10) for anything irreversible.</p></aside>
+<!-- /mcpguide -->
 
 <h2 id="agentic-ai-ch11-sources-and-further-reading">Sources and further reading</h2>
 <ul>
@@ -13800,9 +14041,6 @@ app.mount(&quot;/mcp&quot;, mcp_app)
 </table></div>
 <aside class="callout key"><div class="ct">Key idea<em>Prerequisites</em></div><p><strong>Foundations</strong> chapter 2 (embeddings and the context window) and <strong>Agentic AI with LangChain</strong> chapters 1 to 5 (chains, tools, structured output). The agent and deployment half of Meridian is the last chapter of the LangChain book.</p></aside>
 <aside class="callout beyond"><div class="ct">Beyond the class<em>Where this came from</em></div><p>The content comes from the Meridian course slides and the Meridian learner repo. No class write-up exists for it. When the course's own RAG classes arrive, this book is where they will be added.</p></aside>
-<h2 id="rag-home-the-instructor-s-rag-properly-explained-guide">The instructor's "RAG, properly explained" guide</h2>
-<p>The Craft page links a guide with this section list. I read the section names only, not the body, so use it as a map of what the guide covers:</p>
-<p>A real problem, closed versus open book, the library, setting it up, using it, handing over the answer, contextual retrieval, the whole diagram, do you need RAG, vector databases, and RAG with Claude.</p>
 <h2 id="rag-home-project-idea-guideline-q-amp-a-with-rag">Project idea: guideline Q&amp;A with RAG</h2>
 <p><strong>Goal:</strong> upload a handful of public guideline PDFs and answer questions using <strong>only</strong> their content.</p>
 <ul>
@@ -13823,6 +14061,21 @@ app.mount(&quot;/mcp&quot;, mcp_app)
 <p>basic RAG hurts when the words differ, the answer is split across chunks, or the right chunk is not first. Improve it <strong>before</strong> the search (change the question), <strong>during</strong> (change what is searched or how), <strong>after</strong> (clean the results) or <strong>beyond</strong> it. The site compares <strong>thirteen variants</strong> (I saw these among them: multi-query, contextual compression, HyDE, query decomposition, follow-up rewrite, hybrid search and reranking) and names four bigger ideas, of which I saw three: corrective RAG grades the retrieved chunks and tries again if they are poor, agentic RAG lets an agent decide whether, what and how often to search, and graph RAG works from a graph of the documents. Which first: right chunk found but not first, try reranking; users phrase things differently, try multi-query or HyDE; several-part questions, decomposition. Meridian uses three: similarity, multiquery and contextual (first-run times 7.1, 12.0 and 9.7 seconds).</p>
 <h3 id="rag-r1-the-eight-parts-and-choosing-tools">The eight parts, and choosing tools</h3>
 <p>a RAG system has <strong>eight parts</strong> (parse, chunk, embed, store, retrieve, rerank, generate, evaluate), each a decision. For embeddings check dimensions (768 here), languages, input length, hosted or open, and the rule that <strong>one model must index and search</strong>. Choosing a vector database: how many vectors, do you already run Postgres or Elasticsearch, filtering, managed or self-run, cost.</p>
+<!-- ragguide -->
+<h2 id="rag-r1-the-instructor-s-plain-language-rag-guide">The instructor's plain-language RAG guide</h2>
+<p><em>From "RAG, Properly Explained", part 4 of the instructor's series (read in full). Its figures about Anthropic's research are as the guide states them.</em></p>
+<ul>
+<li><strong>The problem.</strong> Your company's refund policy, contracts and wiki were never in any model's training data, and retraining on them is slow, expensive and would absorb private text into the model. What you need is to hand the model the right document at the moment it is asked.</li>
+<li><strong>Closed book versus open book.</strong> A plain LLM sits a closed-book exam from memory, so its answer can be stale or invented. RAG makes it open-book: the relevant pages are handed over first and it answers from them.</li>
+<li><strong>The library analogy, one to one.</strong> Books are your documents; right-sized chunks are the sections; the librarian is the embedding model; the card catalog is the vector database; the research assistant is the generation model (Claude). The librarian appears twice: once cataloguing, once looking up your question.</li>
+<li><strong>Setting up (once).</strong> Cut documents into chunks (too small loses meaning, too large blurs topics), embed each chunk, and store the vectors. Chunks about the same topic land near each other even if they share few words.</li>
+<li><strong>Using it (every question).</strong> Embed the question with the <strong>same</strong> model, find the nearest chunks, assemble a prompt (system instruction to answer only from the context, the chunks, the question) and send it to the model. Switching embedding providers without re-embedding everything breaks retrieval silently.</li>
+<li><strong>The whole pipeline.</strong> Raw data, information extraction (OCR, PDF parsing, crawlers), chunking, embedding, vector database; then query, embedding (same model), vector database, relevant chunks, model, response.</li>
+<li><strong>Do you even need RAG?</strong> If the whole knowledge base fits in the context window (the guide, following Anthropic's guidance, says under roughly 200,000 tokens, about 500 pages), you can paste it in and use prompt caching. Use RAG when the knowledge base is larger, changes constantly, or must be scoped per user or permission. Many systems use both.</li>
+<li><strong>Vector databases.</strong> Their job is storing vectors and answering "what is nearest" in milliseconds. The guide names Pinecone, Weaviate, Qdrant, pgvector and Milvus, and says nearly all support hybrid search now, so the choice is mostly managed versus self-run and whether it fits a database you already run.</li>
+</ul>
+<!-- /ragguide -->
+
 <h2 id="rag-r1-interview-corner">Interview corner</h2>
 <details class="qa"><summary>What is RAG?</summary><div class="ans"><p>Find the right pages first, then answer from them: an open-book exam. Chunks of your documents are embedded, stored in a vector database and retrieved by meaning, then given to the model with the question.</p></div></details>
 <details class="qa"><summary>How does it stop the model making things up?</summary><div class="ans"><p>The prompt says to answer from the retrieved context and to say "I do not know" otherwise.</p></div></details>
@@ -14095,6 +14348,14 @@ def rerank(question, k=3):
 <p>The keyword side is a home-made ranking (shared words weighted by rarity, i.e. inverse document frequency); real systems use BM25 or a search engine. Run on 10 Oct 2026 with gemini-3.8-flash and gemini-embedding-001; the page itself calls it <strong>an illustration, not a benchmark</strong>.</p>
 <aside class="callout key"><div class="ct">Key idea<em>What to take away</em></div><p>No variant wins everywhere (hybrid made this question worse, reranking made it better, and on another question it could flip), and each has a price: extra model calls, a second index, bigger prompts. Start with basic RAG, add one variant at a time, and <strong>measure on your own list of real questions with known answers</strong>. MMR and parent pages change what is returned (variety and context, no model cost); HyDE, decomposition and the follow-up rewrite fix the question (one extra call each); hybrid helps with exact terms; reranking removed the distraction in this test.</p></aside>
 <p>Other numbers the slides record (verified by the instructor on 10 Oct 2026): the four sample PDFs are 645, 664, 845 and 950 characters and each becomes one chunk; on eight questions over the 22 sentences keyword search found a correct sentence in its top three for 2 and meaning search for 8 (the instructor's own judgement of "correct"); the chunk explorer is a JavaScript port of <code>RecursiveCharacterTextSplitter</code> that matched the library on 120 size and overlap combinations; the 2D meaning map keeps only about 26 percent of the variance, so the ranked list is the truth; library versions were langchain 1.2.11, langchain-core 1.2.18, langchain-chroma 1.1.0 and langchain-google-genai 4.2.1. Not tested: Windows PowerShell variants and cloud mode for any file.</p>
+<!-- ctxretrieval -->
+<h2 id="rag-r4-contextual-retrieval-and-a-typical-claude-stack">Contextual retrieval, and a typical Claude stack</h2>
+<p><em>From the instructor's RAG guide, which cites Anthropic's Contextual Retrieval research.</em></p>
+<p>Chunking has a quiet cost: a chunk that reads fine inside its document can become meaningless once cut loose ("the plan costs $12 a month": which plan, whose pricing, what year?). <strong>Contextual retrieval</strong> has Claude write a short note onto every chunk before it is embedded (for example "from Acme's 2026 pricing page, describing the Pro tier"). The guide reports Anthropic's benchmark figures: about 49 percent fewer failed retrievals from context alone, about 67 percent with reranking added, at roughly $1.02 per million document tokens thanks to prompt caching.</p>
+<p>Production systems also add <strong>hybrid search</strong> (blend meaning search with keyword search, for exact terms) and <strong>reranking</strong> (a slower second pass over the top results), which this chapter's lab compares.</p>
+<p>A typical stack in the guide: chunk with a splitter, embed with an embedding provider (Claude has no embedding model of its own; Anthropic's recommended partner is Voyage AI), store in a vector database, embed the question with the same model, retrieve with hybrid search and rerank, send question plus chunks to the model. Claude can cite which retrieved passage backs each part of its answer, and prompt caching makes repeated context cheaper.</p>
+<!-- /ctxretrieval -->
+
 <h2 id="rag-r4-interview-corner">Interview corner</h2>
 <details class="qa"><summary>Basic RAG returns the right chunk third, not first. What do you try?</summary><div class="ans"><p>Reranking: over-fetch (for example 8), have a model score each candidate, keep the best few. It costs one model call. Measure it on your own list of questions with known answers.</p></div></details>
 <details class="qa"><summary>What does reciprocal rank fusion do?</summary><div class="ans"><p>It merges a keyword ranking and a meaning ranking by adding 1 / (60 + position) for each list, so no weights are needed. Hybrid helps with exact terms but can hurt on other questions.</p></div></details>
@@ -14186,7 +14447,7 @@ def rerank(question, k=3):
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script>
-window.__BOOKS__ = [{"id": "library", "title": "The Agentic AI library", "short": "Library (start here)", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}]}, {"id": "foundations", "title": "Python and Agent Foundations", "short": "1. Foundations", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "f1", "num": "1", "title": "Set up your machine and refresh Python", "part": "Foundations", "ready": true}, {"id": "f2", "num": "2", "title": "LLM basics in plain words", "part": "Foundations", "ready": true}, {"id": "f3", "num": "3", "title": "What an agent is", "part": "Foundations", "ready": true}, {"id": "f4", "num": "4", "title": "Agents in plain Python", "part": "Foundations", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}]}, {"id": "pydantic", "title": "Pydantic", "short": "2. Pydantic", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "p1", "num": "1", "title": "Why validation exists, and type hints", "part": "Pydantic", "ready": true}, {"id": "p2", "num": "2", "title": "Your first model", "part": "Pydantic", "ready": true}, {"id": "p3", "num": "3", "title": "Fields and constraints", "part": "Pydantic", "ready": true}, {"id": "p4", "num": "4", "title": "Validators", "part": "Pydantic", "ready": true}, {"id": "p5", "num": "5", "title": "Computed fields and serialization", "part": "Pydantic", "ready": true}, {"id": "p6", "num": "6", "title": "Nested models", "part": "Pydantic", "ready": true}, {"id": "p7", "num": "7", "title": "Strict mode and JSON Schema", "part": "Pydantic", "ready": true}, {"id": "p8", "num": "8", "title": "Settings and secrets", "part": "Pydantic", "ready": true}, {"id": "p9", "num": "9", "title": "Reading validation errors", "part": "Pydantic", "ready": true}, {"id": "p10", "num": "10", "title": "Pydantic with FastAPI", "part": "Pydantic", "ready": true}, {"id": "p11", "num": "11", "title": "Validating what an LLM gives you back", "part": "Pydantic", "ready": true}, {"id": "p12", "num": "12", "title": "Where Pydantic goes next, and the final project", "part": "Pydantic", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}]}, {"id": "agentic-ai", "title": "Agentic AI with LangChain", "short": "3. Agentic AI (LangChain)", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "ch1", "num": "1", "title": "Introduction to LangChain", "part": "Part A  LangChain core", "ready": true}, {"id": "ch2", "num": "2", "title": "The LangChain family and harness engineering", "part": "Part A  LangChain core", "ready": true}, {"id": "ch3", "num": "3", "title": "Inside the model", "part": "Part A  LangChain core", "ready": true}, {"id": "ch4", "num": "4", "title": "Structured output", "part": "Part A  LangChain core", "ready": true}, {"id": "ch5", "num": "5", "title": "Tools deep dive", "part": "Part A  LangChain core", "ready": true}, {"id": "ch6", "num": "6", "title": "Agents, memory and middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch7", "num": "7", "title": "Mastering middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch8", "num": "8", "title": "Guardrails, todo lists, resilience", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch9", "num": "9", "title": "Shell tools and custom middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch10", "num": "10", "title": "Runtime and human-in-the-loop", "part": "Part C  Runtime", "ready": true}, {"id": "ch10a", "num": "10A", "title": "Streaming agent output (from the docs)", "part": "Part C  Runtime", "ready": true}, {"id": "ch11", "num": "11", "title": "Why MCP exists", "part": "Part D  MCP", "ready": true}, {"id": "ch12", "num": "12", "title": "MCP primitives, lifecycle, JSON-RPC", "part": "Part D  MCP", "ready": true}, {"id": "ch13", "num": "13", "title": "Capability negotiation and operation", "part": "Part D  MCP", "ready": true}, {"id": "ch14", "num": "14", "title": "Shutdown, transports, first server", "part": "Part D  MCP", "ready": true}, {"id": "ch15", "num": "15", "title": "The Time Tracker project", "part": "Part D  MCP", "ready": true}, {"id": "ch16", "num": "16", "title": "Deploying servers, building a client", "part": "Part D  MCP", "ready": true}, {"id": "ch17", "num": "17", "title": "Legacy vs modern MCP", "part": "Part D  MCP", "ready": true}, {"id": "ch18", "num": "18", "title": "MCP inside LangChain", "part": "Part E  Advanced", "ready": true}, {"id": "ch19", "num": "19", "title": "Multi-agent patterns", "part": "Part E  Advanced", "ready": true}, {"id": "ch20", "num": "20", "title": "Meridian AI project tour", "part": "Part E  Advanced", "ready": true}, {"id": "glossary", "num": "", "title": "Glossary", "part": "Back matter", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}, {"id": "cheat", "num": "", "title": "Cheat sheet", "part": "Back matter", "ready": true}]}, {"id": "rag", "title": "RAG", "short": "4. RAG", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "r1", "num": "1", "title": "RAG explained: why, and what the parts are", "part": "RAG", "ready": true}, {"id": "r2", "num": "2", "title": "Embeddings, storing meaning and ingestion", "part": "RAG", "ready": true}, {"id": "r3", "num": "3", "title": "Retrieval and the answer chain", "part": "RAG", "ready": true}, {"id": "r4", "num": "4", "title": "Advanced RAG: seven ways to change retrieval", "part": "RAG", "ready": true}, {"id": "r5", "num": "5", "title": "Costs, errors and tests for a RAG app", "part": "RAG", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}]}];
+window.__BOOKS__ = [{"id": "library", "title": "The Agentic AI library", "short": "Library (start here)", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}]}, {"id": "foundations", "title": "Python and Agent Foundations", "short": "1. Foundations", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "f1", "num": "1", "title": "Set up your machine and refresh Python", "part": "Foundations", "ready": true}, {"id": "f1a", "num": "1A", "title": "APIs, JSON and HTTP in plain words", "part": "Foundations", "ready": true}, {"id": "f2", "num": "2", "title": "LLM basics in plain words", "part": "Foundations", "ready": true}, {"id": "f3", "num": "3", "title": "What an agent is", "part": "Foundations", "ready": true}, {"id": "f4", "num": "4", "title": "Agents in plain Python", "part": "Foundations", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}]}, {"id": "pydantic", "title": "Pydantic", "short": "2. Pydantic", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "p1", "num": "1", "title": "Why validation exists, and type hints", "part": "Pydantic", "ready": true}, {"id": "p2", "num": "2", "title": "Your first model", "part": "Pydantic", "ready": true}, {"id": "p3", "num": "3", "title": "Fields and constraints", "part": "Pydantic", "ready": true}, {"id": "p4", "num": "4", "title": "Validators", "part": "Pydantic", "ready": true}, {"id": "p5", "num": "5", "title": "Computed fields and serialization", "part": "Pydantic", "ready": true}, {"id": "p6", "num": "6", "title": "Nested models", "part": "Pydantic", "ready": true}, {"id": "p7", "num": "7", "title": "Strict mode and JSON Schema", "part": "Pydantic", "ready": true}, {"id": "p8", "num": "8", "title": "Settings and secrets", "part": "Pydantic", "ready": true}, {"id": "p9", "num": "9", "title": "Reading validation errors", "part": "Pydantic", "ready": true}, {"id": "p10", "num": "10", "title": "Pydantic with FastAPI", "part": "Pydantic", "ready": true}, {"id": "p11", "num": "11", "title": "Validating what an LLM gives you back", "part": "Pydantic", "ready": true}, {"id": "p12", "num": "12", "title": "Where Pydantic goes next, and the final project", "part": "Pydantic", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}]}, {"id": "agentic-ai", "title": "Agentic AI with LangChain", "short": "3. Agentic AI (LangChain)", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "ch1", "num": "1", "title": "Introduction to LangChain", "part": "Part A  LangChain core", "ready": true}, {"id": "ch2", "num": "2", "title": "The LangChain family and harness engineering", "part": "Part A  LangChain core", "ready": true}, {"id": "ch3", "num": "3", "title": "Inside the model", "part": "Part A  LangChain core", "ready": true}, {"id": "ch4", "num": "4", "title": "Structured output", "part": "Part A  LangChain core", "ready": true}, {"id": "ch5", "num": "5", "title": "Tools deep dive", "part": "Part A  LangChain core", "ready": true}, {"id": "ch6", "num": "6", "title": "Agents, memory and middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch7", "num": "7", "title": "Mastering middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch8", "num": "8", "title": "Guardrails, todo lists, resilience", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch9", "num": "9", "title": "Shell tools and custom middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch10", "num": "10", "title": "Runtime and human-in-the-loop", "part": "Part C  Runtime", "ready": true}, {"id": "ch10a", "num": "10A", "title": "Streaming agent output (from the docs)", "part": "Part C  Runtime", "ready": true}, {"id": "ch11", "num": "11", "title": "Why MCP exists", "part": "Part D  MCP", "ready": true}, {"id": "ch12", "num": "12", "title": "MCP primitives, lifecycle, JSON-RPC", "part": "Part D  MCP", "ready": true}, {"id": "ch13", "num": "13", "title": "Capability negotiation and operation", "part": "Part D  MCP", "ready": true}, {"id": "ch14", "num": "14", "title": "Shutdown, transports, first server", "part": "Part D  MCP", "ready": true}, {"id": "ch15", "num": "15", "title": "The Time Tracker project", "part": "Part D  MCP", "ready": true}, {"id": "ch16", "num": "16", "title": "Deploying servers, building a client", "part": "Part D  MCP", "ready": true}, {"id": "ch17", "num": "17", "title": "Legacy vs modern MCP", "part": "Part D  MCP", "ready": true}, {"id": "ch18", "num": "18", "title": "MCP inside LangChain", "part": "Part E  Advanced", "ready": true}, {"id": "ch19", "num": "19", "title": "Multi-agent patterns", "part": "Part E  Advanced", "ready": true}, {"id": "ch20", "num": "20", "title": "Meridian AI project tour", "part": "Part E  Advanced", "ready": true}, {"id": "glossary", "num": "", "title": "Glossary", "part": "Back matter", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}, {"id": "cheat", "num": "", "title": "Cheat sheet", "part": "Back matter", "ready": true}]}, {"id": "rag", "title": "RAG", "short": "4. RAG", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "r1", "num": "1", "title": "RAG explained: why, and what the parts are", "part": "RAG", "ready": true}, {"id": "r2", "num": "2", "title": "Embeddings, storing meaning and ingestion", "part": "RAG", "ready": true}, {"id": "r3", "num": "3", "title": "Retrieval and the answer chain", "part": "RAG", "ready": true}, {"id": "r4", "num": "4", "title": "Advanced RAG: seven ways to change retrieval", "part": "RAG", "ready": true}, {"id": "r5", "num": "5", "title": "Costs, errors and tests for a RAG app", "part": "RAG", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}]}];
 /* Interactive widgets for the reader. A chapter writes ":::widget name" and this file builds it.
    Each widget is plain DOM, no libraries, and works with the page's colour variables. */
 (function () {

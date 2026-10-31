@@ -127,7 +127,7 @@ I extracted the text of all 15 PDFs attached on Craft that are also in the repo.
 - The Excalidraw files attached on the Craft page, and the LangChain Colab links themselves (the same notebooks are checked into the repo and were read from there).
 - The clipped tail of the newsletter prompt.
 - The 22-page AI Industry Handbook, which is marked "Not for redistribution" and is a business handout, not course content.
-- The bodies of the instructor's series guides on APIs, AI web versus API economics, open source AI, production readiness and MCP, and of the RAG guide (I read their section names only; they are listed in the matching chapters).
+- The seven instructor series guides are now read in full (APIs and the economics and open source guides in Foundations chapters 1A and 2, MCP in chapter 11, RAG in the RAG book, production readiness in chapter 8, multi-agent in chapter 19). Their statistics are the guide's own reported 2026 figures and I have not verified them independently.
 - For the AI terms and Python-agents sites, only the first part of each page; the Pydantic site was read in full.
 <!-- /craftnotes -->
 

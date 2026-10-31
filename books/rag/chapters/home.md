@@ -20,12 +20,6 @@ meta: Book 4 of the library | 5 chapters | Read after Agentic AI with LangChain
 The content comes from the Meridian course slides and the Meridian learner repo. No class write-up exists for it. When the course's own RAG classes arrive, this book is where they will be added.
 :::
 
-## The instructor's "RAG, properly explained" guide
-
-The Craft page links a guide with this section list. I read the section names only, not the body, so use it as a map of what the guide covers:
-
-A real problem, closed versus open book, the library, setting it up, using it, handing over the answer, contextual retrieval, the whole diagram, do you need RAG, vector databases, and RAG with Claude.
-
 ## Project idea: guideline Q&A with RAG
 
 **Goal:** upload a handful of public guideline PDFs and answer questions using **only** their content.

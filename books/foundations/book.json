@@ -20,6 +20,13 @@
    "file": "f1.md"
   },
   {
+   "id": "f1a",
+   "num": "1A",
+   "title": "APIs, JSON and HTTP in plain words",
+   "part": "Foundations",
+   "file": "f1a.md"
+  },
+  {
    "id": "f2",
    "num": "2",
    "title": "LLM basics in plain words",
