@@ -11,6 +11,8 @@ from openpyxl.formatting.rule import CellIsRule, FormulaRule
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TODAY=datetime.date.today().isoformat()
 rows=json.load(open(f'{ROOT}/build/master_rows.json'))
+# owner: documentation only, no API-reference / reference-tab pages
+rows=[x for x in rows if not (x['group']=='API Documentation' or (x['source']=='LangChain docs' and x['group']=='Reference'))]
 ov=json.load(open(f'{ROOT}/build/master_overrides.json')) if os.path.exists(f'{ROOT}/build/master_overrides.json') else {}
 
 def add(**kw):

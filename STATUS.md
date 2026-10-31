@@ -59,6 +59,7 @@ Updated 2026-10-31 by `build/status.py`. This file is regenerated after every pr
 
 ## 5. Change log (newest first)
 
+- 2026-10-31: Master: API-reference and reference-tab pages removed (documentation only)
 - 2026-10-31: Excel master added; MCP 2026-07-28 spec/docs sections added (ch16, ch17); LangChain concepts/migration and Pydantic JSON/forward/validate_call pages added; class 23 ledgered
 - 2026-10-31: Full inventory written (COVERAGE_INVENTORY.md): every repo file and every LangChain, MCP and Pydantic docs page with status; found 1 new upstream class file; Craft attachments recounted as 33 of 42
 - 2026-10-31: Coverage corrected: Pydantic docs are 17 of 54 teaching pages (not 19 of 19); LangChain docs gaps stated; MCP official docs added (1 of 26 docs, 0 of 31 spec). No book content changed
