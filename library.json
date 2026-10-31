@@ -1,9 +1,0 @@
-{
- "books": [
-  "library",
-  "foundations",
-  "pydantic",
-  "agentic-ai",
-  "rag"
- ]
-}
