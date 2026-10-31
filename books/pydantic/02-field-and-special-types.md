@@ -29,11 +29,28 @@ Two equivalent syntaxes exist: plain `Field(...)` and `Annotated[...]`. The ment
 
 These save you writing your own regular expressions:
 
-- `EmailStr` checks for a valid email (needs the `email-validator` package).
+- `EmailStr` checks for a valid email. It needs the email add-on: `pip install "pydantic[email]"` (the notebook's command). I could not run `EmailStr` here because that package is not installed in my sandbox.
 - `HttpUrl` checks for a valid URL.
 - `SecretStr` masks sensitive values such as API keys and passwords in logs and printed output. It is easy to overlook, and it matters here because you will handle API keys constantly.
 
-*Source: `classes_summary/03`, `classes_transcription_summary/03`.*
+### `SecretStr` in detail
+
+The notebook runs `SecretStr` on a password. I ran the same code:
+
+```python
+class UserAccount(BaseModel):
+    username: str
+    password: SecretStr
+
+account = UserAccount(username="rohan99", password="super-secret-123")
+print(account)                     # username='rohan99' password=SecretStr('**********')
+account.model_dump()               # {'username': 'rohan99', 'password': SecretStr('**********')}
+account.password.get_secret_value()   # 'super-secret-123', the real value, on purpose
+```
+
+**Pitfall:** the notebook goes on to write the model to a file with `json.dump(account.model_dump(mode="json"), f, indent=4)`. I ran `model_dump(mode="json")` and it gives `{'username': 'rohan99', 'password': '**********'}`. The file would hold the masked text, not the password. If you need the real value, read it with `get_secret_value()` deliberately.
+
+*Source: `Pydantic_From_Scratch.ipynb` (`SecretStr` and `account.json` cells).*
 
 ## Practice
 
@@ -44,5 +61,6 @@ These save you writing your own regular expressions:
 
 - Live-Class-2026, `classes_summary/03 - 4 Jul - Pydantic Deep Dive.md`
 - Live-Class-2026, `classes_transcription_summary/03 - 4 Jul - Pydantic Deep Dive.md`
+- Live-Class-2026, notebook `8_Pydantic/Pydantic_From_Scratch.ipynb`
 
 Previous: [Chapter 1](01-why-pydantic-and-basemodel.md) · Next: [Chapter 3](03-validators.md)
