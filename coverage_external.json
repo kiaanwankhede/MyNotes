@@ -71,6 +71,7 @@
   "Only the TimeTrack lab was run; SDK snippets in the Pydantic book were not run"
  ],
  "log": [
+  "2026-10-31: Coverage wording made plainer: Read properly, Looked through, Not opened",
   "2026-10-31: Meridian module 7 (Docker and Google Cloud) read in full, now 7 of 7 modules; costs added to RAG r5",
   "2026-10-31: Meridian module 6 (service and screen) read in full, now 6 of 7 modules",
   "2026-10-31: Meridian module 4 (RAG) read in full, now 5 of 7 modules; RAG chapters expanded",

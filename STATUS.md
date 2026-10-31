@@ -2,11 +2,17 @@
 
 Updated 2026-10-31 by `build/status.py`. This file is regenerated after every prompt.
 
-**How to read it.** Percentages are shares of items (files or pages), not of knowledge. *Full read* means read start to finish. *Touched* means read plus skimmed (scanned, text-extracted or parsed).
+**How to read it, in plain words.** For each file I use one of three levels:
+
+- **Read properly**: I read it from start to finish and the notes use its details.
+- **Looked through (skimmed)**: I opened it and read parts of it, or turned it into text and scanned it. The notes use its main points, not every line. Typical for notebooks, PDFs, big folders of similar files and code.
+- **Not opened**: I have not looked at it.
+
+*Opened at all* = read properly + looked through. Percentages count files or pages, not how much you know. A file counts as *looked through* even if I only used one idea from it, so treat *Read properly* as the number that matters.
 
 ## 1. Course repo files (368, excluding 95 lock, log and config files)
 
-| Area | Files | Full read | Touched | Not read |
+| Area | Files | Read properly | Opened at all | Not opened |
 |---|---:|---:|---:|---:|
 | Repo root, scripts, workflows | 26 | 10 (38%) | 100% | 0 |
 | Complete MCP (TimeTrack, servers, clients) | 60 | 15 (25%) | 100% | 0 |
@@ -50,6 +56,7 @@ Updated 2026-10-31 by `build/status.py`. This file is regenerated after every pr
 
 ## 5. Change log (newest first)
 
+- 2026-10-31: Coverage wording made plainer: Read properly, Looked through, Not opened
 - 2026-10-31: Meridian module 7 (Docker and Google Cloud) read in full, now 7 of 7 modules; costs added to RAG r5
 - 2026-10-31: Meridian module 6 (service and screen) read in full, now 6 of 7 modules
 - 2026-10-31: Meridian module 4 (RAG) read in full, now 5 of 7 modules; RAG chapters expanded

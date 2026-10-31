@@ -142,14 +142,14 @@ def write_coverage(book_dir, manifest):
         "| Status | Files | Meaning |",
         "| --- | ---: | --- |",
         "| read | %d | Read in full or close to it |" % len(by.get("read", [])),
-        "| skimmed | %d | Scanned, extracted or partly read |" % len(by.get("skimmed", [])),
+        "| skimmed | %d | Looked through: parts read, or turned into text and scanned |" % len(by.get("skimmed", [])),
         "| not_read | %d | Listed but not read. Candidates for a deeper pass |" % len(by.get("not_read", [])),
         "| ignored | %d | Lock files, logs, databases, archives and tooling config |" % len(by.get("ignored", [])),
         "",
         "A file is **cited** when a chapter links to it under Sources. Citing is not the same as reading in full: use the status column.",
         "",
     ]
-    for status, title in (("not_read", "Not read yet (cited ones first)"), ("skimmed", "Skimmed"), ("read", "Read")):
+    for status, title in (("not_read", "Not opened yet (cited ones first)"), ("skimmed", "Looked through (skimmed)"), ("read", "Read properly")):
         items = sorted(by.get(status, []), key=lambda p: (not files[p]["cited_in"], p))
         lines += ["## %s (%d)" % (title, len(items)), ""]
         for p in items:

@@ -77,9 +77,13 @@ def main():
     L = []
     L.append("# Coverage status\n")
     L.append("Updated %s by `build/status.py`. This file is regenerated after every prompt.\n" % datetime.date.today().isoformat())
-    L.append("**How to read it.** Percentages are shares of items (files or pages), not of knowledge. *Full read* means read start to finish. *Touched* means read plus skimmed (scanned, text-extracted or parsed).\n")
+    L.append("**How to read it, in plain words.** For each file I use one of three levels:\n")
+    L.append("- **Read properly**: I read it from start to finish and the notes use its details.")
+    L.append("- **Looked through (skimmed)**: I opened it and read parts of it, or turned it into text and scanned it. The notes use its main points, not every line. Typical for notebooks, PDFs, big folders of similar files and code.")
+    L.append("- **Not opened**: I have not looked at it.\n")
+    L.append("*Opened at all* = read properly + looked through. Percentages count files or pages, not how much you know. A file counts as *looked through* even if I only used one idea from it, so treat *Read properly* as the number that matters.\n")
     L.append("## 1. Course repo files (%d, excluding %d lock, log and config files)\n" % (tot["total"], sum(1 for v in files.values() if v["status"] == "ignored")))
-    L.append("| Area | Files | Full read | Touched | Not read |\n|---|---:|---:|---:|---:|")
+    L.append("| Area | Files | Read properly | Opened at all | Not opened |\n|---|---:|---:|---:|---:|")
     for g, c in agg.items():
         L.append("| %s | %d | %d (%s) | %s | %d |" % (g, c["total"], c["read"], pct(c["read"], c["total"]), pct(c["read"] + c["skimmed"], c["total"]), c["not_read"]))
     L.append("| **Total** | **%d** | **%d (%s)** | **%s** | **%d** |\n" % (tot["total"], tot["read"], pct(tot["read"], tot["total"]), pct(tot["read"] + tot["skimmed"], tot["total"]), tot["not_read"]))
