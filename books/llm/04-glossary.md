@@ -1,3 +1,108 @@
-# Glossary
+# Chapter 4: Glossary
 
-_Not written yet._
+An alphabetical list of the terms that the books already explain. Each entry gives a one-line meaning and where to read more. Terms that belong to the LangChain, MCP and Projects books are added when those chapters are written, so this list is not the whole course vocabulary yet.
+
+*Source: Live-Class-2026, `GLOSSARY.md` and `classes_transcription_summary/glossary.md`. Definitions are reworded. The source glossaries link to a different GitHub repository, and I have not reused those links.*
+
+## A
+
+**\*args and \*\*kwargs.** `*args` collects positional arguments and `**kwargs` collects keyword arguments as a dictionary. A decorator's wrapper uses them to pass any call through unchanged. See [Python, Chapter 2](../python/02-python-refresher.md).
+
+**Agent.** Orchestration code that joins a brain (the LLM), memory (the chat history) and tools, so the model can act and not only talk. The agent itself is not intelligent. See [Python, Chapter 3](../python/03-anatomy-of-an-agent.md).
+
+**AgentOps.** The production side the course pairs with agent building: deployment and monitoring, taught after the fundamentals and framework phases. See [LLM, Chapter 1](01-course-roadmap-and-prerequisites.md).
+
+**AI model, chatbot, agent.** Three layers. A model makes one stateless prediction. A chatbot is a model plus history. An agent is a model plus history plus tools it can choose to use. See [Python, Chapter 3](../python/03-anatomy-of-an-agent.md).
+
+## B
+
+**BaseModel.** The Pydantic class that checks every field's type when you create an object and raises an error at once on bad data. See [Pydantic, Chapter 1](../pydantic/01-why-pydantic-and-basemodel.md).
+
+**Brain, memory, tools.** The mental model every agent framework maps onto. See [Python, Chapter 3](../python/03-anatomy-of-an-agent.md).
+
+## C
+
+**Chatbot.** See "AI model, chatbot, agent".
+
+**Context window.** The model's fixed-size whiteboard. When it fills, the oldest content is dropped. It is not the same as memory. See [Inside the model](03-inside-the-model.md).
+
+## D
+
+**Dataclass.** A decorator that writes `__init__` for you from type-hinted fields. It does not check types at run time. See [Python, Chapter 2](../python/02-python-refresher.md).
+
+**Decorator.** A function that wraps another function to add behaviour around it without changing it. The `@tool` pattern is built on it. See [Python, Chapter 2](../python/02-python-refresher.md).
+
+## E
+
+**EmailStr, HttpUrl, SecretStr.** Pydantic's special types. `EmailStr` checks an email, `HttpUrl` checks a URL, and `SecretStr` hides a secret such as an API key when printed. See [Pydantic, Chapter 2](../pydantic/02-field-and-special-types.md).
+
+**Embeddings.** See "Vector embeddings".
+
+## F
+
+**f-string.** A string written `f"..."` where anything in `{ }` is replaced by its value. See [Python, Chapter 1](../python/01-setup-and-api-basics.md).
+
+**Field().** Adds limits on the value itself (for example `gt=0` or `min_length=2`), not just the type. See [Pydantic, Chapter 2](../pydantic/02-field-and-special-types.md).
+
+**field_validator and model_validator.** A `field_validator` checks one field. A `model_validator` runs afterwards and sees the whole model, so it can check rules across fields such as "password matches confirm password". See [Pydantic, Chapter 3](../pydantic/03-validators.md).
+
+**Forward-Deployed Engineer (FDE).** A role the course covers, along with Harness Engineering. See [LLM, Chapter 1](01-course-roadmap-and-prerequisites.md).
+
+**functools.wraps.** Keeps the original function's name when you wrap it in a decorator. See [Python, Chapter 2](../python/02-python-refresher.md).
+
+## G
+
+**Groq.** A fast, free inference provider (not Elon Musk's "Grok") that hosts mostly open-source models behind an OpenAI-compatible API. Point the OpenAI client at its `base_url` with its key and the same code works. See [Python, Chapter 3](../python/03-anatomy-of-an-agent.md).
+
+## L
+
+**LLM.** A large language model. It predicts the next token from patterns in text. See [Inside the model](03-inside-the-model.md).
+
+## N
+
+**Nested models.** A Pydantic model used as the type of a field in another model, which matches nested JSON. See [Pydantic, Chapter 4](../pydantic/04-nested-models-and-inheritance.md).
+
+## O
+
+**OpenRouter.** One API endpoint and one key for models from many providers, with an exact token count per call. See [Inside the model](03-inside-the-model.md).
+
+## P
+
+**Parameters.** The billions of fixed weights set during training. Not the same as tokens. See [Inside the model](03-inside-the-model.md).
+
+**Pydantic.** A library that checks both the type and the value of data at run time and raises `ValidationError` on bad input. See [Pydantic, Chapter 1](../pydantic/01-why-pydantic-and-basemodel.md).
+
+**pyproject.toml.** The project file that records the Python version and the dependencies, so another machine can rebuild the same environment. See [Python, Chapter 1](../python/01-setup-and-api-basics.md).
+
+## S
+
+**Stateless.** A raw model call remembers nothing. What looks like memory is the whole history being sent again each time. See [Python, Chapter 3](../python/03-anatomy-of-an-agent.md) and [Inside the model](03-inside-the-model.md).
+
+**Structured output.** Making a model's reply fit a defined shape. Here that means asking for JSON and validating it with Pydantic before trusting it. See [Pydantic, Chapter 5](../pydantic/05-validating-llm-output.md). The LangChain way of doing it is not written up yet.
+
+## T
+
+**Token.** The unit a model reads, writes and bills in, about three quarters of a word. Output tokens cost more than input tokens. See [Inside the model](03-inside-the-model.md).
+
+**Tool.** A function an agent can use. In plain Python it is a function with a docstring, and a decorator can register it by name. See [Python, Chapter 1](../python/01-setup-and-api-basics.md). The LangChain `@tool` is not written up yet.
+
+## U
+
+**UV.** One fast tool for Python versions, virtual environments and dependencies, replacing the mix of `pip`, `venv` and `conda`. See [Python, Chapter 1](../python/01-setup-and-api-basics.md).
+
+## V
+
+**ValidationError.** The error Pydantic raises the moment data fails a type or value check. See [Pydantic, Chapter 1](../pydantic/01-why-pydantic-and-basemodel.md).
+
+**Vector embeddings.** A word or idea turned into a list of numbers, a point in a high-dimensional space, where similar meanings sit close together. See [Inside the model](03-inside-the-model.md).
+
+## Terms waiting for their books
+
+The source glossaries also define over 100 terms from the LangChain and MCP classes, for example middleware, hooks, checkpointing, human-in-the-loop, runtime, MCP primitives, capability negotiation and transports. They are not defined here yet, because those chapters are not written. Other terms from classes already covered but not yet explained in a book include the agentic loop, knowledge cutoff, `max_tokens`, system, user and assistant messages, tool schema, vibe coding and harness.
+
+## Sources and further reading
+
+- Live-Class-2026, `GLOSSARY.md`
+- Live-Class-2026, `classes_transcription_summary/glossary.md`
+
+Previous: [Chapter 3, Inside the model](03-inside-the-model.md)
