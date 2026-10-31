@@ -383,6 +383,14 @@ Check tracing first (LangSmith or equivalent) and look at the last completed ste
 - [ ] I can explain the 8 calls surprise and the fix
 - [ ] I can say what the emulator is for
 
+<!-- res -->
+## The instructor's guide: "Production readiness"
+
+The Craft page links an interactive guide with these sections. I read the section names only, not the body, so use it as a map of what the guide covers:
+
+Demo to restaurant, guardrails, red-teaming, evaluations, human in the loop, uptime, monitoring, fallbacks, audit logs, building it in n8n.
+<!-- /res -->
+
 ## Sources and further reading
 
 - [Class 13 full notes]({{src:classes_transcription_summary/13 - 09 Aug - LangChain - Middlware & Tools.md}})

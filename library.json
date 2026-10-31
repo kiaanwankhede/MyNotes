@@ -1,3 +1,9 @@
 {
-  "books": ["agentic-ai"]
+ "books": [
+  "library",
+  "foundations",
+  "pydantic",
+  "agentic-ai",
+  "rag"
+ ]
 }

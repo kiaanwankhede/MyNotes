@@ -1,0 +1,17 @@
+{
+ "id": "library",
+ "title": "The Agentic AI library",
+ "short": "Library (start here)",
+ "source_base": "https://github.com/mayank953/Live-Class-2026/blob/main/",
+ "tree_base": "https://github.com/mayank953/Live-Class-2026/tree/main/",
+ "chapters": [
+  {
+   "id": "home",
+   "num": "",
+   "title": "Start here",
+   "part": "Welcome",
+   "file": "home.md"
+  }
+ ],
+ "quiz": false
+}

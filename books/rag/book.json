@@ -1,0 +1,58 @@
+{
+ "id": "rag",
+ "title": "RAG",
+ "short": "4. RAG",
+ "source_base": "https://github.com/mayank953/Live-Class-2026/blob/main/",
+ "tree_base": "https://github.com/mayank953/Live-Class-2026/tree/main/",
+ "chapters": [
+  {
+   "id": "home",
+   "num": "",
+   "title": "Start here",
+   "part": "Welcome",
+   "file": "home.md"
+  },
+  {
+   "id": "r1",
+   "num": "1",
+   "title": "RAG explained: why, and what the parts are",
+   "part": "RAG",
+   "file": "r1.md"
+  },
+  {
+   "id": "r2",
+   "num": "2",
+   "title": "Embeddings, storing meaning and ingestion",
+   "part": "RAG",
+   "file": "r2.md"
+  },
+  {
+   "id": "r3",
+   "num": "3",
+   "title": "Retrieval and the answer chain",
+   "part": "RAG",
+   "file": "r3.md"
+  },
+  {
+   "id": "r4",
+   "num": "4",
+   "title": "Advanced RAG: seven ways to change retrieval",
+   "part": "RAG",
+   "file": "r4.md"
+  },
+  {
+   "id": "r5",
+   "num": "5",
+   "title": "Costs, errors and tests for a RAG app",
+   "part": "RAG",
+   "file": "r5.md"
+  },
+  {
+   "id": "bank",
+   "num": "",
+   "title": "Interview question bank",
+   "part": "Back matter",
+   "file": "@bank"
+  }
+ ]
+}

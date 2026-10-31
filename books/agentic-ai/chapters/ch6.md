@@ -311,7 +311,7 @@ No. Only model calls consume tokens. A tool running on its own, with no model ca
 
 | Question (short form) | Where to find the answer |
 | --- | --- |
-| Describe the agent loop mechanically when a tool call is involved | Primer and Chapter 6, section 1 |
+| Describe the agent loop mechanically when a tool call is involved | Foundations chapter 3 and Chapter 6, section 1 |
 | `thread_id` alone does not persist a conversation: what else is needed and what breaks without it | Chapter 6 (checkpointer) and Chapter 10 |
 | Distinguish `thread_id` from `context` and what data belongs in each | Chapter 10 |
 | Name the three practical `stream_mode` options and what each suits | Chapter 10A |
@@ -328,6 +328,27 @@ No. Only model calls consume tokens. A tool running on its own, with no model ca
 - [ ] I can define a headless tool and give three examples
 - [ ] I can set up a checkpointer with a thread id
 - [ ] I can sort memory saver, store, cache and database by purpose
+
+<!-- res -->
+## Course resources for chapters 6 to 9
+
+| Craft entry | What is attached |
+| --- | --- |
+| **16 Aug** | `Assignment_2_Agents_and_Prebuilt_Middleware.ipynb`, `Assignment_LangChain_Fundamentals_SOLUTIONS.ipynb`, a "Custom Middleware" Colab |
+
+The 8 to 9 August Craft entry is empty apart from its title, so there is nothing to add for it.
+<!-- /res -->
+
+<!-- proj4 -->
+## Practice project: Study buddy with memory
+
+**Goal:** an assistant that remembers your weak topics across sessions.
+
+- A checkpointer and `thread_id` for each session, plus a **store** for long-term facts ("weak on topic X").
+- Read the store with `ToolRuntime`, and pass the user id through **context**.
+- **Stretch:** summarise old history with `SummarizationMiddleware` and compare token usage.
+- **Interview story:** the difference between saver, store and state, and which you chose for each fact.
+<!-- /proj4 -->
 
 ## Sources and further reading
 

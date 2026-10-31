@@ -392,6 +392,25 @@ The model proposes `party_size=50`; Pydantic rejects it; the validation error na
 - [ ] I can describe the validation retry loop and read it from the message history
 - [ ] I can chain a prompt template into a structured model
 
+<!-- res -->
+## Course resources for this chapter
+
+| Craft entry | What is attached |
+| --- | --- |
+| **1 Aug** | Assignment, interview questions and a revision notebook on GitHub (the folder for the structured output and tools class), a Colab and `Langchain-2 (2).pdf` |
+<!-- /res -->
+
+<!-- proj2 -->
+## Practice project: Exam question generator
+
+**Goal:** turn a topic into multiple-choice questions with a guaranteed shape.
+
+- Pydantic schema: stem, four options, correct answer, explanation, difficulty (`Literal`).
+- Constrain the number of options and the answer index with `Field(ge=..., le=...)`.
+- **Stretch:** add a second pass that checks each question against its source text, and reject any it cannot support.
+- **Interview story:** why a schema beats "please reply in JSON", and how validation errors fed back and fixed a bad question.
+<!-- /proj2 -->
+
 ## Sources and further reading
 
 - [Class 09 full notes]({{src:classes_transcription_summary/09 - 25 Jul - LangChain - Structured Output Mastery.md}})

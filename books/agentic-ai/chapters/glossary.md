@@ -6,14 +6,14 @@ meta: About 100 terms | Links go to the chapter
 
 | Term | One line | Chapter |
 | --- | --- | --- |
-| **Agent** | An LLM that decides which tool to call, in a loop, with memory kept as a message list | [Primer](#agentic-ai-primer) |
-| **Agentic loop** | Model decides, tool runs, result goes back to the model, repeat until a plain-text answer. Once called ReAct | [Primer](#agentic-ai-primer), [6](#agentic-ai-ch6) |
+| **Agent** | An LLM that decides which tool to call, in a loop, with memory kept as a message list | [Foundations](#foundations-f3) |
+| **Agentic loop** | Model decides, tool runs, result goes back to the model, repeat until a plain-text answer. Once called ReAct | [Foundations](#foundations-f3), [6](#agentic-ai-ch6) |
 | **Harness** | Everything around the model: system prompt, tools, memory, middleware. Agent = Model + Harness | [1](#agentic-ai-ch1), [2](#agentic-ai-ch2) |
 | **Harness engineering** | The skill of wrapping a raw model so it becomes useful | [2](#agentic-ai-ch2), [16](#agentic-ai-ch16) |
-| **Stateless LLM** | Each call remembers nothing; memory is history you resend | [Primer](#agentic-ai-primer) |
+| **Stateless LLM** | Each call remembers nothing; memory is history you resend | [Foundations](#foundations-f3) |
 | **ReAct** | Reason plus Act: the 2022 pattern behind the first general agents | [2](#agentic-ai-ch2) |
-| **`max_turns`** | A cap on loop iterations to prevent runaway cost | [Primer](#agentic-ai-primer) |
-| **Tool schema** | Name, description and parameters that tell the model how to call a tool | [Primer](#agentic-ai-primer), [5](#agentic-ai-ch5) |
+| **`max_turns`** | A cap on loop iterations to prevent runaway cost | [Foundations](#foundations-f3) |
+| **Tool schema** | Name, description and parameters that tell the model how to call a tool | [Foundations](#foundations-f3), [5](#agentic-ai-ch5) |
 | **Token** | The billing unit of a model call; input and output are counted | [3](#agentic-ai-ch3) |
 | **Context window** | The amount of text a model can consider at once | [7](#agentic-ai-ch7) |
 

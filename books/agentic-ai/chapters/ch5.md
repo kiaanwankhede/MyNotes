@@ -408,6 +408,17 @@ Its schema is registered on the server so the model can call it, but it **execut
 - [ ] I can build a tool that remembers across conversations
 - [ ] I can explain `return_direct` and dynamic loading
 
+<!-- proj3 -->
+## Practice project: Manuscript checklist reviewer
+
+**Goal:** check a draft against a reporting checklist and return structured findings.
+
+- Tools: a section extractor and a checklist lookup. Output: item, status (present, missing, unclear), evidence quote.
+- Use a `Union` schema if findings come in more than one type.
+- **Stretch:** add a todo list so the agent works through the checklist item by item.
+- **Interview story:** when you chose tools versus plain code, and the cost of a vague tool description.
+<!-- /proj3 -->
+
 ## Sources and further reading
 
 - [Class 10 full notes]({{src:classes_transcription_summary/10 - 26 Jul - LangChain - Tools Deep Dive.md}})

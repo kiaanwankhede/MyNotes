@@ -1,0 +1,2450 @@
+{
+ "course_repo": "https://github.com/mayank953/Live-Class-2026",
+ "commit": "dd4bfe38d167aac8a7f1ce63034f802c1eadf6b1",
+ "generated": "2026-10-31",
+ "files": {
+  ".gitattributes": {
+   "blob": "f8e2d500cbbc2cac18d6e2e7902da6fbe9a34838",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  ".github/workflows/path-audit.yml": {
+   "blob": "bd5cdeaf4e85f59212ad2df81daea9c2cfe6d481",
+   "cited_in": [],
+   "status": "not_read"
+  },
+  ".gitignore": {
+   "blob": "c9fd54f0087863bd37fcca45eb418e7950b330f8",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "COLAB_NOTEBOOKS.md": {
+   "blob": "d06080f0347656f1f7bb4473cded714ceab2dd00",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Complete MCP/Commands.txt": {
+   "blob": "b6dec38fc2794ab112de8e623a93e4ca716dee9d",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/MCP-Precoded/README.md": {
+   "blob": "0e792ddfd155de26550b273aa58df9aef1bad6fe",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/MCP-Precoded/recipebox_fastmcp.py": {
+   "blob": "750330b4ac89b760a8f6a06c3b7b662382a9cdce",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/MCP-Precoded/recipebox_lowlevel.py": {
+   "blob": "a64e8cea26ecac21433ad2279783aaf37d77bbb4",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/McpWarmup/.gitignore": {
+   "blob": "505a3b1ca2716907d5b292ab90c36df043c42bb6",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Complete MCP/McpWarmup/.python-version": {
+   "blob": "24ee5b1be9961e38a503c8e764b7385dbb6ba124",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Complete MCP/McpWarmup/README.md": {
+   "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/McpWarmup/mcp_server_with_primitives.py": {
+   "blob": "fb1153fea1b716e437ca5e68bee4d5ad7931cc32",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/McpWarmup/pyproject.toml": {
+   "blob": "ddc3cacebe9c9df1db2dbf45e0ece3ed0f0e1e45",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Complete MCP/McpWarmup/server.py": {
+   "blob": "89b3061cf0b8f62487fc7fa3d5c92924f9f8f392",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/McpWarmup/server_with_auth.py": {
+   "blob": "db273542a275aeb4506ac0d006874e74c1eb5469",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/McpWarmup/src/mcp_warmup/__init__.py": {
+   "blob": "dd35d98d9c9c9f55a7b14e6a90f9be1ab4262591",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "empty package marker"
+  },
+  "Complete MCP/McpWarmup/uv.lock": {
+   "blob": "3ddb0e11a8c9c9d9aed7914d2c1c3c383bd91819",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Complete MCP/TimeTrackProject/mcp-client-and-advanced.zip": {
+   "blob": "395f288962a55c052ab9dbf21d84f213af5dab09",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "log, database or archive"
+  },
+  "Complete MCP/TimeTrackProject/mcp-client-and-advanced/MCP_PROTOCOL_CHANGES_SUMMARY.txt": {
+   "blob": "0c78d99b609794fb98012a038fea4b6830d19956",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/mcp-client-and-advanced/README.md": {
+   "blob": "48ef6a356222cd929385dd0526a87796753d802b",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/01_raw_client.py": {
+   "blob": "6fa40a45e4ef5231ece383036713b3d5f22f715c",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/02_fastmcp_client_explained.py": {
+   "blob": "a07f1c5c0328f23f498391860ec64d195a5f0bce",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/03_fastmcp_client_http.py": {
+   "blob": "41366122893c19a1875f32bcedffdb304048330f",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/04_agent_loop.py": {
+   "blob": "a5de068d8f9ca630d06c37f0c8d3a284ecf32c3d",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/05_sampling_demo.py": {
+   "blob": "c395e575745b543c06b5bbc16df478eb3cc51a0c",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/06_elicitation_demo.py": {
+   "blob": "fddf0d60551764afe3487a08e43a33f8921389e7",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/07_ping_and_errors.py": {
+   "blob": "ecb3f33b4d3e5ff5cc4caddadad9c3044e771061",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/08_timeout_and_cancellation.py": {
+   "blob": "7eaae1f10b81eea359c715c394ca9c6f98080b5f",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Complete MCP/TimeTrackProject/mcp-client-and-advanced/client/09_progress_notifications.py": {
+   "blob": "0541e991782b321ffe3cb3bcc534e68dfb9bd972",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Complete MCP/TimeTrackProject/mcp-client-and-advanced/database.py": {
+   "blob": "0970095b1ab749df728d6f10ac729a7c8d124067",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Complete MCP/TimeTrackProject/mcp-client-and-advanced/main.py": {
+   "blob": "cad3e3d0b167a0da8cd6bbfdb1636fd2c52382a7",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Complete MCP/TimeTrackProject/mcp-client-and-advanced/pyproject.toml": {
+   "blob": "5508469a6a932ce7444d8497732eca8bb3264e97",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Complete MCP/TimeTrackProject/mcp-client-and-advanced/timetrack.db": {
+   "blob": "524d1f74ea5e773003c099d10bf1f4bdb033e481",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "log, database or archive"
+  },
+  "Complete MCP/TimeTrackProject/mcp-client-and-advanced/uv.lock": {
+   "blob": "a0673816ef559cffbb9580af936746ac395f21cd",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/.python-version": {
+   "blob": "24ee5b1be9961e38a503c8e764b7385dbb6ba124",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/README.md": {
+   "blob": "a7a9f511deff272759242229bf9617270877b624",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/database.py": {
+   "blob": "cd77b5452e110e9aae8230503b1976e145abe093",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/dummy.py": {
+   "blob": "97d2ab7e049f95bda4c56f4f4094050aac322481",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/main.py": {
+   "blob": "ee0be1c21fdb733f7161c057adf42ae08005bd17",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/main_to_understand.py": {
+   "blob": "e908fb69df519ae1dfb25d22303459e5190da0a6",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/mcp-client-and-advanced/README.md": {
+   "blob": "77c932dbed9533d3924bacab73acabc26a14ce7a",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/mcp-client-and-advanced/client/01_raw_client.py": {
+   "blob": "9b593c0973d157a1aa1976411daf494cad42b60a",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/mcp-client-and-advanced/client/02_fastmcp_client.py": {
+   "blob": "a7d0f86253d0768a2881235f63633487c86320ff",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/mcp-client-and-advanced/client/03_agent_loop.py": {
+   "blob": "01cd28aa190127db714f5f5a43f0698f08b3a455",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/mcp-client-and-advanced/client/04_sampling_demo.py": {
+   "blob": "72ca098a24e699e8fbe5fb049fc900e9d59e3e8e",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/mcp-client-and-advanced/client/05_elicitation_demo.py": {
+   "blob": "ae616e6986e7a56a666a2c03304defe035927f3f",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/mcp-client-and-advanced/client/06_ping_and_errors.py": {
+   "blob": "f91f990b60a77b54c526954ed9bcc1940a8c41ec",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/mcp-client-and-advanced/client/07_timeout_and_cancellation.py": {
+   "blob": "7ea11c67c1520df7bd4bed3653ca4e8534837c1d",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/mcp-client-and-advanced/client/08_progress_notifications.py": {
+   "blob": "c2f7f1512e7a05d53eff3def1da9d305be396aab",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/mcp-client-and-advanced/database.py": {
+   "blob": "0970095b1ab749df728d6f10ac729a7c8d124067",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/mcp-client-and-advanced/main.py": {
+   "blob": "e382dae716849eb7987ef853b972755c0c4c8635",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/mcp-client-and-advanced/pyproject.toml": {
+   "blob": "5508469a6a932ce7444d8497732eca8bb3264e97",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/mcp_htttp_connection.txt": {
+   "blob": "6a851562e386cfce47a000226b0ddeb026bba3d7",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/pyproject.toml": {
+   "blob": "b8556cc68ada270a6d939c4bfd7ce653647b2f0e",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/scripts/concurrency_showcase.py": {
+   "blob": "e9ba394319fbd23f283072ee14517fb86270a795",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/static/app.js": {
+   "blob": "81c400e671c7722793695d62e1778020c6ccdcb0",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/static/index.html": {
+   "blob": "53a228f4ba4b62c0e7188daf903b78f19aaa31f1",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/static/style.css": {
+   "blob": "d2547389628bd25a78ce2ba66be4d5208c9c5259",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/steps_to_remote_mcp.txt": {
+   "blob": "704c43bd01e13135eb65e643c1808223df2eaa92",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/timetrack.db": {
+   "blob": "1041b20b78299c7bc77d9d417d960110106dc443",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "log, database or archive"
+  },
+  "Complete MCP/TimeTrackProject/timetrack mcp server/uv.lock": {
+   "blob": "b66ed070118b716b2612e19040e2b12ddd73b61c",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Complete MCP/TimeTrackProject/timetrack_notebook.ipynb": {
+   "blob": "4baf117a308bd706da17bd6dd573b86e7b245424",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/Why MCP Had to Exist.txt": {
+   "blob": "9592490f61c7ea897975062283d8e6f0fc6343a6",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/claude_desktop_config.json": {
+   "blob": "9d139c014fb1fc5c8a7c12cae33324edb07802e8",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/first-mcp-server/.python-version": {
+   "blob": "24ee5b1be9961e38a503c8e764b7385dbb6ba124",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Complete MCP/first-mcp-server/README.md": {
+   "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/first-mcp-server/Untitled-1.json": {
+   "blob": "734c3323c06039a6d08e6a372079158c3ac7d1f9",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/first-mcp-server/main.py": {
+   "blob": "28a31a450ca33129fc899b2826cc6421c01c2d0e",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/first-mcp-server/pyproject.toml": {
+   "blob": "f0717db2604367f8881a1cc519234ac638a54f0d",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Complete MCP/first-mcp-server/recipebox_fastmcp.py": {
+   "blob": "39f7bb729dc2f0372c3e9aab62230613b874335e",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/first-mcp-server/recipebox_lowlevel.py": {
+   "blob": "a64e8cea26ecac21433ad2279783aaf37d77bbb4",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/first-mcp-server/uv.lock": {
+   "blob": "d21579bf95cd0153c8c0d0a046ab35ddcb2f13c6",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Complete MCP/link.txt": {
+   "blob": "7edcab863289ec37ee18ebe812a9eee8d9d93ab3",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/mcp-warmup/.gitignore": {
+   "blob": "505a3b1ca2716907d5b292ab90c36df043c42bb6",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Complete MCP/mcp-warmup/.python-version": {
+   "blob": "24ee5b1be9961e38a503c8e764b7385dbb6ba124",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Complete MCP/mcp-warmup/README.md": {
+   "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/mcp-warmup/mcp_server_with_primitives.py": {
+   "blob": "fb1153fea1b716e437ca5e68bee4d5ad7931cc32",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/mcp-warmup/pyproject.toml": {
+   "blob": "ddc3cacebe9c9df1db2dbf45e0ece3ed0f0e1e45",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Complete MCP/mcp-warmup/server.py": {
+   "blob": "89b3061cf0b8f62487fc7fa3d5c92924f9f8f392",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/mcp-warmup/server_with_auth.py": {
+   "blob": "db273542a275aeb4506ac0d006874e74c1eb5469",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/mcp-warmup/src/mcp_warmup/__init__.py": {
+   "blob": "dd35d98d9c9c9f55a7b14e6a90f9be1ab4262591",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "empty package marker"
+  },
+  "Complete MCP/mcp-warmup/uv.lock": {
+   "blob": "3ddb0e11a8c9c9d9aed7914d2c1c3c383bd91819",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Complete MCP/mcp.log": {
+   "blob": "a4d5946b91d35c14c4fb2f3abbea119b426fd1a9",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "log, database or archive"
+  },
+  "Complete MCP/mcp_wiretap.py": {
+   "blob": "fb04f2b19207ab4bbcce6c1da3aeb5c02d7683ff",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/mcp_wiretap_no_color.py": {
+   "blob": "ee3ec321e1e0c05371b36d89ec293b7bf7ab11c1",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/p2_MCP_Architecture.ipynb": {
+   "blob": "13b12c3fab64eaef2493f57e0eb044a65db24aea",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/v4a_primitives_notebook (3).ipynb": {
+   "blob": "f80639c03e98bbe907e7cfc929b2dfd74bb3652b",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Complete MCP/wiretap-live.log": {
+   "blob": "f5525f6555ac6dfb1adf940a0ba62ca41a934ff6",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "log, database or archive"
+  },
+  "GLOSSARY.md": {
+   "blob": "f329b951020ac07a19abcaecbd3a9d7839987829",
+   "cited_in": [],
+   "status": "read"
+  },
+  "PREREQUISITES.md": {
+   "blob": "02aac7bad1b5d0c211a17475d1deb2b5764804a5",
+   "cited_in": [
+    "f1"
+   ],
+   "status": "read"
+  },
+  "README.md": {
+   "blob": "e6e31f331c16f8ca4b06741468efaef3cc94db61",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 00 - 20-21 Jun/README.md": {
+   "blob": "4c38c4a62d888d4391a01b2d9c04d97944c734c5",
+   "cited_in": [],
+   "status": "not_read"
+  },
+  "Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/Class-1-Python-and-AI.pdf": {
+   "blob": "82f0f8523bb1a452f92fa6f87821e4b1ebf92a31",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/OOPS.py": {
+   "blob": "009e2f7bc8c7690d1e37abba5369d4b2940e3ce5",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/Python_foundamentals.py": {
+   "blob": "8a96c90d00c0aa0198da814b80c99b14ee70b9d2",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/README.md": {
+   "blob": "990b3db7600335ad946b748be65c0ec765eadae4",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/currency.py": {
+   "blob": "f74105e73643c62bc7f62bd830a6339c4b49ca79",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/functions or tools.py": {
+   "blob": "b73b42bccdf751c0dfe3ff54887508de9d716731",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/my-first-project/.python-version": {
+   "blob": "24ee5b1be9961e38a503c8e764b7385dbb6ba124",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/my-first-project/README.md": {
+   "blob": "27ba0b94345a5744b187f030d9658d2921a7617b",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/my-first-project/main.py": {
+   "blob": "9f8740617b777f6c936e661ad464f0a6bfb77572",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/my-first-project/pyproject.toml": {
+   "blob": "6ac4bb6b17353260cf30555a254c88a18bf31f50",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/my-first-project/requirements.txt": {
+   "blob": "2371398c529592925589ca5c58b4bb46fb3e6da3",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/my-first-project/uv.lock": {
+   "blob": "f841a3a9f63c60189416e438476e61bffeac347a",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/notebook.ipynb": {
+   "blob": "1c07733e3ab831750be46ebbd0d36363f47edd71",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/tools.py": {
+   "blob": "72e352b899d22a2b09438d5043293debf99eacdb",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/.env.example": {
+   "blob": "9f2b265924bd049dd5b14114c63374ed622b99bb",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/8_Pydantic/.python-version": {
+   "blob": "24ee5b1be9961e38a503c8e764b7385dbb6ba124",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/8_Pydantic/1. Why Pydantic.py": {
+   "blob": "619aeb8f13e0751b477b387fc59364dcbcc8fba5",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/8_Pydantic/Pydantic_From_Scratch.ipynb": {
+   "blob": "6aa296701ccc72138c30b1a70a111c910aefd96b",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/8_Pydantic/README.md": {
+   "blob": "df159cfa0448cc256103c3bfcac4a2b40bb4438a",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/8_Pydantic/main.py": {
+   "blob": "3c7eb8d8e99b980298f717d10dd1e270ddc55058",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/8_Pydantic/pyproject.toml": {
+   "blob": "bc949057721f239f2690fb85946b6caf1b1ee2fd",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/8_Pydantic/test.ipynb": {
+   "blob": "4d1d7e6729b8eda450d3f5d0df6cc6c245f70f43",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/Agentic-3-0.pdf": {
+   "blob": "d033e5ede49dd233279758e59818f65b6ced98a3",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/Class-3-4.pdf": {
+   "blob": "da888d33ec98fdb76785b4da6377a5f8f58d9a76",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/Python_run.ipynb": {
+   "blob": "c00578a8da8d8443997dd8e6c107f1677e6c452f",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/README.md": {
+   "blob": "858e98ca322972070bcce221eef5d30f04bc7fc7",
+   "cited_in": [
+    "f1"
+   ],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/_0_basics_refresher.py": {
+   "blob": "d4662e8b72f0aef5c2701a560973d6dd8c1c280c",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/_10_tool_with_ai_call.py": {
+   "blob": "f5e10c9160b5c695c7d9b25fefff0aaa1cc309e4",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/_11_agent_class_ai_only.py": {
+   "blob": "f282fdbde6b39ac8f6579621a613e1c12a7284de",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/_12_agent_with_one_tool.py": {
+   "blob": "0782f59047573dadc95deecb66990737c3817bc6",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/_13_agent_with_more_tools.py": {
+   "blob": "806eef4b12085f385632afba08b22a813046e8ed",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/_14_agent_with_memory.py": {
+   "blob": "7431f188f39084c5db2431fbf00b5502cba4b874",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/_1_data_structures.py": {
+   "blob": "a790c52b9e5c13279f60802df17cb38bfd8e75d2",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/_2_oop_classes.py": {
+   "blob": "e9c5860311062d798f101ddf9f2e738a5b2b2a8b",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/_3_error_handling.py": {
+   "blob": "5c42e3be01ce7161a54d2a3d7f7c605e0a479df1",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/_4_decorators.py": {
+   "blob": "2c688a2f982501b20d9524dfef6b20c9c7bc5b75",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/_5_calling_a_real_api.py": {
+   "blob": "bffb622477d03df72bc2bad332d8f89b144678a7",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/_6_fake_ai_call.py": {
+   "blob": "636e6165d9062ffdd221662f8716776bfc3a1dc6",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/_7_ai_call_free_and_paid.py": {
+   "blob": "7d8877a0e3c9122a08fa9f885a86d343dadcac32",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/_8_pydantic_with_ai.py": {
+   "blob": "c7536b8cd2985fd19ab664ad1581326aada06cf4",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/_9_api_call_with_structure.py": {
+   "blob": "cf3fcda43add3ade47319354cc8443cc897dff2d",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/pyproject.toml": {
+   "blob": "b356071990c1ae3424f38c6e58d1289141569a06",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/uv.lock": {
+   "blob": "20c1c15c6dc6050dda797367ed74c98e16ba2b7a",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Weekend 01 - 27-28 Jun/AI_Industry_Handbook_2026.pdf": {
+   "blob": "18e259a4537108ffb7c910fdcf7aefb5c9d829fc",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 01 - 27-28 Jun/README.md": {
+   "blob": "2cdd1e86a266cddd094dcf0ac0fca74ec814ff5f",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/.gitignore": {
+   "blob": "78b3df5ea8ff3fba37c072de7c83df417e07697a",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/README.md": {
+   "blob": "f309548a780d15c2cc3f4983dece31eb4aac7c31",
+   "cited_in": [
+    "f4"
+   ],
+   "status": "skimmed"
+  },
+  "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_01_ai_model_vs_chatbot_vs_agent.py": {
+   "blob": "8a8bc4ebe4a52209d13e7f18da1f3567750ce3ee",
+   "cited_in": [
+    "f4"
+   ],
+   "status": "skimmed"
+  },
+  "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_02_calling_the_ai_paid_and_free.py": {
+   "blob": "4b0ab25e1040a2ea34ed8ccd9c0bbe99b856d083",
+   "cited_in": [
+    "f4"
+   ],
+   "status": "skimmed"
+  },
+  "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_03_structuring_with_pydantic.py": {
+   "blob": "e40370230fc3bc4ac028c61359135be39a3a8cb9",
+   "cited_in": [
+    "f4"
+   ],
+   "status": "skimmed"
+  },
+  "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_04_giving_it_a_tool.py": {
+   "blob": "e404d180d640df34ac8d7ac512d974876ec4c30f",
+   "cited_in": [
+    "f4"
+   ],
+   "status": "skimmed"
+  },
+  "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_05_teaching_it_to_choose.py": {
+   "blob": "6167cf45f5c390747b85647c9dc592346b278419",
+   "cited_in": [
+    "f4"
+   ],
+   "status": "skimmed"
+  },
+  "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_06_project_zero_agent.py": {
+   "blob": "b4337ca3e7b2be71fff28e0782c84e306a0d7286",
+   "cited_in": [
+    "f4"
+   ],
+   "status": "skimmed"
+  },
+  "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_07_streamlit_app.py": {
+   "blob": "dfb53279c34b94fe7ecfb6222942303293ff9f20",
+   "cited_in": [
+    "f4"
+   ],
+   "status": "skimmed"
+  },
+  "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/output": {
+   "blob": "90e537dff8b52cd12b5669e174e40ecd652a1425",
+   "cited_in": [
+    "f4"
+   ],
+   "status": "skimmed"
+  },
+  "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/pyproject.toml": {
+   "blob": "6e1ab3e00232afe73a9f33b5a4213db486c8290a",
+   "cited_in": [
+    "f4"
+   ],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/README.md": {
+   "blob": "ac52f3abe851d8184535efb8fe51f7c79cc13169",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 02 - 4-5 Jul/README.md": {
+   "blob": "62c0fdf8fb7c1caabf3edb687455f5eb207d6820",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/.env.example": {
+   "blob": "66510ec857f78c9363a82bcf1f0884b7191d6808",
+   "cited_in": [],
+   "status": "not_read"
+  },
+  "Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/.gitignore": {
+   "blob": "cfd26ef2363a3140414a14f105515666f62be543",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/.python-version": {
+   "blob": "24ee5b1be9961e38a503c8e764b7385dbb6ba124",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/Agentic-Python.pdf": {
+   "blob": "403e70a19c8d9df7d2c42334faa1d9c573c7457f",
+   "cited_in": [
+    "f3"
+   ],
+   "status": "skimmed"
+  },
+  "Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/README.md": {
+   "blob": "ab0cc0d01814d3fed9db724b78a0b6553897c1ea",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/Untitled-scene.pdf": {
+   "blob": "3ee525abbb8985db291f551f773708d8d4cec0d2",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/langchain_agents.py": {
+   "blob": "4e7732a1f4036b25dd906f3029c6d9b4d29e6155",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/langchain_basics.py": {
+   "blob": "8b264cb292d826b3ee26086d9b1999af68c6376d",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/main.py": {
+   "blob": "c7b419f49af54c89f7d875962e71b808ef3e39a8",
+   "cited_in": [],
+   "status": "not_read"
+  },
+  "Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/pyproject.toml": {
+   "blob": "dcc70dffb9e029b32303efca82b347e2fa158bef",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/uv.lock": {
+   "blob": "9f355d1eeb269231c5d7cc207b0004fb5bd0f1c1",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Weekend 03 - 11-12 Jul/README.md": {
+   "blob": "d4448ae9f89138cad07e8066acf3819d3b1112f5",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain Practical/langchain-course/.env.example": {
+   "blob": "5bf9e35b9a7dda6918b4210bcbfff075d153ce37",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain Practical/langchain-course/.gitignore": {
+   "blob": "4f509e525f6022b66d0158c11a1a4eb612d24afc",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain Practical/langchain-course/.python-version": {
+   "blob": "24ee5b1be9961e38a503c8e764b7385dbb6ba124",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain Practical/langchain-course/Learning/Part - 0 Overview/Common FAQs": {
+   "blob": "7abdd93bff7935d5265719b09f2a7986802efa41",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain Practical/langchain-course/Learning/Part 1  - Environment Setup/commands.txt": {
+   "blob": "706b99540fc430b52108389df75f9cf88a12b685",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain Practical/langchain-course/Learning/Part 1  - Environment Setup/setup_check.ipynb": {
+   "blob": "982dcf3cbe81bb9101f7dda9be945a3b9bc664a0",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain Practical/langchain-course/Learning/Part 2 - Models/Langchain (1).ipynb": {
+   "blob": "b0dcec1d438a59ebd4d2c779d115f02ffaee8290",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain Practical/langchain-course/Learning/Part 2 - Models/Langchain - Colab.ipynb": {
+   "blob": "9d6ba5d29c64eac2dc1edafbd1c2d64547f431d4",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain Practical/langchain-course/Learning/Part 3  - Messages/messages.py": {
+   "blob": "7b8ad94ef6f20e7704c4d05d9d4d0b69312d9ae3",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain Practical/langchain-course/README.md": {
+   "blob": "7a7790ac156f6750d3f665028b1b6af143923be7",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain Practical/langchain-course/main.py": {
+   "blob": "93a2caf050a6551fc97acaf497c6c5a6a57e6e23",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain Practical/langchain-course/pyproject.toml": {
+   "blob": "564de4a79e96f17ae1d1d005ebc18948531fc014",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain Practical/langchain-course/requirements.txt": {
+   "blob": "3bb1c17c7055df943298661ee367efb02d334975",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain Practical/langchain-course/uv.lock": {
+   "blob": "7635533830407c0f7ff9252e90582f1ff30dba45",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain.pdf": {
+   "blob": "4270de40fc6c7a3ca96d701ce327daefbf7ec333",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Notebook For Reference/01_landscape_student_notes.ipynb": {
+   "blob": "54ce1320198b13a5f6e58f43f4b4c7f5198f52b4",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Notebook For Reference/02_03_environment_models_messages_student_notes.ipynb": {
+   "blob": "270e5fc727a0e1fe4e24834140af0366bb96453b",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Notebook For Reference/04_05_prompt_templates_structured_output_student_notes.ipynb": {
+   "blob": "d9e3dcc23cfff9391fd8513f85ef5c2c8acba6dc",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Notebook For Reference/Langchain_structured_output_tools_agents.ipynb": {
+   "blob": "5567b246a49ebb7790d51d631aee1e27fc138d00",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Notebook For Reference/Revision_Parts_1-4.ipynb": {
+   "blob": "8dec954dcc756aa57174ba698055da7d6843831a",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/README.md": {
+   "blob": "c309c9b4d1d025264dab102f9493a9a2eee7c9e3",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 04 - 18-19 Jul/README.md": {
+   "blob": "6cf73bd211034105f0bc14ef5af5cb9e3911a563",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Assignment & Questions/Assignment_LangChain_Fundamentals_Landscape_to_Tools.ipynb": {
+   "blob": "0542a650271174278d6f01065beba34053f929a5",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Assignment & Questions/Assignment_LangChain_Fundamentals_SOLUTIONS.ipynb": {
+   "blob": "b85fe5eee84620165b0682b2a6f66c21db78e729",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Assignment & Questions/LangChain_Interview_Questions_Researched.md.pdf": {
+   "blob": "e8e0d2f9a8a942ea5e2e4a9ca4c7ddbf9f68e8c5",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Assignment & Questions/Student_Reference_Structured_Output_and_Tools.ipynb": {
+   "blob": "f1ad00cfd532d7b113198c8b886fe9dc7290cc79",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Langchain-2.pdf": {
+   "blob": "2ffa5c2ec54daa6a27c288635f47ee0a3fee4790",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Langchain-Session-2.pdf": {
+   "blob": "822de7b9cd2629e2ae78938a86be4b9eccd325eb",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Langchain-Tools.ipynb": {
+   "blob": "14ee17b99df76f22595339aa245de4e7df6629a1",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Langchain_Structured_OUTPUT_COLAB.ipynb": {
+   "blob": "441b047e664c0837c8aff530105b931a56e64a14",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Langchain_Till_Agents.ipynb": {
+   "blob": "664cca9c378ea8ec418272d25766e4bfa37d6a7b",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/README.md": {
+   "blob": "6ad2be4ba652a01222c20fd45d2e24f612999e8b",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 05 - 25-26 Jul/README.md": {
+   "blob": "c2bd38a4b7847ef96e3eda36e0e05c79f3fe71d2",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/Agent-Middleware-Architecture.excalidraw": {
+   "blob": "6186bb1773d3ffa37a1eabfc18f56804d8618f3c",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/Agent-Middleware-Architecture.pdf": {
+   "blob": "4646bd18db2d933a6978d20be7add4bded00e029",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/Assignment & Questions/Assignment_2_Agents_and_Prebuilt_Middleware.ipynb": {
+   "blob": "fb8e9f864e0d0fd192d24ef348001a1b446c584b",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/Langchain-2-Updated.pdf": {
+   "blob": "51bc238f5773afc8cd62c8768a4fc35200424113",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/MIddleware.ipynb": {
+   "blob": "157082f0a2ab56b98068cc7d24d93d74763faf3c",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/Middleware-Architecture-Sketch.ipynb": {
+   "blob": "dccb46bd4f68139b3830ccd7607df8a9f8db08ce",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/README.md": {
+   "blob": "b1abd9e0822862bdd7ca9366c0516ecea6799096",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 06 - 1 Aug/README.md": {
+   "blob": "6e887b3f210a6ce4e0697d8158e1a9f98b5323a9",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 07 - 8-9 Aug/Agent-Middleware-Architecture.excalidraw": {
+   "blob": "6186bb1773d3ffa37a1eabfc18f56804d8618f3c",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 07 - 8-9 Aug/Agent-Middleware-Architecture.pdf": {
+   "blob": "debb26714c2556677ae6c99e7e447eea4e45c526",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 07 - 8-9 Aug/Agent-Middleware-Architecture.png": {
+   "blob": "fbb99debb466809339031f50c3fbc0d127d12660",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 07 - 8-9 Aug/MIddleware.ipynb": {
+   "blob": "e7a302fa330f8b07823c6ba896094bb9eb8b3738",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 07 - 8-9 Aug/README.md": {
+   "blob": "2528dcc92587e1e0858a4408c739da5a6c4a53be",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 08 - 15-16 Aug/README.md": {
+   "blob": "db4d2d5cfa17c8d6fb8ae3bd585945e01893dbab",
+   "cited_in": [],
+   "status": "not_read"
+  },
+  "Weekend 09 - 22-23 Aug/22nd Aug - Runtime & HITL/README.md": {
+   "blob": "c95a15986970721cfebf298df03f6fc41cb087a5",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 09 - 22-23 Aug/22nd Aug - Runtime & HITL/Runtime-HITL.excalidraw": {
+   "blob": "852d3044064684c6bf21de8464b74c02e406702d",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 09 - 22-23 Aug/22nd Aug - Runtime & HITL/Runtime-HITL.pdf": {
+   "blob": "1ba081b0230776c887ab226c5583b8fdc093876f",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 09 - 22-23 Aug/22nd Aug - Runtime & HITL/Runtime_and_HITL.ipynb": {
+   "blob": "ca0cb8072c5fcbf404407baeec998d6584b0c1f5",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 09 - 22-23 Aug/23rd Aug - MCP/Complete MCP/Commands.txt": {
+   "blob": "b6dec38fc2794ab112de8e623a93e4ca716dee9d",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 09 - 22-23 Aug/23rd Aug - MCP/Complete MCP/Complete-MCP.pdf": {
+   "blob": "75f5493242be4834e0d0baa05423b0e707104c3c",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 09 - 22-23 Aug/23rd Aug - MCP/Complete MCP/Why MCP Had to Exist.txt": {
+   "blob": "9592490f61c7ea897975062283d8e6f0fc6343a6",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 09 - 22-23 Aug/23rd Aug - MCP/Complete MCP/mcp-warmup/.gitignore": {
+   "blob": "505a3b1ca2716907d5b292ab90c36df043c42bb6",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 09 - 22-23 Aug/23rd Aug - MCP/Complete MCP/mcp-warmup/.python-version": {
+   "blob": "24ee5b1be9961e38a503c8e764b7385dbb6ba124",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 09 - 22-23 Aug/23rd Aug - MCP/Complete MCP/mcp-warmup/README.md": {
+   "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 09 - 22-23 Aug/23rd Aug - MCP/Complete MCP/mcp-warmup/pyproject.toml": {
+   "blob": "ddc3cacebe9c9df1db2dbf45e0ece3ed0f0e1e45",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Weekend 09 - 22-23 Aug/23rd Aug - MCP/Complete MCP/mcp-warmup/server.py": {
+   "blob": "93fd7fae357806d71c53b6d5692ab683705e0da2",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 09 - 22-23 Aug/23rd Aug - MCP/Complete MCP/mcp-warmup/src/mcp_warmup/__init__.py": {
+   "blob": "dd35d98d9c9c9f55a7b14e6a90f9be1ab4262591",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "empty package marker"
+  },
+  "Weekend 09 - 22-23 Aug/23rd Aug - MCP/Complete MCP/mcp-warmup/uv.lock": {
+   "blob": "3ddb0e11a8c9c9d9aed7914d2c1c3c383bd91819",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Weekend 09 - 22-23 Aug/23rd Aug - MCP/Complete MCP/p2_MCP_Architecture.ipynb": {
+   "blob": "13b12c3fab64eaef2493f57e0eb044a65db24aea",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 09 - 22-23 Aug/23rd Aug - MCP/README.md": {
+   "blob": "4fd4a436a10d5875b7db843b321499e0093848a5",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 09 - 22-23 Aug/README.md": {
+   "blob": "f8a9ea06d762d15550964f98803f18fad40942ac",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 10 - 5-6 Sep/06 Sep - MCP Primitives & Architecture/AI-Updater-Project.pdf": {
+   "blob": "a27048f867c07defda0865741cb1fc317eccae5d",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 10 - 5-6 Sep/06 Sep - MCP Primitives & Architecture/Link.txt": {
+   "blob": "7edcab863289ec37ee18ebe812a9eee8d9d93ab3",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 10 - 5-6 Sep/06 Sep - MCP Primitives & Architecture/MCP-Lifecycle.pdf": {
+   "blob": "d46bbd1502f6b5489927c05cbfa0db8f6bddda4f",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 10 - 5-6 Sep/06 Sep - MCP Primitives & Architecture/MCP-Primitives.pdf": {
+   "blob": "8c28e66bd7de44c5646c177c17d2ec6b72d42a57",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 10 - 5-6 Sep/06 Sep - MCP Primitives & Architecture/README.md": {
+   "blob": "5dd15d3f3c58dd038dc526be6db5a537cdd2839d",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 10 - 5-6 Sep/06 Sep - MCP Primitives & Architecture/claude_desktop_config.example.json": {
+   "blob": "c67e1bd2402fd92da754f173178d9a605fb40874",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 10 - 5-6 Sep/06 Sep - MCP Primitives & Architecture/mcp_wiretap.py": {
+   "blob": "fb04f2b19207ab4bbcce6c1da3aeb5c02d7683ff",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 10 - 5-6 Sep/06 Sep - MCP Primitives & Architecture/mcp_wiretap_no_color.py": {
+   "blob": "ee3ec321e1e0c05371b36d89ec293b7bf7ab11c1",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 10 - 5-6 Sep/06 Sep - MCP Primitives & Architecture/v4a_primitives_notebook.ipynb": {
+   "blob": "f80639c03e98bbe907e7cfc929b2dfd74bb3652b",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 10 - 5-6 Sep/README.md": {
+   "blob": "c8b66b2ba8a7b45d46827702c594e93bc3ac3420",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/MCP-Precoded/README.md": {
+   "blob": "0e792ddfd155de26550b273aa58df9aef1bad6fe",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/MCP-Precoded/recipebox_fastmcp.py": {
+   "blob": "750330b4ac89b760a8f6a06c3b7b662382a9cdce",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/MCP-Precoded/recipebox_lowlevel.py": {
+   "blob": "a64e8cea26ecac21433ad2279783aaf37d77bbb4",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/README.md": {
+   "blob": "bde9d7aca067962092cbfc4cb125bfbb1ac8cb7e",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/TimeTrackProject/timetrack/.python-version": {
+   "blob": "24ee5b1be9961e38a503c8e764b7385dbb6ba124",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/TimeTrackProject/timetrack/README.md": {
+   "blob": "a7a9f511deff272759242229bf9617270877b624",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/TimeTrackProject/timetrack/database.py": {
+   "blob": "dcc9aeca2997f31da7dbd027cf75f8da75a3caaf",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/TimeTrackProject/timetrack/main.py": {
+   "blob": "ec2fa82e83cadc55e5dd63e906ca9f1f2e03e05a",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/TimeTrackProject/timetrack/main_to_understand.py": {
+   "blob": "585189b19d6c8b0a8481d342cd0dd467db790b5e",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/TimeTrackProject/timetrack/pyproject.toml": {
+   "blob": "b8556cc68ada270a6d939c4bfd7ce653647b2f0e",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/TimeTrackProject/timetrack/static/app.js": {
+   "blob": "81c400e671c7722793695d62e1778020c6ccdcb0",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/TimeTrackProject/timetrack/static/index.html": {
+   "blob": "53a228f4ba4b62c0e7188daf903b78f19aaa31f1",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/TimeTrackProject/timetrack/static/style.css": {
+   "blob": "d2547389628bd25a78ce2ba66be4d5208c9c5259",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/TimeTrackProject/timetrack/timetrack.db": {
+   "blob": "c908524203e354029af66cc7bc94b0d9a98f5674",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "log, database or archive"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/TimeTrackProject/timetrack/uv.lock": {
+   "blob": "b66ed070118b716b2612e19040e2b12ddd73b61c",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/TimeTrackProject/timetrack_notebook.ipynb": {
+   "blob": "4baf117a308bd706da17bd6dd573b86e7b245424",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/first-mcp-server/.python-version": {
+   "blob": "24ee5b1be9961e38a503c8e764b7385dbb6ba124",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/first-mcp-server/README.md": {
+   "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/first-mcp-server/Untitled-1.json": {
+   "blob": "734c3323c06039a6d08e6a372079158c3ac7d1f9",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/first-mcp-server/main.py": {
+   "blob": "28a31a450ca33129fc899b2826cc6421c01c2d0e",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/first-mcp-server/pyproject.toml": {
+   "blob": "f0717db2604367f8881a1cc519234ac638a54f0d",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/first-mcp-server/recipebox_fastmcp.py": {
+   "blob": "39f7bb729dc2f0372c3e9aab62230613b874335e",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/first-mcp-server/recipebox_lowlevel.py": {
+   "blob": "a64e8cea26ecac21433ad2279783aaf37d77bbb4",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/first-mcp-server/uv.lock": {
+   "blob": "d21579bf95cd0153c8c0d0a046ab35ddcb2f13c6",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/mcp-warmup-primitives/.gitignore": {
+   "blob": "505a3b1ca2716907d5b292ab90c36df043c42bb6",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/mcp-warmup-primitives/.python-version": {
+   "blob": "24ee5b1be9961e38a503c8e764b7385dbb6ba124",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/mcp-warmup-primitives/README.md": {
+   "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/mcp-warmup-primitives/mcp_server_with_primitives.py": {
+   "blob": "fb1153fea1b716e437ca5e68bee4d5ad7931cc32",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/mcp-warmup-primitives/pyproject.toml": {
+   "blob": "ddc3cacebe9c9df1db2dbf45e0ece3ed0f0e1e45",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/mcp-warmup-primitives/server.py": {
+   "blob": "89b3061cf0b8f62487fc7fa3d5c92924f9f8f392",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/mcp-warmup-primitives/server_with_auth.py": {
+   "blob": "db273542a275aeb4506ac0d006874e74c1eb5469",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/mcp-warmup-primitives/src/mcp_warmup/__init__.py": {
+   "blob": "dd35d98d9c9c9f55a7b14e6a90f9be1ab4262591",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "empty package marker"
+  },
+  "Weekend 11 - 12-13 Sep/12-13 Sep - Building & Deploying MCP Servers/mcp-warmup-primitives/uv.lock": {
+   "blob": "3ddb0e11a8c9c9d9aed7914d2c1c3c383bd91819",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Weekend 11 - 12-13 Sep/README.md": {
+   "blob": "cd5c0ee4044e382164f61954a5704117387f4d46",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 13 - 27th Sep/.python-version": {
+   "blob": "24ee5b1be9961e38a503c8e764b7385dbb6ba124",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 13 - 27th Sep/Langchain MCP.ipynb": {
+   "blob": "b96461a1dfdd2163150afd03b8d2b608b204984d",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 13 - 27th Sep/README.md": {
+   "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+   "cited_in": [],
+   "status": "not_read"
+  },
+  "Weekend 13 - 27th Sep/langchain.py": {
+   "blob": "4da7da73d8d78d76bd4fda6c623ad999c9a6a180",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 13 - 27th Sep/main.py": {
+   "blob": "b5dd5027f407ce920fa38117f58170fec6535728",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 13 - 27th Sep/pyproject.toml": {
+   "blob": "fb09e7b5a510629ceb4fdd7402b88cef19efb558",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Weekend 13 - 27th Sep/uv.lock": {
+   "blob": "04e9bd686a9c64d4e1fb23e0c10129d7126427ba",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/MCP in Langchain/.gitignore": {
+   "blob": "03bd4129be5a0c6b906b3f7d240ff9363b227c5c",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/MCP in Langchain/MCP_MultiServer_Live_Demo.ipynb": {
+   "blob": "281bc68f8935e26617f98acd7e94fb3e0f9e6877",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/MCP in Langchain/MCP_in_Langchain.ipynb": {
+   "blob": "c6dfcdce3c13c253b5facf8e9b3d942b02302041",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/MCP in Langchain/cinebot_elicit_server.log": {
+   "blob": "c0b73a969ec2313077b4de2117bc53dd6128c9ce",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "log, database or archive"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/MCP in Langchain/cinebot_elicit_server.py": {
+   "blob": "e2b927be0aab0f863d8e2c3d7fde6828b979a36e",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/MCP in Langchain/cinebot_error_server.log": {
+   "blob": "2d33825aca0c9c4565f30bc9288401b7a0afc9c7",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "log, database or archive"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/MCP in Langchain/cinebot_error_server.py": {
+   "blob": "2b1097c44910037c1761a2826ba7910db2aa29c0",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/MCP in Langchain/cinebot_mcp_server.log": {
+   "blob": "9ba2883c24d9b9a7b5ebd8329158931c1e1a7799",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "log, database or archive"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/MCP in Langchain/cinebot_mcp_server.py": {
+   "blob": "4583a5ae180153b0b9b8e81033b2c3c07e9fea5f",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/MCP in Langchain/pyproject.toml": {
+   "blob": "cab8d6cd206a9f3eebc4d319d9cfadf20139161d",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/MCP in Langchain/uv.lock": {
+   "blob": "9b5268c75ec356cb7b503fd567dd33ea9bc98b59",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/.gitignore": {
+   "blob": "03bd4129be5a0c6b906b3f7d240ff9363b227c5c",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/00_Multi_Agent_Overview.ipynb": {
+   "blob": "e55726518ee6cee0e78ac049b894aa3cbe2078f5",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/01_Subagents_Personal_Assistant.ipynb": {
+   "blob": "556b1fbdfac456dc9ebf8ccea6a057bd4a8ac56c",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/02_Handoffs_Customer_Support.ipynb": {
+   "blob": "d86099c9164dfa6d7fd8a5c9a8185e1155cad9d1",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/03_Router_Knowledge_Base.ipynb": {
+   "blob": "03ebb57d7f788c1b061313d5086ef54f9586af7a",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/04_Skills_SQL_Assistant.ipynb": {
+   "blob": "afdbced2b91c4ba9f8329cff59c1a9e2a4cabf46",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/LangChain_MultiAgent_Patterns_VSCode.ipynb": {
+   "blob": "0233330c6e8e788aef7c15b00d7910c61ca90eab",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/README.md": {
+   "blob": "1776ce993222fbb888d04e10335c8a1ba9eda5ed",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/pyproject.toml": {
+   "blob": "d5530c0ddf11237cf51a1a51a83c524081553cec",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "project metadata"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/test.py": {
+   "blob": "2e061f72fae0edcdfcb104f62c554447198e3a63",
+   "cited_in": [],
+   "status": "not_read"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/uv.lock": {
+   "blob": "16d8192e330d20e954713a016b982838cd1d316f",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main.zip": {
+   "blob": "d028a29e41489d139dbfb05de759daf76dfa9e10",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "log, database or archive"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/.dockerignore": {
+   "blob": "cc2746f9bb7acaf0658eaef6815a5142ceb28bb0",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/.env.example": {
+   "blob": "44d4e6d09fc3548e58a4dac5da0effc7ec133b75",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/.github/workflows/deploy.yml": {
+   "blob": "920f5bff1d42b38bfe908acbae9ad9ec9cb9f47c",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/.gitignore": {
+   "blob": "741179c728fa6a537eb3001947fb60f12a0d01b2",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "tooling config"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/DEPLOY.md": {
+   "blob": "58351b9bac6b06712d278a425c35b294bcc8a4f8",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/Dockerfile": {
+   "blob": "ce48e5d9eac72d7e39d616a05fb218dfa9cda6d4",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/README.md": {
+   "blob": "dc052b271e649ec269c0c083a09780210b4af8e6",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/agent/__init__.py": {
+   "blob": "612a3ba21712ac0192be1e4dfebfe9c2f12755ea",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "empty package marker"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/agent/agents.py": {
+   "blob": "a563243d1a9249b1b722fd4944f888ea24fc33ef",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/agent/prompts.py": {
+   "blob": "b4c1080fa957bbdd1cf9c6fdb645dd9989e10e97",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/agent/tools.py": {
+   "blob": "b4c4b0f7bfb6d78524139821a391c5a2313ed3e2",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/api/__init__.py": {
+   "blob": "04823cabd81420049ef59a2c014d02bed999c1e9",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "empty package marker"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/api/endpoints.py": {
+   "blob": "093775e91bdc0bafa37b9f0d979e9d4673990825",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/api/main.py": {
+   "blob": "fcc83c23ba5b51a167c6b3a42666ad3c944bf9be",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/api/schemas.py": {
+   "blob": "087c383fb074db2840a62959f457abd7beb6af25",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/config/__init__.py": {
+   "blob": "084b5a2114ae2136543453db26a71cd48fe07152",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "empty package marker"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/config/settings.py": {
+   "blob": "4225422fffc19dba5cc2ade4cf427673743c5659",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/logger/__init__.py": {
+   "blob": "7c08a81e4e4861fefd3b8129c0b5f2cb582f4f37",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "empty package marker"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/logger/custom_logger.py": {
+   "blob": "5fcb892de543291d91798bf34d30d79b114f5b2c",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/rag/__init__.py": {
+   "blob": "1d6b1ed85d50cc9789411abc73ef7a4fac4fec44",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "empty package marker"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/rag/data_ingestion.py": {
+   "blob": "ab4896c8335b4bb761f32f9612b0801679e26e25",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/rag/embeddings.py": {
+   "blob": "1ddb5fc98c311dc373453568152a09dafce70655",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/rag/llm.py": {
+   "blob": "0136e813488fe1e7fc97ede592c7ac4af511ccec",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/rag/retrieval.py": {
+   "blob": "01a09cb296a35a8102f1b173a47c726b6994d356",
+   "cited_in": [],
+   "status": "read"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/rag/vector_store.py": {
+   "blob": "4485aca2032a51d010421b676b2e58ba2e5d9abb",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/tests/conftest.py": {
+   "blob": "8d6104cabca9d95c5a1ef8569bd1a8a11e195efe",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/backend/tests/test_api.py": {
+   "blob": "3f0c536d39affd40a896cb177e8e4f181c28c8c6",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/bun.lock": {
+   "blob": "761599e14ef9a61207c33ab8c958ff6732060235",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/components.json": {
+   "blob": "62e101166a31ade477811bd31f6be1ae44d45423",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "frontend build config"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/eslint.config.js": {
+   "blob": "40f72cc45a46993d3d02da765842abb2703a64c1",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "frontend build config"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/index.html": {
+   "blob": "c91f2c12e2362b7e301c3373ee50e4a0ca309321",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "frontend build config"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/package-lock.json": {
+   "blob": "48dba1163499235dddcf91be2b7e233b0612b5ef",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "dependency lock file"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/package.json": {
+   "blob": "b8ea34347aa1379fbbcc87259c174980f5310a58",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "frontend build config"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/playwright-fixture.ts": {
+   "blob": "7d471c19373e904c9c08be4768c94a5746801e9b",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "frontend build config"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/playwright.config.ts": {
+   "blob": "ec19e9596784070e71ed6a3ccb66ce1aae0af37a",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "frontend build config"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/postcss.config.js": {
+   "blob": "2aa7205d4b402a1bdfbe07110c61df920b370066",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "frontend build config"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/App.css": {
+   "blob": "b9d355df2a5956b526c004531b7b0ffe412461e0",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/App.tsx": {
+   "blob": "ed7ca23f1f8d09ca7f707e2ca2c8e8a63b9f9fcb",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/AuditTab.tsx": {
+   "blob": "9d6c5296b87689d18455a6dd85d304ebecfc406b",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/DocumentUploadTab.tsx": {
+   "blob": "248528b5ea695039687187fa8568dae84cef6108",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/NavLink.tsx": {
+   "blob": "a561a95f420d2ee6ffb98e12b690f354a7c9c50d",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/RagQATab.tsx": {
+   "blob": "1533591d2176b3e37dbbddad85633a46eedccde6",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/SystemStatusTab.tsx": {
+   "blob": "c9afdfae1c53316c8f3da8b580edefcb28679942",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/accordion.tsx": {
+   "blob": "1e7878cede299282b94353d31e073bca26f85811",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/alert-dialog.tsx": {
+   "blob": "6dfbfb49fedb30753b1b2c08402953d40cc3389c",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/alert.tsx": {
+   "blob": "2efc3c8ba4b70709df7a82ab6f3e5d07a25c2f62",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/aspect-ratio.tsx": {
+   "blob": "c9e6f4bf9e1c01d6d7022b53e68438e61746c86c",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/avatar.tsx": {
+   "blob": "68d21bbf6d29fc68b1a19d10e4eaf1e72fa2d68c",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/badge.tsx": {
+   "blob": "0853c441dffc3ca2251118d2cca041423023f1a6",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/breadcrumb.tsx": {
+   "blob": "ca91ff53267af649575ad2f5daaec2104395aea5",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/button.tsx": {
+   "blob": "cdedd4f43da30732ce09e289a3c373a34c932078",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/calendar.tsx": {
+   "blob": "900a69e45bafe9f68c2bf073b7441b9a943555fd",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/card.tsx": {
+   "blob": "e28274800fdd298091b911ecadafcf544284df9d",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/carousel.tsx": {
+   "blob": "3aa0f31fbe1f99ce6bdb1c3dd94e9f74f1d17bb8",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/chart.tsx": {
+   "blob": "08d40d90d48fe18e27b17ea9bd37d6122e36f3ea",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/checkbox.tsx": {
+   "blob": "759a41ce202eb6da0310bcb05bb697bc9fe611dd",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/collapsible.tsx": {
+   "blob": "5c28cbcc3bce7cbda84857bd218da20dd7d3770f",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/command.tsx": {
+   "blob": "68d537865fbffd5f621330b9d48955d36a808f59",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/context-menu.tsx": {
+   "blob": "b5d9db065a5a149e0f269e1ce89d152d546c74cf",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/dialog.tsx": {
+   "blob": "8249e2f0a047f20a712e369ce56b8bc0c3ecdec2",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/drawer.tsx": {
+   "blob": "a2a435de93737ebbc73cd62de4e6a3d4617ca444",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/dropdown-menu.tsx": {
+   "blob": "ddabcfdd60883e3b869a1b047577219e210a9810",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/form.tsx": {
+   "blob": "439029fcffd79c94249c92772ff47ee3ad65eff9",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/hover-card.tsx": {
+   "blob": "6ee6892d3627aeef35bd49332094312162d1edcf",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/input-otp.tsx": {
+   "blob": "0e3fa02c744b6243154aff5089e5087114756b85",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/input.tsx": {
+   "blob": "09700f605e069e1856565869ac994f978d1be0b3",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/label.tsx": {
+   "blob": "80e30eec8d12ded7da1f57c8bb83f461bc1a5d25",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/menubar.tsx": {
+   "blob": "15687e4c9263aff8bbee9d6c90b4889be1f5ff0c",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/navigation-menu.tsx": {
+   "blob": "c9fcd7adf74d76a34ff619c536217ee4cc27aa2b",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/pagination.tsx": {
+   "blob": "31ae1be10ef2eaf17c2e3682ee61f1d7a176be5c",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/popover.tsx": {
+   "blob": "59dd5252e9f4fe4c1a2da378af41ca4b0eea072b",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/progress.tsx": {
+   "blob": "f9f131e9b5b88cb76a1dcda6cb971bf2dbafe223",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/radio-group.tsx": {
+   "blob": "5d32e58a4efc47c81ec86c0d31831dfab9c87c2e",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/resizable.tsx": {
+   "blob": "4a1bd8c87ed744ff8659660306763a4f6026c7a2",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/scroll-area.tsx": {
+   "blob": "8d29b27e58e20cad63e349991dfe1d61c2c146a9",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/select.tsx": {
+   "blob": "6f2525465bc450154ac8083461d0f84b2c1360f2",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/separator.tsx": {
+   "blob": "e20c3f4c40ca530616e3e6a5ad6a868c89c53cc6",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/sheet.tsx": {
+   "blob": "c414714b3eca22b7ccfca8238c0407a7a8c6a38b",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/sidebar.tsx": {
+   "blob": "beb1a591fc0375c035cf89966fd7ccab3a1baabd",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/skeleton.tsx": {
+   "blob": "6690a131f28488723d7b4bb7d952e12ea3d03ee7",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/slider.tsx": {
+   "blob": "360d681b378defb20aa42e876cdb4e118c0b6316",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/sonner.tsx": {
+   "blob": "b7f198b5928a228fb55ef595e26d9d74ac0241f2",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/switch.tsx": {
+   "blob": "a76b76120b8d862d349a0ee226ff2188cd8afec7",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/table.tsx": {
+   "blob": "991cdbf3ba12cf4d8e768a7b161471077568d4a6",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/tabs.tsx": {
+   "blob": "ba20fbb1b869b15d60f3e79507b68ebd2ee577ce",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/textarea.tsx": {
+   "blob": "4a5643e87fe235bde0aa67a092a4d5d585618eaf",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/toast.tsx": {
+   "blob": "0699548f55d2b920820a3e19d8b6b4807df8b599",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/toaster.tsx": {
+   "blob": "2cba1c825a884050a4917d1a198726fbd7d888ee",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/toggle-group.tsx": {
+   "blob": "8deae16fe1b4aa1992efccd8c93feae791e230d0",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/toggle.tsx": {
+   "blob": "de5dfc5ad8cca9ad540eead9303b3f09c6f2963e",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/tooltip.tsx": {
+   "blob": "2dece61d05221533410c21ed07bd1fae8e91dbb5",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/components/ui/use-toast.ts": {
+   "blob": "b0aef21be259883fe159d3176ab46c6841c28a07",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/hooks/use-mobile.tsx": {
+   "blob": "502fd323934501eab408a396a9ae4a07c0ae3560",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/hooks/use-toast.ts": {
+   "blob": "ca1316d678d31c11c213ce717c5e064a17e85ecd",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/index.css": {
+   "blob": "35ce75e0bd579a64868382e68892d3ca7ff2f8f9",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/lib/api.ts": {
+   "blob": "37134102da78f2f40839ffc77b5244590442e9a3",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/lib/utils.ts": {
+   "blob": "a5ef193506d07d0459fec4f187af08283094d7c8",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/main.tsx": {
+   "blob": "68176a72f30ae0650f5093c8b6a7b01016acf07a",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/pages/Index.tsx": {
+   "blob": "144bcc1ed76bfdbe968351cc3cc85f3add125324",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/pages/NotFound.tsx": {
+   "blob": "7bc223466c71ffb2ee284f0149a4b4cadfa5ae35",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/test/example.test.ts": {
+   "blob": "52e6d2f0ae9e6bc3ac85dbfeee6cd0b3d6e5d1c7",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/test/setup.ts": {
+   "blob": "fa2d09628e4a5833207600d9387ff1ff141b2583",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/src/vite-env.d.ts": {
+   "blob": "11f02fe2a0061d6e6e1f271b21da95423b448b32",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/tailwind.config.ts": {
+   "blob": "d7be5b27681a1bbc6fc7c91e2f8ad7919e835cf5",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "frontend build config"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/tsconfig.app.json": {
+   "blob": "51f581dd91641b4c1f1219f646788e73cf6bf00c",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "frontend build config"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/tsconfig.json": {
+   "blob": "6b68d80b7d92d0c4a5d774897f2bedfa95b42669",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "frontend build config"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/tsconfig.node.json": {
+   "blob": "3133162c20350e1741b94b8d2ff77b811bec8363",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "frontend build config"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/vite.config.ts": {
+   "blob": "6fce48496eb890759ad425099fbc59a11b01bdb1",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "frontend build config"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/frontend/vitest.config.ts": {
+   "blob": "fefe05a9929f0799cd7ad74081e2d58a1ae464c5",
+   "cited_in": [],
+   "status": "ignored",
+   "reason": "frontend build config"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/generate_json.py": {
+   "blob": "13aaaf4e3e04b90e9852d1947bb47bfe7a5d9be6",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/requirements-dev.txt": {
+   "blob": "20ce286316f31e3d1d2391b2fa8a6a0a45dbeb8d",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/requirements.txt": {
+   "blob": "12f5bd15632015ca9ae341c51ae264b81a66b875",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/sample_docs/aldermoor_accounting_policy_ifrs.pdf": {
+   "blob": "45ddf68d461ccf26124e9920376151c14a1bb0e1",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/sample_docs/aldermoor_annual_report_fy2024.pdf": {
+   "blob": "d85b7679650cc5fcebce3419777dd5231dfc8718",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/sample_docs/aldermoor_procurement_policy.pdf": {
+   "blob": "c14682ca39cbe2b3a3ab50fdfa1d228284d2fcc8",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/sample_docs/eu_tariff_schedule_excerpt.pdf": {
+   "blob": "3c0c4fbd4cd5e12e93dd62c5be0198bc11950a3b",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "Weekend 15 - Oct 10 & 11": {
+   "blob": "acf8ceb11ad1f81715bc871571a929844ceb6679",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_summary/00 - 21 Jun - Course Induction & Roadmap.md": {
+   "blob": "9c5e5d6e5bb9879b908976df63cdca65431404bc",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "classes_summary/01 - 27 Jun - Python Setup & API Basics.md": {
+   "blob": "779bbe7df57aacc7726bd95fb856f1989e2aaaf2",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "classes_summary/02 - 28 Jun - Python Refresher.md": {
+   "blob": "a0f6529a0dcaef72e488319834edb27c725299d5",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "classes_summary/03 - 4 Jul - Pydantic Deep Dive.md": {
+   "blob": "af8a934b8cbfaddd2248917d291f1bf01131260f",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "classes_summary/04 - 5 Jul - Anatomy of an Agent.md": {
+   "blob": "6f4afcae46f5289f8e0aa3ce7abaa713ea8d122e",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_summary/05 - 11 Jul - The Agentic Loop.md": {
+   "blob": "19af740850ce41b4d4cb0a6197538134514d3a44",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_summary/06 - 12 Jul - Introduction to LangChain.md": {
+   "blob": "2dd55e0da61a937ee612b4e53666587b68c1d71d",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_summary/07 - 18 Jul - LangChain Family & Harness Engineering.md": {
+   "blob": "7cd7ef16a790ee931b852c53b578c12c5ba80f1c",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "classes_summary/08 - 19 Jul - Inside the Model.md": {
+   "blob": "7ce643081f9238bf9e7d3faa32c7d1079c43da31",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "classes_summary/09 - 25 Jul - Structured Output Mastery.md": {
+   "blob": "06658dfd9a4950b137e5b71d67c769192a99c6b9",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "classes_summary/10 - 26 Jul - Tools Deep Dive.md": {
+   "blob": "b373fbf4cd29fbf378325a42d67a59fba428a3e4",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "classes_summary/11 - 01 Aug - Agents, Middleware & Memory.md": {
+   "blob": "4759f8aaa2b48e79772bab3620b369699756020d",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "classes_summary/12 - 08 Aug - Mastering Middleware.md": {
+   "blob": "62d317983521c19ee3e491f14ea38b627322a157",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "classes_summary/13 - 09 Aug - Guardrails, Todo Lists & Tool Resilience.md": {
+   "blob": "376383f77340ddbe879ac43a7ed44856c92fb28d",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "classes_summary/14 - 16 Aug - Shell Tools & Custom Middleware.md": {
+   "blob": "bb02871c0fcee27526bfdd93fd92fe4dfebfec1e",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "classes_summary/15 - 22 Aug - Runtime & Human-in-the-Loop.md": {
+   "blob": "71abd037844662b8928b17f9249eafc73d6b7eca",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "classes_summary/16 - 23 Aug - MCP Introduction.md": {
+   "blob": "d66d1d3711742126de96271cb4d547c226da50c9",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "classes_summary/17 - 6 Sep - MCP Primitives, Architecture & Wiretap.md": {
+   "blob": "1cdafe333dfeaa2938f1634b8f6abb1bb5d36b36",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "classes_summary/18 - 12-13 Sep - Building & Deploying MCP Servers.md": {
+   "blob": "55016a5c741ffb44ab199c5b73042e0f9b9207ae",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "classes_transcription_summary/00 - 21 June - Course Induction & Roadmap.md": {
+   "blob": "0b3e381f74076f02086d31a92d85c80f76dba0dd",
+   "cited_in": [],
+   "status": "not_read"
+  },
+  "classes_transcription_summary/01 - 27 June - Python Setup & API Basics.md": {
+   "blob": "7e07fc62d22172d72e88af67afb85e0c28187084",
+   "cited_in": [],
+   "status": "not_read"
+  },
+  "classes_transcription_summary/02 - 28 June - Python Refresher.md": {
+   "blob": "1897f38a46bc5aaf91104a1fad07d501f5513400",
+   "cited_in": [],
+   "status": "not_read"
+  },
+  "classes_transcription_summary/03 - 4 Jul - Pydantic Deep Dive.md": {
+   "blob": "1c5ba44d0685a233aa07901c2ee7f79b147ef416",
+   "cited_in": [
+    "f2"
+   ],
+   "status": "not_read"
+  },
+  "classes_transcription_summary/04 - 5 Jul - Anatomy of an Agent.md": {
+   "blob": "6fa09edd86b9d75fa5a3f31eac7f4beb266becfb",
+   "cited_in": [
+    "f3"
+   ],
+   "status": "not_read"
+  },
+  "classes_transcription_summary/05 - 11 Jul - The Agentic Loop (Pure Python).md": {
+   "blob": "962cad600c169c9d4e423fcfcac5df81d9b9e8ee",
+   "cited_in": [
+    "f2",
+    "f3"
+   ],
+   "status": "not_read"
+  },
+  "classes_transcription_summary/06 - 12 Jul - Introduction to LangChain.md": {
+   "blob": "545ab9200e2478b4f17e04e6154a4e335d6a9380",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/07 - 18 Jul - LangChain Family & Harness Engineering.md": {
+   "blob": "46ae33f65cf3353ddd67235c85984a72e965fc09",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/08 - 19 Jul - LangChain - Inside the Model.md": {
+   "blob": "7244435619822da14b89c11a207cbc703963ced5",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/09 - 25 Jul - LangChain - Structured Output Mastery.md": {
+   "blob": "3d6072e87370b4a2f6abad485eea8163d7ca8c55",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/10 - 26 Jul - LangChain - Tools Deep Dive.md": {
+   "blob": "ecff443ae3b1b533679b9cff1569325be453692b",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/11 - 01 Aug - LangChain - Agents, Memory, Middleware.md": {
+   "blob": "b7418fd6d9a2b9244fe607c2acab01a21f95425c",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/12 - 08 Aug - LangChain - Mastering Middleware.md": {
+   "blob": "4a0eccd5b513170e0cdad2af00875dab57d8f3c0",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/13 - 09 Aug - LangChain - Middlware & Tools.md": {
+   "blob": "cf27e95dcfae497a69fd1ae11d5909b09cfe94f7",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/14 - 16 Aug - LangChain - Shell Tools & Custom Middleware.md": {
+   "blob": "2c2e1ee45ee5abb02eb1d14d00d9bc5601f436e5",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/15 - 22 Aug - LangChain - Runtime & Human-in-loop.md": {
+   "blob": "93657527faea692c158e48b1ac14a728bfc87a7c",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/16 - 23 Aug - MCP Introduction.md": {
+   "blob": "fe3fd68af5458475b8c90877cc03c3996239d4f3",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/17 - 5 Sep - MCP Deep Dive — Primitives, Lifecycle & JSON-RPC.md": {
+   "blob": "e295face9e70444cf48f3dfb3c3fe64e1853b182",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/18 - 6 Sep - MCP Capability Negotiation.md": {
+   "blob": "7d354d1158d218302b36366e9d562e04bbce271c",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/19 - 12 Sep - MCP - Shutdown, Transport Layer.md": {
+   "blob": "03f1cef1d69e4a24dab364122ca13944aed9fd48",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/20 - 13 Sep - MCP - The Time Tracker Project.md": {
+   "blob": "0de45704bdfed6ab6ed070a1178aec106152894c",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/21 - 19 Sep - MCP Deployment.md": {
+   "blob": "a954b6d22028d06cf18338f1b329051811d3e6d0",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/22 - 20 Sep - Legacy vs Modern MCP.md": {
+   "blob": "90c55b83d89b2c7f1672f3afe80ad0d9bb5b578f",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/Readme.md": {
+   "blob": "54486fab1922a29310820cecd53d44a713bb7e01",
+   "cited_in": [],
+   "status": "read"
+  },
+  "classes_transcription_summary/glossary.md": {
+   "blob": "e3c73c2ee36a326307ff0044f0e3d27be5f6aaa4",
+   "cited_in": [],
+   "status": "skimmed"
+  },
+  "interview-questions/mcp.md": {
+   "blob": "9bb8fb260797dbeddc490f18b1adb7a0d6f6549d",
+   "cited_in": [],
+   "status": "read"
+  },
+  "scripts/check_repo_paths.py": {
+   "blob": "515adf7f66ddb2ad8a4198fb238c41e4a7bdd41f",
+   "cited_in": [],
+   "status": "not_read"
+  }
+ }
+}

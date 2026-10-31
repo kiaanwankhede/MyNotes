@@ -870,72 +870,52 @@
   },
   "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/README.md": {
    "blob": "f309548a780d15c2cc3f4983dece31eb4aac7c31",
-   "cited_in": [
-    "primer"
-   ],
+   "cited_in": [],
    "status": "skimmed"
   },
   "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_01_ai_model_vs_chatbot_vs_agent.py": {
    "blob": "8a8bc4ebe4a52209d13e7f18da1f3567750ce3ee",
-   "cited_in": [
-    "primer"
-   ],
+   "cited_in": [],
    "status": "skimmed"
   },
   "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_02_calling_the_ai_paid_and_free.py": {
    "blob": "4b0ab25e1040a2ea34ed8ccd9c0bbe99b856d083",
-   "cited_in": [
-    "primer"
-   ],
+   "cited_in": [],
    "status": "skimmed"
   },
   "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_03_structuring_with_pydantic.py": {
    "blob": "e40370230fc3bc4ac028c61359135be39a3a8cb9",
-   "cited_in": [
-    "primer"
-   ],
+   "cited_in": [],
    "status": "skimmed"
   },
   "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_04_giving_it_a_tool.py": {
    "blob": "e404d180d640df34ac8d7ac512d974876ec4c30f",
-   "cited_in": [
-    "primer"
-   ],
+   "cited_in": [],
    "status": "skimmed"
   },
   "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_05_teaching_it_to_choose.py": {
    "blob": "6167cf45f5c390747b85647c9dc592346b278419",
-   "cited_in": [
-    "primer"
-   ],
+   "cited_in": [],
    "status": "skimmed"
   },
   "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_06_project_zero_agent.py": {
    "blob": "b4337ca3e7b2be71fff28e0782c84e306a0d7286",
-   "cited_in": [
-    "primer"
-   ],
+   "cited_in": [],
    "status": "skimmed"
   },
   "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_07_streamlit_app.py": {
    "blob": "dfb53279c34b94fe7ecfb6222942303293ff9f20",
-   "cited_in": [
-    "primer"
-   ],
+   "cited_in": [],
    "status": "skimmed"
   },
   "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/output": {
    "blob": "90e537dff8b52cd12b5669e174e40ecd652a1425",
-   "cited_in": [
-    "primer"
-   ],
+   "cited_in": [],
    "status": "skimmed"
   },
   "Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/pyproject.toml": {
    "blob": "6e1ab3e00232afe73a9f33b5a4213db486c8290a",
-   "cited_in": [
-    "primer"
-   ],
+   "cited_in": [],
    "status": "ignored",
    "reason": "project metadata"
   },
@@ -975,8 +955,7 @@
   "Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/Agentic-Python.pdf": {
    "blob": "403e70a19c8d9df7d2c42334faa1d9c573c7457f",
    "cited_in": [
-    "ch1",
-    "primer"
+    "ch1"
    ],
    "status": "skimmed"
   },
@@ -3039,16 +3018,12 @@
   },
   "classes_transcription_summary/04 - 5 Jul - Anatomy of an Agent.md": {
    "blob": "6fa09edd86b9d75fa5a3f31eac7f4beb266becfb",
-   "cited_in": [
-    "primer"
-   ],
+   "cited_in": [],
    "status": "not_read"
   },
   "classes_transcription_summary/05 - 11 Jul - The Agentic Loop (Pure Python).md": {
    "blob": "962cad600c169c9d4e423fcfcac5df81d9b9e8ee",
-   "cited_in": [
-    "primer"
-   ],
+   "cited_in": [],
    "status": "not_read"
   },
   "classes_transcription_summary/06 - 12 Jul - Introduction to LangChain.md": {

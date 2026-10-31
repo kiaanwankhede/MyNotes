@@ -7,7 +7,7 @@ meta: Class 08 | 19 July | 35 min read | Code: Weekend 04
 Anyone can run a five-minute quickstart. Real engineering means understanding every knob around the model: the **input** (messages), **parameters** (temperature, max tokens), **tools** and **structured output**. Interviews probe exactly these, especially "what does `bind_tools` actually do?" and "does batching save tokens?"
 
 :::key Under every framework, it is just an API call
-LangChain, OpenRouter, Claude and the raw `chat.completions` code from the primer are all a standard API request and a standard API response. No framework adds magic. Knowing this makes any new framework easier to learn.
+LangChain, OpenRouter, Claude and the raw `chat.completions` code from the Foundations book are all a standard API request and a standard API response. No framework adds magic. Knowing this makes any new framework easier to learn.
 :::
 
 ## Core ideas
@@ -408,6 +408,14 @@ It injects a whole **list** of prior messages as one template variable. A string
 - [ ] I can say precisely what batching does and does not save
 - [ ] I can resolve a tool call by hand with a `ToolMessage`
 - [ ] I can get a typed object with `with_structured_output`
+
+<!-- res -->
+## Course resources for this chapter
+
+| Craft entry | What is attached |
+| --- | --- |
+| **25 to 26 July: LangChain continued** | Colab, a video, `Langchain-2.pdf` and `Langchain.pdf`, the `Revision_Parts_1-4.ipynb` notebook |
+<!-- /res -->
 
 ## Sources and further reading
 

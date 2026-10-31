@@ -17,8 +17,6 @@ A file is **cited** when a chapter links to it under Sources. Citing is not the 
 - `Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/main.py` (cited in ch1)
 - `Weekend 08 - 15-16 Aug/README.md` (cited in ch9)
 - `Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/test.py` (cited in ch19)
-- `classes_transcription_summary/04 - 5 Jul - Anatomy of an Agent.md` (cited in primer)
-- `classes_transcription_summary/05 - 11 Jul - The Agentic Loop (Pure Python).md` (cited in primer)
 - `.github/workflows/path-audit.yml`
 - `Weekend 00 - 20-21 Jun/README.md`
 - `Weekend 13 - 27th Sep/README.md`
@@ -26,6 +24,8 @@ A file is **cited** when a chapter links to it under Sources. Citing is not the 
 - `classes_transcription_summary/01 - 27 June - Python Setup & API Basics.md`
 - `classes_transcription_summary/02 - 28 June - Python Refresher.md`
 - `classes_transcription_summary/03 - 4 Jul - Pydantic Deep Dive.md`
+- `classes_transcription_summary/04 - 5 Jul - Anatomy of an Agent.md`
+- `classes_transcription_summary/05 - 11 Jul - The Agentic Loop (Pure Python).md`
 - `scripts/check_repo_paths.py`
 
 ## Skimmed (279)
@@ -51,16 +51,7 @@ A file is **cited** when a chapter links to it under Sources. Citing is not the 
 - `Complete MCP/TimeTrackProject/timetrack mcp server/static/index.html` (cited in ch15, ch16)
 - `Complete MCP/TimeTrackProject/timetrack mcp server/static/style.css` (cited in ch15, ch16)
 - `Complete MCP/TimeTrackProject/timetrack_notebook.ipynb` (cited in ch15, ch16)
-- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/README.md` (cited in primer)
-- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_01_ai_model_vs_chatbot_vs_agent.py` (cited in primer)
-- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_02_calling_the_ai_paid_and_free.py` (cited in primer)
-- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_03_structuring_with_pydantic.py` (cited in primer)
-- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_04_giving_it_a_tool.py` (cited in primer)
-- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_05_teaching_it_to_choose.py` (cited in primer)
-- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_06_project_zero_agent.py` (cited in primer)
-- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_07_streamlit_app.py` (cited in primer)
-- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/output` (cited in primer)
-- `Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/Agentic-Python.pdf` (cited in ch1, primer)
+- `Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/Agentic-Python.pdf` (cited in ch1)
 - `Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/Untitled-scene.pdf` (cited in ch1)
 - `Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain Practical/langchain-course/.env.example` (cited in ch2, ch3)
 - `Weekend 04 - 18-19 Jul/07-08 - 18-19 Jul - LangChain Family & the Model Layer/Langchain Practical/langchain-course/Learning/Part - 0 Overview/Common FAQs` (cited in ch2, ch3)
@@ -295,6 +286,15 @@ A file is **cited** when a chapter links to it under Sources. Citing is not the 
 - `Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/_9_api_call_with_structure.py`
 - `Weekend 01 - 27-28 Jun/AI_Industry_Handbook_2026.pdf`
 - `Weekend 01 - 27-28 Jun/README.md`
+- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/README.md`
+- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_01_ai_model_vs_chatbot_vs_agent.py`
+- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_02_calling_the_ai_paid_and_free.py`
+- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_03_structuring_with_pydantic.py`
+- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_04_giving_it_a_tool.py`
+- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_05_teaching_it_to_choose.py`
+- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_06_project_zero_agent.py`
+- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/_07_streamlit_app.py`
+- `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/Project 0/output`
 - `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/README.md`
 - `Weekend 02 - 4-5 Jul/README.md`
 - `Weekend 04 - 18-19 Jul/README.md`

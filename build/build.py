@@ -228,7 +228,7 @@ def build_book(root, bid):
     chapters = []
     for c in book["chapters"]:
         chapters.append(c)
-        if c["id"] == "home":          # Quiz me sits right after the start page
+        if c["id"] == "home" and book.get("quiz", True):          # Quiz me sits right after the start page
             chapters.append({"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "file": "@quiz"})
     ready = [c for c in chapters if c.get("file")]
     arts = []

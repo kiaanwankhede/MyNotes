@@ -11,7 +11,11 @@ Study notes and interview prep, one "book" per subject, all in one reader.
 
 | Book | Folder |
 | --- | --- |
-| Agentic AI 3.0 | `books/agentic-ai/` |
+| Library start page | `books/library/` |
+| 1. Python and Agent Foundations | `books/foundations/` |
+| 2. Pydantic | `books/pydantic/` |
+| 3. Agentic AI with LangChain | `books/agentic-ai/` |
+| 4. RAG | `books/rag/` |
 
 ## Rebuild the reader
 

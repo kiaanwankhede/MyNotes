@@ -1,0 +1,86 @@
+{
+ "id": "pydantic",
+ "title": "Pydantic",
+ "short": "2. Pydantic",
+ "source_base": "https://github.com/mayank953/Live-Class-2026/blob/main/",
+ "tree_base": "https://github.com/mayank953/Live-Class-2026/tree/main/",
+ "chapters": [
+  {
+   "id": "home",
+   "num": "",
+   "title": "Start here",
+   "part": "Welcome",
+   "file": "home.md"
+  },
+  {
+   "id": "p1",
+   "num": "1",
+   "title": "Why validation exists, and type hints",
+   "part": "Pydantic",
+   "file": "p1.md"
+  },
+  {
+   "id": "p2",
+   "num": "2",
+   "title": "Your first model",
+   "part": "Pydantic",
+   "file": "p2.md"
+  },
+  {
+   "id": "p3",
+   "num": "3",
+   "title": "Constraints and custom validators",
+   "part": "Pydantic",
+   "file": "p3.md"
+  },
+  {
+   "id": "p4",
+   "num": "4",
+   "title": "Computed fields and controlling output",
+   "part": "Pydantic",
+   "file": "p4.md"
+  },
+  {
+   "id": "p5",
+   "num": "5",
+   "title": "Nested models",
+   "part": "Pydantic",
+   "file": "p5.md"
+  },
+  {
+   "id": "p6",
+   "num": "6",
+   "title": "Settings and secrets",
+   "part": "Pydantic",
+   "file": "p6.md"
+  },
+  {
+   "id": "p7",
+   "num": "7",
+   "title": "Pydantic with FastAPI",
+   "part": "Pydantic",
+   "file": "p7.md"
+  },
+  {
+   "id": "p8",
+   "num": "8",
+   "title": "Validating what an LLM gives you back",
+   "part": "Pydantic",
+   "file": "p8.md"
+  },
+  {
+   "id": "p9",
+   "num": "9",
+   "title": "Where Pydantic goes next, and the final project",
+   "part": "Pydantic",
+   "file": "p9.md"
+  },
+  {
+   "id": "bank",
+   "num": "",
+   "title": "Interview question bank",
+   "part": "Back matter",
+   "file": "@bank"
+  }
+ ]
+}

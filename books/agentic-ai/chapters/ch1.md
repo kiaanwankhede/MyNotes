@@ -1,5 +1,5 @@
 # Introduction to LangChain
-> lead: LangChain packages the hand-written agent loop from the primer into one call, `create_agent()`, so you spend your time on tools and behaviour instead of plumbing.
+> lead: LangChain packages the hand-written agent loop from the Foundations book into one call, `create_agent()`, so you spend your time on tools and behaviour instead of plumbing.
 meta: Class 06 | 12 July | 25 min read | Code: Weekend 03
 
 ## Why it matters
@@ -18,9 +18,9 @@ The model is a powerful engine. On its own it cannot go anywhere. Add steering, 
 
 ## Raw Python vs LangChain
 
-You built the first column in the primer. The second column is what `create_agent()` replaces it with.
+You built the first column in the Foundations book ([What an agent is](#foundations-f3) and [Agents in plain Python](#foundations-f4)). The second column is what `create_agent()` replaces it with.
 
-| Concern | Raw Python (primer) | LangChain |
+| Concern | Raw Python (Foundations) | LangChain |
 | --- | --- | --- |
 | Tool schema | Hand-written JSON | Inferred from the function signature and docstring |
 | The loop | You write `run_agent` | `agent.invoke()` runs it |
@@ -164,7 +164,7 @@ Message 2 has **empty content**, because the model is asking for a tool, not ans
 
 ### How a function becomes a tool
 
-You pass a plain function. LangChain reads its **name**, **type hints** and **docstring** and builds a schema, roughly the same JSON you wrote by hand in the primer:
+You pass a plain function. LangChain reads its **name**, **type hints** and **docstring** and builds a schema, roughly the same JSON you wrote by hand in the Foundations book:
 
 ```json
 {
@@ -182,7 +182,7 @@ You pass a plain function. LangChain reads its **name**, **type hints** and **do
 ```
 
 :::beyond Illustration, not printed in class
-The JSON above is my sketch of roughly what LangChain generates, written to match the schema you hand-wrote in the primer. The class explained that the schema is inferred, but did not print it.
+The JSON above is my sketch of roughly what LangChain generates, written to match the schema you hand-wrote in the Foundations book. The class explained that the schema is inferred, but did not print it.
 :::
 
 The `@tool` decorator wraps the function so an agent can call it. Either way, the **docstring is the model's only guide** to when to use the tool.
@@ -357,7 +357,7 @@ Do this once, with your own hands.
 1. Create a fresh `uv` project and install the three packages. Add `.env`, `.gitignore` and `.env.example`.
 2. Write `get_weather` and build the agent with `create_agent`.
 3. Run it and print `result["messages"]`.
-4. Map each message back to the primer: which is the user request, the tool request, the tool result, the final answer?
+4. Map each message back to the Foundations loop: which is the user request, the tool request, the tool result, the final answer?
 5. Add `InMemorySaver` and a `thread_id`, then prove the agent remembers your name across two `invoke` calls.
 6. Rewrite the docstring badly, rerun, and see what changes.
 
@@ -487,6 +487,17 @@ Plain text for one standalone request with no history. Message objects for multi
 - [ ] I know why the docstring matters
 - [ ] I can add memory with a checkpointer and a thread id
 - [ ] I can keep API keys out of Git
+
+<!-- res -->
+## Course resources for this chapter
+
+| Craft entry | What is attached |
+| --- | --- |
+| **12 July: Agents, Python and LangChain** | Site "Agents, with just Python" (`python-agents-with-mayank.netlify.app`), a Colab, the setup `uv init`, `uv add langchain langchain-openai langchain-anthropic`, `uv sync`, two PDFs (`Agentic-Python.pdf` and `Untitled-scene (3).pdf`) |
+| **18 to 19 July: LangChain** | A Colab, a 22 MB `Langchain.pdf`, and a GitHub repo of collected system prompts of AI tools (`x1xhlol/system-prompts-and-models-of-ai-tools`) |
+
+The 18 to 19 July row includes a GitHub repo of collected system prompts of AI tools, which is useful reading for how real products phrase instructions.
+<!-- /res -->
 
 ## Sources and further reading
 
