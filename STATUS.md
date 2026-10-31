@@ -35,7 +35,7 @@ Updated 2026-10-31 by `build/status.py`. This file is regenerated after every pr
 | Instructor sites | Sites read in full | 15 of 15 | 100% | All 15 read in full: 3 MCP sites, Pydantic, all 7 series guides, AI terms, Python agents, the context-window simulator (all 4 tabs and its script), Meridian slides (7 of 7 modules). |
 | Meridian slides | Modules read in full | 7 of 7 | 100% | All 7 modules read in full (about 500 slides). Caveat: the text I extracted leaves out the code boxes, so exact command lines come from the repo files (deploy.yml, DEPLOY.md), not from the slides. |
 | Craft page | Index pages read | 14 of 14 | 100% | All index pages read. |
-| Craft page | Attachments opened | 20 of 40 | 50% | 15 PDFs text-extracted and 5 Colabs opened (counts approximate). Not opened: Excalidraw files, videos, the other Colab links (same notebooks as in the repo), tail of the newsletter prompt, the AI Industry Handbook (not for redistribution). |
+| Craft page | Attachments opened | 31 of 40 | 78% | Of 40 items: 17 PDFs (text extracted; counts approximate for the earlier ones), 4 notebooks (from the repo) and all 10 Colabs opened. Colabs: 2 read in full (Custom Middleware, MCP adapter); the other 8 were compared by title, headings and opening cells with repo notebooks that were read earlier, not re-read cell by cell. Not opened: the .excalidraw file (its PDF export was read) and 5 class videos. Skipped on purpose: the AI Industry Handbook (not for redistribution) and 2 job-ad PDFs (not course content). Keys found in Colabs were not copied. |
 | Meridian learner repo | Repo reviewed | 1 of 1 | 100% | README, code and a frontend digest read; not every file individually. |
 | agent-flow repo | Repo reviewed | 0 of 1 | 0% | README and folder layout only, source not read. |
 
@@ -56,6 +56,7 @@ Updated 2026-10-31 by `build/status.py`. This file is regenerated after every pr
 
 ## 5. Change log (newest first)
 
+- 2026-10-31: Craft attachments: 3 MCP PDFs not in the repo and all 10 Colabs opened (now 31 of 40); mini-contra checked; keys in Colab flagged
 - 2026-10-31: Context-window simulator site read in full (all 4 tabs and script); instructor sites now 15 of 15
 - 2026-10-31: Read the 7 unread Pydantic docs pages (unions, alias, config, dataclasses, TypeAdapter, performance, FastAPI x5); now 19 of 19
 - 2026-10-31: Coverage wording made plainer: Read properly, Looked through, Not opened

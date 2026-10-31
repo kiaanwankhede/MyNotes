@@ -119,12 +119,23 @@ The repo's `COLAB_NOTEBOOKS.md` lists every notebook shared "anyone with the lin
 
 ## What the Craft PDFs are
 
-I extracted the text of all 15 PDFs attached on Craft that are also in the repo. Most are **single-page Excalidraw whiteboard exports** (class diagrams such as the agent and middleware architecture, the MCP overview, runtime and HITL, structured output and tools), so the text is scattered labels and the information is already in the class write-ups and the chapters. The few small extras: tool use costs **at least two model calls** (one to choose the tool, one to summarise its output); a middleware slide shows the hook order (`before_agent`, `before_model`, `wrap_model_call`, the model call, `after_model`, `wrap_tool_call`, tool execution, `after_agent`); and the MCP slide frames the idea as "not more intelligence, but the ability to see more". The 22-page **AI Industry Handbook** is a separate business-audience handout from an "ET Masterclass" (industry-by-industry use cases and companies) and is marked "Not for redistribution", so I did not reproduce it.
+I extracted the text of the Craft PDFs that are also in the repo (15 by my earlier count), and on 31 Oct 2026 the three that are not (`MCP-Server.pdf`, `MCP-Client.pdf` and the second `MCP-Lifecycle.pdf`; their notes are in chapter 11). Most are **single-page Excalidraw whiteboard exports** (class diagrams such as the agent and middleware architecture, the MCP overview, runtime and HITL, structured output and tools), so the text is scattered labels and the information is already in the class write-ups and the chapters. The few small extras: tool use costs **at least two model calls** (one to choose the tool, one to summarise its output); a middleware slide shows the hook order (`before_agent`, `before_model`, `wrap_model_call`, the model call, `after_model`, `wrap_tool_call`, tool execution, `after_agent`); and the MCP slide frames the idea as "not more intelligence, but the ability to see more". The 22-page **AI Industry Handbook** is a separate business-audience handout from an "ET Masterclass" (industry-by-industry use cases and companies) and is marked "Not for redistribution", so I did not reproduce it.
 
+
+## Craft Colabs and the extra site (31 Oct 2026)
+
+I opened all ten Colab links on the Craft page in the desktop browser. Eight match notebooks already in the repo (Pydantic From Scratch, the models and streaming notebook, CineBot structured output, the student reference for structured output and tools, Runtime and HITL, and three earlier Python ones); for those I compared title, headings and opening cells with the repo copy rather than re-reading every cell. Two have no repo copy and are now written up beside their chapters: the **Custom Middleware** Colab (chapter 9) and the **MCP adapter** Colab with its install trap (chapter 18).
+
+:::trap Keys in shared Colabs, again
+The 18 to 19 July Colab (models and streaming) sets **OpenRouter API keys in cells**. I did not copy them; treat them as compromised and use Colab Secrets or a `.env` file. (The 12 July Colab, noted in the Foundations book, has a Groq key.)
+:::
+
+`mini-contra.netlify.app`, linked on the Class 3 and 4 entry, is a small canvas game (a jungle-stage shooter in the style of an arcade classic), not course material, so nothing from it is in the notes.
 
 ## What I did not read
 
-- The Excalidraw files attached on the Craft page, and the LangChain Colab links themselves (the same notebooks are checked into the repo and were read from there).
+- The `.excalidraw` source file on Craft (`Runtime-HITL.excalidraw`); its PDF export was read. The five class videos (about 3 to 26 minutes each) and the ChatGPT "doubt solver" link were not watched or opened.
+- Skipped on purpose: the two job-ad PDFs and the job pages (recruiting, not course content), and sponsor or discount links (Udemy, Mesh API, Kimi).
 - The clipped tail of the newsletter prompt.
 - The 22-page AI Industry Handbook, which is marked "Not for redistribution" and is a business handout, not course content.
 - The seven instructor series guides are now read in full (APIs and the economics and open source guides in Foundations chapters 1A and 2, MCP in chapter 11, RAG in the RAG book, production readiness in chapter 8, multi-agent in chapter 19). Their statistics are the guide's own reported 2026 figures and I have not verified them independently.

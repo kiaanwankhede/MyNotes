@@ -309,6 +309,24 @@ Only through an explicit, legitimate integration (an MCP connection or messaging
 **Best practices from the page:** one job per middleware, handle errors so a hook does not crash the agent, node hooks for sequential logic and wrap hooks for control flow, document custom state, unit-test middleware separately, order matters, and prefer built-ins when they fit.
 <!-- /docs-add -->
 
+<!-- craftcolab-mw -->
+## The live-class Colab for this chapter (read in full)
+
+:::note Source
+The Craft entry "16th Aug" links a Colab called "Custom Middleware", read in full on 31 Oct 2026. The repo has the class summary but no code for this class, so this Colab is the only code source.
+:::
+
+It is scratch work from the live class, in the CineBot setting, and it follows the order of this chapter.
+
+- **Shell agent.** `ShellToolMiddleware` with a workspace folder and `HostExecutionPolicy()`, then plain-language requests: create a reports folder, write a research file, write and run a small script, delete it, build a calculator. One run printed `Command timed out after 30.00 seconds; restarting shell session` (the calculator waited for input), a useful picture of the shell timeout.
+- **Setup for the custom part.** Four CineBot tools (showtimes, book seats, cancel booking, refund policy) and the reason for custom middleware: rules nothing built-in knows, such as "no customer books more than 2 movies in one session".
+- **Hooks as functions.** `@before_model` logging the message count, `@before_agent` and `@after_agent` printing "connected to DB" and "disconnected", all returning `None` to mean "observed, nothing to change".
+- **Gating and cost.** `@wrap_model_call` that removes `book_vip_lounge` from `request.tools` unless the state says the user is a VIP, and another that picks a cheap model for short conversations and a stronger one past 10 messages.
+- **Class form.** A `CallCounterMiddleware` with a counter and a `warn_after` limit that prints a joking warning after the third call.
+- **Execution order.** Several hooks together, then `PIIMiddleware` for email (redact) and credit card (mask), and a subclass that overrides `wrap_model_call` and returns an `ExtendedModelResponse` with a `Command` that adds a "[Outer ran]" message, to show which layer runs outermost.
+- **Honest note.** It is live scratch code with slips (a hook written with no parameters, class methods without `self`, a stray `sum` function, a tool name used before it was defined), so treat it as a demo of the ideas, not a model to copy.
+<!-- /craftcolab-mw -->
+
 ## Common mistakes
 
 | Mistake | Symptom | Fix |
