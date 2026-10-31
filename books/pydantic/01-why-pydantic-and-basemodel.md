@@ -20,6 +20,12 @@ Pydantic is one of the most downloaded packages on PyPI and is used by major SDK
 
 In the live demo the plain class and the dataclass both accepted `age="banana"`. Only `BaseModel` raised an error immediately.
 
+The class slide frames it with a paper customs-declaration form. Its fields (for example `Name: str` and `PassportNumber: str`) are the blueprint, and the three approaches (plain `class`, `Dataclass`, `BaseModel`) differ in whether anyone checks what is written in the boxes. The slide marks `BaseModel` as the one the course will master, and notes that the loose typing of Python and JavaScript becomes a very big issue once you make or deploy anything in production.
+
+The same slide maps validators to fields: an `email` needs a field validator or a special type such as `EmailStr`, and years of experience (YOE) needs a field validator or a `Field()` limit. It also shows the typed collections from the earlier section (`list[str]`, `dict[str, int]` and so on), where the editor shows the type when you hover a variable, for example `settings: dict[str, str]`.
+
+*Source: `Class-3-4.pdf` (class 03 whiteboard).*
+
 | Dataclass | Pydantic `BaseModel` |
 |---|---|
 | Removes boilerplate only | Removes boilerplate and validates |
@@ -160,6 +166,6 @@ uv run main.py
 
 - Live-Class-2026, `classes_summary/03 - 4 Jul - Pydantic Deep Dive.md`
 - Live-Class-2026, `classes_transcription_summary/03 - 4 Jul - Pydantic Deep Dive.md`
-- Live-Class-2026, code folder `.../02-03 - 28 Jun & 4 Jul - .../8_Pydantic/` (all five files)
+- Live-Class-2026, code folder `.../02-03 - 28 Jun & 4 Jul - .../8_Pydantic/` (all five files) and the whiteboard `Class-3-4.pdf`
 
 Previous: [Python book, Chapter 2](../python/02-python-refresher.md) · Next: [Chapter 2](02-field-and-special-types.md)

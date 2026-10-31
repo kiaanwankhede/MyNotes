@@ -14,6 +14,18 @@ Then install, in this order: Python 3.10 or newer, **UV**, and **VS Code**.
 
 UV is one fast tool that replaces the usual mix of `pip`, `venv` and `conda`/`poetry`. It also mirrors how modern teams manage projects: a single file records the exact Python version and the libraries a project needs, so a teammate can rebuild the same setup. This is the same job `package.json` does in Node. Think of it as a recipe that lists exact ingredients and quantities rather than "some salt".
 
+UV is both a **package manager** (it helps you install packages) and a **project manager** (it keeps the Python version and the package list together). The class slide says UV is "10-100x faster than pip etc.". That is the slide's claim and I have not measured it. The slide also lists `pip`, `venv` and `conda` as the older options and crosses out Anaconda (Anaconda, Miniconda and Conda). The class 01 transcript is gentler: keep conda if you already use it, but do not mix conda and UV commands in one project.
+
+### What you need installed
+
+Before the first coding class: Python, UV, VS Code and a terminal. The slide's advice is to develop in a terminal. Windows has no real terminal by default (it has `cmd` and PowerShell), which is why Git Bash or Windows Terminal is recommended. The class also advised against using an office laptop.
+
+### Check your Python version
+
+Run both `python3 --version` and `python --version`. The slide's example shows two different answers on one machine (3.13.2 and 3.12.9) and says both should be 3.10 or newer. Python versions are like Windows or Office versions: several exist side by side, and you need to be on a recent enough one.
+
+*Source: `Class-1-Python-and-AI.pdf` (class 01 whiteboard), `classes_transcription_summary/01`.*
+
 ### Virtual environments: the "room" idea
 
 A virtual environment is a room.
@@ -23,7 +35,7 @@ A virtual environment is a room.
 - Whatever you install inside stays inside. The outside world and its packages cannot see in.
 - `deactivate` walks you out.
 
-Outside the room is your base Python with its global packages. Inside, a new environment starts empty until you install something. Each project can have its own Python version and its own packages, so projects never conflict.
+Outside the room is your base Python with its global packages. Inside, a new environment starts empty until you install something. Each project can have its own Python version and its own packages, so projects never conflict. The slide draws this as one machine with several rooms: one `venv` on Python 3.12 with no packages, another on 3.13 with a few, and a terminal-level Python (3.12.9) beside a venv Python (3.13.2) that holds `requests`. The slide labels the two things you choose for a project: the libraries you want and the Python version.
 
 ```bash
 uv venv                      # build the room
@@ -34,14 +46,18 @@ deactivate                   # walk out
 
 ### Project mode: `uv init`
 
-`uv init my-first-project` creates a project folder with:
+`uv init my-first-project` creates a project folder. The slide's table says what each item is, whether `uv init` creates it, and whether you edit it:
 
-| File | Purpose |
-|---|---|
-| `pyproject.toml` | Python version and dependency list. The file a teammate's machine reads to rebuild your setup |
-| `uv.lock` | Also created by `uv init` (lock file) |
-| `.python-version` | Also created by `uv init` |
-| `main.py` | A starter script |
+| File or folder | Created by `uv init`? | Purpose | Edit it? |
+|---|---|---|---|
+| `.venv/` | No. Created by `uv venv` or `uv sync` | The virtual environment: the Python interpreter, installed packages, activation scripts. Keeps the project's dependencies separate from the system Python | No |
+| `.python-version` | Yes | Stores the Python version the project should use (for example `3.12`). Tools such as `uv` or `pyenv` select it when you enter the directory | Rarely |
+| `main.py` | Yes | A simple starter file, an entry point where you begin writing the application | Yes |
+| `pyproject.toml` | Yes | The heart of a modern Python project: name, version and description, dependencies, build configuration, scripts, and tool settings (for example Ruff, Black, Pytest) | Yes |
+| `README.md` | Yes | Documentation: what the project does, how to install and run it. GitHub shows it automatically | Yes |
+| `uv.lock` | Yes, but only after you add dependencies or run `uv sync` | Records the exact version of every installed dependency, including the ones those depend on, so everyone gets the same environment | No (generated automatically) |
+
+*Source: the table on the class 01 whiteboard, `Class-1-Python-and-AI.pdf`. An earlier version of this chapter said `uv.lock` comes from `uv init` itself; the slide says otherwise, so that line was corrected.*
 
 The class's `my-first-project` folder is exactly this scaffold. To run it on a fresh machine:
 
@@ -258,6 +274,6 @@ uv run currency.py
 
 - Live-Class-2026, `classes_summary/01 - 27 Jun - Python Setup & API Basics.md`
 - Live-Class-2026, `classes_transcription_summary/01 - 27 June - Python Setup & API Basics.md`
-- Live-Class-2026, code folder `Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/` (all files in it, including its `README.md` and the `my-first-project` folder)
+- Live-Class-2026, code folder `Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/` (all files in it, including its `README.md`, the `my-first-project` folder and the whiteboard `Class-1-Python-and-AI.pdf`)
 
 Next: [Chapter 2, Python refresher](02-python-refresher.md)

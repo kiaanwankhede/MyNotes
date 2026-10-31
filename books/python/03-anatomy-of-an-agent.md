@@ -78,7 +78,9 @@ The agent itself is only plumbing that moves data between these three. The mento
 2. **Add memory.** Before each call the agent fetches the earlier messages, sends them with the new one, then saves the exchange. The brain is called once per turn. This is short-term memory only: a fresh chat starts blank. Long-term memory is a later topic.
 3. **Add tools.** Each tool has a description, and that description is what tells the brain the tool exists. For a casual greeting the brain replies directly. For a factual question it chooses a tool, the tool returns raw results, and the brain is called a second time to turn them into an answer. That is the flow: brain, decide, maybe tool, brain again, respond.
 
-*Source: `classes_transcription_summary/04`. The demos in class used a visual workflow tool purely as illustration and are not code in this book.*
+The class 03-04 whiteboard draws the same thing. The agent's instructions say "You are a helpful assistant, you have 3 tools" and list web search, calculator and weather, next to the memory. For the request "Search for Virat Kohli latest innings" the brain answers with a tool call (call search with the name), the tool returns its results, and the brain is called again to turn them into the reply. The slide describes the agent as an intern or digital human made of brain, memory and tools, and quotes a student's own definition: an agent works out the steps of a task and does them, rather than only answering questions.
+
+*Source: `classes_transcription_summary/04` and `Class-3-4.pdf`. The demos in class used a visual workflow tool purely as illustration and are not code in this book.*
 
 ## 3.4 Calling a real model: four providers, one shape
 

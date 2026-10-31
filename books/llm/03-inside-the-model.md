@@ -16,11 +16,15 @@ This chapter starts with the five terms you need before building an agent, and h
 
 ### LLM
 
-An LLM is trained on a huge amount of text and learns which word usually comes next. It then generates text one token at a time by probability. The class analogy: a friend who has read every book ever published but was never told what any of it means. They have simply seen "thank you for" followed by "your business" millions of times. ChatGPT, Claude and Gemini are LLMs; OpenAI, Anthropic and Google are LLM providers.
+An LLM is trained on a huge amount of text and learns which word usually comes next. It then generates text one token at a time by probability. The class analogy: a friend who has read every book ever published but was never told what any of it means. They have simply seen "thank you for" followed by "your business" millions of times. ChatGPT, Claude and Gemini are LLMs; OpenAI, Anthropic and Google are LLM providers. The class slide's line: ChatGPT is to AI what Google is to the internet, a household name for the whole field. It draws the LLM as a box with an input on one side and, on the other, an output that is a next-token prediction.
 
 ### Tokens
 
 The model sees only tokens, never raw words. A token is more like a Lego brick than a word, so "unbelievable" can split into three pieces. You are billed per token on both input and output, like a prepaid phone plan billed per minute. Output costs more because the model has to generate it, not just receive it. Input tokens are charged too, because every token must be processed. An uploaded PDF costs tokens like any other input.
+
+The slide's token example: a short input measured as 5 tokens. The output can be anything, but it too is counted in tokens. Output tokens always cost more than input tokens. The slide's price card shows a model labelled "5.5" at $5 for input and $30 for output (the card does not state the unit), and writes "output pricing is 6 times the input". Prices change, so check the current ones before relying on the ratio. The slide's one-line summary: tokens are the currency of AI. It also compares tokens to a phone plan charged by the minute, where more words mean more minutes and words are the currency of talking.
+
+*Source: `Class-3-4.pdf`.*
 
 ### Vector embeddings
 
@@ -46,7 +50,9 @@ The context window explains why a model gets forgetful in a long chat. In a clas
 
 ## 3.3 Web app versus API
 
-The chat web apps are like an all-you-can-eat buffet: a flat subscription and no visible per-token cost. The API is à la carte: you pay exactly per token and see full usage. When you build software you need the API.
+The chat web apps are like an all-you-can-eat buffet: a flat subscription and no visible per-token cost. The API is à la carte: you pay exactly per token and see full usage. When you build software you need the API. The slide labels the web app a "controlled buffet" and the API "à la carte", and notes that through the API you can have lots and lots of models. A student question captured on the slide, with no answer written on it, asks what happens to the context window if you switch between two models in the same chat.
+
+*Source: `Class-3-4.pdf`.*
 
 **OpenRouter** gives one API key for models from many providers (OpenAI, Anthropic, Google, Mistral and others). The class created a key, called a free model, and checked the exact input and output token counts in the dashboard.
 
@@ -61,6 +67,7 @@ The chat web apps are like an all-you-can-eat buffet: a flat subscription and no
 - Live-Class-2026, `classes_summary/03 - 4 Jul - Pydantic Deep Dive.md` (vocabulary table)
 - Live-Class-2026, `classes_transcription_summary/03 - 4 Jul - Pydantic Deep Dive.md`
 - Live-Class-2026, `classes_transcription_summary/04 - 5 Jul - Anatomy of an Agent.md`
+- Live-Class-2026, whiteboard `Class-3-4.pdf` in the class 02-03 folder
 
 Previous: [Chapter 2](02-the-agentic-loop-in-pure-python.md) · Next: [Chapter 4, Glossary](04-glossary.md)
 
