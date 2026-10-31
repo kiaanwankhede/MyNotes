@@ -10,6 +10,8 @@ An alphabetical list of the terms that the books already explain. Each entry giv
 
 **Agent.** Orchestration code that joins a brain (the LLM), memory (the chat history) and tools, so the model can act and not only talk. The agent itself is not intelligent. See [Python, Chapter 3](../python/03-anatomy-of-an-agent.md).
 
+**Agentic loop.** The cycle behind every agent: send the messages and tool schemas to the model, run any tool it asks for, append the result, and call the model again, until it replies with plain text. See [LLM, Chapter 2](02-the-agentic-loop-in-pure-python.md).
+
 **AgentOps.** The production side the course pairs with agent building: deployment and monitoring, taught after the fundamentals and framework phases. See [LLM, Chapter 1](01-course-roadmap-and-prerequisites.md).
 
 **AI model, chatbot, agent.** Three layers. A model makes one stateless prediction. A chatbot is a model plus history. An agent is a model plus history plus tools it can choose to use. See [Python, Chapter 3](../python/03-anatomy-of-an-agent.md).
@@ -54,9 +56,17 @@ An alphabetical list of the terms that the books already explain. Each entry giv
 
 **Groq.** A fast, free inference provider (not Elon Musk's "Grok") that hosts mostly open-source models behind an OpenAI-compatible API. Point the OpenAI client at its `base_url` with its key and the same code works. See [Python, Chapter 3](../python/03-anatomy-of-an-agent.md).
 
+## K
+
+**Knowledge cutoff.** The date a model's training data ends. It cannot know anything later, which is one reason agents need tools such as web search. See [LLM, Chapter 2](02-the-agentic-loop-in-pure-python.md).
+
 ## L
 
 **LLM.** A large language model. It predicts the next token from patterns in text. See [Inside the model](03-inside-the-model.md).
+
+## M
+
+**max_tokens and max_turns.** `max_tokens` caps the length of a model's output, which also limits runaway cost. `max_turns` (called `max_iterations` in the class pseudo-code) caps how many times the agent loop may call the model. See [LLM, Chapter 2](02-the-agentic-loop-in-pure-python.md).
 
 ## N
 
@@ -80,11 +90,15 @@ An alphabetical list of the terms that the books already explain. Each entry giv
 
 **Structured output.** Making a model's reply fit a defined shape. Here that means asking for JSON and validating it with Pydantic before trusting it. See [Pydantic, Chapter 5](../pydantic/05-validating-llm-output.md). The LangChain way of doing it is not written up yet.
 
+**System, user and assistant messages.** The three roles of message sent to a model on every call: the rules (system, optional), what the person typed (user), and the model's earlier replies (assistant). See [LLM, Chapter 2](02-the-agentic-loop-in-pure-python.md).
+
 ## T
 
 **Token.** The unit a model reads, writes and bills in, about three quarters of a word. Output tokens cost more than input tokens. See [Inside the model](03-inside-the-model.md).
 
 **Tool.** A function an agent can use. In plain Python it is a function with a docstring, and a decorator can register it by name. See [Python, Chapter 1](../python/01-setup-and-api-basics.md). The LangChain `@tool` is not written up yet.
+
+**Tool schema.** The name, description and parameters of a tool, sent to the model so it can decide whether and how to call it. The model never sees the function itself. See [LLM, Chapter 2](02-the-agentic-loop-in-pure-python.md).
 
 ## U
 
@@ -98,7 +112,7 @@ An alphabetical list of the terms that the books already explain. Each entry giv
 
 ## Terms waiting for their books
 
-The source glossaries also define over 100 terms from the LangChain and MCP classes, for example middleware, hooks, checkpointing, human-in-the-loop, runtime, MCP primitives, capability negotiation and transports. They are not defined here yet, because those chapters are not written. Other terms from classes already covered but not yet explained in a book include the agentic loop, knowledge cutoff, `max_tokens`, system, user and assistant messages, tool schema, vibe coding and harness.
+The source glossaries also define over 100 terms from the LangChain and MCP classes, for example middleware, hooks, checkpointing, human-in-the-loop, runtime, MCP primitives, capability negotiation and transports. They are not defined here yet, because those chapters are not written. Other terms from classes already covered but not yet explained in a book include vibe coding and harness.
 
 ## Sources and further reading
 
