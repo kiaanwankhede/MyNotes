@@ -24,9 +24,9 @@
   {
    "group": "Meridian slides",
    "name": "Modules read in full",
-   "done": 4,
+   "done": 5,
    "total": 7,
-   "note": "Modules 1, 2, 3 and 5 read in full (223 slides). Modules 4, 6 and 7 are digests from the \"In short\" lines (module 4 chapter 21 was read in full). Remaining about 370K characters."
+   "note": "Modules 1, 2, 3, 4 and 5 read in full (about 350 slides). Modules 6 and 7 (the service and screen, Docker and Google Cloud) are still digests from the \"In short\" lines. Remaining about 240K characters."
   },
   {
    "group": "Craft page",
@@ -71,6 +71,7 @@
   "Only the TimeTrack lab was run; SDK snippets in the Pydantic book were not run"
  ],
  "log": [
+  "2026-10-31: Meridian module 4 (RAG) read in full, now 5 of 7 modules; RAG chapters expanded",
   "2026-10-31: Meridian module 5 (the audit team) read in full, now 4 of 7 modules",
   "2026-10-31: Meridian modules 1 and 3 read in full (now 3 of 7); STATUS.md and CLAUDE.md added",
   "2026-10-31: Read the 18 blocked LangChain docs pages (now 41 of 41), Meridian module 2, AI terms and Python-agents sites, class 1-2 write-ups and the last unread repo files"

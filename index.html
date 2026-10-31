@@ -14528,6 +14528,201 @@ app.mount(&quot;/mcp&quot;, mcp_app)
 </ul>
 <!-- /ragguide -->
 
+<!-- m4a -->
+<h2 id="rag-r1-from-the-meridian-slides-in-full-chapters-13-to-">From the Meridian slides in full: chapters 13 to 15</h2>
+<p><em>Module 4 of the Meridian course slides (125 slides) was read in full on 31 Oct 2026. This section adds what the earlier digest left out.</em></p>
+<p><strong>Chapter 13, the idea, with real recorded answers.</strong> Asked "what payment terms do servo motor suppliers get at Aldermoor?" with no documents, the model (gemini-3.8-flash, temperature 0, 10 Oct 2026) gave generic advice that such terms are private and negotiated. With the procurement policy page in the prompt, it answered exactly: Net-45 for low-risk vendors with a credit score of 75 or more. The slides then test the prompt's honest exit across combinations of pages. With the instruction "answer only from the context, otherwise say you don't know" switched on, the tariff page alone gave "I don't know", and the policy page alone gave Net-45 even with the tariff page as a distraction. With the instruction off, the model answered from the policy page when it had it, and without it gave generic advice. One sentence in the prompt is what makes an honest refusal reliable.</p>
+<p>The two stages in the project's settings: index once (PyPDFLoader reads each page and remembers the file name; <code>RecursiveCharacterTextSplitter</code> cuts chunks of about 1,000 characters with 100 overlap; an embedding model returns 768 numbers per chunk; Chroma saves numbers and text, with stable ids so re-indexing replaces) and then per question (embed the question with the <strong>same</strong> model, take the nearest three chunks, build the prompt, let Gemini answer). Real closeness scores sit in a narrow band (0.85 for the right sentence against 0.55 and 0.57 for the others), so compare scores with each other, never with zero.</p>
+<p>On 22 sentences from the four sample documents and eight questions, keyword search found a correct sentence in its top three for 2 questions and meaning search for 8 (the instructor's own judgement of "correct"). For "who has to approve a very expensive order?" the sentences share no useful word, yet meaning search finds the EUR 250,000 and EUR 1,000,000 approval lines. For "when do we pay servo motor suppliers?" the nearest by meaning were the right sentence (0.67), the servo-motor tariff line (0.67) and a wrong-risk-class line (0.66), which is why ranking matters.</p>
+<p><strong>The eight things that go wrong, with the symptom, cause and fix.</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Confident but wrong</td>
+<td>The right chunk was not retrieved, or a near miss came first</td>
+<td>Look at the retrieved chunks before blaming the model; try another mode, a larger k, or a reranker</td>
+</tr>
+<tr>
+<td>"I don't know" though the file has the answer</td>
+<td>The chunk was never found: wrong chunk size, a scanned PDF with no text, very different words</td>
+<td>Check the PDF has real text, try smaller chunks, try multi-query</td>
+</tr>
+<tr>
+<td>Mixes two documents</td>
+<td>Chunks from different topics came back together</td>
+<td>Smaller k, rerank, filter by source, or contextual compression</td>
+</tr>
+<tr>
+<td>Ignores the files</td>
+<td>The prompt does not force the context</td>
+<td>Keep "if you don't know based on the context, say you don't know"</td>
+</tr>
+<tr>
+<td>Worse after changing the embedding model</td>
+<td>Index and search use different models</td>
+<td>Re-index everything with the new model; never mix</td>
+</tr>
+<tr>
+<td>The same sentence twice</td>
+<td>A file was indexed twice with random ids</td>
+<td>Stable ids from file, page and position</td>
+</tr>
+<tr>
+<td>Slow</td>
+<td>Each model-based step (rewrite, trim, rerank) adds a call</td>
+<td>Use plain similarity unless the question needs more</td>
+</tr>
+<tr>
+<td>Key sentence cut in half</td>
+<td>A chunk boundary fell mid-sentence</td>
+<td>Overlap, recursive splitter, chunks large enough for a whole idea</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Chapter 14, thirteen variants, each with a pipeline, a best use and a cost.</strong> Basic RAG hurts three ways: different words ("expensive order" versus "purchases above EUR 250,000"), wrong order (the right chunk is third), and noise or gaps. The variants improve it in four places.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Where</th>
+<th>Variant</th>
+<th>Idea</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Before the search</td>
+<td>Multi-query</td>
+<td>The model writes 3 rewrites; search all 4; merge</td>
+<td>1 extra model call and 4 searches (12 s against 7 s in the run)</td>
+</tr>
+<tr>
+<td></td>
+<td>HyDE</td>
+<td>Search with an imagined answer (never shown or trusted)</td>
+<td>1 extra call</td>
+</tr>
+<tr>
+<td></td>
+<td>Query decomposition</td>
+<td>Split a many-part question; search each; merge</td>
+<td>1 call plus several searches</td>
+</tr>
+<tr>
+<td></td>
+<td>Follow-up rewrite</td>
+<td>"And for moderate risk?" becomes a standalone question</td>
+<td>1 call per turn</td>
+</tr>
+<tr>
+<td>During</td>
+<td>Hybrid</td>
+<td>Keyword and meaning rankings fused (often reciprocal rank fusion)</td>
+<td>A second index to keep</td>
+</tr>
+<tr>
+<td></td>
+<td>MMR</td>
+<td>Relevant but unlike each other</td>
+<td>A little computation</td>
+</tr>
+<tr>
+<td></td>
+<td>Parent pages</td>
+<td>Search small pieces, return the whole page</td>
+<td>Bigger prompts</td>
+</tr>
+<tr>
+<td>After</td>
+<td>Reranking</td>
+<td>Fetch many, a stronger judge reorders (for example 20 down to 3)</td>
+<td>Latency and a reranker call</td>
+</tr>
+<tr>
+<td></td>
+<td>Contextual compression</td>
+<td>Fetch 10, the model copies only the relevant sentences (one call per chunk); one 844-character chunk shrank to 193</td>
+<td>Many small calls</td>
+</tr>
+<tr>
+<td></td>
+<td>Corrective RAG</td>
+<td>Grade the results; if poor, rewrite and search again</td>
+<td>Extra calls</td>
+</tr>
+<tr>
+<td>Beyond</td>
+<td>Agentic RAG</td>
+<td>An agent decides whether, what and how often to search</td>
+<td>Most expensive, least predictable</td>
+</tr>
+<tr>
+<td></td>
+<td>Graph RAG</td>
+<td>Entities and relations; follow links</td>
+<td>Building and maintaining the graph</td>
+</tr>
+<tr>
+<td></td>
+<td>Multimodal RAG</td>
+<td>Index images and tables too</td>
+<td>Heavier parsing</td>
+</tr>
+</tbody>
+</table></div>
+<p>Which to try first: right chunk found but not first, rerank; users phrase things differently, multi-query or HyDE; questions with several parts, decomposition; chat follow-ups, rewrite; exact names or codes missed, hybrid; long noisy chunks, compression; near-duplicate results, MMR; the answer needs surrounding text, parent pages; the model answers when the documents don't cover it, corrective RAG. Meridian implements three (similarity, multiquery, contextual), timed at 7.1, 12.0 and 9.7 seconds in one run and 5.0, 9.8 and 5.8 in another: the numbers varied, the order held.</p>
+<p><strong>Chapter 15, the tools.</strong> The eight parts (parse, chunk, embed, store, retrieve, rerank, generate, evaluate), with the slide's example tools:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Examples</th>
+<th>In Meridian</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Parse</td>
+<td>pypdf, PyMuPDF, Docling, Unstructured, LlamaParse, Google Document AI</td>
+<td><code>PyPDFLoader</code> (pypdf)</td>
+</tr>
+<tr>
+<td>Chunk</td>
+<td>Recursive, semantic or layout-based splitters</td>
+<td>Recursive, 1,000 and 100</td>
+</tr>
+<tr>
+<td>Embed</td>
+<td>Gemini, OpenAI, Cohere, Voyage, BGE-M3, Qwen3-Embedding, Nomic</td>
+<td><code>gemini-embedding-001</code>, 768 numbers</td>
+</tr>
+<tr>
+<td>Store</td>
+<td>Chroma, FAISS, pgvector, Qdrant, Weaviate, Milvus, Pinecone, Elasticsearch or OpenSearch</td>
+<td>Chroma locally, Vertex AI Vector Search in the cloud</td>
+</tr>
+<tr>
+<td>Rerank</td>
+<td>Cohere Rerank, BGE reranker, cross-encoders, a model as judge</td>
+<td>Not in the project (shown in the lab)</td>
+</tr>
+<tr>
+<td>Evaluate</td>
+<td>RAGAS, DeepEval, TruLens, LangSmith, your own question list</td>
+<td>A five-question lab</td>
+</tr>
+</tbody>
+</table></div>
+<p>Embedding models: check how many numbers, languages, how much text it accepts, hosted versus open, and use one model for both indexing and search; leaderboards such as MTEB change every few months, so test on your own documents. Vector databases store vectors with text and metadata, find neighbours, filter and update; exact search compares every vector, approximate search (often an HNSW index) looks at a clever subset, faster at millions with a small chance of missing the best match. Five questions to choose one: how many vectors (thousands: Chroma or FAISS; millions: Qdrant, Weaviate, pgvector or managed; billions: Milvus or managed); do you already run Postgres (pgvector) or Elasticsearch or OpenSearch; do you want to run servers; do you need filters or keyword search; where must the data live. Region, privacy and contracts can decide before performance does. Frameworks save plumbing, not thinking: LangChain here, LlamaIndex for indexing and querying, Haystack for typed pipelines, DSPy for tuning, or none.</p>
+<!-- /m4a -->
+
 <h2 id="rag-r1-interview-corner">Interview corner</h2>
 <details class="qa"><summary>What is RAG?</summary><div class="ans"><p>Find the right pages first, then answer from them: an open-book exam. Chunks of your documents are embedded, stored in a vector database and retrieved by meaning, then given to the model with the question.</p></div></details>
 <details class="qa"><summary>How does it stop the model making things up?</summary><div class="ans"><p>The prompt says to answer from the retrieved context and to say "I do not know" otherwise.</p></div></details>
@@ -14587,6 +14782,13 @@ app.mount(&quot;/mcp&quot;, mcp_app)
 </table></div>
 <p>Everything that needs storage asks one question (<code>settings.is_cloud</code>) and receives a LangChain <code>VectorStore</code>, so ingestion and retrieval never know which database is behind them. This is the <strong>strategy pattern</strong>: same interface, swappable implementation. Both modes use 768-dimensional vectors, but the two databases are separate, so re-upload after switching. The deployment side of <code>APP_MODE</code> is in the last chapter of the LangChain book.</p>
 <!-- docs31h -->
+<!-- m4b -->
+<h2 id="rag-r2-from-the-meridian-slides-in-full-chapters-16-to-">From the Meridian slides in full: chapters 16 to 18</h2>
+<p><strong>Chapter 16, the model and the embeddings (<code>rag/llm.py</code> 35 lines, <code>rag/embeddings.py</code> 41).</strong> Two jobs need the model (answering and later the audit agents), so one shared connection avoids two configurations. <code>get_llm()</code> is created on first use, not on import, so the API can start and answer health checks before any key exists, and <code>lru_cache</code> keeps one object. An empty key raises <code>ConfigurationError</code> with the address to get a key (HTTP 503 in the API). Gemini may reply with a list of content blocks, so <code>extract_text</code> keeps every text block and joins them; a plain string passes through. A gotcha found while writing the variants lab: <code>reply.text</code> is a special string type that the Google embedding client rejected (a 500 INTERNAL), while <code>extract_text(reply.content)</code> returns a plain string and works. <code>embeddings.py</code> follows <code>APP_MODE</code>: local uses <code>gemini-embedding-001</code> through the Gemini API with a key; cloud uses <code>text-embedding-005</code> through Vertex AI with Google Cloud credentials; both give 768 numbers, through one class (<code>GoogleGenerativeAIEmbeddings</code>, with <code>vertexai=True</code> for the cloud). <code>embed_query</code> turns one question into numbers; <code>embed_documents</code> does several at once, which is what indexing uses. Numbers from two models are like temperatures in two unknown units, and a store built for 768 numbers refuses 3,072. Change the model and you must re-index everything and keep one index per model; local and cloud both give 768 numbers but are different models, so never point cloud queries at a local index.</p>
+<p><strong>Chapter 17, storing meaning (<code>vector_store.py</code> 54 lines, <code>document_store.py</code> 80).</strong> The vector store keeps each chunk's numbers, text and source, finds nearest chunks, and survives a restart because Chroma writes to a folder (<code>.meridian/chroma</code>). The rest of the code uses only <code>add_documents</code>, <code>similarity_search</code> and <code>as_retriever</code>. The Chroma import sits inside the function so cloud images do not load it; the cloud path checks the settings with the Module 3 helper, raises an error naming any empty ones, imports Google Cloud packages only then, and builds the store from project, region, index and endpoint (<code>stream_update</code> makes new chunks searchable quickly). <code>get_vector_store()</code> connects on first use and one expression chooses the store from <code>APP_MODE</code>. The vector database holds chunks, not PDFs, so a new embedding model, chunk size or bug fix means re-indexing from the <strong>originals</strong>; <code>document_store</code> has <code>save</code> (a folder locally, a bucket in the cloud) and <code>pdfs</code>, a context manager that downloads to a temporary folder in the cloud and yields a path and a source name (<code>local://file.pdf</code> or <code>gs://bucket/file.pdf</code>) that is saved in every chunk. <code>basename</code> keeps only the file name so an uploaded name cannot point outside the folder.</p>
+<p><strong>Chapter 18, ingestion (<code>data_ingestion.py</code>, 73 lines).</strong> Three reasons to cut: a whole document is too big and costs more the longer it is, one set of numbers for a whole page describes everything and nothing, and a sentence is often the answer. The four sample PDFs are 645, 664, 845 and 950 characters, so each is exactly one chunk; the chunking matters for your own longer documents. <code>PyPDFLoader</code> reads page by page; the splitter uses 1,000 and 100; <code>split_documents</code> keeps each page's metadata. Chunk ids are a <code>sha1</code> of source, page and position, so the same chunk always gets the same id and indexing again replaces instead of duplicating (the lab shows the count staying at one; random ids would give two and duplicate answers). <code>ingest_pdf</code> reads, turns a bad PDF into an <code>IngestionError</code> (HTTP 422), stamps the source on every page, cuts, assigns ids, embeds and stores. <code>ingest_stored_pdfs</code> logs where it is indexing, opens every stored PDF, calls <code>ingest_pdf</code> for each and counts files, pages and chunks (four, four, four); an empty store is a warning, not an error. The upload endpoint uses <code>ingest_pdf</code> and the "index everything" button uses <code>ingest_stored_pdfs</code>. Only text PDFs work: a scan has no text until OCR is applied.</p>
+<!-- /m4b -->
+
 <h2 id="rag-r2-from-the-docs-a-semantic-search-engine-in-langch">From the docs: a semantic search engine in LangChain primitives</h2>
 <p><em>From the LangChain tutorial <a href="https://docs.langchain.com/oss/python/langchain/knowledge-base" target="_blank" rel="noopener">Build a semantic search engine</a>, read in full on 31 Oct 2026. It is the generic version of what Meridian does.</em></p>
 <ol>
@@ -14716,6 +14918,43 @@ app.mount(&quot;/mcp&quot;, mcp_app)
 <p>three strategies with one signature (question in, documents out) chosen from a dictionary, wrapped in <code>RunnableLambda</code>, then the whole chain in sixteen lines. Contextual compression runs <code>batch</code> over the chunks in parallel. Similarity is one model call, multi-query two, contextual one plus one per chunk.</p>
 <h3 id="rag-r3-the-lab-ask-the-four-documents">The lab: ask the four documents</h3>
 <p>write the expected answers first, because a test without an expected answer is just a demo (EUR 2.84 billion, Net-45, 2.2 percent, 10 years, an honest refusal). All five matched in about 24 seconds. Ask the log, not memory: each question leaves a <code>RAG query received</code> line.</p>
+<!-- m4c -->
+<h2 id="rag-r3-from-the-meridian-slides-in-full-chapters-19-and">From the Meridian slides in full: chapters 19 and 20</h2>
+<p><strong>Chapter 19, <code>retrieval.py</code> (115 lines).</strong> Retrieval has four jobs: find the closest chunks (three strategies with one signature, question in and documents out), format them as one block with source names, instruct the model to answer only from that text, and answer. The system prompt is a job description whose second sentence is the honest exit. A second prompt, used only by contextual compression, returns the marker <code>NO_OUTPUT</code> for "nothing relevant". The plain search is one line: ask the store for the <code>k=3</code> closest chunks. Multi-query uses <code>with_structured_output</code> so Gemini returns an <code>AlternativeQuestions</code> shape (one model call, three rewrites), searches the original plus the three, and merges while skipping duplicates (up to four chunks). Contextual compression fetches ten chunks, builds a tiny chain (extraction prompt, model, text), runs <code>batch</code> over the chunks in parallel and drops empty answers and <code>NO_OUTPUT</code>; in the run one 193-character chunk survived. A dictionary of functions picks the strategy from the API's <code>retriever_type</code>, falling back to similarity with a warning; <code>RunnableLambda</code> wraps a plain function so it can join the pipe; <code>format_docs</code> joins the chunks with their source names. The chain, in sixteen lines: question in, context retrieved and formatted while the question passes through, both fill the answer prompt, the shared Gemini model, a string parser; read the pipe as "and then". This is LCEL.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Model calls</th>
+<th>In the prompt</th>
+<th>One run</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Similarity</td>
+<td>1 (the answer)</td>
+<td>3 chunks</td>
+<td>7.1 s</td>
+</tr>
+<tr>
+<td>Multi-query</td>
+<td>2 (rewrite, answer)</td>
+<td>up to 4 chunks, merged</td>
+<td>12.0 s</td>
+</tr>
+<tr>
+<td>Contextual</td>
+<td>1 plus one per chunk fetched</td>
+<td>only the relevant sentences</td>
+<td>9.7 s</td>
+</tr>
+</tbody>
+</table></div>
+<p>All three answered Net-45 correctly; the differences are cost and prompt size. Start with similarity, move to multi-query for vague questions or documents that use other words, and to contextual when chunks are long and noisy.</p>
+<p><strong>Chapter 20, the lab.</strong> A test without an expected answer is just a demo, so the answers are written first: revenue FY2024 about EUR 2.84 billion; servo-motor payment terms Net-45; customs duty on programmable controllers from Japan 2.2 percent; filling-line equipment depreciated over 10 years straight line; and a deliberate fifth question, "who won the football World Cup in 2022?", whose right answer is an honest refusal. All five matched in about 24 seconds (the refusal's wording varies, the refusal does not). Every question leaves two log lines, <code>RAG query received</code> (question and mode) and <code>RAG answer generated</code> (the text), which is how you answer "what did the system say at 2 a.m.?". If something goes wrong: a wrong fact (check the log, then the chunks found, then try multi-query); "I don't know" for a covered question (the index may be empty: ingest again and expect four, four, four); a 503 or API error (the key or a retired model name, set <code>VERTEX_LLM_MODEL_NAME</code>); a real answer to the football question (the instruction line is missing from the prompt); slow answers (network, or a mode with extra calls).</p>
+<!-- /m4c -->
+
 <h2 id="rag-r3-interview-corner">Interview corner</h2>
 <details class="qa"><summary>What are the three retrieval strategies?</summary><div class="ans"><p>Similarity (top 3 by meaning), multi-query (the model rewrites the question several ways and merges results) and contextual (fetch 10, then compress each to the relevant part).</p></div></details>
 <h2 id="rag-r3-quick-revision">Quick revision</h2>
