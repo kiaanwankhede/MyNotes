@@ -27,7 +27,7 @@ Outside the room is your base Python with its global packages. Inside, a new env
 
 ```bash
 uv venv                      # build the room
-source .venv/bin/activate    # walk in (the activation command differs by OS; ask an AI to translate it for yours)
+source .venv/bin/activate    # walk in (Windows: .venv\Scripts\activate)
 uv add requests              # install inside the room (or: uv pip install requests)
 deactivate                   # walk out
 ```
@@ -42,6 +42,13 @@ deactivate                   # walk out
 | `uv.lock` | Also created by `uv init` (lock file) |
 | `.python-version` | Also created by `uv init` |
 | `main.py` | A starter script |
+
+The class's `my-first-project` folder is exactly this scaffold. To run it on a fresh machine:
+
+```bash
+uv sync          # install what pyproject.toml lists
+uv run main.py   # run the script
+```
 
 The starter `main.py` only proves the wiring works:
 
@@ -70,7 +77,7 @@ This course is about agents, not data science. The work is `.py` scripts, a real
 
 ## 1.2 Python fundamentals, with the agent meaning attached
 
-The class file `Python_foundamentals.py` captions every basic line with the role it plays in an agent later:
+A variable is a labelled box, and the data type says what kind of thing may go inside it (you would not store soup in a box labelled "books"). The class file `Python_foundamentals.py` captions every basic line with the role it plays in an agent later:
 
 ```python
 city = "Tokyo"                    # str   -- a tool ARGUMENT looks like this
@@ -78,8 +85,10 @@ temperature = 22.5                # float -- a tool RESULT often looks like this
 is_raining = False                # bool  -- a DECISION inside an agent looks like this
 forecast = [22.5, 23.1, 21.8]     # list  -- a sequence of readings, in order
 
+print(type(city), type(temperature), type(is_raining), type(forecast))   # shows the data types
+
 print(f"The temperature in {city} is {temperature} degrees.")
-print(f"That's {temperature * 9 / 5 + 32:.1f}°F.")   # math works inside f-string { }
+print(f"That's {temperature * 9 / 5 + 32:.1f}°F.")   # math works inside { }; :.1f rounds to 1 decimal
 
 if is_raining:
     print("Bring an umbrella.")
@@ -89,7 +98,13 @@ else:
 for day_temp in forecast:
     if day_temp > 23:
         print(f"{day_temp}°C — warm day")
+    else:
+        print(f"{day_temp}°C — mild day")
 ```
+
+I ran the file. It prints the four types (`str`, `float`, `bool`, `list`), `That's 72.5°F.`, `No umbrella needed.`, then `22.5°C — mild day`, `23.1°C — warm day`, `21.8°C — mild day`. The file ends with the line "Every one of these types and decisions reappears, unchanged, inside the agent you build later.", printed only when the file is run directly.
+
+The companion `notebook.ipynb` repeats the same variables (with `city = "Delhi"`) and the f-string demo, so you can run it cell by cell.
 
 Points to take from it:
 
@@ -184,13 +199,53 @@ def calculator(expression: str) -> float:
 
 **Pitfall.** `eval` is dangerous on arbitrary text. It is acceptable here only because the character check runs first. The class deliberately feeds the tool a SQL-injection-shaped string, `"12 + ; DROP TABLE users;"`, to show the guard rejects it. This habit matters more once a model, not a person, chooses the string.
 
-I ran the decorator and the calculator guard: `calculator("12 * (4 + 1)")` returns `60`, and the injection string raises `ValueError`.
+**Why the registry exists.** The decorator stores each function in `TOOL_REGISTRY` under its name. When a model later answers "call `get_weather`", your code has to find the real function by that name, and the registry is the lookup. The file registers three tools: `get_current_time`, `calculator` and `get_weather` (with its mock data inside the function). The calculator allows only digits, brackets, spaces and `+ - * / .`.
 
-*Source: `classes_summary/01`, code files `functions or tools.py` and `tools.py`.*
+The bottom of `tools.py` runs a demo:
+
+```python
+if __name__ == "__main__":
+    get_current_time()
+    calculator("12 * (4 + 1)")
+    get_weather("Tokyo")
+    print("\nRegistered tools:", list(TOOL_REGISTRY.keys()))
+
+    try:
+        calculator("12 + ; DROP TABLE users;")
+    except ValueError as exc:
+        print(f"Caught cleanly, nothing crashed: {exc}")
+```
+
+The reason for the `try/except`: a tool that crashes the whole program on bad input cannot be trusted when an AI calls it automatically, so the error is caught and the program carries on.
+
+I ran `tools.py`. It prints one `[tool call]` line for each of the three tools (the calculator returns `60`, the weather tool returns `22°C, partly cloudy`), then `Registered tools: ['get_current_time', 'calculator', 'get_weather']`, then the "Caught cleanly, nothing crashed" line with the rejected string.
+
+*Source: `classes_summary/01`, code files `functions or tools.py` and `tools.py`. A comment in `tools.py` names the agent loop as "Class 4"; the course index puts it in Class 05, so I have not repeated the number.*
 
 ## 1.5 Why frameworks come last
 
 The mentor's rule for the whole course: an agent is a concept, so learn it in plain Python first and only then use LangChain. This book, together with the Pydantic book, is that plain-Python phase.
+
+## Run the class code
+
+From the class 01 folder:
+
+```bash
+uv venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+uv add requests
+uv run currency.py
+```
+
+| File | What it is |
+|---|---|
+| `Python_foundamentals.py` | Variables, types, f-strings, control flow, functions and docstrings |
+| `OOPS.py` | First object-oriented Python outline (see Chapter 2) |
+| `currency.py` | Live currency API call with `requests` |
+| `functions or tools.py`, `tools.py` | Plain functions that preview agent tools, then the `@tool` registry |
+| `notebook.ipynb` | Companion exploration notebook |
+| `my-first-project/` | A real `uv init` project |
+
+*Source: the folder's `README.md`.*
 
 ## Practice
 
@@ -203,6 +258,6 @@ The mentor's rule for the whole course: an agent is a concept, so learn it in pl
 
 - Live-Class-2026, `classes_summary/01 - 27 Jun - Python Setup & API Basics.md`
 - Live-Class-2026, `classes_transcription_summary/01 - 27 June - Python Setup & API Basics.md`
-- Live-Class-2026, code folder `Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/`
+- Live-Class-2026, code folder `Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/` (all files in it, including its `README.md` and the `my-first-project` folder)
 
 Next: [Chapter 2, Python refresher](02-python-refresher.md)

@@ -53,6 +53,12 @@ account_2.withdraw(1000)   # too much on purpose: the guard clause rejects it
 
 *Source: `classes_summary/02`, `classes_transcription_summary/02`, code file `_2_oop_classes.py`.*
 
+### The OOP outline from class 01
+
+The first class's `OOPS.py` holds only an outline, as comments: classes, objects, inheritance, polymorphism, abstraction, encapsulation. The class summaries explain classes and objects (the `BankAccount` above); they do not explain the other four, so this book does not either yet.
+
+*Source: code file `OOPS.py` (class 01 folder).*
+
 ## 2.3 Dataclasses: no boilerplate
 
 `@dataclass` writes `__init__` for you from type-hinted fields. The idea is the same blueprint, written shorter. Java developers can compare it to Lombok.
