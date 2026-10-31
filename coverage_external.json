@@ -55,6 +55,13 @@
    "done": 0,
    "total": 1,
    "note": "README and folder layout only, source not read."
+  },
+  {
+   "group": "Code run",
+   "name": "Checks that pass",
+   "done": 71,
+   "total": 71,
+   "note": "Pydantic claims 45 of 45 (build/pydantic_claims_test.py), key-free Foundations and RAG checks 9 of 9 (build/rag_foundations_test.py), Meridian's own backend tests 17 of 17. TimeTrack lab run earlier. These are tests of stated behaviour, not of every chapter."
   }
  ],
  "skipped_on_purpose": [
@@ -65,12 +72,12 @@
   "API keys found in a notebook and a Colab (flagged in the notes, never reproduced)"
  ],
  "structure_gaps": [
-  "Foundations, Pydantic and RAG books have no glossary or cheat sheet",
   "RAG book is built only from Meridian; no course RAG classes exist yet",
-  "Chapter order inside the LangChain book has not been reviewed",
-  "Only the TimeTrack lab was run; SDK snippets in the Pydantic book were not run"
+  "LangChain chapter order reviewed on 31 Oct 2026: sound, with 8 findings waiting for your decision (see REVIEW_langchain_chapter_order.md); nothing reordered",
+  "Not run: provider SDK calls that need paid keys (Pydantic ch 11, Foundations, RAG with Gemini), Vertex AI Vector Search and Cloud Run, the thirteen RAG variants on real answers, and the notebook cells"
  ],
  "log": [
+  "2026-10-31: Glossaries and cheat sheets added to Foundations, Pydantic and RAG; Pydantic claims (45), key-free RAG/Foundations checks (9) and Meridian tests (17) run and passing; LangChain chapter order reviewed (REVIEW file, nothing reordered)",
   "2026-10-31: Craft attachments: 3 MCP PDFs not in the repo and all 10 Colabs opened (now 31 of 40); mini-contra checked; keys in Colab flagged",
   "2026-10-31: Context-window simulator site read in full (all 4 tabs and script); instructor sites now 15 of 15",
   "2026-10-31: Read the 7 unread Pydantic docs pages (unions, alias, config, dataclasses, TypeAdapter, performance, FastAPI x5); now 19 of 19",

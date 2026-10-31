@@ -36,6 +36,17 @@ Interactive demo: edit JSON and validate it against a small Pydantic-style model
 :::
 
 <!-- res -->
+<!-- verified -->
+## What was run, and what was not
+
+On 31 Oct 2026 I ran this book's code and checked its claims against a real install (Pydantic 2.14.2, pydantic-settings 2.16.2, FastAPI 0.162.0, Python 3.13).
+
+- All 13 code blocks in the chapters run. Three needed small additions first (chapter 3's comparison was a fragment; chapter 7's and chapter 9's examples lacked imports or the model they use), and I added them.
+- A test script (`build/pydantic_claims_test.py`) checks **45 behaviours** the chapters state, from coercion and extra keys to validator order, unions, aliases, configuration, dataclasses, `TypeAdapter`, settings, JSON Schema, error structure and the FastAPI patterns. **All 45 pass.** The docs' "about 2.5 times faster" claim for `TypedDict` over nested models measured 2.2 to 2.8 times on my machine.
+- **Not run:** the OpenAI and Anthropic SDK calls in chapter 11 (they need paid keys), and the notebook's own cells.
+- The test is mine, written from the chapters' statements. A pass means the statement is true for that version, not that the chapter covers everything.
+<!-- /verified -->
+
 ## Course resources
 
 | Craft entry | What is attached |

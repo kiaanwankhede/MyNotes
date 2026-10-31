@@ -431,7 +431,12 @@ details.diagram-src pre { margin-top: 8px; }
 
 <h2 id="foundations-home-how-each-chapter-is-built">How each chapter is built</h2>
 <p>Every chapter has the same shape: why it matters, core ideas, common mistakes, an interview corner with tap-to-reveal answers, a tickable revision list and links to the exact course files. The <strong>Quiz me</strong> page collects every interview question in this book.</p>
-<aside class="callout beyond"><div class="ct">Beyond the class<em>Labels</em></div><p>A box marked <strong>Beyond the class</strong> means the content comes from a different class than the chapter's own, or is an explanation added to fill a gap. <strong>Repo note</strong> boxes point out problems in the course code.</p></aside><div class="pager"><span style='flex:1'></span><button class="next" data-id="foundations-quiz"><small>Next</small><b>Quiz me</b></button></div></article>
+<aside class="callout beyond"><div class="ct">Beyond the class<em>Labels</em></div><p>A box marked <strong>Beyond the class</strong> means the content comes from a different class than the chapter's own, or is an explanation added to fill a gap. <strong>Repo note</strong> boxes point out problems in the course code.</p></aside>
+<!-- verified -->
+<h2 id="foundations-home-what-was-run-and-what-was-not">What was run, and what was not</h2>
+<p>On 31 Oct 2026 I ran chapter 3's agent loop against a stub client (no key needed): a tool request followed by a final answer takes two model calls, the tool result is linked by <code>tool_call_id</code>, and a model that always asks for a tool stops at <code>max_turns</code>. The tool schema is a valid JSON Schema shape. The check is in <code>build/rag_foundations_test.py</code>.</p>
+<p><strong>Not run:</strong> the real provider calls (they need a key), the setup steps on Windows, and the Project 0 files.</p>
+<!-- /verified --><div class="pager"><span style='flex:1'></span><button class="next" data-id="foundations-quiz"><small>Next</small><b>Quiz me</b></button></div></article>
 <article id="ch-foundations-quiz" hidden><p class="crumb">Welcome</p><h1>Quiz me</h1><p class="lead">Interview questions from every ready chapter, one at a time. Answer out loud, then check.</p><div class="quizroot" data-book="foundations"></div></article>
 <article id="ch-foundations-f1" hidden><p class="crumb">Foundations &middot; Chapter 1</p><h1>Set up your machine and refresh Python</h1><p class="lead">Install Python 3.13 with <code>uv</code>, get one LLM key into <code>.env</code>, and know which of the course&#x27;s refresher files covers what, so the later chapters never stall on tooling.</p><div class="meta"><span class="chip">Foundations</span><span class="chip plain">Classes 01 to 03</span><span class="chip plain">10 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="foundations-f1-why-it-matters">Why it matters</h2>
 <p>Most "my agent does not work" problems in the first week are setup problems: the wrong Python, a key in the wrong place, a notebook run from the wrong folder. Doing this once, properly, saves the whole course.</p>
@@ -1355,7 +1360,335 @@ details.diagram-src pre { margin-top: 8px; }
 <ul>
 <li><a href="https://github.com/mayank953/Live-Class-2026/tree/main/Weekend%2002%20-%204-5%20Jul/04-05%20-%205%20Jul%20%26%2011%20Jul%20-%20Anatomy%20of%20an%20Agent%20%26%20The%20Agentic%20Loop/Project%200" target="_blank" rel="noopener">Project Zero code (files <code>_01</code> to <code>_07</code>)</a></li>
 <li>Instructor's site: <a href="https://python-agents-with-mayank.netlify.app/" target="_blank" rel="noopener">Agents, with just Python</a></li>
-</ul><button class="readbtn" data-id="foundations-f4">Mark this chapter as read</button><div class="pager"><button data-id="foundations-f3"><small>Previous</small><b>What an agent is</b></button><button class="next" data-id="foundations-bank"><small>Next</small><b>Interview question bank</b></button></div></article>
+</ul><button class="readbtn" data-id="foundations-f4">Mark this chapter as read</button><div class="pager"><button data-id="foundations-f3"><small>Previous</small><b>What an agent is</b></button><button class="next" data-id="foundations-glossary"><small>Next</small><b>Glossary</b></button></div></article>
+<article id="ch-foundations-glossary" hidden><p class="crumb">Back matter</p><h1>Glossary</h1><p class="lead">The terms from Python and Agent Foundations in one line each, grouped by theme, with the chapter where each is explained. Use the search box to jump to a term.</p><div class="meta"><span class="chip">About 60 terms</span><span class="chip plain">Links go to the chapter</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="foundations-glossary-setup-and-python">Setup and Python</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>One line</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>uv</code></strong></td>
+<td>The package and project manager used all course long; <code>uv sync</code> rebuilds an exact environment from <code>pyproject.toml</code> and <code>uv.lock</code></td>
+<td><a href="#foundations-f1">1</a></td>
+</tr>
+<tr>
+<td><strong><code>pyproject.toml</code> / <code>uv.lock</code></strong></td>
+<td>The project's dependency list and the exact versions that were resolved</td>
+<td><a href="#foundations-f1">1</a></td>
+</tr>
+<tr>
+<td><strong><code>.python-version</code></strong></td>
+<td>A file that pins the Python version for a project (the course pins 3.13)</td>
+<td><a href="#foundations-f1">1</a></td>
+</tr>
+<tr>
+<td><strong><code>.env</code></strong></td>
+<td>A local file of real keys, git-ignored so a key cannot be committed by accident</td>
+<td><a href="#foundations-f1">1</a></td>
+</tr>
+<tr>
+<td><strong><code>.env.example</code></strong></td>
+<td>The safe template you copy to make <code>.env</code>; it is committed, the real file is not</td>
+<td><a href="#foundations-f1">1</a></td>
+</tr>
+<tr>
+<td><strong>API key</strong></td>
+<td>A long secret that proves a request comes from you; treat it like a password</td>
+<td><a href="#foundations-f1">1</a>, <a href="#foundations-f1a">1A</a></td>
+</tr>
+<tr>
+<td><strong>Groq / OpenRouter</strong></td>
+<td>Free LLM providers for the course; OpenRouter's <code>openrouter/free</code> model auto-routes to a free model</td>
+<td><a href="#foundations-f1">1</a></td>
+</tr>
+<tr>
+<td><strong>Git Bash / Windows Terminal</strong></td>
+<td>The shells to use on Windows, instead of plain CMD or PowerShell</td>
+<td><a href="#foundations-f1">1</a></td>
+</tr>
+<tr>
+<td><strong><code>@dataclass</code></strong></td>
+<td>A class with an auto-written <code>__init__</code>; it stores values but does not validate them</td>
+<td><a href="#foundations-f1">1</a>, <a href="#pydantic-p2">Pydantic 2</a></td>
+</tr>
+<tr>
+<td><strong>Decorator</strong></td>
+<td>A function that wraps another function to add behaviour, written with <code>@</code></td>
+<td><a href="#foundations-f1">1</a></td>
+</tr>
+<tr>
+<td><strong>Type hint</strong></td>
+<td>A note about what type a value should be; documentation, not enforcement</td>
+<td><a href="#pydantic-p1">Pydantic 1</a></td>
+</tr>
+<tr>
+<td><strong>Compromised key</strong></td>
+<td>Any key that was committed or shared; revoke it and use <code>.env</code> or Colab Secrets</td>
+<td><a href="#foundations-f1">1</a>, <a href="#foundations-f4">4</a></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="foundations-glossary-apis-json-and-http">APIs, JSON and HTTP</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>One line</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>API</strong></td>
+<td>A waiter between you and a kitchen: you ask, work is done elsewhere, the result comes back</td>
+<td><a href="#foundations-f1a">1A</a></td>
+</tr>
+<tr>
+<td><strong>JSON</strong></td>
+<td>A labeled box of text: braces, labels and values; almost every request and response</td>
+<td><a href="#foundations-f1a">1A</a></td>
+</tr>
+<tr>
+<td><strong>Endpoint</strong></td>
+<td>A fixed URL that always means the same thing</td>
+<td><a href="#foundations-f1a">1A</a></td>
+</tr>
+<tr>
+<td><strong>Query parameter</strong></td>
+<td>An option added after <code>?</code> in a URL (or in a body) to customise a call</td>
+<td><a href="#foundations-f1a">1A</a></td>
+</tr>
+<tr>
+<td><strong>GET / POST / PUT / PATCH / DELETE</strong></td>
+<td>Read / create / replace everything / change one detail / remove</td>
+<td><a href="#foundations-f1a">1A</a></td>
+</tr>
+<tr>
+<td><strong>Request body</strong></td>
+<td>The order itself (the JSON); a GET has none</td>
+<td><a href="#foundations-f1a">1A</a></td>
+</tr>
+<tr>
+<td><strong>Header</strong></td>
+<td>Information that rides alongside a request: format, who you are</td>
+<td><a href="#foundations-f1a">1A</a></td>
+</tr>
+<tr>
+<td><strong><code>Content-Type</code></strong></td>
+<td>The header that says what format the body is in (<code>application/json</code>)</td>
+<td><a href="#foundations-f1a">1A</a></td>
+</tr>
+<tr>
+<td><strong>Bearer token</strong></td>
+<td>A credential sent in the <code>Authorization</code> header</td>
+<td><a href="#foundations-f1a">1A</a></td>
+</tr>
+<tr>
+<td><strong>OAuth 2.0</strong></td>
+<td>"Sign in once, get a token"; the flow behind connectors</td>
+<td><a href="#foundations-f1a">1A</a></td>
+</tr>
+<tr>
+<td><strong>Connector</strong></td>
+<td>Claude calling another app's API with a token you approved; it never sees your password</td>
+<td><a href="#foundations-f1a">1A</a></td>
+</tr>
+<tr>
+<td><strong>Postman / cURL</strong></td>
+<td>A visual request builder / the same request from a terminal</td>
+<td><a href="#foundations-f1a">1A</a></td>
+</tr>
+<tr>
+<td><strong>2xx / 4xx / 5xx</strong></td>
+<td>Success / your mistake / their mistake; 429 means slow down, 401 means wrong key</td>
+<td><a href="#foundations-f1a">1A</a></td>
+</tr>
+<tr>
+<td><strong>Rate limiting</strong></td>
+<td>A cap on how fast you may call an API</td>
+<td><a href="#foundations-f1a">1A</a></td>
+</tr>
+<tr>
+<td><strong>Pagination / webhook</strong></td>
+<td>Big answers one page at a time / the server calls you</td>
+<td><a href="#foundations-f1a">1A</a></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="foundations-glossary-llm-basics">LLM basics</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>One line</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LLM</strong></td>
+<td>A next-word predictor; it predicts the next token, not the next word</td>
+<td><a href="#foundations-f2">2</a></td>
+</tr>
+<tr>
+<td><strong>Token</strong></td>
+<td>A piece of text (a "Lego brick"); the unit of billing and of limits</td>
+<td><a href="#foundations-f2">2</a></td>
+</tr>
+<tr>
+<td><strong>Stateless</strong></td>
+<td>Each call remembers nothing; "memory" is the history you resend</td>
+<td><a href="#foundations-f2">2</a>, <a href="#foundations-f3">3</a></td>
+</tr>
+<tr>
+<td><strong>Context window</strong></td>
+<td>The fixed amount of text a model considers at once; older text falls out when it is full</td>
+<td><a href="#foundations-f2">2</a></td>
+</tr>
+<tr>
+<td><strong>Embedding / vector</strong></td>
+<td>A list of numbers for meaning; similar meanings sit close together</td>
+<td><a href="#foundations-f2">2</a>, <a href="#rag-r2">RAG 2</a></td>
+</tr>
+<tr>
+<td><strong>Parameters</strong></td>
+<td>The model's billions of learned numbers; size is only a rough proxy for ability</td>
+<td><a href="#foundations-f2">2</a></td>
+</tr>
+<tr>
+<td><strong>Attention</strong></td>
+<td>Each word weighs which other words matter, for every word at once</td>
+<td><a href="#foundations-f2">2</a></td>
+</tr>
+<tr>
+<td><strong>Transformer</strong></td>
+<td>The architecture the LLM runs on</td>
+<td><a href="#foundations-f2">2</a></td>
+</tr>
+<tr>
+<td><strong>Training / fine-tuning / RLHF</strong></td>
+<td>Learn from text / specialise afterwards / humans pick better answers</td>
+<td><a href="#foundations-f2">2</a></td>
+</tr>
+<tr>
+<td><strong>Zero-shot / few-shot</strong></td>
+<td>A bare instruction / an instruction with worked examples</td>
+<td><a href="#foundations-f2">2</a></td>
+</tr>
+<tr>
+<td><strong>Temperature</strong></td>
+<td>A dial from safe to adventurous; low for facts and code</td>
+<td><a href="#foundations-f2">2</a></td>
+</tr>
+<tr>
+<td><strong>Hallucination</strong></td>
+<td>A confident guess presented as fact; worse when important context was forgotten</td>
+<td><a href="#foundations-f2">2</a></td>
+</tr>
+<tr>
+<td><strong>RAG</strong></td>
+<td>Fetch relevant documents first, then answer (open book)</td>
+<td><a href="#foundations-f2">2</a>, <a href="#rag-r1">RAG 1</a></td>
+</tr>
+<tr>
+<td><strong>Context engineering</strong></td>
+<td>Deciding what is on the table before the model speaks</td>
+<td><a href="#foundations-f2">2</a></td>
+</tr>
+<tr>
+<td><strong>MCP</strong></td>
+<td>One universal plug between models and tools</td>
+<td><a href="#foundations-f2">2</a></td>
+</tr>
+<tr>
+<td><strong>Multimodal / reasoning model / small language model</strong></td>
+<td>More than text / thinks step by step first / a smaller, cheaper model</td>
+<td><a href="#foundations-f2">2</a></td>
+</tr>
+<tr>
+<td><strong>Open-weight model</strong></td>
+<td>A model whose trained numbers you can download and run</td>
+<td><a href="#foundations-f2">2</a></td>
+</tr>
+<tr>
+<td><strong>Subscription vs API</strong></td>
+<td>A flat monthly plan in an app vs pay-per-token calls from your code</td>
+<td><a href="#foundations-f2">2</a></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="foundations-glossary-agents">Agents</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>One line</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Agent</strong></td>
+<td>A brain (LLM), memory (the message list) and tools, deciding its next step</td>
+<td><a href="#foundations-f3">3</a></td>
+</tr>
+<tr>
+<td><strong>Chatbot vs agent</strong></td>
+<td>A chatbot has history; an agent also has tools and decides what to do next</td>
+<td><a href="#foundations-f3">3</a></td>
+</tr>
+<tr>
+<td><strong>Tool</strong></td>
+<td>A function the model may ask for; the model never runs it, your code does</td>
+<td><a href="#foundations-f3">3</a>, <a href="#foundations-f4">4</a></td>
+</tr>
+<tr>
+<td><strong>Tool schema</strong></td>
+<td>Name, description and parameters shown to the model; the description decides when it is used</td>
+<td><a href="#foundations-f3">3</a></td>
+</tr>
+<tr>
+<td><strong>Tool call</strong></td>
+<td>The model's request: a tool name and arguments; several can come in one reply</td>
+<td><a href="#foundations-f3">3</a></td>
+</tr>
+<tr>
+<td><strong>Agentic loop</strong></td>
+<td>Model decides, code runs the tool, result goes back, repeat until plain text</td>
+<td><a href="#foundations-f3">3</a></td>
+</tr>
+<tr>
+<td><strong><code>max_turns</code></strong></td>
+<td>A cap on loop passes so a confused model cannot loop forever</td>
+<td><a href="#foundations-f3">3</a>, <a href="#foundations-f4">4</a></td>
+</tr>
+<tr>
+<td><strong><code>tool_call_id</code></strong></td>
+<td>Links a tool result message to the request it answers</td>
+<td><a href="#foundations-f3">3</a></td>
+</tr>
+<tr>
+<td><strong>Structured output</strong></td>
+<td>Forcing the model's reply into a fixed shape that code can read</td>
+<td><a href="#foundations-f3">3</a>, <a href="#pydantic-p11">Pydantic 11</a></td>
+</tr>
+<tr>
+<td><strong>Provider picker</strong></td>
+<td>A small function that chooses a free or paid provider from your keys</td>
+<td><a href="#foundations-f4">4</a></td>
+</tr>
+<tr>
+<td><strong>Project 0</strong></td>
+<td>The agent built in seven plain-Python files, no framework</td>
+<td><a href="#foundations-f4">4</a></td>
+</tr>
+</tbody>
+</table></div><button class="readbtn" data-id="foundations-glossary">Mark this chapter as read</button><div class="pager"><button data-id="foundations-f4"><small>Previous</small><b>Agents in plain Python</b></button><button class="next" data-id="foundations-bank"><small>Next</small><b>Interview question bank</b></button></div></article>
 <article id="ch-foundations-bank" hidden><p class="crumb">Back matter</p><h1>Interview question bank</h1><p class="lead">Every interview question from every chapter in one place, in chapter order. Tap a question to reveal the answer.</p><div class="meta"><span class="chip">10 questions</span><span class="chip plain">Rebuilt automatically from the chapters</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="foundations-bank-chapter-1a-apis-json-and-http-in-plain-words">Chapter 1A: APIs, JSON and HTTP in plain words</h2>
 <details class="qa"><summary>What is the difference between a header and the body?</summary><div class="ans"><p>The body is the data you are sending (the order). Headers are metadata about it: the format, who you are, how to handle it.</p></div></details>
 <details class="qa"><summary>What do 401, 403 and 429 mean?</summary><div class="ans"><p>401: not authenticated (missing or wrong key). 403: authenticated but not allowed. 429: you are sending requests faster than the limit.</p></div></details>
@@ -1370,7 +1703,115 @@ details.diagram-src pre { margin-top: 8px; }
 <details class="qa"><summary>The model returned an empty answer with a tool call. Is that a bug?</summary><div class="ans"><p>No. When the model wants a tool, <code>content</code> is empty and the useful data is in <code>tool_calls</code>. Your loop should check for <code>tool_calls</code> first.</p></div></details>
 <h2 id="foundations-bank-chapter-4-agents-in-plain-python">Chapter 4: Agents in plain Python</h2>
 <details class="qa"><summary>What stops an agent looping forever?</summary><div class="ans"><p>A turn cap such as <code>max_turns</code>, plus timeouts and clear tool descriptions. Production systems also add budgets and monitoring.</p></div></details>
-<details class="qa"><summary>Why build the agent in plain Python before using a framework?</summary><div class="ans"><p>The framework hides the same loop: call the model, run the requested tool, append the result, repeat. Knowing it lets you debug a framework, and explain what it does when an interviewer asks.</p></div></details><button class="readbtn" data-id="foundations-bank">Mark this chapter as read</button><div class="pager"><button data-id="foundations-f4"><small>Previous</small><b>Agents in plain Python</b></button></div></article>
+<details class="qa"><summary>Why build the agent in plain Python before using a framework?</summary><div class="ans"><p>The framework hides the same loop: call the model, run the requested tool, append the result, repeat. Knowing it lets you debug a framework, and explain what it does when an interviewer asks.</p></div></details><button class="readbtn" data-id="foundations-bank">Mark this chapter as read</button><div class="pager"><button data-id="foundations-glossary"><small>Previous</small><b>Glossary</b></button><button class="next" data-id="foundations-cheat"><small>Next</small><b>Cheat sheet</b></button></div></article>
+<article id="ch-foundations-cheat" hidden><p class="crumb">Back matter</p><h1>Cheat sheet</h1><p class="lead">The key ideas and the agent loop on one page, for revision before moving to the Pydantic and LangChain books. Every item links back to its chapter.</p><div class="meta"><span class="chip">Quick reference</span><span class="chip plain">Code is condensed. See the chapters for the full versions</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="foundations-cheat-setup-in-five-lines-ch-1">Setup in five lines (<a href="#foundations-f1">Ch 1</a>)</h2>
+<pre><code class="language-text">uv sync                      # rebuild the exact environment from pyproject.toml + uv.lock
+cp .env.example .env         # then paste ONE provider key (Groq or OpenRouter are free)
+uv run main.py               # .env is git-ignored, so the key cannot be committed
+</code></pre>
+<p>Use Git Bash or Windows Terminal on Windows; use VS Code, not only notebooks. Any key that was ever committed or shared is compromised: revoke it.</p>
+<h2 id="foundations-cheat-an-api-call-in-your-head-ch-1a">An API call in your head (<a href="#foundations-f1a">Ch 1A</a>)</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Remember</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Endpoint</td>
+<td>A fixed URL; options go after <code>?</code> or in the body</td>
+</tr>
+<tr>
+<td>Verbs</td>
+<td>GET read, POST create, PUT replace, PATCH change a bit, DELETE remove</td>
+</tr>
+<tr>
+<td>Headers</td>
+<td><code>Content-Type: application/json</code>, <code>Authorization: Bearer ...</code>; never put a key in the URL</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>2xx fine, 4xx fix your request (401 key, 429 slow down), 5xx wait and retry</td>
+</tr>
+<tr>
+<td>Auth ladder</td>
+<td>none, API key, bearer token, OAuth 2.0</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="foundations-cheat-llm-facts-that-explain-most-bugs-ch-2">LLM facts that explain most bugs (<a href="#foundations-f2">Ch 2</a>)</h2>
+<ul>
+<li><strong>Stateless:</strong> every call starts blank; memory is the message list you resend.</li>
+<li><strong>Tokens:</strong> the unit of cost and of limits; output usually costs more than input.</li>
+<li><strong>Context window:</strong> a fixed whiteboard; when full, the oldest text goes first, and then the model may guess (hallucinate).</li>
+<li><strong>Temperature:</strong> low for facts and code, higher for brainstorming.</li>
+<li><strong>Embedding:</strong> numbers for meaning. Numbers from two different models cannot be compared.</li>
+<li><strong>Subscription vs API:</strong> an app plan is flat-rate; code calls are paid per token.</li>
+</ul>
+<h2 id="foundations-cheat-what-an-agent-is-ch-3">What an agent is (<a href="#foundations-f3">Ch 3</a>)</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Model</th>
+<th>Chatbot</th>
+<th>Agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>History</td>
+<td>no</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Tools</td>
+<td>no</td>
+<td>no</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Decides next step</td>
+<td>no</td>
+<td>no</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Agent = brain (LLM) + memory (message list) + tools.</strong> The model only <em>requests</em> a tool; <strong>your code runs it</strong> and appends the result.</p>
+<h2 id="foundations-cheat-the-loop-ch-3-ch-4">The loop (<a href="#foundations-f3">Ch 3</a>, <a href="#foundations-f4">Ch 4</a>)</h2>
+<pre><code class="language-python">def run_agent(messages, max_turns=4):
+    for _ in range(max_turns):
+        message = client.chat.completions.create(
+            model=model, messages=messages, tools=TOOL_SCHEMAS).choices[0].message
+        if not message.tool_calls:                    # plain text = final answer
+            return message.content
+        messages.append(message)                      # keep the model's tool request
+        for call in message.tool_calls:               # may be several in one reply
+            result = TOOLS_BY_NAME[call.function.name](**json.loads(call.function.arguments))
+            messages.append({&quot;role&quot;: &quot;tool&quot;, &quot;tool_call_id&quot;: call.id, &quot;content&quot;: str(result)})
+    return &quot;Reached max_turns without a final answer.&quot;
+</code></pre>
+<p>Run in a test with a stub client (key-free): a tool request, then a final answer, gives two model calls; a model that always asks for a tool stops at <code>max_turns</code>.</p>
+<h2 id="foundations-cheat-a-tool-schema">A tool schema</h2>
+<pre><code class="language-python">{&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: {
+    &quot;name&quot;: &quot;get_weather&quot;,
+    &quot;description&quot;: &quot;Get the current weather for a city. Use this whenever the user asks about weather.&quot;,
+    &quot;parameters&quot;: {&quot;type&quot;: &quot;object&quot;,
+                   &quot;properties&quot;: {&quot;city&quot;: {&quot;type&quot;: &quot;string&quot;}}, &quot;required&quot;: [&quot;city&quot;]}}}
+</code></pre>
+<p>The <strong>description</strong> is what the model reads to decide when to call it; write it like an instruction.</p>
+<h2 id="foundations-cheat-common-traps">Common traps</h2>
+<ul>
+<li>"The model calls the function": it does not; it returns a request.</li>
+<li>No tool in the list means no tool call.</li>
+<li>Forgetting <code>max_turns</code> means a runaway cost.</li>
+<li>Keys in a notebook or Colab cell: treat as compromised.</li>
+<li>Next: <a href="#pydantic-home">Pydantic</a>, then <a href="#agentic-ai-home">Agentic AI with LangChain</a>.</li>
+</ul><button class="readbtn" data-id="foundations-cheat">Mark this chapter as read</button><div class="pager"><button data-id="foundations-bank"><small>Previous</small><b>Interview question bank</b></button></div></article>
 <article id="ch-pydantic-home" hidden><p class="crumb">Welcome</p><h1>Pydantic</h1><p class="lead">How to make Python check data at the door: models, constraints, validators, settings, FastAPI, and validating what an LLM sends back, ending with a small ticket-triage project.</p><div class="meta"><span class="chip">Book 2 of the library</span><span class="chip plain">12 chapters</span><span class="chip plain">Read after Foundations</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-home-why-a-whole-book-on-one-library">Why a whole book on one library</h2>
 <p>Pydantic is the validation layer under LangChain's structured output, tool schemas, FastAPI and most agent frameworks. If you understand it here, chapter 4 of the LangChain book (structured output) is mostly review.</p>
 <div class="tablewrap"><table>
@@ -1436,6 +1877,17 @@ details.diagram-src pre { margin-top: 8px; }
 <p>Try the idea straight away. Edit the JSON, break a rule, and read the error:</p>
 <div class="widget" data-w="pydantic-playground"><div class="wfb"><p>Interactive demo: edit JSON and validate it against a small Pydantic-style model.</p></div></div>
 <!-- res -->
+<!-- verified -->
+<h2 id="pydantic-home-what-was-run-and-what-was-not">What was run, and what was not</h2>
+<p>On 31 Oct 2026 I ran this book's code and checked its claims against a real install (Pydantic 2.14.2, pydantic-settings 2.16.2, FastAPI 0.162.0, Python 3.13).</p>
+<ul>
+<li>All 13 code blocks in the chapters run. Three needed small additions first (chapter 3's comparison was a fragment; chapter 7's and chapter 9's examples lacked imports or the model they use), and I added them.</li>
+<li>A test script (<code>build/pydantic_claims_test.py</code>) checks <strong>45 behaviours</strong> the chapters state, from coercion and extra keys to validator order, unions, aliases, configuration, dataclasses, <code>TypeAdapter</code>, settings, JSON Schema, error structure and the FastAPI patterns. <strong>All 45 pass.</strong> The docs' "about 2.5 times faster" claim for <code>TypedDict</code> over nested models measured 2.2 to 2.8 times on my machine.</li>
+<li><strong>Not run:</strong> the OpenAI and Anthropic SDK calls in chapter 11 (they need paid keys), and the notebook's own cells.</li>
+<li>The test is mine, written from the chapters' statements. A pass means the statement is true for that version, not that the chapter covers everything.</li>
+</ul>
+<!-- /verified -->
+
 <h2 id="pydantic-home-course-resources">Course resources</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -1708,8 +2160,14 @@ class JobApplication(BaseModel):
 <p>On an optional field (<code>X | None</code>) the constraint applies to the non-<code>None</code> part.</p>
 <h3 id="pydantic-p3-field-versus-annotated">Field() versus Annotated</h3>
 <p>Two equivalent styles:</p>
-<pre><code class="language-python">years: int = Field(ge=0, le=50)                    # direct
-years: Annotated[int, Field(ge=0, le=50)]          # Annotated
+<pre><code class="language-python">from typing import Annotated
+from pydantic import BaseModel, Field
+
+class A(BaseModel):
+    years: int = Field(ge=0, le=50)                    # direct
+
+class B(BaseModel):
+    years: Annotated[int, Field(ge=0, le=50)]          # Annotated
 </code></pre>
 <p>The docs recommend <code>Annotated</code> because required fields stay visibly required, you can stack several pieces of metadata, types become reusable, and constraints can target inner items (<code>list[Annotated[int, Field(gt=0)]]</code>). The class note says Mayank prefers plain <code>Field()</code> for readability but warns that AI-generated code often uses <code>Annotated</code>, so you must recognise both. <code>default</code>, <code>default_factory</code> and <code>alias</code> still use normal assignment.</p>
 <h3 id="pydantic-p3-defaults">Defaults</h3>
@@ -2189,7 +2647,10 @@ a.address.city          # dot-chain access, fully typed
 <p>Python mode and JSON mode differ: with strict on, a date string is rejected from Python input but accepted from JSON, since JSON has no date type. When adding strict mode to a running app, watch for callers who relied on coercion.</p>
 <h3 id="pydantic-p7-json-schema">JSON Schema</h3>
 <p><code>Model.model_json_schema()</code> returns a dict (not a string) describing the model, using JSON Schema 2020-12 and OpenAPI 3.1. <code>TypeAdapter(list[int]).json_schema()</code> does it for any type.</p>
-<pre><code class="language-python">class Ticket(BaseModel):
+<pre><code class="language-python">from typing import Literal
+from pydantic import BaseModel, Field
+
+class Ticket(BaseModel):
     priority: Literal[&quot;low&quot;, &quot;medium&quot;, &quot;high&quot;]
     summary: str = Field(max_length=200, description=&quot;One-line summary&quot;)
 
@@ -2403,7 +2864,14 @@ class AppSettings(BaseSettings):
 </tr>
 </tbody>
 </table></div>
-<pre><code class="language-python">try:
+<pre><code class="language-python">from pydantic import BaseModel, ValidationError
+
+class User(BaseModel):
+    id: int
+    tastes: dict[str, int]
+    signup_ts: str            # required, so a missing value is a second error
+
+try:
     User(**{&quot;id&quot;: &quot;not an int&quot;, &quot;tastes&quot;: {}})
 except ValidationError as e:
     for err in e.errors():
@@ -2706,7 +3174,355 @@ def apply(a: Applicant) -&gt; Receipt:
 <li>Instructor's site: <a href="https://pydantic-with-mayank.netlify.app/" target="_blank" rel="noopener">Mastering Pydantic</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2001%20-%2027-28%20Jun/02-03%20-%2028%20Jun%20%26%204%20Jul%20-%20Python%20Refresher%20%26%20Pydantic%20Deep%20Dive/8_Pydantic/Pydantic_From_Scratch.ipynb" target="_blank" rel="noopener">Pydantic From Scratch notebook</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/03%20-%204%20Jul%20-%20Pydantic%20Deep%20Dive.md" target="_blank" rel="noopener">Class 03 notes</a></li>
-</ul><button class="readbtn" data-id="pydantic-p12">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p11"><small>Previous</small><b>Validating what an LLM gives you back</b></button><button class="next" data-id="pydantic-bank"><small>Next</small><b>Interview question bank</b></button></div></article>
+</ul><button class="readbtn" data-id="pydantic-p12">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p11"><small>Previous</small><b>Validating what an LLM gives you back</b></button><button class="next" data-id="pydantic-glossary"><small>Next</small><b>Glossary</b></button></div></article>
+<article id="ch-pydantic-glossary" hidden><p class="crumb">Back matter</p><h1>Glossary</h1><p class="lead">The Pydantic terms from this book in one line each, grouped by theme, with the chapter where each is explained. Use the search box to jump to a term.</p><div class="meta"><span class="chip">About 70 terms</span><span class="chip plain">Links go to the chapter</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-glossary-models-and-validation">Models and validation</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>One line</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>BaseModel</code></strong></td>
+<td>A class whose fields are validated when you create it</td>
+<td><a href="#pydantic-p2">2</a></td>
+</tr>
+<tr>
+<td><strong>Validation</strong></td>
+<td>Checking and converting input so the object matches its declared types and constraints</td>
+<td><a href="#pydantic-p2">2</a></td>
+</tr>
+<tr>
+<td><strong>Parsing</strong></td>
+<td>The docs' word for validating a JSON string</td>
+<td><a href="#pydantic-p2">2</a></td>
+</tr>
+<tr>
+<td><strong>Coercion (lax mode)</strong></td>
+<td>Converting reasonable input, such as <code>"28"</code> to <code>28</code>; <code>"28eight"</code> and <code>28.5</code> for an <code>int</code> fail</td>
+<td><a href="#pydantic-p2">2</a></td>
+</tr>
+<tr>
+<td><strong>Strict mode</strong></td>
+<td>Turns conversion off: <code>"123"</code> is no longer an <code>int</code></td>
+<td><a href="#pydantic-p7">7</a></td>
+</tr>
+<tr>
+<td><strong><code>ValidationError</code></strong></td>
+<td>One error that bundles every problem found in a validation pass</td>
+<td><a href="#pydantic-p9">9</a></td>
+</tr>
+<tr>
+<td><strong><code>model_validate</code> / <code>model_validate_json</code></strong></td>
+<td>Validate a dict / a JSON string or bytes</td>
+<td><a href="#pydantic-p2">2</a></td>
+</tr>
+<tr>
+<td><strong><code>model_dump</code> / <code>model_dump_json</code></strong></td>
+<td>Back to a dict / a JSON string</td>
+<td><a href="#pydantic-p5">5</a></td>
+</tr>
+<tr>
+<td><strong><code>model_copy</code></strong></td>
+<td>Copy a model; updates are not validated and the copy is shallow unless <code>deep=True</code></td>
+<td><a href="#pydantic-p2">2</a></td>
+</tr>
+<tr>
+<td><strong><code>model_construct</code></strong></td>
+<td>Build without validation, for data you already trust</td>
+<td><a href="#pydantic-p2">2</a></td>
+</tr>
+<tr>
+<td><strong><code>model_fields_set</code></strong></td>
+<td>Which fields were explicitly provided</td>
+<td><a href="#pydantic-p2">2</a>, <a href="#pydantic-p5">5</a></td>
+</tr>
+<tr>
+<td><strong><code>extra</code></strong></td>
+<td>What to do with unknown keys: ignore (default), <code>forbid</code> or <code>allow</code></td>
+<td><a href="#pydantic-p2">2</a></td>
+</tr>
+<tr>
+<td><strong><code>frozen</code></strong></td>
+<td>Blocks assignment; a "faux" immutability since nested dicts can still change</td>
+<td><a href="#pydantic-p2">2</a></td>
+</tr>
+<tr>
+<td><strong><code>from_attributes</code></strong></td>
+<td>Read fields from attributes of any object, such as an ORM row</td>
+<td><a href="#pydantic-p2">2</a></td>
+</tr>
+<tr>
+<td><strong>Private attribute</strong></td>
+<td>A name starting with an underscore; not a field</td>
+<td><a href="#pydantic-p2">2</a></td>
+</tr>
+<tr>
+<td><strong><code>@dataclass</code></strong></td>
+<td>Standard-library class that stores values but does not validate them</td>
+<td><a href="#pydantic-p2">2</a></td>
+</tr>
+<tr>
+<td><strong>Pydantic dataclass</strong></td>
+<td>A dataclass with Pydantic validation, without <code>BaseModel</code>; no <code>model_validate</code>, wrap in <code>TypeAdapter</code></td>
+<td><a href="#pydantic-p6">6</a></td>
+</tr>
+<tr>
+<td><strong><code>TypeAdapter</code></strong></td>
+<td>Validate, serialize and build a schema for any type without a model; create it once and reuse it</td>
+<td><a href="#pydantic-p6">6</a></td>
+</tr>
+<tr>
+<td><strong><code>ConfigDict</code></strong></td>
+<td>Settings that control a model's behaviour (<code>model_config</code> or class arguments)</td>
+<td><a href="#pydantic-p2">2</a></td>
+</tr>
+<tr>
+<td><strong>Configuration boundary</strong></td>
+<td>Models and Pydantic dataclasses do not pass config to nested models; stdlib dataclasses do</td>
+<td><a href="#pydantic-p2">2</a></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="pydantic-glossary-fields-and-types">Fields and types</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>One line</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>Field()</code></strong></td>
+<td>Adds constraints, defaults, aliases and metadata to a field</td>
+<td><a href="#pydantic-p3">3</a></td>
+</tr>
+<tr>
+<td><strong><code>Annotated</code></strong></td>
+<td>The docs' preferred way to attach <code>Field(...)</code> or validators to a type</td>
+<td><a href="#pydantic-p3">3</a></td>
+</tr>
+<tr>
+<td><strong>Constraint</strong></td>
+<td><code>gt</code>, <code>ge</code>, <code>lt</code>, <code>le</code>, <code>multiple_of</code>, <code>min_length</code>, <code>max_length</code>, <code>pattern</code>, <code>max_digits</code>, <code>decimal_places</code></td>
+<td><a href="#pydantic-p3">3</a></td>
+</tr>
+<tr>
+<td><strong><code>default_factory</code></strong></td>
+<td>A callable that makes a default; since 2.10 it may take the validated data</td>
+<td><a href="#pydantic-p3">3</a></td>
+</tr>
+<tr>
+<td><strong><code>validate_default</code></strong></td>
+<td>Makes Pydantic check default values, which it does not by default</td>
+<td><a href="#pydantic-p3">3</a></td>
+</tr>
+<tr>
+<td><strong>Alias</strong></td>
+<td>Another name for a field: <code>alias</code>, <code>validation_alias</code>, <code>serialization_alias</code></td>
+<td><a href="#pydantic-p3">3</a></td>
+</tr>
+<tr>
+<td><strong><code>AliasPath</code> / <code>AliasChoices</code></strong></td>
+<td>Read a value from a nested path / try several input names, earlier ones first</td>
+<td><a href="#pydantic-p3">3</a></td>
+</tr>
+<tr>
+<td><strong>Alias generator</strong></td>
+<td>Names every field at once: <code>to_camel</code>, <code>to_pascal</code>, <code>to_snake</code> or your own</td>
+<td><a href="#pydantic-p3">3</a></td>
+</tr>
+<tr>
+<td><strong><code>SecretStr</code></strong></td>
+<td>Masks a value in output and logs; read it with <code>.get_secret_value()</code></td>
+<td><a href="#pydantic-p3">3</a>, <a href="#pydantic-p8">8</a></td>
+</tr>
+<tr>
+<td><strong><code>EmailStr</code> / <code>HttpUrl</code></strong></td>
+<td>Email and URL validation (<code>EmailStr</code> needs <code>pydantic[email]</code>)</td>
+<td><a href="#pydantic-p3">3</a></td>
+</tr>
+<tr>
+<td><strong><code>PositiveInt</code></strong></td>
+<td>Shortcut for <code>gt=0</code></td>
+<td><a href="#pydantic-p3">3</a></td>
+</tr>
+<tr>
+<td><strong><code>Literal</code></strong></td>
+<td>Allows only the listed values</td>
+<td><a href="#pydantic-p7">7</a>, <a href="#pydantic-p11">11</a></td>
+</tr>
+<tr>
+<td><strong><code>OnErrorOmit</code> / <code>FailFast</code></strong></td>
+<td>Drop invalid items instead of failing / stop at the first bad item</td>
+<td><a href="#pydantic-p3">3</a></td>
+</tr>
+<tr>
+<td><strong>Union</strong></td>
+<td>A value that may be one of several types; only one member needs to validate</td>
+<td><a href="#pydantic-p6">6</a></td>
+</tr>
+<tr>
+<td><strong>Smart mode</strong></td>
+<td>Default union mode: tries members and picks the best match (valid fields set, then exactness)</td>
+<td><a href="#pydantic-p6">6</a></td>
+</tr>
+<tr>
+<td><strong>Left to right mode</strong></td>
+<td>Tries members in order, first success wins (<code>union_mode='left_to_right'</code>)</td>
+<td><a href="#pydantic-p6">6</a></td>
+</tr>
+<tr>
+<td><strong>Discriminated union</strong></td>
+<td>Picks the member from a tag field, so validation is faster and errors are shorter</td>
+<td><a href="#pydantic-p6">6</a></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="pydantic-glossary-validators-and-serialization">Validators and serialization</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>One line</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>field_validator</code></strong></td>
+<td>Checks one field; returns the value or raises <code>ValueError</code></td>
+<td><a href="#pydantic-p4">4</a></td>
+</tr>
+<tr>
+<td><strong>after / before / plain / wrap</strong></td>
+<td>Run after Pydantic's check / on raw input / replace it / around it</td>
+<td><a href="#pydantic-p4">4</a></td>
+</tr>
+<tr>
+<td><strong><code>model_validator</code></strong></td>
+<td>Checks across fields; an after-validator must return <code>self</code></td>
+<td><a href="#pydantic-p4">4</a></td>
+</tr>
+<tr>
+<td><strong><code>ValidationInfo</code></strong></td>
+<td>Extra argument carrying earlier fields, <code>context</code>, <code>mode</code> and <code>field_name</code></td>
+<td><a href="#pydantic-p4">4</a></td>
+</tr>
+<tr>
+<td><strong>Validation context</strong></td>
+<td>Data passed with <code>model_validate(..., context=...)</code> for validators to read</td>
+<td><a href="#pydantic-p4">4</a>, <a href="#pydantic-p11">11</a></td>
+</tr>
+<tr>
+<td><strong><code>@computed_field</code></strong></td>
+<td>A read-only property included in dumps and the serialization schema</td>
+<td><a href="#pydantic-p5">5</a></td>
+</tr>
+<tr>
+<td><strong><code>mode="json"</code></strong></td>
+<td>Dump only JSON-compatible types (a tuple becomes a list)</td>
+<td><a href="#pydantic-p5">5</a></td>
+</tr>
+<tr>
+<td><strong><code>exclude_unset</code></strong></td>
+<td>Dump only fields the caller set; the key to PATCH-style updates</td>
+<td><a href="#pydantic-p5">5</a></td>
+</tr>
+<tr>
+<td><strong><code>field_serializer</code> / <code>model_serializer</code></strong></td>
+<td>Change how one field or a whole model is written</td>
+<td><a href="#pydantic-p5">5</a></td>
+</tr>
+<tr>
+<td><strong>Serialize as any</strong></td>
+<td>Opt in to serializing a subclass's extra fields</td>
+<td><a href="#pydantic-p5">5</a></td>
+</tr>
+<tr>
+<td><strong>Forward reference / <code>model_rebuild</code></strong></td>
+<td>A string annotation for a class defined later / finish the model once it exists</td>
+<td><a href="#pydantic-p6">6</a></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="pydantic-glossary-json-schema-settings-errors-and-llms">JSON Schema, settings, errors and LLMs</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>One line</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>JSON Schema</strong></td>
+<td>A description of a model's data from <code>model_json_schema()</code>; a dict, not a string</td>
+<td><a href="#pydantic-p7">7</a></td>
+</tr>
+<tr>
+<td><strong><code>$defs</code> / <code>$ref</code></strong></td>
+<td>Where nested models live in the schema and how they are referenced</td>
+<td><a href="#pydantic-p7">7</a></td>
+</tr>
+<tr>
+<td><strong>Validation vs serialization schema</strong></td>
+<td>Describes accepted input / describes the output</td>
+<td><a href="#pydantic-p7">7</a></td>
+</tr>
+<tr>
+<td><strong><code>BaseSettings</code></strong></td>
+<td>A model filled from environment variables, <code>.env</code> files and secrets</td>
+<td><a href="#pydantic-p8">8</a></td>
+</tr>
+<tr>
+<td><strong><code>env_nested_delimiter</code></strong></td>
+<td><code>DB__HOST</code> fills <code>db.host</code> when set to <code>"__"</code></td>
+<td><a href="#pydantic-p8">8</a></td>
+</tr>
+<tr>
+<td><strong><code>errors()</code></strong></td>
+<td>A list of dicts with <code>type</code>, <code>loc</code>, <code>msg</code>, <code>input</code>, <code>ctx</code> and <code>url</code></td>
+<td><a href="#pydantic-p9">9</a></td>
+</tr>
+<tr>
+<td><strong><code>loc</code></strong></td>
+<td>The path to the bad value, such as <code>('items', 1, 'value')</code></td>
+<td><a href="#pydantic-p9">9</a></td>
+</tr>
+<tr>
+<td><strong>Error <code>type</code></strong></td>
+<td>Machine-readable id such as <code>missing</code>, <code>greater_than</code>, <code>int_parsing</code></td>
+<td><a href="#pydantic-p9">9</a></td>
+</tr>
+<tr>
+<td><strong><code>response_model</code></strong></td>
+<td>FastAPI option that validates and filters the output with a model</td>
+<td><a href="#pydantic-p10">10</a></td>
+</tr>
+<tr>
+<td><strong>Request body model</strong></td>
+<td>A Pydantic parameter FastAPI reads from the JSON body</td>
+<td><a href="#pydantic-p10">10</a></td>
+</tr>
+<tr>
+<td><strong>Retry loop</strong></td>
+<td>Feed the <code>ValidationError</code> text back to the model and ask again, up to a limit</td>
+<td><a href="#pydantic-p11">11</a></td>
+</tr>
+<tr>
+<td><strong>Shape, not correctness</strong></td>
+<td>Validation checks type and shape, not whether the facts are right</td>
+<td><a href="#pydantic-p11">11</a></td>
+</tr>
+</tbody>
+</table></div><button class="readbtn" data-id="pydantic-glossary">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p12"><small>Previous</small><b>Where Pydantic goes next, and the final project</b></button><button class="next" data-id="pydantic-bank"><small>Next</small><b>Interview question bank</b></button></div></article>
 <article id="ch-pydantic-bank" hidden><p class="crumb">Back matter</p><h1>Interview question bank</h1><p class="lead">Every interview question from every chapter in one place, in chapter order. Tap a question to reveal the answer.</p><div class="meta"><span class="chip">22 questions</span><span class="chip plain">Rebuilt automatically from the chapters</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-bank-chapter-1-why-validation-exists-and-type-hints">Chapter 1: Why validation exists, and type hints</h2>
 <details class="qa"><summary>Does Python enforce type hints?</summary><div class="ans"><p>No. At runtime they are ignored. They help readers, IDEs and libraries such as Pydantic, which reads them and enforces them.</p></div></details>
 <details class="qa"><summary>What is the difference between type validation and data validation?</summary><div class="ans"><p>Type validation checks the kind of data (an int). Data validation checks the value makes sense (an age of 10000 is an int but not valid). Pydantic does both: types from hints, values from <code>Field</code> constraints and validators.</p></div></details>
@@ -2740,7 +3556,153 @@ def apply(a: Applicant) -&gt; Receipt:
 <details class="qa"><summary>How do you get reliable JSON from an LLM?</summary><div class="ans"><p>Pass a Pydantic model to the provider's structured-output call (or its JSON Schema as a forced tool), constrain values with <code>Literal</code>, validate the result, and retry with the error fed back if it fails.</p></div></details>
 <details class="qa"><summary>Does validation make an answer correct?</summary><div class="ans"><p>No. It confirms the shape and constraints only. A confidently wrong value in the right shape still passes.</p></div></details>
 <h2 id="pydantic-bank-chapter-12-where-pydantic-goes-next-and-the-fina">Chapter 12: Where Pydantic goes next, and the final project</h2>
-<details class="qa"><summary>How would you design a reliable LLM-backed API endpoint?</summary><div class="ans"><p>Validate and clean the request with a model, ask the provider for a structured response in a <code>Literal</code>-constrained schema, derive computed values in code, add a model validator for impossible combinations, and cap retries.</p></div></details><button class="readbtn" data-id="pydantic-bank">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p12"><small>Previous</small><b>Where Pydantic goes next, and the final project</b></button></div></article>
+<details class="qa"><summary>How would you design a reliable LLM-backed API endpoint?</summary><div class="ans"><p>Validate and clean the request with a model, ask the provider for a structured response in a <code>Literal</code>-constrained schema, derive computed values in code, add a model validator for impossible combinations, and cap retries.</p></div></details><button class="readbtn" data-id="pydantic-bank">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-glossary"><small>Previous</small><b>Glossary</b></button><button class="next" data-id="pydantic-cheat"><small>Next</small><b>Cheat sheet</b></button></div></article>
+<article id="ch-pydantic-cheat" hidden><p class="crumb">Back matter</p><h1>Cheat sheet</h1><p class="lead">The Pydantic patterns on one page. Every item links back to the chapter that explains it, and every line of behaviour here was checked against real Pydantic (see the home page).</p><div class="meta"><span class="chip">Quick reference</span><span class="chip plain">Code is condensed. See the chapters for the full versions</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-cheat-a-model-in-one-picture-ch-2-ch-3">A model in one picture (<a href="#pydantic-p2">Ch 2</a>, <a href="#pydantic-p3">Ch 3</a>)</h2>
+<pre><code class="language-python">from typing import Annotated, Literal
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, computed_field, field_validator, model_validator
+
+class Applicant(BaseModel):
+    model_config = ConfigDict(extra=&quot;forbid&quot;)            # reject unknown keys
+    name: str = Field(min_length=2, max_length=100)
+    years: Annotated[int, Field(ge=0, le=50)]
+    level: Literal[&quot;junior&quot;, &quot;senior&quot;] = &quot;junior&quot;       # a default makes it optional
+    api_key: SecretStr | None = None
+
+    @field_validator(&quot;name&quot;)
+    @classmethod
+    def tidy(cls, v: str) -&gt; str:                       # one field; return the value
+        return v.strip()
+
+    @model_validator(mode=&quot;after&quot;)
+    def rules(self):                                    # across fields; return self
+        return self
+
+    @computed_field
+    @property
+    def tier(self) -&gt; str:                              # read-only, appears in dumps
+        return &quot;mid&quot; if self.years &gt;= 2 else &quot;junior&quot;
+</code></pre>
+<h2 id="pydantic-cheat-calls-to-remember-ch-2-ch-5">Calls to remember (<a href="#pydantic-p2">Ch 2</a>, <a href="#pydantic-p5">Ch 5</a>)</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Call</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Validate a dict / JSON</td>
+<td><code>Model.model_validate(d)</code> / <code>Model.model_validate_json(s)</code></td>
+</tr>
+<tr>
+<td>Back to dict / JSON</td>
+<td><code>m.model_dump()</code> / <code>m.model_dump_json()</code></td>
+</tr>
+<tr>
+<td>JSON-safe dict</td>
+<td><code>m.model_dump(mode="json")</code></td>
+</tr>
+<tr>
+<td>Only what the caller sent</td>
+<td><code>m.model_dump(exclude_unset=True)</code></td>
+</tr>
+<tr>
+<td>Hide / show fields</td>
+<td><code>exclude=</code>, <code>include=</code>, <code>Field(exclude=True)</code>, <code>exclude_none=True</code></td>
+</tr>
+<tr>
+<td>Output with aliases</td>
+<td><code>m.model_dump(by_alias=True)</code></td>
+</tr>
+<tr>
+<td>Copy with changes</td>
+<td><code>m.model_copy(update={...})</code> (not validated)</td>
+</tr>
+<tr>
+<td>No validation (trusted data)</td>
+<td><code>Model.model_construct(...)</code></td>
+</tr>
+<tr>
+<td>Schema</td>
+<td><code>Model.model_json_schema()</code> (a dict)</td>
+</tr>
+<tr>
+<td>Any type</td>
+<td><code>TypeAdapter(list[int]).validate_python(x)</code>; create once, reuse</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="pydantic-cheat-rules-that-catch-people-out">Rules that catch people out</h2>
+<ul>
+<li>Unknown keys are <strong>ignored</strong> by default; use <code>extra="forbid"</code> for LLM schemas.</li>
+<li><code>"25"</code> becomes <code>25</code> for an <code>int</code>, but <code>12345</code> is <strong>not</strong> turned into <code>"12345"</code> for a <code>str</code>.</li>
+<li>Defaults are <strong>not validated</strong> unless <code>validate_default=True</code> (in <code>BaseSettings</code> they are).</li>
+<li>A validator must <strong>return the value</strong>; forgetting makes the field <code>None</code>.</li>
+<li>Raise <code>ValueError</code>, never <code>ValidationError</code>, inside a validator.</li>
+<li>Cleaning raw text needs <code>mode="before"</code>; the default (after) never sees it.</li>
+<li>Two methods with the same name: only the last one survives.</li>
+<li>A cross-field rule needs <code>model_validator</code>, not <code>field_validator</code>.</li>
+<li>A model validator is skipped if a field already failed.</li>
+<li>Config does not pass into nested <strong>models</strong>; it does pass into stdlib dataclasses.</li>
+<li><code>dump_json</code> on <code>TypeAdapter</code> returns <strong>bytes</strong>; <code>model_dump_json</code> returns a <code>str</code>.</li>
+</ul>
+<h2 id="pydantic-cheat-validators-ch-4">Validators (<a href="#pydantic-p4">Ch 4</a>)</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Runs</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>after (default)</td>
+<td>after Pydantic's check</td>
+<td>value has the right type</td>
+</tr>
+<tr>
+<td>before</td>
+<td>on raw input</td>
+<td>clean <code>"5 years"</code> to <code>5</code></td>
+</tr>
+<tr>
+<td>plain</td>
+<td>instead of Pydantic's check</td>
+<td>bad input can pass</td>
+</tr>
+<tr>
+<td>wrap</td>
+<td>around it, with a <code>handler</code></td>
+<td>catch errors, retry</td>
+</tr>
+</tbody>
+</table></div>
+<p>Order on one field: before and wrap run right to left, then after runs left to right. All field validators run before the model validator.</p>
+<h2 id="pydantic-cheat-unions-ch-6">Unions (<a href="#pydantic-p6">Ch 6</a>)</h2>
+<p>Smart mode is the default. Use <code>Field(discriminator="kind")</code> with a <code>Literal</code> tag for speed and short errors; <code>Discriminator</code> plus <code>Tag</code> for a callable.</p>
+<h2 id="pydantic-cheat-errors-ch-9">Errors (<a href="#pydantic-p9">Ch 9</a>)</h2>
+<pre><code class="language-python">try:
+    Model(**data)
+except ValidationError as e:
+    for err in e.errors():            # type, loc, msg, input, ctx, url
+        print(err[&quot;loc&quot;], err[&quot;type&quot;], err[&quot;msg&quot;])
+</code></pre>
+<h2 id="pydantic-cheat-settings-ch-8">Settings (<a href="#pydantic-p8">Ch 8</a>)</h2>
+<pre><code class="language-python">class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=&quot;.env&quot;, extra=&quot;ignore&quot;)
+    api_key: SecretStr
+    debug: bool = False
+</code></pre>
+<p>Environment beats <code>.env</code> beats the secrets directory. <code>os.getenv("DEBUG")</code> of <code>"false"</code> is truthy; a <code>bool</code> field is not.</p>
+<h2 id="pydantic-cheat-fastapi-and-llms-ch-10-ch-11">FastAPI and LLMs (<a href="#pydantic-p10">Ch 10</a>, <a href="#pydantic-p11">Ch 11</a>)</h2>
+<ul>
+<li>A Pydantic parameter is the <strong>body</strong>; a simple type is a <strong>query</strong> parameter; a name in the path is a <strong>path</strong> parameter.</li>
+<li><code>response_model=Out</code> filters the output (keeps <code>password</code> out); invalid output is a 500, bad input a 422.</li>
+<li>PATCH: <code>item.model_dump(exclude_unset=True)</code> then <code>stored.model_copy(update=...)</code>.</li>
+<li>LLM output: schema from <code>model_json_schema()</code> with <code>extra="forbid"</code>, validate the reply, on <code>ValidationError</code> send <code>str(e)</code> back and retry with a <strong>cap</strong>. Valid shape does not mean true facts.</li>
+</ul><button class="readbtn" data-id="pydantic-cheat">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-bank"><small>Previous</small><b>Interview question bank</b></button></div></article>
 <article id="ch-agentic-ai-home" hidden><p class="crumb">Welcome</p><h1>Agentic AI with LangChain</h1><p class="lead">A chapter-by-chapter reader built from the live class code, notebooks, PDFs and class summaries, written so you can learn each topic and defend it in an interview.</p><div class="meta"><span class="chip">Book 3 of the library</span><span class="chip plain">Draft for review</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="agentic-ai-home-how-to-read-this-book">How to read this book</h2>
 <aside class="callout key"><div class="ct">Key idea<em>Read the earlier books first</em></div><p>This is book 3 of the library. It assumes <strong>Python and Agent Foundations</strong> (the agent loop, tokens, setup) and <strong>Pydantic</strong> (used for structured output in chapter 4). Read those first, or skim them if you already know the basics.</p></aside>
 <aside class="callout key"><div class="ct">Key idea<em>Read in order</em></div><p>Each chapter builds on the one before it. Chapter 1 explains <code>create_agent()</code>, Chapter 6 adds memory and middleware, and Chapter 10 adds human approval. If you skip ahead, the later chapters will assume terms you have not seen.</p></aside>
@@ -14686,7 +15648,16 @@ app.mount(&quot;/mcp&quot;, mcp_app)
 <li><strong>Stretch:</strong> compare <code>similarity</code>, <code>multiquery</code> and <code>contextual</code> retrieval on the same ten questions and record which wins.</li>
 <li><strong>Interview story:</strong> how you stopped the model making things up, and what the retrieval comparison showed.</li>
 </ul>
-<aside class="callout note"><div class="ct">Note<em>Real data</em></div><p>Never use real patient or personal data with any model or tool. Use synthetic or fully de-identified examples.</p></aside><div class="pager"><span style='flex:1'></span><button class="next" data-id="rag-quiz"><small>Next</small><b>Quiz me</b></button></div></article>
+<aside class="callout note"><div class="ct">Note<em>Real data</em></div><p>Never use real patient or personal data with any model or tool. Use synthetic or fully de-identified examples.</p></aside>
+<!-- verified -->
+<h2 id="rag-home-what-was-run-and-what-was-not">What was run, and what was not</h2>
+<p>On 31 Oct 2026 I ran what can run without keys or a cloud account (Python 3.13, <code>langchain-core</code> 1.7, <code>chromadb</code> 1.5, <code>langchain-chroma</code>).</p>
+<ul>
+<li><code>build/rag_foundations_test.py</code> has <strong>9 checks</strong>, all passing: the splitter settings (1,000 characters, 100 overlap), <code>sha1</code> chunk ids replacing rather than duplicating and surviving a restart, the LCEL chain shape, similarity versus MMR on near-duplicates, multi-query de-duplication and reciprocal rank fusion arithmetic. These use fake embeddings and a stand-in model, so they check the logic, not answer quality.</li>
+<li>Meridian's own <strong>17 backend tests pass</strong> (3.4 s) on current library versions, not the pinned ones.</li>
+<li><strong>Not run:</strong> anything that calls Gemini, Vertex AI Vector Search or Cloud Run, and the thirteen RAG variants against real answers. Numbers quoted from the slides (such as 218 s builds) are the instructor's measurements, not mine.</li>
+</ul>
+<!-- /verified --><div class="pager"><span style='flex:1'></span><button class="next" data-id="rag-quiz"><small>Next</small><b>Quiz me</b></button></div></article>
 <article id="ch-rag-quiz" hidden><p class="crumb">Welcome</p><h1>Quiz me</h1><p class="lead">Interview questions from every ready chapter, one at a time. Answer out loud, then check.</p><div class="quizroot" data-book="rag"></div></article>
 <article id="ch-rag-r1" hidden><p class="crumb">RAG &middot; Chapter 1</p><h1>RAG explained: why, and what the parts are</h1><p class="lead">A model cannot know your documents. RAG looks the right pages up first and answers from them. This chapter shows the two stages, the ways basic RAG fails, and the eight parts you choose between.</p><div class="meta"><span class="chip">RAG</span><span class="chip plain">Meridian slides, module 4</span><span class="chip plain">15 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="rag-r1-why-it-matters">Why it matters</h2>
 <p>Companies keep rules in PDFs. A general chatbot has never seen them, so it either refuses or guesses. RAG (retrieval-augmented generation) is the open-book exam: fetch the relevant documents first, then answer from them. The answer is only as good as what is retrieved.</p>
@@ -15358,7 +16329,287 @@ def rerank(question, k=3):
 <ul>
 <li class="task"><label><input type="checkbox"><span>I know Vector Search is billed by the hour while deployed</span></label></li>
 <li class="task"><label><input type="checkbox"><span>I know the first thing to check when a fresh upload returns nothing</span></label></li>
-</ul><button class="readbtn" data-id="rag-r5">Mark this chapter as read</button><div class="pager"><button data-id="rag-r4"><small>Previous</small><b>Advanced RAG: seven ways to change retrieval</b></button><button class="next" data-id="rag-bank"><small>Next</small><b>Interview question bank</b></button></div></article>
+</ul><button class="readbtn" data-id="rag-r5">Mark this chapter as read</button><div class="pager"><button data-id="rag-r4"><small>Previous</small><b>Advanced RAG: seven ways to change retrieval</b></button><button class="next" data-id="rag-glossary"><small>Next</small><b>Glossary</b></button></div></article>
+<article id="ch-rag-glossary" hidden><p class="crumb">Back matter</p><h1>Glossary</h1><p class="lead">The RAG terms from this book in one line each, grouped by theme, with the chapter where each is explained. Use the search box to jump to a term.</p><div class="meta"><span class="chip">About 50 terms</span><span class="chip plain">Links go to the chapter</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="rag-glossary-the-idea">The idea</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>One line</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>RAG</strong></td>
+<td>Look up relevant text first, then answer from it: an open-book exam</td>
+<td><a href="#rag-r1">1</a></td>
+</tr>
+<tr>
+<td><strong>Closed book vs open book</strong></td>
+<td>A plain model answers from memory; RAG hands it the pages first</td>
+<td><a href="#rag-r1">1</a></td>
+</tr>
+<tr>
+<td><strong>Indexing (once)</strong></td>
+<td>Read, chunk, embed and store the documents</td>
+<td><a href="#rag-r1">1</a></td>
+</tr>
+<tr>
+<td><strong>Query time (every question)</strong></td>
+<td>Embed the question, find the closest chunks, build the prompt, answer</td>
+<td><a href="#rag-r1">1</a></td>
+</tr>
+<tr>
+<td><strong>Hallucination guard</strong></td>
+<td>The prompt rule "if you do not know based on the context, say so"</td>
+<td><a href="#rag-r3">3</a></td>
+</tr>
+<tr>
+<td><strong>The eight parts</strong></td>
+<td>Parse, chunk, embed, store, retrieve, rerank, generate, evaluate</td>
+<td><a href="#rag-r1">1</a></td>
+</tr>
+<tr>
+<td><strong>Do you even need RAG?</strong></td>
+<td>If the whole knowledge base fits in the context window, you can paste it in instead</td>
+<td><a href="#rag-r1">1</a></td>
+</tr>
+<tr>
+<td><strong>Before / during / after / beyond</strong></td>
+<td>Where to improve basic RAG: change the question, the search, the results, or go past it</td>
+<td><a href="#rag-r1">1</a></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="rag-glossary-ingestion-and-storage">Ingestion and storage</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>One line</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Chunk</strong></td>
+<td>A piece of a document sized for search (about 1,000 characters in Meridian)</td>
+<td><a href="#rag-r2">2</a></td>
+</tr>
+<tr>
+<td><strong>Chunk overlap</strong></td>
+<td>Neighbouring chunks share text (100 characters) so sentences are not cut off</td>
+<td><a href="#rag-r2">2</a></td>
+</tr>
+<tr>
+<td><strong><code>RecursiveCharacterTextSplitter</code></strong></td>
+<td>The splitter that cuts text at natural breaks to a size limit</td>
+<td><a href="#rag-r2">2</a></td>
+</tr>
+<tr>
+<td><strong>Embedding</strong></td>
+<td>A list of numbers for meaning (768 in this project)</td>
+<td><a href="#rag-r2">2</a></td>
+</tr>
+<tr>
+<td><strong>Dimensions</strong></td>
+<td>Length of the number list; the embedding model must match the index</td>
+<td><a href="#rag-r2">2</a>, <a href="#rag-r5">5</a></td>
+</tr>
+<tr>
+<td><strong>Same model rule</strong></td>
+<td>One embedding model must index and search; numbers from two models cannot be compared</td>
+<td><a href="#rag-r1">1</a>, <a href="#rag-r2">2</a></td>
+</tr>
+<tr>
+<td><strong>Vector store / vector database</strong></td>
+<td>Stores vectors with text and source and answers "what is nearest"</td>
+<td><a href="#rag-r1">1</a>, <a href="#rag-r2">2</a></td>
+</tr>
+<tr>
+<td><strong>Chroma</strong></td>
+<td>The local vector store, a folder on disk (<code>.meridian/chroma</code>)</td>
+<td><a href="#rag-r2">2</a></td>
+</tr>
+<tr>
+<td><strong>Vertex AI Vector Search</strong></td>
+<td>The managed cloud vector store; bills by the hour while deployed</td>
+<td><a href="#rag-r2">2</a>, <a href="#rag-r5">5</a></td>
+</tr>
+<tr>
+<td><strong>Chunk id (<code>sha1</code>)</strong></td>
+<td>A hash of source, page and position, so indexing a file twice replaces, not duplicates</td>
+<td><a href="#rag-r2">2</a></td>
+</tr>
+<tr>
+<td><strong>Keep the originals</strong></td>
+<td>Store the source files; a new model, chunk size or bug fix means re-indexing</td>
+<td><a href="#rag-r2">2</a></td>
+</tr>
+<tr>
+<td><strong><code>APP_MODE</code></strong></td>
+<td>The one setting that switches local and cloud storage behind the same code</td>
+<td><a href="#rag-r2">2</a></td>
+</tr>
+<tr>
+<td><strong>Strategy pattern</strong></td>
+<td>Same interface, swappable implementation (local or cloud store)</td>
+<td><a href="#rag-r2">2</a></td>
+</tr>
+<tr>
+<td><strong>Metadata <code>source</code></strong></td>
+<td>Which file a chunk came from, so an answer can be traced</td>
+<td><a href="#rag-r2">2</a></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="rag-glossary-retrieval-and-answering">Retrieval and answering</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>One line</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Retriever</strong></td>
+<td>Anything that turns a question into a list of documents</td>
+<td><a href="#rag-r3">3</a></td>
+</tr>
+<tr>
+<td><strong>Similarity search</strong></td>
+<td>The <code>k</code> chunks closest in meaning (default 3)</td>
+<td><a href="#rag-r3">3</a></td>
+</tr>
+<tr>
+<td><strong>Multi-query</strong></td>
+<td>The model rewrites the question several ways and merges the results</td>
+<td><a href="#rag-r3">3</a></td>
+</tr>
+<tr>
+<td><strong>Contextual compression</strong></td>
+<td>Fetch 10 chunks, then the model trims each to the relevant part</td>
+<td><a href="#rag-r3">3</a></td>
+</tr>
+<tr>
+<td><strong>MMR</strong></td>
+<td>Maximal marginal relevance: relevant and different, so no near-duplicates</td>
+<td><a href="#rag-r3">3</a>, <a href="#rag-r4">4</a></td>
+</tr>
+<tr>
+<td><strong>LCEL</strong></td>
+<td>LangChain's pipe syntax for chains: each step's output feeds the next, joined with the pipe symbol</td>
+<td><a href="#rag-r3">3</a></td>
+</tr>
+<tr>
+<td><strong><code>RunnablePassthrough</code></strong></td>
+<td>Passes the question through unchanged alongside the retrieved context</td>
+<td><a href="#rag-r3">3</a></td>
+</tr>
+<tr>
+<td><strong><code>langchain-classic</code></strong></td>
+<td>The package holding the older chains and retrievers after LangChain v1</td>
+<td><a href="#rag-r3">3</a></td>
+</tr>
+<tr>
+<td><strong>Expected answer first</strong></td>
+<td>Write the answer you expect before testing; otherwise it is only a demo</td>
+<td><a href="#rag-r3">3</a>, <a href="#rag-r5">5</a></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="rag-glossary-advanced-variants">Advanced variants</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>One line</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HyDE</strong></td>
+<td>Search with an imagined answer instead of the question</td>
+<td><a href="#rag-r4">4</a></td>
+</tr>
+<tr>
+<td><strong>Hybrid search</strong></td>
+<td>Keyword ranking plus meaning ranking, merged</td>
+<td><a href="#rag-r4">4</a></td>
+</tr>
+<tr>
+<td><strong>Reciprocal rank fusion</strong></td>
+<td>Score each item by the sum of <code>1/(60 + position)</code> across rankings</td>
+<td><a href="#rag-r4">4</a></td>
+</tr>
+<tr>
+<td><strong>Reranking</strong></td>
+<td>Over-fetch, then have the model score each candidate and keep the best</td>
+<td><a href="#rag-r4">4</a></td>
+</tr>
+<tr>
+<td><strong>Parent pages</strong></td>
+<td>Search small pieces but hand over the whole page</td>
+<td><a href="#rag-r4">4</a></td>
+</tr>
+<tr>
+<td><strong>Decomposition</strong></td>
+<td>Split a many-part question into simple ones, search each, merge</td>
+<td><a href="#rag-r4">4</a></td>
+</tr>
+<tr>
+<td><strong>Follow-up rewrite</strong></td>
+<td>Turn "And for moderate risk?" into a question that stands alone</td>
+<td><a href="#rag-r4">4</a></td>
+</tr>
+<tr>
+<td><strong>Contextual retrieval</strong></td>
+<td>The model writes a short note onto each chunk before embedding it</td>
+<td><a href="#rag-r4">4</a></td>
+</tr>
+<tr>
+<td><strong>BM25</strong></td>
+<td>A standard keyword-ranking method; the lab's keyword side is a simpler home-made version</td>
+<td><a href="#rag-r4">4</a></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="rag-glossary-cost-and-operations">Cost and operations</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>One line</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Deployed index</strong></td>
+<td>An index running on machines at an endpoint; billed by the hour even when idle</td>
+<td><a href="#rag-r5">5</a></td>
+</tr>
+<tr>
+<td><strong>Budget alert</strong></td>
+<td>Emails you as spending grows; it never stops anything</td>
+<td><a href="#rag-r5">5</a></td>
+</tr>
+<tr>
+<td><strong>Searchable delay</strong></td>
+<td>New data takes about a minute to become searchable</td>
+<td><a href="#rag-r5">5</a></td>
+</tr>
+<tr>
+<td><strong>Key-free tests</strong></td>
+<td>Tests that replace the model with a stand-in, so they run without keys or accounts</td>
+<td><a href="#rag-r5">5</a></td>
+</tr>
+</tbody>
+</table></div><button class="readbtn" data-id="rag-glossary">Mark this chapter as read</button><div class="pager"><button data-id="rag-r5"><small>Previous</small><b>Costs, errors and tests for a RAG app</b></button><button class="next" data-id="rag-bank"><small>Next</small><b>Interview question bank</b></button></div></article>
 <article id="ch-rag-bank" hidden><p class="crumb">Back matter</p><h1>Interview question bank</h1><p class="lead">Every interview question from every chapter in one place, in chapter order. Tap a question to reveal the answer.</p><div class="meta"><span class="chip">8 questions</span><span class="chip plain">Rebuilt automatically from the chapters</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="rag-bank-chapter-1-rag-explained-why-and-what-the-parts-a">Chapter 1: RAG explained: why, and what the parts are</h2>
 <details class="qa"><summary>What is RAG?</summary><div class="ans"><p>Find the right pages first, then answer from them: an open-book exam. Chunks of your documents are embedded, stored in a vector database and retrieved by meaning, then given to the model with the question.</p></div></details>
 <details class="qa"><summary>How does it stop the model making things up?</summary><div class="ans"><p>The prompt says to answer from the retrieved context and to say "I do not know" otherwise.</p></div></details>
@@ -15371,13 +16622,157 @@ def rerank(question, k=3):
 <details class="qa"><summary>Basic RAG returns the right chunk third, not first. What do you try?</summary><div class="ans"><p>Reranking: over-fetch (for example 8), have a model score each candidate, keep the best few. It costs one model call. Measure it on your own list of questions with known answers.</p></div></details>
 <details class="qa"><summary>What does reciprocal rank fusion do?</summary><div class="ans"><p>It merges a keyword ranking and a meaning ranking by adding 1 / (60 + position) for each list, so no weights are needed. Hybrid helps with exact terms but can hurt on other questions.</p></div></details>
 <h2 id="rag-bank-chapter-5-costs-errors-and-tests-for-a-rag-app">Chapter 5: Costs, errors and tests for a RAG app</h2>
-<details class="qa"><summary>What is the biggest cost risk of deploying it?</summary><div class="ans"><p>Vector Search, billed by the hour even when idle, and possibly with two replicas by default. Do the work in one sitting, switch it off and set a budget alert (which does not stop spending).</p></div></details><button class="readbtn" data-id="rag-bank">Mark this chapter as read</button><div class="pager"><button data-id="rag-r5"><small>Previous</small><b>Costs, errors and tests for a RAG app</b></button></div></article>
+<details class="qa"><summary>What is the biggest cost risk of deploying it?</summary><div class="ans"><p>Vector Search, billed by the hour even when idle, and possibly with two replicas by default. Do the work in one sitting, switch it off and set a budget alert (which does not stop spending).</p></div></details><button class="readbtn" data-id="rag-bank">Mark this chapter as read</button><div class="pager"><button data-id="rag-glossary"><small>Previous</small><b>Glossary</b></button><button class="next" data-id="rag-cheat"><small>Next</small><b>Cheat sheet</b></button></div></article>
+<article id="ch-rag-cheat" hidden><p class="crumb">Back matter</p><h1>Cheat sheet</h1><p class="lead">The RAG pipeline, the retrieval choices and the cost traps on one page. Every item links back to its chapter.</p><div class="meta"><span class="chip">Quick reference</span><span class="chip plain">Code is condensed. See the chapters for the full versions</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="rag-cheat-the-pipeline-ch-1-ch-2-ch-3">The pipeline (<a href="#rag-r1">Ch 1</a>, <a href="#rag-r2">Ch 2</a>, <a href="#rag-r3">Ch 3</a>)</h2>
+<pre><code class="language-text">Once:      PDF -&gt; pages -&gt; chunks (~1000 chars, 100 overlap) -&gt; embeddings -&gt; vector store
+Each ask:  question -&gt; SAME embedding model -&gt; nearest chunks -&gt; prompt -&gt; LLM -&gt; answer
+</code></pre>
+<pre><code class="language-python">splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+
+chain = (
+    {&quot;context&quot;: retriever | format_docs, &quot;input&quot;: RunnablePassthrough()}
+    | ANSWER_PROMPT | llm | StrOutputParser()
+)
+answer = chain.invoke(&quot;When do we pay servo motor suppliers?&quot;)
+</code></pre>
+<p>The prompt must say: use the context, and <strong>if you do not know based on the context, say so</strong>.</p>
+<h2 id="rag-cheat-which-retrieval-ch-3-ch-4">Which retrieval? (<a href="#rag-r3">Ch 3</a>, <a href="#rag-r4">Ch 4</a>)</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>Extra cost</th>
+<th>Typical reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Similarity (k=3)</td>
+<td>none</td>
+<td>start here</td>
+</tr>
+<tr>
+<td>Multi-query</td>
+<td>1 model call</td>
+<td>the user's words differ from the document's</td>
+</tr>
+<tr>
+<td>Contextual compression</td>
+<td>1 call + 1 per chunk</td>
+<td>prompts are too long or noisy</td>
+</tr>
+<tr>
+<td>MMR</td>
+<td>none</td>
+<td>results are near-duplicates</td>
+</tr>
+<tr>
+<td>HyDE</td>
+<td>1 call</td>
+<td>the question looks nothing like the answer</td>
+</tr>
+<tr>
+<td>Hybrid (RRF)</td>
+<td>none extra</td>
+<td>exact terms matter (names, codes)</td>
+</tr>
+<tr>
+<td>Rerank</td>
+<td>1 call</td>
+<td>the right chunk is found but not first</td>
+</tr>
+<tr>
+<td>Parent pages</td>
+<td>bigger prompt</td>
+<td>a chunk needs its surrounding page</td>
+</tr>
+<tr>
+<td>Decomposition</td>
+<td>1 call</td>
+<td>the question has several parts</td>
+</tr>
+<tr>
+<td>Follow-up rewrite</td>
+<td>1 call</td>
+<td>chat questions like "and for moderate risk?"</td>
+</tr>
+</tbody>
+</table></div>
+<p>The last column is my short summary of each idea, not a rule from the slides. Reciprocal rank fusion: <code>score = sum over rankings of 1 / (60 + position)</code>. No variant wins everywhere; add one at a time and <strong>measure on your own questions with known answers</strong>.</p>
+<h2 id="rag-cheat-rules-that-save-hours">Rules that save hours</h2>
+<ul>
+<li><strong>One embedding model</strong> must index and search; dimensions must match the index (768 here). Switching models means re-indexing, so <strong>keep the originals</strong>.</li>
+<li>Chunk ids from a hash of source, page and position make re-indexing replace, not duplicate.</li>
+<li>Local mode uses Chroma (a folder); cloud mode uses Vertex AI Vector Search. One setting, <code>APP_MODE</code>, switches them; the two stores are separate, so re-upload after switching.</li>
+<li>New data takes about a minute to become searchable.</li>
+<li>Write the <strong>expected answer first</strong>; a test without one is a demo.</li>
+<li>Tests replace the model with a stand-in, so they need no key.</li>
+</ul>
+<h2 id="rag-cheat-costs-ch-5">Costs (<a href="#rag-r5">Ch 5</a>)</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>If this exists</th>
+<th>It costs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>An index deployed to an endpoint</td>
+<td><strong>By the hour, even with no users</strong>: the main bill</td>
+</tr>
+<tr>
+<td>A Cloud Run service</td>
+<td>Only while it handles requests</td>
+</tr>
+<tr>
+<td>Buckets, images, secrets</td>
+<td>Small storage charges</td>
+</tr>
+<tr>
+<td>Only a project with billing linked</td>
+<td>Nothing</td>
+</tr>
+</tbody>
+</table></div>
+<p>A budget alert <strong>only emails</strong>. Switch things off: undeploy the index, then delete the endpoint and the index. For small data, Postgres with pgvector or local Chroma is cheaper.</p>
+<h2 id="rag-cheat-errors-ch-5">Errors (<a href="#rag-r5">Ch 5</a>)</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>You see</th>
+<th>Do this</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nothing found right after upload</td>
+<td>Wait about a minute</td>
+</tr>
+<tr>
+<td><code>DefaultCredentialsError</code></td>
+<td><code>gcloud auth application-default login</code></td>
+</tr>
+<tr>
+<td>503 listing missing settings</td>
+<td><code>APP_MODE=cloud</code> with an empty index id: fill the settings</td>
+</tr>
+<tr>
+<td>Errors after switching models</td>
+<td>Dimensions must match the index (768)</td>
+</tr>
+<tr>
+<td>"Index ... is not deployed to endpoint"</td>
+<td>Check <code>deployedIndexes</code> on the endpoint before uploading</td>
+</tr>
+</tbody>
+</table></div><button class="readbtn" data-id="rag-cheat">Mark this chapter as read</button><div class="pager"><button data-id="rag-bank"><small>Previous</small><b>Interview question bank</b></button></div></article>
   </main>
   <aside class="toc" id="toc"></aside>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script>
-window.__BOOKS__ = [{"id": "library", "title": "The Agentic AI library", "short": "Library (start here)", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}]}, {"id": "foundations", "title": "Python and Agent Foundations", "short": "1. Foundations", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "f1", "num": "1", "title": "Set up your machine and refresh Python", "part": "Foundations", "ready": true}, {"id": "f1a", "num": "1A", "title": "APIs, JSON and HTTP in plain words", "part": "Foundations", "ready": true}, {"id": "f2", "num": "2", "title": "LLM basics in plain words", "part": "Foundations", "ready": true}, {"id": "f3", "num": "3", "title": "What an agent is", "part": "Foundations", "ready": true}, {"id": "f4", "num": "4", "title": "Agents in plain Python", "part": "Foundations", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}]}, {"id": "pydantic", "title": "Pydantic", "short": "2. Pydantic", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "p1", "num": "1", "title": "Why validation exists, and type hints", "part": "Pydantic", "ready": true}, {"id": "p2", "num": "2", "title": "Your first model", "part": "Pydantic", "ready": true}, {"id": "p3", "num": "3", "title": "Fields and constraints", "part": "Pydantic", "ready": true}, {"id": "p4", "num": "4", "title": "Validators", "part": "Pydantic", "ready": true}, {"id": "p5", "num": "5", "title": "Computed fields and serialization", "part": "Pydantic", "ready": true}, {"id": "p6", "num": "6", "title": "Nested models", "part": "Pydantic", "ready": true}, {"id": "p7", "num": "7", "title": "Strict mode and JSON Schema", "part": "Pydantic", "ready": true}, {"id": "p8", "num": "8", "title": "Settings and secrets", "part": "Pydantic", "ready": true}, {"id": "p9", "num": "9", "title": "Reading validation errors", "part": "Pydantic", "ready": true}, {"id": "p10", "num": "10", "title": "Pydantic with FastAPI", "part": "Pydantic", "ready": true}, {"id": "p11", "num": "11", "title": "Validating what an LLM gives you back", "part": "Pydantic", "ready": true}, {"id": "p12", "num": "12", "title": "Where Pydantic goes next, and the final project", "part": "Pydantic", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}]}, {"id": "agentic-ai", "title": "Agentic AI with LangChain", "short": "3. Agentic AI (LangChain)", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "ch1", "num": "1", "title": "Introduction to LangChain", "part": "Part A  LangChain core", "ready": true}, {"id": "ch2", "num": "2", "title": "The LangChain family and harness engineering", "part": "Part A  LangChain core", "ready": true}, {"id": "ch3", "num": "3", "title": "Inside the model", "part": "Part A  LangChain core", "ready": true}, {"id": "ch4", "num": "4", "title": "Structured output", "part": "Part A  LangChain core", "ready": true}, {"id": "ch5", "num": "5", "title": "Tools deep dive", "part": "Part A  LangChain core", "ready": true}, {"id": "ch6", "num": "6", "title": "Agents, memory and middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch7", "num": "7", "title": "Mastering middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch8", "num": "8", "title": "Guardrails, todo lists, resilience", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch9", "num": "9", "title": "Shell tools and custom middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch10", "num": "10", "title": "Runtime and human-in-the-loop", "part": "Part C  Runtime", "ready": true}, {"id": "ch10a", "num": "10A", "title": "Streaming agent output (from the docs)", "part": "Part C  Runtime", "ready": true}, {"id": "ch11", "num": "11", "title": "Why MCP exists", "part": "Part D  MCP", "ready": true}, {"id": "ch12", "num": "12", "title": "MCP primitives, lifecycle, JSON-RPC", "part": "Part D  MCP", "ready": true}, {"id": "ch13", "num": "13", "title": "Capability negotiation and operation", "part": "Part D  MCP", "ready": true}, {"id": "ch14", "num": "14", "title": "Shutdown, transports, first server", "part": "Part D  MCP", "ready": true}, {"id": "ch15", "num": "15", "title": "The Time Tracker project", "part": "Part D  MCP", "ready": true}, {"id": "ch16", "num": "16", "title": "Deploying servers, building a client", "part": "Part D  MCP", "ready": true}, {"id": "ch17", "num": "17", "title": "Legacy vs modern MCP", "part": "Part D  MCP", "ready": true}, {"id": "ch18", "num": "18", "title": "MCP inside LangChain", "part": "Part E  Advanced", "ready": true}, {"id": "ch19", "num": "19", "title": "Multi-agent patterns", "part": "Part E  Advanced", "ready": true}, {"id": "ch20", "num": "20", "title": "Meridian AI project tour", "part": "Part E  Advanced", "ready": true}, {"id": "glossary", "num": "", "title": "Glossary", "part": "Back matter", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}, {"id": "cheat", "num": "", "title": "Cheat sheet", "part": "Back matter", "ready": true}]}, {"id": "rag", "title": "RAG", "short": "4. RAG", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "r1", "num": "1", "title": "RAG explained: why, and what the parts are", "part": "RAG", "ready": true}, {"id": "r2", "num": "2", "title": "Embeddings, storing meaning and ingestion", "part": "RAG", "ready": true}, {"id": "r3", "num": "3", "title": "Retrieval and the answer chain", "part": "RAG", "ready": true}, {"id": "r4", "num": "4", "title": "Advanced RAG: seven ways to change retrieval", "part": "RAG", "ready": true}, {"id": "r5", "num": "5", "title": "Costs, errors and tests for a RAG app", "part": "RAG", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}]}];
+window.__BOOKS__ = [{"id": "library", "title": "The Agentic AI library", "short": "Library (start here)", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}]}, {"id": "foundations", "title": "Python and Agent Foundations", "short": "1. Foundations", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "f1", "num": "1", "title": "Set up your machine and refresh Python", "part": "Foundations", "ready": true}, {"id": "f1a", "num": "1A", "title": "APIs, JSON and HTTP in plain words", "part": "Foundations", "ready": true}, {"id": "f2", "num": "2", "title": "LLM basics in plain words", "part": "Foundations", "ready": true}, {"id": "f3", "num": "3", "title": "What an agent is", "part": "Foundations", "ready": true}, {"id": "f4", "num": "4", "title": "Agents in plain Python", "part": "Foundations", "ready": true}, {"id": "glossary", "num": "", "title": "Glossary", "part": "Back matter", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}, {"id": "cheat", "num": "", "title": "Cheat sheet", "part": "Back matter", "ready": true}]}, {"id": "pydantic", "title": "Pydantic", "short": "2. Pydantic", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "p1", "num": "1", "title": "Why validation exists, and type hints", "part": "Pydantic", "ready": true}, {"id": "p2", "num": "2", "title": "Your first model", "part": "Pydantic", "ready": true}, {"id": "p3", "num": "3", "title": "Fields and constraints", "part": "Pydantic", "ready": true}, {"id": "p4", "num": "4", "title": "Validators", "part": "Pydantic", "ready": true}, {"id": "p5", "num": "5", "title": "Computed fields and serialization", "part": "Pydantic", "ready": true}, {"id": "p6", "num": "6", "title": "Nested models", "part": "Pydantic", "ready": true}, {"id": "p7", "num": "7", "title": "Strict mode and JSON Schema", "part": "Pydantic", "ready": true}, {"id": "p8", "num": "8", "title": "Settings and secrets", "part": "Pydantic", "ready": true}, {"id": "p9", "num": "9", "title": "Reading validation errors", "part": "Pydantic", "ready": true}, {"id": "p10", "num": "10", "title": "Pydantic with FastAPI", "part": "Pydantic", "ready": true}, {"id": "p11", "num": "11", "title": "Validating what an LLM gives you back", "part": "Pydantic", "ready": true}, {"id": "p12", "num": "12", "title": "Where Pydantic goes next, and the final project", "part": "Pydantic", "ready": true}, {"id": "glossary", "num": "", "title": "Glossary", "part": "Back matter", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}, {"id": "cheat", "num": "", "title": "Cheat sheet", "part": "Back matter", "ready": true}]}, {"id": "agentic-ai", "title": "Agentic AI with LangChain", "short": "3. Agentic AI (LangChain)", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "ch1", "num": "1", "title": "Introduction to LangChain", "part": "Part A  LangChain core", "ready": true}, {"id": "ch2", "num": "2", "title": "The LangChain family and harness engineering", "part": "Part A  LangChain core", "ready": true}, {"id": "ch3", "num": "3", "title": "Inside the model", "part": "Part A  LangChain core", "ready": true}, {"id": "ch4", "num": "4", "title": "Structured output", "part": "Part A  LangChain core", "ready": true}, {"id": "ch5", "num": "5", "title": "Tools deep dive", "part": "Part A  LangChain core", "ready": true}, {"id": "ch6", "num": "6", "title": "Agents, memory and middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch7", "num": "7", "title": "Mastering middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch8", "num": "8", "title": "Guardrails, todo lists, resilience", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch9", "num": "9", "title": "Shell tools and custom middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch10", "num": "10", "title": "Runtime and human-in-the-loop", "part": "Part C  Runtime", "ready": true}, {"id": "ch10a", "num": "10A", "title": "Streaming agent output (from the docs)", "part": "Part C  Runtime", "ready": true}, {"id": "ch11", "num": "11", "title": "Why MCP exists", "part": "Part D  MCP", "ready": true}, {"id": "ch12", "num": "12", "title": "MCP primitives, lifecycle, JSON-RPC", "part": "Part D  MCP", "ready": true}, {"id": "ch13", "num": "13", "title": "Capability negotiation and operation", "part": "Part D  MCP", "ready": true}, {"id": "ch14", "num": "14", "title": "Shutdown, transports, first server", "part": "Part D  MCP", "ready": true}, {"id": "ch15", "num": "15", "title": "The Time Tracker project", "part": "Part D  MCP", "ready": true}, {"id": "ch16", "num": "16", "title": "Deploying servers, building a client", "part": "Part D  MCP", "ready": true}, {"id": "ch17", "num": "17", "title": "Legacy vs modern MCP", "part": "Part D  MCP", "ready": true}, {"id": "ch18", "num": "18", "title": "MCP inside LangChain", "part": "Part E  Advanced", "ready": true}, {"id": "ch19", "num": "19", "title": "Multi-agent patterns", "part": "Part E  Advanced", "ready": true}, {"id": "ch20", "num": "20", "title": "Meridian AI project tour", "part": "Part E  Advanced", "ready": true}, {"id": "glossary", "num": "", "title": "Glossary", "part": "Back matter", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}, {"id": "cheat", "num": "", "title": "Cheat sheet", "part": "Back matter", "ready": true}]}, {"id": "rag", "title": "RAG", "short": "4. RAG", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "r1", "num": "1", "title": "RAG explained: why, and what the parts are", "part": "RAG", "ready": true}, {"id": "r2", "num": "2", "title": "Embeddings, storing meaning and ingestion", "part": "RAG", "ready": true}, {"id": "r3", "num": "3", "title": "Retrieval and the answer chain", "part": "RAG", "ready": true}, {"id": "r4", "num": "4", "title": "Advanced RAG: seven ways to change retrieval", "part": "RAG", "ready": true}, {"id": "r5", "num": "5", "title": "Costs, errors and tests for a RAG app", "part": "RAG", "ready": true}, {"id": "glossary", "num": "", "title": "Glossary", "part": "Back matter", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}, {"id": "cheat", "num": "", "title": "Cheat sheet", "part": "Back matter", "ready": true}]}];
 /* Interactive widgets for the reader. A chapter writes ":::widget name" and this file builds it.
    Each widget is plain DOM, no libraries, and works with the page's colour variables. */
 (function () {

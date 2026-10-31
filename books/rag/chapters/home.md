@@ -32,3 +32,13 @@ The content comes from the Meridian course slides and the Meridian learner repo.
 :::note Real data
 Never use real patient or personal data with any model or tool. Use synthetic or fully de-identified examples.
 :::
+
+<!-- verified -->
+## What was run, and what was not
+
+On 31 Oct 2026 I ran what can run without keys or a cloud account (Python 3.13, `langchain-core` 1.7, `chromadb` 1.5, `langchain-chroma`).
+
+- `build/rag_foundations_test.py` has **9 checks**, all passing: the splitter settings (1,000 characters, 100 overlap), `sha1` chunk ids replacing rather than duplicating and surviving a restart, the LCEL chain shape, similarity versus MMR on near-duplicates, multi-query de-duplication and reciprocal rank fusion arithmetic. These use fake embeddings and a stand-in model, so they check the logic, not answer quality.
+- Meridian's own **17 backend tests pass** (3.4 s) on current library versions, not the pinned ones.
+- **Not run:** anything that calls Gemini, Vertex AI Vector Search or Cloud Run, and the thirteen RAG variants against real answers. Numbers quoted from the slides (such as 218 s builds) are the instructor's measurements, not mine.
+<!-- /verified -->

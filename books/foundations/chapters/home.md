@@ -48,3 +48,11 @@ Every chapter has the same shape: why it matters, core ideas, common mistakes, a
 :::beyond Labels
 A box marked **Beyond the class** means the content comes from a different class than the chapter's own, or is an explanation added to fill a gap. **Repo note** boxes point out problems in the course code.
 :::
+
+<!-- verified -->
+## What was run, and what was not
+
+On 31 Oct 2026 I ran chapter 3's agent loop against a stub client (no key needed): a tool request followed by a final answer takes two model calls, the tool result is linked by `tool_call_id`, and a model that always asks for a tool stops at `max_turns`. The tool schema is a valid JSON Schema shape. The check is in `build/rag_foundations_test.py`.
+
+**Not run:** the real provider calls (they need a key), the setup steps on Windows, and the Project 0 files.
+<!-- /verified -->

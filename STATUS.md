@@ -38,6 +38,7 @@ Updated 2026-10-31 by `build/status.py`. This file is regenerated after every pr
 | Craft page | Attachments opened | 31 of 40 | 78% | Of 40 items: 17 PDFs (text extracted; counts approximate for the earlier ones), 4 notebooks (from the repo) and all 10 Colabs opened. Colabs: 2 read in full (Custom Middleware, MCP adapter); the other 8 were compared by title, headings and opening cells with repo notebooks that were read earlier, not re-read cell by cell. Not opened: the .excalidraw file (its PDF export was read) and 5 class videos. Skipped on purpose: the AI Industry Handbook (not for redistribution) and 2 job-ad PDFs (not course content). Keys found in Colabs were not copied. |
 | Meridian learner repo | Repo reviewed | 1 of 1 | 100% | README, code and a frontend digest read; not every file individually. |
 | agent-flow repo | Repo reviewed | 0 of 1 | 0% | README and folder layout only, source not read. |
+| Code run | Checks that pass | 71 of 71 | 100% | Pydantic claims 45 of 45 (build/pydantic_claims_test.py), key-free Foundations and RAG checks 9 of 9 (build/rag_foundations_test.py), Meridian's own backend tests 17 of 17. TimeTrack lab run earlier. These are tests of stated behaviour, not of every chapter. |
 
 ## 3. Skipped on purpose
 
@@ -49,13 +50,13 @@ Updated 2026-10-31 by `build/status.py`. This file is regenerated after every pr
 
 ## 4. Structural gaps
 
-- Foundations, Pydantic and RAG books have no glossary or cheat sheet
 - RAG book is built only from Meridian; no course RAG classes exist yet
-- Chapter order inside the LangChain book has not been reviewed
-- Only the TimeTrack lab was run; SDK snippets in the Pydantic book were not run
+- LangChain chapter order reviewed on 31 Oct 2026: sound, with 8 findings waiting for your decision (see REVIEW_langchain_chapter_order.md); nothing reordered
+- Not run: provider SDK calls that need paid keys (Pydantic ch 11, Foundations, RAG with Gemini), Vertex AI Vector Search and Cloud Run, the thirteen RAG variants on real answers, and the notebook cells
 
 ## 5. Change log (newest first)
 
+- 2026-10-31: Glossaries and cheat sheets added to Foundations, Pydantic and RAG; Pydantic claims (45), key-free RAG/Foundations checks (9) and Meridian tests (17) run and passing; LangChain chapter order reviewed (REVIEW file, nothing reordered)
 - 2026-10-31: Craft attachments: 3 MCP PDFs not in the repo and all 10 Colabs opened (now 31 of 40); mini-contra checked; keys in Colab flagged
 - 2026-10-31: Context-window simulator site read in full (all 4 tabs and script); instructor sites now 15 of 15
 - 2026-10-31: Read the 7 unread Pydantic docs pages (unions, alias, config, dataclasses, TypeAdapter, performance, FastAPI x5); now 19 of 19

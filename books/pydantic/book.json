@@ -97,11 +97,25 @@
    "file": "p12.md"
   },
   {
+   "id": "glossary",
+   "num": "",
+   "title": "Glossary",
+   "part": "Back matter",
+   "file": "glossary.md"
+  },
+  {
    "id": "bank",
    "num": "",
    "title": "Interview question bank",
    "part": "Back matter",
    "file": "@bank"
+  },
+  {
+   "id": "cheat",
+   "num": "",
+   "title": "Cheat sheet",
+   "part": "Back matter",
+   "file": "cheat.md"
   }
  ]
 }
