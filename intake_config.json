@@ -1,0 +1,65 @@
+{
+ "notes_repo": "kiaanwankhede/MyNotes",
+ "master": "master/master.xlsx",
+ "format": "GitBook-style markdown, one folder per book under books/",
+ "push": "main after each batch (confirmed by owner)",
+ "books": {
+  "Python": {
+   "folder": "books/python",
+   "chapters": [
+    "Setup and API basics",
+    "Python refresher",
+    "Pydantic deep dive",
+    "Anatomy of an agent"
+   ]
+  },
+  "LLM": {
+   "folder": "books/llm",
+   "chapters": [
+    "Course roadmap and prerequisites",
+    "The agentic loop in pure Python",
+    "Inside the model",
+    "Glossary"
+   ]
+  },
+  "Langchain": {
+   "folder": "books/langchain",
+   "chapters": [
+    "Introduction to LangChain",
+    "LangChain family and harness engineering",
+    "Models, messages and parameters",
+    "Structured output",
+    "Tools",
+    "Agents and memory",
+    "Middleware",
+    "Guardrails, to-do lists and tool resilience",
+    "Shell tools and custom middleware",
+    "Runtime and human-in-the-loop",
+    "MCP in LangChain",
+    "Multi-agent patterns"
+   ]
+  },
+  "MCP": {
+   "folder": "books/mcp",
+   "chapters": [
+    "Why MCP exists",
+    "Primitives and architecture",
+    "Lifecycle, JSON-RPC and capability negotiation",
+    "Transports and shutdown",
+    "Building MCP servers",
+    "Deployment",
+    "Legacy vs modern MCP",
+    "Interview questions"
+   ]
+  },
+  "Projects": {
+   "folder": "books/projects",
+   "chapters": [
+    "CineBot",
+    "Time Tracker (MCP)",
+    "Meridian AI learner",
+    "AI Updater"
+   ]
+  }
+ }
+}
