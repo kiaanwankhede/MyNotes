@@ -35,7 +35,7 @@ Updated 2026-10-31 by `build/status.py`. This file is regenerated after every pr
 | Instructor sites | Sites read in full | 15 of 15 | 100% | All 15 read in full: 3 MCP sites, Pydantic, all 7 series guides, AI terms, Python agents, the context-window simulator (all 4 tabs and its script), Meridian slides (7 of 7 modules). |
 | Meridian slides | Modules read in full | 7 of 7 | 100% | All 7 modules read in full (about 500 slides). Caveat: the text I extracted leaves out the code boxes, so exact command lines come from the repo files (deploy.yml, DEPLOY.md), not from the slides. |
 | Craft page | Index pages read | 14 of 14 | 100% | All index pages read. |
-| Craft page | Attachments opened | 31 of 40 | 78% | Of 40 items: 17 PDFs (text extracted; counts approximate for the earlier ones), 4 notebooks (from the repo) and all 10 Colabs opened. Colabs: 2 read in full (Custom Middleware, MCP adapter); the other 8 were compared by title, headings and opening cells with repo notebooks that were read earlier, not re-read cell by cell. Not opened: the .excalidraw file (its PDF export was read) and 5 class videos. Skipped on purpose: the AI Industry Handbook (not for redistribution) and 2 job-ad PDFs (not course content). Keys found in Colabs were not copied. |
+| Craft page | Attachments opened | 33 of 42 | 79% | Recounted 31 Oct from the full list (COVERAGE_INVENTORY.md section 5a): 22 PDFs, 4 notebooks, 1 .excalidraw, 10 Colabs, 5 videos = 42. Opened: 19 PDFs, 4 notebooks, 10 Colabs. Not opened: the .excalidraw file (its PDF export was read) and 5 videos. Skipped on purpose: the AI Industry Handbook and 2 job-ad PDFs. Three LangChain PDF variants share names with repo copies; byte-for-byte equality was not checked. Only 2 Colabs were read cell by cell; 8 were compared by title and headings with repo notebooks. |
 | Meridian learner repo | Repo reviewed | 1 of 1 | 100% | README, code and a frontend digest read; not every file individually. |
 | agent-flow repo | Repo reviewed | 0 of 1 | 0% | README and folder layout only, source not read. |
 | Code run | Automated checks (count, not coverage) | 73 of 73 | 100% | Pydantic claims 47 of 47 (build/pydantic_claims_test.py), key-free Foundations and RAG checks 9 of 9 (build/rag_foundations_test.py), Meridian's own backend tests 17 of 17; TimeTrack lab run earlier. 100% here means every check written passes, not that every chapter's code was run. |
@@ -55,9 +55,11 @@ Updated 2026-10-31 by `build/status.py`. This file is regenerated after every pr
 - RAG book is built only from Meridian; no course RAG classes exist yet
 - LangChain chapter order reviewed on 31 Oct 2026: sound, with 8 findings waiting for your decision (see REVIEW_langchain_chapter_order.md); nothing reordered
 - Not run: provider SDK calls that need paid keys (Pydantic ch 11, Foundations, RAG with Gemini), Vertex AI Vector Search and Cloud Run, the thirteen RAG variants on real answers, and the notebook cells
+- New upstream file not yet read: classes_transcription_summary/23 - 27 Sep - MCP In LangChain.md (the course repo moved from dd4bfe3 to 579c38a)
 
 ## 5. Change log (newest first)
 
+- 2026-10-31: Full inventory written (COVERAGE_INVENTORY.md): every repo file and every LangChain, MCP and Pydantic docs page with status; found 1 new upstream class file; Craft attachments recounted as 33 of 42
 - 2026-10-31: Coverage corrected: Pydantic docs are 17 of 54 teaching pages (not 19 of 19); LangChain docs gaps stated; MCP official docs added (1 of 26 docs, 0 of 31 spec). No book content changed
 - 2026-10-31: Self-review: 2 more Pydantic checks (wrap-validator order, settings priority; now 47 of 47), review finding 8 corrected, new pages render-checked
 - 2026-10-31: Glossaries and cheat sheets added to Foundations, Pydantic and RAG; Pydantic claims (45), key-free RAG/Foundations checks (9) and Meridian tests (17) run and passing; LangChain chapter order reviewed (REVIEW file, nothing reordered)

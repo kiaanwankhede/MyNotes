@@ -1,0 +1,100 @@
+Docs 2026-07-28 / Getting started|What is the Model Context Protocol (MCP)?|https://modelcontextprotocol.io/docs/2026-07-28/getting-started/intro
+Docs 2026-07-28 / Learn|Architecture overview|https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture
+Docs 2026-07-28 / Learn|Understanding MCP servers|https://modelcontextprotocol.io/docs/2026-07-28/learn/server-concepts
+Docs 2026-07-28 / Learn|Understanding MCP clients|https://modelcontextprotocol.io/docs/2026-07-28/learn/client-concepts
+Docs 2026-07-28 / Learn|Versioning|https://modelcontextprotocol.io/docs/2026-07-28/learn/versioning
+Docs 2026-07-28 / Develop|Connect to local MCP servers|https://modelcontextprotocol.io/docs/2026-07-28/develop/connect-local-servers
+Docs 2026-07-28 / Develop|Connect to remote MCP Servers|https://modelcontextprotocol.io/docs/2026-07-28/develop/connect-remote-servers
+Docs 2026-07-28 / Develop|Build with Agent Skills|https://modelcontextprotocol.io/docs/2026-07-28/develop/build-with-agent-skills
+Docs 2026-07-28 / Develop|Build an MCP server|https://modelcontextprotocol.io/docs/2026-07-28/develop/build-server
+Docs 2026-07-28 / Develop|Build an MCP client|https://modelcontextprotocol.io/docs/2026-07-28/develop/build-client
+Docs 2026-07-28 / Develop|Client Best Practices|https://modelcontextprotocol.io/docs/2026-07-28/develop/clients/client-best-practices
+Docs 2026-07-28 / SDKs|SDKs|https://modelcontextprotocol.io/docs/2026-07-28/sdk
+Docs 2026-07-28 / Security tutorials|Understanding Authorization in MCP|https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/authorization
+Docs 2026-07-28 / Security tutorials|Security Best Practices|https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices
+Docs 2026-07-28 / Security tutorials|Local Server Security|https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/local-server-security
+Docs 2026-07-28 / Tools|MCP Inspector (index)|https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector
+Docs 2026-07-28 / Tools|Inspector: Web client|https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/web
+Docs 2026-07-28 / Tools|Inspector: CLI client|https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/cli
+Docs 2026-07-28 / Tools|Inspector: TUI client|https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/tui
+Docs 2026-07-28 / Tools|Inspector: mcpdo connection client|https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/mcpdo
+Docs 2026-07-28 / Tools|Inspector: Configuration and flags|https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/configuration
+Docs 2026-07-28 / Tools|Inspector: Authorization|https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/authorization
+Docs 2026-07-28 / Tools|Inspector: Protocol eras|https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/protocol-eras
+Docs 2026-07-28 / Tools|Inspector: Recipes|https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/recipes
+Docs 2026-07-28 / Tools|Inspector: Security|https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/security
+Docs 2026-07-28 / Tools|Debugging|https://modelcontextprotocol.io/docs/2026-07-28/tools/debugging
+Specification 2026-07-28|Specification|https://modelcontextprotocol.io/specification/2026-07-28/index
+Specification 2026-07-28|Key Changes|https://modelcontextprotocol.io/specification/2026-07-28/changelog
+Specification 2026-07-28|Deprecated Features|https://modelcontextprotocol.io/specification/2026-07-28/deprecated
+Specification 2026-07-28|Architecture|https://modelcontextprotocol.io/specification/2026-07-28/architecture/index
+Specification 2026-07-28|Basic: Overview|https://modelcontextprotocol.io/specification/2026-07-28/basic/index
+Specification 2026-07-28|Basic: Versioning and Compatibility|https://modelcontextprotocol.io/specification/2026-07-28/basic/versioning
+Specification 2026-07-28|Patterns: Overview|https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/index
+Specification 2026-07-28|Patterns: Multi Round-Trip Requests|https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/mrtr
+Specification 2026-07-28|Patterns: Subscriptions|https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/subscriptions
+Specification 2026-07-28|Patterns: Cancellation|https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/cancellation
+Specification 2026-07-28|Patterns: Progress|https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/progress
+Specification 2026-07-28|Transports: Overview|https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/index
+Specification 2026-07-28|Transports: stdio|https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/stdio
+Specification 2026-07-28|Transports: Streamable HTTP|https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http
+Specification 2026-07-28|Authorization|https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization/index
+Specification 2026-07-28|Authorization Server Discovery|https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization/authorization-server-discovery
+Specification 2026-07-28|Client Registration|https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization/client-registration
+Specification 2026-07-28|Authorization Security Considerations|https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization/security-considerations
+Specification 2026-07-28|Client: Roots|https://modelcontextprotocol.io/specification/2026-07-28/client/roots
+Specification 2026-07-28|Client: Sampling|https://modelcontextprotocol.io/specification/2026-07-28/client/sampling
+Specification 2026-07-28|Client: Elicitation|https://modelcontextprotocol.io/specification/2026-07-28/client/elicitation
+Specification 2026-07-28|Server: Overview|https://modelcontextprotocol.io/specification/2026-07-28/server/index
+Specification 2026-07-28|Server: Discovery|https://modelcontextprotocol.io/specification/2026-07-28/server/discover
+Specification 2026-07-28|Server: Prompts|https://modelcontextprotocol.io/specification/2026-07-28/server/prompts
+Specification 2026-07-28|Server: Resources|https://modelcontextprotocol.io/specification/2026-07-28/server/resources
+Specification 2026-07-28|Server: Tools|https://modelcontextprotocol.io/specification/2026-07-28/server/tools
+Specification 2026-07-28|Server utilities: Caching|https://modelcontextprotocol.io/specification/2026-07-28/server/utilities/caching
+Specification 2026-07-28|Server utilities: Completion|https://modelcontextprotocol.io/specification/2026-07-28/server/utilities/completion
+Specification 2026-07-28|Server utilities: Logging|https://modelcontextprotocol.io/specification/2026-07-28/server/utilities/logging
+Specification 2026-07-28|Server utilities: Pagination|https://modelcontextprotocol.io/specification/2026-07-28/server/utilities/pagination
+Specification 2026-07-28|Schema Reference|https://modelcontextprotocol.io/specification/2026-07-28/schema
+Extensions (unversioned)|Extensions Overview|https://modelcontextprotocol.io/extensions/overview
+Extensions (unversioned)|Extension Support Matrix|https://modelcontextprotocol.io/extensions/client-matrix
+Extensions (unversioned)|MCP Apps|https://modelcontextprotocol.io/extensions/apps/overview
+Extensions (unversioned)|Build an MCP App|https://modelcontextprotocol.io/extensions/apps/build
+Extensions (unversioned)|Authorization Extensions|https://modelcontextprotocol.io/extensions/auth/overview
+Extensions (unversioned)|OAuth Client Credentials|https://modelcontextprotocol.io/extensions/auth/oauth-client-credentials
+Extensions (unversioned)|Enterprise-Managed Authorization|https://modelcontextprotocol.io/extensions/auth/enterprise-managed-authorization
+Extensions (unversioned)|Tasks|https://modelcontextprotocol.io/extensions/tasks/overview
+Extensions (unversioned)|Skills|https://modelcontextprotocol.io/extensions/skills/overview
+Community (unversioned)|Contributing to MCP|https://modelcontextprotocol.io/community/contributing
+Community (unversioned)|Contributor Communication|https://modelcontextprotocol.io/community/communication
+Community (unversioned)|Working and Interest Groups|https://modelcontextprotocol.io/community/working-interest-groups
+Community (unversioned)|Group Charter Template|https://modelcontextprotocol.io/community/charter-template
+Community (unversioned)|Design Principles|https://modelcontextprotocol.io/community/design-principles
+Community (unversioned)|SEP Guidelines|https://modelcontextprotocol.io/community/sep-guidelines
+Community (unversioned)|Governance and Stewardship|https://modelcontextprotocol.io/community/governance
+Community (unversioned)|Contributor Ladder|https://modelcontextprotocol.io/community/contributor-ladder
+Community (unversioned)|Feature Lifecycle and Deprecation Policy|https://modelcontextprotocol.io/community/feature-lifecycle
+Community (unversioned)|SDK Tiering System|https://modelcontextprotocol.io/community/sdk-tiers
+Community (unversioned)|Security Policy|https://modelcontextprotocol.io/community/security
+Community (unversioned)|Antitrust Policy|https://modelcontextprotocol.io/community/antitrust
+Community (unversioned)|Working group: File Uploads|https://modelcontextprotocol.io/community/working-groups/file-uploads
+Community (unversioned)|Working group: Filesystems|https://modelcontextprotocol.io/community/working-groups/filesystems
+Community (unversioned)|Working group: Governance|https://modelcontextprotocol.io/community/working-groups/governance
+Community (unversioned)|Working group: Infrastructure|https://modelcontextprotocol.io/community/working-groups/infrastructure
+Community (unversioned)|Working group: Inspector V2|https://modelcontextprotocol.io/community/working-groups/inspector-v2
+Community (unversioned)|Working group: Interceptors|https://modelcontextprotocol.io/community/working-groups/interceptors
+Community (unversioned)|Working group: Progressive Disclosure|https://modelcontextprotocol.io/community/working-groups/progressive-disclosure
+Community (unversioned)|Working group: Registry|https://modelcontextprotocol.io/community/working-groups/registry
+Community (unversioned)|Working group: SDK|https://modelcontextprotocol.io/community/working-groups/sdk
+Community (unversioned)|Working group: Server Card|https://modelcontextprotocol.io/community/working-groups/server-card
+Community (unversioned)|Working group: Skills Over MCP|https://modelcontextprotocol.io/community/working-groups/skills-over-mcp
+Community (unversioned)|Working group: Tasks and Events|https://modelcontextprotocol.io/community/working-groups/tasks-events
+Community (unversioned)|Working group: Transports|https://modelcontextprotocol.io/community/working-groups/transports
+Community (unversioned)|Interest group: Agents|https://modelcontextprotocol.io/community/interest-groups/agents
+Community (unversioned)|Interest group: Authorization|https://modelcontextprotocol.io/community/interest-groups/auth
+Community (unversioned)|Interest group: Enterprise|https://modelcontextprotocol.io/community/interest-groups/enterprise
+Community (unversioned)|Interest group: Enterprise-Managed Authorization|https://modelcontextprotocol.io/community/interest-groups/enterprise-managed-authorization
+Community (unversioned)|Interest group: Financial Services|https://modelcontextprotocol.io/community/interest-groups/financial-services
+Community (unversioned)|Interest group: Scientific Computing|https://modelcontextprotocol.io/community/interest-groups/scientific-computing
+Community (unversioned)|Interest group: Security|https://modelcontextprotocol.io/community/interest-groups/security
+Community (unversioned)|Interest group: Tool Annotations|https://modelcontextprotocol.io/community/interest-groups/tool-annotations
+Roadmap (unversioned)|Roadmap|https://modelcontextprotocol.io/development/roadmap

@@ -38,9 +38,9 @@
   {
    "group": "Craft page",
    "name": "Attachments opened",
-   "done": 31,
-   "total": 40,
-   "note": "Of 40 items: 17 PDFs (text extracted; counts approximate for the earlier ones), 4 notebooks (from the repo) and all 10 Colabs opened. Colabs: 2 read in full (Custom Middleware, MCP adapter); the other 8 were compared by title, headings and opening cells with repo notebooks that were read earlier, not re-read cell by cell. Not opened: the .excalidraw file (its PDF export was read) and 5 class videos. Skipped on purpose: the AI Industry Handbook (not for redistribution) and 2 job-ad PDFs (not course content). Keys found in Colabs were not copied."
+   "done": 33,
+   "total": 42,
+   "note": "Recounted 31 Oct from the full list (COVERAGE_INVENTORY.md section 5a): 22 PDFs, 4 notebooks, 1 .excalidraw, 10 Colabs, 5 videos = 42. Opened: 19 PDFs, 4 notebooks, 10 Colabs. Not opened: the .excalidraw file (its PDF export was read) and 5 videos. Skipped on purpose: the AI Industry Handbook and 2 job-ad PDFs. Three LangChain PDF variants share names with repo copies; byte-for-byte equality was not checked. Only 2 Colabs were read cell by cell; 8 were compared by title and headings with repo notebooks."
   },
   {
    "group": "Meridian learner repo",
@@ -88,9 +88,11 @@
  "structure_gaps": [
   "RAG book is built only from Meridian; no course RAG classes exist yet",
   "LangChain chapter order reviewed on 31 Oct 2026: sound, with 8 findings waiting for your decision (see REVIEW_langchain_chapter_order.md); nothing reordered",
-  "Not run: provider SDK calls that need paid keys (Pydantic ch 11, Foundations, RAG with Gemini), Vertex AI Vector Search and Cloud Run, the thirteen RAG variants on real answers, and the notebook cells"
+  "Not run: provider SDK calls that need paid keys (Pydantic ch 11, Foundations, RAG with Gemini), Vertex AI Vector Search and Cloud Run, the thirteen RAG variants on real answers, and the notebook cells",
+  "New upstream file not yet read: classes_transcription_summary/23 - 27 Sep - MCP In LangChain.md (the course repo moved from dd4bfe3 to 579c38a)"
  ],
  "log": [
+  "2026-10-31: Full inventory written (COVERAGE_INVENTORY.md): every repo file and every LangChain, MCP and Pydantic docs page with status; found 1 new upstream class file; Craft attachments recounted as 33 of 42",
   "2026-10-31: Coverage corrected: Pydantic docs are 17 of 54 teaching pages (not 19 of 19); LangChain docs gaps stated; MCP official docs added (1 of 26 docs, 0 of 31 spec). No book content changed",
   "2026-10-31: Self-review: 2 more Pydantic checks (wrap-validator order, settings priority; now 47 of 47), review finding 8 corrected, new pages render-checked",
   "2026-10-31: Glossaries and cheat sheets added to Foundations, Pydantic and RAG; Pydantic claims (45), key-free RAG/Foundations checks (9) and Meridian tests (17) run and passing; LangChain chapter order reviewed (REVIEW file, nothing reordered)",
