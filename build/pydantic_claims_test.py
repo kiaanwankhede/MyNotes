@@ -1,7 +1,7 @@
 """Checks the Pydantic book's claims against a real install.
 Run:  python -m venv v && v/bin/pip install pydantic pydantic-settings email-validator fastapi httpx
       v/bin/python build/pydantic_claims_test.py
-Last run 2026-10-31: pydantic 2.14.2, pydantic-settings 2.16.2, fastapi 0.162.0 -> 45 of 45 checks pass.
+Last run 2026-10-31: pydantic 2.14.2, pydantic-settings 2.16.2, fastapi 0.162.0 -> 47 of 47 checks pass.
 Needs no API keys or network.
 """
 import json, traceback
@@ -585,6 +585,30 @@ def _():
     assert c.get('/i/foo').json()=={'name':'Foo','price':50.2}
     assert c.patch('/i/foo',json={'price':1}).json()['name']=='Foo'
     r=c.get('/q?limit=10&tool=x'); assert r.status_code==422 and r.json()['detail'][0]['type']=='extra_forbidden'
+@t('p4 wrap validators run right to left together with before; after runs last')
+def _():
+    log=[]
+    def b(n):
+        def f(v): log.append(n); return v
+        return f
+    def w(n):
+        def f(v,h): log.append(n); return h(v)
+        return f
+    class M(BaseModel):
+        a:Annotated[int,AfterValidator(b('A1')),WrapValidator(w('W1')),BeforeValidator(b('B2')),WrapValidator(w('W2'))]
+    M(a=1); assert log==['W2','B2','W1','A1'], log
+@t('p8 priority: environment beats .env beats secrets_dir')
+def _():
+    import os, tempfile
+    from pydantic_settings import BaseSettings, SettingsConfigDict
+    d=tempfile.mkdtemp(); sd=os.path.join(d,'s'); os.mkdir(sd); open(os.path.join(sd,'token_x'),'w').write('from_secrets')
+    envf=os.path.join(d,'.env')
+    class S(BaseSettings):
+        model_config=SettingsConfigDict(env_file=envf,secrets_dir=sd); token_x:str
+    os.environ.pop('TOKEN_X',None)
+    assert S().token_x=='from_secrets'
+    open(envf,'w').write('TOKEN_X=from_dotenv\n'); assert S().token_x=='from_dotenv'
+    os.environ['TOKEN_X']='from_env'; assert S().token_x=='from_env'; os.environ.pop('TOKEN_X')
 @t('book snippets 13 blocks p4 EmailStr snippet etc run (with imports)')
 def _(): pass
 

@@ -38,7 +38,7 @@ Updated 2026-10-31 by `build/status.py`. This file is regenerated after every pr
 | Craft page | Attachments opened | 31 of 40 | 78% | Of 40 items: 17 PDFs (text extracted; counts approximate for the earlier ones), 4 notebooks (from the repo) and all 10 Colabs opened. Colabs: 2 read in full (Custom Middleware, MCP adapter); the other 8 were compared by title, headings and opening cells with repo notebooks that were read earlier, not re-read cell by cell. Not opened: the .excalidraw file (its PDF export was read) and 5 class videos. Skipped on purpose: the AI Industry Handbook (not for redistribution) and 2 job-ad PDFs (not course content). Keys found in Colabs were not copied. |
 | Meridian learner repo | Repo reviewed | 1 of 1 | 100% | README, code and a frontend digest read; not every file individually. |
 | agent-flow repo | Repo reviewed | 0 of 1 | 0% | README and folder layout only, source not read. |
-| Code run | Checks that pass | 71 of 71 | 100% | Pydantic claims 45 of 45 (build/pydantic_claims_test.py), key-free Foundations and RAG checks 9 of 9 (build/rag_foundations_test.py), Meridian's own backend tests 17 of 17. TimeTrack lab run earlier. These are tests of stated behaviour, not of every chapter. |
+| Code run | Automated checks (count, not coverage) | 73 of 73 | 100% | Pydantic claims 47 of 47 (build/pydantic_claims_test.py), key-free Foundations and RAG checks 9 of 9 (build/rag_foundations_test.py), Meridian's own backend tests 17 of 17; TimeTrack lab run earlier. 100% here means every check written passes, not that every chapter's code was run. |
 
 ## 3. Skipped on purpose
 
@@ -56,6 +56,7 @@ Updated 2026-10-31 by `build/status.py`. This file is regenerated after every pr
 
 ## 5. Change log (newest first)
 
+- 2026-10-31: Self-review: 2 more Pydantic checks (wrap-validator order, settings priority; now 47 of 47), review finding 8 corrected, new pages render-checked
 - 2026-10-31: Glossaries and cheat sheets added to Foundations, Pydantic and RAG; Pydantic claims (45), key-free RAG/Foundations checks (9) and Meridian tests (17) run and passing; LangChain chapter order reviewed (REVIEW file, nothing reordered)
 - 2026-10-31: Craft attachments: 3 MCP PDFs not in the repo and all 10 Colabs opened (now 31 of 40); mini-contra checked; keys in Colab flagged
 - 2026-10-31: Context-window simulator site read in full (all 4 tabs and script); instructor sites now 15 of 15

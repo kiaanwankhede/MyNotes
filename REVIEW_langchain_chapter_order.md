@@ -1,6 +1,6 @@
 # Review: chapter order of the LangChain book
 
-Written 31 Oct 2026. **Nothing was reordered or edited.** Changing the order is your decision (standing instruction 1); this file lists what I found and the options.
+Written 31 Oct 2026; finding 8 corrected the same day after re-checking ch11 and ch16. **Nothing was reordered or edited.** Changing the order is your decision (standing instruction 1); this file lists what I found and the options.
 
 **How I checked.** I read all chapter titles, leads and section headings, and traced every "Chapter N" mention in the text (outside code) to see which chapters lean on later ones. I spot-read ch1, ch5, ch6 and ch10 where the overlaps are. I did not re-read every chapter in full.
 
@@ -19,7 +19,7 @@ The order is sound. It follows the class order (Part A classes 06–10, B 11–1
 | 5 | **The capstone points forward to another book.** Ch20 sends RAG details to the RAG book (`#rag-r2` to `#rag-r5`), which comes after this book. This is the "option C" split you approved, so it is by design. | ch20 | None, but ch20's first lines could say "RAG half is in book 4". |
 | 6 | **Two chapters are very long.** Ch20 is about 83 KB (it now holds the module-by-module Meridian digests) and ch16 about 56 KB; the next longest is 36 KB. | ch20, ch16 | Split ch20 into "the tour" and "slide-by-slide detail", or collapse the digests. Needs your decision on where the detail goes. |
 | 7 | **Streaming is split.** Model streaming is in ch3, agent streaming in ch10A (docs only, labelled "10A", between HITL and MCP). | ch3, ch10A | Fine; maybe number it 11 and shift the rest, or leave as is. |
-| 8 | **MCP is seven chapters (ch11–17)** and ch17 (the July 2026 spec change) comes after chapters that teach the older design. That is the right order for learning, but ch11–16 should say early that ch17 changes some details. | ch11, ch17 | Add a one-line note at the top of ch11. |
+| 8 | **MCP is seven chapters (ch11–17)** and ch17 (the July 2026 spec change) comes after chapters that teach the older design. That is the right order for learning. Ch16 already flags that sampling was removed (Chapter 17), but ch11 mentions ch17 only in its resource table at the end, so a reader learns the older design first without warning. | ch11, ch16, ch17 | Add a one-line note near the top of ch11. |
 
 ## Checked and fine
 

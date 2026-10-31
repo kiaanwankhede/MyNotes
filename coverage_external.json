@@ -58,10 +58,10 @@
   },
   {
    "group": "Code run",
-   "name": "Checks that pass",
-   "done": 71,
-   "total": 71,
-   "note": "Pydantic claims 45 of 45 (build/pydantic_claims_test.py), key-free Foundations and RAG checks 9 of 9 (build/rag_foundations_test.py), Meridian's own backend tests 17 of 17. TimeTrack lab run earlier. These are tests of stated behaviour, not of every chapter."
+   "name": "Automated checks (count, not coverage)",
+   "done": 73,
+   "total": 73,
+   "note": "Pydantic claims 47 of 47 (build/pydantic_claims_test.py), key-free Foundations and RAG checks 9 of 9 (build/rag_foundations_test.py), Meridian's own backend tests 17 of 17; TimeTrack lab run earlier. 100% here means every check written passes, not that every chapter's code was run."
   }
  ],
  "skipped_on_purpose": [
@@ -77,6 +77,7 @@
   "Not run: provider SDK calls that need paid keys (Pydantic ch 11, Foundations, RAG with Gemini), Vertex AI Vector Search and Cloud Run, the thirteen RAG variants on real answers, and the notebook cells"
  ],
  "log": [
+  "2026-10-31: Self-review: 2 more Pydantic checks (wrap-validator order, settings priority; now 47 of 47), review finding 8 corrected, new pages render-checked",
   "2026-10-31: Glossaries and cheat sheets added to Foundations, Pydantic and RAG; Pydantic claims (45), key-free RAG/Foundations checks (9) and Meridian tests (17) run and passing; LangChain chapter order reviewed (REVIEW file, nothing reordered)",
   "2026-10-31: Craft attachments: 3 MCP PDFs not in the repo and all 10 Colabs opened (now 31 of 40); mini-contra checked; keys in Colab flagged",
   "2026-10-31: Context-window simulator site read in full (all 4 tabs and script); instructor sites now 15 of 15",
