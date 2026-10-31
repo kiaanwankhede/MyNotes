@@ -1103,7 +1103,7 @@ details.diagram-src pre { margin-top: 8px; }
 <h2 id="foundations-bank-chapter-4-agents-in-plain-python">Chapter 4: Agents in plain Python</h2>
 <details class="qa"><summary>What stops an agent looping forever?</summary><div class="ans"><p>A turn cap such as <code>max_turns</code>, plus timeouts and clear tool descriptions. Production systems also add budgets and monitoring.</p></div></details>
 <details class="qa"><summary>Why build the agent in plain Python before using a framework?</summary><div class="ans"><p>The framework hides the same loop: call the model, run the requested tool, append the result, repeat. Knowing it lets you debug a framework, and explain what it does when an interviewer asks.</p></div></details><button class="readbtn" data-id="foundations-bank">Mark this chapter as read</button><div class="pager"><button data-id="foundations-f4"><small>Previous</small><b>Agents in plain Python</b></button></div></article>
-<article id="ch-pydantic-home" hidden><p class="crumb">Welcome</p><h1>Pydantic</h1><p class="lead">How to make Python check data at the door: models, constraints, validators, settings, FastAPI, and validating what an LLM sends back, ending with a small ticket-triage project.</p><div class="meta"><span class="chip">Book 2 of the library</span><span class="chip plain">9 chapters</span><span class="chip plain">Read after Foundations</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-home-why-a-whole-book-on-one-library">Why a whole book on one library</h2>
+<article id="ch-pydantic-home" hidden><p class="crumb">Welcome</p><h1>Pydantic</h1><p class="lead">How to make Python check data at the door: models, constraints, validators, settings, FastAPI, and validating what an LLM sends back, ending with a small ticket-triage project.</p><div class="meta"><span class="chip">Book 2 of the library</span><span class="chip plain">12 chapters</span><span class="chip plain">Read after Foundations</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-home-why-a-whole-book-on-one-library">Why a whole book on one library</h2>
 <p>Pydantic is the validation layer under LangChain's structured output, tool schemas, FastAPI and most agent frameworks. If you understand it here, chapter 4 of the LangChain book (structured output) is mostly review.</p>
 <div class="tablewrap"><table>
 <thead>
@@ -1119,39 +1119,52 @@ details.diagram-src pre { margin-top: 8px; }
 </tr>
 <tr>
 <td>2</td>
-<td>Your first model, coercion, dumping</td>
+<td>Your first model</td>
 </tr>
 <tr>
 <td>3</td>
-<td>Constraints and custom validators</td>
+<td>Fields and constraints</td>
 </tr>
 <tr>
 <td>4</td>
-<td>Computed fields and controlling output</td>
+<td>Validators</td>
 </tr>
 <tr>
 <td>5</td>
-<td>Nested models</td>
+<td>Computed fields and serialization</td>
 </tr>
 <tr>
 <td>6</td>
-<td>Settings and secrets</td>
+<td>Nested models</td>
 </tr>
 <tr>
 <td>7</td>
-<td>Pydantic with FastAPI</td>
+<td>Strict mode and JSON Schema</td>
 </tr>
 <tr>
 <td>8</td>
-<td>Validating LLM output (the AI bridge)</td>
+<td>Settings and secrets</td>
 </tr>
 <tr>
 <td>9</td>
+<td>Reading validation errors</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Pydantic with FastAPI</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Validating what an LLM gives you back</td>
+</tr>
+<tr>
+<td>12</td>
 <td>Where Pydantic goes next, and the final project</td>
 </tr>
 </tbody>
 </table></div>
-<aside class="callout key"><div class="ct">Key idea<em>Source</em></div><p>Built from the instructor's Pydantic reference site and the class 03 and 04 material in the course repo (<code>8_Pydantic/</code>). The code samples here are my own short versions of the ideas, not copies of the site.</p></aside>
+<aside class="callout key"><div class="ct">Key idea<em>Sources</em></div><p>Each chapter names its sources at the end. In short, the book is built from: the official Pydantic documentation (models, fields, validators, serialization, strict mode, types, JSON schema, settings, error handling, and the get-started page), the class 03 write-up, the <code>Pydantic_From_Scratch</code> notebook in the course repo, Pydantic's article on LLMs, and the instructor's Pydantic site. The analogies come from the instructor's site, the repo notes flag problems in the notebook, and code samples are short examples of my own.</p></aside>
+<aside class="callout beyond"><div class="ct">Beyond the class<em>Not read</em></div><p>The settings docs page was read up to about 100,000 of its roughly 103,900 characters. The docs pages on unions, dataclasses, type adapters, performance and the Pydantic AI framework itself were not read. The FastAPI chapter comes from the instructor's site only.</p></aside>
 <p>Try the idea straight away. Edit the JSON, break a rule, and read the error:</p>
 <div class="widget" data-w="pydantic-playground"><div class="wfb"><p>Interactive demo: edit JSON and validate it against a small Pydantic-style model.</p></div></div>
 <!-- res -->
@@ -1173,26 +1186,24 @@ details.diagram-src pre { margin-top: 8px; }
 <p>The class 3 and 4 Colab "Pydantic From Scratch" is the same notebook as <code>Pydantic_From_Scratch.ipynb</code> in the repo: it shows why unchecked types let <code>age = 10000</code> produce a birth year of -7974.</p>
 <!-- /res --><div class="pager"><span style='flex:1'></span><button class="next" data-id="pydantic-quiz"><small>Next</small><b>Quiz me</b></button></div></article>
 <article id="ch-pydantic-quiz" hidden><p class="crumb">Welcome</p><h1>Quiz me</h1><p class="lead">Interview questions from every ready chapter, one at a time. Answer out loud, then check.</p><div class="quizroot" data-book="pydantic"></div></article>
-<article id="ch-pydantic-p1" hidden><p class="crumb">Pydantic &middot; Chapter 1</p><h1>Why validation exists, and type hints</h1><p class="lead">Python will happily run with garbage data. Type hints describe what you expect, but only a library like Pydantic enforces it.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Part 1</span><span class="chip plain">8 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p1-why-it-matters">Why it matters</h2>
-<p>Data from outside your code (an API, a form, a file, an LLM) can be anything. If nothing checks it at the entrance, the crash happens deep inside, far from the real cause.</p>
+<article id="ch-pydantic-p1" hidden><p class="crumb">Pydantic &middot; Chapter 1</p><h1>Why validation exists, and type hints</h1><p class="lead">Python will happily run with garbage data. Type hints say what you expect, but only a library like Pydantic enforces it at the door.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Class 03, the notebook, the instructor&#x27;s site</span><span class="chip plain">10 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p1-why-it-matters">Why it matters</h2>
+<p>Data from outside your code (an API, a form, a file, an LLM) can be anything. If nothing checks it when it arrives, the crash happens deep inside, far from the real cause. Pydantic's own docs describe it as the most widely used validation library for Python, and the class note lists the Anthropic and OpenAI SDKs among the places it is used.</p>
 <h2 id="pydantic-p1-core-ideas">Core ideas</h2>
-<h3 id="pydantic-p1-the-dynamic-typing-problem">The dynamic typing problem</h3>
-<p>A function that computes <code>2026 - age</code> works for <code>28</code> and crashes for <code>"unknown"</code>, with an error that points at the subtraction, not at the bad input. The bug is that nothing inspected the data when it arrived.</p>
-<aside class="callout analogy"><div class="ct">Analogy<em>The courier with no intake desk</em></div><p>A courier that loads any parcel, whatever the label, finds the problem three stops into the route. Pydantic is the intake desk that refuses the bad parcel at the door.</p></aside>
+<h3 id="pydantic-p1-why-python-is-loose">Why Python is "loose"</h3>
+<p>The class explained it like this: in Java or C++ a variable reserves a block of memory of a declared type. In Python a variable is a pointer to a value, so the same name can point at an int, then a string, then a list, with no complaint. That is great for learning and dangerous in production, where real users, or people trying to break the system, send you data.</p>
+<aside class="callout analogy"><div class="ct">Analogy<em>The courier with no intake desk</em></div><p>A courier that loads any parcel finds the problem three stops into the route. Pydantic is the intake desk that refuses a bad parcel at the door. (From the instructor's site.)</p></aside>
+<p>The notebook shows it with <code>register_user</code>: it computes <code>2026 - age</code>. <code>age=28</code> works. <code>age="unknown"</code> crashes inside the subtraction, and <code>age=10000</code> quietly gives a birth year of -7974, because the types are fine and the <strong>value</strong> is nonsense. That is the difference between <strong>type validation</strong> (what kind of data) and <strong>data validation</strong> (does the value make sense).</p>
+<aside class="callout tip"><div class="ct">Pro tip<em>The class&#x27;s point on AI-written code</em></div><p>If AI writes your code, you still need to understand Pydantic to debug or trust it. (Class 03, paraphrased.)</p></aside>
 <h3 id="pydantic-p1-type-hints-are-documentation-not-enforcement">Type hints are documentation, not enforcement</h3>
-<p><code>age: int = "not a number"</code> runs without complaint. Hints are read by humans, IDEs and Pydantic, and by nothing else at runtime.</p>
-<pre><code class="language-python">tags: list[str] = [&quot;python&quot;, &quot;pydantic&quot;]        # lowercase built-ins since Python 3.9
+<p><code>age: int = "not a number"</code> runs. Hints are read by humans, IDEs and Pydantic, and nothing else at runtime.</p>
+<pre><code class="language-python">tags: list[str] = [&quot;python&quot;, &quot;pydantic&quot;]     # lowercase built-ins since Python 3.9
 word_counts: dict[str, int] = {&quot;error&quot;: 12}
 
 def format_price(amount: float, currency: str = &quot;USD&quot;) -&gt; str:
     return f&quot;{currency} {amount:.2f}&quot;
 </code></pre>
 <h3 id="pydantic-p1-optional-and-literal">Optional and Literal</h3>
-<p><code>str | None</code> (or <code>Optional[str]</code>) means the value may be absent. <code>Literal["low", "medium", "high"]</code> limits a value to a fixed set. Alone they are only documentation; once Pydantic enforces them, <code>Literal</code> is how you stop a model returning "kinda urgent i guess".</p>
-<pre><code class="language-python">from typing import Literal
-priority: Literal[&quot;low&quot;, &quot;medium&quot;, &quot;high&quot;] = &quot;medium&quot;
-phone: str | None = None
-</code></pre>
+<p><code>str | None</code> (or <code>Optional[str]</code>) allows a missing value. The class adds a Python reminder: the missing value is <code>None</code>, with a capital N; there is no <code>null</code>. <code>Literal["low", "medium", "high"]</code> limits a value to a fixed set. Alone they are only documentation; with Pydantic they are enforced, and <code>Literal</code> is how you stop a model returning "kinda urgent i guess".</p>
 <h2 id="pydantic-p1-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -1209,24 +1220,32 @@ phone: str | None = None
 <td>Validate at the boundary with a <code>BaseModel</code></td>
 </tr>
 <tr>
-<td>Using <code>List</code>/<code>Dict</code> from <code>typing</code> in new code</td>
-<td>Works but dated</td>
-<td>Use <code>list[str]</code>, <code>dict[str, int]</code></td>
+<td>Checking only the type</td>
+<td><code>age=10000</code> passes</td>
+<td>Add value constraints (chapter 3)</td>
 </tr>
 </tbody>
 </table></div>
 <h2 id="pydantic-p1-interview-corner">Interview corner</h2>
 <details class="qa"><summary>Does Python enforce type hints?</summary><div class="ans"><p>No. At runtime they are ignored. They help readers, IDEs and libraries such as Pydantic, which reads them and enforces them.</p></div></details>
-<details class="qa"><summary>Why is validating at the boundary better than inside the function?</summary><div class="ans"><p>The error appears where the bad data entered, with a clear message, instead of as an unrelated crash several calls later.</p></div></details>
+<details class="qa"><summary>What is the difference between type validation and data validation?</summary><div class="ans"><p>Type validation checks the kind of data (an int). Data validation checks the value makes sense (an age of 10000 is an int but not valid). Pydantic does both: types from hints, values from <code>Field</code> constraints and validators.</p></div></details>
 <h2 id="pydantic-p1-quick-revision">Quick revision</h2>
 <ul>
 <li class="task"><label><input type="checkbox"><span>I can explain why <code>age: int = "x"</code> runs</span></label></li>
-<li class="task"><label><input type="checkbox"><span>I know <code>Optional[str]</code> and <code>str | None</code> are the same</span></label></li>
-<li class="task"><label><input type="checkbox"><span>I can say what <code>Literal</code> is for</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I can give the type-versus-data validation example</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I know <code>Optional[str]</code> and <code>str | None</code> mean the same thing</span></label></li>
+</ul>
+<h2 id="pydantic-p1-sources-and-further-reading">Sources and further reading</h2>
+<ul>
+<li><a href="https://pydantic.dev/docs/validation/latest/get-started/" target="_blank" rel="noopener">Pydantic docs: Get started</a></li>
+<li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/03%20-%204%20Jul%20-%20Pydantic%20Deep%20Dive.md" target="_blank" rel="noopener">Class 03 notes</a></li>
+<li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2001%20-%2027-28%20Jun/02-03%20-%2028%20Jun%20%26%204%20Jul%20-%20Python%20Refresher%20%26%20Pydantic%20Deep%20Dive/8_Pydantic/Pydantic_From_Scratch.ipynb" target="_blank" rel="noopener">Pydantic From Scratch notebook</a></li>
+<li>Instructor's site: <a href="https://pydantic-with-mayank.netlify.app/" target="_blank" rel="noopener">Mastering Pydantic</a></li>
 </ul><button class="readbtn" data-id="pydantic-p1">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-quiz"><small>Previous</small><b>Quiz me</b></button><button class="next" data-id="pydantic-p2"><small>Next</small><b>Your first model</b></button></div></article>
-<article id="ch-pydantic-p2" hidden><p class="crumb">Pydantic &middot; Chapter 2</p><h1>Your first model</h1><p class="lead">A BaseModel is a class that inspects its data: it validates types, converts safe values, and raises one clear error listing every problem.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Part 2</span><span class="chip plain">10 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p2-why-it-matters">Why it matters</h2>
-<p>A plain class and a dataclass look just like a model but check nothing. Only <code>BaseModel</code> refuses bad data before the object exists.</p>
+<article id="ch-pydantic-p2" hidden><p class="crumb">Pydantic &middot; Chapter 2</p><h1>Your first model</h1><p class="lead">A BaseModel validates on creation, converts safe values, collects every error, and has a small set of methods you should know by name.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Docs &quot;Models&quot;, class 03, the notebook</span><span class="chip plain">15 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p2-why-it-matters">Why it matters</h2>
+<p>A plain class and a dataclass look like a model but check nothing. Only <code>BaseModel</code> refuses bad data before the object exists.</p>
 <h2 id="pydantic-p2-core-ideas">Core ideas</h2>
+<h3 id="pydantic-p2-three-ways-to-define-a-data-shape">Three ways to define a data shape</h3>
 <div class="tablewrap"><table>
 <thead>
 <tr>
@@ -1237,14 +1256,14 @@ phone: str | None = None
 </thead>
 <tbody>
 <tr>
-<td>Plain class with hints only</td>
-<td>No (no <code>__init__</code>)</td>
+<td>Plain class (you write <code>__init__</code>)</td>
+<td>Yes</td>
 <td>No</td>
 </tr>
 <tr>
-<td><code>@dataclass</code></td>
+<td><code>@dataclass</code> (auto <code>__init__</code>)</td>
 <td>Yes</td>
-<td>No: <code>age="not a number"</code> is accepted</td>
+<td>No: <code>age="banana"</code> is accepted</td>
 </tr>
 <tr>
 <td><code>BaseModel</code></td>
@@ -1253,25 +1272,77 @@ phone: str | None = None
 </tr>
 </tbody>
 </table></div>
-<aside class="callout analogy"><div class="ct">Analogy<em>The customs form</em></div><p>A plain class is a form nobody hands out, a dataclass is a form nobody reads, and a <code>BaseModel</code> is a form with an officer behind it.</p></aside>
+<p>The class demo showed a plain class and a dataclass silently accepting garbage, and only <code>BaseModel</code> raising at once.</p>
+<aside class="callout analogy"><div class="ct">Analogy<em>The customs form</em></div><p>A plain class is a form nobody hands out, a dataclass is a form nobody reads, and a <code>BaseModel</code> is a form with an officer behind it. (Instructor's site.)</p></aside>
 <pre><code class="language-python">from pydantic import BaseModel, ValidationError
 
-class Signup(BaseModel):
+class SignupForm(BaseModel):
     username: str
     age: int
-    newsletter: bool = False        # has a default, so optional
+    newsletter_opt_in: bool = False     # a default makes it optional
 
-Signup(username=&quot;a&quot;, age=&quot;30&quot;)      # age becomes the int 30
+SignupForm(username=&quot;a&quot;, age=&quot;28&quot;, newsletter_opt_in=&quot;True&quot;)   # age -&gt; 28, flag -&gt; True
 try:
-    Signup(username=&quot;a&quot;)            # missing age
+    SignupForm(username=&quot;Mayank&quot;)        # missing age
 except ValidationError as e:
-    print(e)                        # names every problem field
+    print(e)                             # lists every problem field
 </code></pre>
-<h3 id="pydantic-p2-coercion-lax-mode-by-default">Coercion: lax mode by default</h3>
-<p>Pydantic converts safe values (<code>"30"</code> to <code>30</code>) and refuses ambiguous ones. Strict mode (<code>ConfigDict(strict=True)</code>) turns conversion off.</p>
-<aside class="callout trap"><div class="ct">Common trap<em>Coercion is not symmetric</em></div><p><code>"25"</code> becomes <code>25</code> for an <code>int</code> field, but <code>12345</code> is <strong>not</strong> turned into <code>"12345"</code> for a <code>str</code> field. It is rejected.</p></aside>
-<h3 id="pydantic-p2-creating-and-dumping">Creating and dumping</h3>
-<p><code>Model(**data)</code> and <code>Model.model_validate(data)</code> validate the same way; use <code>model_validate</code> when you need options such as <code>strict=True</code>. <code>model_dump()</code> returns a dict (database, other functions); <code>model_dump_json(indent=2)</code> returns a JSON string. Fields without a default are required, and the error lists all missing fields at once, which is what later powers the retry-with-error pattern.</p>
+<p>A default value is what makes a field optional; without one the field is required. If you do not know the right default, use <code>None</code>.</p>
+<h3 id="pydantic-p2-coercion-lax-mode">Coercion ("lax mode")</h3>
+<p>Pydantic converts reasonable input: the string <code>"28"</code> becomes <code>28</code>. It refuses what it cannot convert safely: <code>"28eight"</code> fails, and so does <code>28.5</code> for an <code>int</code> field (class demo). The docs add that conversion can lose information in some cases (a float like <code>3.0</code> becomes <code>3</code>) and that <strong>strict mode</strong> turns conversion off (chapter 7).</p>
+<aside class="callout trap"><div class="ct">Common trap<em>Coercion is not symmetric</em></div><p><code>"25"</code> becomes <code>25</code> for an <code>int</code> field, but <code>12345</code> is <strong>not</strong> turned into <code>"12345"</code> for a <code>str</code> field. It is rejected. (Instructor's site.)</p></aside>
+<h3 id="pydantic-p2-the-methods-to-know">The methods to know</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Model(**data)</code> / <code>Model.model_validate(data)</code></td>
+<td>Validate a dict (the second takes options such as <code>strict=True</code>)</td>
+</tr>
+<tr>
+<td><code>Model.model_validate_json(text)</code></td>
+<td>Validate a JSON string or bytes directly; generally faster than parsing the JSON yourself</td>
+</tr>
+<tr>
+<td><code>model_dump()</code> / <code>model_dump_json()</code></td>
+<td>Back to a dict or JSON string (chapter 5)</td>
+</tr>
+<tr>
+<td><code>model_json_schema()</code></td>
+<td>The JSON Schema for the model (chapter 7)</td>
+</tr>
+<tr>
+<td><code>model_copy(update=...)</code></td>
+<td>Copy; the updates are <strong>not</strong> validated, and the copy is shallow unless <code>deep=True</code></td>
+</tr>
+<tr>
+<td><code>model_construct()</code></td>
+<td>Build <strong>without validation</strong>, for data you already trust; nested dicts stay dicts and the result can be invalid</td>
+</tr>
+<tr>
+<td><code>model_fields_set</code></td>
+<td>Which fields were explicitly provided</td>
+</tr>
+</tbody>
+</table></div>
+<p>The docs use "validate" for everything except JSON, where they say "parse". The model's guarantee is about the <strong>output</strong>: after validation the object matches its declared types and constraints.</p>
+<h3 id="pydantic-p2-extra-data">Extra data</h3>
+<p>By default unknown keys are silently <strong>ignored</strong>. <code>extra="forbid"</code> raises an error, and <code>extra="allow"</code> keeps them. Add <code>extra="forbid"</code> to any model you hand to an LLM provider as a schema, so the model cannot add surprise keys.</p>
+<h3 id="pydantic-p2-other-behaviours-worth-knowing">Other behaviours worth knowing</h3>
+<ul>
+<li>Models are mutable by default; <code>frozen=True</code> blocks assignment (a "faux" immutability, since nested dicts can still change).</li>
+<li>Fields are validated in declaration order, and errors, serialization and schema follow that order.</li>
+<li>Names starting with an underscore are private attributes, not fields.</li>
+<li><code>from_attributes=True</code> lets a model read attributes from any object, which is how ORM objects are validated.</li>
+<li>Inheritance works: a model can extend another and inherit its fields and validators (class Q&amp;A).</li>
+<li>A custom <code>__init__</code> is discouraged; use an after-validator or <code>model_post_init</code> instead.</li>
+</ul>
+<aside class="callout repo"><div class="ct">Repo note<em>In the notebook</em></div><p>The notebook's <code>years_experience</code> and <code>age</code> demos are the same ideas as above, with <code>"True"</code> coerced to <code>True</code> and <code>age=28.5</code> rejected.</p></aside>
 <h2 id="pydantic-p2-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -1288,87 +1359,114 @@ except ValidationError as e:
 <td>Use <code>BaseModel</code></td>
 </tr>
 <tr>
-<td>Expecting int to str coercion</td>
-<td>Unexpected <code>ValidationError</code></td>
-<td>Convert yourself or annotate with the right type</td>
+<td>Trusting <code>model_construct()</code> output</td>
+<td>Invalid data inside a "model"</td>
+<td>Use it only for already-validated data</td>
+</tr>
+<tr>
+<td>Assuming unknown keys raise</td>
+<td>They are dropped silently</td>
+<td>Set <code>extra="forbid"</code></td>
 </tr>
 </tbody>
 </table></div>
 <h2 id="pydantic-p2-interview-corner">Interview corner</h2>
-<details class="qa"><summary>BaseModel versus dataclass?</summary><div class="ans"><p>Both give a clean constructor from hints. Only <code>BaseModel</code> validates and coerces, and it raises <code>ValidationError</code> before the object is created.</p></div></details>
-<details class="qa"><summary>What is lax mode?</summary><div class="ans"><p>Pydantic's default: it converts clearly compatible values (a numeric string to an int) and rejects the rest. Strict mode disables conversion.</p></div></details>
+<details class="qa"><summary>BaseModel versus dataclass?</summary><div class="ans"><p>Both give a clean constructor from hints. Only <code>BaseModel</code> validates and coerces, raising one <code>ValidationError</code> before the object is created.</p></div></details>
+<details class="qa"><summary>What does the default extra setting do?</summary><div class="ans"><p>It ignores unknown keys. <code>forbid</code> raises; <code>allow</code> stores them.</p></div></details>
+<details class="qa"><summary>model_validate versus model_construct?</summary><div class="ans"><p><code>model_validate</code> checks the data. <code>model_construct</code> skips all checks, so use it only for data you already trust.</p></div></details>
 <h2 id="pydantic-p2-quick-revision">Quick revision</h2>
 <ul>
-<li class="task"><label><input type="checkbox"><span>I can name the three ways to define a data shape and which one validates</span></label></li>
-<li class="task"><label><input type="checkbox"><span>I know <code>model_validate</code> versus <code>Model(**data)</code></span></label></li>
-<li class="task"><label><input type="checkbox"><span>I know <code>model_dump</code> versus <code>model_dump_json</code></span></label></li>
-</ul><button class="readbtn" data-id="pydantic-p2">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p1"><small>Previous</small><b>Why validation exists, and type hints</b></button><button class="next" data-id="pydantic-p3"><small>Next</small><b>Constraints and custom validators</b></button></div></article>
-<article id="ch-pydantic-p3" hidden><p class="crumb">Pydantic &middot; Chapter 3</p><h1>Constraints and custom validators</h1><p class="lead">Types are not enough: use Field() for ranges and patterns, special types for emails and secrets, and validators for your own business rules.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Part 3</span><span class="chip plain">15 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p3-why-it-matters">Why it matters</h2>
-<p><code>age: int</code> accepts <code>-50</code>. Real rules (minimum length, a range, a format, "these two fields must agree") need constraints and validators.</p>
+<li class="task"><label><input type="checkbox"><span>I can name the three ways to define a shape and which one validates</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I know what makes a field optional</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I know the methods in the table</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I know the three <code>extra</code> settings</span></label></li>
+</ul>
+<h2 id="pydantic-p2-sources-and-further-reading">Sources and further reading</h2>
+<ul>
+<li><a href="https://pydantic.dev/docs/validation/latest/concepts/models/" target="_blank" rel="noopener">Pydantic docs: Models</a></li>
+<li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/03%20-%204%20Jul%20-%20Pydantic%20Deep%20Dive.md" target="_blank" rel="noopener">Class 03 notes</a></li>
+<li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2001%20-%2027-28%20Jun/02-03%20-%2028%20Jun%20%26%204%20Jul%20-%20Python%20Refresher%20%26%20Pydantic%20Deep%20Dive/8_Pydantic/Pydantic_From_Scratch.ipynb" target="_blank" rel="noopener">Pydantic From Scratch notebook</a></li>
+<li>Instructor's site: <a href="https://pydantic-with-mayank.netlify.app/" target="_blank" rel="noopener">Mastering Pydantic</a></li>
+</ul><button class="readbtn" data-id="pydantic-p2">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p1"><small>Previous</small><b>Why validation exists, and type hints</b></button><button class="next" data-id="pydantic-p3"><small>Next</small><b>Fields and constraints</b></button></div></article>
+<article id="ch-pydantic-p3" hidden><p class="crumb">Pydantic &middot; Chapter 3</p><h1>Fields and constraints</h1><p class="lead">Types are not enough. Field() adds ranges, lengths, patterns, defaults, aliases and more, and Pydantic ships ready-made types for emails, URLs and secrets.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Docs &quot;Fields&quot;, class 03, the notebook</span><span class="chip plain">15 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p3-why-it-matters">Why it matters</h2>
+<p><code>age: int</code> accepts <code>-50</code> and <code>10000</code>. Real rules (minimum length, a range, a format) belong in the model, so the data is checked in one place.</p>
 <h2 id="pydantic-p3-core-ideas">Core ideas</h2>
-<h3 id="pydantic-p3-field-constraints-and-annotated">Field() constraints and Annotated</h3>
-<p>Numbers take <code>gt, ge, lt, le</code>. Strings take <code>min_length, max_length, pattern</code>. The <code>Annotated[int, Field(gt=0, le=120)]</code> form separates the type from its metadata and is preferred in production code; the direct <code>age: int = Field(gt=0, le=120)</code> form behaves the same.</p>
-<pre><code class="language-python">from typing import Annotated
-from pydantic import BaseModel, Field
-
-class Applicant(BaseModel):
-    name: Annotated[str, Field(min_length=2, max_length=100)]
-    years: Annotated[int, Field(ge=0, le=50)]
-</code></pre>
-<h3 id="pydantic-p3-special-types">Special types</h3>
-<p><code>EmailStr</code> (needs <code>pip install pydantic[email]</code>), <code>HttpUrl</code>, and <code>SecretStr</code>, which prints as <code>**********</code> and gives the real value only through <code>.get_secret_value()</code>.</p>
-<h3 id="pydantic-p3-field-validator-one-field">field_validator: one field</h3>
-<p>Operates on a single field. <code>mode="after"</code> (default) receives the already-coerced value; <code>mode="before"</code> receives raw input, useful for cleaning <code>"5 years"</code> to <code>5</code>. Return the value to accept or raise <code>ValueError</code> to reject.</p>
-<pre><code class="language-python">from pydantic import field_validator
-
-class Applicant(BaseModel):
-    name: str
-
-    @field_validator(&quot;name&quot;)
-    @classmethod
-    def tidy(cls, v: str) -&gt; str:
-        if not v.strip():
-            raise ValueError(&quot;name cannot be empty&quot;)
-        return v.strip().title()
-</code></pre>
-<h3 id="pydantic-p3-model-validator-rules-across-fields">model_validator: rules across fields</h3>
-<p>Receives the whole model after every field has passed, so it can check "password equals confirm_password".</p>
-<pre><code class="language-python">from pydantic import model_validator
-
-class Signup(BaseModel):
-    password: str
-    confirm: str
-
-    @model_validator(mode=&quot;after&quot;)
-    def same(self):
-        if self.password != self.confirm:
-            raise ValueError(&quot;passwords do not match&quot;)
-        return self
-</code></pre>
-<aside class="callout key"><div class="ct">Key idea<em>Fixed order</em></div><p>Every <code>field_validator</code> runs first, for every field. Only then does <code>model_validator</code> run.</p></aside>
+<h3 id="pydantic-p3-constraints">Constraints</h3>
 <div class="tablewrap"><table>
 <thead>
 <tr>
-<th>Need</th>
-<th>Tool</th>
+<th>Kind</th>
+<th>Options</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Check or clean one field</td>
-<td><code>field_validator</code></td>
+<td>Numbers</td>
+<td><code>gt</code>, <code>ge</code>, <code>lt</code>, <code>le</code>, <code>multiple_of</code></td>
 </tr>
 <tr>
-<td>Rule across two or more fields</td>
-<td><code>model_validator</code></td>
+<td>Strings and sequences</td>
+<td><code>min_length</code>, <code>max_length</code>, <code>pattern</code> (a regex)</td>
 </tr>
 <tr>
-<td>Compute a new value from others</td>
-<td><code>computed_field</code> (next chapter)</td>
+<td>Decimals</td>
+<td><code>max_digits</code>, <code>decimal_places</code></td>
 </tr>
 </tbody>
 </table></div>
-<p>Try it: the playground on the book's start page mirrors these rules.</p>
+<pre><code class="language-python">from pydantic import BaseModel, Field
+
+class JobApplication(BaseModel):
+    full_name: str = Field(min_length=2, max_length=100)
+    years_experience: int = Field(ge=0, le=50)
+</code></pre>
+<p>On an optional field (<code>X | None</code>) the constraint applies to the non-<code>None</code> part.</p>
+<h3 id="pydantic-p3-field-versus-annotated">Field() versus Annotated</h3>
+<p>Two equivalent styles:</p>
+<pre><code class="language-python">years: int = Field(ge=0, le=50)                    # direct
+years: Annotated[int, Field(ge=0, le=50)]          # Annotated
+</code></pre>
+<p>The docs recommend <code>Annotated</code> because required fields stay visibly required, you can stack several pieces of metadata, types become reusable, and constraints can target inner items (<code>list[Annotated[int, Field(gt=0)]]</code>). The class note says Mayank prefers plain <code>Field()</code> for readability but warns that AI-generated code often uses <code>Annotated</code>, so you must recognise both. <code>default</code>, <code>default_factory</code> and <code>alias</code> still use normal assignment.</p>
+<h3 id="pydantic-p3-defaults">Defaults</h3>
+<ul>
+<li>A plain value, or <code>Field(default=...)</code>.</li>
+<li><code>default_factory</code> takes a callable, for example one that makes a new id. Since Pydantic 2.10 it may take one argument, the already-validated data, so fields it reads must be declared earlier.</li>
+<li>Mutable defaults such as a list are copied per instance, so instances do not share state.</li>
+<li>Defaults are <strong>not validated</strong> unless you set <code>validate_default=True</code>.</li>
+</ul>
+<h3 id="pydantic-p3-aliases">Aliases</h3>
+<p><code>alias</code> renames a field for both input and output. <code>validation_alias</code> affects only input, <code>serialization_alias</code> only output. Output uses aliases only when you call <code>model_dump(by_alias=True)</code>.</p>
+<h3 id="pydantic-p3-other-options">Other options</h3>
+<p><code>strict=True</code> (no coercion for this field), <code>frozen=True</code> (cannot be reassigned), <code>exclude=True</code> (omitted from <code>model_dump</code>), <code>repr=False</code>, <code>discriminator</code> (choose a union member by a field's value), <code>deprecated</code>, and schema-only options <code>title</code>, <code>description</code>, <code>examples</code>.</p>
+<h3 id="pydantic-p3-special-types">Special types</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>EmailStr</code></td>
+<td>Validates email format (needs <code>pip install "pydantic[email]"</code>)</td>
+</tr>
+<tr>
+<td><code>HttpUrl</code></td>
+<td>Validates URLs</td>
+</tr>
+<tr>
+<td><code>SecretStr</code></td>
+<td>Masks the value in output and logs; read it on purpose with <code>.get_secret_value()</code></td>
+</tr>
+<tr>
+<td><code>PositiveInt</code>, <code>NonNegativeInt</code></td>
+<td>Shortcuts for <code>gt=0</code>, <code>ge=0</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>The class singled out <code>SecretStr</code> as underused but important in this course, since API keys are handled constantly. In the notebook, <code>account.model_dump(mode="json")</code> is what gets written to a JSON file.</p>
+<aside class="callout beyond"><div class="ct">Beyond the class<em>Collection helpers</em></div><p><code>OnErrorOmit</code> drops invalid items from a collection instead of rejecting the whole thing, and <code>FailFast</code> stops at the first bad item. (Docs "Types".)</p></aside>
 <h2 id="pydantic-p3-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
@@ -1380,76 +1478,243 @@ class Signup(BaseModel):
 </thead>
 <tbody>
 <tr>
-<td>Forgetting to return the value in a validator</td>
-<td>Field becomes <code>None</code></td>
-<td>Always return the (cleaned) value</td>
+<td>Expecting a default to be validated</td>
+<td>Invalid default slips through</td>
+<td><code>validate_default=True</code></td>
 </tr>
 <tr>
-<td>Putting a cross-field rule in <code>field_validator</code></td>
-<td>Cannot see the other field</td>
-<td>Use <code>model_validator</code></td>
+<td>Using <code>Field(...)</code> inside a union on the wrong side</td>
+<td>Constraint has no effect</td>
+<td>Put the metadata around the whole union</td>
 </tr>
 <tr>
-<td>Logging a plain <code>str</code> password</td>
-<td>Secret in logs</td>
-<td>Use <code>SecretStr</code></td>
+<td>A plain <code>str</code> for an API key</td>
+<td>Key appears in logs</td>
+<td><code>SecretStr</code></td>
 </tr>
 </tbody>
 </table></div>
 <h2 id="pydantic-p3-interview-corner">Interview corner</h2>
-<details class="qa"><summary>field_validator versus model_validator?</summary><div class="ans"><p>The first checks one field with no view of the others. The second sees the whole model after all field checks passed, so it handles cross-field rules.</p></div></details>
-<details class="qa"><summary>What does mode=&quot;before&quot; do?</summary><div class="ans"><p>It runs on the raw input before type coercion, so you can clean messy input (like <code>"5 years"</code>) before Pydantic tries to read it as an int.</p></div></details>
+<details class="qa"><summary>Field() or Annotated?</summary><div class="ans"><p>Both work the same. Annotated keeps required fields visibly required and is reusable, which is why the docs prefer it. The class prefers plain <code>Field()</code> for readability but wants you to recognise both.</p></div></details>
+<details class="qa"><summary>alias versus validation_alias versus serialization_alias?</summary><div class="ans"><p><code>alias</code> applies to input and output, the other two to only one direction. Output uses aliases only with <code>by_alias=True</code>.</p></div></details>
 <h2 id="pydantic-p3-quick-revision">Quick revision</h2>
 <ul>
 <li class="task"><label><input type="checkbox"><span>I can list the numeric and string constraints</span></label></li>
-<li class="task"><label><input type="checkbox"><span>I know why <code>Annotated</code> is preferred</span></label></li>
-<li class="task"><label><input type="checkbox"><span>I know the validator execution order</span></label></li>
-</ul><button class="readbtn" data-id="pydantic-p3">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p2"><small>Previous</small><b>Your first model</b></button><button class="next" data-id="pydantic-p4"><small>Next</small><b>Computed fields and controlling output</b></button></div></article>
-<article id="ch-pydantic-p4" hidden><p class="crumb">Pydantic &middot; Chapter 4</p><h1>Computed fields and controlling output</h1><p class="lead">Derive values instead of storing stale ones, and decide exactly which fields leave a model.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Part 4</span><span class="chip plain">8 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p4-why-it-matters">Why it matters</h2>
-<p>Some values should always be calculated from others, and almost every real API must hide or trim fields. Both are one-line settings.</p>
+<li class="task"><label><input type="checkbox"><span>I know defaults are not validated by default</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I can name three special types and what each is for</span></label></li>
+</ul>
+<h2 id="pydantic-p3-sources-and-further-reading">Sources and further reading</h2>
+<ul>
+<li><a href="https://pydantic.dev/docs/validation/latest/concepts/fields/" target="_blank" rel="noopener">Pydantic docs: Fields</a> and <a href="https://pydantic.dev/docs/validation/latest/concepts/types/" target="_blank" rel="noopener">Types</a></li>
+<li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/03%20-%204%20Jul%20-%20Pydantic%20Deep%20Dive.md" target="_blank" rel="noopener">Class 03 notes</a></li>
+<li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2001%20-%2027-28%20Jun/02-03%20-%2028%20Jun%20%26%204%20Jul%20-%20Python%20Refresher%20%26%20Pydantic%20Deep%20Dive/8_Pydantic/Pydantic_From_Scratch.ipynb" target="_blank" rel="noopener">Pydantic From Scratch notebook</a></li>
+</ul><button class="readbtn" data-id="pydantic-p3">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p2"><small>Previous</small><b>Your first model</b></button><button class="next" data-id="pydantic-p4"><small>Next</small><b>Validators</b></button></div></article>
+<article id="ch-pydantic-p4" hidden><p class="crumb">Pydantic &middot; Chapter 4</p><h1>Validators</h1><p class="lead">Write your own rules: field validators for one field, model validators for rules across fields, in four modes, with a fixed order of execution.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Docs &quot;Validators&quot;, class 03, the notebook</span><span class="chip plain">20 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p4-why-it-matters">Why it matters</h2>
+<p>Built-in constraints cover most cases. Business rules ("a disposable email is not allowed", "password must equal confirm_password") need code.</p>
 <h2 id="pydantic-p4-core-ideas">Core ideas</h2>
-<h3 id="pydantic-p4-computed-field">@computed_field</h3>
-<p>Stack <code>@computed_field</code> on a <code>@property</code>. The value is read-only, appears in <code>model_dump()</code> and the JSON schema, and is recomputed on every access, so it never goes stale.</p>
-<pre><code class="language-python">from pydantic import BaseModel, computed_field
+<h3 id="pydantic-p4-field-validator-one-field">field_validator: one field</h3>
+<p>It sees one field's value and nothing else. Return the value (cleaned or not) to accept, or raise <code>ValueError</code> to reject. Raise <code>ValueError</code> or <code>AssertionError</code>, not <code>ValidationError</code>: Pydantic turns those into entries in its single error. (<code>AssertionError</code> checks vanish if Python runs with <code>-O</code>; <code>PydanticCustomError</code> gives the most control over the message.)</p>
+<pre><code class="language-python">from pydantic import BaseModel, EmailStr, field_validator
 
-class Application(BaseModel):
-    years: int
+class JobApplication(BaseModel):
+    email: EmailStr
 
-    @computed_field
-    @property
-    def tier(self) -&gt; str:
-        return &quot;junior&quot; if self.years &lt; 2 else &quot;mid&quot; if self.years &lt; 7 else &quot;senior&quot;
+    @field_validator(&quot;email&quot;)
+    @classmethod
+    def no_disposable(cls, value: str) -&gt; str:
+        if value.split(&quot;@&quot;)[-1].lower() in {&quot;yopmail.com&quot;, &quot;mailinator.com&quot;}:
+            raise ValueError(&quot;disposable email domains are not accepted&quot;)
+        return value.lower()
 </code></pre>
-<aside class="callout analogy"><div class="ct">Analogy<em>The receipt total</em></div><p>A receipt total is not typed in; it is added up at checkout, so a changed price is reflected on the next receipt. <code>computed_field</code> is that adding-up.</p></aside>
-<aside class="callout tip"><div class="ct">Pro tip<em>Do the arithmetic in code, not in the LLM</em></div><p>Models are unreliable at consistent arithmetic. Let the model classify (for example a priority), then derive numbers such as an SLA with a <code>computed_field</code>.</p></aside>
-<h3 id="pydantic-p4-dump-control">Dump control</h3>
+<h3 id="pydantic-p4-four-modes-of-field-validator">Four modes of field validator</h3>
 <div class="tablewrap"><table>
 <thead>
 <tr>
-<th>Flag</th>
+<th>Mode</th>
+<th>Runs</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>after</strong> (default)</td>
+<td>After Pydantic's own validation</td>
+<td>The value already has the right type</td>
+</tr>
+<tr>
+<td><strong>before</strong></td>
+<td>On the raw input, before parsing</td>
+<td>Use <code>Any</code> as the hint; good for cleaning <code>"5 years"</code> to <code>5</code></td>
+</tr>
+<tr>
+<td><strong>plain</strong></td>
+<td>Replaces Pydantic's validation</td>
+<td>Later validators and the type check are skipped, so bad input can pass</td>
+</tr>
+<tr>
+<td><strong>wrap</strong></td>
+<td>Around Pydantic's validation, with a <code>handler</code></td>
+<td>Can run code before and after, catch errors, retry with other input, or skip the handler</td>
+</tr>
+</tbody>
+</table></div>
+<aside class="callout trap"><div class="ct">Common trap<em>The notebook&#x27;s &quot;strip years&quot; validator</em></div><p>In the notebook, <code>strip_years_suffix</code> says it runs "BEFORE the int type-check" to turn <code>"5 years"</code> into <code>5</code>, but it is declared without <code>mode="before"</code>. The default is <strong>after</strong>, so by then Pydantic has already rejected <code>"5 years"</code> as not an int and the validator never sees it. Add <code>mode="before"</code> for the behaviour its docstring describes.</p></aside>
+<h3 id="pydantic-p4-model-validator-rules-across-fields">model_validator: rules across fields</h3>
+<p>The class posed the problem: an applicant with an <code>@infosys.com</code> email needs at least 5 years of experience. A field validator cannot do it, because it sees one field at a time (the class called it "Schrödinger's field"). A model validator sees the whole model.</p>
+<pre><code class="language-python">from pydantic import BaseModel, model_validator
+
+class SignupForm(BaseModel):
+    password: str
+    confirm_password: str
+
+    @model_validator(mode=&quot;after&quot;)
+    def passwords_match(self):
+        if self.password != self.confirm_password:
+            raise ValueError(&quot;passwords do not match&quot;)
+        return self
+</code></pre>
+<p>Model validators also have <strong>before</strong> (a classmethod receiving raw input, which may not be a dict) and <strong>wrap</strong> modes. An after-validator is an instance method and must return <code>self</code>.</p>
+<aside class="callout key"><div class="ct">Key idea<em>Fixed order</em></div><p>Every field validator runs first, for every field. Then the model validator runs on the fully validated object. (Class 03.) Within one field, <code>before</code> and <code>wrap</code> validators run right to left, then <code>after</code> validators run left to right.</p></aside>
+<h3 id="pydantic-p4-validators-that-need-more-context">Validators that need more context</h3>
+<p>A validator can take an optional <code>ValidationInfo</code> argument. It carries <code>data</code> (fields already validated, so only earlier fields), a user-supplied <code>context</code>, the <code>mode</code>, and the <code>field_name</code>. Pass context with <code>Model.model_validate(data, context=...)</code>; plain <code>Model(...)</code> cannot take it.</p>
+<h3 id="pydantic-p4-reusable-validators">Reusable validators</h3>
+<p>With the Annotated pattern, <code>AfterValidator(fn)</code> and friends attach to a type, so you can define something like an "even number" type once. With the decorator, one function can target several fields, or all of them with <code>'*'</code>.</p>
+<aside class="callout repo"><div class="ct">Repo note<em>Duplicate method names in the notebook</em></div><p>In the notebook's <code>SignupForm</code>, two <code>field_validator</code> methods are both named <code>reject_disposable_domains</code>. In Python the second definition replaces the first, so only one validator survives. The bodies also <code>raise ValidationError</code>, which is not how you reject a value; they should <code>raise ValueError(...)</code>. And they lower-case the password, which would silently change the user's password. Treat that cell as a sketch.</p></aside>
+<h2 id="pydantic-p4-common-mistakes">Common mistakes</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Mistake</th>
+<th>Symptom</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Forgetting to return the value</td>
+<td>The field becomes <code>None</code></td>
+<td>Always return the (cleaned) value</td>
+</tr>
+<tr>
+<td>Reusing a method name</td>
+<td>One validator silently disappears</td>
+<td>Give each a unique name</td>
+</tr>
+<tr>
+<td>Cross-field rule in <code>field_validator</code></td>
+<td>Cannot see the other field</td>
+<td>Use <code>model_validator</code></td>
+</tr>
+<tr>
+<td>Raising <code>ValidationError</code> yourself</td>
+<td>Wrong error type</td>
+<td>Raise <code>ValueError</code></td>
+</tr>
+<tr>
+<td>Cleaning raw text in an <code>after</code> validator</td>
+<td>Never reached</td>
+<td>Use <code>mode="before"</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="pydantic-p4-interview-corner">Interview corner</h2>
+<details class="qa"><summary>field_validator versus model_validator?</summary><div class="ans"><p>The first checks one field with no view of the others. The second sees the whole model after every field check has passed, so it handles cross-field rules.</p></div></details>
+<details class="qa"><summary>What does mode=&quot;before&quot; do, and when do you need it?</summary><div class="ans"><p>It runs on the raw input before type coercion, so you can clean messy input before Pydantic tries to read it. Without it, the validator only sees an already-valid value.</p></div></details>
+<details class="qa"><summary>What is the difference between a plain and a wrap validator?</summary><div class="ans"><p>A plain validator replaces Pydantic's check entirely, so invalid input can slip through. A wrap validator calls Pydantic's check through a handler and can catch errors or retry.</p></div></details>
+<h2 id="pydantic-p4-quick-revision">Quick revision</h2>
+<ul>
+<li class="task"><label><input type="checkbox"><span>I can write one field validator and one model validator</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I know the four modes and the execution order</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I know why raising <code>ValueError</code> is the right way to reject</span></label></li>
+</ul>
+<h2 id="pydantic-p4-sources-and-further-reading">Sources and further reading</h2>
+<ul>
+<li><a href="https://pydantic.dev/docs/validation/latest/concepts/validators/" target="_blank" rel="noopener">Pydantic docs: Validators</a></li>
+<li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/03%20-%204%20Jul%20-%20Pydantic%20Deep%20Dive.md" target="_blank" rel="noopener">Class 03 notes</a></li>
+<li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2001%20-%2027-28%20Jun/02-03%20-%2028%20Jun%20%26%204%20Jul%20-%20Python%20Refresher%20%26%20Pydantic%20Deep%20Dive/8_Pydantic/Pydantic_From_Scratch.ipynb" target="_blank" rel="noopener">Pydantic From Scratch notebook</a></li>
+</ul><button class="readbtn" data-id="pydantic-p4">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p3"><small>Previous</small><b>Fields and constraints</b></button><button class="next" data-id="pydantic-p5"><small>Next</small><b>Computed fields and serialization</b></button></div></article>
+<article id="ch-pydantic-p5" hidden><p class="crumb">Pydantic &middot; Chapter 5</p><h1>Computed fields and serialization</h1><p class="lead">Derive values instead of storing stale ones, then control exactly what leaves a model: dict or JSON, which fields, which names, and in what shape.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Docs &quot;Serialization&quot; and &quot;Fields&quot;, the notebook</span><span class="chip plain">15 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p5-why-it-matters">Why it matters</h2>
+<p>Some values should always be calculated from others, and almost every real API must hide or trim fields. Both are small settings once you know them.</p>
+<h2 id="pydantic-p5-core-ideas">Core ideas</h2>
+<h3 id="pydantic-p5-computed-field">@computed_field</h3>
+<p>Stack <code>@computed_field</code> on a <code>@property</code>. The value is read-only, appears in <code>model_dump()</code> and in the serialization JSON schema (marked read-only), and is recomputed on every access. Pydantic adds no validation or caching to the property.</p>
+<pre><code class="language-python">from pydantic import BaseModel, computed_field
+
+class JobApplication(BaseModel):
+    full_name: str
+    years_experience: int
+
+    @computed_field
+    @property
+    def experience_tier(self) -&gt; str:
+        return &quot;junior&quot; if self.years_experience &lt; 2 else &quot;mid&quot; if self.years_experience &lt; 7 else &quot;senior&quot;
+</code></pre>
+<p>The notebook builds exactly this tier example.</p>
+<aside class="callout analogy"><div class="ct">Analogy<em>The receipt total</em></div><p>A receipt total is added up at checkout rather than typed in, so a changed price shows on the next receipt. (Instructor's site.)</p></aside>
+<aside class="callout tip"><div class="ct">Pro tip<em>Do the arithmetic in code, not in the LLM</em></div><p>Models are unreliable at consistent arithmetic. Let the model classify (for example a priority), then derive numbers such as an SLA with a <code>computed_field</code>.</p></aside>
+<h3 id="pydantic-p5-dict-json-and-modes">dict, JSON and modes</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Call</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>model_dump()</code></td>
+<td>A Python dict; nested models converted recursively. Values keep Python types (a tuple stays a tuple)</td>
+</tr>
+<tr>
+<td><code>model_dump(mode="json")</code></td>
+<td>Only JSON-compatible types (a tuple becomes a list). The notebook uses this to write <code>account.json</code></td>
+</tr>
+<tr>
+<td><code>model_dump_json()</code></td>
+<td>A JSON string, with support for datetimes, UUIDs and sets</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="pydantic-p5-choosing-fields">Choosing fields</h3>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Option</th>
 <th>Effect</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>exclude={"password"}</code></td>
-<td>Remove named fields</td>
+<td><code>include</code>, <code>exclude</code></td>
+<td>Sets, or nested dicts to reach into lists (<code>'__all__'</code> for every item)</td>
 </tr>
 <tr>
-<td><code>include={"username"}</code></td>
-<td>Only these fields</td>
+<td><code>Field(exclude=True)</code></td>
+<td>Always omit this field; wins over <code>include</code></td>
 </tr>
 <tr>
 <td><code>exclude_none=True</code></td>
 <td>Drop fields currently <code>None</code></td>
 </tr>
 <tr>
+<td><code>exclude_defaults=True</code></td>
+<td>Drop fields equal to their default</td>
+</tr>
+<tr>
 <td><code>exclude_unset=True</code></td>
-<td>Keep only fields the caller actually set; the one for PATCH-style partial updates</td>
+<td>Keep only fields the caller explicitly set; the one for PATCH-style partial updates. Assigning a field later adds it to the set</td>
+</tr>
+<tr>
+<td><code>by_alias=True</code></td>
+<td>Use <code>serialization_alias</code> names</td>
 </tr>
 </tbody>
 </table></div>
-<h2 id="pydantic-p4-common-mistakes">Common mistakes</h2>
+<h3 id="pydantic-p5-custom-serializers">Custom serializers</h3>
+<p><code>@field_serializer</code> changes how one field is written (for example a datetime to an epoch number), and <code>@model_serializer</code> shapes the whole output. <strong>Plain</strong> mode replaces Pydantic's logic; <strong>wrap</strong> mode calls a handler and edits the result. Only one serializer applies per field or model.</p>
+<h3 id="pydantic-p5-subclasses-and-secrets">Subclasses and secrets</h3>
+<p>When a field is annotated with a model type, only that type's declared fields are serialized, even if the value is a subclass. This is deliberate: it stops a subclass's extra field (such as a password) leaking by accident. Opt in to the runtime subclass with <code>polymorphic_serialization</code> or <code>serialize_as_any</code>.</p>
+<h2 id="pydantic-p5-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
 <tr>
@@ -1462,43 +1727,67 @@ class Application(BaseModel):
 <tr>
 <td>Storing a derived value</td>
 <td>It drifts out of sync</td>
-<td>Use <code>computed_field</code></td>
+<td><code>computed_field</code></td>
 </tr>
 <tr>
 <td>PATCH that dumps defaults</td>
-<td>Overwrites other data with defaults</td>
-<td><code>model_dump(exclude_unset=True)</code></td>
+<td>Overwrites stored data with defaults</td>
+<td><code>exclude_unset=True</code></td>
+</tr>
+<tr>
+<td>Writing <code>model_dump()</code> straight to a JSON file</td>
+<td>A non-JSON type raises</td>
+<td>Use <code>mode="json"</code> or <code>model_dump_json()</code></td>
 </tr>
 </tbody>
 </table></div>
-<h2 id="pydantic-p4-interview-corner">Interview corner</h2>
-<details class="qa"><summary>Why exclude_unset for PATCH?</summary><div class="ans"><p>It serialises only what the caller explicitly provided, so unset defaults do not silently overwrite stored values.</p></div></details>
-<h2 id="pydantic-p4-quick-revision">Quick revision</h2>
+<h2 id="pydantic-p5-interview-corner">Interview corner</h2>
+<details class="qa"><summary>Why exclude_unset for PATCH?</summary><div class="ans"><p>It serialises only what the caller explicitly provided, so unset defaults do not overwrite stored values.</p></div></details>
+<details class="qa"><summary>model_dump versus model_dump(mode=&quot;json&quot;)?</summary><div class="ans"><p>The first keeps Python types; the second converts to JSON-compatible ones (tuples to lists, and so on).</p></div></details>
+<h2 id="pydantic-p5-quick-revision">Quick revision</h2>
 <ul>
 <li class="task"><label><input type="checkbox"><span>I can write a computed field</span></label></li>
-<li class="task"><label><input type="checkbox"><span>I know the four dump flags</span></label></li>
-</ul><button class="readbtn" data-id="pydantic-p4">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p3"><small>Previous</small><b>Constraints and custom validators</b></button><button class="next" data-id="pydantic-p5"><small>Next</small><b>Nested models</b></button></div></article>
-<article id="ch-pydantic-p5" hidden><p class="crumb">Pydantic &middot; Chapter 5</p><h1>Nested models</h1><p class="lead">Use one model as another&#x27;s field type and validation cascades through every layer, with errors that name the exact path.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Part 5</span><span class="chip plain">8 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p5-why-it-matters">Why it matters</h2>
-<p>Real data (JSON from an API or an LLM) is nested: an applicant has an address, an order has a list of items.</p>
-<h2 id="pydantic-p5-core-ideas">Core ideas</h2>
-<pre><code class="language-python">from pydantic import BaseModel
+<li class="task"><label><input type="checkbox"><span>I know the five dump filters</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I know why subclass fields are not serialized by default</span></label></li>
+</ul>
+<h2 id="pydantic-p5-sources-and-further-reading">Sources and further reading</h2>
+<ul>
+<li><a href="https://pydantic.dev/docs/validation/latest/concepts/serialization/" target="_blank" rel="noopener">Pydantic docs: Serialization</a> and <a href="https://pydantic.dev/docs/validation/latest/concepts/fields/" target="_blank" rel="noopener">Fields (computed fields)</a></li>
+<li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2001%20-%2027-28%20Jun/02-03%20-%2028%20Jun%20%26%204%20Jul%20-%20Python%20Refresher%20%26%20Pydantic%20Deep%20Dive/8_Pydantic/Pydantic_From_Scratch.ipynb" target="_blank" rel="noopener">Pydantic From Scratch notebook</a></li>
+</ul><button class="readbtn" data-id="pydantic-p5">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p4"><small>Previous</small><b>Validators</b></button><button class="next" data-id="pydantic-p6"><small>Next</small><b>Nested models</b></button></div></article>
+<article id="ch-pydantic-p6" hidden><p class="crumb">Pydantic &middot; Chapter 6</p><h1>Nested models</h1><p class="lead">Use one model as another&#x27;s field type and validation cascades through every layer, with errors that name the exact path.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Docs &quot;Models&quot;, class 03, the notebook</span><span class="chip plain">10 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p6-why-it-matters">Why it matters</h2>
+<p>Real data, including JSON from an API or an LLM, is nested: an applicant has an address, an order has a list of items. The class pointed out that nested models mirror nested JSON, which is the shape of most API payloads and LLM structured outputs.</p>
+<h2 id="pydantic-p6-core-ideas">Core ideas</h2>
+<pre><code class="language-python">from pydantic import BaseModel, Field
 
 class Address(BaseModel):
     city: str
+    state: str
     pin_code: str
 
 class Applicant(BaseModel):
     name: str
+    email: str
     address: Address
     history: list[str] = []
 
-a = Applicant.model_validate({&quot;name&quot;: &quot;R&quot;, &quot;address&quot;: {&quot;city&quot;: &quot;Pune&quot;, &quot;pin_code&quot;: &quot;411001&quot;}})
-a.address.city          # dot-chain access, typed
+a = Applicant.model_validate(
+    {&quot;name&quot;: &quot;R&quot;, &quot;email&quot;: &quot;r@x.com&quot;,
+     &quot;address&quot;: {&quot;city&quot;: &quot;Pune&quot;, &quot;state&quot;: &quot;MH&quot;, &quot;pin_code&quot;: &quot;411001&quot;}})
+a.address.city          # dot-chain access, fully typed
 </code></pre>
-<p>A bad inner value raises an error that points at <code>address.pin_code</code>, however deep. A whole nested object can be optional with <code>Address | None = None</code>. There is no practical depth limit, and lists of models work the same way.</p>
-<aside class="callout analogy"><div class="ct">Analogy<em>The org chart</em></div><p>A company contains departments, which contain employees. Validate the company and every layer beneath is validated for you.</p></aside>
-<aside class="callout trap"><div class="ct">Common trap<em>Coercion is not symmetric here either</em></div><p>A nested <code>12345</code> will not become the string <code>"12345"</code>. It is rejected; convert it yourself if you need to.</p></aside>
-<h2 id="pydantic-p5-common-mistakes">Common mistakes</h2>
+<ul>
+<li>Validating the outer model builds the inner models from the inner dicts. <code>model_dump()</code> converts everything back, recursively.</li>
+<li>A bad inner value gives an error whose location is the full path, such as <code>address.pin_code</code>.</li>
+<li>A whole nested object can be optional with <code>Address | None = None</code>. Lists of models work the same way. There is no practical depth limit.</li>
+<li>The notebook's version of this puts a <code>Field(gt=1000, lt=43125315)</code> constraint on <code>pin_code</code>, to show that nested models carry their own rules.</li>
+</ul>
+<aside class="callout analogy"><div class="ct">Analogy<em>The org chart</em></div><p>A company contains departments, which contain employees. Validate the company and every layer beneath is validated for you. (Instructor's site.)</p></aside>
+<h3 id="pydantic-p6-inheritance-is-also-allowed">Inheritance is also allowed</h3>
+<p>From the class Q&amp;A: a model can extend another (<code>class Applicant(Address)</code> inherits its fields and validators) with ordinary Python inheritance. Prefer composition (a field of type <code>Address</code>) when the data really is "has an", and inheritance only when it is "is a".</p>
+<h3 id="pydantic-p6-self-referencing-data-and-forward-references">Self-referencing data and forward references</h3>
+<p>Data that refers to itself (a parent that points back to a child) is detected and reported as a <code>ValidationError</code> instead of recursing forever. A model that mentions a class defined later uses a string annotation, and you call <code>model_rebuild()</code> once the names exist.</p>
+<h2 id="pydantic-p6-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
 <tr>
@@ -1509,23 +1798,119 @@ a.address.city          # dot-chain access, typed
 </thead>
 <tbody>
 <tr>
-<td>Passing a model instance where a dict is expected, or the reverse</td>
-<td>Confusing errors</td>
-<td><code>model_validate</code> accepts a dict; instances pass as they are</td>
+<td>Expecting int to str coercion in a nested field</td>
+<td>A nested <code>12345</code> is rejected for a <code>str</code> field</td>
+<td>Convert it yourself</td>
+</tr>
+<tr>
+<td>Calling <code>dict()</code> and expecting nested dicts</td>
+<td>Inner models stay as models</td>
+<td>Use <code>model_dump()</code></td>
 </tr>
 </tbody>
 </table></div>
-<h2 id="pydantic-p5-interview-corner">Interview corner</h2>
+<h2 id="pydantic-p6-interview-corner">Interview corner</h2>
 <details class="qa"><summary>How does validation work for nested data?</summary><div class="ans"><p>Pydantic builds the inner model from the inner dict and validates it with its own rules; errors report the full path, such as <code>address.pin_code</code>.</p></div></details>
-<h2 id="pydantic-p5-quick-revision">Quick revision</h2>
+<h2 id="pydantic-p6-quick-revision">Quick revision</h2>
 <ul>
 <li class="task"><label><input type="checkbox"><span>I can parse a nested dict into nested models</span></label></li>
 <li class="task"><label><input type="checkbox"><span>I can make a whole nested object optional</span></label></li>
-</ul><button class="readbtn" data-id="pydantic-p5">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p4"><small>Previous</small><b>Computed fields and controlling output</b></button><button class="next" data-id="pydantic-p6"><small>Next</small><b>Settings and secrets</b></button></div></article>
-<article id="ch-pydantic-p6" hidden><p class="crumb">Pydantic &middot; Chapter 6</p><h1>Settings and secrets</h1><p class="lead">Replace string-only os.getenv() with a typed settings class that reads the environment and .env files and hides secrets.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Part 6</span><span class="chip plain">8 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p6-why-it-matters">Why it matters</h2>
+<li class="task"><label><input type="checkbox"><span>I can read an error location like <code>items.1.value</code></span></label></li>
+</ul>
+<h2 id="pydantic-p6-sources-and-further-reading">Sources and further reading</h2>
+<ul>
+<li><a href="https://pydantic.dev/docs/validation/latest/concepts/models/" target="_blank" rel="noopener">Pydantic docs: Models</a></li>
+<li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/03%20-%204%20Jul%20-%20Pydantic%20Deep%20Dive.md" target="_blank" rel="noopener">Class 03 notes</a></li>
+<li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2001%20-%2027-28%20Jun/02-03%20-%2028%20Jun%20%26%204%20Jul%20-%20Python%20Refresher%20%26%20Pydantic%20Deep%20Dive/8_Pydantic/Pydantic_From_Scratch.ipynb" target="_blank" rel="noopener">Pydantic From Scratch notebook</a></li>
+</ul><button class="readbtn" data-id="pydantic-p6">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p5"><small>Previous</small><b>Computed fields and serialization</b></button><button class="next" data-id="pydantic-p7"><small>Next</small><b>Strict mode and JSON Schema</b></button></div></article>
+<article id="ch-pydantic-p7" hidden><p class="crumb">Pydantic &middot; Chapter 7</p><h1>Strict mode and JSON Schema</h1><p class="lead">Turn coercion off when silent conversion would hide bugs, and turn a model into a JSON Schema, the document that tells an API or an LLM what shape to expect.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Docs &quot;Strict mode&quot; and &quot;JSON Schema&quot;</span><span class="chip plain">12 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p7-why-it-matters">Why it matters</h2>
+<p>Lax mode is friendly, but it can hide mistakes. The schema is how a model becomes machine-readable, and chapter 11 uses it to ask an LLM for a specific shape.</p>
+<h2 id="pydantic-p7-core-ideas">Core ideas</h2>
+<h3 id="pydantic-p7-strict-mode">Strict mode</h3>
+<p>Strict mode refuses to convert: <code>"123"</code> is no longer an <code>int</code>. Four ways to turn it on:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Where</th>
+<th>How</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One call</td>
+<td><code>Model.model_validate(data, strict=True)</code></td>
+</tr>
+<tr>
+<td>One field</td>
+<td><code>Field(strict=True)</code> or <code>Annotated[int, Field(strict=True)]</code></td>
+</tr>
+<tr>
+<td>A type</td>
+<td><code>StrictInt</code>, <code>StrictStr</code>, <code>StrictBool</code>, or <code>Annotated[UUID, Strict()]</code></td>
+</tr>
+<tr>
+<td>The whole model</td>
+<td><code>model_config = ConfigDict(strict=True)</code>; a field can opt out with <code>Field(strict=False)</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Python mode and JSON mode differ: with strict on, a date string is rejected from Python input but accepted from JSON, since JSON has no date type. When adding strict mode to a running app, watch for callers who relied on coercion.</p>
+<h3 id="pydantic-p7-json-schema">JSON Schema</h3>
+<p><code>Model.model_json_schema()</code> returns a dict (not a string) describing the model, using JSON Schema 2020-12 and OpenAPI 3.1. <code>TypeAdapter(list[int]).json_schema()</code> does it for any type.</p>
+<pre><code class="language-python">class Ticket(BaseModel):
+    priority: Literal[&quot;low&quot;, &quot;medium&quot;, &quot;high&quot;]
+    summary: str = Field(max_length=200, description=&quot;One-line summary&quot;)
+
+Ticket.model_json_schema()
+</code></pre>
+<ul>
+<li>Constraints map to standard keywords: <code>max_length</code> becomes <code>maxLength</code>, <code>gt</code> becomes <code>exclusiveMinimum</code>, <code>PositiveInt</code> becomes <code>exclusiveMinimum: 0</code>, <code>EmailStr</code> becomes <code>format: email</code>, and <code>SecretStr</code> adds <code>writeOnly</code>.</li>
+<li><code>title</code>, <code>description</code>, <code>examples</code> and <code>json_schema_extra</code> on a field show up in the schema. The <code>description</code> is what a model reads, so write it as an instruction.</li>
+<li>Nested models go under <code>$defs</code> and are referenced with <code>$ref</code>.</li>
+<li><code>mode="validation"</code> (default) describes accepted input; <code>mode="serialization"</code> describes output. A <code>Decimal</code> accepts a number or string as input but is emitted as a string.</li>
+<li>An <code>Enum</code> becomes an <code>enum</code> list. (The docs say little about <code>Literal</code>; check the output of your own models.)</li>
+</ul>
+<aside class="callout key"><div class="ct">Key idea<em>Why chapter 11 cares</em></div><p>The dict from <code>model_json_schema()</code> is exactly what you hand a provider as a tool's input schema. Add <code>extra="forbid"</code> so the schema forbids unknown keys.</p></aside>
+<h2 id="pydantic-p7-common-mistakes">Common mistakes</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Mistake</th>
+<th>Symptom</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Turning on strict mode without checking callers</td>
+<td>Clients that sent <code>"5"</code> now fail</td>
+<td>Roll out gradually and watch failures</td>
+</tr>
+<tr>
+<td>Treating the schema as a string</td>
+<td>Type errors</td>
+<td>It is a dict; <code>json.dumps</code> it when needed</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="pydantic-p7-interview-corner">Interview corner</h2>
+<details class="qa"><summary>How do you turn off coercion?</summary><div class="ans"><p>Strict mode: per call (<code>strict=True</code>), per field, with a <code>Strict*</code> type, or for the whole model through <code>ConfigDict(strict=True)</code>.</p></div></details>
+<details class="qa"><summary>What does model_json_schema give you?</summary><div class="ans"><p>A dict describing the model's fields, types and constraints in JSON Schema, which APIs use for documentation and LLM providers use to constrain output.</p></div></details>
+<h2 id="pydantic-p7-quick-revision">Quick revision</h2>
+<ul>
+<li class="task"><label><input type="checkbox"><span>I know the four ways to enable strict mode</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I can say how <code>Field</code> constraints show up in the schema</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I know validation versus serialization schema</span></label></li>
+</ul>
+<h2 id="pydantic-p7-sources-and-further-reading">Sources and further reading</h2>
+<ul>
+<li><a href="https://pydantic.dev/docs/validation/latest/concepts/strict_mode/" target="_blank" rel="noopener">Pydantic docs: Strict mode</a> and <a href="https://pydantic.dev/docs/validation/latest/concepts/json_schema/" target="_blank" rel="noopener">JSON Schema</a></li>
+</ul><button class="readbtn" data-id="pydantic-p7">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p6"><small>Previous</small><b>Nested models</b></button><button class="next" data-id="pydantic-p8"><small>Next</small><b>Settings and secrets</b></button></div></article>
+<article id="ch-pydantic-p8" hidden><p class="crumb">Pydantic &middot; Chapter 8</p><h1>Settings and secrets</h1><p class="lead">Replace string-only os.getenv() with a typed settings class that reads the environment and .env files, masks secrets and validates defaults.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Docs &quot;Settings&quot;, class 03, the instructor&#x27;s site</span><span class="chip plain">12 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p8-why-it-matters">Why it matters</h2>
 <p><code>os.getenv()</code> always returns a string or <code>None</code>. <code>DEBUG="false"</code> is a non-empty string, so <code>if debug:</code> is true. Every project ends up rewriting the same parsing code.</p>
-<h2 id="pydantic-p6-core-ideas">Core ideas</h2>
-<p><code>BaseSettings</code> (from the separate <code>pydantic-settings</code> package) extends <code>BaseModel</code>. Field names map to uppercase environment variables (<code>api_key</code> reads <code>API_KEY</code>), <code>SettingsConfigDict(env_file=".env")</code> also reads a <code>.env</code> file, and every <code>Field</code> constraint applies.</p>
+<aside class="callout beyond"><div class="ct">Beyond the class<em>Read most of the settings page</em></div><p>The settings docs page is long. I read the first 100,000 of its roughly 103,900 characters; the last part (the end of the secrets section) was not read, and SecretStr is not covered on that page.</p></aside>
+<h2 id="pydantic-p8-core-ideas">Core ideas</h2>
+<p><code>BaseSettings</code> (from the separate <code>pydantic-settings</code> package) extends <code>BaseModel</code>. Fields not passed as keyword arguments are filled from the environment, and keyword arguments are handy for overrides in tests.</p>
 <pre><code class="language-python">from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -1535,10 +1920,52 @@ class AppSettings(BaseSettings):
     max_connections: int = Field(default=100, ge=1, le=1000)
     debug: bool = False
 </code></pre>
-<p><code>settings.max_connections</code> is an <code>int</code>, <code>debug</code> is a real <code>bool</code>, and <code>api_key</code> prints masked; read it on purpose with <code>.get_secret_value()</code>.</p>
-<aside class="callout analogy"><div class="ct">Analogy<em>Sensor wires versus a dashboard</em></div><p><code>os.getenv()</code> gives raw unlabeled wires. <code>BaseSettings</code> is the dashboard that shows typed gauges.</p></aside>
-<aside class="callout tip"><div class="ct">Pro tip<em>Same idea as Foundations chapter 1</em></div><p>The <code>.env</code> file that Foundations set up is exactly what this class reads.</p></aside>
-<h2 id="pydantic-p6-common-mistakes">Common mistakes</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>How it works</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Name mapping</td>
+<td>The variable name matches the field name, case-insensitive (<code>api_key</code> reads <code>API_KEY</code>). <code>alias</code>, <code>validation_alias</code>, <code>AliasChoices</code> or <code>env_prefix</code> change it</td>
+</tr>
+<tr>
+<td><code>.env</code> files</td>
+<td><code>env_file</code>, or a tuple of files where later ones win. Real environment variables beat the file</td>
+</tr>
+<tr>
+<td>Unknown entries</td>
+<td>With the default <code>extra='forbid'</code>, unknown <code>.env</code> entries raise an error; <code>extra="ignore"</code> skips them</td>
+</tr>
+<tr>
+<td>Nested values</td>
+<td>With <code>env_nested_delimiter="__"</code>, <code>DB__HOST</code> fills <code>db.host</code>. Lists and dicts are read as JSON</td>
+</tr>
+<tr>
+<td>Secrets directory</td>
+<td><code>secrets_dir</code>: each file's name is the key, its contents the value. Lower priority than the environment and <code>.env</code></td>
+</tr>
+<tr>
+<td>Priority</td>
+<td>Environment over <code>.env</code> over secrets directory; <code>settings_customise_sources</code> reorders</td>
+</tr>
+<tr>
+<td>Defaults</td>
+<td><strong>Validated</strong>, unlike in <code>BaseModel</code> (set <code>validate_default=False</code> to skip)</td>
+</tr>
+<tr>
+<td>Command line</td>
+<td><code>cli_parse_args=True</code> parses <code>sys.argv</code> into fields</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>settings.max_connections</code> is a real <code>int</code>, <code>debug</code> a real <code>bool</code>, and <code>api_key</code> prints masked; read it on purpose with <code>.get_secret_value()</code>.</p>
+<aside class="callout analogy"><div class="ct">Analogy<em>Sensor wires versus a dashboard</em></div><p><code>os.getenv()</code> gives raw unlabeled wires. <code>BaseSettings</code> is the dashboard that shows typed gauges. (Instructor's site.)</p></aside>
+<aside class="callout tip"><div class="ct">Pro tip<em>Same file as Foundations chapter 1</em></div><p>The <code>.env</code> file the Foundations book sets up is exactly what this class reads. The Meridian project uses the same pattern in <code>config/settings.py</code>.</p></aside>
+<h2 id="pydantic-p8-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
 <tr>
@@ -1551,25 +1978,148 @@ class AppSettings(BaseSettings):
 <tr>
 <td><code>if os.getenv("DEBUG")</code></td>
 <td><code>"false"</code> is truthy</td>
-<td>Use a <code>bool</code> field in <code>BaseSettings</code></td>
+<td>A <code>bool</code> field in <code>BaseSettings</code></td>
 </tr>
 <tr>
 <td>Keys as plain <code>str</code></td>
 <td>Secret printed in logs</td>
-<td>Use <code>SecretStr</code></td>
+<td><code>SecretStr</code></td>
+</tr>
+<tr>
+<td>Unknown entry in <code>.env</code></td>
+<td><code>ValidationError</code> on start</td>
+<td><code>extra="ignore"</code></td>
 </tr>
 </tbody>
 </table></div>
-<h2 id="pydantic-p6-interview-corner">Interview corner</h2>
+<h2 id="pydantic-p8-interview-corner">Interview corner</h2>
 <details class="qa"><summary>Why BaseSettings over os.getenv?</summary><div class="ans"><p>It gives typed, validated configuration with defaults and constraints, reads <code>.env</code>, and masks secrets, instead of hand-written string parsing.</p></div></details>
-<h2 id="pydantic-p6-quick-revision">Quick revision</h2>
+<details class="qa"><summary>Which wins: an environment variable or the .env file?</summary><div class="ans"><p>The real environment variable. A tuple of <code>.env</code> files loads in order, with later files overriding earlier ones.</p></div></details>
+<h2 id="pydantic-p8-quick-revision">Quick revision</h2>
 <ul>
 <li class="task"><label><input type="checkbox"><span>I know the env-name mapping</span></label></li>
 <li class="task"><label><input type="checkbox"><span>I can say why <code>"false"</code> is truthy as a string</span></label></li>
-</ul><button class="readbtn" data-id="pydantic-p6">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p5"><small>Previous</small><b>Nested models</b></button><button class="next" data-id="pydantic-p7"><small>Next</small><b>Pydantic with FastAPI</b></button></div></article>
-<article id="ch-pydantic-p7" hidden><p class="crumb">Pydantic &middot; Chapter 7</p><h1>Pydantic with FastAPI</h1><p class="lead">FastAPI uses your model as the request validator, the response filter and the source of the API docs, all from one class.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Part 7</span><span class="chip plain">8 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p7-why-it-matters">Why it matters</h2>
+<li class="task"><label><input type="checkbox"><span>I know the source priority order</span></label></li>
+</ul>
+<h2 id="pydantic-p8-sources-and-further-reading">Sources and further reading</h2>
+<ul>
+<li><a href="https://pydantic.dev/docs/validation/latest/concepts/pydantic_settings/" target="_blank" rel="noopener">Pydantic docs: Settings</a></li>
+<li>Instructor's site: <a href="https://pydantic-with-mayank.netlify.app/" target="_blank" rel="noopener">Mastering Pydantic</a></li>
+</ul><button class="readbtn" data-id="pydantic-p8">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p7"><small>Previous</small><b>Strict mode and JSON Schema</b></button><button class="next" data-id="pydantic-p9"><small>Next</small><b>Reading validation errors</b></button></div></article>
+<article id="ch-pydantic-p9" hidden><p class="crumb">Pydantic &middot; Chapter 9</p><h1>Reading validation errors</h1><p class="lead">A ValidationError collects every problem in one pass, and each entry says where, what and why in a form code can read, which is what makes automatic retries possible.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Docs &quot;Error handling&quot;</span><span class="chip plain">8 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p9-why-it-matters">Why it matters</h2>
+<p>The error is not just a message for a human. Its structure lets you show clear feedback to an API caller, or hand the failure back to an LLM so it can correct itself.</p>
+<h2 id="pydantic-p9-core-ideas">Core ideas</h2>
+<p>One <code>ValidationError</code> bundles <strong>all</strong> errors from a validation pass, not the first one. Ways to read it:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Call</th>
+<th>Gives</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>str(e)</code></td>
+<td>A readable block per error</td>
+</tr>
+<tr>
+<td><code>e.errors()</code></td>
+<td>A list of dicts</td>
+</tr>
+<tr>
+<td><code>e.error_count()</code></td>
+<td>How many</td>
+</tr>
+<tr>
+<td><code>e.json()</code></td>
+<td>The list as JSON</td>
+</tr>
+</tbody>
+</table></div>
+<p>Each entry in <code>errors()</code>:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td>Machine-readable id such as <code>missing</code>, <code>greater_than</code>, <code>int_parsing</code>, <code>value_error</code></td>
+</tr>
+<tr>
+<td><code>loc</code></td>
+<td>A tuple: field name first, then nested names or list indexes, for example <code>('items', 1, 'value')</code></td>
+</tr>
+<tr>
+<td><code>msg</code></td>
+<td>Human-readable message</td>
+</tr>
+<tr>
+<td><code>input</code></td>
+<td>The value that failed</td>
+</tr>
+<tr>
+<td><code>ctx</code></td>
+<td>Optional values used to build the message, such as the <code>gt</code> bound, or the original exception</td>
+</tr>
+<tr>
+<td><code>url</code></td>
+<td>A link to the docs for that error type</td>
+</tr>
+</tbody>
+</table></div>
+<pre><code class="language-python">try:
+    User(**{&quot;id&quot;: &quot;not an int&quot;, &quot;tastes&quot;: {}})
+except ValidationError as e:
+    for err in e.errors():
+        print(err[&quot;loc&quot;], err[&quot;type&quot;], err[&quot;msg&quot;])
+</code></pre>
+<p>For the get-started example in the docs this reports two problems at once: <code>id</code> could not be parsed as an integer, and the required <code>signup_ts</code> is missing.</p>
+<p>Your own validators raise <code>ValueError</code> (or <code>AssertionError</code>) and Pydantic turns them into <code>value_error</code> entries whose message starts with "Value error,".</p>
+<h3 id="pydantic-p9-customising-messages">Customising messages</h3>
+<p>Because every entry has a <code>type</code> and <code>ctx</code>, you can map types to your own templates (for translation or friendlier wording) and rewrite <code>loc</code> into a dotted path like <code>items[1].value</code>. The docs show both as small helper functions over <code>e.errors()</code>.</p>
+<aside class="callout key"><div class="ct">Key idea<em>Why this matters for LLMs</em></div><p>The same structured list, passed back to a model as text, is the trigger for the retry pattern in chapter 11.</p></aside>
+<h2 id="pydantic-p9-common-mistakes">Common mistakes</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Mistake</th>
+<th>Symptom</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Showing <code>str(e)</code> to API users</td>
+<td>Noisy, internal wording</td>
+<td>Map <code>type</code> to your own message</td>
+</tr>
+<tr>
+<td>Catching a generic exception around validation</td>
+<td>Real bugs get swallowed</td>
+<td>Catch <code>ValidationError</code> specifically</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="pydantic-p9-interview-corner">Interview corner</h2>
+<details class="qa"><summary>What is in a Pydantic error entry?</summary><div class="ans"><p><code>type</code>, <code>loc</code>, <code>msg</code>, <code>input</code>, and optionally <code>ctx</code> and <code>url</code>. <code>loc</code> is a tuple that includes nested names and list indexes.</p></div></details>
+<h2 id="pydantic-p9-quick-revision">Quick revision</h2>
+<ul>
+<li class="task"><label><input type="checkbox"><span>I can name the keys of an error entry</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I can read a <code>loc</code> tuple</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I know one error object holds all problems from one pass</span></label></li>
+</ul>
+<h2 id="pydantic-p9-sources-and-further-reading">Sources and further reading</h2>
+<ul>
+<li><a href="https://pydantic.dev/docs/validation/dev/errors/errors/" target="_blank" rel="noopener">Pydantic docs: Error handling</a></li>
+</ul><button class="readbtn" data-id="pydantic-p9">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p8"><small>Previous</small><b>Settings and secrets</b></button><button class="next" data-id="pydantic-p10"><small>Next</small><b>Pydantic with FastAPI</b></button></div></article>
+<article id="ch-pydantic-p10" hidden><p class="crumb">Pydantic &middot; Chapter 10</p><h1>Pydantic with FastAPI</h1><p class="lead">FastAPI uses your model as the request validator, the response filter and the source of the API docs, all from one class.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Instructor&#x27;s site</span><span class="chip plain">8 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><aside class="callout beyond"><div class="ct">Beyond the class<em>Source for this chapter</em></div><p>The official Pydantic docs pages I read do not cover FastAPI. This chapter comes from the instructor's Pydantic site, plus the <code>model_json_schema()</code> behaviour from the JSON Schema docs (chapter 7). The FastAPI docs themselves were not read.</p></aside>
+<h2 id="pydantic-p10-why-it-matters">Why it matters</h2>
 <p>This is where Pydantic is "everywhere": an endpoint that takes a model is validated before your function body runs.</p>
-<h2 id="pydantic-p7-core-ideas">Core ideas</h2>
+<h2 id="pydantic-p10-core-ideas">Core ideas</h2>
 <pre><code class="language-python">from fastapi import FastAPI
 from pydantic import BaseModel, EmailStr, Field
 
@@ -1589,10 +2139,10 @@ def apply(a: Applicant) -&gt; Receipt:
 <ul>
 <li><strong>Request validation.</strong> Malformed bodies are rejected with a detailed error before the function runs; no manual <code>if</code> checks.</li>
 <li><strong><code>response_model=</code></strong> filters what you return down to that shape, a safety net against leaking extra fields.</li>
-<li><strong>Docs.</strong> <code>model_json_schema()</code> feeds the <code>/docs</code> page; every <code>Field()</code> constraint becomes a documented API constraint.</li>
+<li><strong>Docs.</strong> The model's JSON Schema feeds the <code>/docs</code> page, so every <code>Field()</code> constraint becomes a documented API constraint.</li>
 </ul>
-<aside class="callout analogy"><div class="ct">Analogy<em>One scanner at the terminal entrance</em></div><p>Instead of each gate building its own detector, the terminal has one scanner everyone passes. Your model is that scanner.</p></aside>
-<h2 id="pydantic-p7-common-mistakes">Common mistakes</h2>
+<aside class="callout analogy"><div class="ct">Analogy<em>One scanner at the terminal entrance</em></div><p>Instead of each gate building its own detector, the terminal has one scanner everyone passes. Your model is that scanner. (Instructor's site.)</p></aside>
+<h2 id="pydantic-p10-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
 <tr>
@@ -1609,20 +2159,29 @@ def apply(a: Applicant) -&gt; Receipt:
 </tr>
 </tbody>
 </table></div>
-<h2 id="pydantic-p7-interview-corner">Interview corner</h2>
+<h2 id="pydantic-p10-interview-corner">Interview corner</h2>
 <details class="qa"><summary>What does response_model do?</summary><div class="ans"><p>It validates and filters the returned object to the declared shape, so extra fields cannot leak, and it documents the response in <code>/docs</code>.</p></div></details>
-<h2 id="pydantic-p7-quick-revision">Quick revision</h2>
+<h2 id="pydantic-p10-quick-revision">Quick revision</h2>
 <ul>
 <li class="task"><label><input type="checkbox"><span>I can say what runs before the endpoint body</span></label></li>
 <li class="task"><label><input type="checkbox"><span>I know where the <code>/docs</code> schema comes from</span></label></li>
-</ul><button class="readbtn" data-id="pydantic-p7">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p6"><small>Previous</small><b>Settings and secrets</b></button><button class="next" data-id="pydantic-p8"><small>Next</small><b>Validating what an LLM gives you back</b></button></div></article>
-<article id="ch-pydantic-p8" hidden><p class="crumb">Pydantic &middot; Chapter 8</p><h1>Validating what an LLM gives you back</h1><p class="lead">LLM text output is unreliable. Ask the provider to guarantee a Pydantic schema, constrain values with Literal, and retry with the validation error when it still fails.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Part 8</span><span class="chip plain">15 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p8-why-it-matters">Why it matters</h2>
-<p>An LLM asked for JSON may add a code fence, a friendly preamble, or return a number as a string. Cleaning that up with string tricks is fragile. The fix is to have the provider guarantee the shape and to validate what arrives.</p>
-<h2 id="pydantic-p8-core-ideas">Core ideas</h2>
-<h3 id="pydantic-p8-why-raw-text-is-a-liability">Why raw text is a liability</h3>
-<p>Four realistic replies to the same prompt: clean JSON, JSON in a markdown fence, JSON after "Sure! Here it is:", and the right shape with wrong types (<code>"1999 dollars"</code>). Only the first survives <code>json.loads()</code> plus <code>model_validate()</code> untouched.</p>
-<aside class="callout analogy"><div class="ct">Analogy<em>Shouting an order versus a printed slip</em></div><p>A shouted order gets misheard. A printed checkbox slip is a response guaranteed to match a schema you defined.</p></aside>
-<h3 id="pydantic-p8-provider-structured-outputs">Provider structured outputs</h3>
+</ul>
+<h2 id="pydantic-p10-sources-and-further-reading">Sources and further reading</h2>
+<ul>
+<li>Instructor's site: <a href="https://pydantic-with-mayank.netlify.app/" target="_blank" rel="noopener">Mastering Pydantic</a></li>
+<li>Meridian uses this pattern: see the capstone chapter in the LangChain book</li>
+</ul><button class="readbtn" data-id="pydantic-p10">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p9"><small>Previous</small><b>Reading validation errors</b></button><button class="next" data-id="pydantic-p11"><small>Next</small><b>Validating what an LLM gives you back</b></button></div></article>
+<article id="ch-pydantic-p11" hidden><p class="crumb">Pydantic &middot; Chapter 11</p><h1>Validating what an LLM gives you back</h1><p class="lead">LLM text output is unreliable. Ask the provider to guarantee a Pydantic schema, constrain values with Literal, and retry with the validation error when it still fails.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Pydantic&#x27;s LLM article and docs, the instructor&#x27;s site</span><span class="chip plain">15 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p11-why-it-matters">Why it matters</h2>
+<p>An LLM asked for JSON may add a code fence, a friendly preamble, or return a number as a string. Cleaning that up with string tricks is fragile. Pydantic's own article makes the same argument: model output is untrusted, and a model gives it a defined shape.</p>
+<h2 id="pydantic-p11-core-ideas">Core ideas</h2>
+<h3 id="pydantic-p11-three-approaches-from-simple-to-robust">Three approaches, from simple to robust</h3>
+<p>The Pydantic article on LLMs walks through them:</p>
+<ol>
+<li><strong>Prompt for JSON, then validate.</strong> Ask for a JSON object with given fields and parse the reply with <code>model_validate_json</code>. Simple, but replies can arrive wrapped in a markdown fence or surrounded by prose, which breaks parsing.</li>
+<li><strong>Tool calling with a generated schema.</strong> Pass <code>Model.model_json_schema()</code> as a function's parameters and require the model to call that function. The prompt holds only the data request; the schema defines the structure, including nesting. Note the article's caveat: tool calling was designed to call external APIs, so using it to format output is a repurposing.</li>
+<li><strong>A wrapper library.</strong> Instructor wraps the client so you pass a <code>response_model</code> and get a validated object back.</li>
+</ol>
+<p>Provider SDKs have since added direct support. The instructor's site shows:</p>
 <div class="tablewrap"><table>
 <thead>
 <tr>
@@ -1644,9 +2203,10 @@ def apply(a: Applicant) -&gt; Receipt:
 </tr>
 </tbody>
 </table></div>
-<p>The same model works for both; only the SDK call changes. Add <code>ConfigDict(extra="forbid")</code> to a model you hand to a provider so the generated schema forbids surprise keys. The lower-level route is <code>Model.model_json_schema()</code> as a tool's <code>input_schema</code> with a forced <code>tool_choice</code>.</p>
-<h3 id="pydantic-p8-literal-and-the-retry-pattern">Literal and the retry pattern</h3>
-<p><code>Literal</code> physically limits a classification to allowed values. When validation still fails, the <code>ValidationError</code> text is the trigger for a retry: feed it into the next prompt and ask again, up to a limit.</p>
+<p>The same model works for both; only the SDK call changes. Add <code>extra="forbid"</code> so the generated schema rejects surprise keys. (I did not run these calls; check each provider's current SDK docs.)</p>
+<aside class="callout analogy"><div class="ct">Analogy<em>Shouting an order versus a printed slip</em></div><p>A shouted order gets misheard. A printed checkbox slip is a response guaranteed to match a schema you defined. (Instructor's site.)</p></aside>
+<h3 id="pydantic-p11-literal-and-the-retry-loop">Literal and the retry loop</h3>
+<p><code>Literal</code> physically limits a classification to allowed values. When validation still fails, the <code>ValidationError</code> text (chapter 9) is the trigger for a retry: feed it into the next prompt and ask again, up to a limit.</p>
 <pre><code class="language-python">def classify_with_retry(text, max_retries=3):
     last_error = None
     for _ in range(max_retries):
@@ -1657,8 +2217,11 @@ def apply(a: Applicant) -&gt; Receipt:
             last_error = str(e)
     raise RuntimeError(&quot;Failed after max retries&quot;)
 </code></pre>
-<aside class="callout key"><div class="ct">Key idea<em>Shape, not correctness</em></div><p>Structured output guarantees the <strong>shape</strong>. A well-formed answer can still be confidently wrong. Validation catches malformed data, not hallucinated facts.</p></aside>
-<h2 id="pydantic-p8-common-mistakes">Common mistakes</h2>
+<p>Pydantic AI, built by the Pydantic team, automates this: when validation of an output or a tool's arguments fails, it sends the errors back to the model and asks it to retry. Its docs also show a <strong>validation context</strong>: values your validators read from <code>info.context</code> (for example a list of allowed countries) that the model never sees.</p>
+<h3 id="pydantic-p11-context-aware-validators">Context-aware validators</h3>
+<p>A validator can check against data supplied at call time through <code>model_validate(..., context=...)</code> (chapter 4), which is how an app can enforce "country must be one of these" without telling the model the list.</p>
+<aside class="callout key"><div class="ct">Key idea<em>Shape, not correctness</em></div><p>Structured output guarantees the <strong>shape</strong>. A well-formed answer can still be confidently wrong. Pydantic's article says the same: structurally valid output does not guarantee correct content, and validation catches type and shape problems, not semantic ones.</p></aside>
+<h2 id="pydantic-p11-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
 <tr>
@@ -1671,7 +2234,7 @@ def apply(a: Applicant) -&gt; Receipt:
 <tr>
 <td>Cleaning fences with string code</td>
 <td>Breaks when the format shifts</td>
-<td>Use provider structured output</td>
+<td>Provider structured output, or a schema-forcing tool call</td>
 </tr>
 <tr>
 <td>Treating a valid object as true</td>
@@ -1685,23 +2248,30 @@ def apply(a: Applicant) -&gt; Receipt:
 </tr>
 </tbody>
 </table></div>
-<h2 id="pydantic-p8-interview-corner">Interview corner</h2>
-<details class="qa"><summary>How do you get reliable JSON from an LLM?</summary><div class="ans"><p>Pass a Pydantic model to the provider's structured-output call, constrain values with <code>Literal</code>, validate the result, and retry with the error fed back if it fails.</p></div></details>
+<h2 id="pydantic-p11-interview-corner">Interview corner</h2>
+<details class="qa"><summary>How do you get reliable JSON from an LLM?</summary><div class="ans"><p>Pass a Pydantic model to the provider's structured-output call (or its JSON Schema as a forced tool), constrain values with <code>Literal</code>, validate the result, and retry with the error fed back if it fails.</p></div></details>
 <details class="qa"><summary>Does validation make an answer correct?</summary><div class="ans"><p>No. It confirms the shape and constraints only. A confidently wrong value in the right shape still passes.</p></div></details>
-<h2 id="pydantic-p8-quick-revision">Quick revision</h2>
+<h2 id="pydantic-p11-quick-revision">Quick revision</h2>
 <ul>
-<li class="task"><label><input type="checkbox"><span>I can name the OpenAI and Anthropic parse calls and their result fields</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I can name the three approaches</span></label></li>
 <li class="task"><label><input type="checkbox"><span>I can write the retry loop</span></label></li>
-<li class="task"><label><input type="checkbox"><span>I can say what <code>extra="forbid"</code> does</span></label></li>
-</ul><button class="readbtn" data-id="pydantic-p8">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p7"><small>Previous</small><b>Pydantic with FastAPI</b></button><button class="next" data-id="pydantic-p9"><small>Next</small><b>Where Pydantic goes next, and the final project</b></button></div></article>
-<article id="ch-pydantic-p9" hidden><p class="crumb">Pydantic &middot; Chapter 9</p><h1>Where Pydantic goes next, and the final project</h1><p class="lead">An honest map of the ecosystem above core Pydantic, then a small support-ticket triage service that uses every idea in the book.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Part 9 and final project</span><span class="chip plain">12 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p9-the-ecosystem-map">The ecosystem map</h2>
-<p>This book covers core Pydantic: <code>BaseModel</code>, <code>Field</code>, validators, <code>computed_field</code>, nested models, dump control, settings, and structured output with the OpenAI and Anthropic SDKs.</p>
-<ul>
-<li><strong>One layer up:</strong> libraries such as Instructor patch an LLM client to validate and retry automatically, which is the retry loop from chapter 8 wrapped in a decorator.</li>
-<li><strong>Two layers up:</strong> agent frameworks (PydanticAI, LangChain, CrewAI) use Pydantic for tool schemas and structured agent outputs, and add orchestration: when to call a tool, multi-turn state, chaining calls. Orchestration is not Pydantic's job; validating data against a schema is.</li>
+<li class="task"><label><input type="checkbox"><span>I can say what <code>extra="forbid"</code> does and why it helps</span></label></li>
 </ul>
-<aside class="callout beyond"><div class="ct">Beyond the class<em>Out of scope here</em></div><p>PydanticAI, LangChain, CrewAI and Instructor are not taught in this book. LangChain is taught in the next book.</p></aside>
-<h2 id="pydantic-p9-final-project-support-ticket-triage">Final project: support-ticket triage</h2>
+<h2 id="pydantic-p11-sources-and-further-reading">Sources and further reading</h2>
+<ul>
+<li><a href="https://pydantic.dev/articles/llm-intro" target="_blank" rel="noopener">Pydantic: How to use Pydantic for LLMs</a></li>
+<li><a href="https://pydantic.dev/docs/validation/dev/examples/pydantic_ai/" target="_blank" rel="noopener">Pydantic docs: Agent libraries (Pydantic AI)</a></li>
+<li>Instructor's site: <a href="https://pydantic-with-mayank.netlify.app/" target="_blank" rel="noopener">Mastering Pydantic</a></li>
+</ul><button class="readbtn" data-id="pydantic-p11">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p10"><small>Previous</small><b>Pydantic with FastAPI</b></button><button class="next" data-id="pydantic-p12"><small>Next</small><b>Where Pydantic goes next, and the final project</b></button></div></article>
+<article id="ch-pydantic-p12" hidden><p class="crumb">Pydantic &middot; Chapter 12</p><h1>Where Pydantic goes next, and the final project</h1><p class="lead">An honest map of the ecosystem above core Pydantic, then a small support-ticket triage service that uses every idea in the book.</p><div class="meta"><span class="chip">Pydantic</span><span class="chip plain">Instructor&#x27;s site and the docs</span><span class="chip plain">12 min read</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-p12-the-ecosystem-map">The ecosystem map</h2>
+<p>This book covers core Pydantic: models, fields, validators, computed fields, serialization, strict mode, JSON Schema, settings, errors, and structured output with provider SDKs. The docs list much more, which this book does not teach: unions and discriminators in depth, <code>TypeAdapter</code>, dataclasses, generics, <code>RootModel</code>, performance, the architecture notes, and extra-types packages.</p>
+<ul>
+<li><strong>One layer up:</strong> Instructor patches an LLM client to validate and retry automatically, which is the retry loop from chapter 11 wrapped up.</li>
+<li><strong>Two layers up:</strong> agent frameworks use Pydantic for tool schemas and structured outputs and add orchestration. <strong>Pydantic AI</strong> is made by the Pydantic team; LangChain and CrewAI also build on Pydantic. Orchestration (when to call a tool, state across turns) is not Pydantic's job; validating data against a schema is.</li>
+<li>The docs say around 8,000 PyPI packages use Pydantic, with FastAPI, SQLModel and LangChain among them.</li>
+</ul>
+<aside class="callout beyond"><div class="ct">Beyond the class<em>Out of scope here</em></div><p>LangChain is taught in the next book. This book does not teach Instructor, Pydantic AI or CrewAI.</p></aside>
+<h2 id="pydantic-p12-final-project-support-ticket-triage">Final project: support-ticket triage</h2>
 <p><code>POST /triage</code> takes a messy support message and returns a validated result: category, priority, sentiment, a computed SLA and redacted customer info.</p>
 <div class="tablewrap"><table>
 <thead>
@@ -1713,27 +2283,27 @@ def apply(a: Applicant) -&gt; Receipt:
 <tbody>
 <tr>
 <td><code>IncomingTicket</code></td>
-<td>A <code>mode="before"</code> <code>field_validator</code> redacts email addresses before storing (chapter 3), and it is the FastAPI request body (chapter 7)</td>
+<td>A <code>mode="before"</code> <code>field_validator</code> redacts email addresses before storing (chapter 4), and it is the FastAPI request body (chapter 10)</td>
 </tr>
 <tr>
 <td><code>TriagedTicket</code></td>
-<td><code>Literal</code> for category, priority and sentiment (chapter 8); a nested <code>CustomerInfo</code> (chapter 5)</td>
+<td><code>Literal</code> for category, priority and sentiment (chapter 11); a nested <code>CustomerInfo</code> (chapter 6); <code>extra="forbid"</code> (chapter 2)</td>
 </tr>
 <tr>
 <td><code>sla_hours</code></td>
-<td>A <code>computed_field</code> from priority: high 4, medium 24, low 72 (chapter 4), so the LLM never does arithmetic</td>
+<td>A <code>computed_field</code> from priority: high 4, medium 24, low 72 (chapter 5), so the LLM never does arithmetic</td>
 </tr>
 <tr>
 <td>Safety net</td>
-<td>A <code>model_validator</code> rejects <code>high</code> priority with <code>general_question</code> (chapter 3)</td>
+<td>A <code>model_validator</code> rejects <code>high</code> priority with <code>general_question</code> (chapter 4)</td>
 </tr>
 <tr>
 <td><code>AppSettings</code></td>
-<td>Picks Anthropic, then OpenAI, then a free OpenRouter model, whichever key exists (chapter 6)</td>
+<td>Picks Anthropic, then OpenAI, then a free OpenRouter model, whichever key exists (chapter 8)</td>
 </tr>
 </tbody>
 </table></div>
-<h2 id="pydantic-p9-common-mistakes">Common mistakes</h2>
+<h2 id="pydantic-p12-common-mistakes">Common mistakes</h2>
 <div class="tablewrap"><table>
 <thead>
 <tr>
@@ -1755,41 +2325,54 @@ def apply(a: Applicant) -&gt; Receipt:
 </tr>
 </tbody>
 </table></div>
-<h2 id="pydantic-p9-interview-corner">Interview corner</h2>
+<h2 id="pydantic-p12-interview-corner">Interview corner</h2>
 <details class="qa"><summary>How would you design a reliable LLM-backed API endpoint?</summary><div class="ans"><p>Validate and clean the request with a model, ask the provider for a structured response in a <code>Literal</code>-constrained schema, derive computed values in code, add a model validator for impossible combinations, and cap retries.</p></div></details>
-<h2 id="pydantic-p9-quick-revision">Quick revision</h2>
+<h2 id="pydantic-p12-quick-revision">Quick revision</h2>
 <ul>
 <li class="task"><label><input type="checkbox"><span>I can sketch the triage project and name the concept in each piece</span></label></li>
-<li class="task"><label><input type="checkbox"><span>I can say what Instructor and PydanticAI add on top of Pydantic</span></label></li>
+<li class="task"><label><input type="checkbox"><span>I can say what Instructor and Pydantic AI add on top of Pydantic</span></label></li>
 </ul>
-<h2 id="pydantic-p9-sources-and-further-reading">Sources and further reading</h2>
+<h2 id="pydantic-p12-sources-and-further-reading">Sources and further reading</h2>
 <ul>
+<li><a href="https://pydantic.dev/docs/validation/latest/get-started/" target="_blank" rel="noopener">Pydantic docs: Get started</a></li>
 <li>Instructor's site: <a href="https://pydantic-with-mayank.netlify.app/" target="_blank" rel="noopener">Mastering Pydantic</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/Weekend%2001%20-%2027-28%20Jun/02-03%20-%2028%20Jun%20%26%204%20Jul%20-%20Python%20Refresher%20%26%20Pydantic%20Deep%20Dive/8_Pydantic/Pydantic_From_Scratch.ipynb" target="_blank" rel="noopener">Pydantic From Scratch notebook</a></li>
 <li><a href="https://github.com/mayank953/Live-Class-2026/blob/main/classes_transcription_summary/03%20-%204%20Jul%20-%20Pydantic%20Deep%20Dive.md" target="_blank" rel="noopener">Class 03 notes</a></li>
-</ul><button class="readbtn" data-id="pydantic-p9">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p8"><small>Previous</small><b>Validating what an LLM gives you back</b></button><button class="next" data-id="pydantic-bank"><small>Next</small><b>Interview question bank</b></button></div></article>
-<article id="ch-pydantic-bank" hidden><p class="crumb">Back matter</p><h1>Interview question bank</h1><p class="lead">Every interview question from every chapter in one place, in chapter order. Tap a question to reveal the answer.</p><div class="meta"><span class="chip">13 questions</span><span class="chip plain">Rebuilt automatically from the chapters</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-bank-chapter-1-why-validation-exists-and-type-hints">Chapter 1: Why validation exists, and type hints</h2>
+</ul><button class="readbtn" data-id="pydantic-p12">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p11"><small>Previous</small><b>Validating what an LLM gives you back</b></button><button class="next" data-id="pydantic-bank"><small>Next</small><b>Interview question bank</b></button></div></article>
+<article id="ch-pydantic-bank" hidden><p class="crumb">Back matter</p><h1>Interview question bank</h1><p class="lead">Every interview question from every chapter in one place, in chapter order. Tap a question to reveal the answer.</p><div class="meta"><span class="chip">22 questions</span><span class="chip plain">Rebuilt automatically from the chapters</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="pydantic-bank-chapter-1-why-validation-exists-and-type-hints">Chapter 1: Why validation exists, and type hints</h2>
 <details class="qa"><summary>Does Python enforce type hints?</summary><div class="ans"><p>No. At runtime they are ignored. They help readers, IDEs and libraries such as Pydantic, which reads them and enforces them.</p></div></details>
-<details class="qa"><summary>Why is validating at the boundary better than inside the function?</summary><div class="ans"><p>The error appears where the bad data entered, with a clear message, instead of as an unrelated crash several calls later.</p></div></details>
+<details class="qa"><summary>What is the difference between type validation and data validation?</summary><div class="ans"><p>Type validation checks the kind of data (an int). Data validation checks the value makes sense (an age of 10000 is an int but not valid). Pydantic does both: types from hints, values from <code>Field</code> constraints and validators.</p></div></details>
 <h2 id="pydantic-bank-chapter-2-your-first-model">Chapter 2: Your first model</h2>
-<details class="qa"><summary>BaseModel versus dataclass?</summary><div class="ans"><p>Both give a clean constructor from hints. Only <code>BaseModel</code> validates and coerces, and it raises <code>ValidationError</code> before the object is created.</p></div></details>
-<details class="qa"><summary>What is lax mode?</summary><div class="ans"><p>Pydantic's default: it converts clearly compatible values (a numeric string to an int) and rejects the rest. Strict mode disables conversion.</p></div></details>
-<h2 id="pydantic-bank-chapter-3-constraints-and-custom-validators">Chapter 3: Constraints and custom validators</h2>
-<details class="qa"><summary>field_validator versus model_validator?</summary><div class="ans"><p>The first checks one field with no view of the others. The second sees the whole model after all field checks passed, so it handles cross-field rules.</p></div></details>
-<details class="qa"><summary>What does mode=&quot;before&quot; do?</summary><div class="ans"><p>It runs on the raw input before type coercion, so you can clean messy input (like <code>"5 years"</code>) before Pydantic tries to read it as an int.</p></div></details>
-<h2 id="pydantic-bank-chapter-4-computed-fields-and-controlling-output">Chapter 4: Computed fields and controlling output</h2>
-<details class="qa"><summary>Why exclude_unset for PATCH?</summary><div class="ans"><p>It serialises only what the caller explicitly provided, so unset defaults do not silently overwrite stored values.</p></div></details>
-<h2 id="pydantic-bank-chapter-5-nested-models">Chapter 5: Nested models</h2>
+<details class="qa"><summary>BaseModel versus dataclass?</summary><div class="ans"><p>Both give a clean constructor from hints. Only <code>BaseModel</code> validates and coerces, raising one <code>ValidationError</code> before the object is created.</p></div></details>
+<details class="qa"><summary>What does the default extra setting do?</summary><div class="ans"><p>It ignores unknown keys. <code>forbid</code> raises; <code>allow</code> stores them.</p></div></details>
+<details class="qa"><summary>model_validate versus model_construct?</summary><div class="ans"><p><code>model_validate</code> checks the data. <code>model_construct</code> skips all checks, so use it only for data you already trust.</p></div></details>
+<h2 id="pydantic-bank-chapter-3-fields-and-constraints">Chapter 3: Fields and constraints</h2>
+<details class="qa"><summary>Field() or Annotated?</summary><div class="ans"><p>Both work the same. Annotated keeps required fields visibly required and is reusable, which is why the docs prefer it. The class prefers plain <code>Field()</code> for readability but wants you to recognise both.</p></div></details>
+<details class="qa"><summary>alias versus validation_alias versus serialization_alias?</summary><div class="ans"><p><code>alias</code> applies to input and output, the other two to only one direction. Output uses aliases only with <code>by_alias=True</code>.</p></div></details>
+<h2 id="pydantic-bank-chapter-4-validators">Chapter 4: Validators</h2>
+<details class="qa"><summary>field_validator versus model_validator?</summary><div class="ans"><p>The first checks one field with no view of the others. The second sees the whole model after every field check has passed, so it handles cross-field rules.</p></div></details>
+<details class="qa"><summary>What does mode=&quot;before&quot; do, and when do you need it?</summary><div class="ans"><p>It runs on the raw input before type coercion, so you can clean messy input before Pydantic tries to read it. Without it, the validator only sees an already-valid value.</p></div></details>
+<details class="qa"><summary>What is the difference between a plain and a wrap validator?</summary><div class="ans"><p>A plain validator replaces Pydantic's check entirely, so invalid input can slip through. A wrap validator calls Pydantic's check through a handler and can catch errors or retry.</p></div></details>
+<h2 id="pydantic-bank-chapter-5-computed-fields-and-serialization">Chapter 5: Computed fields and serialization</h2>
+<details class="qa"><summary>Why exclude_unset for PATCH?</summary><div class="ans"><p>It serialises only what the caller explicitly provided, so unset defaults do not overwrite stored values.</p></div></details>
+<details class="qa"><summary>model_dump versus model_dump(mode=&quot;json&quot;)?</summary><div class="ans"><p>The first keeps Python types; the second converts to JSON-compatible ones (tuples to lists, and so on).</p></div></details>
+<h2 id="pydantic-bank-chapter-6-nested-models">Chapter 6: Nested models</h2>
 <details class="qa"><summary>How does validation work for nested data?</summary><div class="ans"><p>Pydantic builds the inner model from the inner dict and validates it with its own rules; errors report the full path, such as <code>address.pin_code</code>.</p></div></details>
-<h2 id="pydantic-bank-chapter-6-settings-and-secrets">Chapter 6: Settings and secrets</h2>
+<h2 id="pydantic-bank-chapter-7-strict-mode-and-json-schema">Chapter 7: Strict mode and JSON Schema</h2>
+<details class="qa"><summary>How do you turn off coercion?</summary><div class="ans"><p>Strict mode: per call (<code>strict=True</code>), per field, with a <code>Strict*</code> type, or for the whole model through <code>ConfigDict(strict=True)</code>.</p></div></details>
+<details class="qa"><summary>What does model_json_schema give you?</summary><div class="ans"><p>A dict describing the model's fields, types and constraints in JSON Schema, which APIs use for documentation and LLM providers use to constrain output.</p></div></details>
+<h2 id="pydantic-bank-chapter-8-settings-and-secrets">Chapter 8: Settings and secrets</h2>
 <details class="qa"><summary>Why BaseSettings over os.getenv?</summary><div class="ans"><p>It gives typed, validated configuration with defaults and constraints, reads <code>.env</code>, and masks secrets, instead of hand-written string parsing.</p></div></details>
-<h2 id="pydantic-bank-chapter-7-pydantic-with-fastapi">Chapter 7: Pydantic with FastAPI</h2>
+<details class="qa"><summary>Which wins: an environment variable or the .env file?</summary><div class="ans"><p>The real environment variable. A tuple of <code>.env</code> files loads in order, with later files overriding earlier ones.</p></div></details>
+<h2 id="pydantic-bank-chapter-9-reading-validation-errors">Chapter 9: Reading validation errors</h2>
+<details class="qa"><summary>What is in a Pydantic error entry?</summary><div class="ans"><p><code>type</code>, <code>loc</code>, <code>msg</code>, <code>input</code>, and optionally <code>ctx</code> and <code>url</code>. <code>loc</code> is a tuple that includes nested names and list indexes.</p></div></details>
+<h2 id="pydantic-bank-chapter-10-pydantic-with-fastapi">Chapter 10: Pydantic with FastAPI</h2>
 <details class="qa"><summary>What does response_model do?</summary><div class="ans"><p>It validates and filters the returned object to the declared shape, so extra fields cannot leak, and it documents the response in <code>/docs</code>.</p></div></details>
-<h2 id="pydantic-bank-chapter-8-validating-what-an-llm-gives-you-back">Chapter 8: Validating what an LLM gives you back</h2>
-<details class="qa"><summary>How do you get reliable JSON from an LLM?</summary><div class="ans"><p>Pass a Pydantic model to the provider's structured-output call, constrain values with <code>Literal</code>, validate the result, and retry with the error fed back if it fails.</p></div></details>
+<h2 id="pydantic-bank-chapter-11-validating-what-an-llm-gives-you-back">Chapter 11: Validating what an LLM gives you back</h2>
+<details class="qa"><summary>How do you get reliable JSON from an LLM?</summary><div class="ans"><p>Pass a Pydantic model to the provider's structured-output call (or its JSON Schema as a forced tool), constrain values with <code>Literal</code>, validate the result, and retry with the error fed back if it fails.</p></div></details>
 <details class="qa"><summary>Does validation make an answer correct?</summary><div class="ans"><p>No. It confirms the shape and constraints only. A confidently wrong value in the right shape still passes.</p></div></details>
-<h2 id="pydantic-bank-chapter-9-where-pydantic-goes-next-and-the-final">Chapter 9: Where Pydantic goes next, and the final project</h2>
-<details class="qa"><summary>How would you design a reliable LLM-backed API endpoint?</summary><div class="ans"><p>Validate and clean the request with a model, ask the provider for a structured response in a <code>Literal</code>-constrained schema, derive computed values in code, add a model validator for impossible combinations, and cap retries.</p></div></details><button class="readbtn" data-id="pydantic-bank">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p9"><small>Previous</small><b>Where Pydantic goes next, and the final project</b></button></div></article>
+<h2 id="pydantic-bank-chapter-12-where-pydantic-goes-next-and-the-fina">Chapter 12: Where Pydantic goes next, and the final project</h2>
+<details class="qa"><summary>How would you design a reliable LLM-backed API endpoint?</summary><div class="ans"><p>Validate and clean the request with a model, ask the provider for a structured response in a <code>Literal</code>-constrained schema, derive computed values in code, add a model validator for impossible combinations, and cap retries.</p></div></details><button class="readbtn" data-id="pydantic-bank">Mark this chapter as read</button><div class="pager"><button data-id="pydantic-p12"><small>Previous</small><b>Where Pydantic goes next, and the final project</b></button></div></article>
 <article id="ch-agentic-ai-home" hidden><p class="crumb">Welcome</p><h1>Agentic AI with LangChain</h1><p class="lead">A chapter-by-chapter reader built from the live class code, notebooks, PDFs and class summaries, written so you can learn each topic and defend it in an interview.</p><div class="meta"><span class="chip">Book 3 of the library</span><span class="chip plain">Draft for review</span></div><details class="jump"><summary>Jump to a section</summary><nav class="jl"></nav></details><h2 id="agentic-ai-home-how-to-read-this-book">How to read this book</h2>
 <aside class="callout key"><div class="ct">Key idea<em>Read the earlier books first</em></div><p>This is book 3 of the library. It assumes <strong>Python and Agent Foundations</strong> (the agent loop, tokens, setup) and <strong>Pydantic</strong> (used for structured output in chapter 4). Read those first, or skim them if you already know the basics.</p></aside>
 <aside class="callout key"><div class="ct">Key idea<em>Read in order</em></div><p>Each chapter builds on the one before it. Chapter 1 explains <code>create_agent()</code>, Chapter 6 adds memory and middleware, and Chapter 10 adds human approval. If you skip ahead, the later chapters will assume terms you have not seen.</p></aside>
@@ -13603,7 +14186,7 @@ def rerank(question, k=3):
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script>
-window.__BOOKS__ = [{"id": "library", "title": "The Agentic AI library", "short": "Library (start here)", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}]}, {"id": "foundations", "title": "Python and Agent Foundations", "short": "1. Foundations", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "f1", "num": "1", "title": "Set up your machine and refresh Python", "part": "Foundations", "ready": true}, {"id": "f2", "num": "2", "title": "LLM basics in plain words", "part": "Foundations", "ready": true}, {"id": "f3", "num": "3", "title": "What an agent is", "part": "Foundations", "ready": true}, {"id": "f4", "num": "4", "title": "Agents in plain Python", "part": "Foundations", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}]}, {"id": "pydantic", "title": "Pydantic", "short": "2. Pydantic", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "p1", "num": "1", "title": "Why validation exists, and type hints", "part": "Pydantic", "ready": true}, {"id": "p2", "num": "2", "title": "Your first model", "part": "Pydantic", "ready": true}, {"id": "p3", "num": "3", "title": "Constraints and custom validators", "part": "Pydantic", "ready": true}, {"id": "p4", "num": "4", "title": "Computed fields and controlling output", "part": "Pydantic", "ready": true}, {"id": "p5", "num": "5", "title": "Nested models", "part": "Pydantic", "ready": true}, {"id": "p6", "num": "6", "title": "Settings and secrets", "part": "Pydantic", "ready": true}, {"id": "p7", "num": "7", "title": "Pydantic with FastAPI", "part": "Pydantic", "ready": true}, {"id": "p8", "num": "8", "title": "Validating what an LLM gives you back", "part": "Pydantic", "ready": true}, {"id": "p9", "num": "9", "title": "Where Pydantic goes next, and the final project", "part": "Pydantic", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}]}, {"id": "agentic-ai", "title": "Agentic AI with LangChain", "short": "3. Agentic AI (LangChain)", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "ch1", "num": "1", "title": "Introduction to LangChain", "part": "Part A  LangChain core", "ready": true}, {"id": "ch2", "num": "2", "title": "The LangChain family and harness engineering", "part": "Part A  LangChain core", "ready": true}, {"id": "ch3", "num": "3", "title": "Inside the model", "part": "Part A  LangChain core", "ready": true}, {"id": "ch4", "num": "4", "title": "Structured output", "part": "Part A  LangChain core", "ready": true}, {"id": "ch5", "num": "5", "title": "Tools deep dive", "part": "Part A  LangChain core", "ready": true}, {"id": "ch6", "num": "6", "title": "Agents, memory and middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch7", "num": "7", "title": "Mastering middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch8", "num": "8", "title": "Guardrails, todo lists, resilience", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch9", "num": "9", "title": "Shell tools and custom middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch10", "num": "10", "title": "Runtime and human-in-the-loop", "part": "Part C  Runtime", "ready": true}, {"id": "ch10a", "num": "10A", "title": "Streaming agent output (from the docs)", "part": "Part C  Runtime", "ready": true}, {"id": "ch11", "num": "11", "title": "Why MCP exists", "part": "Part D  MCP", "ready": true}, {"id": "ch12", "num": "12", "title": "MCP primitives, lifecycle, JSON-RPC", "part": "Part D  MCP", "ready": true}, {"id": "ch13", "num": "13", "title": "Capability negotiation and operation", "part": "Part D  MCP", "ready": true}, {"id": "ch14", "num": "14", "title": "Shutdown, transports, first server", "part": "Part D  MCP", "ready": true}, {"id": "ch15", "num": "15", "title": "The Time Tracker project", "part": "Part D  MCP", "ready": true}, {"id": "ch16", "num": "16", "title": "Deploying servers, building a client", "part": "Part D  MCP", "ready": true}, {"id": "ch17", "num": "17", "title": "Legacy vs modern MCP", "part": "Part D  MCP", "ready": true}, {"id": "ch18", "num": "18", "title": "MCP inside LangChain", "part": "Part E  Advanced", "ready": true}, {"id": "ch19", "num": "19", "title": "Multi-agent patterns", "part": "Part E  Advanced", "ready": true}, {"id": "ch20", "num": "20", "title": "Meridian AI project tour", "part": "Part E  Advanced", "ready": true}, {"id": "glossary", "num": "", "title": "Glossary", "part": "Back matter", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}, {"id": "cheat", "num": "", "title": "Cheat sheet", "part": "Back matter", "ready": true}]}, {"id": "rag", "title": "RAG", "short": "4. RAG", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "r1", "num": "1", "title": "RAG explained: why, and what the parts are", "part": "RAG", "ready": true}, {"id": "r2", "num": "2", "title": "Embeddings, storing meaning and ingestion", "part": "RAG", "ready": true}, {"id": "r3", "num": "3", "title": "Retrieval and the answer chain", "part": "RAG", "ready": true}, {"id": "r4", "num": "4", "title": "Advanced RAG: seven ways to change retrieval", "part": "RAG", "ready": true}, {"id": "r5", "num": "5", "title": "Costs, errors and tests for a RAG app", "part": "RAG", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}]}];
+window.__BOOKS__ = [{"id": "library", "title": "The Agentic AI library", "short": "Library (start here)", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}]}, {"id": "foundations", "title": "Python and Agent Foundations", "short": "1. Foundations", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "f1", "num": "1", "title": "Set up your machine and refresh Python", "part": "Foundations", "ready": true}, {"id": "f2", "num": "2", "title": "LLM basics in plain words", "part": "Foundations", "ready": true}, {"id": "f3", "num": "3", "title": "What an agent is", "part": "Foundations", "ready": true}, {"id": "f4", "num": "4", "title": "Agents in plain Python", "part": "Foundations", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}]}, {"id": "pydantic", "title": "Pydantic", "short": "2. Pydantic", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "p1", "num": "1", "title": "Why validation exists, and type hints", "part": "Pydantic", "ready": true}, {"id": "p2", "num": "2", "title": "Your first model", "part": "Pydantic", "ready": true}, {"id": "p3", "num": "3", "title": "Fields and constraints", "part": "Pydantic", "ready": true}, {"id": "p4", "num": "4", "title": "Validators", "part": "Pydantic", "ready": true}, {"id": "p5", "num": "5", "title": "Computed fields and serialization", "part": "Pydantic", "ready": true}, {"id": "p6", "num": "6", "title": "Nested models", "part": "Pydantic", "ready": true}, {"id": "p7", "num": "7", "title": "Strict mode and JSON Schema", "part": "Pydantic", "ready": true}, {"id": "p8", "num": "8", "title": "Settings and secrets", "part": "Pydantic", "ready": true}, {"id": "p9", "num": "9", "title": "Reading validation errors", "part": "Pydantic", "ready": true}, {"id": "p10", "num": "10", "title": "Pydantic with FastAPI", "part": "Pydantic", "ready": true}, {"id": "p11", "num": "11", "title": "Validating what an LLM gives you back", "part": "Pydantic", "ready": true}, {"id": "p12", "num": "12", "title": "Where Pydantic goes next, and the final project", "part": "Pydantic", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}]}, {"id": "agentic-ai", "title": "Agentic AI with LangChain", "short": "3. Agentic AI (LangChain)", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "ch1", "num": "1", "title": "Introduction to LangChain", "part": "Part A  LangChain core", "ready": true}, {"id": "ch2", "num": "2", "title": "The LangChain family and harness engineering", "part": "Part A  LangChain core", "ready": true}, {"id": "ch3", "num": "3", "title": "Inside the model", "part": "Part A  LangChain core", "ready": true}, {"id": "ch4", "num": "4", "title": "Structured output", "part": "Part A  LangChain core", "ready": true}, {"id": "ch5", "num": "5", "title": "Tools deep dive", "part": "Part A  LangChain core", "ready": true}, {"id": "ch6", "num": "6", "title": "Agents, memory and middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch7", "num": "7", "title": "Mastering middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch8", "num": "8", "title": "Guardrails, todo lists, resilience", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch9", "num": "9", "title": "Shell tools and custom middleware", "part": "Part B  Agents and middleware", "ready": true}, {"id": "ch10", "num": "10", "title": "Runtime and human-in-the-loop", "part": "Part C  Runtime", "ready": true}, {"id": "ch10a", "num": "10A", "title": "Streaming agent output (from the docs)", "part": "Part C  Runtime", "ready": true}, {"id": "ch11", "num": "11", "title": "Why MCP exists", "part": "Part D  MCP", "ready": true}, {"id": "ch12", "num": "12", "title": "MCP primitives, lifecycle, JSON-RPC", "part": "Part D  MCP", "ready": true}, {"id": "ch13", "num": "13", "title": "Capability negotiation and operation", "part": "Part D  MCP", "ready": true}, {"id": "ch14", "num": "14", "title": "Shutdown, transports, first server", "part": "Part D  MCP", "ready": true}, {"id": "ch15", "num": "15", "title": "The Time Tracker project", "part": "Part D  MCP", "ready": true}, {"id": "ch16", "num": "16", "title": "Deploying servers, building a client", "part": "Part D  MCP", "ready": true}, {"id": "ch17", "num": "17", "title": "Legacy vs modern MCP", "part": "Part D  MCP", "ready": true}, {"id": "ch18", "num": "18", "title": "MCP inside LangChain", "part": "Part E  Advanced", "ready": true}, {"id": "ch19", "num": "19", "title": "Multi-agent patterns", "part": "Part E  Advanced", "ready": true}, {"id": "ch20", "num": "20", "title": "Meridian AI project tour", "part": "Part E  Advanced", "ready": true}, {"id": "glossary", "num": "", "title": "Glossary", "part": "Back matter", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}, {"id": "cheat", "num": "", "title": "Cheat sheet", "part": "Back matter", "ready": true}]}, {"id": "rag", "title": "RAG", "short": "4. RAG", "chapters": [{"id": "home", "num": "", "title": "Start here", "part": "Welcome", "ready": true}, {"id": "quiz", "num": "", "title": "Quiz me", "part": "Welcome", "ready": true}, {"id": "r1", "num": "1", "title": "RAG explained: why, and what the parts are", "part": "RAG", "ready": true}, {"id": "r2", "num": "2", "title": "Embeddings, storing meaning and ingestion", "part": "RAG", "ready": true}, {"id": "r3", "num": "3", "title": "Retrieval and the answer chain", "part": "RAG", "ready": true}, {"id": "r4", "num": "4", "title": "Advanced RAG: seven ways to change retrieval", "part": "RAG", "ready": true}, {"id": "r5", "num": "5", "title": "Costs, errors and tests for a RAG app", "part": "RAG", "ready": true}, {"id": "bank", "num": "", "title": "Interview question bank", "part": "Back matter", "ready": true}]}];
 /* Interactive widgets for the reader. A chapter writes ":::widget name" and this file builds it.
    Each widget is plain DOM, no libraries, and works with the page's colour variables. */
 (function () {

@@ -13,7 +13,7 @@ A file is **cited** when a chapter links to it under Sources. Citing is not the 
 
 ## Not read yet (cited ones first) (14)
 
-- `classes_transcription_summary/03 - 4 Jul - Pydantic Deep Dive.md` (cited in p9)
+- `classes_transcription_summary/03 - 4 Jul - Pydantic Deep Dive.md` (cited in p1, p12, p2, p3, p4, p6)
 - `.github/workflows/path-audit.yml`
 - `Weekend 00 - 20-21 Jun/README.md`
 - `Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/.env.example`
@@ -30,7 +30,7 @@ A file is **cited** when a chapter links to it under Sources. Citing is not the 
 
 ## Skimmed (279)
 
-- `Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/8_Pydantic/Pydantic_From_Scratch.ipynb` (cited in p9)
+- `Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/8_Pydantic/Pydantic_From_Scratch.ipynb` (cited in p1, p12, p2, p3, p4, p5, p6)
 - `Complete MCP/Commands.txt`
 - `Complete MCP/MCP-Precoded/README.md`
 - `Complete MCP/MCP-Precoded/recipebox_fastmcp.py`

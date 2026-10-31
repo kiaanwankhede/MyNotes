@@ -29,51 +29,72 @@
   {
    "id": "p3",
    "num": "3",
-   "title": "Constraints and custom validators",
+   "title": "Fields and constraints",
    "part": "Pydantic",
    "file": "p3.md"
   },
   {
    "id": "p4",
    "num": "4",
-   "title": "Computed fields and controlling output",
+   "title": "Validators",
    "part": "Pydantic",
    "file": "p4.md"
   },
   {
    "id": "p5",
    "num": "5",
-   "title": "Nested models",
+   "title": "Computed fields and serialization",
    "part": "Pydantic",
    "file": "p5.md"
   },
   {
    "id": "p6",
    "num": "6",
-   "title": "Settings and secrets",
+   "title": "Nested models",
    "part": "Pydantic",
    "file": "p6.md"
   },
   {
    "id": "p7",
    "num": "7",
-   "title": "Pydantic with FastAPI",
+   "title": "Strict mode and JSON Schema",
    "part": "Pydantic",
    "file": "p7.md"
   },
   {
    "id": "p8",
    "num": "8",
-   "title": "Validating what an LLM gives you back",
+   "title": "Settings and secrets",
    "part": "Pydantic",
    "file": "p8.md"
   },
   {
    "id": "p9",
    "num": "9",
-   "title": "Where Pydantic goes next, and the final project",
+   "title": "Reading validation errors",
    "part": "Pydantic",
    "file": "p9.md"
+  },
+  {
+   "id": "p10",
+   "num": "10",
+   "title": "Pydantic with FastAPI",
+   "part": "Pydantic",
+   "file": "p10.md"
+  },
+  {
+   "id": "p11",
+   "num": "11",
+   "title": "Validating what an LLM gives you back",
+   "part": "Pydantic",
+   "file": "p11.md"
+  },
+  {
+   "id": "p12",
+   "num": "12",
+   "title": "Where Pydantic goes next, and the final project",
+   "part": "Pydantic",
+   "file": "p12.md"
   },
   {
    "id": "bank",

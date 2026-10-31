@@ -1,6 +1,6 @@
 # Pydantic
 > lead: How to make Python check data at the door: models, constraints, validators, settings, FastAPI, and validating what an LLM sends back, ending with a small ticket-triage project.
-meta: Book 2 of the library | 9 chapters | Read after Foundations
+meta: Book 2 of the library | 12 chapters | Read after Foundations
 
 ## Why a whole book on one library
 
@@ -9,17 +9,24 @@ Pydantic is the validation layer under LangChain's structured output, tool schem
 | Chapter | Topic |
 | --- | --- |
 | 1 | Why validation exists, and type hints |
-| 2 | Your first model, coercion, dumping |
-| 3 | Constraints and custom validators |
-| 4 | Computed fields and controlling output |
-| 5 | Nested models |
-| 6 | Settings and secrets |
-| 7 | Pydantic with FastAPI |
-| 8 | Validating LLM output (the AI bridge) |
-| 9 | Where Pydantic goes next, and the final project |
+| 2 | Your first model |
+| 3 | Fields and constraints |
+| 4 | Validators |
+| 5 | Computed fields and serialization |
+| 6 | Nested models |
+| 7 | Strict mode and JSON Schema |
+| 8 | Settings and secrets |
+| 9 | Reading validation errors |
+| 10 | Pydantic with FastAPI |
+| 11 | Validating what an LLM gives you back |
+| 12 | Where Pydantic goes next, and the final project |
 
-:::key Source
-Built from the instructor's Pydantic reference site and the class 03 and 04 material in the course repo (`8_Pydantic/`). The code samples here are my own short versions of the ideas, not copies of the site.
+:::key Sources
+Each chapter names its sources at the end. In short, the book is built from: the official Pydantic documentation (models, fields, validators, serialization, strict mode, types, JSON schema, settings, error handling, and the get-started page), the class 03 write-up, the `Pydantic_From_Scratch` notebook in the course repo, Pydantic's article on LLMs, and the instructor's Pydantic site. The analogies come from the instructor's site, the repo notes flag problems in the notebook, and code samples are short examples of my own.
+:::
+
+:::beyond Not read
+The settings docs page was read up to about 100,000 of its roughly 103,900 characters. The docs pages on unions, dataclasses, type adapters, performance and the Pydantic AI framework itself were not read. The FastAPI chapter comes from the instructor's site only.
 :::
 
 Try the idea straight away. Edit the JSON, break a rule, and read the error:
