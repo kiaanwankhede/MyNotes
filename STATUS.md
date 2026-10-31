@@ -27,7 +27,7 @@ Updated 2026-10-31 by `build/status.py`. This file is regenerated after every pr
 | LangChain docs | Pages in scope | 41 of 41 | 100% | 23 read earlier plus the 18 that were blocked, all read in full on 31 Oct 2026 through the desktop browser. Out of scope by your request: frontend pages, Agent Chat UI, Deep Agents from scratch, four multi-agent tutorials. |
 | Pydantic docs | Pages read | 12 of 19 | 63% | Read: get started, models, fields, validators, serialization, strict mode, types, JSON schema, settings (about 96%), error handling, the LLM article, the Pydantic AI example. Not read: unions, alias, configuration, dataclasses, TypeAdapter, performance, FastAPI docs. |
 | Instructor sites | Sites read in full | 13 of 15 | 87% | Full: 3 MCP sites, Pydantic, all 7 series guides, AI terms, Python agents. Partial: the context-window site (widgets only) and the Meridian slides (see below). |
-| Meridian slides | Modules read in full | 5 of 7 | 71% | Modules 1, 2, 3, 4 and 5 read in full (about 350 slides). Modules 6 and 7 (the service and screen, Docker and Google Cloud) are still digests from the "In short" lines. Remaining about 240K characters. |
+| Meridian slides | Modules read in full | 6 of 7 | 86% | Modules 1 to 6 read in full (about 440 slides). Only module 7 (Docker and Google Cloud, 63 slides, about 158K characters, mostly commands) is still a digest from the "In short" lines. |
 | Craft page | Index pages read | 14 of 14 | 100% | All index pages read. |
 | Craft page | Attachments opened | 20 of 40 | 50% | 15 PDFs text-extracted and 5 Colabs opened (counts approximate). Not opened: Excalidraw files, videos, the other Colab links (same notebooks as in the repo), tail of the newsletter prompt, the AI Industry Handbook (not for redistribution). |
 | Meridian learner repo | Repo reviewed | 1 of 1 | 100% | README, code and a frontend digest read; not every file individually. |
@@ -50,6 +50,7 @@ Updated 2026-10-31 by `build/status.py`. This file is regenerated after every pr
 
 ## 5. Change log (newest first)
 
+- 2026-10-31: Meridian module 6 (service and screen) read in full, now 6 of 7 modules
 - 2026-10-31: Meridian module 4 (RAG) read in full, now 5 of 7 modules; RAG chapters expanded
 - 2026-10-31: Meridian module 5 (the audit team) read in full, now 4 of 7 modules
 - 2026-10-31: Meridian modules 1 and 3 read in full (now 3 of 7); STATUS.md and CLAUDE.md added
