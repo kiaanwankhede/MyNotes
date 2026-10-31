@@ -53,8 +53,8 @@ The course repo describes the same journey in five phases, and these notes follo
 | Phase | Content | Where in these notes |
 |---|---|---|
 | 0 Foundations | Python, Pydantic, AI vocabulary | Python and Pydantic books, LLM chapter 3 |
-| 1 Agents in pure Python | Brain, memory, tools, the agentic loop | Python chapter 3, LLM chapter 2 (not written yet) |
-| 2 LangChain in depth | Models, structured output, tools, agents, middleware | Langchain book (not written yet) |
+| 1 Agents in pure Python | Brain, memory, tools, the agentic loop | Python chapter 3, LLM chapter 2 |
+| 2 LangChain in depth | Models, structured output, tools, agents, middleware | Langchain book (chapters 1 to 5 written; 6 to 12 not yet) |
 | 3 LangGraph and beyond | State, checkpointing, MCP, RAG | MCP book for the MCP part (not written yet). No book is planned yet for LangGraph or RAG |
 | 4 Production capstones | Deployed on cloud and VPS | Projects book (not written yet) |
 

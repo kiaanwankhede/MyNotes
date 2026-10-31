@@ -24,7 +24,7 @@ A model is trained on data up to a fixed date and knows nothing after it. Every 
 
 ### The raw response and `max_tokens`
 
-The class created an OpenAI key, called `client.chat.completions.create(model=..., max_tokens=200, messages=[...])` and printed the whole response object. Its shape: an `id`, the `model`, `choices[0].message.content`, and a `usage` block with `prompt_tokens`, `completion_tokens` and `total_tokens`. The counts matched the provider dashboard's usage log. Groq (the free provider, not Elon Musk's Grok) uses the same OpenAI-compatible code with a different `base_url` and key. The takeaway in the mentor's words: every AI model is, for you, just an API call. Providers differ slightly in the response shape, so check each one.
+The class created an OpenAI key, called `client.chat.completions.create(model=..., max_tokens=200, messages=[...])` and printed the whole response object. Its shape: an `id`, the `model`, `choices[0].message.content`, and a `usage` block with `prompt_tokens`, `completion_tokens` and `total_tokens`. The counts matched the provider dashboard's usage log. Groq (the free provider, not Elon Musk's Grok) uses the same OpenAI-compatible code with a different `base_url` and key. The whiteboard sorts providers into closed-source models you pay for (OpenAI, Claude, which ask you to load credits in dollars) and providers like Groq and OpenRouter, which give some credit for free, host open-source models, and are comparatively cheaper. The takeaway in the mentor's words: every AI model is, for you, just an API call. Providers differ slightly in the response shape, so check each one.
 
 `max_tokens` caps the **output** length. It also works as a safety net against runaway cost if a key ever leaks. The provider calls are in [Python, Chapter 3](../python/03-anatomy-of-an-agent.md), section 3.4.
 
@@ -97,6 +97,8 @@ The file's comment block keeps real replies from class. A casual "Hi How are you
 **Several calls in one reply.** Asked "What is the capital of Japan?", the model returned three `get_capital` calls at once, with `country` set to `Japan`, `Tokyo` and `Delhi`. A model can ask for more than one call in a single reply, which is why the loop below handles every call in the list. This particular answer is also messy, because two of the three are wrong.
 
 The file needs an OpenAI-compatible provider (Groq, OpenRouter or OpenAI). Anthropic's tool-calling response has a different shape, which the file says is covered in a later module.
+
+**Tool names should be unambiguous.** The class 05 whiteboard in the Weekend 03 folder draws a `drop_user` tool that means "drop a user from a table", with a joke that the model might think it has to send a robot to take a user to the top of a building and drop it. The slide has no written explanation, so this is my reading: a tool's name and description must say exactly what it does, because the model decides from them. The same board shows the decision as a fork: a normal question gets a normal reply, and a question that needs a tool the model has gets a call to that tool with its parameters.
 
 **Source quirk.** In the repo file, `get_weather_schema` is nested wrongly: the `parameters` block sits beside `function` instead of inside it. I loaded it and the keys are `type`, `function` and `parameters`, with only `name` and `description` inside `function`. The model would not receive the parameters. The file's later `get_complete_weather_schema` is the correct one and matches the version above.
 
@@ -293,6 +295,7 @@ Unlike the class 02-03 files, these **require a real API key**. The folder's REA
 
 - Live-Class-2026, `classes_summary/05 - 11 Jul - The Agentic Loop.md`
 - Live-Class-2026, `classes_transcription_summary/05 - 11 Jul - The Agentic Loop (Pure Python).md`
+- Live-Class-2026, whiteboard `Weekend 03 - 11-12 Jul/06 - .../Agentic-Python.pdf` (class 05 board)
 - Live-Class-2026, code folder `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - .../Project 0/` (files `_05` to `_07`, `README.md`, `output`) and its overview `README.md`
 
 Previous: [Chapter 1](01-course-roadmap-and-prerequisites.md) · Next: [Chapter 3, Inside the model](03-inside-the-model.md)

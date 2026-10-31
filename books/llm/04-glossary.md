@@ -34,6 +34,8 @@ An alphabetical list of the terms that the books already explain. Each entry giv
 
 **Decorator.** A function that wraps another function to add behaviour around it without changing it. The `@tool` pattern is built on it. See [Python, Chapter 2](../python/02-python-refresher.md).
 
+**Deep Agents.** The batteries-included layer built on LangChain agents, with context compression, a virtual file system and sub-agents, at the cost of the least control. See [Langchain, Chapter 1](../langchain/01-introduction-to-langchain.md) and [Chapter 2](../langchain/02-langchain-family-and-harness-engineering.md).
+
 ## E
 
 **EmailStr, HttpUrl, SecretStr.** Pydantic's special types. `EmailStr` checks an email, `HttpUrl` checks a URL, and `SecretStr` hides a secret such as an API key when printed. See [Pydantic, Chapter 2](../pydantic/02-field-and-special-types.md).
@@ -56,11 +58,25 @@ An alphabetical list of the terms that the books already explain. Each entry giv
 
 **Groq.** A fast, free inference provider (not Elon Musk's "Grok") that hosts mostly open-source models behind an OpenAI-compatible API. Point the OpenAI client at its `base_url` with its key and the same code works. See [Python, Chapter 3](../python/03-anatomy-of-an-agent.md).
 
+## H
+
+**Harness.** Everything wrapped around a raw model (system prompt, tools, memory, middleware, guardrails) that turns it into an agent. "Harness engineering" is how well you do that wrapping. See [Langchain, Chapter 2](../langchain/02-langchain-family-and-harness-engineering.md).
+
 ## K
 
 **Knowledge cutoff.** The date a model's training data ends. It cannot know anything later, which is one reason agents need tools such as web search. See [LLM, Chapter 2](02-the-agentic-loop-in-pure-python.md).
 
 ## L
+
+**LangChain.** The middle layer of the family: a customisable harness (`create_agent`) built on LangGraph. See [Langchain, Chapter 1](../langchain/01-introduction-to-langchain.md).
+
+**LangChain Classic.** LangChain before v1.0 (October 2025). Most online tutorials still teach it. It still runs but is legacy. See [Langchain, Chapter 2](../langchain/02-langchain-family-and-harness-engineering.md).
+
+**LangFuse.** An independent open-source observability platform. Despite the name it is not part of the LangChain family. See [Langchain, Chapter 2](../langchain/02-langchain-family-and-harness-engineering.md).
+
+**LangGraph.** The low-level foundation the family is built on: total control of every step and the steepest learning curve. See [Langchain, Chapter 2](../langchain/02-langchain-family-and-harness-engineering.md).
+
+**LangSmith.** An observability and evaluation platform that records a trace of every model call, tool call and decision, like a flight's black box. It is not for building agents. See [Langchain, Chapter 2](../langchain/02-langchain-family-and-harness-engineering.md).
 
 **LLM.** A large language model. It predicts the next token from patterns in text. See [Inside the model](03-inside-the-model.md).
 
@@ -83,6 +99,10 @@ An alphabetical list of the terms that the books already explain. Each entry giv
 **Pydantic.** A library that checks both the type and the value of data at run time and raises `ValidationError` on bad input. See [Pydantic, Chapter 1](../pydantic/01-why-pydantic-and-basemodel.md).
 
 **pyproject.toml.** The project file that records the Python version and the dependencies, so another machine can rebuild the same environment. See [Python, Chapter 1](../python/01-setup-and-api-basics.md).
+
+## R
+
+**ReAct.** "Reason plus Act", the first general-purpose agent pattern, from a paper right after ChatGPT appeared. The model reasons and acts instead of following a fixed chain. See [Langchain, Chapter 2](../langchain/02-langchain-family-and-harness-engineering.md).
 
 ## S
 
@@ -112,7 +132,7 @@ An alphabetical list of the terms that the books already explain. Each entry giv
 
 ## Terms waiting for their books
 
-The source glossaries also define over 100 terms from the LangChain and MCP classes, for example middleware, hooks, checkpointing, human-in-the-loop, runtime, MCP primitives, capability negotiation and transports. They are not defined here yet, because those chapters are not written. Other terms from classes already covered but not yet explained in a book include vibe coding and harness.
+The source glossaries also define about 100 terms from the LangChain and MCP classes, for example middleware, hooks, checkpointing, human-in-the-loop, runtime, MCP primitives, capability negotiation and transports. They are not defined here yet, because those chapters are not written. Vibe coding is also not explained in a book yet.
 
 ## Sources and further reading
 

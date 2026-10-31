@@ -2,11 +2,46 @@
 
 Everyone can "use a model" after a five-minute tutorial. This chapter is about the knobs LangChain puts around a model: the parameters you set, the messages you send, what comes back, and the three ways to call it. The mentor's point in class 08 was that real work needs all of these, and that most quickstarts stop at `create_agent()`.
 
-Read [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md) first. It builds by hand the loop that LangChain later wraps. This chapter assumes the LangChain family and `init_chat_model` from classes 06 and 07, which are not written up in this book yet.
+Read [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md) first. It builds by hand the loop that LangChain later wraps. This chapter assumes the LangChain family and `create_agent` from [Chapter 1](01-introduction-to-langchain.md) and [Chapter 2](02-langchain-family-and-harness-engineering.md).
 
-*Status: only the class 08 material is written. Class 07's first model calls will be added to this chapter when it is processed.*
+*Status: written from classes 07 and 08.*
 
-## 3.1 Where your API key lives
+## 3.1 The first model call
+
+`init_chat_model` is LangChain's universal entry point to a model. Change the provider string and the rest of the code stays the same:
+
+```python
+from langchain.chat_models import init_chat_model
+
+model = init_chat_model("openai:gpt-5")
+response = model.invoke("Tell me what LangChain is")
+print(response.content)
+```
+
+Without LangChain you would write different code to reach OpenAI, Claude, Groq and OpenRouter. LangChain puts them behind one interface. The class showed that CrewAI's documentation uses the same "give me any LLM" pattern, which is why learning it deeply here pays off across later frameworks.
+
+**Models differ in capabilities.** Tool calling, structured output, multimodality (text and images) and reasoning vary from model to model. In class the mentor had ChatGPT summarise one model's capability sheet (tool calling yes, structured output yes, multimodal yes, reasoning present but weaker than the flagships). Look up the sheet for the model you plan to use.
+
+**Messages steer behaviour.** A system message and a human message go in as a list:
+
+```python
+from langchain_core.messages import SystemMessage, HumanMessage
+
+messages = [
+    SystemMessage(content="You are a pirate. Answer everything in pirate language."),
+    HumanMessage(content="What is the capital of France?"),
+]
+response = model.invoke(messages)
+print(response.content)
+```
+
+Running it gave a pirate-flavoured answer, a concrete proof that the system message steers the model. This matches the roles in [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md). Note that the chat model does nothing to manage chat history for you. That is still your job.
+
+Class 07 stopped here and said the next class would cover temperature, `max_tokens` and the API timeout, which are section 3.3 below.
+
+*Source: Live-Class-2026, `classes_transcription_summary/07`. Not run: LangChain is not installed in my sandbox.*
+
+## 3.2 Where your API key lives
 
 The class notebook is blunt about this. If `.env` is not listed in `.gitignore`, the first time you commit and push, your real API key goes to GitHub with the code. Automated scanners that look for leaked keys can find and use it, often within minutes.
 
@@ -21,7 +56,7 @@ If this raises an error, either `.env` is not in the folder you are running from
 
 *Source: Live-Class-2026, `classes_summary/08`.*
 
-## 3.2 Model parameters
+## 3.3 Model parameters
 
 `init_chat_model` takes the model name and a few parameters:
 
@@ -47,7 +82,7 @@ A local model through Ollama has no API cost, but it needs real RAM (ideally a G
 
 *Source: `classes_summary/08`, `classes_transcription_summary/08`. Not run: LangChain is not installed in my sandbox and the calls need keys.*
 
-## 3.3 Messages
+## 3.4 Messages
 
 Three message types go to the model together:
 
@@ -79,7 +114,7 @@ response = model.invoke(messages)
 
 *Source: `classes_summary/08`, `classes_transcription_summary/08`.*
 
-## 3.4 What comes back: the full `AIMessage`
+## 3.5 What comes back: the full `AIMessage`
 
 The notebook says most tutorials skip this. A model call returns far more than the text:
 
@@ -103,7 +138,7 @@ You do not need a separate token-counting library, because the billed numbers ar
 
 *Source: `classes_summary/08`.*
 
-## 3.5 Streaming: it feels fast
+## 3.6 Streaming: it feels fast
 
 In class, a request for about 2,000 words took roughly 5 to 7 seconds to generate in ChatGPT, but the text appeared piece by piece. That progressive appearance is streaming. It does not make the answer arrive sooner, but the wait feels shorter. For a product (the examples were Amazon or Swiggy) nobody wants a screen frozen for seven seconds.
 
@@ -125,7 +160,7 @@ The notebook's point: `.invoke()` was never called, yet the message built by sum
 
 *Source: `classes_summary/08`, `classes_transcription_summary/08`.*
 
-## 3.6 Batching
+## 3.7 Batching
 
 Imagine a company that receives a constant stream of questions. Asking one, waiting, asking the next is slow. `.batch()` sends several questions together:
 
@@ -151,7 +186,7 @@ for response in responses:
 
 *Source: `classes_summary/08`, `classes_transcription_summary/08`.*
 
-## 3.7 Prompt templates
+## 3.8 Prompt templates
 
 An f-string prompt works for one case. When you need the same structure with different tones or several variables, you rewrite it by hand each time, with no warning on a silent typo. `ChatPromptTemplate` separates the fixed structure from what changes:
 
@@ -174,7 +209,7 @@ The structure is the same on every call and only the two variables change. The t
 
 *Source: `classes_summary/08`, notebook `04_05_prompt_templates_structured_output_student_notes.ipynb` as described there (I did not open the notebook).*
 
-## 3.8 Questions from the class
+## 3.9 Questions from the class
 
 | Question | Answer |
 |---|---|
@@ -203,8 +238,9 @@ Two more answers from the end-of-class session belong with later chapters, so th
 
 ## Sources and further reading
 
+- Live-Class-2026, `classes_transcription_summary/07 - 18 Jul - LangChain Family & Harness Engineering.md` (section 3.1)
 - Live-Class-2026, `classes_summary/08 - 19 Jul - Inside the Model.md`
 - Live-Class-2026, `classes_transcription_summary/08 - 19 Jul - LangChain - Inside the Model.md`
 - Live-Class-2026, notebook `Weekend 04 - 18-19 Jul/07-08 - .../Notebook For Reference/02_03_environment_models_messages_student_notes.ipynb` (named in the summary, not opened)
 
-Previous: [Chapter 2](02-langchain-family-and-harness-engineering.md) (not written yet) · Next: [Chapter 4, Structured output](04-structured-output.md)
+Previous: [Chapter 2](02-langchain-family-and-harness-engineering.md) · Next: [Chapter 4, Structured output](04-structured-output.md)
