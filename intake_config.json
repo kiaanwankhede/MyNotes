@@ -9,8 +9,17 @@
    "chapters": [
     "Setup and API basics",
     "Python refresher",
-    "Pydantic deep dive",
     "Anatomy of an agent"
+   ]
+  },
+  "Pydantic": {
+   "folder": "books/pydantic",
+   "chapters": [
+    "Why Pydantic, and BaseModel",
+    "Field() and special types",
+    "field_validator and model_validator",
+    "Nested models and inheritance",
+    "Validating LLM output"
    ]
   },
   "LLM": {

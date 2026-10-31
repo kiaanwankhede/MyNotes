@@ -190,7 +190,7 @@ I ran the decorator and the calculator guard: `calculator("12 * (4 + 1)")` retur
 
 ## 1.5 Why frameworks come last
 
-The mentor's rule for the whole course: an agent is a concept, so learn it in plain Python first and only then use LangChain. Chapters 1 to 4 of this book are that plain-Python phase.
+The mentor's rule for the whole course: an agent is a concept, so learn it in plain Python first and only then use LangChain. This book, together with the Pydantic book, is that plain-Python phase.
 
 ## Practice
 

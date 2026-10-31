@@ -76,7 +76,7 @@ my_book.read(40)
 
 **Pitfall 1: mutable defaults.** A list, dict or set default must use `field(default_factory=...)`. A plain `tags: list = []` is rejected by dataclasses, and this is a very common beginner trap.
 
-**Pitfall 2: no validation.** A dataclass does not check types at run time. I confirmed this by building `Book(title="x", pages_read="banana")`: it succeeds and stores the string. Chapter 3 fixes this with Pydantic.
+**Pitfall 2: no validation.** A dataclass does not check types at run time. I confirmed this by building `Book(title="x", pages_read="banana")`: it succeeds and stores the string. The Pydantic book fixes this.
 
 *Source: `classes_summary/02`, `classes_transcription_summary/02`.*
 
@@ -136,7 +136,7 @@ create_user("Mayank", 25)   # fine
 create_user(25, "Mayank")   # Python allows this with no error
 ```
 
-The bad value then breaks things further along, in a database, a spreadsheet or an API. Adding `isinstance()` checks by hand works for one function but not for ten (`create_user`, `update_user`, `delete_user` and so on). Pydantic solves this, and that is Chapter 3.
+The bad value then breaks things further along, in a database, a spreadsheet or an API. Adding `isinstance()` checks by hand works for one function but not for ten (`create_user`, `update_user`, `delete_user` and so on). Pydantic solves this, and it has its own book: start at [Why Pydantic, and BaseModel](../pydantic/01-why-pydantic-and-basemodel.md).
 
 *Source: `classes_summary/02`, `classes_transcription_summary/02`.*
 
@@ -153,4 +153,4 @@ The bad value then breaks things further along, in a database, a spreadsheet or 
 - Live-Class-2026, `classes_transcription_summary/02 - 28 June - Python Refresher.md`
 - Live-Class-2026, code folder `Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/`
 
-Previous: [Chapter 1](01-setup-and-api-basics.md) · Next: [Chapter 3, Pydantic deep dive](03-pydantic-deep-dive.md)
+Previous: [Chapter 1](01-setup-and-api-basics.md) · Next: [Chapter 3, Anatomy of an agent](03-anatomy-of-an-agent.md) (Pydantic has its own book: [Why Pydantic](../pydantic/01-why-pydantic-and-basemodel.md))

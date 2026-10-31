@@ -1,8 +1,8 @@
-# Chapter 4: Anatomy of an agent
+# Chapter 3: Anatomy of an agent
 
 This chapter builds the agent idea in plain Python, with no framework. The background on how models, tokens and context windows work is in the LLM book: [Inside the model](../llm/03-inside-the-model.md).
 
-## 4.1 The big idea: LLM calls are stateless
+## 3.1 The big idea: LLM calls are stateless
 
 Every call to an LLM takes an input and gives an output. The model remembers nothing on its own. What looks like memory in a chat window is the **entire history being sent again with every message**. Message 2 really sends message 1, reply 1 and message 2.
 
@@ -14,7 +14,7 @@ Practical consequence: long chats get slow, costly and forgetful, so starting a 
 
 *Source: `classes_summary/04`, `classes_transcription_summary/04`.*
 
-## 4.2 Model, chatbot, agent: three levels in real code
+## 3.2 Model, chatbot, agent: three levels in real code
 
 `_01_ai_model_vs_chatbot_vs_agent.py` draws all three in Python with no API calls, so the structural difference shows without network noise:
 
@@ -62,7 +62,7 @@ class Agent:
 
 *Source: `classes_summary/04`, code file `Project 0/_01_ai_model_vs_chatbot_vs_agent.py`.*
 
-## 4.3 Brain, memory, tools
+## 3.3 Brain, memory, tools
 
 An agent has three parts:
 
@@ -80,7 +80,7 @@ The agent itself is only plumbing that moves data between these three. The mento
 
 *Source: `classes_transcription_summary/04`. The demos in class used a visual workflow tool purely as illustration and are not code in this book.*
 
-## 4.4 Calling a real model: four providers, one shape
+## 3.4 Calling a real model: four providers, one shape
 
 `_02_calling_the_ai_paid_and_free.py` puts the providers side by side. OpenAI and Groq use the same SDK and the same response shape. Groq is free and only needs a different `base_url`. Anthropic's SDK is the one exception:
 
@@ -111,41 +111,17 @@ def ask_groq(question: str) -> str:
     return response.choices[0].message.content
 ```
 
-The course also uses a fourth provider, OpenRouter (see Chapter 3's code folder table and the LLM book). A helper, `ask_ai()`, picks whichever key is set in `.env`, free providers first. That pattern is reused for the rest of the course.
+The course also uses a fourth provider, OpenRouter (see the code folder table in the [Pydantic book](../pydantic/05-validating-llm-output.md) and the LLM book). A helper, `ask_ai()`, picks whichever key is set in `.env`, free providers first. That pattern is reused for the rest of the course.
 
 **Check before you copy:** model names such as `claude-3-5-haiku-20241022` and `gpt-4o-mini` were current when the class ran in July 2026 and may have been retired since. Look up the current names before running.
 
 *Source: `classes_summary/04`, code file `Project 0/_02_calling_the_ai_paid_and_free.py`. Not run here (needs API keys).*
 
-## 4.5 Structuring the reply with Pydantic
+## 3.5 Structuring the reply with Pydantic
 
-`_03_structuring_with_pydantic.py` asks the model for **only** a JSON object and validates it before trusting any field:
+The class asks the model to reply with **only** a JSON object and validates it with a Pydantic model (`WeatherQuestion`, with `city` and `wants_fahrenheit`) before trusting any field. That code and its explanation now live in the Pydantic book: [Validating LLM output](../pydantic/05-validating-llm-output.md). The next section uses its `extract_weather_question` function.
 
-```python
-class WeatherQuestion(BaseModel):
-    city: str
-    wants_fahrenheit: bool = False
-
-def extract_weather_question(user_message: str) -> WeatherQuestion | str:
-    instruction = (
-        "Read the user's message and reply with ONLY a JSON object -- no other text -- "
-        'in this exact shape: {"city": "<city name>", "wants_fahrenheit": <true or false>}. '
-        f"User's message: {user_message!r}"
-    )
-    raw_reply = ask_ai(instruction)
-    try:
-        cleaned = raw_reply.strip().removeprefix("```json").removesuffix("```").strip()
-        data = json.loads(cleaned)
-        return WeatherQuestion(**data)
-    except (json.JSONDecodeError, ValidationError) as exc:
-        return f"Rejected: {exc}"
-```
-
-Why the ` ```json ` fences are stripped: models often wrap JSON in a markdown code fence, and `json.loads` fails on the fence characters.
-
-*Source: `classes_summary/04`, code file `Project 0/_03_structuring_with_pydantic.py`.*
-
-## 4.6 Giving it a tool, by hand
+## 3.6 Giving it a tool, by hand
 
 `_04_giving_it_a_tool.py` connects the extraction above to a real tool, but **you** decide to call the tool, not the model:
 
@@ -163,7 +139,7 @@ The line `return get_weather(extracted.city)` is the "we decided" step. The next
 
 *Source: `classes_summary/04`, code file `Project 0/_04_giving_it_a_tool.py`.*
 
-## 4.7 Questions from the class
+## 3.7 Questions from the class
 
 | Question | Answer |
 |---|---|
@@ -176,7 +152,7 @@ The line `return get_weather(extracted.city)` is the "we decided" step. The next
 
 1. Explain "LLM calls are stateless" in your own words, with an example.
 2. Run `_02` and compare Anthropic's response shape with the others.
-3. Trace `_03` and explain why the code-fence markers are stripped.
+3. Trace `_03` (see the Pydantic book, Validating LLM output) and explain why the code-fence markers are stripped.
 4. Run `_04` and point to the one line that means "we decided".
 
 ## Sources and further reading
@@ -185,4 +161,4 @@ The line `return get_weather(extracted.city)` is the "we decided" step. The next
 - Live-Class-2026, `classes_transcription_summary/04 - 5 Jul - Anatomy of an Agent.md`
 - Live-Class-2026, code folder `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - .../Project 0/`
 
-Previous: [Chapter 3](03-pydantic-deep-dive.md)
+Previous: [Chapter 2](02-python-refresher.md)
