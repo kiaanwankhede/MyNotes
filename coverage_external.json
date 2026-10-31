@@ -17,9 +17,9 @@
   {
    "group": "Instructor sites",
    "name": "Sites read in full",
-   "done": 14,
+   "done": 15,
    "total": 15,
-   "note": "Full: 3 MCP sites, Pydantic, all 7 series guides, AI terms, Python agents, Meridian slides (7 of 7 modules). Partial: the context-window site (widgets only)."
+   "note": "All 15 read in full: 3 MCP sites, Pydantic, all 7 series guides, AI terms, Python agents, the context-window simulator (all 4 tabs and its script), Meridian slides (7 of 7 modules)."
   },
   {
    "group": "Meridian slides",
@@ -71,6 +71,7 @@
   "Only the TimeTrack lab was run; SDK snippets in the Pydantic book were not run"
  ],
  "log": [
+  "2026-10-31: Context-window simulator site read in full (all 4 tabs and script); instructor sites now 15 of 15",
   "2026-10-31: Read the 7 unread Pydantic docs pages (unions, alias, config, dataclasses, TypeAdapter, performance, FastAPI x5); now 19 of 19",
   "2026-10-31: Coverage wording made plainer: Read properly, Looked through, Not opened",
   "2026-10-31: Meridian module 7 (Docker and Google Cloud) read in full, now 7 of 7 modules; costs added to RAG r5",

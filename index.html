@@ -890,6 +890,19 @@ details.diagram-src pre { margin-top: 8px; }
 <h2 id="foundations-f2-play-with-the-context-window">Play with the context window</h2>
 <div class="widget" data-w="ctx-window"><div class="wfb"><p>Interactive demo: a conversation that forgets its oldest messages when the window is full.</p></div></div>
 <div class="widget" data-w="ctx-memory"><div class="wfb"><p>Interactive demo: save a fact, flood the window, and see a hallucinated answer appear.</p></div></div>
+<!-- ctxsite -->
+<h3 id="foundations-f2-what-the-instructor-s-simulator-teaches-site-rea">What the instructor's simulator teaches (site read in full)</h3>
+<aside class="callout note"><div class="ct">Note<em>Source</em></div><p><a href="https://context-with-mayank.netlify.app/" target="_blank" rel="noopener">context-with-mayank.netlify.app</a>: all four tabs and the page's own script, read on 31 Oct 2026.</p></aside>
+<p>The site is one small page with four tabs. Each is a toy model, and the script shows exactly what it simulates.</p>
+<ul>
+<li><strong>Context Window.</strong> It starts with the line "Hi! My name is Rahul and I love football." and a reply. Every message costs tokens, counted as words times 1.3, rounded up (a rough guess, not a real tokenizer). A slider sets the window from 40 to 300 tokens (default 120). The page counts tokens from the newest message backwards; messages that fit are "Still Remembered", older ones become "Forgotten". A bar shows the window filling, one block per 5 tokens.</li>
+<li><strong>Memory Types.</strong> <em>Short-term</em> memory is the current conversation: limited, fast, forgotten when the window is full. <em>Long-term</em> memory is stored preferences or an external memory system that can persist across chats and be retrieved later. In the demo, a short-term item turns grey once its message is pushed out of the window, while long-term items stay green. The long-term list is simply kept outside the chat, which is the point.</li>
+<li><strong>Hallucinations.</strong> Save a fact ("Example: My favorite city is Tokyo"), flood the window with large text, then ask "What was my favorite city?". If the fact is still in the window the AI answers correctly; if not, it gives a made-up answer such as Paris or London. The lesson on the page: hallucinations often happen when important context is forgotten or unavailable.</li>
+<li><strong>Temperature.</strong> A slider from 0 to 2 (default 0.7). Below 0.4: very factual and deterministic. 0.4 to below 1: balanced creativity and accuracy. 1 and above: highly creative with a higher hallucination risk. The page lists low temperature as better for coding and maths, and high temperature as more random and diverse.</li>
+</ul>
+<p><strong>Where it simplifies.</strong> The made-up answers are a random pick from four fixed cities, not a model; the token counter is a word-count estimate; and the temperature tab only changes a sentence, it does not change any output. A real model forgets by truncation or by the app dropping old messages, and real long-term memory needs retrieval (see the RAG book).</p>
+<!-- /ctxsite -->
+
 <!-- guides -->
 <!-- termsplus -->
 <h2 id="foundations-f2-what-the-ai-terms-site-adds-beyond-the-table">What the AI terms site adds beyond the table</h2>
