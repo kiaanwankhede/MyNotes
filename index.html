@@ -38,24 +38,28 @@ header{display:flex;align-items:center;gap:16px;padding:10px 20px;border-bottom:
 .books button[aria-current="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
 .icon-btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 12px;cursor:pointer;font-weight:500}
 .icon-btn:hover{border-color:var(--accent)}
-#menu{display:none}
-.shell{flex:1;min-height:0;display:grid;grid-template-columns:270px minmax(0,1fr) 230px}
-nav.left,aside.right{overflow-y:auto;padding:22px 16px}
-nav.left{border-right:1px solid var(--line);background:var(--surface)}
+#chbtn{display:flex;align-items:center;gap:8px;max-width:340px;min-width:0}
+#chbtn .lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;color:var(--accent)}
+#chbtn .car{transition:transform .15s;flex:none}
+#chbtn[aria-expanded="true"] .car{transform:rotate(180deg)}
+#chmenu{position:fixed;z-index:20;top:56px;right:16px;width:min(380px,calc(100vw - 24px));max-height:calc(100vh - 72px);overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:0 12px 32px rgba(0,0,0,.22)}
+#chmenu[hidden]{display:none}
+#chmenu a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);text-decoration:none;font-size:15px;line-height:1.35;margin-bottom:2px}
+#chmenu a:hover{background:var(--accent-soft)}
+#chmenu a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+#chmenu a.draft{color:var(--muted)}
+#chmenu .tag{font-size:11px;border:1px solid var(--line);border-radius:999px;padding:0 7px;margin-left:6px;color:var(--muted)}
+.shell{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 230px}
+aside.right{overflow-y:auto;padding:22px 16px}
 aside.right{border-left:1px solid var(--line)}
 .nav-title{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 10px 8px;font-weight:600}
-nav.left a{display:block;padding:7px 10px;border-radius:8px;color:var(--ink);text-decoration:none;font-size:15px;line-height:1.35;margin-bottom:2px}
-nav.left a:hover{background:var(--accent-soft)}
-nav.left a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
-nav.left a.draft{color:var(--muted)}
-nav.left .tag{font-size:11px;border:1px solid var(--line);border-radius:999px;padding:0 7px;margin-left:6px;color:var(--muted)}
 aside.right ul{list-style:none;margin:0;padding:0;border-left:1px solid var(--line)}
 aside.right a{display:block;padding:4px 12px;color:var(--muted);text-decoration:none;font-size:14px;line-height:1.4;margin-left:-1px;border-left:2px solid transparent}
 aside.right a.h3{padding-left:26px}
 aside.right a:hover{color:var(--ink)}
 aside.right a.on{color:var(--accent);border-left-color:var(--accent);font-weight:600}
 main{overflow-y:auto;scroll-behavior:smooth}
-article{max-width:780px;margin:0 auto;padding:36px 32px 60px}
+article{max-width:860px;margin:0 auto;padding:36px 32px 60px}
 article h1{font-family:var(--font-display);font-size:2.2rem;line-height:1.2;margin:0 0 .6em;text-wrap:balance}
 article h2{font-family:var(--font-display);font-size:1.5rem;margin:2.1em 0 .5em;padding-top:.4em;border-top:1px solid var(--line);text-wrap:balance}
 article h3{font-family:var(--font-display);font-size:1.2rem;margin:1.7em 0 .4em}
@@ -82,35 +86,32 @@ article hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 .hljs-title{color:#7a4fb5}.hljs-meta{color:var(--warn)}
 :root[data-theme="dark"] .hljs-string{color:#8fd19e}:root[data-theme="dark"] .hljs-number{color:#f0a37f}:root[data-theme="dark"] .hljs-title{color:#c4a4f0}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .hljs-string{color:#8fd19e}:root:not([data-theme="light"]) .hljs-number{color:#f0a37f}:root:not([data-theme="light"]) .hljs-title{color:#c4a4f0}}
-@media (max-width:1100px){.shell{grid-template-columns:250px minmax(0,1fr)}aside.right{display:none}.mtoc{display:block}}
+@media (max-width:1100px){.shell{grid-template-columns:minmax(0,1fr)}aside.right{display:none}.mtoc{display:block}}
 @media (max-width:760px){
-  #menu{display:inline-block}
   .brand{display:none}
   header{padding:8px 12px;gap:8px;flex-wrap:wrap}
   .books{order:3;flex:1 1 100%;flex-wrap:wrap;gap:2px}
   .books button{padding:6px 10px}
-  #theme{margin-left:auto}
+  #chbtn{flex:1 1 0;max-width:none}
+  #chmenu{top:104px;right:12px;left:12px;width:auto;max-height:calc(100vh - 120px)}
   body{font-size:16px}
   article h1{font-size:1.75rem}
   article h2{font-size:1.3rem}
-  .shell{grid-template-columns:minmax(0,1fr)}
-  .shell{grid-template-columns:minmax(0,1fr);position:relative}
-  nav.left{position:absolute;inset:0 auto 0 0;width:280px;z-index:5;transform:translateX(-102%);transition:transform .2s;box-shadow:4px 0 18px rgba(0,0,0,.2)}
-  body.open nav.left{transform:none}
   article{padding:24px 18px 48px}
 }
-@media (prefers-reduced-motion:reduce){main{scroll-behavior:auto}nav.left{transition:none}}
+@media (prefers-reduced-motion:reduce){main{scroll-behavior:auto}#chbtn .car{transition:none}}
 </style>
 </head>
 <body>
 <header>
-  <button id="menu" class="icon-btn" aria-label="Show chapters">Chapters</button>
+  
   <div class="brand">Study Notes</div>
   <div class="books" id="books" role="tablist" aria-label="Books"></div>
+  <button id="chbtn" class="icon-btn" aria-haspopup="true" aria-expanded="false" aria-controls="chmenu"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex:none"><path d="M3 5h14M3 10h14M3 15h14"/></svg><span class="lbl" id="chlbl">Chapters</span><svg class="car" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 4l4 4 4-4"/></svg></button>
   <button id="theme" class="icon-btn" aria-label="Switch colour theme">Dark</button>
 </header>
+<div id="chmenu" role="menu" aria-label="Chapters" hidden></div>
 <div class="shell">
-  <nav class="left" id="left" aria-label="Chapters"></nav>
   <main id="main"><article id="doc"></article></main>
   <aside class="right" id="right" aria-label="On this page"></aside>
 </div>
@@ -156,11 +157,13 @@ function renderBooks(){
   }).join('');
 }
 function renderLeft(b){
-  var h='<p class="nav-title">'+esc(b.title)+'</p>';
+  var h='<p class="nav-title">'+esc(b.title)+'</p>', cur=null;
   (b.chapters||[]).forEach(function(c,i){
+    if(c.id===state.ch) cur=(i+1)+'. '+c.title;
     h+='<a href="#'+hashFor(b.slug,c.id)+'" class="'+(c.written?'':'draft')+'"'+(c.id===state.ch?' aria-current="page"':'')+'>'+(i+1)+'. '+esc(c.title)+(c.written?'':'<span class="tag">soon</span>')+'</a>';
   });
-  document.getElementById('left').innerHTML=h;
+  document.getElementById('chmenu').innerHTML=h;
+  document.getElementById('chlbl').textContent=cur||(b.title+' chapters');
 }
 function fixLinks(html){
   return html.replace(/href="(?:\.\.\/([a-z]+)\/)?([0-9]{2}-[^"#]+)\.md"/g,function(m,bk,id){
@@ -170,7 +173,7 @@ function fixLinks(html){
 function show(){
   var p=parseHash(), my=++token; state.book=p.book; renderBooks();
   var b=bookOf(p.book), doc=document.getElementById('doc');
-  if(!b.chapters){ doc.innerHTML='<p>Loading '+esc(b.title)+'...</p>'; document.getElementById('left').innerHTML=''; document.getElementById('right').innerHTML=''; }
+  if(!b.chapters){ doc.innerHTML='<p>Loading '+esc(b.title)+'...</p>'; document.getElementById('chmenu').innerHTML=''; document.getElementById('right').innerHTML=''; }
   loadBook(b).then(function(){
     if(my!==token) return;
     var id=p.ch; if(id===undefined) id=firstWritten(b);
@@ -191,7 +194,7 @@ function show(){
     document.title=(c?c.title+' - ':'')+b.title+' - Study Notes';
     document.getElementById('main').scrollTop=0;
     buildToc();
-    document.body.classList.remove('open');
+    setMenu(false);
   });
 }
 function buildToc(){
@@ -213,7 +216,10 @@ document.getElementById('main').addEventListener('scroll',function(){
   document.querySelectorAll('aside.right a').forEach(function(a){a.classList.toggle('on',a.getAttribute('data-t')===cur)});
 });
 window.addEventListener('hashchange',function(){ if(/^#s\d+$/.test(location.hash))return; show(); });
-document.getElementById('menu').addEventListener('click',function(){document.body.classList.toggle('open')});
+function setMenu(open){var m=document.getElementById('chmenu');m.hidden=!open;document.getElementById('chbtn').setAttribute('aria-expanded',open)}
+document.getElementById('chbtn').addEventListener('click',function(e){e.stopPropagation();setMenu(document.getElementById('chmenu').hidden)});
+document.addEventListener('click',function(e){var m=document.getElementById('chmenu');if(!m.hidden&&!e.target.closest('#chmenu'))setMenu(false)});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')setMenu(false)});
 function isDark(){return root.getAttribute('data-theme')==='dark'||(!root.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches)}
 function setTheme(t){ if(t){root.setAttribute('data-theme',t)} document.getElementById('theme').textContent=isDark()?'Light':'Dark'; }
 document.getElementById('theme').addEventListener('click',function(){

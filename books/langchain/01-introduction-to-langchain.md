@@ -1,223 +1,344 @@
 # Chapter 1: Introduction to LangChain
 
-Class 06 is where the course moves from hand-built Python to its first framework. LangChain's `create_agent()` runs the same loop you built in [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md), in a few lines. This chapter covers why a framework, what you get, what you give up, and the first working agents.
+**After this chapter you can:**
 
-The mentor's framing: having built it by hand, you will now appreciate LangChain instead of copying it.
+- Explain what an agent is
+- Build one with `create_agent()`
+- Read what it returns
+- Give it memory
+- Answer the common interview questions
 
-*Status: written from class 06. Class 07's material is in [Chapter 2](02-langchain-family-and-harness-engineering.md).*
+**Before this:** the agent loop from [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md). Here the same loop is run by a framework.
 
-## 1.1 Why a framework at all
+## 1.1 Why a framework
 
-The raw-Python agent works, but the mentor's point is that it does not scale as a long-term way to build. A framework fills that gap. A whiteboard from the class puts it simply: there are lots of agents around us, and because agents exploded so quickly there are now many frameworks for defining them. LangChain is the first one the course teaches, and it is taught deeply because the later frameworks are compared against it.
-
-A sanity check posed to the class: if ChatGPT told you to search Google yourself and paste the results back, it would not be useful. The whole point of an agent is that **it** calls the tool and you do not.
-
-Class 06 also finished the pure-Python agent first. The loop was wrapped in a `run_agent(messages, max_turns=4)` function, and `max_turns` caps how many times the loop may call the model again. In the live demo, a question about converting 1 USD to INR with no currency tool defined got a plain-text answer and not an invented tool call.
-
-*Source: Live-Class-2026, `classes_summary/06`, `classes_transcription_summary/06`, `Untitled-scene.pdf` (a one-page whiteboard).*
+- **Agent** = a model that decides the next step, calls tools, and loops until it has an answer.
+- The raw loop is easy to write **once**. Repeating it per project is the pain:
+  - different providers
+  - tool schemas
+  - memory
+  - retries
+  - approvals
+  - tracing
+- **LangChain** supplies that plumbing. You choose the model, tools and instructions. It runs the loop.
+- **Quick test:** if an AI tells you to search the web and paste results back, it is not acting as an agent. An agent calls the tool **itself**.
 
 ## 1.2 Agent = model + harness
 
-LangChain's own definition, as read out in class: an agent is a **model plus a harness**. `create_agent` is a minimal, highly configurable harness: everything around the model loop, meaning the prompts, the tools, and any middleware that shapes behaviour. A model on its own has no memory and no tools. The harness adds them.
+- **Model:** text in, text out. No memory, no tools.
+- **Harness:** everything around the model:
+  - system prompt (role and rules)
+  - tools (actions the model can request)
+  - the loop (call model → run tools → feed results back → repeat)
+  - memory (stored conversation)
+  - middleware (hooks on the loop, from [Chapter 7](07-middleware.md))
+- `create_agent()` is LangChain's harness: minimal, but highly configurable.
 
-## 1.3 Three levels of control
+## 1.3 The LangChain family (short version)
 
-| Layer | Analogy used in class | What you get |
-|---|---|---|
-| Deep Agents | A delivery app (Swiggy) | Batteries included: context compression, a virtual file system, sub-agents. You control almost nothing inside |
-| LangChain | A home-cooked meal | A customisable harness: you pick the spice level and the ingredients. The course starts here |
-| LangGraph | Raw vegetables | Low-level orchestration with total control of every step and the steepest learning curve |
+Full detail in [Chapter 2](02-langchain-family-and-harness-engineering.md). They are layers, not rivals.
 
-LangSmith is separate: it is for monitoring and observing agents, not for building them. The mentor's reason for starting at the middle layer: real software needs the control LangChain gives, and with Deep Agents you cannot control what happens inside, as with delivered food. Chapter 2 covers the family in detail.
+- **Deep Agents:** top layer. Planning, a virtual file system and sub-agents are ready-made. Little control inside.
+- **LangChain:** middle layer. A harness you configure. **This book starts here.**
+- **LangGraph:** bottom layer. You define every step and branch. Most control, steepest learning curve.
+- **LangSmith:** not for building. It records and evaluates what your agent did.
+- **Version note:** everything before LangChain v1 is called **LangChain Classic**. Many old tutorials teach Classic, so mismatched code usually means a version difference.
 
-**Version note.** Everything before LangChain v1 is now called **LangChain Classic**. Most YouTube tutorials still teach Classic, and this course teaches the latest version only.
-
-*Source: `classes_summary/06`, `classes_transcription_summary/06`.*
-
-## 1.4 A short career note
-
-The mentor said clients care about control, such as how fast an agent runs, not about how many frameworks you know. He builds his own agents, or skips frameworks, in real client work, even while teaching one here. His advice: master the fundamentals (the raw-Python work), after which frameworks become easy, and depth is what gets you hired more than a list of framework names on a CV.
-
-*Source: `classes_transcription_summary/06`. I left out the credentials he listed.*
-
-## 1.5 Setting up a LangChain project
+## 1.4 Set up a project
 
 ```bash
-uv init                                              # new project
+uv init
 uv add langchain langchain-openai langchain-anthropic
-uv sync                                              # no manual venv activation needed
+uv sync
 ```
 
-Then create three files:
+Create three files:
 
-1. `.env` with your provider keys.
-2. `.gitignore` that excludes `.env` and `.venv`.
-3. `.env.example`, a safe template of placeholders that you do commit.
+- `.env`: your provider keys
+- `.gitignore`: must list `.env` and `.venv`
+- `.env.example`: key names with empty values. This one **is** committed
 
-Notes from class:
+```
+# .env.example
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+```
 
-- Three installs pulled in about 45 dependencies. That is normal, since each provider package has its own.
-- `pyproject.toml` already records everything a `requirements.txt` would.
-- The mentor accidentally pushed a real API key earlier in the session and had to delete it. It was his live example of why `.gitignore` and `.env.example` matter. A whiteboard in the folder shows GitHub's "Push Blocked: Secret Detected" message, the kind of block that appears when you try to push a key.
-- The `.env.example` in the class folder lists five keys with empty values: OpenAI, Groq, Anthropic, Gemini and OpenRouter. I checked it and it holds no real keys.
+Good to know:
 
-See also [Chapter 3](03-models-messages-and-parameters.md), section 3.2, on keeping the key out of git.
+- Three installs pull in about 45 dependencies. That is normal.
+- `pyproject.toml` already does the job of `requirements.txt`.
+- You need **your own key** for each provider. LangChain is only the harness.
+- **Pitfall:** a key pushed to a public repo is found by bots within minutes. Deleting the commit is not enough. **Revoke the key** and create a new one. See [Chapter 3](03-models-messages-and-parameters.md), section 3.2.
 
-*Source: `classes_transcription_summary/06`, `classes_summary/06`, `Agentic-Python.pdf`, `.env.example`.*
-
-## 1.6 `create_agent()`, the one-liner
+## 1.5 Your first agent
 
 ```python
 from langchain.agents import create_agent
-
-agent = create_agent(
-    model="openai:gpt-4o-mini",     # or anthropic, groq, gemini, ollama...
-    tools=[get_weather],
-    system_prompt="You are a helpful weather assistant.",
-)
-
-result = agent.invoke({"messages": [{"role": "user", "content": "Weather in San Francisco?"}]})
-```
-
-The mentor's words: this is the same weather agent that took hours to build by hand, in a few lines. `agent.invoke()` runs the loop you wrote yourself: check for a tool call, run it, feed the result back, repeat.
-
-- **Swap the provider by changing the string prefix.** Supported ones named in class: OpenAI, Anthropic, Gemini, Groq, Ollama, Azure, Bedrock, Hugging Face and Fireworks. You always need your own key for the provider, because LangChain is only the harness.
-- **Tools can be plain Python functions.** There is no hand-written JSON schema as in LLM Chapter 2. LangChain works out the structure from the function signature. The `@tool` decorator and a **docstring** are what supply the description to the model (Chapter 5 covers tools).
-
-The model names in the class files (`openai:gpt-5.5`, `openai:gpt-4o-mini`) were current in July 2026 and may have changed. Check before running.
-
-### What is really in the result
-
-Printing `result["messages"]` shows the same anatomy as the hand-built loop:
-
-1. A **HumanMessage** with the question.
-2. An **AIMessage** with empty content and a finish reason of tool call.
-3. A **ToolMessage** with the tool's result and the same `tool_call_id` as step 2.
-4. A final **AIMessage** with the answer.
-
-Each message carries `prompt_tokens`, `completion_tokens` and `total_tokens`. The class confirmed that this call ran the loop twice: one AI message to request the tool, then a second using its result.
-
-**Trade-offs, as named in class.** You lose some visibility and fine control, because LangChain infers most of the tool schema for you and you cannot see it as plainly as in the raw notebook. LangChain calls can also feel slower, because of the extra work around each call: generating IDs, structuring messages and internal bookkeeping.
-
-*Source: `classes_summary/06`, `classes_transcription_summary/06`. Not run: LangChain is not installed in my sandbox and the calls need keys.*
-
-## 1.7 The class 06 code folder
-
-The five steps of LangChain's own quickstart, which both files follow: a detailed system prompt, create tools (`@tool` on any function), configure the model (`init_chat_model` with temperature, timeout and `max_tokens`), add memory, then assemble and run the agent.
-
-### `langchain_agents.py`: the first working agent
-
-A plain mock tool plus a real one, a URL fetcher:
-
-```python
-from langchain.agents import create_agent
-from langchain.tools import tool
-import urllib.request, urllib.error
-
-@tool
-def fetch_text_from_url(url: str) -> str:
-    """Fetch the document from a URL."""
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; quickstart-research/1.0)"})
-    try:
-        with urllib.request.urlopen(req, timeout=120) as resp:
-            raw = resp.read()
-    except urllib.error.URLError as e:
-        return f"Fetch failed: {e}"
-    return raw.decode("utf-8", errors="replace")
 
 def get_weather(city: str) -> str:
     """Get weather for a given city."""
     return f"It's always sunny in {city}!"
 
 agent = create_agent(
-    model="openai:gpt-5.5",
-    tools=[get_weather, fetch_text_from_url],
-    system_prompt="You are a helpful assistant",
+    model="openai:gpt-4o-mini",      # "provider:model-name"
+    tools=[get_weather],
+    system_prompt="You are a helpful weather assistant.",
 )
-result = agent.invoke({"messages": [{"role": "user", "content": "Who am I?"}]})
-print(result["messages"][-1].content_blocks)
+
+result = agent.invoke(
+    {"messages": [{"role": "user", "content": "Weather in San Francisco?"}]}
+)
+print(result["messages"][-1].content)
 ```
 
-`get_weather` is a plain function with no decorator, and `fetch_text_from_url` uses `@tool`. The question "Who am I?" needs no tool, so the agent answers directly. The file also imports `pprint` but leaves its use commented out.
+What each argument does:
 
-### `langchain_basics.py`: a research agent that must not guess
+- **`model`**
+  - String in the form `provider:model-name`
+  - Switch provider by changing the prefix (OpenAI, Anthropic, Gemini, Groq, Ollama, Azure, Bedrock and more)
+  - Model names change often, so check the provider's current list
+- **`tools`**
+  - A list of **plain Python functions**
+  - No hand-written JSON schema. LangChain builds it from the **name, type hints and docstring**
+- **`system_prompt`**: the role and rules
+- **`agent.invoke(...)`**: runs the whole loop and returns when the model stops asking for tools
 
-The same fetcher is pointed at a harder job, counting things in a real text of about 280 KB. The system prompt tells the model to ground line counts and positions in tool results and not guess:
+**The model never sees your code.** It only sees the tool's name, parameters and docstring. A vague docstring is the top reason for wrong tool choices.
+
+`@tool` makes the tool explicit ([Chapter 5](05-tools.md)):
 
 ```python
+from langchain.tools import tool
+
+@tool
+def get_weather(city: str) -> str:
+    """Get the current weather for a city. Use for any weather question."""
+    return f"It's always sunny in {city}!"
+```
+
+### What comes back
+
+```python
+for m in result["messages"]:
+    m.pretty_print()
+```
+
+`result["messages"]` is the full conversation:
+
+1. **`HumanMessage`:** the question
+2. **`AIMessage`:** empty text plus a **tool call** (`get_weather`, `{"city": "San Francisco"}`, an id)
+3. **`ToolMessage`:** the function's return value, with the **same id** as step 2
+4. **`AIMessage`:** the final answer
+
+Notes:
+
+- The model was called **twice**: once to ask for the tool, once to answer.
+- The matching id tells the model which result belongs to which request. It matters when several tools are requested at once.
+- AI messages carry token counts (`prompt_tokens`, `completion_tokens`, `total_tokens`). Use them to work out cost.
+
+## 1.6 Memory
+
+- Each `invoke` sees **only the messages you pass in**.
+- So "Hi, I am Mayank" in one call and "Who am I?" in the next: the agent does not know.
+- Fix: a **checkpointer** (stores state) plus a **thread_id** (picks the conversation).
+
+```python
+from langgraph.checkpoint.memory import InMemorySaver
+
+agent = create_agent(
+    model="openai:gpt-4o-mini",
+    tools=[get_weather],
+    system_prompt="You are a helpful assistant.",
+    checkpointer=InMemorySaver(),
+)
+
+config = {"configurable": {"thread_id": "chat-1"}}
+agent.invoke({"messages": [{"role": "user", "content": "Hi, I am Mayank"}]}, config)
+reply = agent.invoke({"messages": [{"role": "user", "content": "Who am I?"}]}, config)
+```
+
+- Same `thread_id` → remembers. New `thread_id` → fresh start.
+- **Pitfall:** `InMemorySaver` lives in the running process. Script ends → memory gone. Production needs a database-backed saver ([Chapter 6](06-agents-and-memory.md)).
+- **Pitfall:** `checkpointer=checkpointer` raises `NameError` if you never created it. Create it first.
+
+## 1.7 Make the model check, not guess
+
+- Models sound sure even when wrong. Counting, lookups and maths should come from a **tool**, not from the model.
+- Pattern: give a fetch tool, then tell the model not to guess.
+
+```python
+import urllib.request, urllib.error
+from langchain.tools import tool
+from langchain.chat_models import init_chat_model
+
+@tool
+def fetch_text_from_url(url: str) -> str:
+    """Fetch the text of a document from a URL."""
+    req = urllib.request.Request(url, headers={"User-Agent": "notes-demo/1.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            return resp.read().decode("utf-8", errors="replace")
+    except urllib.error.URLError as e:
+        return f"Fetch failed: {e}"
+
 SYSTEM_PROMPT = """You are a literary data assistant.
 
 ## Capabilities
-- `fetch_text_from_url`: loads document text from a URL into the conversation.
-Do not guess line counts or positions--ground them in tool results from the saved file."""
+- `fetch_text_from_url`: loads document text from a URL.
 
-model = init_chat_model("openai:gpt-5.5", temperature=0.5, timeout=300, max_tokens=25000)
+Do not guess line counts or positions. Ground them in tool results.
+If an exact answer cannot be verified, return null and explain why."""
 
-agent = create_agent(
-    model=model,
-    tools=[fetch_text_from_url],
-    system_prompt=SYSTEM_PROMPT,
-    checkpointer=checkpointer,
+model = init_chat_model("openai:gpt-4o-mini", temperature=0.5, timeout=300, max_tokens=25000)
+```
+
+Three habits to copy:
+
+- **Name each tool's purpose** in the system prompt, not only its docstring.
+- **Allow "I cannot verify this."** Otherwise the model invents a number.
+- **Return errors as text** (`"Fetch failed: ..."`) so the model can react instead of the run crashing.
+
+`init_chat_model(...)` is the alternative to the model string. Use it to set `temperature`, `timeout` or `max_tokens` ([Chapter 3](03-models-messages-and-parameters.md)).
+
+## 1.8 Caching tool results
+
+- Cache time depends on **how fast the data changes**:
+  - Stock prices: do not cache
+  - Currency rates: minutes
+  - Weather: hours
+  - Static reference data: long
+- Idea: a **TTL** (time-to-live), meaning how long a stored result may be reused.
+- A cached wrong answer is worse than a slow right one.
+
+```python
+import time
+
+_cache = {}
+
+def cached(key, ttl_seconds, fetch):
+    hit = _cache.get(key)
+    if hit and time.time() - hit[0] < ttl_seconds:
+        return hit[1]
+    value = fetch()
+    _cache[key] = (time.time(), value)
+    return value
+
+# inside a tool:
+# return cached(("fx", "USD", "INR"), 600, lambda: call_rates_api("USD", "INR"))
+```
+
+## 1.9 Trade-offs
+
+- **You gain**
+  - A working agent in a few lines
+  - Provider swap by changing a string
+  - Memory, structured output, middleware and tracing on tap
+- **You give up**
+  - Some visibility: the tool schema is inferred
+  - Some speed: extra work per call (ids, message objects, bookkeeping)
+  - Fine control, unless you step down to LangGraph
+- **Career angle:** depth in the fundamentals (the raw loop) lasts longer than a list of framework names. Clients care about control and speed, not how many frameworks you know.
+
+## 1.10 Interview corner
+
+**1. What is an agent in LangChain?**
+
+- A model plus a harness (instructions, tools, loop, memory, middleware)
+- `create_agent()` is the minimal configurable harness
+- *Stronger answer:* the model alone is stateless and cannot act, so almost everything useful comes from the harness
+
+**2. Why a framework instead of writing the loop?**
+
+- The loop is easy. The plumbing is not: providers, tool schemas, structured output, memory, retries, approvals, tracing
+- *Stronger answer:* name the costs (less visibility, overhead, one more dependency) and say you can still write the loop by hand
+
+**3. LangChain vs LangGraph vs Deep Agents vs LangSmith?**
+
+- Deep Agents: batteries-included top layer
+- LangChain: configurable harness
+- LangGraph: low-level orchestration
+- LangSmith: observability, not a builder
+- *Stronger answer:* they are layers, not rivals. LangChain agents run on LangGraph underneath
+
+**4. When does the loop stop?**
+
+- When the model replies **without** requesting a tool
+- *Stronger answer:* you still need a safety limit (`recursion_limit`) in case it keeps calling tools
+
+**5. Why does an agent forget between runs?**
+
+- Each `invoke` sees only what you pass in
+- Fix: checkpointer + `thread_id`
+- *Stronger answer:* the in-memory saver dies with the process, so production uses a database-backed one
+
+**6. How does LangChain describe your function to the model?**
+
+- From its name, type hints and docstring. `@tool` gives explicit control
+- *Stronger answer:* the docstring is effectively part of the prompt
+
+**7. A tool fetches any URL. What can go wrong?**
+
+- Huge pages, hangs, failures
+- *Stronger answer:* prompt injection and SSRF (see 1.11)
+
+## 1.11 Added by Claude, not from the sources
+
+Not in the course material. Well-established practice, but check current docs before relying on it.
+
+- **Prompt injection**
+  - A fetched web page can contain text written to look like instructions
+  - Treat tool output as **data**, never as instructions
+  - Do not give an agent that reads the open web tools that can also send, delete or spend, without a human approval step ([Chapter 10](10-runtime-and-human-in-the-loop.md))
+- **SSRF (server-side request forgery)**
+  - If the model controls the URL, it can be steered to internal addresses
+  - In real systems, allow-list domains and block private IP ranges
+- **Set your own step limit**
+  - In the LangGraph version I checked (while preparing this chapter), the default `recursion_limit` was very high (10007)
+  - A looping agent can run, and cost money, for a long time
+  - Set a lower value:
+
+```python
+agent.invoke(
+    {"messages": [{"role": "user", "content": "..."}]},
+    config={"recursion_limit": 25},
 )
 ```
 
-The user message gives the Project Gutenberg link for *The Great Gatsby* and asks for (1) how many lines contain `Gatsby`, (2) the line number of the first line with `Daisy`, and (3) a two-sentence synopsis. It also says that if an exact answer cannot be **verified** with the tools, the model must not invent numbers: use `null` and explain the limitation. That is a hands-on guardrail pattern, shown long before guardrails get a chapter of their own. The call passes a `thread_id` (`"great-gatsby-lc"`) in its config so a checkpointer can keep the conversation.
+- **Tools with side effects can run more than once**
+  - Loops, retries or a model asking twice can repeat a call
+  - Make write, send and charge tools **idempotent** (safe to repeat), or guard them with approval
+- **`create_agent` is the current way to build agents in LangChain v1.** Older tutorials use other helpers
 
-**Source quirks in `langchain_basics.py`.**
+## Recap
 
-1. It passes `checkpointer=checkpointer` but never defines `checkpointer`, so running it raises `NameError`. (A checkpointer is what stores a conversation between calls. A later chapter covers it.)
-2. The prompt refers to a field called `how_you_computed_counts`, but nothing defines a structured output with that field.
-3. It imports `create_agent` three times and imports `create_deep_agent` from `deepagents`, which it never uses. The class presented that import as a preview of the third tier of the family.
-
-*Source: `classes_summary/06`, code files `langchain_agents.py` and `langchain_basics.py`. Checked by reading and by a name check for undefined names. Not run.*
-
-| File | What it is |
-|---|---|
-| `langchain_basics.py` | The Gatsby research agent |
-| `langchain_agents.py` | `get_weather` plus `fetch_text_from_url`, the first working `create_agent()` |
-| `main.py` | A "Hello from class-6-langchain-starts!" scaffold |
-| `.env.example` | The provider key template |
-
-## 1.8 Memory and caching
-
-**Memory.** In a live demo, "Hi, I am Mayank" and then "Who am I?" were sent in two **separate script runs**. The agent had no idea, because the memory only exists while the Python process runs (an in-memory list that disappears when the script ends). Real persistence needs a database, a file, or a checkpoint mechanism, which comes in a later class.
-
-**Caching tool results: it depends how fast the data changes.**
-
-| Data | Suggested caching |
-|---|---|
-| Stock prices | Never cache (they change every second) |
-| Weather | Perhaps a day (a time-to-live, TTL) |
-| Currency conversion | Perhaps ten minutes |
-
-The rule: do not cache everything just because it is easy. Think about how fast the underlying data actually changes.
-
-*Source: `classes_transcription_summary/06`.*
-
-## 1.9 Questions from the class
-
-| Question | Answer |
-|---|---|
-| Do I need an API key to use LangChain itself? | LangChain is only the harness. You always need your own model provider key |
-| Can `create_agent` use Groq, Gemini, OpenRouter or Ollama? | Yes. Swap the model string or config |
-| Is the default loop count the same in every framework? | No. Some cap it near 100. The mentor's raw version used 4 as a sane default |
-| Do I have to write a tool schema as in raw Python? | No. Pass a plain function, optionally with `@tool`. The docstring becomes the description |
-| Should tool results always be cached? | No. It depends on how quickly the data changes |
-| Why does a LangChain agent feel slower than raw Python? | Extra overhead: IDs, message structure, bookkeeping |
-
-*Source: `classes_transcription_summary/06`.*
+- Agent = **model + harness**. `create_agent()` is the harness
+- You give `model`, `tools`, `system_prompt`. `invoke` runs the loop
+- Result = human → AI (tool call) → tool result (same id) → final AI
+- Tool descriptions come from name, type hints, **docstring**
+- Memory = **checkpointer + thread_id**. In-memory is lost when the process ends
+- Make the model **verify with tools** and allow "cannot verify"
+- Cache by how fast the data changes
+- Frameworks trade some visibility and speed for a lot of plumbing
 
 ## Practice
 
-1. `uv add langchain langchain-openai langchain-anthropic` in a fresh project, with `.env`, `.gitignore` and `.env.example`.
-2. Build the weather agent with `create_agent()`, print `result["messages"]`, and match each message to the hand-built loop.
-3. Wrap one of your own functions with `@tool` and a clear docstring.
-4. Run the Gatsby agent after defining a checkpointer, then check its line counts against the real file. Does it ground the numbers, or guess?
+1. New project with `uv add langchain langchain-openai langchain-anthropic`, plus `.env`, `.gitignore`, `.env.example`
+2. Build the weather agent. Print the messages and match each to a step of the hand-built loop
+3. Add `InMemorySaver` and `thread_id`. Show it remembers within a thread and forgets across threads
+4. Write a tool with a clear docstring, then make it vague and watch tool choice get worse
+5. Run the line-counting agent from 1.7 on a real text and check its numbers yourself
+
+## How this chapter was checked
+
+- Run offline with a stand-in model on `langchain` 1.4.7: message order, matching tool-call id, `pretty_print`, checkpointer memory per `thread_id`, `recursion_limit` in config, and the `cached` helper
+- **Not** run against a live model (needs a provider key). Check model names and prompts before running
 
 ## Sources and further reading
 
 - Live-Class-2026, `classes_summary/06 - 12 Jul - Introduction to LangChain.md`
 - Live-Class-2026, `classes_transcription_summary/06 - 12 Jul - Introduction to LangChain.md`
-- Live-Class-2026, code folder `Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/` (the two Python files, `main.py`, `.env.example`, its `README.md` and the whiteboard `Untitled-scene.pdf`)
+- Live-Class-2026, code folder `Weekend 03 - 11-12 Jul/06 - 12 Jul - Introduction to LangChain/`
+- Section 1.11 is added by Claude and is not from these sources
 
 Previous: [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md) · Next: [Chapter 2, LangChain family and harness engineering](02-langchain-family-and-harness-engineering.md)
