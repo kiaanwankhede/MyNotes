@@ -9,7 +9,7 @@
 - Tell tools, resources and prompts apart, and say when each fits
 - Build, run and inspect a first MCP server with FastMCP
 
-**Builds on:** [Chapter 1](01-why-mcp-exists.md). The messages on the wire and the connection lifecycle are in [Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md). Transports in depth are in [Chapter 4](04-transports-and-shutdown.md). Building servers properly is in [Chapter 5](05-building-mcp-servers.md).
+**Builds on:** [Chapter 1](01-why-mcp-exists.md). The messages on the wire and the connection lifecycle are in [Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md). Operation, transports and shutdown are in [Chapter 4](04-operation-transports-and-shutdown.md). Building servers properly is in [Chapter 5](05-building-mcp-servers.md).
 
 ## 2.1 The three participants
 
@@ -306,7 +306,7 @@ Not in the course material. Established practice, but check current docs. Items 
 
 - **Pin the FastMCP version.** *Checked:* the Inspector command changed between major versions. Pin it (for example `fastmcp>=3.4,<4`) or follow the current docs, so a fresh install does not break your notes
 - **Write tool descriptions for the model, not for yourself.** The description and input schema are all the model sees. Say what the tool does and when to use it, as with any tool ([Langchain, Chapter 5](../langchain/05-tools.md), 5.12)
-- **STDIO servers must not print to standard output.** On STDIO, standard output **is** the protocol channel. A stray `print()` in a tool corrupts the messages. Log to standard error instead (a design point of the transport, covered in Chapter 4)
+- **On STDIO, standard output is the protocol channel.** Log to standard error, not standard output ([Chapter 4](04-operation-transports-and-shutdown.md), 4.8). *Checked:* `fastmcp` 4.1.4 sends a stray `print()` inside a tool to standard error, so the connection kept working. Other libraries and hand-written servers may not protect you. That case was not tested
 - **Keep servers small and named clearly.** One focused server per job makes it easier to approve, to trust and to trim
 - **Test servers without a model.** The small client in 2.9 lets you check tools, schemas and errors in seconds
 

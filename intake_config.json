@@ -55,7 +55,7 @@
     "Why MCP exists",
     "Primitives and architecture",
     "Lifecycle, JSON-RPC and capability negotiation",
-    "Transports and shutdown",
+    "Operation, transports and shutdown",
     "Building MCP servers",
     "Deployment",
     "Legacy vs modern MCP",

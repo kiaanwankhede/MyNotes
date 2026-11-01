@@ -9,8 +9,10 @@
 - Read a JSON-RPC request, response, notification and error
 - Explain why MCP uses JSON-RPC and not plain REST
 - Walk through the three-step initialization handshake and version negotiation
+- Say what capability negotiation declares, and why `tools/list` is still needed after it
+- Explain elicitation, and why it is not human-in-the-loop
 
-**Builds on:** [Chapter 2](02-primitives-and-architecture.md). The rest of capability negotiation (class 18) will be added to this chapter. The operation and shutdown phases and the transports come in [Chapter 4](04-transports-and-shutdown.md) (not written yet).
+**Builds on:** [Chapter 2](02-primitives-and-architecture.md). The operation phase, the transports and shutdown are in [Chapter 4](04-operation-transports-and-shutdown.md).
 
 ## 3.1 Who starts each primitive?
 
@@ -202,15 +204,46 @@ Client → Server : 3. initialized (notification: no id, no reply)
 - Real consequence: a serious client, such as one built for a company, must decide **which historical versions it supports** and handle each difference in behaviour. "Connect to whatever URL I am given" is not enough. Class flagged this as interview depth
 
 *Checked:* asking a real server for version `2099-01-01` made it answer with `2025-11-25`, its own latest.
+- **Modern clients try a newer call first.** *Checked with `mcp` 2.3.0:* the client's first message to a server was **`server/discover`** (version `2026-07-28`), not `initialize`
+  - A server that answered "Method not found" made the client **fall back** to the old handshake: `initialize` with version `2025-11-25`
+  - A current `fastmcp` 4.1.4 server answered `server/discover` directly, with `supportedVersions` and its capabilities
+  - This is the "newer discovery call, then fall back" that class 18 saw in a debugging tool. The legacy and modern handshakes get their own chapter ([Chapter 7](07-legacy-vs-modern-mcp.md), not written yet)
+  - The 3.7 handshake is the **legacy** pattern, still what most servers use. Class estimate for the ecosystem to move: **8 months to a year**, with only the most actively maintained servers moving in the first couple of months
 
-## 3.9 Capability negotiation: the first look
+## 3.9 Capability negotiation
 
-- The handshake also swaps **capability menus**, so nobody uses something that was never offered
-- From the handout whiteboard:
-  - **Client** can offer: `roots`, `sampling`, `experimental`
-  - **Server** can offer: `tools`, `resources`, `prompts`, `logging`
-- The same handout notes that **roots, sampling and logging are being deprecated** in the newest spec revision. That was not covered further in this class and is not verified here
-- The rest of capability negotiation was deferred to the next class and will be added to this chapter
+- Class picture: **both sides hand over an honest menu before anyone orders**
+- Each side declares what it **can** do, not what it is about to do. Nothing is used until it is needed later
+- **Client can declare** (class 18):
+  - `roots`: it can expose file-system access
+  - `sampling`: it can handle an LLM sampling request
+  - `elicitation`: it can ask the user for information on the server's behalf
+  - `tasks`, and `experimental` (non-standard features)
+- **Server can declare:**
+  - `tools`, `resources`, `prompts`: the three primitives
+  - `logging`
+  - `completions`: argument auto-completion
+  - `experimental`
+- **The two lists differ between sources.** The class 17 handout showed a shorter list (client: roots, sampling, experimental; server: tools, resources, prompts, logging) and noted that roots, sampling and logging are being **deprecated** in the newest spec revision. Class 18 showed the longer list above. Treat both as snapshots and check the current specification
+- **"Deprecated" does not mean "unused".** Most servers in the wild still run the older pattern
+
+**Capability negotiation is not discovery:**
+
+- Negotiation says a **category** exists ("this server has tools")
+- Discovery (`tools/list`) says **which** tools, their names, descriptions and argument schemas
+- A client therefore still calls `tools/list` after the handshake (class 18 student question)
+
+*Checked:* a real server's answer listed the capabilities `logging`, `prompts`, `resources` and `tools`, and no `completions`. A server only declares what it has. In the newer `server/discover` answer each capability carried flags such as `listChanged` and `subscribe` (all `false` here).
+
+### Elicitation
+
+- **Elicitation:** the server asks for **more information from the user, through the client, in the middle of a task**
+  - It is the two-way nature of JSON-RPC made concrete: the server reaches out, instead of only replying
+- In LangChain it surfaces as a **LangGraph interrupt**: a person answers, then the run resumes. The class cited LangChain's documentation for this. Not re-checked here
+- **Not the same as human-in-the-loop (HITL):**
+  - HITL is a safety layer in the AI application: approve, edit or reject a tool call ([Langchain, Chapter 11](../langchain/11-runtime-and-human-in-the-loop.md))
+  - Elicitation is a native MCP request from a **server** for information it is missing
+- Not run in these notes. It needs a client with an elicitation handler
 
 ## 3.10 Seeing the real messages: the wiretap
 
@@ -249,6 +282,13 @@ A whiteboard project from the handout. Aim: **MCP concepts without writing a lin
   - Outputs: **save as a draft** in Gmail, a **calendar meeting** to read it every day at 8 am, and a **LinkedIn post saved in Apple Notes**
   - A **schedule** is added so it repeats
 - **Homework on the board:** a stock recommendation, plus buying
+- **Class 18 built it live** with four connectors switched on as MCP servers: **Gmail, Google Calendar, Tavily, Apple Notes**
+  - Claude turned the rough diagram into a structured **system prompt**
+  - The flow: research AI news with Tavily, categorise it, draft an HTML email, create a recurring calendar reminder, produce a LinkedIn post and a Substack-style article
+- **"Brain decides, tools act."** The model decides which tool, with what arguments, and how to read a result. Data moves only through tool calls
+  - A search tool does not write the story. The model assembles the results into one
+- **Lesson from the live run:** with no instruction on how many headlines per category, the model made its **own assumption** and quietly dropped real stories
+  - Fix: say exactly how much detail you want per category, then test
 - The boxes on the whiteboard are unlabelled and the brain icons mark the steps where the model works. The detail of the steps was not written on the page
 
 ## 3.12 Class questions
@@ -259,6 +299,9 @@ A whiteboard project from the handout. Aim: **MCP concepts without writing a lin
 - **How does a client know which server to connect to?** The address or URL is given when the client is configured. It is not discovered at connect time
 - **How does a server tell which client a request came from?** The transport layer keeps session details once connected
 - **My own email domain: how do I make it MCP compatible?** You do not make a domain compatible. You **build an MCP server** for it
+- **Why call `tools/list` if negotiation already said the server has tools?** Negotiation names the category. Discovery fetches the actual tools (3.9)
+- **How is elicitation different from HITL?** Elicitation is the server asking for missing information. HITL approves, edits or rejects tool calls (3.9)
+- **Logs used to show full JSON-RPC and now do not. Did the protocol version change?** No. The class's answer: Anthropic's own client changed how much it writes to disk. It is unrelated to the MCP specification and to version negotiation
 - **Who builds what for Gmail?** The service provider builds the **server**. The host builds the **client**. Claude's Gmail client is Anthropic's work
 - **Reference server from the class:** `Link.txt` points to a Gmail MCP server on GitHub (`theposch/gmail-mcp`). It was shared as a reference and not read for these notes
 
@@ -296,6 +339,18 @@ A whiteboard project from the handout. Aim: **MCP concepts without writing a lin
 **7. Is JSON-RPC an MCP invention?**
 
 - No. It is a general existing specification that MCP adopted
+
+**8. Why does the client call `tools/list` if negotiation said the server has tools?**
+
+- Negotiation names a category. Discovery fetches the names, descriptions and schemas
+
+**9. What is elicitation, and is it human-in-the-loop?**
+
+- A server asking the user for missing information through the client, mid-task. No. HITL is an application-side approval layer on tool calls
+
+**10. A client connects to an old server. What happens?**
+
+- *Checked:* a modern client tries `server/discover` first. On "Method not found" it falls back to `initialize`. A serious client supports both
 
 ## 3.14 Added by Claude, not from the sources
 
@@ -339,6 +394,8 @@ p.terminate()
 - JSON-RPC 2.0: `jsonrpc`, `id`, `method`, `params`; a response has `result` or `error`; no `id` means notification
 - Chosen over REST: lightweight, transport-agnostic, two-way, notifications, standard errors. It is not an MCP invention
 - Handshake: `initialize`, response, `initialized` notification. Version: client proposes its latest, server answers, client accepts or disconnects
+- Capability negotiation is a two-way menu: it names categories, `tools/list` names the tools. Elicitation lets a server ask the user for missing information
+- A modern client tries `server/discover` first and falls back to `initialize`
 - The wiretap sits between host and server and prints the real messages
 
 ## Practice
@@ -352,18 +409,21 @@ p.terminate()
 7. Say out loud why JSON-RPC was chosen over REST
 8. For a service you use daily, list what would be a tool, a resource and a prompt
 9. Open a real server's published capabilities (GitHub's or Gmail's) and check whether it ships tools only
+10. Add a free, no-auth server such as Context7 in VS Code and watch the tools appear before you ask anything
+11. Build the no-code AI-news project with three or more connectors. State how many items per category you want
 
 ## How this chapter was checked
 
-- Run with `fastmcp` 4.1.4: the full three-primitive server from the class notebook; `resources/list`, `resources/read`, `prompts/list` and `prompts/get` over raw JSON-RPC on STDIO; the `initialize` answer and capabilities; the `initialized` notification; an unknown method and an unknown tool; two back-to-back requests; a future protocol version; the trailing-slash URI behaviour; and the working-directory failure with a read from a different folder
-- **Not run:** the Inspector in a browser, Claude Desktop and its log files, the wiretap scripts, the Tavily and Gmail project, templates and subscriptions
+- Run with `fastmcp` 4.1.4: the full three-primitive server from the class notebook; `resources/list`, `resources/read`, `prompts/list` and `prompts/get` over raw JSON-RPC on STDIO; the `initialize` answer and capabilities; the `initialized` notification; an unknown method and an unknown tool; two back-to-back requests; a future protocol version; the first message a current client sends (`server/discover`) and its fallback to `initialize`; the trailing-slash URI behaviour; and the working-directory failure with a read from a different folder
+- **Not run:** elicitation, the Inspector in a browser, Claude Desktop and its log files, the wiretap scripts, the Tavily and Gmail project, templates and subscriptions
 - The class write-ups, notebook and handouts are the source for everything not marked *checked*. The three handout PDFs are whiteboard images, read as text and as images
 
 ## Sources and further reading
 
+- Live-Class-2026, `classes_transcription_summary/18 - 6 Sep - MCP Capability Negotiation.md` (capability negotiation, elicitation, the no-code project, class Q&A)
 - Live-Class-2026, `classes_summary/17 - 6 Sep - MCP Primitives, Architecture & Wiretap.md`
 - Live-Class-2026, `classes_transcription_summary/17 - 5 Sep - MCP Deep Dive — Primitives, Lifecycle & JSON-RPC.md`
 - Live-Class-2026, `Weekend 10 - 5-6 Sep/README.md`, and under `06 Sep - MCP Primitives & Architecture/`: `README.md`, `v4a_primitives_notebook.ipynb`, `MCP-Lifecycle.pdf`, `MCP-Primitives.pdf`, `AI-Updater-Project.pdf`, `claude_desktop_config.example.json`, `Link.txt`
 - Sections 3.3 (Checked), 3.5 and 3.7 to 3.8 (the *checked* lines) and 3.14 are from testing, not from the class sources
 
-Previous: [Chapter 2, Primitives and architecture](02-primitives-and-architecture.md) · Next: [Chapter 4, Transports and shutdown](04-transports-and-shutdown.md) (not written yet)
+Previous: [Chapter 2, Primitives and architecture](02-primitives-and-architecture.md) · Next: [Chapter 4, Operation, transports and shutdown](04-operation-transports-and-shutdown.md)
