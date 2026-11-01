@@ -63,6 +63,48 @@ print("What your APP can use:", tool_message.artifact)
 
 *Source: Live-Class-2026, `classes_summary/08`, `classes_transcription_summary/08`. Not run: LangChain is not installed in my sandbox.*
 
+## 5.3 Completing the loop by hand, once
+
+The revision notebook walks the whole mechanism once, so that `create_agent` later feels like a shortcut for real work and not magic. Bind two tools, ask for something, run the tool the model requested, wrap the result, and send everything back:
+
+```python
+from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
+
+def get_weather(location: str) -> str:
+    """Get the weather at a location."""
+    return f"Sunny in {location}"
+
+def set_password(new_pass: str) -> str:
+    """Set a new password."""
+    return "Password changed"
+
+TOOLS = {"get_weather": get_weather, "set_password": set_password}
+model_with_tools = model.bind_tools([get_weather, set_password])
+
+question = HumanMessage("Set the password to admin123")
+response = model_with_tools.invoke([question])
+
+# 1. the model's REQUEST: nothing has run yet
+requested_call = response.tool_calls[0]
+
+# 2. run the tool the model asked for (this is the step create_agent automates)
+tool_result = TOOLS[requested_call["name"]](**requested_call["args"])
+
+# 3. wrap it as a ToolMessage with the EXACT tool_call_id from the request
+tool_message = ToolMessage(content=tool_result, tool_call_id=requested_call["id"])
+
+# 4. send the question, the AI's tool request and the result back for the final answer
+conversation = [question, AIMessage(content="", tool_calls=[requested_call]), tool_message]
+final_response = model.invoke(conversation)
+print(final_response.content)
+```
+
+Request, run, wrap, send back: that is the loop from LLM Chapter 2, written with LangChain's message classes.
+
+**Source quirk.** In the notebook, step 2 reads `get_weather(**requested_call["args"])` even though the model asked for `set_password` (the argument is `new_pass`, not `location`). I tested the call: it raises `TypeError: get_weather() got an unexpected keyword argument 'new_pass'`. The version above looks the tool up by the name the model gave, which is the correct way.
+
+*Source: `Revision_Parts_1-4.ipynb`. Not run against a model: LangChain is not installed and the call needs a key. I checked the tool lookup on its own.*
+
 ## Practice
 
 1. Run `bind_tools()` on a simple function, call `.invoke()`, and inspect `response.tool_calls`. Remember that nothing has executed yet.
@@ -73,5 +115,7 @@ print("What your APP can use:", tool_message.artifact)
 
 - Live-Class-2026, `classes_summary/08 - 19 Jul - Inside the Model.md`
 - Live-Class-2026, `classes_transcription_summary/08 - 19 Jul - LangChain - Inside the Model.md`
+
+- Live-Class-2026, notebooks `02_03_environment_models_messages_student_notes.ipynb` and `Revision_Parts_1-4.ipynb` in `Weekend 04 - 18-19 Jul/07-08 - .../Notebook For Reference/`
 
 Previous: [Chapter 4](04-structured-output.md) · Next: [Chapter 6, Agents and memory](06-agents-and-memory.md) (not written yet)

@@ -68,7 +68,18 @@ If this raises an error, either `.env` is not in the folder you are running from
 | `max_tokens` | Caps the output length |
 | `timeout` and `max_retries` | How long and how persistently LangChain waits for the model before giving up. The default for retries is 6 |
 
-They are passed as keyword arguments, `key=value` beside the model name. A common OpenRouter error is a reply longer than the allowed limit, and raising `max_tokens` fixes it.
+They are passed as keyword arguments, `key=value` beside the model name. The revision notebook's analogy is the dials on a car dashboard: `temperature` is how much creative liberty you allow, `max_tokens` is a hard fuel ceiling on the reply, `timeout` is how long you wait at a red light before giving up, and `max_retries` is how many times you try restarting a car that will not start.
+
+```python
+deterministic_model = init_chat_model("openai:gpt-5-mini", temperature=0.0, max_tokens=200, timeout=30)
+creative_model      = init_chat_model("openai:gpt-5-mini", temperature=1.0, max_tokens=200, timeout=30)
+
+prompt = "Describe a sunset in one creative sentence."
+print(deterministic_model.invoke(prompt).content)
+print(creative_model.invoke(prompt).content)
+```
+
+The notebook's note: run the `temperature=0.0` model twice and it comes back nearly identical, while `temperature=1.0` varies from run to run. A common OpenRouter error is a reply longer than the allowed limit, and raising `max_tokens` fixes it. OpenRouter's free router can be used with `init_chat_model("openrouter/free")` once `OPENROUTER_API_KEY` is set.
 
 ```python
 paid_model = init_chat_model("openai:gpt-5-mini")
@@ -84,15 +95,34 @@ A local model through Ollama has no API cost, but it needs real RAM (ideally a G
 
 ## 3.4 Messages
 
-Three message types go to the model together:
+You could send one long string that mixes the instructions and the user's question, but the model then has no reliable way to tell which part is an instruction and which is what the user said (the revision notebook's picture is a note slid under a door). A **message list** labels each piece with who said it. The notebooks list four types:
 
 - **System message:** behaviour, tone and rules.
 - **Human message:** the user's input.
 - **AI message:** the model's own earlier reply.
+- **Tool message:** the result of a tool call, sent back so the model can carry on (see [Chapter 5](05-tools.md)).
+
+The notebook calls the system message the director's note: not something spoken in the scene. In the pirate example the "be a pirate" instruction never gets mixed into the actual question.
 
 The class showed again that a single "hi" to Claude sends thousands of tokens once the hidden system message is counted. In a finished product such as Claude's web app, the provider fixes the system message and you cannot change it. When you build your own agent you control it, which is the point of building your own harness. The system message can be changed whichever model sits behind it. A system message is not the same thing as a "skill".
 
-Messages can be the classes below or plain dictionaries with a `role` key (`"system"`, `"user"`, `"assistant"`). There is no functional difference. The mentor prefers the classes for readability.
+Messages can be the classes below or plain dictionaries with a `role` key (`"system"`, `"user"`, `"assistant"`). There is no functional difference. The mentor prefers the classes for readability. Dictionaries are common when the history comes from a database or a JSON API.
+
+**Which shape when:**
+
+| Shape | Use when |
+|---|---|
+| Plain text | A single standalone request with no history |
+| Message objects | Multi-turn conversations, multimodal content, system instructions |
+| Dictionaries | The same as objects, when the data arrives from a database or JSON API |
+
+LangChain also accepts a `("human", "text")` tuple and a bare string (turned into a human message), and converts all four shapes consistently. A dictionary that has no `content`, or has an unknown `role`, raises `MESSAGE_COERCION_FAILURE`.
+
+A `HumanMessage` can carry two optional fields, `name` (useful to label who is speaking in a multi-user chat) and `id` (a stable identifier for the message):
+
+```python
+human_msg = HumanMessage(content="Hi, how are you?", name="mayank", id="user_1234")
+```
 
 ### Few-shot prompting
 
@@ -134,7 +164,7 @@ print("tool_calls:    ", response.tool_calls)     # empty: no tools bound yet
 print(response.usage_metadata)
 ```
 
-You do not need a separate token-counting library, because the billed numbers are on the response. Streaming, structured output and tool calling all build on reading these fields correctly.
+`.text` is always a string. `.content` is usually the same, but can be a list of content blocks for richer replies. `pprint(response)` shows everything on the object at once. You do not need a separate token-counting library, because the billed numbers are on the response. `usage_metadata` can also hold finer breakdowns (`input_token_details` and `output_token_details`, for example cached tokens and reasoning tokens). If you need to track spend per user or per session, add `usage_metadata` up across the conversation: it is the exact billed number, not an estimate. Streaming, structured output and tool calling all build on reading these fields correctly.
 
 *Source: `classes_summary/08`.*
 
@@ -169,6 +199,19 @@ responses = model.batch([Q1, Q2, Q3])
 for response in responses:
     print(response)
 ```
+
+```python
+questions = ["Why do parrots have colorful feathers?", "How do airplanes fly?", "What is quantum computing?"]
+
+responses = model.batch(questions)                         # waits for ALL, same order as the input
+for q, r in zip(questions, responses):
+    print(f"Q: {q}\nA: {r.content[:80]}...")
+
+for idx, response in model.batch_as_completed(questions):  # each result as it finishes, order not guaranteed
+    print(f"[input #{idx}] {response.content[:50]}...")
+```
+
+The revision notebook's picture is a restaurant kitchen: `.batch()` sends every order at once and brings them **all** out together when the last one is done, while `.batch_as_completed()` brings each dish out the moment it is ready, possibly out of order. `batch_as_completed` hands back the input's index with each answer so you can match them up.
 
 - The requests must be **independent**, which is what lets them run in parallel.
 - By default `.batch()` waits and returns everything at once. `batch_as_completed()` returns each answer as soon as that one finishes, so it avoids waiting for the slowest. That is also how batching and streaming combine.
@@ -205,9 +248,42 @@ for tone, topic in [("playful and silly", "octopuses"), ("deadpan and serious", 
     print(f"[{tone} / {topic}] -> {result.content}")
 ```
 
-The structure is the same on every call and only the two variables change. The two "octopuses" answers sound completely different because of `tone` alone.
+The class ran it a third time with `("excited like a sports commentator", "the Roman Empire")`. The structure is the same on every call and only the two variables change. The two "octopuses" answers sound completely different because of `tone` alone.
 
-*Source: `classes_summary/08`, notebook `04_05_prompt_templates_structured_output_student_notes.ipynb` as described there (I did not open the notebook).*
+You are writing one prompt with two blanks and filling them three ways, not three prompts. The revision notebook's picture: an f-string is a napkin you scribble on each time, and a `ChatPromptTemplate` is a resume template with labelled blank fields.
+
+**The most common real bug: unescaped curly braces.** If the fixed text of a template contains literal braces (often from pasting in an example JSON object), LangChain reads them as more variables and fails. Double them to escape:
+
+```python
+# WRONG: the JSON example's braces are read as extra variables, so this raises KeyError
+ChatPromptTemplate.from_messages([
+    ("system", 'Respond in this format: {"name": "John", "age": 21}'),
+    ("human", "{question}"),
+])
+
+# RIGHT: escape literal braces by doubling them
+ChatPromptTemplate.from_messages([
+    ("system", 'Respond in this format: {{"name": "John", "age": 21}}'),
+    ("human", "{question}"),
+])
+```
+
+**`MessagesPlaceholder`** slots a whole list of earlier messages into a template as one variable:
+
+```python
+from langchain_core.prompts import MessagesPlaceholder
+
+history_aware_prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful assistant."),
+    MessagesPlaceholder("history"),
+    ("human", "{new_question}"),
+])
+result = history_aware_prompt.invoke({"history": [HumanMessage("My name is Rina."), AIMessage("Nice to meet you, Rina!")],
+                                      "new_question": "What's my name?"})
+response = model.invoke(result.to_messages())
+```
+
+*Source: `classes_summary/08`, notebooks `04_05_prompt_templates_structured_output_student_notes.ipynb` and `Revision_Parts_1-4.ipynb`. Not run.*
 
 ## 3.9 Questions from the class
 
@@ -241,6 +317,6 @@ Two more answers from the end-of-class session belong with later chapters, so th
 - Live-Class-2026, `classes_transcription_summary/07 - 18 Jul - LangChain Family & Harness Engineering.md` (section 3.1)
 - Live-Class-2026, `classes_summary/08 - 19 Jul - Inside the Model.md`
 - Live-Class-2026, `classes_transcription_summary/08 - 19 Jul - LangChain - Inside the Model.md`
-- Live-Class-2026, notebook `Weekend 04 - 18-19 Jul/07-08 - .../Notebook For Reference/02_03_environment_models_messages_student_notes.ipynb` (named in the summary, not opened)
+- Live-Class-2026, notebooks `02_03_environment_models_messages_student_notes.ipynb`, `04_05_prompt_templates_structured_output_student_notes.ipynb` and `Revision_Parts_1-4.ipynb` in `Weekend 04 - 18-19 Jul/07-08 - .../Notebook For Reference/`
 
 Previous: [Chapter 2](02-langchain-family-and-harness-engineering.md) · Next: [Chapter 4, Structured output](04-structured-output.md)

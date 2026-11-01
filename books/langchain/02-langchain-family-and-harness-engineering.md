@@ -15,6 +15,8 @@ The class notebook opens with the exact confusion it exists to clear: "LangChain
 | Deep Agents | Built on top of `create_agent`, with planning tools, a virtual file system and sub-agent spawning ready-made |
 | LangSmith | Different from the other three: an observability and evaluation platform, not something you build with |
 
+The official docs put the relationship this way: LangChain's agents are built on LangGraph to take advantage of its durable execution, human-in-the-loop support and persistence. LangSmith watches agents built with any of the other three and, because it supports OpenTelemetry, technically almost anything else too.
+
 **A common mix-up.** LangFuse is **not** part of the LangChain family. It only shares "Lang" in the name and is an independent open-source observability platform.
 
 *Source: Live-Class-2026, `classes_summary/07`, `classes_transcription_summary/07`.*
@@ -40,7 +42,7 @@ The class said the free Developer tier included 5,000 traces a month as of 2026,
 
 The **model** is raw reasoning power that cannot do anything: it does not know what tools exist, has no behavioural instructions, and cannot check anything outside its own knowledge. The **harness** (system prompt, tools, middleware) turns that into something useful. `create_agent(model=..., tools=..., system_prompt=...)` configures the harness **around** a model. It never builds a new model.
 
-The mentor's analogy: the model is the engine, the harness is everything else, and the agent is the car you can drive. Even Claude Code and ChatGPT are, at their core, a brain wrapped in connectors, skills, memory and web search.
+The mentor's analogy: the model is the engine, the harness is everything else, and the agent is the car you can drive. The revision notebook adds two more. A Formula 1 car: a bare engine on a workbench is superb engineering that cannot take you anywhere until it has a chassis, tyres and a pit crew. And a construction site: LangGraph is the foundation and steel that you rarely touch, `create_agent` is the prefabricated rooms (ready-made but customisable), Deep Agents is the furnished show home next door, and LangSmith is the site inspector with cameras pointed at everything else. It also compares the three tiers to cooking: LangGraph is whole spices you grind yourself, `create_agent` is pre-mixed masala you can still adjust, and Deep Agents is the dish already cooked. Even Claude Code and ChatGPT are, at their core, a brain wrapped in connectors, skills, memory and web search.
 
 **Harness engineering** is the name for how well you wrap a raw model with the right system prompt, tools, middleware, guardrails and checkpoints. The components named in class: the model, tools, a system prompt, memory, context (earlier messages and documents) and sub-agents. `create_agent` officially exposes the model, tools, system prompt, structured output, invocation and streaming output, and each gets its own deep dive later.
 
@@ -69,7 +71,7 @@ The class plans to teach LangChain in real depth over three or four classes, bec
 
 The summary dates the first agents to Dec 2022. The transcript is vaguer ("late 2022 or 2023"), so I used the summary's date.
 
-Old "Chains" were a fixed workflow: prompt, then node, node, node. ReAct (Reason plus Act) then gave agents that could reason and act, which is still the shape of most real applications.
+Old "Chains" were a fixed workflow: prompt, then node, node, node (the notebook's example is a RAG chain: retrieve documents, then generate an answer). For two years, 2022 to 2024, building an agent meant hand-parsing JSON into tool calls, which is what classes such as `AgentExecutor` and functions such as `initialize_agent` do. That did not scale well, which is why LangGraph was built. ReAct (Reason plus Act) then gave agents that could reason and act, which is still the shape of most real applications.
 
 **Spotting an outdated tutorial.** If a 2026 tutorial imports `AgentExecutor` directly from `langchain`, running it raises an `ImportError`. That is not a fault in your set-up. That code now deliberately lives in `langchain-classic`, kept apart so the v1.0 package stays clean. Old Classic code still runs, but it is legacy and unmaintained (the mentor's analogy: an old iPhone still charges, but nobody is fixing its bugs).
 
@@ -81,7 +83,16 @@ Old "Chains" were a fixed workflow: prompt, then node, node, node. ReAct (Reason
 
 **Where to run code.** Google Colab is best for learning line by line: it is free, needs no local set-up and works on weak laptops. VS Code is for real projects with several dependent files and a front end. All notebooks are also on GitHub. The mentor's advice was not to code along live but to watch and then practise from the recording.
 
-**Project set-up** is the same as Chapter 1, section 1.5: `uv init`, `uv add langchain langchain-openai langchain-anthropic`, then `.env`, `.gitignore` and `.env.example`.
+**Project set-up** is the same as Chapter 1, section 1.5. The class project (`langchain-course`) installs a larger set up front:
+
+```bash
+uv init langchain-course
+cd langchain-course
+uv add langchain langchain-openai langchain-community langgraph python-dotenv
+uv add langchain-mcp-adapters langchain-chroma chromadb pypdf
+```
+
+The second `uv add` line holds packages you do not need until later modules (connecting to external tools, and retrieval). Installing them now avoids stopping mid-course. In Colab, install directly with `!pip install -q langchain langchain-openai langchain-community langgraph python-dotenv langchain-chroma chromadb`, and note that Colab resets its packages each session, so run the install once per session.
 
 **Loading keys.** `load_dotenv()` then `os.environ.get("OPENAI_API_KEY")`. As a safe check, print only the first five characters of the key, never the whole key. Setting `os.environ["OPENAI_API_KEY"] = "..."` also works, but `.env` with `load_dotenv()` is the safer, reusable pattern. In Colab use the built-in **Secrets** manager (the key icon), not a key typed into a cell.
 
@@ -106,7 +117,7 @@ agent = create_agent(
 agent.invoke({"messages": [{"role": "user", "content": "Weather in SF?"}]})
 ```
 
-If this runs in both Colab and VS Code, the environment is wired correctly.
+If this runs in both Colab and VS Code, the environment is wired correctly. The notebooks call it the official quickstart, taken unmodified from the LangChain docs, so passing it means the environment is genuinely correct. If the model name has been retired, check docs.langchain.com for the current catalogue and change only that string. The class's own run printed the final message's `content_blocks` as a list of blocks, `[{'type': 'text', 'text': '...sunny in San Francisco.'}]`. If it raises an authentication error, the usual causes are a `.env` that is not in the folder you run from, or a `.env` created after the session started, which needs a kernel or runtime restart.
 
 *Source: `classes_transcription_summary/07`. Not run: LangChain is not installed in my sandbox.*
 
@@ -141,6 +152,9 @@ From the course's own FAQ notes for the session:
 | Which is better, Anthropic or OpenAI? | It depends on use case, budget and needs |
 | Paid or free models in a real project? | It depends on requirements and budget |
 | Does the chat model manage chat history for you? | No. History management is still your job |
+| Do I have to pay for LangSmith to follow the course? | No. The free Developer tier covers 5,000 traces a month, far more than learning needs. Paid tiers matter only for production traffic |
+| What happens to old LangChain code after upgrading to v1.0? | It does not break silently, but code that uses things like `AgentExecutor` raises an `ImportError`. Install `langchain-classic` to keep old code running while you migrate |
+| Is Deep Agents just LangGraph or LangChain with extra steps? | Neither. It is built on top of LangChain's `create_agent`, one layer further out, with planning, a virtual file system and sub-agent spawning ready-made |
 
 *Source: `classes_summary/07`, `classes_transcription_summary/07`.*
 
@@ -150,6 +164,8 @@ From the course's own FAQ notes for the session:
 2. If your agent misbehaves in production and you need to know what happened on one run? **LangSmith.**
 3. Fill in the blank: an agent is a model calling ___ in a ___ until a task is complete. **Tools, loop.**
 4. Why would a tutorial using `AgentExecutor` suggest outdated content? It predates the October 2025 v1.0 unification into `create_agent`.
+
+The revision notebook has a longer self-check that also asks what separates `runtime.state` from `runtime.context` and what causes `INVALID_PROMPT_INPUT`. The notebook does not teach either, so they are left out here and will be covered when the chapters that teach them are written.
 
 ## Practice
 
@@ -162,6 +178,6 @@ From the course's own FAQ notes for the session:
 
 - Live-Class-2026, `classes_summary/07 - 18 Jul - LangChain Family & Harness Engineering.md`
 - Live-Class-2026, `classes_transcription_summary/07 - 18 Jul - LangChain Family & Harness Engineering.md`
-- Live-Class-2026, notebook `Weekend 04 - 18-19 Jul/07-08 - .../Notebook For Reference/01_landscape_student_notes.ipynb` (named in the summary, not opened)
+- Live-Class-2026, notebooks `01_landscape_student_notes.ipynb`, `Revision_Parts_1-4.ipynb` and the `langchain-course` folder (`Common FAQs`, `commands.txt`, `setup_check.ipynb`) in `Weekend 04 - 18-19 Jul/07-08 - .../`
 
 Previous: [Chapter 1](01-introduction-to-langchain.md) · Next: [Chapter 3, Models, messages and parameters](03-models-messages-and-parameters.md)
