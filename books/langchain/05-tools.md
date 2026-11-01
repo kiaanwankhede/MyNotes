@@ -363,7 +363,7 @@ Not in the course material. Established practice, but check current docs.
 - **Check permissions inside the tool.** Hiding a tool is a good first layer. The tool should still verify that this user may do this action
 - **Keep secrets out of arguments.** Pass tokens and user ids through `runtime.context`, so the model never sees or invents them
 - **Write docstrings like a job posting.** What it does, when to use it, when **not** to, and what the arguments mean. Vague docstrings are the top cause of wrong tool choice
-- **Return errors as text.** Let the model read "not found" and adapt, instead of crashing the run ([Chapter 8](08-guardrails-to-do-lists-and-tool-resilience.md))
+- **Return errors as text.** Let the model read "not found" and adapt, instead of crashing the run ([Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md))
 - **Fewer, sharper tools.** Accuracy of tool choice tends to drop as the list grows. That is the reason dynamic loading exists
 - **Make side-effect tools safe to repeat** (idempotent), because loops and retries can call them twice
 

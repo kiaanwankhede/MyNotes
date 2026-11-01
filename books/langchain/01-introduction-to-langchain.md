@@ -289,7 +289,7 @@ Not in the course material. Well-established practice, but check current docs be
 - **Prompt injection**
   - A fetched web page can contain text written to look like instructions
   - Treat tool output as **data**, never as instructions
-  - Do not give an agent that reads the open web tools that can also send, delete or spend, without a human approval step ([Chapter 10](10-runtime-and-human-in-the-loop.md))
+  - Do not give an agent that reads the open web tools that can also send, delete or spend, without a human approval step ([Chapter 11](11-runtime-and-human-in-the-loop.md))
 - **SSRF (server-side request forgery)**
   - If the model controls the URL, it can be steered to internal addresses
   - In real systems, allow-list domains and block private IP ranges
