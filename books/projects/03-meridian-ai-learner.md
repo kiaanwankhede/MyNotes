@@ -11,7 +11,7 @@
 
 **Builds on:** [LangChain Ch4](../langchain/04-structured-output.md) (structured output), [LangChain Ch5](../langchain/05-tools.md) (tools), [LangChain Ch6](../langchain/06-agents-and-memory.md) (agents). Pydantic is used for request shapes.
 
-> **Status of these notes.** Built from the README, `DEPLOY.md`, the four sample PDFs and, for settings, logging and document Q&A, the backend code (3.4, 3.6, 3.8), which was run with stand-ins for Google's services. The **agent and web code** is not read yet. The **frontend is left out** at your request. **Nothing was deployed.**
+> **Status of these notes.** Built from the README, `DEPLOY.md`, the four sample PDFs and, for settings, logging and document Q&A, the backend code (3.4, 3.5, 3.6, 3.8), which was run with stand-ins for Google's services. The **web code** is not read yet. The **frontend is left out** at your request. **Nothing was deployed.**
 
 ## 3.1 What it is
 
@@ -118,12 +118,85 @@ def ingest_pdf(local_path, source):
 ## 3.5 Purchase audit (agents)
 
 - Input: a request, for example 200 PLC controllers from Japan, 480,000 EUR
-- **Three agents** each read it and choose their own tools (the README lists **five tools**; one example is the exchange-rate check)
-  - Risk, tax and control
-- A final step reads the three reports and writes **one memo** with a decision
-  - Approved, conditional hold, or rejected
-- Output is four texts: three reports and the memo. Wording changes; layout stays the same
-- Takes up to a minute or more, because several model calls run in turn
+- Output is four texts: three specialist reports and one CFO memo. Wording changes; layout stays the same
+- Takes up to a minute or more, because the model is called many times, **one after another**
+
+**Shape** (`agent/agents.py`):
+
+```
+request -> Risk agent -> Tax agent -> Control agent -> CFO prompt -> memo
+```
+
+- The README diagram draws the three agents side by side. The code runs them **in sequence**: `run_audit` calls `risk`, then `tax`, then `control`. No agent sees another's report
+- Each specialist is one line of LangChain: `create_agent(model=get_llm(), tools=[...], system_prompt=...)`
+- The CFO step is **not an agent**. It is one plain model call with a prompt that has the three reports pasted in
+- The result is a dict: `risk_result`, `tax_result`, `control_result`, `cfo_memo`
+
+**The agents and their tools** (`agent/tools.py`, five tools):
+
+| Agent | Tools | What the tool does |
+|---|---|---|
+| Risk & Compliance | `check_sanctions_list(vendor_name)` | asks the **model** to screen from its training knowledge; answers `RED ALERT:` or `CLEARED:` |
+| | `get_vendor_credit_score(vendor_name)` | asks the model for JSON `{score, risk_level, reasoning}`; formats it |
+| Tax & Treasury | `calculate_cross_border_tax(amount, origin, destination)` | asks the model for rates and amounts as JSON |
+| | `validate_fx_hedge(currency_pair, rate_used)` | gets a live rate from the Frankfurter API, else asks the model; flags a gap above 5% |
+| Financial Control | `categorize_expense(amount, item_description)` | asks the model for CapEx or OpEx, with flags |
+
+- **Four of the five "tools" are the model answering a prompt.** Only the exchange rate comes from outside. The README says so ("done by the AI from its general knowledge")
+- A tool's name, argument names and docstring become what the agent sees. The docstring is the description
+- The agents have **no document search tool**. The audit never reads the PDFs from Document Q&A. The rules it applies (19% VAT, EUR 250,000 and 1,000,000 thresholds) are **typed into the prompts**
+
+**The prompt recipe** (`agent/prompts.py`, stated in the file's comments):
+
+1. **Role**: who the agent is, with the fictional company's background
+2. **Responsibilities**: what it owns
+3. **Decision framework**: which tool first, how to read each result, thresholds
+4. **Output format**: an exact structure, so the next step can rely on it
+
+- Risk: sanctions first ("a hard blocker"), then credit score. 75 or more is low risk, 50-74 needs a deposit or letter of credit, below 50 escalates to the Head of Procurement and CFO
+- Tax: German VAT 19%, intra-EU B2B reverse charge 0%, third-country import VAT plus customs duty; then the FX check
+- Control: CapEx versus OpEx per IFRS; EUR 250,000 means Department Head, EUR 1,000,000 means CFO and Board; GL account ranges `0xxx`, `4xxx`, `5xxx`, `6xxx`
+- **The CFO prompt holds the decision rule:**
+  - any `RED ALERT` means REJECTED
+  - any `FX ALERT` or `HOLD FOR TREASURY AUDIT` means CONDITIONAL HOLD
+  - all approved means APPROVED TO PAY
+- The file warns that these literal strings come from the tools and prompts. **Rename one and the rule silently stops matching**
+
+**Run with stand-ins** (a scripted agent model and a scripted tool model, pinned `langchain` 1.2.11):
+
+- The order was: risk calls both tools, then tax, then control, then the CFO call. Each report was built from its tool results
+- With a sanctions `RED ALERT`, the **tax and control agents still ran** and the alert text reached the CFO prompt
+- So "REJECTED" depends on the model following the prompt. **No line of code enforces it.** What the real model does was not run
+
+**The five tools, tested one by one** (model replaced by a fake):
+
+| Tool | What happened |
+|---|---|
+| Sanctions | `CLEARED` passes through. A model error gives `SYSTEM WARNING ... Manual review required` |
+| Credit score | Plain JSON and JSON wrapped in a code fence are parsed into `CREDIT SCORE: 82/100 | RISK: LOW | ...`. Plain text passes through. Missing keys give `N/A/100`. **JSON that is a list crashes** with `AttributeError` |
+| Tax | Good JSON passes. **Unparseable text becomes a flat 15% rate** (480,000 gives 72,000) with a note. A missing `tax_rate` also defaults to 15%. A model error returns an `error` dict |
+| FX | Live rate used when the API answers. 4.9% off passes, 6% off gives `FX ALERT`, exactly 5% passes (the check is strictly greater than 5%) |
+| Expense | If the model is down, a heuristic runs (below) |
+
+**FX tool surprises** (all run):
+
+- The Frankfurter call failed from my sandbox, so the fallback was exercised
+- If the API fails and the **model guesses** the rate, the text still says "**live market** rate". Only a pair with no separator (such as `EURJPY`) says "estimated"
+- The model replying with text (`about 163.5 JPY`) gives an `FX WARNING`. The model replying `0` **crashes** with `ZeroDivisionError`
+- The prompts talk about Aldermoor's **hedged rate**. The tool compares to the **market** rate
+
+**Fallback heuristic in `categorize_expense`** (model down): anything over 50,000, or a description containing `server`, `machine`, `vehicle`, `building`, `equipment` or `hardware`, becomes CapEx over 3 years.
+
+- 120,000 CNC machine: CapEx (right)
+- 60,000 lubricants and consumables: CapEx (wrong, it is OpEx)
+- 10,000 cloud server **subscription**: CapEx (wrong)
+- 500 "hardware store screws": CapEx (wrong)
+
+**`generate_json.py`** belongs to the deploy:
+
+- It writes `init_embeddings.json`: one record, id `init_0001`, with **768 random numbers** (about 15.9 KB)
+- `deploy.yml` runs it and copies the file to the bucket before creating the index. A new index needs starting data, and the dimension must be 768
+- The workflow's index settings include 768 dimensions and `DOT_PRODUCT_DISTANCE`. The rest of `deploy.yml` is not covered here
 
 ## 3.6 Why many files
 
@@ -257,6 +330,15 @@ gcloud projects delete YOUR_PROJECT_ID     # removes everything
 **Q10. The audit says "approved". Should you trust it?**
 - No. The checks come from general model knowledge. Treat it as a demo
 
+**Q11. How would you make the three specialists run in parallel?**
+- They do not depend on each other, so run them together (threads or async) and join the results before the CFO call. Total time becomes the slowest agent, not the sum
+
+**Q12. Where does the "RED ALERT means reject" rule live, and is that safe?**
+- In the CFO prompt text. Safe only if the model always obeys. For a hard rule, check the result in code
+
+**Q13. Why is a model-backed sanctions check weak?**
+- The model answers from training knowledge, which can be stale or wrong. A real check calls an official list
+
 ## 3.12 Added by Claude, not from the sources
 
 - **Worked example (my arithmetic, not app output).** Using the figures from the README example and the sample tariff and procurement documents:
@@ -268,12 +350,17 @@ gcloud projects delete YOUR_PROJECT_ID     # removes everything
   - Approval: above EUR 250,000 needs **Department Head**; below EUR 1,000,000 so **no CFO and Board**
   - Quoted yen amount at 1 EUR = 163.5 JPY = **JPY 78,480,000**
   - Whether the app reaches the same numbers is **not tested**. Use these to judge its output
+- **The audit will not use the 2.2% in the tariff PDF.** The tax tool asks the model for a "general merchandise" duty rate, and no tool reads documents. Expect a different duty from the worked example above
 - **Compare answers to the PDFs, not to your expectations.** A good RAG test set has questions whose answers you can find on a page
 - **Add a "not in the documents" question** every time. It is the test that catches made-up answers
 - **The sample set is too small to prove retrieval.** Each of the four PDFs is one page and **one chunk** (644 to 949 characters, under the 1,000 limit). So the whole store holds 4 chunks and "the 3 closest" returns 3 of 4. A right answer proves the pipeline is wired, not that retrieval is good. The "not in the documents" question is the stronger test
 - **Retrieval count (3) is a trade-off.** Too few misses facts, too many adds noise
 - **`contextual` gets expensive:** one model call per chunk fetched (10) plus the answer
 - **A bulk GCS run stops at the first bad PDF.** There is no per-file `try`, so files after it are skipped. With 3 files and the 2nd corrupt, only 1 was stored. Wrap each file if you want the rest to continue
+- **Make the safety rule code, not prose.** If a sanctions check returns `RED ALERT`, stop the run in Python and reject. Today the other agents still run and the model is trusted to apply the rule
+- **Labels should tell the truth.** An FX result guessed by the model should never say "live market"
+- **Validate model JSON.** Check it is a dict, check ranges (a rate between 0 and 1, a score between 0 and 100), and fail loudly instead of defaulting to 15%
+- **Use the structured-output tools** from [LangChain Ch4](../langchain/04-structured-output.md) instead of asking for "strict JSON" and parsing text
 - **`exc_info` is not rendered** (see 3.8). Add structlog's exception formatter if you want tracebacks in the logs
 - **Pin model names in config.** The README warns that model names are retired; the default shown there is its own and was not checked
 
@@ -298,14 +385,16 @@ gcloud projects delete YOUR_PROJECT_ID     # removes everything
 
 ## How this chapter was checked
 
-- Read fully: `README.md`, `DEPLOY.md`, four sample PDFs, `.env.example`, and the settings, logger and five `rag/` files
+- Read fully: `README.md`, `DEPLOY.md`, four sample PDFs, `.env.example`, the settings, logger and five `rag/` files, and the `agent/` files plus `generate_json.py`
 - Computed in Python: the figures in 3.12
 - **Run** with the pinned packages from `requirements.txt` (`langchain` 1.2.11, `pydantic` 2.12.5, `structlog` 26.1.0, `pypdf` 6.7.5):
   - settings: defaults, environment override, `.env` file, a bad temperature (a clear validation error), the credentials path
   - logger: JSON fields, console and file output, the GCS skip and failure messages
   - ingestion: the 4 sample PDFs (4 chunks), a 7,689-character page (9 chunks, neighbours share 91 to 97 characters), a fake GCS bucket, a corrupt PDF
+  - tools: all five, with the model replaced by a fake (every case in 3.5), and the FX tool with a faked API
+  - agents: the whole `ProcurementSupervisor` flow with a scripted agent model and a scripted tool model, including the `RED ALERT` case
   - retrieval: all three retrievers plus an unknown type, with a **stand-in embedding** (word counts) and a **stand-in chat model**. This checks the wiring and the call counts. It says **nothing** about Vertex or Gemini answer quality
-- **Not read:** the agent and API code, the tests, the Dockerfile, `deploy.yml`. The frontend is left out at your request
+- **Not read:** the API code, the tests, the Dockerfile, and `deploy.yml` beyond the lines around `generate_json.py`. The frontend is left out at your request
 - **Not run:** the real app, Vertex AI, Gemini, Cloud Storage, the deploy. The price figure in `DEPLOY.md` is third-party, as the guide says
 
 ## Sources and further reading
