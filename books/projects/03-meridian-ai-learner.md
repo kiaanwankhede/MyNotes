@@ -11,7 +11,7 @@
 
 **Builds on:** [LangChain Ch4](../langchain/04-structured-output.md) (structured output), [LangChain Ch5](../langchain/05-tools.md) (tools), [LangChain Ch6](../langchain/06-agents-and-memory.md) (agents). Pydantic is used for request shapes.
 
-> **Status of these notes.** Built from the README, `DEPLOY.md` and the four sample PDFs. The backend and frontend **code was not read**, and **nothing was deployed or run**. Code-level notes will be added when the code batch is done.
+> **Status of these notes.** Built from the README, `DEPLOY.md`, the four sample PDFs and, for settings, logging and document Q&A, the backend code (3.4, 3.6, 3.8), which was run with stand-ins for Google's services. The **agent and web code** is not read yet. The **frontend is left out** at your request. **Nothing was deployed.**
 
 ## 3.1 What it is
 
@@ -68,12 +68,52 @@ Browser (React) -> FastAPI backend
 - If the answer is not in the documents, it should say it does not know. **Test this** (3.7)
 - Why not paste the whole PDF into the prompt? Cost, limits, and noise. Retrieval sends only what matters
 
+**The code, file by file** (`backend/rag/`):
+
+| File | Job |
+|---|---|
+| `data_ingestion.py` | PDF to pages to chunks to Vector Search |
+| `embeddings.py` | Text to a 768-number vector (Vertex AI `text-embedding-005`) |
+| `vector_store.py` | Connect to Vertex AI Vector Search |
+| `llm.py` | The Gemini chat model, plus `extract_text` |
+| `retrieval.py` | Find chunks, build the prompt, call the model |
+
+**Ingest** (`data_ingestion.py`):
+
 ```python
-# the idea, not the repo's code (not read)
-q_vec  = embed(question)
-chunks = vector_search(q_vec, k=3)
-answer = llm(f"Answer only from this:\n{chunks}\n\nQ: {question}")
+CHUNK_SIZE = 1000
+CHUNK_OVERLAP = 100      # neighbouring chunks share up to 100 characters
+
+def ingest_pdf(local_path, source):
+    pages = PyPDFLoader(local_path).load()
+    for page in pages: page.metadata["source"] = source
+    chunks = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100).split_documents(pages)
+    get_vector_store().add_documents(chunks)       # embeds, then stores
+    return {"pages": len(pages), "chunks": len(chunks)}
 ```
+
+- `source` is written into every chunk so an answer can be traced to a file
+- `ingest_data_from_gcs()` does the same for every `.pdf` under the bucket and prefix: download to a temp folder, ingest, delete the folder
+- Two ways in: the upload endpoint calls `ingest_pdf`; the bulk route calls the GCS version
+
+**Ask** (`retrieval.py`): three retrievers, chosen by `retriever_type`:
+
+| Type | What it does | Model calls per question |
+|---|---|---|
+| `similarity` (default) | the 3 closest chunks | 1 (the answer) |
+| `multiquery` | the model rewrites the question several ways, results merged | 2 |
+| `contextual` | fetch 10 chunks, the model trims each to the relevant part | one **per chunk fetched**, plus the answer |
+
+- An unknown type logs a warning and falls back to `similarity`
+- The system prompt says: answer from the context, otherwise say you don't know, keep it concise
+- It uses `create_stuff_documents_chain` and `create_retrieval_chain` from `langchain_classic`, the older chain helpers
+- `get_llm()`, `get_embeddings()` and `get_vector_store()` are cached with `lru_cache` and connect on **first use**, so `/api/health` works before Google is configured
+
+**Two ways to sign in to Google** (the file says this on purpose):
+
+- Gemini chat: an **API key** (`GOOGLE_API_KEY`)
+- Embeddings and Vector Search: **Google Cloud credentials**
+- The index is built with **768 dimensions**. The same embedding model must be used to index and to search
 
 ## 3.5 Purchase audit (agents)
 
@@ -95,6 +135,12 @@ answer = llm(f"Answer only from this:\n{chunks}\n\nQ: {question}")
   - `config/settings.py`, `logger/custom_logger.py`, `tests/`
 - **Prompts live in their own file.** You can edit instructions without touching logic
 - **Settings come from `.env`**, never from code, and `.env` is never committed
+  - `config/settings.py` is a `pydantic-settings` class. Each field maps an environment name to a Python name, for example `GCP_PROJECT_ID` becomes `settings.GCP_PROJECT`
+  - It reads `.env` from the **current folder**, which is why you start the app from the main folder
+  - Defaults: temperature `0.0`, embedding model `text-embedding-005`, chat model `gemini-3.8-flash` (the repo's own default; model names get retired, so check it)
+  - Unknown variables are ignored (`extra="ignore"`)
+  - If `GCP_SERVICE_ACCOUNT_PATH` points to an existing file, the module sets `GOOGLE_APPLICATION_CREDENTIALS` for you. A missing file is **silently ignored**; the log lines for it are commented out
+  - `.env.example` lists every variable. `VECTOR_SEARCH_INDEX_ID` and the endpoint ID stay empty until the deploy prints them
 
 ## 3.7 Run it
 
@@ -127,6 +173,12 @@ uvicorn api.main:app --app-dir backend --reload --port 8080
 ## 3.8 Logs and tests
 
 - The app writes **one JSON line per event** (structlog). When something fails, read the last lines
+- `logger/custom_logger.py`:
+  - Importing `logger` creates one shared logger, a `logs/` folder in the current directory, and a timestamped file
+  - Lines go to the console **and** the file as JSON, with `timestamp`, `level`, `event` and any extra fields (`log.info("Embedding chunks", source="a.pdf", chunks=3)`)
+  - A small step copies the level into `severity`, which Cloud Logging uses to colour and filter entries
+  - On exit, the file is uploaded to `gs://<bucket>/logs/<timestamp>.log`. With no bucket set it prints a skip message; with a bucket but no credentials it prints the error and moves on
+- **Gap:** `log.error("...", exc_info=True)` writes `"exc_info": true`, **not** the traceback, because no step turns it into text
 - Tests need no accounts. They run the parts that do not call the cloud
 - A rule worth copying: **a project's tests should run with no internet and no keys**
 
@@ -196,7 +248,13 @@ gcloud projects delete YOUR_PROJECT_ID     # removes everything
 **Q7. What is the cost trap in this project?**
 - A vector index endpoint bills hourly while deployed, idle or not
 
-**Q8. The audit says "approved". Should you trust it?**
+**Q8. Why use `lru_cache` on the model and store getters?**
+- They connect on first use and are reused. The API can start and answer `/health` before Google is set up
+
+**Q9. Why overlap chunks?**
+- A sentence cut at a boundary still appears whole in one of the two neighbours. Cost: some repeated text
+
+**Q10. The audit says "approved". Should you trust it?**
 - No. The checks come from general model knowledge. Treat it as a demo
 
 ## 3.12 Added by Claude, not from the sources
@@ -212,7 +270,11 @@ gcloud projects delete YOUR_PROJECT_ID     # removes everything
   - Whether the app reaches the same numbers is **not tested**. Use these to judge its output
 - **Compare answers to the PDFs, not to your expectations.** A good RAG test set has questions whose answers you can find on a page
 - **Add a "not in the documents" question** every time. It is the test that catches made-up answers
+- **The sample set is too small to prove retrieval.** Each of the four PDFs is one page and **one chunk** (644 to 949 characters, under the 1,000 limit). So the whole store holds 4 chunks and "the 3 closest" returns 3 of 4. A right answer proves the pipeline is wired, not that retrieval is good. The "not in the documents" question is the stronger test
 - **Retrieval count (3) is a trade-off.** Too few misses facts, too many adds noise
+- **`contextual` gets expensive:** one model call per chunk fetched (10) plus the answer
+- **A bulk GCS run stops at the first bad PDF.** There is no per-file `try`, so files after it are skipped. With 3 files and the 2nd corrupt, only 1 was stored. Wrap each file if you want the rest to continue
+- **`exc_info` is not rendered** (see 3.8). Add structlog's exception formatter if you want tracebacks in the logs
 - **Pin model names in config.** The README warns that model names are retired; the default shown there is its own and was not checked
 
 ## Recap
@@ -236,10 +298,15 @@ gcloud projects delete YOUR_PROJECT_ID     # removes everything
 
 ## How this chapter was checked
 
-- Read fully: `README.md`, `DEPLOY.md`, four sample PDFs
+- Read fully: `README.md`, `DEPLOY.md`, four sample PDFs, `.env.example`, and the settings, logger and five `rag/` files
 - Computed in Python: the figures in 3.12
-- **Not read:** all backend and frontend code, the Dockerfile, `deploy.yml`
-- **Not run:** the app, tests, the deploy, any Google service. The price figure in `DEPLOY.md` is third-party, as the guide says
+- **Run** with the pinned packages from `requirements.txt` (`langchain` 1.2.11, `pydantic` 2.12.5, `structlog` 26.1.0, `pypdf` 6.7.5):
+  - settings: defaults, environment override, `.env` file, a bad temperature (a clear validation error), the credentials path
+  - logger: JSON fields, console and file output, the GCS skip and failure messages
+  - ingestion: the 4 sample PDFs (4 chunks), a 7,689-character page (9 chunks, neighbours share 91 to 97 characters), a fake GCS bucket, a corrupt PDF
+  - retrieval: all three retrievers plus an unknown type, with a **stand-in embedding** (word counts) and a **stand-in chat model**. This checks the wiring and the call counts. It says **nothing** about Vertex or Gemini answer quality
+- **Not read:** the agent and API code, the tests, the Dockerfile, `deploy.yml`. The frontend is left out at your request
+- **Not run:** the real app, Vertex AI, Gemini, Cloud Storage, the deploy. The price figure in `DEPLOY.md` is third-party, as the guide says
 
 ## Sources and further reading
 
