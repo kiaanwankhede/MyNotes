@@ -74,6 +74,8 @@ tool_limited_agent = create_agent(
 - Class demo: three separate `invoke`s asking to cancel B100, B101, B102. The third tool call was refused with the tool message `Tool call limit exceeded. Do not call 'cancel_booking' again.`
 - **Default behaviour (`exit_behavior="continue"`):** the blocked call becomes an **error tool message**, and the model carries on and can explain. Other options: `"end"` and `"error"`
 - A strict limit on one irreversible tool plus a looser overall limit is a common pairing (assignment question A2 Q10)
+- **Run vs thread, class 13 wording:** a run limit of 4 caps the chapatis in one sitting, a thread limit of 10 caps the whole day however it is split. Another picture: the searches inside **one reply** are the run, the total across the **whole chat session** is the thread
+- **A limit rejection is a tool message with an error status, not an interrupt.** An interrupt exists to ask a human for a decision. A limit needs no human input, so the call is refused and reported back as information the model can pass on to the user
 
 ## 8.3 `ModelFallbackMiddleware`
 
@@ -126,12 +128,22 @@ Strategies (checked on `langchain` 1.4.7):
 
 - **`redact`:** removes the value. `priya@example.com` becomes `[REDACTED_EMAIL]`
 - **`mask`:** keeps a hint so the model can tell something was there. `priya@example.com` becomes `priya@****.com`
-- **`hash`:** replaces it with a hash, for example `<email_hash:6bdb7e96>`
+- **`hash`:** replaces it with a **deterministic** hash, for example `<email_hash:6bdb7e96>`. The same input always gives the same hash
+  - Identity stays usable for analytics and debugging without exposing the value
+  - Class analogy: telling an outsider a card is "AMZ1234ABC" reveals nothing, but the system that made the reference can still look it up
+  - When a tool really needs the real value, the lookup that turns the hash back into it happens **separately, outside the model's view**. The model never sees it
 - **`block`:** stops the run with a `PIIDetectionError`
 
 Built-in types in this version: `email`, `credit_card`, `ip`, `mac_address`, `url`. Anything else is a **custom** type.
 
-> **What really happened with the class card number.** The class text says the card `4111-1111-1111-1234` was masked. The notebook output shows it was **not**: only the email was redacted, and the model even warned the user about the card. The built-in card detector checks that the number is **valid** (a checksum, the Luhn check), and this made-up number fails it. A valid test number such as `4111-1111-1111-1111` is masked to `****-****-****-1111`. Class 13 covers the detail. For now: **test with valid-looking numbers, and remember a detector can skip lookalikes**
+> **What really happened with the class card number.** The class text says the card `4111-1111-1111-1234` was masked. The notebook output shows it was **not**: only the email was redacted, and the model even warned the user about the card. The built-in card detector checks that the number is **valid** (a checksum, the Luhn check), and this made-up number fails it. A valid test number such as `4111-1111-1111-1111` is masked to `****-****-****-1111`. Class 13 found this live in the docs: the detector uses the **Luhn algorithm**, the standard checksum that real card numbers satisfy. A string of digits that fails it does not register as a card. So: **test with valid-looking numbers, and remember a detector can skip lookalikes**
+
+What the class 13 run also showed:
+
+- Instead of silently stripping the data, the agent's **reply warned the user** not to share full card numbers in chat. That is a better experience than a blunt rejection
+- The message history confirmed the email was redacted **before** it reached the model
+- **Why this matters beyond the reply:** even if the system prompt tells the model not to misuse personal data, sending that data to a third-party provider is itself a **compliance question**. A customer could ask why their information left your application at all. Audits increasingly ask this
+- **Real payment details:** do not let card numbers pass through the model to complete a purchase. Use a **headless tool**, a secure payment page the user interacts with directly, outside the model's view ([Chapter 6](06-agents-and-memory.md), 6.7)
 
 **Custom PII types.** Aadhaar and PAN (India-specific IDs) are named on the whiteboard as formats no framework can ship for every country. Supply your own detector, either as a **function** or as a **regex string**:
 
@@ -163,6 +175,8 @@ custom_pii_agent = create_agent(
 
 The function detector returns a list of dicts with `text`, `start` and `end`.
 
+Class 13 used `strategy="hash"` for the booking codes. Checked: `BK1044` becomes `<booking_code_hash:94be15f9>`.
+
 Three more switches (from the library signature, not explained in class 12):
 
 - `apply_to_input` (default `True`): clean user messages before the model
@@ -174,7 +188,12 @@ Three more switches (from the library signature, not explained in class 12):
 > **A guardrail is the concept: protecting the agent from doing something undesirable. Middleware is the mechanism you use to implement it.**
 
 - The whiteboard: "Guardrails is a way to control the AI agent behaviour." PII detection is one concrete guardrail, implemented with `PIIMiddleware`
-- They are **not two competing systems**. Guardrails are applied **as** middleware
+- They are **not two competing systems**. Middleware is one **mechanism** for a guardrail. Class 12 put it as "guardrails are applied as middleware". Class 13 adds that careful system-prompt instructions and third-party libraries are other mechanisms
+- **Highway analogy (class 13):** a barrier on a mountain road keeps a car from going over the edge. A barrier on a highway keeps it from swerving into oncoming traffic. An agent's output is unpredictable by default, so something must bound what it can say or do
+- Working definition: "a guardrail is a way to control the AI agent's behaviour, that's it"
+- **Built-in guardrails you can see:** a chat product refuses a request for something dangerous and deflects a request for its raw system message. The tighter the guardrail, the harder it is to work around. Gaps make a system easier to push past
+- **Even a tool call limit is a guardrail.** It is a deliberate constraint on behaviour
+- **"Compliance" is not defined by the framework.** It is defined outside it, by company policy, regulation or certification (HIPAA, GDPR, SOC 2)
 - Examples the board gives: the user talks rudely or gives personal info, and the agent flags it
 - This came up repeatedly in class and is a **common interview question**
 
@@ -281,7 +300,7 @@ PIIMiddleware("pan", detector=r"\b[A-Z]{5}[0-9]{4}[A-Z]\b", strategy="mask")
    - A2 Q10: a strict `ToolCallLimitMiddleware` on one tool with a looser `ModelCallLimitMiddleware` overall
    - B2.2: a custom detector for `NB-` plus 8 digits, attached with `strategy="mask"`
    - B3.1 (partly): `SummarizationMiddleware`, `ToolCallLimitMiddleware` and `ModelCallLimitMiddleware` together on one agent
-   - (Q6, Q9, Q11 to Q15, B2.3, B3.2, B3.3 and the capstone need the middlewares in Chapter 9)
+   - (Q6, Q9, Q11 to Q15, B2.3, B3.2, B3.3 and the capstone use the middlewares in Chapter 9)
 
 ## How this chapter was checked
 
@@ -289,14 +308,14 @@ PIIMiddleware("pan", detector=r"\b[A-Z]{5}[0-9]{4}[A-Z]\b", strategy="mask")
   - model call limit: run limit, thread limit, `"end"` and `"error"`, and no thread limit without a checkpointer
   - tool call limit: global plus per tool, the blocked third cancel
   - model fallback: a failing primary, the fallback seeing the same message, and the keyword `model=` `TypeError`
-  - PII: redact, mask, hash and block, the card checksum, the function detector, the regex string, the compiled-regex `TypeError`, the PAN pattern, and declaration order of two hooks
+  - PII: redact, mask, hash and block, the card checksum, the function detector with `hash`, the regex string, the compiled-regex `TypeError`, the PAN pattern, and declaration order of two hooks
 - **Not run against a live model:** a real provider outage and real tool-call choices. Class output was read from the notebook (cells 57 to 101)
-- The middlewares for to-do lists, tool selection, tool errors, tool retry and tool emulation are **not** in this chapter. They belong to [Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md)
+- The middlewares for to-do lists, tool selection, tool errors, tool retry and tool emulation are in [Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md)
 
 ## Sources and further reading
 
-- Live-Class-2026, `classes_summary/12 - 08 Aug - Mastering Middleware.md`
-- Live-Class-2026, `classes_transcription_summary/12 - 08 Aug - LangChain - Mastering Middleware.md`
+- Live-Class-2026, `classes_summary/12 - 08 Aug - Mastering Middleware.md` and `classes_summary/13 - 09 Aug - Guardrails, Todo Lists & Tool Resilience.md` (tool call limit, guardrails and PII parts)
+- Live-Class-2026, `classes_transcription_summary/12 - 08 Aug - LangChain - Mastering Middleware.md` and `classes_transcription_summary/13 - 09 Aug - LangChain - Middlware & Tools.md` (the same parts)
 - Live-Class-2026, `MIddleware.ipynb` (cells 57 to 97), the whiteboard `Agent-Middleware-Architecture.pdf` and the folder README in `Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/`
 - Live-Class-2026, `Weekend 07 - 8-9 Aug/README.md` (the other files in that folder are copies of Weekend 06 files)
 - Section 8.9 and the corrections in 8.3 and 8.4 are from testing, not from the class sources
