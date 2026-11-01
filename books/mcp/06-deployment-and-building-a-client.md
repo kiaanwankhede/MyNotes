@@ -268,6 +268,10 @@ async def run_agent(anthropic_client, mcp_client, user_message: str, model: str)
 
 Items marked *checked* were run with `fastmcp` 4.1.4. Check current documentation for deployment details.
 
+- **Measuring concurrency yourself.** The class has `scripts/concurrency_showcase.py`, a dev-only script that fires N `log_time` calls one after another, then N at once, then reads every write back. It prints a speedup and flags lost writes
+  - *Checked* against the class server run locally (N = 8): sequential 0.49 s, concurrent 0.22 s, speedup 2.22x, and **all 8 writes persisted**
+  - The script says "largely serializing" when the speedup is below half of N. With calls this fast (about 60 ms each, each opening its own client) setup cost dominates, so the verdict is a rough hint locally and means more against a slow remote server
+  - Its default URL is a Vercel deployment (`time-track-server-iota`). It was not reachable from my environment
 - **Hosted disks may be temporary.** The class default path is `/tmp/timetrack.db`. On many platforms a restart clears that folder. Treat SQLite on a hosted disk as a demo, and use a managed database for real data. This is general practice, not from the class
 - **Never commit secrets.** Keep API keys in environment variables. Add `.env` to `.gitignore`. Rotate a key that was ever committed
 - **Add authentication before sharing a public URL.** Anyone with the URL can write to the shared database

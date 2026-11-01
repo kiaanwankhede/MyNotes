@@ -364,6 +364,19 @@ mcp = FastMCP.from_fastapi(app)     # app is your existing FastAPI instance
 - Calling the converted tools worked: the summary for "Website Redesign" returned 19.0 hours with the per-employee split
 - Prompts: 0. Resources: 0
 
+### The class file that adds a raw SQL tool (`main_to_understand.py`)
+
+- The file builds the server with `FastMCP.from_fastapi(app=app)`, then adds one hand-written tool and one resource:
+  - `execute_query_dynamically(query, params)` runs **any SQL the model sends**
+  - `timesheet://schema` returns the table layout so the model knows the columns
+  - The `@mcp.tool` / `@mcp.resource` versions of the four original tools sit below as comments
+- *Checked* (copy of the file, `fastmcp` 4.1.4): the converted server listed 6 tools. Five were the REST routes with long generated names (for example `api_list_all_entries_api_entries_get`), plus the SQL tool
+- *Checked:* `SELECT * ... WHERE hours > ?` with a parameter worked
+- *Checked, two bugs in the helper behind it (`execute_query`):*
+  - Every row goes through a function that reads the six `time_entries` columns, so `SELECT COUNT(*) AS n` fails with "No item with that key"
+  - It never commits. A `DELETE` returned `[]` but the 5 rows were **still there**. A `DROP TABLE` **did** go through, because table changes are committed on their own. After that only `sqlite_sequence` was left
+- **The lesson is the design, not the bugs:** a tool that runs arbitrary SQL gives the model, and anyone who can talk to it, the whole database. Safer: read-only connection, an allow-list of statements, or named tools like the original four. The class file's docstring does not warn about this
+
 ### Choosing between them (class guidance)
 
 - **Convert automatically** to make already-working, already-trusted APIs available to AI **quickly**, with no wish to reshape them. It needs no change to the API code, which is why it is a safe starting point
