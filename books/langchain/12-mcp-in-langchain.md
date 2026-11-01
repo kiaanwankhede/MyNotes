@@ -118,6 +118,30 @@ async with MCPAdapter(transport) as adapter:
 - Handy for testing a tool before any model is involved
 - To get a full `ToolMessage` back (with status and artifact), pass a **tool call dictionary**: `{"name": ..., "args": {...}, "id": "c1", "type": "tool_call"}`
 
+### The class's one-file example (`langchain.py`)
+
+The Weekend 13 folder holds one 16-line script: the smallest working MCP agent.
+
+```python
+from langchain.agents import create_agent
+from langchain.mcp import MCPAdapter
+
+async def run_agent(server) -> dict:
+    async with MCPAdapter(server) as adapter:
+        tools = await adapter.list_tools()
+        agent = create_agent("claude-sonnet-5", tools)
+        return await agent.ainvoke(
+            {"messages": [{"role": "user", "content": "What is the forecast for Oslo?"}]}
+        )
+```
+
+- The comments in the file say it: the **tools hold the client**, so the agent stays usable for the life of the `async with` block. Use the agent **inside** the block
+- `server` can be a FastMCP object, a URL or a transport (12.4)
+- *Checked* with a FastMCP weather server and a scripted model in place of the string id: the messages were the question, a tool call, the tool result, and the final answer. The tool result's content is a **list of text blocks**, `[{'type': 'text', 'text': ...}]`, not a plain string
+- **Trap 1: the file name.** It is called `langchain.py`. Run from its own folder, Python finds the file before the real package, and `from langchain.agents import create_agent` fails with "'langchain' is not a package". *Checked* by putting the folder first on the path. Rename it (for example `mcp_agent.py`)
+- **Trap 2: a string model id needs its provider package.** *Checked:* `create_agent("claude-sonnet-5", ...)` with no key raised an `ImportError` saying `langchain-anthropic` must be installed. Whether `claude-sonnet-5` is a valid id was **not checked**; use an id from the provider's current list
+- The same folder's `main.py` is the 3-line `uv init` stub and has nothing to learn
+
 ## 12.5 What the adapter translates
 
 | MCP side | What the adapter makes |
@@ -442,13 +466,14 @@ Items marked *checked* were run with `langchain` 1.4.7, `langgraph` 1.2.19, `fas
 - Run in a separate environment: the older package's public methods and constructor
 - **Not run:** a real model, any remote server (Context7, the hosted TimeTrack server, the LangChain docs server), OAuth, an input-required server, the interrupt resume with `{"responses": {key: answer}}`, per-user credentials, audio or image content, interceptors, transport-failure exceptions
 - The class transcript and the two notebooks are the source for everything not marked *checked*
+- Run later: the one-file example `langchain.py` (12.4) with a scripted model; the file-name shadowing; the string model id with no key
 - **Open:** the first class notebook (`Langchain MCP.ipynb`) is a failed demo on the old LangChain version. Its README is an empty file (0 bytes)
 
 ## Sources and further reading
 
 - Live-Class-2026, `classes_transcription_summary/23 - 27 Sep - MCP In LangChain.md` (first half: the adapter, translation, authentication, elicitation)
 - Live-Class-2026, `Weekend 14 - Oct 3 & Oct 4/MCP in Langchain/`: `MCP_in_Langchain.ipynb`, `MCP_MultiServer_Live_Demo.ipynb`, `cinebot_mcp_server.py`, `cinebot_error_server.py`, `cinebot_elicit_server.py`, `cinebot_mcp_server.log` and `pyproject.toml`
-- Live-Class-2026, `Weekend 13 - 27th Sep/Langchain MCP.ipynb`
+- Live-Class-2026, `Weekend 13 - 27th Sep/Langchain MCP.ipynb` and `langchain.py`
 - The installed `langchain.mcp` module's own documentation (adapter targets, elicitation behaviour)
 - Sections marked *checked* and 12.14 are from testing
 
