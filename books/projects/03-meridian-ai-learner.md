@@ -11,7 +11,7 @@
 
 **Builds on:** [LangChain Ch4](../langchain/04-structured-output.md) (structured output), [LangChain Ch5](../langchain/05-tools.md) (tools), [LangChain Ch6](../langchain/06-agents-and-memory.md) (agents). Pydantic is used for request shapes.
 
-> **Status of these notes.** Built from the README, `DEPLOY.md`, the four sample PDFs and, for settings, logging and document Q&A, the backend code (3.4, 3.5, 3.6, 3.8), which was run with stand-ins for Google's services. The **web code** is not read yet. The **frontend is left out** at your request. **Nothing was deployed.**
+> **Status of these notes.** Built from the README, `DEPLOY.md`, the four sample PDFs and, for settings, logging and document Q&A, the backend code (3.3 to 3.8), which was run with stand-ins for Google's services. The Dockerfile and `deploy.yml` are not covered. The **frontend is left out** at your request. **Nothing was deployed.**
 
 ## 3.1 What it is
 
@@ -51,6 +51,32 @@ Browser (React) -> FastAPI backend
 - **Backend** is FastAPI. It has two feature areas: `rag/` and `agent/`
 - Layers depend downward only: `api -> rag, agent -> config, logger`
   - The web layer does not know how AI works. The AI code does not know what a web address is
+
+### The web layer (`backend/api/`)
+
+| File | Job |
+|---|---|
+| `main.py` | Creates the app, adds CORS, plugs in four routers, serves the built React app |
+| `endpoints.py` | Every route. Each is thin: validate, call the real logic, return JSON |
+| `schemas.py` | Pydantic shapes: `AuditRequest`, `AuditResponse` (4 strings), `QueryRequest` (`query`, `retriever_type`), `QueryResponse` |
+
+| Route | Calls | Notes |
+|---|---|---|
+| `GET /api/health` | nothing | `{"status": "ok"}` |
+| `GET /api/status` | settings only | config summary, uptime, upload count. No Google call |
+| `POST /api/agent/audit` | `ProcurementSupervisor.run_audit` | built on first use and cached, so one supervisor serves all requests |
+| `POST /api/rag/ask` | `ask_question` | `retriever_type` is passed straight through |
+| `POST /api/rag/upload` | GCS copy, then `ingest_pdf` | one or more PDFs; others are `skipped` |
+| `GET /api/rag/uploads` | the in-memory list | resets on restart |
+| `POST /api/rag/ingest-gcs` | `ingest_data_from_gcs` | indexes every PDF already in the bucket |
+
+- Every route catches errors, logs them and returns **500 with the error text** as `detail`
+- `upload` is `async` and moves the slow `ingest_pdf` into a worker thread (`run_in_threadpool`). The audit route is a plain `def`, which FastAPI also runs in a thread
+- A lifespan hook flushes logs to GCS on shutdown ("critical on Cloud Run, whose disk disappears")
+- **Serving the frontend:** if `frontend/dist` exists (after `npm run build`, as in Docker), the app mounts `/assets` and adds a catch-all route
+  - A real file is served if it exists inside `dist`, otherwise `index.html`, so React can handle the route
+  - Paths starting with `api/` get a 404, not the page
+  - A check keeps paths inside `dist`. Without `dist`, a warning is logged and only the API runs
 
 ## 3.4 Document Q&A (RAG)
 
@@ -252,8 +278,27 @@ uvicorn api.main:app --app-dir backend --reload --port 8080
   - A small step copies the level into `severity`, which Cloud Logging uses to colour and filter entries
   - On exit, the file is uploaded to `gs://<bucket>/logs/<timestamp>.log`. With no bucket set it prints a skip message; with a bucket but no credentials it prints the error and moves on
 - **Gap:** `log.error("...", exc_info=True)` writes `"exc_info": true`, **not** the traceback, because no step turns it into text
-- Tests need no accounts. They run the parts that do not call the cloud
 - A rule worth copying: **a project's tests should run with no internet and no keys**
+
+**The tests** (`backend/tests/`, run with `pytest backend/tests` from the main folder):
+
+- `conftest.py` puts `backend/` on the path and sets fake `GOOGLE_API_KEY`, `GCP_PROJECT_ID`, `GCP_REGION` and an **empty** bucket name, so the logger skips its upload
+- `test_api.py` uses FastAPI's `TestClient` and `monkeypatch` to replace anything external. It has **nine** tests:
+
+| Test | Checks |
+|---|---|
+| health | `{"status": "ok"}` |
+| status | shows `test-project` and `text-embedding-005`, no Google call |
+| unknown API route | 404 |
+| ask | a faked `ask_question` returns its answer |
+| audit | a faked supervisor returns the 4 sections |
+| upload non-PDF | `.txt` is `skipped` |
+| chunking | long text splits, metadata kept, each chunk 1,000 characters or less |
+| sample PDFs | exactly 4 PDFs load and split |
+| severity | `add_severity` copies the level; nothing is added without one |
+
+- *Checked:* **9 passed** with the pinned versions (`pytest` 8.4.2, `httpx` 0.28.1). It took about 9 seconds
+- What they do **not** cover: a real PDF upload, the GCS routes, failures, CORS, the frontend route (see 3.12)
 
 ## 3.9 Deploying to Google Cloud
 
@@ -339,6 +384,15 @@ gcloud projects delete YOUR_PROJECT_ID     # removes everything
 **Q13. Why is a model-backed sanctions check weak?**
 - The model answers from training knowledge, which can be stale or wrong. A real check calls an official list
 
+**Q14. Why run `ingest_pdf` in a thread pool?**
+- It is slow and blocking. Inside an `async` route it would freeze the whole server for everyone until it finished
+
+**Q15. What is wrong with `allow_origins=["*"]` plus `allow_credentials=True`?**
+- Any website can call your API from a browser with the user's cookies. Browsers forbid `*` with credentials, so the framework echoes the caller's origin, which is worse. List exact origins
+
+**Q16. Why test with `monkeypatch` and `TestClient`?**
+- You test the routes and the wiring without Google or a key. Fast, free, repeatable. The cost: the real integration is untested
+
 ## 3.12 Added by Claude, not from the sources
 
 - **Worked example (my arithmetic, not app output).** Using the figures from the README example and the sample tariff and procurement documents:
@@ -357,6 +411,16 @@ gcloud projects delete YOUR_PROJECT_ID     # removes everything
 - **Retrieval count (3) is a trade-off.** Too few misses facts, too many adds noise
 - **`contextual` gets expensive:** one model call per chunk fetched (10) plus the answer
 - **A bulk GCS run stops at the first bad PDF.** There is no per-file `try`, so files after it are skipped. With 3 files and the 2nd corrupt, only 1 was stored. Wrap each file if you want the rest to continue
+- **The upload route has gaps** (tested with faked storage and indexing):
+  - A request with **no files** returns 422 from FastAPI. The code's own "No files provided" 400 is never reached
+  - With `good.pdf` then a corrupt `bad.pdf`, the first file **is indexed**, but the caller gets only a 500 and the upload list does not record it. The success is invisible to the user
+  - The GCS object name is built from the raw filename: `../../evil.pdf` became `uploads/../../evil.pdf`. The local temp file uses `os.path.basename`, so the disk is safe; clean the name for the bucket too
+  - The GCS copy is a blocking call inside an `async` route, so by reading, it holds up the server while it runs (not measured). A failed copy is logged and ignored
+- **CORS is wide open:** `allow_origins=["*"]` with `allow_credentials=True`. In this version the server **echoed any origin back**, even without a cookie, and allowed credentials. The code comment says "tighten in production". List your real origins
+- **Errors leak detail:** a failing audit returned the exception text to the caller. Log the detail, return a short message
+- **Empty requests are accepted:** an audit with `request_text` of `""` returned 200 (it would spend model calls). Add a minimum length
+- **`/api/status` and the docs page are public** and show project, region, bucket and index IDs. None is a secret, but they help an attacker (see the no-login warning in 3.10)
+- **Frontend path check works:** `/..%2fsecret.txt` and `/%2e%2e/secret.txt` served `index.html`, not a file outside `dist` (tested with a fake `dist`)
 - **Make the safety rule code, not prose.** If a sanctions check returns `RED ALERT`, stop the run in Python and reject. Today the other agents still run and the model is trusted to apply the rule
 - **Labels should tell the truth.** An FX result guessed by the model should never say "live market"
 - **Validate model JSON.** Check it is a dict, check ranges (a rate between 0 and 1, a score between 0 and 100), and fail loudly instead of defaulting to 15%
@@ -385,16 +449,18 @@ gcloud projects delete YOUR_PROJECT_ID     # removes everything
 
 ## How this chapter was checked
 
-- Read fully: `README.md`, `DEPLOY.md`, four sample PDFs, `.env.example`, the settings, logger and five `rag/` files, and the `agent/` files plus `generate_json.py`
+- Read fully: `README.md`, `DEPLOY.md`, four sample PDFs, `.env.example`, the settings, logger and five `rag/` files, the `agent/` files plus `generate_json.py`, and the `api/` and `tests/` files
 - Computed in Python: the figures in 3.12
 - **Run** with the pinned packages from `requirements.txt` (`langchain` 1.2.11, `pydantic` 2.12.5, `structlog` 26.1.0, `pypdf` 6.7.5):
   - settings: defaults, environment override, `.env` file, a bad temperature (a clear validation error), the credentials path
   - logger: JSON fields, console and file output, the GCS skip and failure messages
   - ingestion: the 4 sample PDFs (4 chunks), a 7,689-character page (9 chunks, neighbours share 91 to 97 characters), a fake GCS bucket, a corrupt PDF
+  - the repo's own tests: `pytest backend/tests` gave **9 passed**
+  - the web layer: every route through `TestClient` with faked storage, indexing, supervisor and `ask_question` (valid and invalid bodies, errors, mixed uploads, CORS, a fake `dist/` for frontend serving, shutdown)
   - tools: all five, with the model replaced by a fake (every case in 3.5), and the FX tool with a faked API
   - agents: the whole `ProcurementSupervisor` flow with a scripted agent model and a scripted tool model, including the `RED ALERT` case
   - retrieval: all three retrievers plus an unknown type, with a **stand-in embedding** (word counts) and a **stand-in chat model**. This checks the wiring and the call counts. It says **nothing** about Vertex or Gemini answer quality
-- **Not read:** the API code, the tests, the Dockerfile, and `deploy.yml` beyond the lines around `generate_json.py`. The frontend is left out at your request
+- **Not read:** the Dockerfile, and `deploy.yml` beyond the lines around `generate_json.py`. The frontend is left out at your request
 - **Not run:** the real app, Vertex AI, Gemini, Cloud Storage, the deploy. The price figure in `DEPLOY.md` is third-party, as the guide says
 
 ## Sources and further reading
