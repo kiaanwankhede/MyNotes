@@ -46,7 +46,8 @@
     "Shell tools and custom middleware",
     "Runtime and human-in-the-loop",
     "MCP in LangChain",
-    "Multi-agent patterns"
+    "Multi-agent systems and subagents",
+    "Handoffs, skills, router and custom workflows"
    ]
   },
   "MCP": {

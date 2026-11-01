@@ -12,7 +12,7 @@
 
 **Builds on:** [Chapter 5](05-tools.md) (tools), [Chapter 11](11-runtime-and-human-in-the-loop.md) (human-in-the-loop, interrupts) and the whole [MCP book](../mcp/01-why-mcp-exists.md), especially [Chapter 6](../mcp/06-deployment-and-building-a-client.md) (your own client) and [Chapter 7](../mcp/07-legacy-vs-modern-mcp.md) (legacy and modern).
 
-**Not covered yet:** the multi-agent half of class 23 (context isolation, patterns). It goes in [Chapter 13](13-multi-agent-patterns.md).
+**Not covered yet:** the multi-agent half of class 23 (context isolation, patterns). It goes in [Chapter 13](13-multi-agent-systems-and-subagents.md) and [Chapter 14](14-handoffs-skills-router-and-custom-workflows.md).
 
 ## 12.1 An agent just needs tools
 
@@ -452,4 +452,4 @@ Items marked *checked* were run with `langchain` 1.4.7, `langgraph` 1.2.19, `fas
 - The installed `langchain.mcp` module's own documentation (adapter targets, elicitation behaviour)
 - Sections marked *checked* and 12.14 are from testing
 
-Previous: [Chapter 11, Runtime and human-in-the-loop](11-runtime-and-human-in-the-loop.md) · Next: [Chapter 13, Multi-agent patterns](13-multi-agent-patterns.md) (not written yet)
+Previous: [Chapter 11, Runtime and human-in-the-loop](11-runtime-and-human-in-the-loop.md) · Next: [Chapter 13, Multi-agent systems and subagents](13-multi-agent-systems-and-subagents.md)

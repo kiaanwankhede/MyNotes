@@ -13,4 +13,5 @@
 * [Shell tools and custom middleware](10-shell-tools-and-custom-middleware.md)
 * [Runtime and human-in-the-loop](11-runtime-and-human-in-the-loop.md)
 * [MCP in LangChain](12-mcp-in-langchain.md)
-* [Multi-agent patterns](13-multi-agent-patterns.md)
+* [Multi-agent systems and subagents](13-multi-agent-systems-and-subagents.md)
+* [Handoffs, skills, router and custom workflows](14-handoffs-skills-router-and-custom-workflows.md)
