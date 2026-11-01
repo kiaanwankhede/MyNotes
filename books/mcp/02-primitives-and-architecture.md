@@ -343,4 +343,4 @@ Not in the course material. Established practice, but check current docs. Items 
 - Live-Class-2026, `Weekend 09 - 22-23 Aug/23rd Aug - MCP/`: `README.md`, `Complete MCP/p2_MCP_Architecture.ipynb`, `Complete MCP/Complete-MCP.pdf`, `Complete MCP/Commands.txt` and `Complete MCP/mcp-warmup/` (`README.md`, `server.py`, `src/mcp_warmup/__init__.py`, `pyproject.toml`)
 - Sections 2.9 and 2.12 and the corrections marked *checked* are from testing, not from the class sources
 
-Previous: [Chapter 1, Why MCP exists](01-why-mcp-exists.md) · Next: [Chapter 3, Lifecycle, JSON-RPC and capability negotiation](03-lifecycle-json-rpc-and-capability-negotiation.md) (not written yet)
+Previous: [Chapter 1, Why MCP exists](01-why-mcp-exists.md) · Next: [Chapter 3, Lifecycle, JSON-RPC and capability negotiation](03-lifecycle-json-rpc-and-capability-negotiation.md)
