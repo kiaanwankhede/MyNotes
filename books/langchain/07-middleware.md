@@ -7,8 +7,11 @@
 - Filter tools by state or by context
 - Compress long conversations with `SummarizationMiddleware`
 - Guard irreversible tools with `HumanInTheLoopMiddleware` and resume a paused run
+- Cap cost with model and tool call limits, survive outages with model fallback
+- Keep personal data away from the model with `PIIMiddleware`, including custom detectors
+- Explain the difference between a guardrail and middleware
 
-**Builds on:** [Chapter 5](05-tools.md) (tools, gating) and [Chapter 6](06-agents-and-memory.md) (agents, checkpointer, context). The other built-in middlewares (limits, fallback, PII, retry, todo list, tool selector) come next, from class 12 onward. [Chapter 10](10-runtime-and-human-in-the-loop.md) goes deeper on runtime and human-in-the-loop.
+**Builds on:** [Chapter 5](05-tools.md) (tools, gating) and [Chapter 6](06-agents-and-memory.md) (agents, checkpointer, context). The middlewares for to-do lists, tool selection, tool errors, tool retry and tool emulation are in [Chapter 8](08-guardrails-to-do-lists-and-tool-resilience.md). [Chapter 10](10-runtime-and-human-in-the-loop.md) goes deeper on runtime and human-in-the-loop.
 
 ## 7.1 The problem: not every tool belongs to every user
 
@@ -153,6 +156,15 @@ What the summary looks like:
   - **NEXT STEPS**
 - Recent messages kept by `keep` stay as they were. Older ones live only in the summary
 
+More on the options:
+
+- **`trigger`** can be an absolute token count, a message count, or a **fraction of the model's context length** (for example once the context is 80% full)
+- **`keep`** can also be a fraction, a token count or a message count. Class example: keep the last 10 messages, summarise everything before
+- You have already seen this in chat products: the "conversation has been compacted" behaviour is this mechanism. Claude Code's `/compact` command is a visible example, with a context-usage breakdown (system prompt, tools, custom instructions, messages)
+- **The trade-off is real:** squeezing a long history into a short summary can lose information. That is part of why models seem to forget or hallucinate in very long chats
+- **No way to guarantee zero loss.** If something must be kept, save it separately into long-term memory ([Chapter 6](06-agents-and-memory.md)), do not rely on the summary alone
+- Summarization is a model call, so it adds some latency. It runs on its own separate text, not on the agent's main running context
+
 **Text only.** Summarization compresses text. It does not shrink images, audio or video:
 
 - Recent messages that `keep` retains still carry their original media
@@ -178,6 +190,14 @@ User: "Send an email asking for leave"
         edit    → change the arguments, then send
         reject  → do not send
 ```
+
+Why it applies only to **tool calls**:
+
+- Everything before a tool call is just the model reasoning. A tool call is the "hands" changing something in the real world
+- That is the moment worth pausing on, not the model's internal reasoning
+- Motivating case: if an agent decided on its own to spend a large sum, should it be allowed to do that without checking? The user is the human in the loop
+
+**HITL is not a transfer.** A support bot escalating to a human agent hands off the **whole conversation** and steps out. That is a transfer. Human-in-the-loop keeps the agent in the loop, **paused for a decision**, for example proposing a refund and asking a representative to approve or adjust the amount.
 
 **Set it up**
 
@@ -280,17 +300,219 @@ def run_interactive_hitl_demo(agent, config):
 ```
 
 - In class, rejecting with "Don't want to cancel" made the agent report that the cancel was not accepted and offer next options (check status, show policy, retry, contact support)
+- **No UI comes with it.** You resolve the interrupt in code with `Command(resume=...)`, or wire it to your own interface (a pop-up, an approve and reject button)
+- **Two levels of sign-off** (for example manager then director) are not available out of the box. That needs custom middleware
 
-## 7.7 Questions from the class
+## 7.7 `ModelCallLimitMiddleware`
 
-- **What if a tool fails or times out?**
-  - Recoverable failures are typically retried by the harness
-  - A fatal error (for example no internet) makes the agent fail outright
-  - That is why defining a harness matters. Retries and error handling come in later middleware
-- **Can an agent discover brand-new tools at run time, not just from a fixed list?** Yes. This is where MCP and middleware meet. Tools arriving dynamically can still be registered and made available mid-run
-- **Why can't a plain `if/else` decide the tool list?** It cannot read the agent's live state or store (7.2)
+**Why:** cost. An agent that makes 100 model calls in one run costs real money, and there was no built-in cap.
 
-## 7.8 Interview corner
+- Same idea as the `max_turns` safeguard from the raw Python loop ([LLM book, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md)), formalised with better checks
+- **Where to set the number** comes from domain knowledge, not a framework default. A web-search agent rarely needs more than 5 to 15 searches
+- **Why not tell the model "do not call more than twice"?** A model can ignore it, and it breaks when you swap the model. A limit in code is specific and dependable
+
+**Run limit vs thread limit** (whiteboard analogy: breakfast, lunch, dinner):
+
+- **Run limit:** a cap on **one `.invoke()`**. "Chappatis allowed per meal"
+- **Thread limit:** a cap **across all runs** of one conversation. "Chappatis allowed in total, across all meals"
+
+```python
+from langchain.agents import create_agent
+from langchain.agents.middleware import ModelCallLimitMiddleware
+from langgraph.checkpoint.memory import InMemorySaver
+
+call_limited_agent = create_agent(
+    model="openai:gpt-5-mini",
+    tools=cinebot_tools,
+    checkpointer=InMemorySaver(),        # needed for thread_limit to persist across calls
+    middleware=[
+        ModelCallLimitMiddleware(        # low values, just for the example
+            thread_limit=5,              # across the WHOLE conversation
+            run_limit=2,                 # per single .invoke() call
+            exit_behavior="end",         # graceful stop, not an exception
+        ),
+    ],
+)
+```
+
+- **`exit_behavior="end"`:** the run stops and the last message is an `AIMessage` such as `Model call limits exceeded: run limit (2/2)` or `... thread limit (5/5)`. The class notebook showed the thread version
+- **`exit_behavior="error"`:** raises `ModelCallLimitExceededError` instead
+- The run limit **resets on every `invoke`**. The thread limit does not
+- **Without a checkpointer** the thread limit has nothing to remember between calls. In my test a thread limit of 1 never fired across two separate `invoke`s
+
+## 7.8 `ToolCallLimitMiddleware`
+
+**Why:** tool calls add to context size and cost. An agent asked to "find the important emails" could keep digging through years of mail unless capped.
+
+- Works **globally** or for **one named tool**. Use two instances together:
+
+```python
+from langchain.agents import create_agent
+from langchain.agents.middleware import ToolCallLimitMiddleware
+from langgraph.checkpoint.memory import InMemorySaver
+
+tool_limited_agent = create_agent(
+    model="openai:gpt-5-mini",
+    tools=cinebot_tools,
+    checkpointer=InMemorySaver(),
+    middleware=[
+        ToolCallLimitMiddleware(run_limit=8),                                              # global, this run
+        ToolCallLimitMiddleware(tool_name="cancel_booking", thread_limit=2, run_limit=1),  # one tool, tighter
+    ],
+)
+```
+
+- Whiteboard numbers: **8** for the global run limit. For `cancel_booking`, **`run_limit=1`** and **`thread_limit=2`** (the conversation limit)
+- The board traces bookings B100, B101, B102: the first two cancels go through (one per run, two in the whole thread). The third is blocked, because the thread limit is used up. A new run refreshes only the **run** counter
+- Class demo: three separate `invoke`s asking to cancel B100, B101, B102. The third tool call was refused with the tool message `Tool call limit exceeded. Do not call 'cancel_booking' again.`
+- **Default behaviour (`exit_behavior="continue"`):** the blocked call becomes an **error tool message**, and the model carries on and can explain. Other options: `"end"` and `"error"`
+- A strict limit on one irreversible tool plus a looser overall limit is a common pairing (assignment question A2 Q10)
+
+## 7.9 `ModelFallbackMiddleware`
+
+**Why:** if the primary model provider has an outage, the app should not simply stop working.
+
+```python
+from langchain.agents import create_agent
+from langchain.agents.middleware import ModelFallbackMiddleware
+
+resilient_agent = create_agent(
+    model="openai:gpt-5",                  # primary
+    tools=cinebot_tools,
+    middleware=[
+        ModelFallbackMiddleware(
+            "openai:gpt-5-mini",           # first fallback
+            # "ollama:llama3.2",           # a further, fully local last resort
+        ),
+    ],
+)
+```
+
+- Models are passed **positionally**, first fallback first, then more in order
+- **What counts as a failure:** a hard error such as a 404 or an expired key
+- **What it is not:** routing by speed or cost, or a smart dispatcher choosing the best model for a task. It only activates when the primary model genuinely fails
+- The **full conversation history** goes to whichever model ends up answering. Nothing else changes
+- Class demo: the primary name was one that does not exist, so without the middleware the call failed with a 404 `model_not_found` error. With the middleware it fell through to `gpt-5-mini`
+- The whiteboard draws the symptom it prevents: **"AI -> I am unable to connect."**
+
+> **Correction.** The class transcript wrote `ModelFallbackMiddleware(model="...")`. That raises `TypeError: unexpected keyword argument 'model'`. The notebook's positional form is the one that works
+
+## 7.10 `PIIMiddleware`
+
+**PII** (personally identifiable information): date of birth, phone number, email, government ID numbers, passwords. It generally should **not reach the model** at all.
+
+```python
+from langchain.agents import create_agent
+from langchain.agents.middleware import PIIMiddleware
+
+pii_agent = create_agent(
+    model="openai:gpt-5-mini",
+    tools=cinebot_tools,
+    middleware=[
+        PIIMiddleware("email", strategy="redact", apply_to_input=True),
+        PIIMiddleware("credit_card", strategy="mask", apply_to_input=True),
+    ],
+)
+```
+
+Strategies (checked on `langchain` 1.4.7):
+
+- **`redact`:** removes the value. `priya@example.com` becomes `[REDACTED_EMAIL]`
+- **`mask`:** keeps a hint so the model can tell something was there. `priya@example.com` becomes `priya@****.com`
+- **`hash`:** replaces it with a hash, for example `<email_hash:6bdb7e96>`
+- **`block`:** stops the run with a `PIIDetectionError`
+
+Built-in types in this version: `email`, `credit_card`, `ip`, `mac_address`, `url`. Anything else is a **custom** type.
+
+> **What really happened with the class card number.** The class text says the card `4111-1111-1111-1234` was masked. The notebook output shows it was **not**: only the email was redacted, and the model even warned the user about the card. The built-in card detector checks that the number is **valid** (a checksum, the Luhn check), and this made-up number fails it. A valid test number such as `4111-1111-1111-1111` is masked to `****-****-****-1111`. Class 13 covers the detail. For now: **test with valid-looking numbers, and remember a detector can skip lookalikes**
+
+**Custom PII types.** Aadhaar and PAN (India-specific IDs) are named on the whiteboard as formats no framework can ship for every country. Supply your own detector, either as a **function** or as a **regex string**:
+
+```python
+import re
+from langchain.agents import create_agent
+from langchain.agents.middleware import PIIMiddleware
+
+def detect_booking_code(content: str) -> list[dict]:
+    """Detect CineBot's own booking code format: BK followed by 4 digits."""
+    return [
+        {"text": m.group(0), "start": m.start(), "end": m.end()}
+        for m in re.finditer(r"BK\d{4}", content)
+    ]
+
+custom_pii_agent = create_agent(
+    model="openai:gpt-5-mini",
+    tools=cinebot_tools,
+    middleware=[
+        PIIMiddleware("booking_code", detector=detect_booking_code, strategy="mask"),
+        PIIMiddleware("aadhaar", detector=r"\b\d{12}\b", strategy="mask"),     # regex as a STRING
+    ],
+)
+# "my booking BK1044"    -> "my booking ****1044"
+# "aadhaar 123456789012" -> "aadhaar ****9012"
+```
+
+> **Correction.** The class transcript passed a compiled pattern, `detector=re.compile(r"\b\d{12}\b")`. That raises `TypeError: 're.Pattern' object is not callable`. Pass the pattern as a **string**, or write a function that returns a list of matches
+
+The function detector returns a list of dicts with `text`, `start` and `end`.
+
+Three more switches (from the library signature, not explained in class 12):
+
+- `apply_to_input` (default `True`): clean user messages before the model
+- `apply_to_output` (default `False`): clean what the model replies
+- `apply_to_tool_results` (default `False`): clean what tools return
+
+## 7.11 Guardrail vs middleware
+
+> **A guardrail is the concept: protecting the agent from doing something undesirable. Middleware is the mechanism you use to implement it.**
+
+- The whiteboard: "Guardrails is a way to control the AI agent behaviour." PII detection is one concrete guardrail, implemented with `PIIMiddleware`
+- They are **not two competing systems**. Guardrails are applied **as** middleware
+- Examples the board gives: the user talks rudely or gives personal info, and the agent flags it
+- This came up repeatedly in class and is a **common interview question**
+
+Where these patterns show up in real work (from the notebook):
+
+- **Fintech fraud detection:** a `wrap_tool_call` hook around every transaction tool, flagging or blocking by velocity, amount or pattern
+- **Healthcare assistants:** PII redaction is often a legal requirement (HIPAA in the US), not optional polish
+- **Customer support:** approval gates before refunds or account changes (human in the loop)
+- **Internal tools:** audit logging via `wrap_tool_call`, anywhere "who did what, when" needs an answer
+
+## 7.12 Several middlewares, and LangChain vs LangGraph
+
+**Several middlewares on one agent**
+
+- Pass them as a **list**. No need for a separate agent per concern
+- Order is **not random**. Either a defined priority applies, or they run in **declaration order**. They are designed not to collide
+- My test: two `before_model` hooks ran in the order they were listed
+- **Latency:** a middleware that calls a model (summarization) adds some. Pure code (a call-limit check) adds almost none
+
+**When to stay in LangChain and when to drop to LangGraph**
+
+- Middleware exists in LangGraph too. It is not unique to LangChain
+- LangChain sits on top of LangGraph and gives a more convenient, somewhat abstracted interface to the same machinery
+- **Stay in LangChain + middleware** for most agents, including a simple RAG chatbot (which may not even need middleware)
+- **Go to LangGraph** when you need precise, deterministic control of state, checkpointer internals, stores or interrupts
+- Other tools use other names for the same idea: Google's Agent Development Kit says "callbacks", Claude Code and Cursor say "hooks"
+- Agents built only from MCP connections and instructions (no framework) are usually local developer tools, not deployable services
+
+**Observability:** there is no universal best choice. LangFuse integrates easily with the LangChain family. For RAG, test dedicated evaluation tools. Early results are often deceptively easy, so real quality needs more testing than the basics.
+
+## 7.13 Questions from the class
+
+- **What if a tool fails or times out?** Recoverable failures are typically retried by the harness. A fatal error (for example no internet) makes the agent fail outright. Retry and error middleware come in [Chapter 8](08-guardrails-to-do-lists-and-tool-resilience.md)
+- **Can an agent discover brand-new tools at run time?** Yes. This is where MCP and middleware meet
+- **Why not a plain `if/else` for the tool list?** It cannot read the agent's live state or store (7.2)
+- **Why not just prompt "do not call the tool more than twice"?** A prompt is not reliable. A limit in code is (7.7)
+- **Does middleware add latency?** Only if it calls a model, or does heavy work (7.12)
+- **Two levels of human approval?** Needs custom middleware (7.6)
+- **Does summarization share the agent's main context?** No. It works on its own separate text
+- **Is PII a guardrail or middleware?** The guardrail is the goal, middleware is how you implement it (7.11)
+- **Can I attach several middlewares?** Yes, as a list (7.12)
+- **LangChain + middleware or LangGraph?** See 7.12
+- **Does a support bot handing a chat to a human count as HITL?** No, that is a transfer (7.6)
+
+## 7.14 Interview corner
 
 **1. What is middleware in an agent?**
 
@@ -316,21 +538,67 @@ def run_interactive_hitl_demo(agent, config):
 - Human in the loop: interrupt, then approve, edit, reject or respond
 - *Stronger answer:* it needs a checkpointer, because the run must pause and resume
 
-**6. What does `SummarizationMiddleware` do, and what is lost?**
+**6. Is a support bot passing a chat to a human "human in the loop"?**
+
+- No. That is a **transfer**: the agent leaves. In HITL the agent stays, paused for a decision
+
+**7. What does `SummarizationMiddleware` do, and what is lost?**
 
 - Replaces old messages with a generated summary when a trigger is hit
-- *Stronger answer:* detail is lost, media is not compressed, and the summary call costs tokens
+- *Stronger answer:* detail is lost, media is not compressed, the summary call costs tokens, and must-keep facts belong in long-term memory
 
-## 7.9 Added by Claude, not from the sources
+**8. Run limit vs thread limit?**
+
+- Run limit: one `invoke`. Thread limit: the whole conversation, which needs a checkpointer
+- *Stronger answer:* you can limit one tool tightly and the whole run loosely. Set the numbers from domain knowledge
+
+**9. What does model fallback do, and what does it not do?**
+
+- It switches to another model when the primary hard-fails (404, bad key, outage)
+- It does **not** route by cost, speed or task. The full history goes to the fallback
+
+**10. Redact vs mask vs hash vs block for PII?**
+
+- Redact removes it, mask hides part, hash replaces it with a hash, block stops the run
+- *Stronger answer:* masking an id your tool needs breaks the tool call. Pick the strategy per field
+
+**11. Guardrail vs middleware?**
+
+- A guardrail is the goal of keeping the agent from undesirable behaviour. Middleware is the mechanism that implements it
+- *Stronger answer:* give an example, such as PII protection implemented with `PIIMiddleware`
+
+## 7.15 Added by Claude, not from the sources
 
 Not in the course material. Established practice, but check current docs.
 
+**Human in the loop**
+
 - **Show the reviewer the exact arguments**, not a paraphrase. The `action_requests` in the interrupt hold them. Log who approved what and when
 - **Paused runs wait forever.** Decide how long an approval may stay open and what happens when it expires. Only let the **same authorised user** resume a thread
-- **Summaries drop exact facts** (ids, amounts, dates). Keep must-not-lose facts in the system prompt, the state or the store, not only in chat history
-- **The summarising model sees the whole history**, so it also sees any personal data in it. Treat it like any other model call
+
+**Summarization and cost**
+
+- **Summaries drop exact facts** (ids, amounts, dates). Keep must-not-lose facts in the system prompt, the state or the store
+- **The summarising model sees the whole history**, so it also sees any personal data in it
 - **Fewer tools per call means fewer input tokens per call.** Filtering tools is a cost control as well as a safety control
 - **Gate twice.** Hide the tool with middleware, and check permission again inside the tool ([Chapter 5](05-tools.md), 5.12)
+
+**Limits and fallback**
+
+- **Limits stop runaway cost, not bad behaviour.** Keep the run limit comfortably above what a normal task needs, and add a time limit too
+- **A thread limit needs a persistent checkpointer** to survive restarts
+- **Log when a fallback fires.** It can hide an outage, and the fallback model may follow your prompt and tools differently. Re-test your prompts on it, and do not fall back to a weaker model silently for safety-critical work
+
+**PII**
+
+- **Masking an identifier your tools need breaks the tool call.** After `BK1044` becomes `****1044`, the model cannot pass the real code to a tool. Mask what the **model** must not see, and fetch the real value in code
+- **Regex detectors guess.** A 12-digit pattern matches any 12-digit number, and misses numbers written with spaces. A PAN pattern is more specific (five letters, four digits, one letter):
+
+```python
+PIIMiddleware("pan", detector=r"\b[A-Z]{5}[0-9]{4}[A-Z]\b", strategy="mask")
+```
+
+- **PII middleware is one layer.** Logs, traces and your own database may still hold the raw text. Check what each of them records
 
 ## Recap
 
@@ -338,8 +606,13 @@ Not in the course material. Established practice, but check current docs.
 - **Dynamic tool loading:** filter pre-registered tools, or register tools dynamically (MCP)
 - Six hooks: `before_agent`, `before_model`, `wrap_model_call`, `after_model`, `wrap_tool_call`, `after_agent`
 - Filter with `request.override(tools=...)`. Per-user flags need a **state schema** or **context**
-- `SummarizationMiddleware`: `model`, `trigger=("tokens", n)`, `keep=("messages", n)`. Text only
-- `HumanInTheLoopMiddleware`: needs a **checkpointer**. Resume with `Command(resume={"decisions": [...]})`. Four decisions: approve, edit, reject, respond
+- `SummarizationMiddleware`: `model`, `trigger=("tokens", n)`, `keep=("messages", n)`. Text only, and lossy
+- `HumanInTheLoopMiddleware`: needs a **checkpointer**. Resume with `Command(resume={"decisions": [...]})`. Four decisions: approve, edit, reject, respond. It is **not** a transfer
+- **Model call limit:** `run_limit` (one invoke) and `thread_limit` (whole conversation, needs a checkpointer). **Tool call limit:** global or per tool
+- **Model fallback:** models passed positionally, only on hard failure, full history passed on
+- **PII:** redact, mask, hash or block. Custom detector = function or regex **string**. The card checksum can skip fake numbers
+- **Guardrail = goal, middleware = mechanism**
+- Several middlewares go in one list and run in declaration order
 
 ## Practice
 
@@ -348,23 +621,39 @@ Not in the course material. Established practice, but check current docs.
 3. Recreate `SummarizationMiddleware` with your own `trigger` and `keep`, and watch a long conversation compress
 4. Build the `cancel_booking` HITL demo, run `run_interactive_hitl_demo()` yourself and try **all four** decisions
 5. Open the whiteboard `Agent-Middleware-Architecture.excalidraw` in excalidraw.com and trace the full loop diagram by hand
-6. Assignment 2 (NovaBank), the parts this chapter prepares you for. The assignment has no answer key:
-   - A2 Q7: a realistic NovaBank `transfer_funds` situation for each of the four HITL decisions
-   - B2.1: guard `transfer_funds` with all four decisions, resume with an `edit` that changes the amount, and confirm the edited amount was used (remember the `edited_action` shape)
-   - (Q6, Q8 to Q15 and B2.2 to B3.3 need the middlewares from class 12 onward)
+6. Set both a `run_limit` and a `thread_limit` on one agent and trigger each one independently
+7. Add a model call limit and a tool call limit to an existing agent and deliberately trigger both
+8. Configure `ModelFallbackMiddleware` and force the primary model to fail (an intentionally wrong model name or key) to confirm the fallback fires
+9. Write your own custom `PIIMiddleware` detector (with `re`) for an ID format from your own country or use case
+10. Explain the difference between a guardrail and middleware in your own words, out loud
+11. Assignment 2 (NovaBank), the parts this chapter prepares you for. The assignment has no answer key:
+    - A2 Q7: a realistic NovaBank `transfer_funds` situation for each of the four HITL decisions
+    - A2 Q10: a strict `ToolCallLimitMiddleware` on one tool with a looser `ModelCallLimitMiddleware` overall
+    - B2.1: guard `transfer_funds` with all four decisions, resume with an `edit` that changes the amount, and confirm the edited amount was used (remember the `edited_action` shape)
+    - B2.2: a custom detector for `NB-` plus 8 digits, attached with `strategy="mask"`
+    - B3.1 (partly): `SummarizationMiddleware`, `ToolCallLimitMiddleware` and `ModelCallLimitMiddleware` together on one agent
+    - (Q6, Q9, Q11 to Q15, B2.3, B3.2, B3.3 and the capstone need the middlewares in Chapter 8)
 
 ## How this chapter was checked
 
-- Run offline with a stand-in model on `langchain` 1.4.7: tool filtering with state schema and with context, the deprecated `request.tools` assignment (works, with a deprecation warning), summarization (the summary message and its `lc_source`, the invalid `"token"` and valid `"tokens"`), HITL interrupt, `get_state`, approve, edit (both shapes), reject, respond, a disallowed decision, and resume without a checkpointer
-- **Not run against a live model:** the quality of a real summary, and real model tool-call choices. Class output was read from the notebook
-- Class 12 material (the nine built-in middlewares, limits, PII, retries) is **not** in this chapter yet
+- Run offline with a stand-in model on `langchain` 1.4.7:
+  - tool filtering with state schema and with context, and the deprecated `request.tools` assignment
+  - summarization: the summary message and its `lc_source`, the invalid `"token"` and the valid `"tokens"`
+  - HITL: interrupt, `get_state`, approve, edit (both shapes), reject, respond, a disallowed decision, resume without a checkpointer
+  - model call limit: run limit, thread limit, `"end"` and `"error"`, and no thread limit without a checkpointer
+  - tool call limit: global plus per tool, the blocked third cancel
+  - model fallback: a failing primary, the fallback seeing the same message, and the keyword `model=` `TypeError`
+  - PII: redact, mask, hash and block, the card checksum, the function detector, the regex string, the compiled-regex `TypeError`, and declaration order of two hooks
+- **Not run against a live model:** the quality of a real summary, real tool-call choices, a real provider outage. Class output was read from the notebook (cells 57 to 101)
+- The middlewares for to-do lists, tool selection, tool errors, tool retry and tool emulation are **not** in this chapter. They belong to [Chapter 8](08-guardrails-to-do-lists-and-tool-resilience.md)
 
 ## Sources and further reading
 
-- Live-Class-2026, `classes_summary/11 - 01 Aug - Agents, Middleware & Memory.md`
-- Live-Class-2026, `classes_transcription_summary/11 - 01 Aug - LangChain - Agents, Memory, Middleware.md`
-- Live-Class-2026, `MIddleware.ipynb` (cells 0 to 56), `Middleware-Architecture-Sketch.ipynb`, the whiteboards `Agent-Middleware-Architecture.pdf` and `Langchain-2-Updated.pdf`, and the folder README, all in `Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/`
+- Live-Class-2026, `classes_summary/11 - 01 Aug - Agents, Middleware & Memory.md` and `classes_summary/12 - 08 Aug - Mastering Middleware.md`
+- Live-Class-2026, `classes_transcription_summary/11 - 01 Aug - LangChain - Agents, Memory, Middleware.md` and `classes_transcription_summary/12 - 08 Aug - LangChain - Mastering Middleware.md`
+- Live-Class-2026, `MIddleware.ipynb` (cells 0 to 101), `Middleware-Architecture-Sketch.ipynb`, the whiteboards `Agent-Middleware-Architecture.pdf` and `Langchain-2-Updated.pdf`, and the folder README, all in `Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/`
+- Live-Class-2026, `Weekend 07 - 8-9 Aug/README.md` (the other files in that folder are copies of Weekend 06 files)
 - Live-Class-2026, `Assignment_2_Agents_and_Prebuilt_Middleware.ipynb` (questions only; the answers belong to later classes)
-- Section 7.9 and the corrections in 7.4 to 7.6 are from testing, not from the class sources
+- Section 7.15 and the corrections in 7.4 to 7.10 are from testing, not from the class sources
 
 Previous: [Chapter 6, Agents and memory](06-agents-and-memory.md) · Next: [Chapter 8, Guardrails, to-do lists and tool resilience](08-guardrails-to-do-lists-and-tool-resilience.md) (not written yet)
