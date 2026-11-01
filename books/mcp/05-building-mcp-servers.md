@@ -13,7 +13,7 @@
 
 **Builds on:** [Chapter 2](02-primitives-and-architecture.md) (first server), [Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md) (primitives in code), [Chapter 4](04-operation-transports-and-shutdown.md) (transports).
 
-**Not covered yet in this chapter:** the code of the low-level server and of role-scoped authentication. Those are `.py` files, planned for a later batch. Deployment is in [Chapter 6](06-deployment-and-building-a-client.md).
+**Deployment** is in [Chapter 6](06-deployment-and-building-a-client.md). The low-level server (5.2) and role-scoped authentication (5.10) were added after the `.py` files were read and run.
 
 ## 5.1 Two libraries, one protocol
 
@@ -37,7 +37,38 @@
   - hand-written JSON Schema
   - explicit transport wiring with `stdio_server()`
 - Working, but long and easy to get wrong
-- The class folder's README gives a comparison for the same three tools: about **72 lines** of real code low-level against **31** with FastMCP. That count is from the README. It was not re-counted here because the code files are planned for a later batch
+- The class folder's README gives a comparison for the same three tools: about **72 lines** low-level against **31** with FastMCP
+  - *Checked:* counting non-blank, non-comment lines **including the docstring** gives exactly 72 and 31. Without the docstrings it is about 59 against 22
+
+```python
+# the low-level file (mcp 1.x style), the three parts
+server = Server("RecipeBox")
+
+@server.list_tools()                       # part 1: describe each tool by hand
+async def list_tools() -> list[types.Tool]:
+    return [types.Tool(name="get_recipe", description="...",
+            inputSchema={"type": "object",
+                         "properties": {"recipe_id": {"type": "integer"}},
+                         "required": ["recipe_id"]}), ...]
+
+@server.call_tool()                        # part 2: dispatch by name
+async def call_tool(name: str, arguments: dict):
+    if name == "get_recipe": ...
+    elif name == "search_recipes": ...
+    else: raise ValueError(f"Unknown tool: {name}")
+    return [types.TextContent(type="text", text=str(result))]
+
+async def main():                          # part 3: transport wiring
+    async with stdio_server() as (r, w):
+        await server.run(r, w, server.create_initialization_options())
+```
+
+- **Checked, with `mcp` 1.30.0:** the file runs. It listed the 3 tools, and `search_recipes("vegan")` worked
+  - The result is `str(result)`, a **Python repr as text**, not JSON, and there is no structured output. FastMCP returned the real objects
+  - A missing id came back as `isError: true` with the message
+- **Checked, with `mcp` 2.3.0 (the version these notes use): the file does not start.** `Server` has no `list_tools` decorator, so it fails at import with `AttributeError`
+  - So the class's low-level file is tied to the older SDK. The 2.x package also has `MCPServer`. Which new API replaces the decorators was not studied here
+  - The FastMCP file works with the same package set
 
 ## 5.3 The FastMCP way: RecipeBox
 
@@ -98,7 +129,12 @@ def plan_weekly_meals() -> str:
 - A recipe's `tags` only exist **inside** a tool's returned data. A model cannot know the valid tag values until it has already called a tool
 - The `recipe://tags` resource lets it learn the valid values **first**
 - Then "give me something for the holidays" can become a tag the server actually understands, not a guess at something missing from the data
-- The class folder also adds two more prompts in the live build (`search_for_quick_recipes` and `send_email`). Their code is in a file planned for a later batch
+- The class folder also adds two more prompts in the live build, `search_for_quick_recipes` and `send_email`
+  - **Code read:** the server is named `RecipeBox_Updated`, the resource returns a plain list of five valid tags, and `search_recipes` mentions `recipe://tags` in its docstring
+  - **Quirk:** `send_email` has nothing to do with email. Its description says "Plan a week's worth of meals" and the text it returns says the same. The name looks like a leftover
+  - *Checked:* both prompts and the resource listed correctly, and the resource returned `["quick","vegetarian","sunday","meat","vegan"]`
+  - The Precoded version has no resource and no prompts. Its `@mcp.tool` has no brackets; the updated one uses `@mcp.tool()`. Both work in 4.1.4
+  - The file ends with comments holding the Inspector and `fastmcp install claude-desktop` commands
 
 ## 5.4 Inspect it, and the port conflict
 
@@ -338,15 +374,40 @@ mcp = FastMCP.from_fastapi(app)     # app is your existing FastAPI instance
 - **A reason companies pick the manual route:** teams are reluctant to change a working, deployed API just to improve its descriptions. A separate hand-built MCP layer leaves trusted code alone
 - If you do convert, **add docstrings** to the routes. *Checked:* a docstring became the tool description
 
-## 5.10 Authentication: a preview
+## 5.10 Authentication: role-scoped tools
 
-From the class summary only. The code file is held for a later batch, so this was **not run or read in full**.
+From `server_with_auth.py`. *Checked* by running it over HTTP on port 8000 with `fastmcp` 4.1.4.
 
-- The warm-up server from classes 16 and 17 gains **role-scoped authentication**
-- It uses a static token checker with three tokens: `user-token`, `analyst-token`, `admin-token`
-- Each tool is gated with `@mcp.tool(auth=require_scopes("user"))`, on the same `greet` and `add` tools
-- The file marks itself **development only**. Static tokens teach the scope pattern and are **not** a production login system
-- For interviews, the class advised reading up on **JWT and OAuth**
+```python
+auth = StaticTokenVerifier(tokens={
+    "user-token":    {"client_id": "normal-user",   "scopes": ["user"]},
+    "analyst-token": {"client_id": "data-analyst",  "scopes": ["user", "analyst"]},
+    "admin-token":   {"client_id": "administrator", "scopes": ["user", "analyst", "admin"]},
+})
+mcp = FastMCP("Warm-Up Server", auth=auth)
+
+@mcp.tool(auth=require_scopes("analyst"))
+def query_db(a: int, b: int, c: int) -> int: ...
+```
+
+- Eight tools in three tiers: **user** (`greet`, `add_numbers`, `who_am_i`), **analyst** (`query_db`, `calculate_average`, `sales_report`), **admin** (`list_users`, `delete_user`)
+  - `who_am_i` uses `get_access_token()` to return the caller's `client_id` and `scopes`
+  - It runs on HTTP, host `127.0.0.1`, port 8000. Auth needs HTTP; it has no place on STDIO
+- The file marks itself **development only**. Static tokens teach the pattern. They are **not** a production login
+
+**What the run showed:**
+
+| Caller | Tools it could see | Calling a higher tool |
+|---|---|---|
+| No token | rejected with an error | n/a |
+| Bad token | rejected with an error | n/a |
+| `user-token` | 3 | `query_db` and `delete_user` denied |
+| `analyst-token` | 6 | `delete_user` denied, `query_db` returned 6 |
+| `admin-token` | 8 | `delete_user` worked |
+
+- **Two layers:** a tool above your scope is **hidden** from `tools/list`, and calling it by name is also **denied**. Hiding alone would not be security
+- The data in `list_users` and `sales_report` is hard-coded sample data
+- For interviews, the class advised reading up on **JWT and OAuth**. Real servers verify signed tokens from an identity provider, not a fixed dictionary
 
 ## 5.11 Interview corner
 
@@ -434,7 +495,7 @@ Items marked *checked* were run with `fastmcp` 4.1.4.
 - Run: the RecipeBox tools, resource and prompt through a client; the notebook's TimeTrack database code with its own asserts; the generated `main.py` served by `uvicorn` in three variants (correct, `path="/mcp"`, no `lifespan`); the REST route; `POST /mcp` with and without the trailing slash; `fastmcp inspect`; `fastmcp install mcp-json`; and the `fastmcp dev inspector` and `fastmcp install claude-desktop` help text
 - Run for class 20: a FastAPI app with the class's four routes, its `/docs` page and OpenAPI paths, `FastMCP.from_fastapi` with calls to the converted tools, and a docstring's effect on the description
 - **Not run:** the Inspector in a browser, the port conflict, the `which uv` failure, VS Code's `MCP: Add Server`, Firecrawl, Claude Desktop (install or connection), ngrok, Prefect Horizon, the website's static files (a stub page stood in), hot reload of a new resource
-- **Not read yet:** all `.py` files in the class folders (low-level RecipeBox, the FastMCP RecipeBox with extra prompts, authentication, the TimeTrack source files), the web files (`.js`, `.html`, `.css`) and the two empty READMEs
+- **Read and run since:** the low-level and both FastMCP RecipeBox files, the auth server (5.2, 5.3, 5.10). **Not read yet:** the TimeTrack source files and the web files (`.js`, `.html`, `.css`)
 - The class folder's `first-mcp-server/README.md` and `mcp-warmup-primitives/README.md` are **empty** (0 bytes)
 
 ## Sources and further reading

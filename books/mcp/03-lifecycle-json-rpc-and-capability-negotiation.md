@@ -269,7 +269,18 @@ Client → Server : 3. initialized (notification: no id, no reply)
 
 - **Restart the host fully**, then use it normally. The terminal or the log file shows the handshake, capability discovery, every tool call and shutdown
 - Replace the `/path/to/...` values with your own. Do not copy someone else's machine paths
-- The wiretap scripts themselves (`mcp_wiretap.py` and the no-colour version) are **not covered in this chapter**. They are planned for a later batch, so this section rests on the class write-up and the sample config
+- **The script, read and run:** `mcp_wiretap.py` (165 lines, standard library only)
+  - Usage: `python3 mcp_wiretap.py [--log FILE] [--no-color] -- <real command> [args...]`
+  - It starts the real server as a sub-process, then two threads relay lines: host stdin to server, and server stdout to host
+  - Each message is printed pretty and coloured to **stderr**, never stdout. stdout is the protocol channel, and anything extra there would break the connection
+  - `--log FILE` appends the same text to a file. It writes the **colour codes too**, meant for `tail -f` in a terminal
+  - `--no-color` is for plain text editors. `mcp_wiretap_no_color.py` is the same tool with colour removed from the code (4.5 KB against 6.7 KB)
+  - When the real server exits, it prints and logs `real server exited with code N`
+- *Checked:* I put it in front of the RecipeBox server and sent `initialize`, `initialized` and a `tools/call`. The replies came back unchanged
+  - Log: 3 client-to-server and 2 server-to-client banners (the `initialized` notification has no reply)
+  - Colour codes were in stderr and log by default. With `--no-color`, and in the `no_color` file, there were none
+- **Limits:** it reads **line by line**, so it fits STDIO servers that send one JSON message per line. It does not tap HTTP servers
+- The class folder holds two copies of each script, byte-identical
 
 ## 3.11 Project: AI updates, with no code
 

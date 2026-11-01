@@ -39,6 +39,7 @@ Client → Host   : result, turned into an answer by the model
 - Live class example, from Claude Desktop's own log: Apple Notes `list_notes`
   - `folder`: string, optional, "filter notes by folder"
   - `limit`: number, default 20
+  - The class folder keeps this schema as `Untitled-1.json` (a copy of `list_notes`: `folder` as an optional string, `limit` as a number with default 20). It is a scratch file, not part of a server
 - Asking for the "Personal" folder sent `folder: "Personal"` with no `limit`, so the server's default of 20 applied
 - **The description decides whether the model picks the right tool.** Write it for the model
 - The model only learns a tool exists through discovery. It cannot call something it was never told about
