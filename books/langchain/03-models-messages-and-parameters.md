@@ -1,14 +1,19 @@
 # Chapter 3: Models, messages and parameters
 
-Everyone can "use a model" after a five-minute tutorial. This chapter is about the knobs LangChain puts around a model: the parameters you set, the messages you send, what comes back, and the three ways to call it. The mentor's point in class 08 was that real work needs all of these, and that most quickstarts stop at `create_agent()`.
+**After this chapter you can:**
 
-Read [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md) first. It builds by hand the loop that LangChain later wraps. This chapter assumes the LangChain family and `create_agent` from [Chapter 1](01-introduction-to-langchain.md) and [Chapter 2](02-langchain-family-and-harness-engineering.md).
+- Call any model through one interface
+- Set the parameters that matter
+- Build message lists (and few-shot prompts)
+- Read everything inside a model reply
+- Choose between `invoke`, `stream` and `batch`
+- Write prompt templates without the brace bug
 
-*Status: written from classes 07 and 08.*
+**Before this:** [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md) (the loop by hand), [Chapter 1](01-introduction-to-langchain.md) and [Chapter 2](02-langchain-family-and-harness-engineering.md).
 
 ## 3.1 The first model call
 
-`init_chat_model` is LangChain's universal entry point to a model. Change the provider string and the rest of the code stays the same:
+`init_chat_model` is LangChain's universal entry point. Change the provider string, the rest of the code stays the same.
 
 ```python
 from langchain.chat_models import init_chat_model
@@ -18,9 +23,9 @@ response = model.invoke("Tell me what LangChain is")
 print(response.content)
 ```
 
-Without LangChain you would write different code to reach OpenAI, Claude, Groq and OpenRouter. LangChain puts them behind one interface. The class showed that CrewAI's documentation uses the same "give me any LLM" pattern, which is why learning it deeply here pays off across later frameworks.
-
-**Models differ in capabilities.** Tool calling, structured output, multimodality (text and images) and reasoning vary from model to model. In class the mentor had ChatGPT summarise one model's capability sheet (tool calling yes, structured output yes, multimodal yes, reasoning present but weaker than the flagships). Look up the sheet for the model you plan to use.
+- Without LangChain you write different code for OpenAI, Claude, Groq, OpenRouter. LangChain puts them behind one interface
+- The "give me any LLM" pattern appears in other frameworks too (CrewAI's docs use it), so it transfers
+- **Models differ in capabilities:** tool calling, structured output, multimodality (text + images), reasoning. Look up the model's capability sheet before you plan around a feature ([Chapter 4](04-structured-output.md), section 4.7, shows `model.profile`)
 
 **Messages steer behaviour.** A system message and a human message go in as a list:
 
@@ -31,19 +36,16 @@ messages = [
     SystemMessage(content="You are a pirate. Answer everything in pirate language."),
     HumanMessage(content="What is the capital of France?"),
 ]
-response = model.invoke(messages)
-print(response.content)
+print(model.invoke(messages).content)     # pirate-flavoured: the system message steers the model
 ```
 
-Running it gave a pirate-flavoured answer, a concrete proof that the system message steers the model. This matches the roles in [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md). Note that the chat model does nothing to manage chat history for you. That is still your job.
-
-Class 07 stopped here and said the next class would cover temperature, `max_tokens` and the API timeout, which are section 3.3 below.
-
-*Source: Live-Class-2026, `classes_transcription_summary/07`. Not run: LangChain is not installed in my sandbox.*
+- Roles match [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md)
+- The chat model does **not** manage history. You pass the history in
 
 ## 3.2 Where your API key lives
 
-The class notebook is blunt about this. If `.env` is not listed in `.gitignore`, the first time you commit and push, your real API key goes to GitHub with the code. Automated scanners that look for leaked keys can find and use it, often within minutes.
+- If `.env` is not in `.gitignore`, the first push sends your real key to GitHub with the code
+- Scanners find leaked keys, often within minutes
 
 ```python
 import os
@@ -52,85 +54,96 @@ load_dotenv()
 assert os.environ.get("OPENAI_API_KEY"), "Missing OPENAI_API_KEY -- check your .env file"
 ```
 
-If this raises an error, either `.env` is not in the folder you are running from, or you created it after starting the notebook session. In the second case, restart the kernel so `load_dotenv()` picks up the file.
-
-*Source: Live-Class-2026, `classes_summary/08`.*
+- Error? Either `.env` is not in the folder you run from, or you created it after the session started
+- Second case: **restart the kernel** so `load_dotenv()` picks it up
 
 ## 3.3 Model parameters
 
-`init_chat_model` takes the model name and a few parameters:
+`init_chat_model` takes the model name plus keyword arguments.
 
-| Parameter | What it does |
-|---|---|
-| `model` | The only required one: which LLM to use, for example `"openai:gpt-5-mini"` |
-| `api_key` | Optional, because LangChain looks for the standard environment variable (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY` and so on) |
-| `temperature` | A dial for randomness and creativity |
-| `max_tokens` | Caps the output length |
-| `timeout` and `max_retries` | How long and how persistently LangChain waits for the model before giving up. The default for retries is 6 |
-
-They are passed as keyword arguments, `key=value` beside the model name. The revision notebook's analogy is the dials on a car dashboard: `temperature` is how much creative liberty you allow, `max_tokens` is a hard fuel ceiling on the reply, `timeout` is how long you wait at a red light before giving up, and `max_retries` is how many times you try restarting a car that will not start.
+- **`model`:** the only required one, for example `"openai:gpt-5-mini"`
+- **`api_key`:** optional. LangChain reads the standard variable (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, ...)
+- **`temperature`:** randomness and creativity. Low = steady, high = varied
+- **`max_tokens`:** caps the length of the reply
+- **`timeout`:** how long to wait for the model before giving up
+- **`max_retries`:** how many times to retry (default 6)
 
 ```python
-deterministic_model = init_chat_model("openai:gpt-5-mini", temperature=0.0, max_tokens=200, timeout=30)
-creative_model      = init_chat_model("openai:gpt-5-mini", temperature=1.0, max_tokens=200, timeout=30)
+deterministic = init_chat_model("openai:gpt-5-mini", temperature=0.0, max_tokens=200, timeout=30)
+creative      = init_chat_model("openai:gpt-5-mini", temperature=1.0, max_tokens=200, timeout=30)
 
 prompt = "Describe a sunset in one creative sentence."
-print(deterministic_model.invoke(prompt).content)
-print(creative_model.invoke(prompt).content)
+print(deterministic.invoke(prompt).content)   # nearly identical on every run
+print(creative.invoke(prompt).content)        # varies run to run
 ```
 
-The notebook's note: run the `temperature=0.0` model twice and it comes back nearly identical, while `temperature=1.0` varies from run to run. A common OpenRouter error is a reply longer than the allowed limit, and raising `max_tokens` fixes it. OpenRouter's free router can be used with `init_chat_model("openrouter/free")` once `OPENROUTER_API_KEY` is set.
+- Car-dashboard picture: temperature = creative liberty, `max_tokens` = fuel ceiling on the reply, `timeout` = how long you wait at a red light, `max_retries` = how many times you retry starting the car
+- Common OpenRouter error: reply longer than the allowed limit. Raise `max_tokens`
+- OpenRouter's free router: `init_chat_model("openrouter/free")` once `OPENROUTER_API_KEY` is set
+
+**Paid, free and local**
+
+- **Paid** (OpenAI, Anthropic, Gemini): billed per token
+- **Free tiers** (OpenRouter, Groq, NVIDIA): rate limited. In class OpenRouter's free tier hit 20 requests a minute and 50 a day (class numbers, may have changed)
+- **Groq:** hosts mostly open-source models. That is the trade for free or cheap access
+- **Local (Ollama):** no API cost, but needs real RAM (ideally a GPU). Quality trails a frontier paid model
+- Same interface, different intelligence
 
 ```python
 paid_model = init_chat_model("openai:gpt-5-mini")
-
-# free_model = init_chat_model("ollama:llama3.2")   # runs on your own machine, no API key
+# local_model = init_chat_model("ollama:llama3.2")   # runs on your machine, no API key
 ```
-
-**Paid, free and local.** Paid providers (OpenAI, Anthropic, Gemini) bill per token. Free tiers (OpenRouter, Groq, NVIDIA) are rate limited. In class the mentor hit OpenRouter's free-tier limit live, quoting 20 requests a minute and 50 a day. Those numbers are from the class and may have changed. Groq hosts mostly open-source models and pays for the hosting, which is the trade for free or cheap access. Free models generally trail the flagship paid models in quality.
-
-A local model through Ollama has no API cost, but it needs real RAM (ideally a GPU) to run at usable speed, and its quality also trails a frontier paid model. The interface is the same and the intelligence is different.
-
-*Source: `classes_summary/08`, `classes_transcription_summary/08`. Not run: LangChain is not installed in my sandbox and the calls need keys.*
 
 ## 3.4 Messages
 
-You could send one long string that mixes the instructions and the user's question, but the model then has no reliable way to tell which part is an instruction and which is what the user said (the revision notebook's picture is a note slid under a door). A **message list** labels each piece with who said it. The notebooks list four types:
+**Why a message list?** One long string mixes instructions with the user's words, so the model cannot tell them apart. A message list labels each piece with **who said it**.
 
-- **System message:** behaviour, tone and rules.
-- **Human message:** the user's input.
-- **AI message:** the model's own earlier reply.
-- **Tool message:** the result of a tool call, sent back so the model can carry on (see [Chapter 5](05-tools.md)).
+Four message types:
 
-The notebook calls the system message the director's note: not something spoken in the scene. In the pirate example the "be a pirate" instruction never gets mixed into the actual question.
+- **System:** behaviour, tone, rules (the "director's note", not part of the scene)
+- **Human:** the user's input
+- **AI:** the model's earlier reply
+- **Tool:** a tool's result, sent back to the model ([Chapter 5](05-tools.md))
 
-The class showed again that a single "hi" to Claude sends thousands of tokens once the hidden system message is counted. In a finished product such as Claude's web app, the provider fixes the system message and you cannot change it. When you build your own agent you control it, which is the point of building your own harness. The system message can be changed whichever model sits behind it. A system message is not the same thing as a "skill".
+Good to know:
 
-Messages can be the classes below or plain dictionaries with a `role` key (`"system"`, `"user"`, `"assistant"`). There is no functional difference. The mentor prefers the classes for readability. Dictionaries are common when the history comes from a database or a JSON API.
+- A single "hi" to Claude sends thousands of tokens once the hidden system message counts
+- In a finished product (Claude's web app) the provider fixes the system message. In your own agent **you** control it
+- The system message can change whichever model sits behind it
+- A system message is **not** a "skill"
 
-**Which shape when:**
-
-| Shape | Use when |
-|---|---|
-| Plain text | A single standalone request with no history |
-| Message objects | Multi-turn conversations, multimodal content, system instructions |
-| Dictionaries | The same as objects, when the data arrives from a database or JSON API |
-
-LangChain also accepts a `("human", "text")` tuple and a bare string (turned into a human message), and converts all four shapes consistently. A dictionary that has no `content`, or has an unknown `role`, raises `MESSAGE_COERCION_FAILURE`.
-
-A `HumanMessage` can carry two optional fields, `name` (useful to label who is speaking in a multi-user chat) and `id` (a stable identifier for the message):
-
-```python
-human_msg = HumanMessage(content="Hi, how are you?", name="mayank", id="user_1234")
-```
-
-### Few-shot prompting
-
-The mentor told a story from earlier in his career. A co-pilot style chatbot performed poorly even with a good system message. Instead of piling more instructions into it, he put a few example exchanges into the conversation as separate earlier messages (a sample user message, then a sample AI reply), before the real question. The output improved. This is called **few-shot prompting**: the model mimics the pattern it is shown.
+**Message shapes**
 
 ```python
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
+# 1. objects (readable, preferred)
+[SystemMessage("be brief"), HumanMessage("hi")]
+# 2. dictionaries (common when history comes from a database or JSON API)
+[{"role": "system", "content": "be brief"}, {"role": "user", "content": "hi"}]
+# 3. tuple and bare string (a bare string becomes a human message)
+[("human", "hi")]
+```
+
+- No functional difference between objects and dicts. Use objects for readability
+- Plain text: one standalone request, no history
+- Message objects: multi-turn, multimodal, system instructions
+- A dict with no `content`, or an unknown `role`, raises an error (`MESSAGE_COERCION_FAILURE`)
+
+`HumanMessage` has two optional fields:
+
+```python
+HumanMessage(content="Hi, how are you?", name="mayank", id="user_1234")
+# name: label who is speaking in a multi-user chat. id: stable message identifier
+```
+
+### Few-shot prompting
+
+- Story from class: a co-pilot style chatbot did poorly even with a good system message
+- Fix: put a few example exchanges into the conversation **before** the real question
+- The model copies the pattern it is shown. This is **few-shot prompting**
+
+```python
 messages = [
     SystemMessage(content="You are a helpful support assistant."),
     HumanMessage(content="Example question..."),
@@ -140,98 +153,96 @@ messages = [
 response = model.invoke(messages)
 ```
 
-**Inserting history by hand.** The notebook adds a caution. Putting an `AIMessage` into the list yourself is fine for restoring real conversation history. It is not a way to make the model "believe" it agreed to something so as to bias it dishonestly, because the model treats a made-up `AIMessage` as real context either way.
+**Caution on inserting history by hand**
 
-*Source: `classes_summary/08`, `classes_transcription_summary/08`.*
+- Fine for restoring **real** conversation history
+- Not a trick to make the model "believe" it agreed to something. A made-up `AIMessage` is treated as real context either way
 
 ## 3.5 What comes back: the full `AIMessage`
 
-The notebook says most tutorials skip this. A model call returns far more than the text:
+A call returns far more than text.
 
-| Field | What it holds |
-|---|---|
-| `.text` | The plain reply, always a string |
-| `.content` and `.content_blocks` | The raw content, or LangChain's standard structure for rich content (text, reasoning, citations, images) |
-| `.tool_calls` | Any tool calls requested, an empty list if none |
-| `.id` | A unique identifier for the message |
-| `.usage_metadata` | Real token counts: `input_tokens`, `output_tokens`, `total_tokens` |
-| `.response_metadata` | Provider extras, such as which exact model answered and why it stopped |
+- **`.text`:** the plain reply, always a string
+- **`.content` / `.content_blocks`:** raw content, or the standard structure for rich content (text, reasoning, citations, images)
+- **`.tool_calls`:** tool calls requested, empty list if none
+- **`.id`:** unique message id
+- **`.usage_metadata`:** real token counts (`input_tokens`, `output_tokens`, `total_tokens`)
+- **`.response_metadata`:** provider extras, such as the exact model and why it stopped
 
 ```python
-response = openai_model.invoke("Explain agentic AI in one sentence.")
-print("text:          ", response.text)
-print("tool_calls:    ", response.tool_calls)     # empty: no tools bound yet
+response = model.invoke("Explain agentic AI in one sentence.")
+print("text:      ", response.text)
+print("tool_calls:", response.tool_calls)      # empty: no tools bound yet
 print(response.usage_metadata)
 ```
 
-`.text` is always a string. `.content` is usually the same, but can be a list of content blocks for richer replies. `pprint(response)` shows everything on the object at once. You do not need a separate token-counting library, because the billed numbers are on the response. `usage_metadata` can also hold finer breakdowns (`input_token_details` and `output_token_details`, for example cached tokens and reasoning tokens). If you need to track spend per user or per session, add `usage_metadata` up across the conversation: it is the exact billed number, not an estimate. Streaming, structured output and tool calling all build on reading these fields correctly.
-
-*Source: `classes_summary/08`.*
+- `.content` is usually the same as `.text` but can be a list of blocks for richer replies
+- `pprint(response)` shows everything on the object
+- No separate token-counting library needed. The billed numbers are on the response
+- `usage_metadata` can hold finer detail (`input_token_details`, `output_token_details`, for example cached and reasoning tokens)
+- **Cost per user or session:** add up `usage_metadata` across the conversation. It is the exact billed number, not an estimate
+- Streaming, structured output and tool calling all build on reading these fields correctly
 
 ## 3.6 Streaming: it feels fast
 
-In class, a request for about 2,000 words took roughly 5 to 7 seconds to generate in ChatGPT, but the text appeared piece by piece. That progressive appearance is streaming. It does not make the answer arrive sooner, but the wait feels shorter. For a product (the examples were Amazon or Swiggy) nobody wants a screen frozen for seven seconds.
+- About 2,000 words took roughly 5 to 7 seconds to generate in ChatGPT, but the text appears piece by piece
+- Streaming does not make the answer arrive sooner. The wait **feels** shorter
+- Nobody wants a frozen screen for seven seconds in a product
 
 ```python
 for chunk in model.stream("Why do parrots have colorful feathers?"):
     print(chunk.text, end="", flush=True)
 ```
 
-Streaming is built into the model call. You swap `.invoke()` for `.stream()` and install nothing. Each chunk is an `AIMessageChunk`, and chunks add together with `+`:
+- Built into the model call. Swap `.invoke()` for `.stream()`, install nothing
+- Each chunk is an `AIMessageChunk`. Chunks add together with `+`:
 
 ```python
-full_message = None
-for chunk in openai_model.stream("Write one short sentence about the ocean."):
-    full_message = chunk if full_message is None else full_message + chunk
-print("Reconstructed full message:", full_message.content)
+full = None
+for chunk in model.stream("Write one short sentence about the ocean."):
+    full = chunk if full is None else full + chunk
+print("Reconstructed:", full.content)
 ```
 
-The notebook's point: `.invoke()` was never called, yet the message built by summing the chunks has the same shape as one from `.invoke()`.
-
-*Source: `classes_summary/08`, `classes_transcription_summary/08`.*
+- `.invoke()` was never called, yet the summed message has the same shape as one from `.invoke()`
 
 ## 3.7 Batching
 
-Imagine a company that receives a constant stream of questions. Asking one, waiting, asking the next is slow. `.batch()` sends several questions together:
-
-```python
-responses = model.batch([Q1, Q2, Q3])
-for response in responses:
-    print(response)
-```
+Asking one question, waiting, asking the next is slow. `.batch()` sends several together.
 
 ```python
 questions = ["Why do parrots have colorful feathers?", "How do airplanes fly?", "What is quantum computing?"]
 
-responses = model.batch(questions)                         # waits for ALL, same order as the input
+responses = model.batch(questions)                          # waits for ALL, same order as input
 for q, r in zip(questions, responses):
     print(f"Q: {q}\nA: {r.content[:80]}...")
 
-for idx, response in model.batch_as_completed(questions):  # each result as it finishes, order not guaranteed
+for idx, response in model.batch_as_completed(questions):   # each result as it finishes, order not guaranteed
     print(f"[input #{idx}] {response.content[:50]}...")
 ```
 
-The revision notebook's picture is a restaurant kitchen: `.batch()` sends every order at once and brings them **all** out together when the last one is done, while `.batch_as_completed()` brings each dish out the moment it is ready, possibly out of order. `batch_as_completed` hands back the input's index with each answer so you can match them up.
+- Restaurant picture: `.batch()` brings every dish out together when the last is done. `.batch_as_completed()` brings each dish out the moment it is ready
+- `batch_as_completed` returns the **input index** with each answer so you can match them up
+- Requests must be **independent**, which is what lets them run in parallel
+- Batching and streaming combine through `batch_as_completed`
+- Example use: a Q&A portal collects questions over a short window (every 15 seconds) and batches them
 
-- The requests must be **independent**, which is what lets them run in parallel.
-- By default `.batch()` waits and returns everything at once. `batch_as_completed()` returns each answer as soon as that one finishes, so it avoids waiting for the slowest. That is also how batching and streaming combine.
-- A company Q&A portal could collect questions over a short window (every 15 seconds, say) and batch them.
+**Does batching save tokens? No.**
 
-**Does batching save tokens?** A learner pushed on this in class. The mentor's answer: no. Every request inside a batch still carries its own system message and context. What is saved is cost and time, from two separate places: provider batch APIs (the example given was OpenAI's batch endpoint, which runs jobs asynchronously at roughly 50% lower cost, a pricing decision by the provider) and infrastructure savings from fewer round trips and connections when a million calls are grouped into far fewer. The 50% figure is the class's, so check the current price.
+- Every request still carries its own system message and context
+- What it saves is **cost and time**, from two places:
+  - Provider batch APIs (OpenAI's batch endpoint runs jobs asynchronously at roughly 50% lower cost, class figure, a pricing decision by the provider)
+  - Fewer round trips and connections when a million calls are grouped
 
-**Three ways to call a model:**
+**Three ways to call a model**
 
-| Call | Use |
-|---|---|
-| `.invoke()` | One call, the whole answer |
-| `.stream()` | Progressive output |
-| `.batch()` | Parallel, independent requests |
-
-*Source: `classes_summary/08`, `classes_transcription_summary/08`.*
+- `.invoke()`: one call, the whole answer
+- `.stream()`: progressive output
+- `.batch()`: parallel, independent requests
 
 ## 3.8 Prompt templates
 
-An f-string prompt works for one case. When you need the same structure with different tones or several variables, you rewrite it by hand each time, with no warning on a silent typo. `ChatPromptTemplate` separates the fixed structure from what changes:
+An f-string works for one case. For the same structure with different tones or variables you rewrite it each time, with no warning on a silent typo. `ChatPromptTemplate` separates structure from what changes.
 
 ```python
 from langchain_core.prompts import ChatPromptTemplate
@@ -241,21 +252,25 @@ fun_fact_prompt = ChatPromptTemplate.from_messages([
     ("human", "Topic: {topic}"),
 ])
 
-chain = fun_fact_prompt | openai_model   # the | pipe feeds the template's output into the model
+chain = fun_fact_prompt | model        # the | pipe feeds the template's output into the model
 
 for tone, topic in [("playful and silly", "octopuses"), ("deadpan and serious", "octopuses")]:
     result = chain.invoke({"tone": tone, "topic": topic})
     print(f"[{tone} / {topic}] -> {result.content}")
 ```
 
-The class ran it a third time with `("excited like a sports commentator", "the Roman Empire")`. The structure is the same on every call and only the two variables change. The two "octopuses" answers sound completely different because of `tone` alone.
+- One prompt, two blanks, filled many ways. Same structure on every call
+- The two octopus answers differ because of `tone` alone
+- f-string = a napkin you scribble on. Template = a form with labelled blanks
 
-You are writing one prompt with two blanks and filling them three ways, not three prompts. The revision notebook's picture: an f-string is a napkin you scribble on each time, and a `ChatPromptTemplate` is a resume template with labelled blank fields.
+**Most common real bug: unescaped curly braces**
 
-**The most common real bug: unescaped curly braces.** If the fixed text of a template contains literal braces (often from pasting in an example JSON object), LangChain reads them as more variables and fails. Double them to escape:
+- Literal braces in the fixed text (often a pasted example JSON) are read as extra variables
+- Result: `KeyError` for a missing variable
+- Fix: double the braces
 
 ```python
-# WRONG: the JSON example's braces are read as extra variables, so this raises KeyError
+# WRONG: {"name": ...} is read as a variable, raises KeyError
 ChatPromptTemplate.from_messages([
     ("system", 'Respond in this format: {"name": "John", "age": 21}'),
     ("human", "{question}"),
@@ -268,7 +283,7 @@ ChatPromptTemplate.from_messages([
 ])
 ```
 
-**`MessagesPlaceholder`** slots a whole list of earlier messages into a template as one variable:
+**`MessagesPlaceholder`** slots a whole list of earlier messages in as one variable:
 
 ```python
 from langchain_core.prompts import MessagesPlaceholder
@@ -278,39 +293,97 @@ history_aware_prompt = ChatPromptTemplate.from_messages([
     MessagesPlaceholder("history"),
     ("human", "{new_question}"),
 ])
-result = history_aware_prompt.invoke({"history": [HumanMessage("My name is Rina."), AIMessage("Nice to meet you, Rina!")],
-                                      "new_question": "What's my name?"})
+result = history_aware_prompt.invoke({
+    "history": [HumanMessage("My name is Rina."), AIMessage("Nice to meet you, Rina!")],
+    "new_question": "What's my name?",
+})
 response = model.invoke(result.to_messages())
 ```
 
-*Source: `classes_summary/08`, notebooks `04_05_prompt_templates_structured_output_student_notes.ipynb` and `Revision_Parts_1-4.ipynb`. Not run.*
-
 ## 3.9 Questions from the class
 
-| Question | Answer |
-|---|---|
-| Does `create_agent` call a tool in a single `invoke`? | Normally yes, it resolves within one invoke call |
-| Can the system message change if a different LLM is used? | Yes, regardless of which model sits behind it |
-| Is a system message the same as a "skill"? | No, they are different concepts |
-| Any advantage to message dictionaries over message classes? | No functional advantage; the mentor prefers the classes |
-| Does batching increase latency? | Only if you wait for the whole batch. `batch_as_completed` avoids that |
-| Can streaming and batching be combined? | Yes, `batch_as_completed` streams results as each item finishes |
-| Is every AI call underneath a standard API request and response? | Yes: LangChain, OpenRouter, Claude and the raw `chat.completions` calls from LLM Chapter 2 are all the same kind of request and response. No framework adds magic |
+- **Does `create_agent` call a tool in a single `invoke`?** Normally yes, it resolves within one invoke
+- **Can the system message change if a different LLM is used?** Yes, whichever model sits behind it
+- **System message = "skill"?** No, different concepts
+- **Advantage of message dicts over classes?** No functional advantage
+- **Does batching increase latency?** Only if you wait for the whole batch. `batch_as_completed` avoids that
+- **Is every AI call a standard API request and response?** Yes. LangChain, OpenRouter, Claude and the raw `chat.completions` calls from the LLM book are all the same kind of request and response. No framework adds magic
+- **Routing a query to one of several specialised agents** (each with a big Markdown knowledge file)
+  - Treat each agent like a tool and give the router only a short name and description
+  - Routing can be an `if` statement or a small classification call
+  - Belongs with the multi-agent chapter
+- **A `memory.md` pattern for multi-day builds**
+  - Keep a running summary file the AI updates after each session and read only that next time
+  - Summarising can lose detail
+  - Belongs with agents and memory
 
-Two more answers from the end-of-class session belong with later chapters, so they are only noted here:
+## 3.10 Interview corner
 
-- **Routing a query to one of several specialised agents** (each with a large Markdown knowledge file): treat each agent like a tool and give the routing step only a short name and description. The routing can be an `if` statement or a small classification call. This belongs in the multi-agent chapter.
-- **A `memory.md` pattern for multi-day builds:** keep a running summary file that the AI updates after each session and read only that next time, accepting that summarising can lose detail. This belongs with agents and memory.
+**1. Why `init_chat_model` instead of the provider's own SDK?**
 
-*Source: `classes_transcription_summary/08`. I left out an off-topic freelancing answer.*
+- One interface across providers. Change the string, keep the code
+- *Stronger answer:* it lowers switching cost, but capabilities still differ per model, so check them
+
+**2. What does temperature do, and when would you set it to 0?**
+
+- Controls randomness. 0 for extraction, classification, anything that should be repeatable
+- *Stronger answer:* 0 is steadier, not guaranteed identical
+
+**3. What is in a model reply besides the text?**
+
+- `.tool_calls`, `.usage_metadata` (token counts), `.response_metadata` (model and stop reason), `.id`, `.content_blocks`
+- *Stronger answer:* `usage_metadata` is how you track cost per user
+
+**4. `invoke` vs `stream` vs `batch`?**
+
+- One whole answer / progressive output / many independent requests in parallel
+- *Stronger answer:* streaming improves **perceived** speed, not total time. `batch_as_completed` combines both ideas
+
+**5. Does batching save tokens?**
+
+- No. Each request carries its own context. It saves cost (provider batch pricing) and time (fewer round trips)
+
+**6. What is few-shot prompting?**
+
+- Put example question and answer pairs before the real question so the model copies the pattern
+- *Stronger answer:* often beats adding more instructions
+
+**7. A template that contains example JSON throws `KeyError`. Why?**
+
+- The braces are read as variables. Double them: `{{ }}`
+
+## 3.11 Added by Claude, not from the sources
+
+Not in the course material. Established practice, but check current docs.
+
+- **Temperature 0 is not a guarantee.** Providers can still return slightly different text. Do not build logic that needs byte-identical output
+- **Check why the reply stopped.** If `max_tokens` is too small the reply is cut off and nothing crashes. Look at the stop reason in `response_metadata` (the key name differs by provider)
+- **Always set a `timeout`** in production, and decide how many retries you can afford. Retries multiply cost and latency
+- **History grows every turn and you pay for it every turn.** Long chats need trimming or summarising before they hit the context limit or the budget
+- **Do not put secrets in the system prompt.** Users can often coax a model into repeating its instructions
+
+## Recap
+
+- `init_chat_model("provider:model")` = one entry point for all providers
+- Parameters: `temperature`, `max_tokens`, `timeout`, `max_retries`
+- Messages: system, human, AI, tool. Objects or dicts, same result
+- Few-shot = example exchanges before the real question
+- A reply has text, tool calls, token usage and metadata
+- `.stream()` = feels fast. `.batch()` = parallel and cheaper, **not** fewer tokens
+- Templates separate structure from variables. Double literal braces
 
 ## Practice
 
-1. Set `temperature`, `max_tokens`, `timeout` and `max_retries` explicitly and see what changes.
-2. Rebuild the few-shot pattern and compare its output with a system-message-only version.
-3. Run `.stream()` on a long prompt, then `.batch()` on three questions, then `batch_as_completed()`.
-4. Print `.usage_metadata` on a real call and compare it with your provider's dashboard.
-5. If you have the RAM, run the same prompt through a local Ollama model and compare quality.
+1. Set `temperature`, `max_tokens`, `timeout` and `max_retries` explicitly and see what changes
+2. Rebuild the few-shot pattern and compare with a system-message-only version
+3. Run `.stream()` on a long prompt, then `.batch()` on three questions, then `batch_as_completed()`
+4. Print `.usage_metadata` on a real call and compare with your provider's dashboard
+5. If you have the RAM, run the same prompt through a local Ollama model and compare quality
+
+## How this chapter was checked
+
+- Run offline with a stand-in model on `langchain` 1.4.7: message dicts, tuples, bad `role` and missing `content` errors, `name` and `id`, `.batch()`, `.batch_as_completed()`, prompt template filling, the unescaped-brace `KeyError`, the doubled-brace fix, `MessagesPlaceholder`
+- **Not run against a live model:** temperature behaviour, token counts, OpenRouter limits, provider batch pricing. Those are class figures
 
 ## Sources and further reading
 
@@ -318,5 +391,6 @@ Two more answers from the end-of-class session belong with later chapters, so th
 - Live-Class-2026, `classes_summary/08 - 19 Jul - Inside the Model.md`
 - Live-Class-2026, `classes_transcription_summary/08 - 19 Jul - LangChain - Inside the Model.md`
 - Live-Class-2026, notebooks `02_03_environment_models_messages_student_notes.ipynb`, `04_05_prompt_templates_structured_output_student_notes.ipynb` and `Revision_Parts_1-4.ipynb` in `Weekend 04 - 18-19 Jul/07-08 - .../Notebook For Reference/`
+- Section 3.11 is added by Claude and is not from these sources
 
 Previous: [Chapter 2](02-langchain-family-and-harness-engineering.md) · Next: [Chapter 4, Structured output](04-structured-output.md)

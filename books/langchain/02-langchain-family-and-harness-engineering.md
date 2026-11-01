@@ -1,106 +1,150 @@
 # Chapter 2: LangChain family and harness engineering
 
-Class 07 sorts out four products that sound alike, gives the one sentence the mentor calls the most important in the course, and walks through the history and the environment set-up. It builds on [Chapter 1](01-introduction-to-langchain.md).
+**After this chapter you can:**
 
-*Status: written from class 07. The model and message parts of class 07 are in [Chapter 3](03-models-messages-and-parameters.md), section 3.1.*
+- Tell LangChain, LangGraph, Deep Agents and LangSmith apart
+- Say why tracing matters and turn it on
+- Define "agent" and "harness" in one sentence each
+- Spot an outdated tutorial from the timeline
+- Set up and sanity-check your environment
+
+**Builds on:** [Chapter 1](01-introduction-to-langchain.md). Model and message basics are in [Chapter 3](03-models-messages-and-parameters.md).
 
 ## 2.1 Four products, four jobs
 
-The class notebook opens with the exact confusion it exists to clear: "LangChain vs LangGraph vs LangSmith: which one should I use?" The answer is that they are not competitors. You do not pick one. You use as many as the project needs.
+They are **not competitors**. You use as many as the project needs.
 
-| Product | Job |
-|---|---|
-| LangGraph | The low-level foundation: branching, loops, persistence, durable execution. Most people building agents do not touch it at first, because LangChain hides it until it is needed |
-| LangChain | `create_agent`, a highly configurable harness built **on top of** LangGraph. The course is built around it |
-| Deep Agents | Built on top of `create_agent`, with planning tools, a virtual file system and sub-agent spawning ready-made |
-| LangSmith | Different from the other three: an observability and evaluation platform, not something you build with |
+- **LangGraph**
+  - Low-level foundation: branching, loops, persistence, durable execution
+  - Most agent builders do not touch it at first, because LangChain hides it until needed
+- **LangChain**
+  - `create_agent`: a configurable harness built **on top of** LangGraph
+  - This book is built around it
+- **Deep Agents**
+  - Built on top of `create_agent`
+  - Planning tools, a virtual file system and sub-agent spawning ready-made
+- **LangSmith**
+  - Observability and evaluation platform, **not** something you build with
+  - Watches agents built with any of the above (it supports OpenTelemetry, so almost anything else too)
 
-The official docs put the relationship this way: LangChain's agents are built on LangGraph to take advantage of its durable execution, human-in-the-loop support and persistence. LangSmith watches agents built with any of the other three and, because it supports OpenTelemetry, technically almost anything else too.
+Why LangChain sits on LangGraph: to get durable execution, human-in-the-loop and persistence for free.
 
-**A common mix-up.** LangFuse is **not** part of the LangChain family. It only shares "Lang" in the name and is an independent open-source observability platform.
-
-*Source: Live-Class-2026, `classes_summary/07`, `classes_transcription_summary/07`.*
+**Common mix-up:** LangFuse is **not** part of the LangChain family. It only shares "Lang" in the name. It is an independent open-source observability platform.
 
 ## 2.2 Why LangSmith exists
 
-With an ordinary script, when something goes wrong you read the stack trace and the code. An agent decides what to do at run time, so the code only describes what it **could** do, not what it **did**. LangSmith records a **trace**: a complete, timestamped record of every model call, tool call and decision. The class called it a flight's black box. It also shows latency and token cost for each step.
+- An ordinary script: when it fails, you read the stack trace and the code
+- An agent decides at run time, so the code shows what it **could** do, not what it **did**
+- LangSmith records a **trace**: every model call, tool call and decision, timestamped
+- It also shows latency and token cost per step
+- `print` shows only what you thought to check. A trace shows everything (diary vs flight recorder)
 
-Two environment variables turn it on:
+Turn it on with two environment variables:
 
 ```
 LANGSMITH_TRACING=true
 LANGSMITH_API_KEY=your-key-here
 ```
 
-The class said the free Developer tier included 5,000 traces a month as of 2026, which is plenty for learning (check the current figure). A `print` statement shows only what you thought to check, whereas a trace shows everything, like the difference between a diary and a flight recorder.
+- Free Developer tier: 5,000 traces a month as of 2026 (class figure, check the current number)
+- Enough for learning. Paid tiers matter only for production traffic
 
-*Source: `classes_summary/07`, `classes_transcription_summary/07`.*
+## 2.3 Agent and harness, in one sentence each
 
-## 2.3 The most important sentence
+> An agent is a model calling tools in a loop until a task is complete. A harness is everything around that loop.
 
-> An agent is a model calling tools in a loop until a given task is complete. A harness is everything around that loop.
+- **Model:** raw reasoning. It does not know what tools exist, has no behavioural instructions, cannot check anything outside its own knowledge
+- **Harness:** system prompt, tools, middleware, memory, context. It makes the model useful
+- `create_agent(model=..., tools=..., system_prompt=...)` configures the harness **around** a model. It never builds a model
+- Memory aid: **model = engine, harness = everything else, agent = the car you can drive**
 
-The **model** is raw reasoning power that cannot do anything: it does not know what tools exist, has no behavioural instructions, and cannot check anything outside its own knowledge. The **harness** (system prompt, tools, middleware) turns that into something useful. `create_agent(model=..., tools=..., system_prompt=...)` configures the harness **around** a model. It never builds a new model.
+**Harness engineering** = how well you wrap a raw model. Parts to design:
 
-The mentor's analogy: the model is the engine, the harness is everything else, and the agent is the car you can drive. The revision notebook adds two more. A Formula 1 car: a bare engine on a workbench is superb engineering that cannot take you anywhere until it has a chassis, tyres and a pit crew. And a construction site: LangGraph is the foundation and steel that you rarely touch, `create_agent` is the prefabricated rooms (ready-made but customisable), Deep Agents is the furnished show home next door, and LangSmith is the site inspector with cameras pointed at everything else. It also compares the three tiers to cooking: LangGraph is whole spices you grind yourself, `create_agent` is pre-mixed masala you can still adjust, and Deep Agents is the dish already cooked. Even Claude Code and ChatGPT are, at their core, a brain wrapped in connectors, skills, memory and web search.
+- the model
+- tools
+- system prompt
+- memory
+- context (earlier messages, documents)
+- sub-agents
+- guardrails and checkpoints
 
-**Harness engineering** is the name for how well you wrap a raw model with the right system prompt, tools, middleware, guardrails and checkpoints. The components named in class: the model, tools, a system prompt, memory, context (earlier messages and documents) and sub-agents. `create_agent` officially exposes the model, tools, system prompt, structured output, invocation and streaming output, and each gets its own deep dive later.
+`create_agent` exposes: model, tools, system prompt, structured output, invocation and streaming output.
 
-**The brain sets the ceiling.** The mentor warned: do not say you used a small model and expected the smartest agent. The capability of your agent always depends on the brain you chose.
-
-*Source: `classes_summary/07`, `classes_transcription_summary/07`.*
+**The brain sets the ceiling.** A weak model in a good harness is still a weak agent. Choose the model deliberately.
 
 ## 2.4 Why start with LangChain, and in what order
 
-Starting at Deep Agents would be like beginning a job as a chef who only knows how to order delivery: you get food and no control. LangChain is the kitchen, and LangGraph goes lower still, to choosing which vegetables to buy. The intended order is **LangChain, then LangGraph, then Deep Agents**, because Deep Agents becomes easy once the other two are solid.
-
-The class plans to teach LangChain in real depth over three or four classes, because every later framework (LangGraph, ADK, AutoGen, Amazon's agent SDK) will be compared against it. The language analogy: once you understand one language deeply, the next is easier.
-
-*Source: `classes_transcription_summary/07`.*
+- Order: **LangChain → LangGraph → Deep Agents**
+- Deep Agents is easy once the other two are solid
+- Starting at Deep Agents gives you results with no control (ordering delivery vs cooking)
+- LangChain is taught deeply because later frameworks (LangGraph, ADK, AutoGen, Amazon's agent SDK) get compared against it
+- Learn one framework well and the next one is faster, like a second programming language
 
 ## 2.5 A real timeline
 
-| Date | What happened |
-|---|---|
-| Oct 2022 | LangChain launches with LLM abstractions and "Chains", fixed sequences of steps |
-| Dec 2022 | First general-purpose agents, based on the ReAct paper. The model generates JSON and LangChain parses it into a tool call |
-| Feb 2024 | LangGraph released: streaming, durable execution, short-term memory, human-in-the-loop |
-| Oct 2024 | LangGraph becomes the preferred way to build past a single call. Most old chains and agents are deprecated |
-| Oct 20, 2025 | LangChain v1.0: one unified agent abstraction. Old code needs the separate `langchain-classic` package |
-| Mar 15, 2026 | Deep Agents released |
+- **Oct 2022:** LangChain launches with LLM abstractions and "Chains" (fixed sequences of steps)
+- **Dec 2022:** first general-purpose agents, based on the ReAct paper. The model writes JSON and LangChain parses it into a tool call
+- **Feb 2024:** LangGraph released: streaming, durable execution, short-term memory, human-in-the-loop
+- **Oct 2024:** LangGraph becomes the preferred way to build past a single call. Most old chains and agents deprecated
+- **Oct 20, 2025:** LangChain v1.0, one unified agent abstraction. Old code needs the separate `langchain-classic` package
+- **Mar 15, 2026:** Deep Agents released
 
-The summary dates the first agents to Dec 2022. The transcript is vaguer ("late 2022 or 2023"), so I used the summary's date.
+(The Dec 2022 date is from the class summary. The transcript is vaguer, "late 2022 or 2023".)
 
-Old "Chains" were a fixed workflow: prompt, then node, node, node (the notebook's example is a RAG chain: retrieve documents, then generate an answer). For two years, 2022 to 2024, building an agent meant hand-parsing JSON into tool calls, which is what classes such as `AgentExecutor` and functions such as `initialize_agent` do. That did not scale well, which is why LangGraph was built. ReAct (Reason plus Act) then gave agents that could reason and act, which is still the shape of most real applications.
+Key ideas:
 
-**Spotting an outdated tutorial.** If a 2026 tutorial imports `AgentExecutor` directly from `langchain`, running it raises an `ImportError`. That is not a fault in your set-up. That code now deliberately lives in `langchain-classic`, kept apart so the v1.0 package stays clean. Old Classic code still runs, but it is legacy and unmaintained (the mentor's analogy: an old iPhone still charges, but nobody is fixing its bugs).
+- **Chain** = fixed workflow, for example a RAG chain: retrieve documents, then generate an answer
+- **2022 to 2024:** building an agent meant hand-parsing JSON into tool calls (`AgentExecutor`, `initialize_agent`). It did not scale, so LangGraph was built
+- **ReAct** (Reason + Act): agents that reason and act. Still the shape of most real apps
+- **Low level = more control.** Closer to the machine, less abstraction. That is why LangGraph gives more control than LangChain
 
-**Low-level or high-level.** The lowest level gives the most control. It sits closer to the machine with little abstraction. That is why LangGraph gives more control than LangChain.
+**Spotting an outdated tutorial:**
 
-*Source: `classes_summary/07`, `classes_transcription_summary/07`.*
+```python
+from langchain import AgentExecutor   # ImportError on v1.0+
+```
 
-## 2.6 Setting up and checking your environment
+- This is not your set-up. The code now deliberately lives in `langchain-classic`
+- Classic code still runs but is legacy and unmaintained
+- To keep old code running while you migrate: `uv add langchain-classic`
 
-**Where to run code.** Google Colab is best for learning line by line: it is free, needs no local set-up and works on weak laptops. VS Code is for real projects with several dependent files and a front end. All notebooks are also on GitHub. The mentor's advice was not to code along live but to watch and then practise from the recording.
+## 2.6 Set up and check your environment
 
-**Project set-up** is the same as Chapter 1, section 1.5. The class project (`langchain-course`) installs a larger set up front:
+**Where to run code**
+
+- **Google Colab:** free, no local set-up, works on weak laptops. Best for learning line by line
+- **VS Code:** real projects with several files and a front end
+- Colab resets packages every session. Install once per session
+
+**Project set-up** (same basics as [Chapter 1](01-introduction-to-langchain.md), section 1.4):
 
 ```bash
 uv init langchain-course
 cd langchain-course
 uv add langchain langchain-openai langchain-community langgraph python-dotenv
-uv add langchain-mcp-adapters langchain-chroma chromadb pypdf
+uv add langchain-mcp-adapters langchain-chroma chromadb pypdf   # needed in later modules
 ```
 
-The second `uv add` line holds packages you do not need until later modules (connecting to external tools, and retrieval). Installing them now avoids stopping mid-course. In Colab, install directly with `!pip install -q langchain langchain-openai langchain-community langgraph python-dotenv langchain-chroma chromadb`, and note that Colab resets its packages each session, so run the install once per session.
+```python
+# Colab
+!pip install -q langchain langchain-openai langchain-community langgraph python-dotenv langchain-chroma chromadb
+```
 
-**Loading keys.** `load_dotenv()` then `os.environ.get("OPENAI_API_KEY")`. As a safe check, print only the first five characters of the key, never the whole key. Setting `os.environ["OPENAI_API_KEY"] = "..."` also works, but `.env` with `load_dotenv()` is the safer, reusable pattern. In Colab use the built-in **Secrets** manager (the key icon), not a key typed into a cell.
+**Loading keys**
 
-**A live debug.** A notebook failed to read `.env` because the wrong Python kernel was selected in VS Code. The fix was to pick the project's own `.venv` interpreter.
+```python
+import os
+from dotenv import load_dotenv
+load_dotenv()
+key = os.environ.get("OPENAI_API_KEY")
+print(key[:5] if key else "missing")      # first five characters only, never the whole key
+```
 
-**Exact key names.** LangChain finds the key by the standard variable name for each provider (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY` and so on). Renaming the variable (the class tried `OPENAI_API_KEY_2`), or switching provider without its matching variable, gives an authentication error. The mentor showed this by switching to Claude without setting `ANTHROPIC_API_KEY`.
+- Prefer `.env` + `load_dotenv()` over typing the key into code
+- Colab: use the built-in **Secrets** manager (key icon), not a key in a cell
+- **Exact names matter.** LangChain looks for each provider's standard variable (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, ...). Rename it or switch provider without its variable and you get an authentication error
 
-**A sanity check that the whole set-up works:**
+**Sanity check** (the official quickstart; if it runs, the environment is right):
 
 ```python
 from langchain.agents import create_agent
@@ -114,70 +158,120 @@ agent = create_agent(
     tools=[get_weather],
     system_prompt="You are a helpful assistant.",
 )
-agent.invoke({"messages": [{"role": "user", "content": "Weather in SF?"}]})
+result = agent.invoke({"messages": [{"role": "user", "content": "Weather in SF?"}]})
+print(result["messages"][-1].content_blocks)   # [{'type': 'text', 'text': '...sunny in San Francisco.'}]
 ```
 
-If this runs in both Colab and VS Code, the environment is wired correctly. The notebooks call it the official quickstart, taken unmodified from the LangChain docs, so passing it means the environment is genuinely correct. If the model name has been retired, check docs.langchain.com for the current catalogue and change only that string. The class's own run printed the final message's `content_blocks` as a list of blocks, `[{'type': 'text', 'text': '...sunny in San Francisco.'}]`. If it raises an authentication error, the usual causes are a `.env` that is not in the folder you run from, or a `.env` created after the session started, which needs a kernel or runtime restart.
+**If it fails**
 
-*Source: `classes_transcription_summary/07`. Not run: LangChain is not installed in my sandbox.*
+- Retired model name: check docs.langchain.com for the current catalogue, change only that string
+- Authentication error, usual causes:
+  - `.env` is not in the folder you run from
+  - `.env` was created after the session started, so **restart the kernel or runtime**
+  - Wrong Python kernel in VS Code: pick the project's own `.venv` interpreter
 
 ## 2.7 Open and closed source models
 
-| | Open source | Closed source |
-|---|---|---|
-| Access to the weights | Yes. You can self-host and fine-tune | No, never provided |
-| Hosting | Your own infrastructure is possible | Only through the provider's API |
-| Cost | Often free, or only your hosting cost | You pay the company per use |
-| Fine-tuning | Possible | Not possible |
+- **Open source (open weights)**
+  - You get the weights: self-host and fine-tune
+  - Cost: often free, or just your hosting
+- **Closed source**
+  - Weights never provided, API only
+  - You pay the provider per use. No fine-tuning of the weights
+- Class examples: recent GPT-OSS releases are open-weight. Flagship GPT-5 line and Claude are closed and API-only
 
-The examples given: recent GPT-OSS releases are open-weight, while most flagship models (the GPT-5 line and Claude) remain closed and API-only.
+## 2.8 FAQs
 
-*Source: `classes_transcription_summary/07`.*
-
-## 2.8 FAQs and questions from the class
-
-From the course's own FAQ notes for the session:
-
-- **If LangChain is built on LangGraph, why not learn LangGraph directly?** Because `create_agent` is designed to hide LangGraph's complexity until you need it. You do not learn assembly before Python. Drop to the lower layer only when the higher one cannot do what you need.
-- **Is LangSmith the same as built-in logging or print statements?** No. See section 2.2.
-- **Is all this too much just to ask an LLM a question?** For one single question, yes: call the model directly. It earns its cost once you need reliability, such as multiple tool calls, memory across a conversation, or anything you will want to debug later.
-
-| Question | Answer |
-|---|---|
-| Is LangChain foundational, with LangGraph on top? | The other way round: LangGraph is the foundation and LangChain sits on it |
-| Does LangChain cost anything? | No. You only pay your model provider |
-| Is LangChain still used in production? | Yes |
-| Is there official support if something breaks? | No, as with Python itself. Open a GitHub issue for a real bug. Support exists only with a company contract |
-| Can we use several models and compare outputs? | Yes, it is a common workflow |
-| Which is better, Anthropic or OpenAI? | It depends on use case, budget and needs |
-| Paid or free models in a real project? | It depends on requirements and budget |
-| Does the chat model manage chat history for you? | No. History management is still your job |
-| Do I have to pay for LangSmith to follow the course? | No. The free Developer tier covers 5,000 traces a month, far more than learning needs. Paid tiers matter only for production traffic |
-| What happens to old LangChain code after upgrading to v1.0? | It does not break silently, but code that uses things like `AgentExecutor` raises an `ImportError`. Install `langchain-classic` to keep old code running while you migrate |
-| Is Deep Agents just LangGraph or LangChain with extra steps? | Neither. It is built on top of LangChain's `create_agent`, one layer further out, with planning, a virtual file system and sub-agent spawning ready-made |
-
-*Source: `classes_summary/07`, `classes_transcription_summary/07`.*
+- **LangChain is built on LangGraph. Why not learn LangGraph directly?**
+  - `create_agent` hides LangGraph's complexity until you need it
+  - You do not learn assembly before Python. Drop a layer only when the higher one cannot do the job
+- **Is LangSmith just logging or `print`?** No. See 2.2
+- **Is all this too much just to ask an LLM a question?**
+  - One question: call the model directly
+  - It pays off with several tool calls, memory across a conversation, or anything you will want to debug
+- **Does LangChain cost anything?** No. You only pay your model provider
+- **Is it used in production?** Yes
+- **Official support if something breaks?** No, as with Python. Open a GitHub issue for a real bug. Support exists only with a company contract
+- **Can we use several models and compare outputs?** Yes, common workflow
+- **Anthropic or OpenAI? Paid or free?** Depends on use case, budget and needs
+- **Does the chat model manage chat history?** No. That is still your job
+- **LangSmith needed for the course?** No. The free tier is plenty
+- **Old code after upgrading to v1.0?** It does not break silently, but things like `AgentExecutor` raise `ImportError`. Install `langchain-classic`
+- **Is Deep Agents just LangGraph or LangChain with extra steps?** Neither. It is built on `create_agent`, one layer out, with planning, a virtual file system and sub-agents ready-made
 
 ## 2.9 Self-check
 
-1. To build an agent quickly with a lot of customisation, which tool do you reach for? **`create_agent`**, or Deep Agents for batteries included.
-2. If your agent misbehaves in production and you need to know what happened on one run? **LangSmith.**
-3. Fill in the blank: an agent is a model calling ___ in a ___ until a task is complete. **Tools, loop.**
-4. Why would a tutorial using `AgentExecutor` suggest outdated content? It predates the October 2025 v1.0 unification into `create_agent`.
+1. Quick agent with lots of customisation? **`create_agent`** (or Deep Agents for batteries included)
+2. Agent misbehaved in production, what happened on that run? **LangSmith**
+3. An agent is a model calling ___ in a ___ until a task is complete. **Tools, loop**
+4. A tutorial uses `AgentExecutor`. What does that tell you? It **predates the Oct 2025 v1.0** unification into `create_agent`
 
-The revision notebook has a longer self-check that also asks what separates `runtime.state` from `runtime.context` and what causes `INVALID_PROMPT_INPUT`. The notebook does not teach either, so they are left out here and will be covered when the chapters that teach them are written.
+## 2.10 Interview corner
+
+**1. LangChain vs LangGraph vs Deep Agents vs LangSmith?**
+
+- LangGraph: low-level orchestration and durable execution
+- LangChain: configurable harness on LangGraph
+- Deep Agents: batteries-included layer on `create_agent`
+- LangSmith: observability and evaluation
+- *Stronger answer:* you combine them. Pick the highest layer that still gives the control you need
+
+**2. What is "harness engineering"?**
+
+- Designing everything around the model: prompt, tools, memory, context, middleware, guardrails
+- *Stronger answer:* the model sets the ceiling, the harness decides how close you get to it
+
+**3. Why trace an agent instead of printing?**
+
+- Agents decide at run time, so code does not show what happened
+- A trace records every model and tool call with latency and cost
+- *Stronger answer:* traces also feed evaluation and regression tests
+
+**4. How do you recognise an outdated LangChain tutorial?**
+
+- Imports like `AgentExecutor` or `initialize_agent` from `langchain` fail on v1.0+ because they moved to `langchain-classic`
+- *Stronger answer:* check the date and the package version before copying code
+
+**5. Open vs closed models?**
+
+- Open weights: self-host, fine-tune, you carry the hosting
+- Closed: API only, you pay per use
+- *Stronger answer:* the choice is usually about data control, cost at scale and capability
+
+## 2.11 Added by Claude, not from the sources
+
+Not in the course material. Established practice, but check current docs.
+
+- **Traces can contain sensitive data.** Prompts, tool arguments and outputs may include personal or confidential information. Decide what you send to a hosted tracing service, mask fields where you can, and check the retention and data-location terms
+- **Pin versions.** This ecosystem moved fast (v1.0 in late 2025). Commit `uv.lock`, and pin a major range such as `langchain>=1,<2`, so a fresh install does not break your project
+- **Keep tracing projects separate.** Use a different tracing project (or key) for experiments, staging and production so noise does not bury real runs
+
+## Recap
+
+- LangGraph = foundation, LangChain = harness on it, Deep Agents = on top of that, LangSmith = observability
+- Agent = model calling tools in a loop. Harness = everything around the loop
+- The model sets the ceiling
+- Trace with `LANGSMITH_TRACING=true`
+- Outdated tutorial? Look for `AgentExecutor`
+- Sanity check = the quickstart agent. Restart the kernel after creating `.env`
 
 ## Practice
 
-1. Set up a fresh LangChain project and run the sanity check in both Colab and VS Code.
-2. Turn on `LANGSMITH_TRACING=true` and read one trace from start to finish.
-3. Learn the timeline well enough to spot an outdated tutorial on sight.
-4. Answer the four self-check questions without looking back.
+1. Set up a fresh project and run the sanity check in both Colab and VS Code
+2. Turn on `LANGSMITH_TRACING=true` and read one trace from start to finish
+3. Learn the timeline well enough to spot an outdated tutorial
+4. Answer the four self-check questions without looking back
+
+## How this chapter was checked
+
+- Imports and the `create_agent` signature checked on `langchain` 1.4.7. No live model run
+- Dates, free-tier numbers and model names are class figures. Check before relying on them
 
 ## Sources and further reading
 
 - Live-Class-2026, `classes_summary/07 - 18 Jul - LangChain Family & Harness Engineering.md`
 - Live-Class-2026, `classes_transcription_summary/07 - 18 Jul - LangChain Family & Harness Engineering.md`
 - Live-Class-2026, notebooks `01_landscape_student_notes.ipynb`, `Revision_Parts_1-4.ipynb` and the `langchain-course` folder (`Common FAQs`, `commands.txt`, `setup_check.ipynb`) in `Weekend 04 - 18-19 Jul/07-08 - .../`
+- Section 2.11 is added by Claude and is not from these sources
 
 Previous: [Chapter 1](01-introduction-to-langchain.md) · Next: [Chapter 3, Models, messages and parameters](03-models-messages-and-parameters.md)
