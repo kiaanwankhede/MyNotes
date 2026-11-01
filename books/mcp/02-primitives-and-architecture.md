@@ -194,7 +194,7 @@ npx -y @modelcontextprotocol/inspector uv run python server.py
 - **VS Code:** register the launch command `uv run python server.py` as a **STDIO** server (`Add Server`, then STDIO), with the working directory set to the folder that holds `server.py`. VS Code records it in its own `mcp.json`. A new chat can then see and call `greet` and `add`
 - **Claude Desktop:** Manage Connectors, then **Add custom connector**, pointing at a remote MCP server URL (or the local-server pattern)
 - **The same server works across hosts with no changes.** That was the point of the demo
-- **Sharing with a small team:** a locally running server can be shared by port-forwarding or tunnelling. It is **not the most secure option**. Proper hosting and publishing as a package come later ([Chapter 6](06-deployment.md))
+- **Sharing with a small team:** a locally running server can be shared by port-forwarding or tunnelling. It is **not the most secure option**. Proper hosting and publishing as a package come later ([Chapter 6](06-deployment-and-building-a-client.md))
 
 **Files in the class repo, for reference:**
 

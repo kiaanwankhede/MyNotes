@@ -6,6 +6,6 @@
 * [Lifecycle, JSON-RPC and capability negotiation](03-lifecycle-json-rpc-and-capability-negotiation.md)
 * [Operation, transports and shutdown](04-operation-transports-and-shutdown.md)
 * [Building MCP servers](05-building-mcp-servers.md)
-* [Deployment](06-deployment.md)
+* [Deployment and building a client](06-deployment-and-building-a-client.md)
 * [Legacy vs modern MCP](07-legacy-vs-modern-mcp.md)
 * [Interview questions](08-interview-questions.md)

@@ -57,7 +57,7 @@
     "Lifecycle, JSON-RPC and capability negotiation",
     "Operation, transports and shutdown",
     "Building MCP servers",
-    "Deployment",
+    "Deployment and building a client",
     "Legacy vs modern MCP",
     "Interview questions"
    ]
