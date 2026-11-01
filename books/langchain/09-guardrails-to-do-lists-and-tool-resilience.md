@@ -268,7 +268,40 @@ emulated_agent = create_agent(
 - A short demo had an agent run a real `mkdir` on request: a glimpse of how far "an agent's hands" can go
 - Full depth comes in [Chapter 10](10-shell-tools-and-custom-middleware.md) and with Deep Agents
 
-## 9.9 Questions from the class
+## 9.9 More prebuilt middleware from the class diagram
+
+The class architecture diagram listed the prebuilt middleware from the documentation. Four entries are not covered elsewhere in this book. *Checked on `langchain` 1.4.7, where the first three exist as classes:*
+
+**`ModelRetryMiddleware`:** retries a failed **model** call with backoff, like `ToolRetryMiddleware` does for tools (section 9.5).
+
+```python
+from langchain.agents.middleware import ModelRetryMiddleware
+mw = ModelRetryMiddleware(max_retries=2, initial_delay=1.0, backoff_factor=2.0, on_failure="continue")
+```
+
+- Defaults: `max_retries=2`, `initial_delay=1.0`, `backoff_factor=2.0`, `max_delay=60.0`, `jitter=True`
+- *Checked with a model that raised `ConnectionError`:* it failed twice and then answered, so **3 attempts** in total. With three failures, `on_failure="continue"` (the default) ended the run with an AI message "Model call failed after 3 attempts with ConnectionError..." and `on_failure="error"` **raised** the error
+- Put model retry and model fallback ([Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md)) in a deliberate order, as with the tool pair in 9.6
+
+**`ContextEditingMiddleware` with `ClearToolUsesEdit`:** clears **old tool results** when the context grows, to save tokens.
+
+```python
+from langchain.agents.middleware import ContextEditingMiddleware, ClearToolUsesEdit
+mw = ContextEditingMiddleware(edits=[ClearToolUsesEdit(trigger=100000, keep=3, placeholder="[cleared]")])
+```
+
+- Defaults: `trigger=100000` tokens, `keep=3` most recent tool results, placeholder `[cleared]`. Options include `clear_at_least`, `clear_tool_inputs` and `exclude_tools`
+- *Checked with `trigger=500, keep=2` and five long tool results:* on the model's last call the three oldest tool messages read `[cleared]` and the two newest were intact
+- **Against summarisation:** this edits tool output **in place** without writing a summary. It is cheaper, and loses the old results
+
+**`FilesystemFileSearchMiddleware(root_path=...)`:** gives the agent search tools over a folder.
+
+- *Checked:* it adds two tools, **`glob_search`** and **`grep_search`**. In a test folder, a glob for `*.txt` and a grep for a word both found the file
+- Defaults: uses `ripgrep` if available, skips files over 10 MB. **Limit `root_path` to the folder you intend to expose**
+
+**Also on the diagram, not found in the installed version:** a **subagent** middleware and **rubric grading (beta)**, which applies model-as-judge scoring so an agent iterates until a rubric is met. They were only a line each in the class table. `ProviderToolSearchMiddleware` (9.3) and `ShellToolMiddleware` (Chapter 10) are covered elsewhere.
+
+## 9.10 Questions from the class
 
 - **Tool Error vs Tool Retry?** Error handles a failure gracefully **once**, as a readable tool message, with no retry. Retry actively retries the call, with backoff
 - **Why does a tool call limit give a tool message, not an interrupt?** An interrupt asks a human for a decision. A limit needs none ([Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md), 8.2)
@@ -279,7 +312,7 @@ emulated_agent = create_agent(
 - **Why 8 calls, not 4, with `max_retries=3`?** The middleware's cycle is 4. The model then asked for the tool again, which started another cycle (9.5)
 - **Why wrap tool errors as a message instead of fixing the tool?** Tools are often third-party or shared, so the general fix is at the middleware level
 
-## 9.10 Interview corner
+## 9.11 Interview corner
 
 **1. Why use `TodoListMiddleware` instead of a prompt that says "make a plan"?**
 
@@ -315,7 +348,7 @@ emulated_agent = create_agent(
 - In development and tests, to check agent logic without real side effects
 - *Stronger answer:* the output is invented by a model, so it never belongs in production or in results you rely on
 
-## 9.11 Added by Claude, not from the sources
+## 9.12 Added by Claude, not from the sources
 
 Not in the course material. Established practice, but check current docs. Items marked *checked* were tested on `langchain` 1.4.7.
 
@@ -365,6 +398,7 @@ ToolRetryMiddleware(max_retries=3, retry_on=(ConnectionError, TimeoutError))
 
 ## How this chapter was checked
 
+- Run offline for 9.9 on `langchain` 1.4.7: `ModelRetryMiddleware` (success after two failures, and both `on_failure` settings after three), `ContextEditingMiddleware` with `ClearToolUsesEdit` (older tool results replaced by the placeholder), and the two tools of `FilesystemFileSearchMiddleware`. The subagent and rubric-grading entries from the class diagram were **not** found in the installed version and were not run
 - Run offline with a stand-in model on `langchain` 1.4.7:
   - to-do list: the `write_todos` tool, the `todos` state key, persistence on a second turn with a checkpointer
   - tool selector: a selector returning three names with `max_tools=2` (capped to two, plus the always-included tool), the refund query, an invalid name, a missing `always_include` name, and the order with `show_tools`
@@ -382,5 +416,7 @@ ToolRetryMiddleware(max_retries=3, retry_on=(ConnectionError, TimeoutError))
 - Live-Class-2026, `MIddleware.ipynb` (cells 98 to 145), the whiteboard `Agent-Middleware-Architecture.pdf` and the folder README in `Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/`
 - `Assignment_2_Agents_and_Prebuilt_Middleware.ipynb` (questions only)
 - The guardrail map (9.1), the order rule (9.6) and section 9.11 are from testing, not from the class sources
+- Live-Class-2026, `Weekend 07 - 8-9 Aug/Agent-Middleware-Architecture.png` (the table of prebuilt middleware used in 9.9) and the `.excalidraw` versions of the diagram
+- Section 9.9 is checked by testing against `langchain` 1.4.7
 
 Previous: [Chapter 8, Prebuilt middleware](08-prebuilt-middleware-limits-fallback-and-pii.md) · Next: [Chapter 10, Shell tools and custom middleware](10-shell-tools-and-custom-middleware.md) (not written yet)

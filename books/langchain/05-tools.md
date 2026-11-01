@@ -133,6 +133,8 @@ def reserve(movie: str, seats: int) -> str:
     return f"Reserved {seats} seat(s) for {movie}"
 ```
 
+**What the `Args:` block does.** The class notebook's tools list `Args:` in the docstring, saying it sharpens what the model knows about each argument. *Checked:* by default the whole docstring, `Args:` block included, becomes the **description text**, and the argument schema carries **no** per-argument description. With **`@tool(parse_docstring=True)`** the `Args:` entries move into the schema: `{'movie_title': {'description': 'The exact title of the movie to check', ...}}`. Use it for tools with more than one argument.
+
 - Ready-made tools exist. Class example: web search through Tavily (`from langchain_tavily import TavilySearch`, install the package and set an API key)
 
 ## 5.5 Argument schemas: `args_schema` and `Field()`
@@ -175,12 +177,15 @@ def get_weather(location: str, config: str) -> str:
 - Calling it directly, I got `TypeError: gw() missing 1 required positional argument: 'config'`, matching the answer key
 - Fix: use a different name
 - Unconfirmed in class: whether nesting `config` or `runtime` inside a schema gets around the restriction
+- *Checked, and a refinement:* `config` as a plain `str` argument defines fine and fails when called. **`runtime` as a plain `str` argument worked** (the call returned normally). What LangChain treats specially is a parameter **annotated as `ToolRuntime`**, which it hides from the model. Do not rely on a plain `runtime: str` working in other versions. Avoid both names
 
 ## 5.7 Binding versus running, once more
 
 - The most misunderstood point: after `bind_tools` the model **can never run a tool itself**. It can only **request** a call
 - Class demo: "Is Interstellar showing tonight, can you book two seats?" gave empty `content` and `tool_calls` with `book_seats` (movie Interstellar, two seats, middle row) plus a `config` value the model tried to fill in, a live reminder of why that name is off limits
 - Something must read the request, run the function and send back the result. That something is the agent harness ([Chapter 6](06-agents-and-memory.md))
+
+- **Seeing which tools an agent was built with:** *checked* on `langchain` 1.4.7, `agent.get_graph().nodes["tools"].data._tools_by_name.keys()` listed the registered tools. `_tools_by_name` is a private attribute, so use it for debugging only
 
 ## 5.8 Four kinds of tool
 
@@ -391,6 +396,7 @@ Not in the course material. Established practice, but check current docs.
 
 ## How this chapter was checked
 
+- Run offline for the additions: the `Args:` block with and without `parse_docstring=True`, `config` and `runtime` as plain arguments, and the registered-tools listing of a built agent
 - Run offline with a stand-in model on `langchain` 1.4.7: the manual tool loop from 5.3, `ToolMessage` content and artifact, `@tool` name and description override, `args_schema` output, the `config` parameter failure, `runtime` hidden from `.args`, `InMemoryStore` with a tuple namespace, `return_direct`, and gating with both context and a state schema (plus the failing bare-input version)
 - **Not run against a live model:** what a real model returns for `tool_calls`, Tavily, headless tools, `Command`. Those are class or answer-key statements
 
@@ -403,5 +409,6 @@ Not in the course material. Established practice, but check current docs.
 - Colab used in class (Student Reference, class 10): https://colab.research.google.com/drive/1KlOpWf5-KIwsA0UaqWH98eISyZZQphXD?usp=sharing
 - Live-Class-2026, notebooks `02_03_environment_models_messages_student_notes.ipynb` and `Revision_Parts_1-4.ipynb` in `Weekend 04 - 18-19 Jul/07-08 - .../Notebook For Reference/`
 - Section 5.12 is added by Claude and is not from these sources
+- Live-Class-2026, `Student_Reference_Structured_Output_and_Tools.ipynb` and `Langchain_Till_Agents.ipynb` (Weekend 5). The `parse_docstring` and `runtime` findings are from testing
 
 Previous: [Chapter 4](04-structured-output.md) · Next: [Chapter 6, Agents and memory](06-agents-and-memory.md) (not written yet)

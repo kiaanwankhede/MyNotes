@@ -42,6 +42,20 @@ print(model.invoke(messages).content)     # pirate-flavoured: the system message
 - Roles match [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md)
 - The chat model does **not** manage history. You pass the history in
 
+### Why LangChain's one interface matters: the same question through three SDKs
+
+The class notebook asked "What is the capital of France" through each provider's **own** Python SDK. The three shapes differ:
+
+| Provider SDK | Call | Where the text is |
+|---|---|---|
+| Anthropic | `client.messages.create(model=..., max_tokens=..., messages=...)` | `response.content[0].text` |
+| Google (Gemini) | `client.models.generate_content(model=..., contents=...)` | `response.text` |
+| OpenAI | `client.chat.completions.create(model=..., messages=...)` | `response.choices[0].message.content` |
+
+- Each also needs its own package, its own key variable and its own error handling
+- `init_chat_model("provider:model").invoke(...)` is **one call, one reply type**, whatever the provider
+- *Not run here: it needs three provider keys. The shapes are from the class notebook*
+
 ## 3.2 Where your API key lives
 
 - If `.env` is not in `.gitignore`, the first push sends your real key to GitHub with the code
@@ -180,6 +194,7 @@ print(response.usage_metadata)
 - `pprint(response)` shows everything on the object
 - No separate token-counting library needed. The billed numbers are on the response
 - `usage_metadata` can hold finer detail (`input_token_details`, `output_token_details`, for example cached and reasoning tokens)
+- **Reasoning models spend hidden tokens.** In the class run, a one-line pirate answer to "capital of France" reported `input_tokens: 27` and `output_tokens: 151`, and `output_token_details.reasoning` was **128** of those. The visible reply was a few words. Read the field, do not guess the cost from the length of the text
 - **Cost per user or session:** add up `usage_metadata` across the conversation. It is the exact billed number, not an estimate
 - Streaming, structured output and tool calling all build on reading these fields correctly
 
@@ -382,6 +397,7 @@ Not in the course material. Established practice, but check current docs.
 
 ## How this chapter was checked
 
+- The reasoning-token figures (3.5) and the three-SDK comparison (3.1) come from the class notebook output and code. Neither was run here (they need provider keys)
 - Run offline with a stand-in model on `langchain` 1.4.7: message dicts, tuples, bad `role` and missing `content` errors, `name` and `id`, `.batch()`, `.batch_as_completed()`, prompt template filling, the unescaped-brace `KeyError`, the doubled-brace fix, `MessagesPlaceholder`
 - **Not run against a live model:** temperature behaviour, token counts, OpenRouter limits, provider batch pricing. Those are class figures
 
@@ -392,5 +408,7 @@ Not in the course material. Established practice, but check current docs.
 - Live-Class-2026, `classes_transcription_summary/08 - 19 Jul - LangChain - Inside the Model.md`
 - Live-Class-2026, notebooks `02_03_environment_models_messages_student_notes.ipynb`, `04_05_prompt_templates_structured_output_student_notes.ipynb` and `Revision_Parts_1-4.ipynb` in `Weekend 04 - 18-19 Jul/07-08 - .../Notebook For Reference/`
 - Section 3.11 is added by Claude and is not from these sources
+- Live-Class-2026, `Weekend 04 - 18-19 Jul/.../Learning/Part 2 - Models/Langchain (1).ipynb` and `Langchain - Colab.ipynb` (reasoning-token output, three-SDK comparison). Both notebooks hold **API keys in their source**. They were not copied. Revoke any that are yours
+- Live-Class-2026, `Weekend 04 - 18-19 Jul/07-08 .../Langchain.pdf` and the Weekend 4 README (whiteboard summary of classes 7 and 8: family, harness, messages, structured output)
 
 Previous: [Chapter 2](02-langchain-family-and-harness-engineering.md) · Next: [Chapter 4, Structured output](04-structured-output.md)

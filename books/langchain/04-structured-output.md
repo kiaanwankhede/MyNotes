@@ -61,6 +61,18 @@ print(type(response))    # <class '__main__.Email'>
 
 - Why it matters downstream: logic that expects an `Email` will not choke on a malformed string. The model is constrained to that shape
 
+### How the raw model enforces the schema: `method=`
+
+`with_structured_output` takes a `method` argument. *Checked on the installed `langchain-openai`:* the options are `"json_schema"` (**the default**), `"function_calling"` and `"json_mode"`. It also takes `include_raw` and `strict`.
+
+- **`"json_schema"`:** the provider's own native structured-output feature, used when it exists
+- **`"function_calling"`:** forces the shape through a synthetic tool call. Works more widely
+- **`"json_mode"`:** an older, looser JSON-only mode
+- You rarely set it. The default is fine
+- **Two layers, two vocabularies.** `method=` belongs to the **raw model**. `ToolStrategy` and `ProviderStrategy` belong to **`create_agent(response_format=...)`**
+- *Checked:* `model.with_structured_output(ProviderStrategy(Schema))` raised `ValueError: Unsupported function` at once. Pick one layer, never both
+- Class note: wrapping the schema is how you force a strategy. A separate `strategy=` keyword is silently ignored (4.4)
+
 ## 4.3 `BaseModel` or `TypedDict`
 
 - **Pydantic `BaseModel`**
@@ -158,6 +170,8 @@ model.profile["tool_calling"]
 - "Just pass a schema" is only safe when the profile says the model supports it
 - With no strategy given, LangChain reads the profile: `ProviderStrategy` if supported, else `ToolStrategy`
 - Older or self-hosted model reporting `False`? Name `ToolStrategy` yourself
+- *Checked from the installed `langchain-openai` data (no network call):* `gpt-5-mini` reported `structured_output` and `tool_calling` as `True` with `max_input_tokens` 272000. `gpt-3.5-turbo` reported both as `False`. The profile is **static library data**, so it can lag a model's real abilities
+- *Checked:* building an agent with `response_format=ToolStrategy(...)`, `ProviderStrategy(...)` or a bare schema on `gpt-3.5-turbo` **did not fail at construction**. Any failure shows up at call time, which was not run here
 
 ## 4.8 Structured output on a model versus on an agent
 
@@ -250,6 +264,20 @@ What the message trace shows, in order:
 
 - **No error-handling code written.** The schema is a check **outside** the model, so a persuasive prompt cannot talk past it
 - Custom hint for the model instead of Pydantic's raw error text: `ToolStrategy(SeatBooking, handle_errors="Seats must be 1 to 10. Try again.")`
+
+| `handle_errors=` | Behaviour |
+|---|---|
+| `True` (default) | Catch every error and retry with a default error message |
+| A string | Catch every error and retry with **your** message |
+| An exception type | Catch only that type. Anything else propagates |
+| `False` | No retry. The exception propagates at once |
+
+*Checked with a scripted model that first asks for 15 tickets, then 10:*
+
+- Default and custom-string settings: **2 model calls**, final answer `ticket_count=10`. The default fed back "Failed to parse structured output for tool 'SeatBooking' ..."
+- `handle_errors=False`: raised `StructuredOutputValidationError` straight away
+- **`handle_errors=ValueError` did not catch it** and raised the same error. LangChain wraps Pydantic's error in its own `StructuredOutputValidationError`, which is **not** a `ValueError`. *Checked:* `handle_errors=StructuredOutputValidationError` (from `langchain.agents.structured_output`) retried and succeeded. Name that type
+- Pydantic's own `ValidationError` is a `ValueError`, which is why the mistake is easy to make
 - **Limit of this safety net:** `10` was the model's choice of a valid value, not what the user wanted. Hard business rules belong in the schema. Add a human check for anything consequential
 - Assignment Q17 asks for this exact walk-through for `party_size: int = Field(ge=1, le=20)` and "table for 50 please". Answer: propose 50, fail validation, feed the error back, retry until valid or `handle_errors` gives up
 
@@ -326,6 +354,7 @@ Not in the course material. Established practice, but check current docs.
 
 ## How this chapter was checked
 
+- Run offline for the additions: the `method=` options and defaults of `with_structured_output`, the `ProviderStrategy` refusal on a raw model, the `model.profile` values for `gpt-5-mini` and `gpt-3.5-turbo`, agent construction on `gpt-3.5-turbo` with three `response_format` choices, and the four `handle_errors` settings with a scripted model that first breaks the constraint. **Not run:** any real model, so how a real model reacts to a rejected value was not tested
 - Run offline with a stand-in model on `langchain` 1.4.7: the `ToolStrategy` retry (15 rejected, error returned as a `ToolMessage`, retry with 10), the custom `handle_errors` message, `Union` returning the right class, the `ValidationError` text, and the imports
 - **Not run against a live model:** `with_structured_output`, `model.profile` values, the `bind_tools(...).with_structured_output(...)` failure and the `strategy=` claim. Those are class or answer-key statements
 
@@ -338,5 +367,7 @@ Not in the course material. Established practice, but check current docs.
 - Live-Class-2026, `classes_transcription_summary/08 - 19 Jul - LangChain - Inside the Model.md`
 - Live-Class-2026, notebooks `04_05_prompt_templates_structured_output_student_notes.ipynb` and `Langchain_structured_output_tools_agents.ipynb` in `Weekend 04 - 18-19 Jul/07-08 - .../Notebook For Reference/`
 - Section 4.11 is added by Claude and is not from these sources
+- Live-Class-2026, `Weekend 05 - 25-26 Jul/09-10 .../Assignment & Questions/Student_Reference_Structured_Output_and_Tools.ipynb`, `Langchain_Structured_OUTPUT_COLAB.ipynb`, `Langchain_Till_Agents.ipynb`, and the whiteboard PDFs `Langchain-2.pdf` and `Langchain-Session-2.pdf` (text extracted)
+- The `method=` options, `profile` values and `handle_errors` behaviour in 4.2, 4.7 and 4.9 are from testing
 
 Previous: [Chapter 3](03-models-messages-and-parameters.md) · Next: [Chapter 5, Tools](05-tools.md)
