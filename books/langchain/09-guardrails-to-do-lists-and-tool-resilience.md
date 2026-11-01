@@ -236,6 +236,7 @@ Checked with a tool that always raises `ValueError`:
 
 - **`[ToolErrorMiddleware, ToolRetryMiddleware]`:** the tool ran **3 times** (1 + 2 retries), then the model got the safe message
 - **`[ToolRetryMiddleware, ToolErrorMiddleware]`:** the tool ran **once**. The error middleware turned the exception into a message first, so the retry middleware never saw a failure and never retried
+- With the retry default `on_failure="continue"`, the retry middleware already turns its own final failure into a message, so the error middleware has little left to do. Class 15 advised listing retry **before** error. *Checked:* in that order the tool ran **once** and never retried. Error first, retry second ran it three times
 - The same rule explains 9.3: `show_tools` only sees the filtered tools when it is listed **after** the selector
 
 ## 9.7 `LLMToolEmulator`

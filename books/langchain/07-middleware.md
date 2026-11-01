@@ -297,6 +297,7 @@ def run_interactive_hitl_demo(agent, config):
 ```
 
 - In class, rejecting with "Don't want to cancel" made the agent report that the cancel was not accepted and offer next options (check status, show policy, retry, contact support)
+- **In depth:** `version="v2"` (the current way to read interrupts), `description_prefix`, `respond` for question-only tools and conditional interrupts with `when=` are in [Chapter 11](11-runtime-and-human-in-the-loop.md)
 - **No UI comes with it.** You resolve the interrupt in code with `Command(resume=...)`, or wire it to your own interface (a pop-up, an approve and reject button)
 - **Two levels of sign-off** (for example manager then director) are not available out of the box. That needs custom middleware
 
