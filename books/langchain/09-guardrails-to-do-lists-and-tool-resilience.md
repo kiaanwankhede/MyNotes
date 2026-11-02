@@ -24,6 +24,32 @@
 
 The class opened with real industry mapping: fraud-detection hooks in fintech, PII redaction as a legal requirement in healthcare, refund approval gates in customer support, audit logging in internal tools.
 
+### Custom guardrails: before and after the agent (LangChain docs)
+
+The docs page `guardrails` gives two custom examples. Both were run (`langchain` 1.4.7, scripted model).
+
+- **Before agent: a deterministic filter.** `before_agent` runs **once at the start**. Good for session checks: authentication, rate limits, banned content
+
+```python
+class ContentFilterMiddleware(AgentMiddleware):
+    def __init__(self, banned_keywords): super().__init__(); self.banned = [k.lower() for k in banned_keywords]
+
+    @hook_config(can_jump_to=["end"])
+    def before_agent(self, state, runtime):
+        first = state["messages"][0]
+        if first.type == "human" and any(k in first.content.lower() for k in self.banned):
+            return {"messages": [{"role": "assistant", "content": "I cannot process requests containing inappropriate content."}],
+                    "jump_to": "end"}
+```
+
+  - *Checked:* a banned word ended the run with **0 model calls** and the history `human, ai`. A clean request made 1 model call. The decorator form `@before_agent(can_jump_to=["end"])` behaved the same
+- **After agent: a model-based safety check.** `after_agent` runs **once at the end**, on the full answer. Good for safety, quality and compliance scans. The docs example asks a second model to reply `SAFE` or `UNSAFE` and overwrites `last_message.content` when it is unsafe
+  - *Checked:* editing the last message in place and returning `None` did change the final answer. That works by side effect. A clearer way, also *checked*: return `{"messages": [AIMessage(content="I cannot provide that response.", id=last.id)]}`. The same `id` **replaces** the message, leaving one AI message
+- **Combining guardrails:** list several in `middleware=[...]`. Cheap deterministic ones go first, so a blocked request never reaches the model-based check
+- Deterministic guardrails are fast and predictable but catch only what you list. Model-based ones are broader but cost a model call and can be wrong ([8.5](08-prebuilt-middleware-limits-fallback-and-pii.md))
+
+*Source: `langchain-ai/docs`, `src/oss/langchain/guardrails.mdx` (Custom guardrails).*
+
 ## 9.2 `TodoListMiddleware`
 
 For a complex, multi-step task, an agent does better when it **plans first and tracks progress** against the plan. This is the visible checklist you see in tools like Claude Code.

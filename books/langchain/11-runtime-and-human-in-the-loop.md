@@ -324,6 +324,63 @@ ask_agent = create_agent(
 - Checked: the tool message the model received was exactly the human's text
 - It is the behaviour you see when a chat assistant pauses to ask you a question instead of guessing. The human supplies **missing information**
 
+### Per-call interrupt mode (LangChain docs)
+
+From the docs page `human-in-the-loop`. Needs `langchain>=1.4.6`. *Checked* on 1.4.7 with a scripted model: three tools, `read_data` ungated, `write_file` and `execute_sql` gated.
+
+| | `interrupt_mode="batched"` (default) | `interrupt_mode="per_call"` |
+|---|---|---|
+| Interrupts | one per model turn, listing every gated call | one per gated call, raised as the call starts |
+| Answer | a list of decisions in the same order | one decision per **interrupt ID** |
+| Ungated tools | *checked:* ran only after the resume | *checked:* `read_data` ran **immediately** |
+| Schema | none | each interrupt carries a `response_schema` |
+
+- The docs advise per-call mode for new agents and say LangChain plans to make it the default in the next major release
+- *Checked, batched:* 1 interrupt holding both `write_file` and `execute_sql`; no tool ran before the resume
+- *Checked, per call:* 2 interrupts; each value has `type: "tool_approval"`, `tool_call_id`, `name`, `args` and `description`. Resume with `Command(resume={interrupt_id: decision, ...})`
+
+```python
+HumanInTheLoopMiddleware(
+    interrupt_on={"write_file": True,
+                  "execute_sql": {"allowed_decisions": ["approve", "reject"]},
+                  "read_data": False},
+    interrupt_mode="per_call",
+    edit_notice=None,            # optional: drop the note shown to the model after an edit
+)
+```
+
+- **Edit:** `{"type": "edit", "edited_action": {"name": "write_file", "args": {...}}}`. The name must stay the same and the args must fit the tool's schema. *Checked:* the edited call ran with the new path, and the model received a note that "a human reviewer replaced this tool call" before the result. With `edit_notice=None` the model saw only `Wrote 1 characters to e.csv`
+- **Reject:** `{"type": "reject", "message": "use SELECT"}`. *Checked:* the model received `User rejected the tool call for `execute_sql` with reason: use SELECT`
+- **Respond:** `{"type": "respond", "message": "..."}` skips the tool and answers in its place. The message is required, and the model gets it as a **successful** result, so use `reject` to deny
+- **One at a time:** an unanswered interrupt stays pending. *Checked:* after answering only `write_file`, `execute_sql` was still pending and had not run
+- **Invalid answers:** the answer is checked against the schema before it is saved. *Checked:* an edit missing `content` raised a `ValidationError`, nothing was saved, and a corrected answer to the **same ID** was accepted. The docs warn that if several answers are sent together and one is invalid, the others' tools can run while their interrupts still show as pending, and answering again runs them twice. Check answers first or send them one at a time
+- **Order of middleware:** list `HumanInTheLoopMiddleware` **before** `ToolRetryMiddleware` and `ToolErrorMiddleware`, so a retried call does not ask the reviewer again. Middleware listed before it runs again up to the pause on resume, so it must have no side effects before it calls its handler
+
+*Source: `langchain-ai/docs`, `src/oss/langchain/human-in-the-loop.mdx` (Set the interrupt mode, Pause once per tool call).*
+
+## Context engineering: the framework (LangChain docs)
+
+From `context-engineering.mdx`. The idea: agents usually fail not because the model is weak but because the **right context was not passed**. Context engineering is giving the model the right information and tools in the right format.
+
+| Context type | What you control | Transient or persistent |
+|---|---|---|
+| **Model context** | what goes into a model call: instructions, message history, tools, model, response format | transient |
+| **Tool context** | what tools read and write (state, store, runtime context) | persistent |
+| **Life-cycle context** | what happens between steps: summarisation, guardrails, logging | persistent |
+
+| Data source | Also called | Scope |
+|---|---|---|
+| Runtime context | static configuration (user id, keys, permissions) | one conversation |
+| State | short-term memory (messages, files, tool results) | one conversation |
+| Store | long-term memory (preferences, insights) | across conversations |
+
+- Middleware is the mechanism: it updates context and can jump to another step ([Ch 10](10-shell-tools-and-custom-middleware.md))
+- *Checked, transient:* a `wrap_model_call` that replaced the system message changed what the model saw, and the state kept only `human, ai`. A `dynamic_prompt` that read `request.state` did the same and left no system message in state
+- *Checked, persistent:* a `before_model` hook returning `{"messages": [SystemMessage(...)]}` put the note into **state**, and it stayed after the run
+- Where each kind lives in these notes: system prompt and dynamic prompt ([11.8](11-runtime-and-human-in-the-loop.md)), messages and summarisation ([Ch 7](07-middleware.md)), tools and gating ([Ch 5](05-tools.md), [Ch 7](07-middleware.md)), response format ([Ch 4](04-structured-output.md)), runtime, state and store (11.3 to 11.7)
+
+*Source: `langchain-ai/docs`, `src/oss/langchain/context-engineering.mdx` (Overview). The page's many examples were compared by identifier only; every identifier is already in these notes.*
+
 ## 11.12 Conditional interrupts
 
 Not every action needs a human. Interview-style case: an e-commerce company wants a human only when an order value crosses a threshold.
