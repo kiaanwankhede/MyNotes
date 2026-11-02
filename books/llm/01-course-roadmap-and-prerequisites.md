@@ -150,7 +150,7 @@ uv run main.py
 | `invalid path '...'` or `unable to checkout working tree` | A bad filename slipped in. Report the path, then `git restore --source=HEAD :/` and `git pull` after it is fixed |
 | `Filename too long` (Windows) | `git config --global core.longpaths true`; clone to a short path such as `C:\src\` |
 | `Your local changes would be overwritten by merge` | `git stash -u`, `git pull`, `git stash pop` |
-| A folder never shows on GitHub | It has its own `.git` (created by `uv init`). Delete `<folder>/.git`, or use `uv init --no-vcs` |
+| A folder never shows on GitHub | It has its own `.git` (created by `uv init`). Delete `<folder>/.git`, or create projects with `uv init --vcs none` (the repo's table says `--no-vcs`; *checked* with uv 0.11.32, that flag is rejected) |
 
 **Checklist before class 01:**
 

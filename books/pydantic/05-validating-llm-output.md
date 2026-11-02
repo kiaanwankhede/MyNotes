@@ -94,7 +94,7 @@ def call_tool_safely(raw_arguments: dict) -> float | str:
 
 - `ask_ai` uses Groq if `GROQ_API_KEY` is set, else a fake client from the Python book
 - The file's point (its closing message): both parts work, but **neither knows the other exists**. The AI did not choose the tool; the code called both by hand
-- Connecting them is the agent loop: [LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md). The class files `_11` to `_14` do it, and are not written up (see "Open items" below)
+- Connecting them is the agent loop: [LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md). Files `_11` to `_14` put them into one `Agent` class but still call the tool by hand: [Python Ch 3](../python/03-anatomy-of-an-agent.md), 3.7
 - *Checked:* with no key, the AI part printed the fake client's reply. The tool logged `[tool call] convert_currency({'amount': 100.0, 'from_currency': 'USD', 'to_currency': 'INR'}) -> ...`. Validated values are upper-cased and the amount became a float. `Tools registered so far` printed `['convert_currency']`. The tool's own result was "Couldn't reach the currency service" (no network)
 
 *Source: `_10_tool_with_ai_call.py`.*
@@ -203,10 +203,6 @@ for attempt in range(max_tries):
 - **Catch the wrong top-level type** in `_03`: add `TypeError` (or check `isinstance(data, dict)`) before `WeatherQuestion(**data)`
 - **Strip text before JSON** if the model adds "Sure!": find the first `{` and last `}` and parse that slice
 - **Cap retries.** Two or three. A model that cannot fix its reply in a few tries needs a better prompt
-
-## Open items
-
-- Class files `_11_agent_class_ai_only.py` to `_14_agent_with_memory.py` (agent class, one tool, more tools, memory) are marked "Excluded" in the master and were **not read**. [Python Ch 2](../python/02-python-refresher.md) lists them as not written
 
 ## Recap
 

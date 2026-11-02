@@ -1,14 +1,22 @@
 # Chapter 2: Python refresher
 
-Variables and lists, classes, dataclasses, and decorators. Each is shown because agents lean on it later, and the chapter ends with the problem that Chapter 3 solves.
+**After this chapter you can:**
 
-## 2.1 Quick refresher: types, f-strings, control flow and data structures
+- Use lists, tuples, dicts and a list of dicts, and write a list comprehension
+- Build a class with state and a guard clause, and a dataclass without boilerplate
+- Write and stack decorators with `functools.wraps`
+- Handle errors with `try/except/finally`
+- Say why Python needs Pydantic
 
-The first five code files (`_0` to `_4`) are plain Python with no AI in them. The class presents them as skills worth having on their own.
+**Builds on:** [Chapter 1](01-setup-and-api-basics.md). **Leads to:** [Chapter 3](03-anatomy-of-an-agent.md) and the [Pydantic book](../pydantic/01-why-pydantic-and-basemodel.md).
+
+Each topic is here because agents lean on it later.
+
+## 2.1 Types, f-strings, control flow and data structures
+
+Files `_0` to `_4` are plain Python with no AI. The class presents them as skills worth having on their own.
 
 ### Types, f-strings and decisions
-
-Variables hold `str`, `float` and `bool` values, and f-strings embed them in text. `if` can chain with `elif`, and comparisons and `and` build conditions:
 
 ```python
 temperature = 22.5
@@ -27,13 +35,11 @@ if has_ticket and has_id:
     print("Ready to board.")
 ```
 
-I ran `_0_basics_refresher.py`: with 22.5 it prints "A light jacket should be enough.", then `True True False`, then "Ready to board."
-
-*Source: code file `_0_basics_refresher.py`.*
+- *Checked* (`_0_basics_refresher.py`): prints "A light jacket should be enough.", `True True False`, "Ready to board."
 
 ### Lists
 
-A list is an ordered, changeable collection. Indexing works from both ends. For `["Tokyo", "Delhi", "London"]`:
+- An ordered, changeable collection. Indexing works from both ends
 
 | Index | 0 | 1 | 2 |
 |---|---|---|---|
@@ -42,50 +48,41 @@ A list is an ordered, changeable collection. Indexing works from both ends. For 
 
 ```python
 cities = ["Tokyo", "Delhi", "London"]
-print(cities[0])          # indexing: first item
-print(cities[-1])         # negative indexing: last item
-print(cities[0:2])        # slicing: a sub-list  ->  ['Tokyo', 'Delhi']
+print(cities[0])          # first item
+print(cities[-1])         # last item
+print(cities[0:2])        # slice -> ['Tokyo', 'Delhi']
 cities.append("Paris")    # add to the end
-
-for city in cities:
-    print(f"Visiting {city}")
 ```
 
-A list can mix types. The class notebook `Python_run.ipynb` uses `["Tokyo", "Delhi", "London", 1]` and the list accepts the number without complaint. The notebook also has a note to compare arrays and lists in a table, but that is only a comment with nothing written under it, so this book does not make the comparison.
+- A list can mix types. `Python_run.ipynb` uses `["Tokyo", "Delhi", "London", 1]` and it accepts the number. *Checked*
+- The notebook has a note to compare arrays and lists, but nothing under it, so this book does not make that comparison
 
-*Source: `classes_summary/02`, `classes_transcription_summary/02`, code files `_1_data_structures.py` and `Python_run.ipynb`.*
+*Source: `classes_summary/02`, `classes_transcription_summary/02`, `_1_data_structures.py`, `Python_run.ipynb`.*
 
 ### Tuples
 
-A tuple is like a list that cannot be changed after it is created. **Unpacking** splits it into separate variables:
+- Like a list that cannot change after creation. *Checked:* assigning to an item raised `TypeError`
+- **Unpacking** splits it into variables:
 
 ```python
-coordinates = (35.68, 139.69)         # latitude, longitude: a fixed pair
-latitude, longitude = coordinates     # unpacking
-print(f"Lat: {latitude}, Lon: {longitude}")
+coordinates = (35.68, 139.69)         # latitude, longitude
+latitude, longitude = coordinates
 ```
 
 ### Dictionaries
 
-A dictionary holds labelled data and is read by key instead of position.
-
 ```python
-weather_reading = {
-    "city": "Tokyo",
-    "temperature_c": 22.5,
-    "condition": "partly cloudy",
-}
-print(weather_reading["city"])          # access by key
-print(weather_reading.get("humidity"))  # .get() returns None instead of crashing if the key is missing
-weather_reading["humidity"] = 60        # add a new key
-
-for key, value in weather_reading.items():   # loop over keys and values together
+weather_reading = {"city": "Tokyo", "temperature_c": 22.5, "condition": "partly cloudy"}
+print(weather_reading["city"])          # by key
+print(weather_reading.get("humidity"))  # None instead of a crash if missing
+weather_reading["humidity"] = 60        # add a key
+for key, value in weather_reading.items():
     print(f"{key}: {value}")
 ```
 
 ### A list of dictionaries, and a list comprehension
 
-This is the combination that matters most later, because tool results and chat messages take this shape.
+The shape that matters most later: tool results and chat messages look like this.
 
 ```python
 readings = [
@@ -93,28 +90,25 @@ readings = [
     {"city": "Delhi", "temperature_c": 34.0},
     {"city": "London", "temperature_c": 15.0},
 ]
-for reading in readings:
-    print(f"{reading['city']}: {reading['temperature_c']}°C")
-
-warm_cities = [r["city"] for r in readings if r["temperature_c"] > 20]   # a list comprehension
-print(f"Warm cities: {warm_cities}")     # ['Tokyo', 'Delhi']
+warm_cities = [r["city"] for r in readings if r["temperature_c"] > 20]   # ['Tokyo', 'Delhi']
 ```
 
-I ran `_1_data_structures.py` and got the outputs shown in the comments (`None` for the missing key, then the dictionary with `humidity` added, then the warm cities `['Tokyo', 'Delhi']`).
+- *Checked* (`_1_data_structures.py`): `None` for the missing key, the dict with `humidity` added, and `['Tokyo', 'Delhi']`
 
-*Source: code file `_1_data_structures.py`.*
+*Source: `_1_data_structures.py`.*
 
 ## 2.2 Object-oriented Python: a bank account
 
-A class is a blueprint. Each object built from it gets its own data (its **state**). The class was drawn on a whiteboard first, then coded:
+- A class is a blueprint. Each object gets its own data (its **state**)
+- The class was drawn on a whiteboard first, then coded:
 
 ```python
 class BankAccount:
     """A blueprint for a bank account -- nothing to do with AI."""
 
     def __init__(self, owner: str, balance: float = 0.0):
-        self.owner = owner       # every instance gets its OWN owner
-        self.balance = balance   # and its OWN balance -- the account's STATE
+        self.owner = owner
+        self.balance = balance    # the account's STATE
         self.history = []
 
     def deposit(self, amount: float) -> None:
@@ -128,39 +122,26 @@ class BankAccount:
         self.balance -= amount
         self.history.append(f"Withdrew {amount}")
 
-    def show_history(self) -> None:
-        for entry in self.history:
-            print(f"  - {entry}")
-
-# Two separate accounts from the same blueprint: each has its own state.
 account_1 = BankAccount(owner="Mayank", balance=1000)
 account_2 = BankAccount(owner="Krish", balance=500)
-
-account_1.deposit(200)
-account_1.withdraw(50)
-account_2.withdraw(1000)   # too much on purpose: the guard clause rejects it
-
-print(f"{account_1.owner}'s balance: {account_1.balance}")
-account_1.show_history()
+account_1.deposit(200); account_1.withdraw(50); account_2.withdraw(1000)
 ```
 
-I ran `_2_oop_classes.py`. The rejected withdrawal prints "Insufficient funds: tried to withdraw 1000, balance is 500". Mayank ends at 1150 with a history of "Deposited 200" and "Withdrew 50". Krish stays at 500 with no history, which shows the two objects do not share state.
-
-- `self` means "this particular object".
-- `__init__` runs when the object is created and sets starting values (here `balance=0` unless given).
-- The `if amount > self.balance` check is a **guard clause**: reject a bad request instead of letting it corrupt state. Agents need the same habit.
-
-*Source: `classes_summary/02`, `classes_transcription_summary/02`, code file `_2_oop_classes.py`.*
+- *Checked* (`_2_oop_classes.py`): "Insufficient funds: tried to withdraw 1000, balance is 500"; Mayank ends at 1150 with two history lines; Krish stays at 500 with none. The objects do not share state
+- `self` is "this particular object"
+- `__init__` runs when the object is created and sets starting values
+- `if amount > self.balance` is a **guard clause**: reject a bad request before it corrupts state. Agents need the same habit
 
 ### The OOP outline from class 01
 
-The first class's `OOPS.py` holds only an outline, as comments: classes, objects, inheritance, polymorphism, abstraction, encapsulation. The class summaries explain classes and objects (the `BankAccount` above); they do not explain the other four, so this book does not either yet.
+- `OOPS.py` holds only comments: classes, objects, inheritance, polymorphism, abstraction, encapsulation
+- The summaries explain classes and objects only. This book does not explain the other four
 
-*Source: code file `OOPS.py` (class 01 folder).*
+*Source: `classes_summary/02`, `classes_transcription_summary/02`, `_2_oop_classes.py`, `OOPS.py`.*
 
 ## 2.3 Dataclasses: no boilerplate
 
-`@dataclass` writes `__init__` for you from type-hinted fields. The idea is the same blueprint, written shorter. Java developers can compare it to Lombok.
+- `@dataclass` writes `__init__` from type-hinted fields. Java developers: compare Lombok
 
 ```python
 from dataclasses import dataclass, field
@@ -170,39 +151,34 @@ class Book:
     title: str
     author: str
     pages_read: int = 0
-    # tags = []                                # the file keeps this wrong version as a comment
     tags: list = field(default_factory=list)   # mutable defaults need default_factory
 
     def read(self, pages: int) -> None:
         self.pages_read += pages
-
     def add_tag(self, tag: str) -> None:
         self.tags.append(tag)
 
-my_book = Book(title="Atomic Habits", author="James Clear")
-my_book.read(40)
-my_book.add_tag("self-help")
-print(my_book)   # Book(title='Atomic Habits', author='James Clear', pages_read=40, tags=['self-help'])
+print(Book(title="Atomic Habits", author="James Clear"))
+# Book(title='Atomic Habits', author='James Clear', pages_read=0, tags=[])
 ```
 
-A dataclass also prints itself in that readable form with no extra code.
-
-**Pitfall 1: mutable defaults.** A list, dict or set default must use `field(default_factory=...)`. A plain `tags: list = []` is rejected by dataclasses, and this is a very common beginner trap.
-
-**Pitfall 2: no validation.** A dataclass does not check types at run time. I confirmed this by building `Book(title="x", pages_read="banana")`: it succeeds and stores the string. The Pydantic book fixes this.
+- A dataclass prints itself readably with no extra code
+- **Pitfall 1: mutable defaults.** A list, dict or set default needs `field(default_factory=...)`. *Checked:* `tags: list = []` raises `ValueError: mutable default <class 'list'> for field tags is not allowed`
+- **Pitfall 2: no validation.** *Checked:* `Book(title="x", pages_read="banana")` succeeds and stores the string. Pydantic fixes this ([Pydantic Ch 1](../pydantic/01-why-pydantic-and-basemodel.md))
 
 *Source: `classes_summary/02`, `classes_transcription_summary/02`.*
 
 ## 2.4 Decorators: wrap a function without changing it
 
-A decorator is gift wrap. The contents (your function) stay the same, but extra behaviour is added around them. It works because functions in Python are first-class objects: you can pass one in and return one out. Writing `@decorator` above a function is shorthand for `func = decorator(func)`.
+- A decorator is gift wrap. The contents stay the same; behaviour is added around them
+- It works because functions are objects: you can pass one in and return one
+- `@decorator` above a function is shorthand for `func = decorator(func)`
 
 ```python
 import functools, time
 
 def announce(func):
-    """Announces when a function starts and finishes."""
-    @functools.wraps(func)   # keeps func.__name__ for introspection
+    @functools.wraps(func)   # keeps func.__name__
     def wrapper(*args, **kwargs):
         print(f"Starting {func.__name__}...")
         result = func(*args, **kwargs)
@@ -211,13 +187,11 @@ def announce(func):
     return wrapper
 
 def timed(func):
-    """Prints how long a function took to run."""
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         start = time.perf_counter()
         result = func(*args, **kwargs)
-        elapsed_ms = (time.perf_counter() - start) * 1000
-        print(f"{func.__name__} took {elapsed_ms:.2f} ms")
+        print(f"{func.__name__} took {(time.perf_counter() - start) * 1000:.2f} ms")
         return result
     return wrapper
 
@@ -228,37 +202,32 @@ def slow_greeting(name):
     return f"Hello there, {name}!"
 ```
 
-Things to remember:
+- `functools.wraps` keeps the original name. *Checked:* without it the name was `w`, the wrapper's
+- Forget `return result` and the wrapped function gives back `None`. *Checked*
+- `*args` collects positional arguments; `**kwargs` collects keywords as a dict. *Checked:* `f(1, 2, x=3)` gave `((1, 2), {'x': 3})`
+- **Stacking:** the one nearest the function wraps first. *Checked:* the call order was `announce start`, `timed start`, body, `timed end`, `announce end`
+- **Why it matters:** the `@tool` decorator ([Chapter 1](01-setup-and-api-basics.md), 1.4) uses this exact pattern
 
-- `functools.wraps` keeps the original name. Without it, tools that inspect the function see `wrapper`.
-- Forget the `return result` and the wrapped function gives back `None`.
-- `*args` collects positional arguments and `**kwargs` collects keyword arguments as a dictionary. The class listed these as a topic to study further on your own.
-- Stacked decorators apply from the bottom up: `@timed` wraps first, then `@announce` wraps that.
-- **Why it matters:** the `@tool` decorator for agent tools (Chapter 1.4) uses exactly this pattern.
-
-*Source: `classes_summary/02`, `classes_transcription_summary/02`, code file `_4_decorators.py`.*
+*Source: `classes_summary/02`, `classes_transcription_summary/02`, `_4_decorators.py`.*
 
 ## 2.5 Error handling: catch a problem on purpose
 
-Without error handling, one unexpected problem stops the whole program. For example `10 / 0` raises a `ZeroDivisionError`. `try/except` lets you catch the problem and decide what happens instead.
+- Without handling, one problem stops the program. `10 / 0` raises `ZeroDivisionError`
+- `try/except` catches it so you decide what happens
 
 ```python
 try:
     result = 10 / 0
 except ZeroDivisionError:
-    print("Can't divide by zero -- using 0 instead.")
     result = 0
 
 try:
     age = int("not a number")
 except ValueError:
-    print("That wasn't a valid number -- using 0 instead.")
     age = 0
 ```
 
-Different failure, same shape: name the exception you expect and say what to do.
-
-**More than one possible problem.** Stack several `except` blocks:
+Several `except` blocks for several problems:
 
 ```python
 def safe_divide(a, b):
@@ -272,7 +241,7 @@ def safe_divide(a, b):
 print(safe_divide(10, 2), safe_divide(10, 0), safe_divide(10, "x"))   # 5.0 0 0
 ```
 
-**`finally` runs no matter what happened:**
+`finally` runs no matter what:
 
 ```python
 def read_setting(value):
@@ -283,40 +252,27 @@ def read_setting(value):
         return 0
     finally:
         print("(Done attempting to read this setting.)")
-
-read_setting("42")     # prints only the "Done" line
-read_setting("oops")   # prints the "isn't a number" line, then the "Done" line
 ```
 
-**A missing dictionary key** raises `KeyError`, tying back to the dictionaries above:
+A missing dictionary key raises `KeyError`:
 
 ```python
-weather_reading = {"city": "Tokyo", "temperature_c": 22.5}
 try:
-    print(weather_reading["humidity"])   # this key doesn't exist
+    print(weather_reading["humidity"])
 except KeyError:
     print("No humidity data available -- that's fine, we'll skip it.")
 ```
 
-I ran `_3_error_handling.py` and its output matches the comments above.
+- *Checked* (`_3_error_handling.py`): the output matches the comments. `5.0 0 0`; `finally` printed after both the good and the bad value
+- The summaries list this file only as `try`/`except`/`finally` with a missing key; the examples are from the file
 
-*Source: code file `_3_error_handling.py`. The class summaries list this file only as `try`/`except`/`finally` tied to a missing dict key; the examples are from the file.*
+*Source: `_3_error_handling.py`.*
 
 ## 2.6 Calling a real API from a function
 
-Chapter 1 made one request. The code file `_5_calling_a_real_api.py` makes the simplest request first, prints the status code and the parsed dictionary, and then wraps the call in a reusable function with the error handling from the section above:
+[Chapter 1](01-setup-and-api-basics.md) made one request. `_5_calling_a_real_api.py` makes the simplest request, prints the status and the parsed dict, then wraps the call in a reusable function:
 
 ```python
-import requests
-
-response = requests.get(
-    "https://api.frankfurter.dev/v1/latest",
-    params={"base": "USD", "symbols": "INR"},
-    timeout=10,   # never call a real API with no timeout
-)
-print("Status code:", response.status_code)
-print("Parsed as a dict:", response.json())
-
 def convert_currency(amount: float, from_currency: str, to_currency: str) -> float | str:
     """Convert `amount` between currencies using real, live ECB rates."""
     try:
@@ -334,73 +290,123 @@ def convert_currency(amount: float, from_currency: str, to_currency: str) -> flo
         return f"No rate available for {from_currency} -> {to_currency}"
 ```
 
-The two `except` blocks handle two different failures: the network or server failing (`RequestException`) and the service having no rate for the currency pair (`KeyError`). The file calls it with `convert_currency(100, "USD", "INR")`, `convert_currency(5000, "INR", "JPY")` and a deliberately bad pair, `convert_currency(50, "USD", "ZZZ")`. It ends by noting that this function still knows nothing about AI.
+- Two `except` blocks: the network or server fails (`RequestException`), or there is no rate for the pair (`KeyError`)
+- The file calls it with `(100, "USD", "INR")`, `(5000, "INR", "JPY")` and a bad pair `(50, "USD", "ZZZ")`
+- It ends by noting this function still knows nothing about AI
+- **Two URL forms in the course:** Chapter 1's `currency.py` uses `api.frankfurter.app` (`from`, `to`, `amount`). This file uses `api.frankfurter.dev/v1` (`base`, `symbols`) and multiplies by the rate itself. Which is current was not checked, and neither could be run here
 
-**Two URL forms in the course.** Chapter 1's `currency.py` uses `api.frankfurter.app` with `from`, `to` and `amount`. This file uses `api.frankfurter.dev/v1` with `base` and `symbols` and multiplies by the rate itself. Both appear in the repo and I have not checked which is current. I could not run either, because the sandbox has no network.
-
-*Source: code file `_5_calling_a_real_api.py`.*
+*Source: `_5_calling_a_real_api.py`.*
 
 ## 2.7 The problem: Python does not enforce types
-
-Python is dynamically typed. It never enforces that `name` is a string or `age` an integer, even if you write type hints:
 
 ```python
 def create_user(name, age): ...
 
 create_user("Mayank", 25)   # fine
-create_user(25, "Mayank")   # Python allows this with no error
+create_user(25, "Mayank")   # allowed, no error
 ```
 
-The bad value then breaks things further along, in a database, a spreadsheet or an API. Adding `isinstance()` checks by hand works for one function but not for ten (`create_user`, `update_user`, `delete_user` and so on). Pydantic solves this, and it has its own book: start at [Why Pydantic, and BaseModel](../pydantic/01-why-pydantic-and-basemodel.md).
+- The bad value breaks things later, in a database, spreadsheet or API
+- Hand-written `isinstance()` checks work for one function, not ten (`create_user`, `update_user`, `delete_user`...)
+- Pydantic solves it: [Why Pydantic, and BaseModel](../pydantic/01-why-pydantic-and-basemodel.md)
 
 *Source: `classes_summary/02`, `classes_transcription_summary/02`.*
 
 ## 2.8 The class 02-03 code folder
 
-The folder `02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/` holds 15 numbered files, from basics to an agent that holds memory. Run them in this order:
+15 numbered files, from basics to an agent with memory. Run in this order:
 
-| File | Covers | Where in these notes |
+| File | Covers | In these notes |
 |---|---|---|
-| `_0_basics_refresher.py` | Quick class 01 recap | This chapter, 2.1 |
-| `_1_data_structures.py` | Lists, dicts, tuples, list of dicts | This chapter, 2.1 |
-| `_2_oop_classes.py` | `BankAccount` and `Book`, no agent | This chapter, 2.2 and 2.3 |
-| `_3_error_handling.py` | `try/except` patterns | This chapter, 2.5 |
-| `_4_decorators.py` | The wrapper pattern, then stacked | This chapter, 2.4 |
-| `_5_calling_a_real_api.py` | `requests`, real currency conversion | This chapter, 2.6 |
-| `_6_fake_ai_call.py` | The OpenAI-style shape with no dependencies | Chapter 3, 3.4 |
+| `_0_basics_refresher.py` | Class 01 recap | 2.1 |
+| `_1_data_structures.py` | Lists, dicts, tuples, list of dicts | 2.1 |
+| `_2_oop_classes.py` | `BankAccount` and `Book` | 2.2, 2.3 |
+| `_3_error_handling.py` | `try/except` | 2.5 |
+| `_4_decorators.py` | The wrapper pattern, stacked | 2.4 |
+| `_5_calling_a_real_api.py` | `requests`, real conversion | 2.6 |
+| `_6_fake_ai_call.py` | The OpenAI-style shape with no dependencies | [Chapter 3](03-anatomy-of-an-agent.md), 3.4 |
 | `_7_ai_call_free_and_paid.py` | Groq, OpenRouter (free), OpenAI (paid) | Chapter 3, 3.4 |
-| `_8_pydantic_with_ai.py` | BaseModel, Field, validators, nested models, LLM output | Pydantic book |
-| `_9_api_call_with_structure.py` | The `_5` API call, now validated | Not written up yet |
-| `_10_tool_with_ai_call.py` | A validated tool beside an AI call | Not written up yet |
-| `_11` to `_14` (agent files) | Agent with brain only, one tool, three tools, memory | Not written up yet |
-
-Setup, using UV from Chapter 1:
+| `_8_pydantic_with_ai.py` | BaseModel, Field, validators, nested, LLM output | [Pydantic book](../pydantic/05-validating-llm-output.md) |
+| `_9_api_call_with_structure.py` | The `_5` call, validated | [Pydantic Ch 5](../pydantic/05-validating-llm-output.md), 5.2 |
+| `_10_tool_with_ai_call.py` | A validated tool beside an AI call | Pydantic Ch 5, 5.3 |
+| `_11` to `_14` | Agent with brain only, one tool, three tools, memory | Chapter 3, 3.7 |
 
 ```bash
 uv add requests pydantic python-dotenv
-# optional, for real AI calls (every file falls back automatically without it)
-uv add openai
-cp .env.example .env     # paste a free Groq and/or OpenRouter key in
+uv add openai        # optional, for real AI calls; every file falls back without it
+cp .env.example .env     # paste a free Groq and/or OpenRouter key
 uv run _0_basics_refresher.py
 ```
 
 Notes from the folder's README:
 
-- Filenames start with an underscore (`_0_`, `_1_`) because Python cannot `import` a file that starts with a bare digit. The underscore sorts the same way and stays importable.
-- Every file is self-contained and runs on its own. Later files re-declare earlier patterns instead of importing across the whole chain.
-- The folder's rule: if you cannot point to which earlier file taught a pattern, it does not belong yet.
-- Testing: files `_5`, `_7`, `_9`, `_10`, `_12`, `_13` and `_14` make real network calls. The README says its author tested all request building, response parsing and validation with mocked responses, because the build environment blocked those domains, and advises running each once for real before class.
+- Filenames start with an underscore (`_0_`) because Python cannot `import` a file that starts with a bare digit. The underscore sorts the same and stays importable
+- Every file is self-contained. Later files re-declare earlier patterns instead of importing across the chain (one exception: `_6_fake_ai_call` is imported)
+- The folder's rule: if you cannot point to which earlier file taught a pattern, it does not belong yet
+- `_5`, `_7`, `_9`, `_10`, `_12`, `_13` and `_14` make real network calls. The README says its author tested request building, parsing and validation with mocked responses (the build environment blocked those domains), and advises running each once for real
 
 *Source: the folder's `README.md`.*
 
+## 2.9 Interview corner
+
+**Q1. List or tuple? Dict or list?**
+- List: changeable, ordered. Tuple: fixed. Dict: values by key. A list of dicts is the shape of chat messages and tool results
+
+**Q2. Why does a dataclass reject `tags: list = []`?**
+- A mutable default would be shared by all instances. Use `field(default_factory=list)`
+
+**Q3. Dataclass or Pydantic model?**
+- A dataclass has no run-time checks. Pydantic validates. Use it at the edges: APIs, LLM output
+
+**Q4. What does `functools.wraps` do?**
+- Copies the original function's name and docstring onto the wrapper, which frameworks read
+
+**Q5. What are `*args` and `**kwargs`?**
+- Collect positional and keyword arguments so a wrapper can pass any call through
+
+**Q6. In what order do stacked decorators run?**
+- Applied bottom up; called outside in. The top decorator's "before" runs first, its "after" last
+
+**Q7. `try/except/else/finally`: what does `finally` guarantee?**
+- It runs whether or not an error happened, even with a `return` in the `try`
+
+**Q8. What is a guard clause?**
+- An early check that rejects bad input before it changes state
+
+**Q9. Why does Python need Pydantic?**
+- Hints are not enforced, so bad values flow on silently
+
+## 2.10 Added by Claude, not from the sources
+
+- **Mutable default arguments bite in functions too.** *Checked:* `def bad(x, acc=[])` gave `[1, 2]` for both calls, because the list is shared. Use `None` and create a new list inside
+- **Catch the exception you expect.** A bare `except:` hides bugs. The files catch named errors
+- **`dict.get` for optional keys; `[]` for required ones.** The first returns `None`, the second raises `KeyError`, which is what you want for a key that must be there
+- **A dict key lookup that fails in a tool** is better returned as a message than raised, so the model can read it ([LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md))
+- **Test files from the code folder in order,** and compare each output with the comments. All of `_0` to `_4` matched
+
+## Recap
+
+- Lists, tuples, dicts and lists of dicts carry all the data in an agent
+- A class holds state; a guard clause protects it
+- Dataclass removes boilerplate but not bad data
+- A decorator wraps behaviour; use `functools.wraps` and return the result
+- `try/except/finally` handles expected failures
+- Python does not enforce types: that is Pydantic's job
+
 ## Practice
 
-1. Rebuild `BankAccount` from scratch without copying.
-2. Write a `@dataclass` and trigger the mutable-default error on purpose.
-3. Write a decorator with `functools.wraps`, then stack two on one function.
-4. Read about `*args` and `**kwargs`.
-5. Write a function that catches `KeyError` and `ValueError` separately, and use `finally` once.
-6. Run `_0` to `_4` in order and match each output to this chapter.
+1. Rebuild `BankAccount` from scratch without copying
+2. Write a `@dataclass` and trigger the mutable-default error on purpose
+3. Write a decorator with `functools.wraps`, then stack two on one function
+4. Catch `KeyError` and `ValueError` separately and use `finally` once
+5. Run `_0` to `_4` in order and match each output to this chapter
+6. Fix `def bad(x, acc=[])`
+
+## How this chapter was checked
+
+- **Run:** `_0`, `_1`, `_2`, `_3`, `_4` (outputs match); the dataclass mutable default and `banana`; decorator order, missing `wraps`, missing `return`; `*args`/`**kwargs`; tuple immutability; slicing and a mixed list; the shared default list
+- **Not run:** `_5`, `_9`, `_10`, `_12` to `_14` against the live API (no network); the notebook `Python_run.ipynb`
+- **Rewritten** from the earlier chapter; the class summaries were not re-opened in this pass
 
 ## Sources and further reading
 
@@ -408,4 +414,4 @@ Notes from the folder's README:
 - Live-Class-2026, `classes_transcription_summary/02 - 28 June - Python Refresher.md`
 - Live-Class-2026, code folder `Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/`: `_0` to `_5`, `Python_run.ipynb` and the folder `README.md`
 
-Previous: [Chapter 1](01-setup-and-api-basics.md) · Next: [Chapter 3, Anatomy of an agent](03-anatomy-of-an-agent.md) (Pydantic has its own book: [Why Pydantic](../pydantic/01-why-pydantic-and-basemodel.md))
+Previous: [Chapter 1](01-setup-and-api-basics.md) · Next: [Chapter 3, Anatomy of an agent](03-anatomy-of-an-agent.md)
