@@ -77,6 +77,14 @@ tool_limited_agent = create_agent(
 - **Run vs thread, class 13 wording:** a run limit of 4 caps the chapatis in one sitting, a thread limit of 10 caps the whole day however it is split. Another picture: the searches inside **one reply** are the run, the total across the **whole chat session** is the thread
 - **A limit rejection is a tool message with an error status, not an interrupt.** An interrupt exists to ask a human for a decision. A limit needs no human input, so the call is refused and reported back as information the model can pass on to the user
 
+### `ToolCallLimitMiddleware`: the exit behaviours and the error (LangChain docs)
+
+- Settings from the docs: `tool_name` (one tool; without it the limit covers all tools), `run_limit`, `thread_limit` (needs a checkpointer) and `exit_behavior`. At least one limit is required
+- `exit_behavior`: `'continue'` (default) blocks the extra calls with error messages and lets the model carry on. `'end'` stops gracefully. `'error'` raises **`ToolCallLimitExceededError`**
+- *Checked* with `tool_name="t1"`, `run_limit=1` and a model that asked twice: `continue` gave a final model answer; `end` ended with the message `'t1' tool call limit reached: run limit exceeded (2/1 calls).`; `error` raised `ToolCallLimitExceededError` with the same text
+
+*Source: `langchain-ai/docs`, `src/oss/langchain/middleware/built-in.mdx` (Tool call limit).*
+
 ## 8.3 `ModelFallbackMiddleware`
 
 **Why:** if the primary model provider has an outage, the app should not simply stop working.

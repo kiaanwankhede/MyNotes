@@ -170,6 +170,26 @@ More on the options:
 
 > **Pitfall in the class notebook.** An early cell used `trigger=("token", 4000)`. That raises `ValueError: Unsupported context size type token`. The word is **`"tokens"`** (plural)
 
+### More `SummarizationMiddleware` settings (LangChain docs)
+
+From the docs page `middleware/built-in`. Everything marked *checked* was run with a scripted summariser model (`langchain` 1.4.7).
+
+| Setting | Meaning |
+|---|---|
+| `trigger` | When to summarise. One tuple such as `("tokens", 4000)`, `("messages", 4)` or `("fraction", 0.8)`; a **dict** where **all** conditions must hold (AND); or a **list** where **any** one is enough (OR) |
+| `keep` | What stays word for word: exactly one of `fraction`, `tokens` or `messages`. Default `("messages", 20)` |
+| `token_counter` | A counting function. The default counts approximately, from characters |
+| `summary_prompt` | A custom prompt template. It must contain the `{messages}` placeholder. Replaces the old `summary_prefix` |
+| `trim_tokens_to_summarize` | The most tokens sent to the summariser. Default `4000` |
+
+- *Checked:* `trigger=("messages", 4)` summarised once over three long turns. A **list** `[("tokens", 100000), ("messages", 4)]` also did (the second condition was enough). A **dict** `{"tokens": 10, "messages": 100}` did **not** (the second condition failed)
+- *Checked:* the default prompt is a long template. It starts "Context Extraction Assistant" and asks for four sections: `SESSION INTENT`, `SUMMARY`, `ARTIFACTS` and `NEXT STEPS`
+- *Checked:* with `summary_prompt="Summarise briefly:\n{messages}"`, the summariser received that text with the messages inserted as `<message type="human">...` blocks
+- The docs mark `summary_prefix`, `max_tokens_before_summary` and `messages_to_keep` as **deprecated**. *Checked:* the old names still worked (the summariser ran). Use `trigger` and `keep`
+- The installed signature also has a `summarizer` argument (a callable or runnable in place of `model`). The docs page does not list it, so treat it as unverified
+
+*Source: `langchain-ai/docs`, `src/oss/langchain/middleware/built-in.mdx` (Summarization section).*
+
 ## 7.6 `HumanInTheLoopMiddleware`
 
 When an agent can do something **irreversible**, a human should sign off first.

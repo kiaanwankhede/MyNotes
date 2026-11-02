@@ -325,6 +325,47 @@ agent.invoke({"messages": [("user", "Hi")]})
 - **Test** middleware on its own where you can, not only inside a full agent run
 - **Default to a prebuilt middleware** whenever one already covers the need. Write your own only for a genuinely business-specific rule
 
+## Agent jumps, tracing and state composition (LangChain docs)
+
+From `middleware/custom.mdx`. *Checked* with `langchain` 1.4.7 and a scripted model.
+
+**Agent jumps**
+
+- A node-style hook can leave the normal flow by returning a dict with `jump_to`. Targets: `'end'` (the end of the run, or the first `after_agent` hook), `'tools'` (the tools node) and `'model'` (the model node, or the first `before_model` hook)
+- Declare the targets a hook may use with `@hook_config(can_jump_to=["end"])`
+
+```python
+@after_model
+@hook_config(can_jump_to=["end"])
+def check_blocked(state: AgentState, runtime: Runtime):
+    if "BLOCKED" in str(state["messages"][-1].content):
+        return {"messages": [AIMessage("I cannot respond to that request.")], "jump_to": "end"}
+```
+
+- *Checked:* a reply containing `BLOCKED` ended the run with the replacement message after **1** model call. After a tool turn it ended after **2** calls
+- *Checked:* the same hook **without** `can_jump_to` also ended the run for `'end'`. The docs still ask you to declare it, and the other targets need it, so declare it
+- A class version puts `@hook_config(...)` on the method of an `AgentMiddleware` subclass
+
+**Configure tracing**
+
+- Needs `langchain>=1.3.15`. Hook spans record their inputs and outputs by default. Set `trace_policy = TracePolicy(process_inputs=omit_payload)` on a middleware to leave the input out of its trace
+- `configure_trace_policy(TracePolicy(...))` sets a global default, and `configure_trace_policy(None)` clears it. A middleware's own policy overrides the global one
+- *Checked:* `TracePolicy`, `omit_payload` and `configure_trace_policy` import from `langchain.agents.middleware`, a class with `trace_policy` builds, and the global set and clear run. Whether the trace really omits the payload needs LangSmith and was **not** checked
+
+**State updates from wrap hooks**
+
+- Node-style hooks return a dict. A wrap hook returns an `ExtendedModelResponse` with a `Command`, and the update goes through the graph's reducers (messages add up)
+- The docs say that with several layers, commands apply inner first then outer, **the outer one wins** on a plain (non-reducer) field, and commands from an earlier retry are discarded
+- *Not reproduced:* two middleware each returning `Command(update={"tag": ...})` for the same plain field raised `InvalidUpdateError` ("Can receive only one value per step"). Use a field with a reducer (an `Annotated` key) when more than one layer writes it
+
+**Custom stream transformers**
+
+- Middleware can register stream transformers through a `transformers` class attribute (needs `langchain>=1.3.2`). They are part of the event-streaming page and are not covered here
+
+**The docs' best practices:** keep each middleware focused; handle errors gracefully; use node-style hooks for sequential logic (logging, validation) and wrap-style hooks for control flow (retry, fallback, caching); document custom state; unit test each on its own; remember execution order; prefer built-in middleware
+
+*Source: `langchain-ai/docs`, `src/oss/langchain/middleware/custom.mdx` (Agent jumps, Configure tracing, State updates, Custom stream transformers, Best practices).*
+
 ## 10.10 Questions from the class
 
 - **What can `wrap_model_call` change?** Anything on the outgoing request: model, messages, system message, tool choice, tools, response format, state, runtime, settings (10.5)
