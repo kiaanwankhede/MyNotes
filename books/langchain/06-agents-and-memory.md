@@ -260,7 +260,7 @@ for c in agent.stream(inp, stream_mode="custom", version="v2"):
   - `stream.tool_calls`: tool run lifecycle (`tool_name`, `input`, `output_deltas`, `output`, `error`).
   - `stream.values`, `stream.output` (final state), `stream.subgraphs`, `stream.extensions`.
   - Async code can read several projections together with `asyncio.gather`.
-- *Checked (scripted model, langchain 1.4.7):* the v2 chunk keys; `updates` gave `model, tools, model`; `values` gave 4 snapshots; `messages` gave tuples; `GraphOutput.interrupts` was `()`; `custom` printed both writer lines; v3 `stream.messages` gave text `It is sunny` and tool call `get_weather {'city': 'SF'}`. **Observed:** in sync code, reading `stream.messages` first left `stream.tool_calls` empty; reading it alone worked, so consume one projection at a time or use async.
+- *Checked (scripted model, langchain 1.4.7):* the v2 chunk keys; `updates` gave `model, tools, model`; `values` gave 4 snapshots; `messages` gave tuples; `GraphOutput.interrupts` was `()`; `custom` printed both writer lines; v3 `stream.messages` gave text `It is sunny` and tool call `get_weather {'city': 'SF'}`. **Observed:** in sync code, reading `stream.messages` first left `stream.tool_calls` empty. Use `stream.interleave("messages", "tool_calls")` to get both in order (tested in Ch16), plus `stream.interrupted` and `stream.interrupts` for a paused run.
 
 
 ## 6.8 Questions from the class
