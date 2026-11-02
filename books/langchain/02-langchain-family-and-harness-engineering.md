@@ -108,6 +108,32 @@ from langchain import AgentExecutor   # ImportError on v1.0+
 - Classic code still runs but is legacy and unmaintained
 - To keep old code running while you migrate: `uv add langchain-classic`
 
+## What LangChain believes, and more of the timeline (LangChain docs)
+
+- *Source: LangChain docs, `philosophy.mdx`, `overview.mdx`, `component-architecture.mdx`. The history is narrative, so nothing here was run.*
+- **Beliefs:** LLMs are powerful and better with outside data; apps will become more agentic; it is early; a prototype is easy but a **reliable** production agent is hard.
+- **Two focuses:**
+  - Let you use the best models: one standard input and output format across providers, so you avoid lock-in.
+  - Let models **orchestrate** flows that use data and computation, through tools.
+- **Timeline items not in 2.5:**
+  - **Jan 2023:** chat-completion APIs take a **list of messages**; LangChain moves to message lists. LangChain also gets a JavaScript version.
+  - **Feb 2023:** LangChain Inc. is formed.
+  - **Mar 2023:** function calling in model APIs becomes the preferred way to call tools, instead of parsing JSON.
+  - **Jun 2023:** LangSmith released (closed source) for observability and evals.
+  - **Jan 2024:** LangChain 0.1.0, the first non-0.0.x release, with a focus on stability.
+  - **Jun 2024:** over 700 integrations; they move to standalone packages or `langchain-community`.
+  - **Apr 2025:** multimodal model APIs; the message format changes to carry files, images and video.
+  - **Oct 2025 (v1.0):** one agent abstraction on LangGraph, **and** a standard message content format for reasoning blocks, citations and server-side tool calls (Ch3, standard content blocks).
+- **The overview in one line:** *Agent = Model + Harness.* `create_agent` is a minimal, configurable harness: prompt, tools, middleware.
+  - LangChain for a custom harness; LangGraph for low-level, deterministic plus agentic flows; Deep Agents for a batteries-included harness; LangSmith to trace and evaluate any of them.
+- **Component map (architecture page):**
+  - Input processing: loaders and splitters make documents.
+  - Embedding and storage: embedding models, vector stores.
+  - Retrieval: retrievers find context for a query.
+  - Generation: chat models and tools.
+  - Orchestration: agents and memory tie these together.
+  - RAG = retriever, then chat model with the found context. Agent = loop of model and tool. Multi-agent = supervisor plus specialists (Ch13).
+
 ## 2.6 Set up and check your environment
 
 **Where to run code**

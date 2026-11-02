@@ -362,6 +362,27 @@ except ModelTimeoutError:
   - Then `.stream()` returns one chunk with the whole text.
 - *Checked (langchain 1.4.7, scripted model):* the exception names and `is_retryable` values above; a limiter at 5 requests/s with a bucket of 1 made 4 calls take about 0.8 s; `disable_streaming=True` gave one chunk. `model.profile` was not run (needs the provider package).
 
+## The LangChain error pages (LangChain docs)
+
+- *Source: LangChain docs, `errors/*.mdx` (7 pages), `install.mdx`.*
+- **`MESSAGE_COERCION_FAILURE`**: a chat model got something that is not message-like.
+  - Accepted: message objects, `(role, text)` tuples, OpenAI-style dicts with `role` and `content`, plain strings (become a `HumanMessage`).
+  - A dict like `{"role": "HumanMessage", "random_field": "v"}` fails. Check you did not turn messages into strings.
+- **`INVALID_PROMPT_INPUT`**: a prompt template got missing or wrong inputs.
+  - In f-strings escape literal braces: `{{` for one, `{{{{` for two.
+  - For `MessagesPlaceholder` pass a list of messages.
+  - Log the real inputs (LangSmith or print).
+- **`OUTPUT_PARSING_FAILURE`**: an output parser could not read the model text.
+  - Prefer structured output (Ch4); sharpen the format instructions; try a stronger model.
+- **`INVALID_TOOL_RESULTS`** (JavaScript only): every `tool_call` needs exactly one `ToolMessage` with the same `tool_call_id`.
+  - Causes: too few, duplicates, or an orphan `ToolMessage`. The rule is the same in Python (Ch5, Ch11).
+- **`MODEL_AUTHENTICATION`**, **`MODEL_NOT_FOUND`**, **`MODEL_RATE_LIMIT`** (JavaScript only): bad key, wrong model name, too many requests.
+  - Python equivalents are `ModelAuthenticationError`, `ModelNotFoundError`, `ModelRateLimitError` (see the section above).
+  - Fix auth: check the variable name and value, `dotenv` loading, proxy; or pass `api_key=` explicitly.
+  - Fix rate limits: a rate limiter, response caching, several providers, a higher quota.
+- **Install:** `pip install -U langchain` (Python 3.10+), then one provider package: `langchain-openai`, `langchain-anthropic`.
+- *Checked (langchain-core):* the coercion dict raised `ValueError: Message dict must contain 'role' and 'content' keys`; a template missing `name` raised `KeyError ... missing variables {'name'}`; a `(role, text)` tuple worked. The JavaScript-only pages were not run.
+
 ## 3.9 Questions from the class
 
 - **Does `create_agent` call a tool in a single `invoke`?** Normally yes, it resolves within one invoke
