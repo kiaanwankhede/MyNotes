@@ -307,6 +307,42 @@ for name, target in targets.items():
 - The two remote servers were **not run here** (no network access to them)
 - In the live run the agent asked a clarifying question about "MCP" before using Context7. Give such questions context, or the model will guess
 
+## MCP tool results, metadata and connection patterns (LangChain docs)
+
+- *Source: LangChain docs, `mcp/index.mdx`, `mcp/tools.mdx`, `mcp/connections.mdx`, `mcp/auth.mdx`. Example snippets are embedded components I could not read; the text and inline code were used.*
+- **Target types** `MCPAdapter(target)` accepts:
+  - an `http`/`https` URL string (Streamable HTTP)
+  - a `Path` to a script (stdio subprocess)
+  - an in-process `FastMCP` server (in memory)
+  - a transport object, an `MCPConfig` dict, or a prebuilt `fastmcp.Client`
+  - A **plain string must look like a URL**; a string naming a `.py` file is rejected, so a config value or a model cannot launch a subprocess.
+- **Tool results** become `ToolMessage`s.
+  - Text and images become standard content blocks (Ch3).
+  - Structured results go to `message.artifact`, not the model text; none gives `None`.
+  - A server `isError` becomes `status="error"` with the server's message; a transport or session failure **raises** instead.
+- **Tool metadata**: `tool.metadata["mcp"]` holds `tool.annotations` (`read_only_hint`, `destructive_hint`), `tool._meta` and `server` (`name`, `version`). Every field is optional, so read with `.get()`.
+  - Use the hint to gate approval by what the server declares, not by tool name (pairs with 12.6).
+- **Lifetime**: tools are reentrant; each call opens the client, runs, releases.
+  - Discover inside `async with`, build the agent, leave the context: the tools still work.
+  - Keep the adapter open around the agent call only to hold one session across calls.
+- **Several servers**: `MCPConfig` = one shared connection, one shared protocol era (one legacy server drags all to legacy). `ClientGroup` = one connection each, own era and auth.
+- **Deployments**: discover per run in a graph factory; share one HTTP pool via `httpx_client_factory`; cache tool lists.
+  - Factory annotations must be importable at runtime, not only under `TYPE_CHECKING`.
+- **List cache**: `adapter.list_tools(cache_mode=...)`
+  - `use` (default): serve cached list if within the server TTL hint
+  - `refresh`: refetch and store
+  - `bypass`: skip the cache
+  - The cache itself is set with `Client(cache=...)`; isolate it per user.
+- **Protocol eras**: legacy begins with `initialize`; modern (version `2026-07-28`+) probes `server/discover`. FastMCP picks per connection.
+- **Auth**: `auth=` takes a token string, `"oauth"` (discovery, dynamic client registration, browser, exchange) or any `httpx.Auth`. Tokens are in memory by default; pass `OAuth(..., token_storage=...)` to persist.
+- *Checked (langchain 1.4.7, fastmcp 4.1.4, in-process server):*
+  - `list_tools()` returned 3 tools; `refresh`, `bypass` and `use` all returned 3.
+  - Metadata showed `destructive_hint: True`, `read_only_hint: False` and `server: {name: crm}`.
+  - A raising tool gave `status="error"` with the message.
+  - **Refinement:** the structured artifact came back as a plain dict `{'structured_content': {'x': 3}}`, not an object with an attribute; read it by key.
+  - An in-process server inside an `MCPConfig` dict was rejected (config takes server configs, not objects).
+  - Not run: OAuth, the shared pool, protocol-era negotiation, a deployed factory.
+
 ## 12.9 Authentication, and the per-user trap
 
 **Auth is set on the FastMCP client, not on the adapter.** The adapter wraps whatever client you give it. Anything FastMCP's client accepts works.
