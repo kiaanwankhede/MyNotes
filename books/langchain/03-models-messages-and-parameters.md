@@ -198,6 +198,24 @@ print(response.usage_metadata)
 - **Cost per user or session:** add up `usage_metadata` across the conversation. It is the exact billed number, not an estimate
 - Streaming, structured output and tool calling all build on reading these fields correctly
 
+## Standard content blocks (LangChain docs)
+
+- *Source: LangChain docs, `messages.mdx` (Message content, Standard content blocks).*
+- `message.content` is whatever the provider returned (string or provider-shaped list).
+- `message.content_blocks` parses it **lazily** into one standard shape, whatever the provider.
+  - Anthropic `thinking` + `signature` becomes `{"type": "reasoning", "reasoning": ..., "extras": {"signature": ...}}`.
+  - OpenAI `reasoning` with a `summary` list becomes one `reasoning` block per summary item, keeping the `id`.
+  - The parser uses `response_metadata["model_provider"]` to pick the rules.
+- You can also **build** a message from standard blocks:
+```python
+HumanMessage(content_blocks=[
+    {"type": "text", "text": "Describe this"},
+    {"type": "image", "url": "https://example.com/i.jpg"},
+])
+```
+- To store standard blocks in `content` itself (for apps outside LangChain), set env `LC_OUTPUT_VERSION=v1` or pass `output_version="v1"` to the model.
+- *Checked (langchain 1.4.7):* both parses above and the `content_blocks=` constructor gave exactly these shapes. `output_version` was **not** run: it is not an argument of the installed `init_chat_model` signature, so treat it as docs-only.
+
 ## 3.6 Streaming: it feels fast
 
 - About 2,000 words took roughly 5 to 7 seconds to generate in ChatGPT, but the text appears piece by piece

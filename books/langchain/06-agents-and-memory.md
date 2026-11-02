@@ -104,6 +104,16 @@ print(state.next)                  # () when the run finished, otherwise the ste
 
 - Full mechanics (state as checkpoints) belong to LangGraph and are covered there in depth
 
+### Deleting messages with `RemoveMessage` (LangChain docs)
+
+- *Source: LangChain docs, `short-term-memory.mdx` (Delete messages).*
+- The state key must use the `add_messages` reducer; the default `AgentState` does.
+- Remove some: return `{"messages": [RemoveMessage(id=m.id) for m in messages[:2]]}` from a hook.
+- Remove all: `RemoveMessage(id=REMOVE_ALL_MESSAGES)` from `langgraph.graph.message`.
+- *Checked:* an `after_model` hook with a checkpointer dropped the first two messages, so after two turns the thread held `['b', '2']`; the remove-all hook left `[]`.
+- Postgres saver install note: `langgraph-checkpoint-postgres "psycopg[binary]"`.
+
+
 ## 6.5 Saver, store, cache or database?
 
 There is no single right answer. It depends on the use case.

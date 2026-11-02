@@ -325,6 +325,26 @@ agent.invoke({"messages": [("user", "Hi")]})
 - **Test** middleware on its own where you can, not only inside a full agent run
 - **Default to a prebuilt middleware** whenever one already covers the need. Write your own only for a genuinely business-specific rule
 
+## Custom middleware examples (LangChain docs)
+
+- *Source: LangChain docs, `middleware/custom.mdx` (Examples). The four example snippets are embedded components I could not read; only the written parts and the inline code below were used.*
+- **`request.system_message` is always a `SystemMessage`**, even when you passed `system_prompt="text"`.
+  - Use `.content_blocks` to read it as a list, append blocks, build a new `SystemMessage`, then `request.override(system_message=...)`.
+- **Prompt caching (Anthropic):** append a block with `"cache_control": {"type": "ephemeral"}`; everything up to that block is cached.
+```python
+@wrap_model_call
+def add_cached_context(request, handler):
+    blocks = list(request.system_message.content_blocks) + [
+        {"type": "text", "text": "<document>...</document>",
+         "cache_control": {"type": "ephemeral"}}]
+    return handler(request.override(system_message=SystemMessage(content=blocks)))
+```
+- **Select tools per call:** `handler(request.override(tools=subset))`.
+  - Benefits: shorter prompts, better accuracy, permission control.
+  - Register **all** tools in `create_agent(tools=...)`; adding an unregistered tool raises `ValueError: Middleware added tools that the agent doesn't know how to execute`.
+- You may also pass a `SystemMessage` straight to `create_agent(system_prompt=...)`.
+- *Checked (scripted model):* the type was `SystemMessage` for a string prompt; the override with a subset sent only `a_tool`; the unregistered-tool case raised the `ValueError`. The `cache_control` block itself was built but not sent to Anthropic.
+
 ## Agent jumps, tracing and state composition (LangChain docs)
 
 From `middleware/custom.mdx`. *Checked* with `langchain` 1.4.7 and a scripted model.
