@@ -223,6 +223,36 @@ How it works:
 - The **implementation** is registered only on the **client**
 - It runs after a short **interrupt and resume** handshake
 
+## Streaming an agent (LangChain docs)
+
+- *Source: LangChain docs, `streaming.mdx` and `event-streaming.mdx`.*
+- `agent.stream(input, stream_mode=...)` modes:
+  - `updates`: one chunk per step, keyed by node (`model`, `tools`).
+  - `values`: the full state after each step.
+  - `messages`: `(token_chunk, metadata)` tuples for LLM tokens.
+  - `custom`: anything a tool writes with `get_stream_writer()`.
+  - Pass a list to get several modes at once.
+- **`version="v2"`** (LangGraph 1.1+): every chunk is a dict with `type`, `ns`, `data`; no `(mode, data)` tuple unpacking.
+  - `invoke(..., version="v2")` returns `GraphOutput` with `.value` (state) and `.interrupts` (empty tuple if none).
+```python
+from langgraph.config import get_stream_writer
+@tool
+def get_weather(city: str) -> str:
+    """Weather."""
+    get_stream_writer()(f"Looking up {city}")   # custom update
+    return "sunny"
+for c in agent.stream(inp, stream_mode="custom", version="v2"):
+    print(c["type"], c["data"])   # custom Looking up SF
+```
+- A tool that calls `get_stream_writer()` cannot be run outside a LangGraph run.
+- **Event streaming (v3, experimental)**: `stream = agent.stream_events(input, version="v3")`.
+  - `stream.messages`: one stream per model call; `.text` deltas, `.reasoning`, `.tool_calls.get()`, `.output` (final `AIMessage`), `.node`.
+  - `stream.tool_calls`: tool run lifecycle (`tool_name`, `input`, `output_deltas`, `output`, `error`).
+  - `stream.values`, `stream.output` (final state), `stream.subgraphs`, `stream.extensions`.
+  - Async code can read several projections together with `asyncio.gather`.
+- *Checked (scripted model, langchain 1.4.7):* the v2 chunk keys; `updates` gave `model, tools, model`; `values` gave 4 snapshots; `messages` gave tuples; `GraphOutput.interrupts` was `()`; `custom` printed both writer lines; v3 `stream.messages` gave text `It is sunny` and tool call `get_weather {'city': 'SF'}`. **Observed:** in sync code, reading `stream.messages` first left `stream.tool_calls` empty; reading it alone worked, so consume one projection at a time or use async.
+
+
 ## 6.8 Questions from the class
 
 - **Is `thread_id` a reserved keyword?** No. It is just the identifier the checkpointer looks for in the config. The app decides how ids are made

@@ -315,6 +315,35 @@ result = history_aware_prompt.invoke({
 response = model.invoke(result.to_messages())
 ```
 
+## Model errors, rate limits and profiles (LangChain docs)
+
+- *Source: LangChain docs, `models.mdx` (Model exceptions, Rate limiting, Model profiles, Invocation config, Disable streaming).*
+- **Standard error types** live in `langchain_core.exceptions`, so you catch one type for any provider.
+  - Not retryable: `ModelAuthenticationError`, `ModelPermissionDeniedError`, `ModelInvalidRequestError`, `ModelNotFoundError`, `ContextOverflowError`.
+  - Retryable: `ModelRateLimitError`, `ModelAPIError`, `ModelConnectionError`, `ModelTimeoutError`.
+  - Each has `is_retryable`; the retry middleware (Ch8) reads it.
+  - They inherit from the provider SDK's own error too, so old `except` blocks still work.
+```python
+from langchain_core.exceptions import ModelTimeoutError
+try:
+    model.invoke("Hello")
+except ModelTimeoutError:
+    ...   # safe to retry
+```
+- **Rate limiter**: pass `rate_limiter=` when you create the model.
+  - `InMemoryRateLimiter(requests_per_second=..., check_every_n_seconds=..., max_bucket_size=...)` from `langchain.rate_limiters`.
+  - Thread safe; share one object across threads in a process.
+  - Limits requests per time, **not** request size or tokens.
+- **Model profile** (`langchain>=1.1`): `model.profile` is a dict of capabilities (`max_input_tokens`, `image_inputs`, `tool_calling`, ...).
+  - Used by summarization middleware (context window) and by structured-output strategy choice.
+  - Data comes from the open-source models.dev project.
+- **Invocation config**: `model.invoke(x, config={"run_name": ..., "tags": [...], "metadata": {...}, "callbacks": [...]})`.
+  - `tags` and `metadata` are inherited by sub-calls; `run_name` is not.
+  - `max_concurrency` limits parallel calls in `batch()`.
+- **Turn token streaming off**: `disable_streaming=True` (any chat model); some providers also accept `streaming=False`.
+  - Then `.stream()` returns one chunk with the whole text.
+- *Checked (langchain 1.4.7, scripted model):* the exception names and `is_retryable` values above; a limiter at 5 requests/s with a bucket of 1 made 4 calls take about 0.8 s; `disable_streaming=True` gave one chunk. `model.profile` was not run (needs the provider package).
+
 ## 3.9 Questions from the class
 
 - **Does `create_agent` call a tool in a single `invoke`?** Normally yes, it resolves within one invoke

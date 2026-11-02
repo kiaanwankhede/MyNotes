@@ -292,6 +292,19 @@ What the message trace shows, in order:
 - **Model level vs agent level?** See 4.8
 - **`Union` with an ambiguous message?** The model decides. It may even try more than one schema before settling
 
+### Tool-strategy extras: tool message text and wrong multi-output (LangChain docs)
+
+- *Source: LangChain docs, `structured-output.mdx` (Custom tool message content, Error handling).*
+- With `ToolStrategy`, the schema is a fake tool call, so the history gets a `ToolMessage`.
+  - `tool_message_content="Captured!"` replaces the default text of that message.
+```python
+ToolStrategy(MeetingAction, tool_message_content="Action item captured!")
+```
+- If the model calls **two** schema tools in one turn (union type), the agent sends `Error: Model incorrectly returned multiple structured responses (A, B)` back as tool messages and lets the model retry.
+  - The error exception is `MultipleStructuredOutputsError`; the retry is the default `handle_errors=True`.
+- *Checked (scripted model):* the final message was `Captured!`; a two-schema turn produced the error text twice, then the retry gave `task='y'`.
+
+
 ## 4.10 Interview corner
 
 **1. Why not just ask for JSON in the prompt?**
