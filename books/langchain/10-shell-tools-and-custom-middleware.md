@@ -327,7 +327,7 @@ agent.invoke({"messages": [("user", "Hi")]})
 
 ## Custom middleware examples (LangChain docs)
 
-- *Source: LangChain docs, `middleware/custom.mdx` (Examples). The four example snippets are embedded components I could not read; only the written parts and the inline code below were used.*
+- *Source: LangChain docs, `middleware/custom.mdx` (Examples) and its snippets `middleware-dynamic-*`, `middleware-tool-call-monitoring-*` in `src/snippets/code-samples`.*
 - **`request.system_message` is always a `SystemMessage`**, even when you passed `system_prompt="text"`.
   - Use `.content_blocks` to read it as a list, append blocks, build a new `SystemMessage`, then `request.override(system_message=...)`.
 - **Prompt caching (Anthropic):** append a block with `"cache_control": {"type": "ephemeral"}`; everything up to that block is cached.
@@ -343,7 +343,25 @@ def add_cached_context(request, handler):
   - Benefits: shorter prompts, better accuracy, permission control.
   - Register **all** tools in `create_agent(tools=...)`; adding an unregistered tool raises `ValueError: Middleware added tools that the agent doesn't know how to execute`.
 - You may also pass a `SystemMessage` straight to `create_agent(system_prompt=...)`.
-- *Checked (scripted model):* the type was `SystemMessage` for a string prompt; the override with a subset sent only `a_tool`; the unregistered-tool case raised the `ValueError`. The `cache_control` block itself was built but not sent to Anthropic.
+- **Dynamic model:** pick a model per call from the state, for example a bigger one after ten messages.
+```python
+@wrap_model_call
+def dynamic_model(request, handler):
+    model = complex_model if len(request.messages) > 10 else simple_model
+    return handler(request.override(model=model))
+```
+- **Tool call monitoring:** `@wrap_tool_call` wraps each tool run; log before, call `handler(request)`, log success, and **re-raise** on failure.
+```python
+@wrap_tool_call
+def monitor_tool(request, handler):
+    print(request.tool_call["name"], request.tool_call["args"])
+    try:
+        return handler(request)
+    except Exception as e:
+        print("failed:", e); raise
+```
+- *Checked (scripted model):* the monitor logged `('ok','ok')` then `('bad','failed:nope')` and the `ValueError` still reached the caller; a three-message history picked the second model and a one-message history picked the first.
+- *Checked earlier (scripted model):* the type was `SystemMessage` for a string prompt; the override with a subset sent only `a_tool`; the unregistered-tool case raised the `ValueError`. The `cache_control` block itself was built but not sent to Anthropic.
 
 ## Agent jumps, tracing and state composition (LangChain docs)
 

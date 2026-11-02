@@ -309,7 +309,7 @@ for name, target in targets.items():
 
 ## MCP tool results, metadata and connection patterns (LangChain docs)
 
-- *Source: LangChain docs, `mcp/index.mdx`, `mcp/tools.mdx`, `mcp/connections.mdx`, `mcp/auth.mdx`. Example snippets are embedded components I could not read; the text and inline code were used.*
+- *Source: LangChain docs, `mcp/index.mdx`, `mcp/tools.mdx`, `mcp/connections.mdx`, `mcp/auth.mdx`. The example snippets in `src/snippets/code-samples/mcp-*` were read too.*
 - **Target types** `MCPAdapter(target)` accepts:
   - an `http`/`https` URL string (Streamable HTTP)
   - a `Path` to a script (stdio subprocess)
@@ -342,6 +342,12 @@ for name, target in targets.items():
   - **Refinement:** the structured artifact came back as a plain dict `{'structured_content': {'x': 3}}`, not an object with an attribute; read it by key.
   - An in-process server inside an `MCPConfig` dict was rejected (config takes server configs, not objects).
   - Not run: OAuth, the shared pool, protocol-era negotiation, a deployed factory.
+- **Gate only the destructive tools (snippet `mcp-destructive-gate`):** read `destructive_hint` from `tool.metadata` once, then give every tool the same `InterruptOnConfig(allowed_decisions=["approve","reject"], when=needs_approval)`; `when` receives the pending call and returns `True` or `False`.
+  - *Checked:* with one destructive and one read-only tool called together, the run paused for `delete_file` only; `read_file` ran at once; rejecting gave a tool message `User rejected the tool call`.
+- **`ClientGroup` names tools `{server}_{tool}`.** *Checked:* two servers that both had `read_file` came out as `calc_read_file` and `crm_read_file`.
+- **`Client(url, mode=...)`:** `"legacy"` pins the old handshake; `"auto"` (default) negotiates the newest. One adapter per server, or one `ClientGroup`, keeps each on its own era. *Not run.*
+- **Elicitation answer shape:** `Command(resume={"responses": {question["key"]: {"action": "accept", "content": {...}}}})`; `decline` or `cancel` refuse. *Checked:* a legacy `ctx.elicit` server tool failed on the adapter, which matches 12.7.
+- **Shared pool (snippet):** build every client with an `httpx_client_factory` that lends one transport and ignores `close()`, so a fleet shares one HTTP pool. *Not run.*
 
 ## 12.9 Authentication, and the per-user trap
 

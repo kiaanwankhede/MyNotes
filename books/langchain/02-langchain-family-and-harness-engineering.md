@@ -124,6 +124,7 @@ from langchain import AgentExecutor   # ImportError on v1.0+
   - **Jun 2024:** over 700 integrations; they move to standalone packages or `langchain-community`.
   - **Apr 2025:** multimodal model APIs; the message format changes to carry files, images and video.
   - **Oct 2025 (v1.0):** one agent abstraction on LangGraph, **and** a standard message content format for reasoning blocks, citations and server-side tool calls (Ch3, standard content blocks).
+- **Four benefits (overview page):** one model interface so you can switch providers; a highly configurable harness you grow with middleware; built on LangGraph (durable execution, human-in-the-loop, persistence); debugging in LangSmith (traces, tool calls, state changes, latency).
 - **The overview in one line:** *Agent = Model + Harness.* `create_agent` is a minimal, configurable harness: prompt, tools, middleware.
   - LangChain for a custom harness; LangGraph for low-level, deterministic plus agentic flows; Deep Agents for a batteries-included harness; LangSmith to trace and evaluate any of them.
 - **Component map (architecture page):**

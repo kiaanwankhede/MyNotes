@@ -95,7 +95,11 @@ export LANGSMITH_AGENT_ID="<your-agent-id>"
 export LANGSMITH_AGENT_ENVIRONMENT="local"
 ```
 - You need a LangSmith account and an API key
-- *Not run:* no LangSmith account is available here; the variable names are from the docs page, and the page mentions agent-id setup in a component I could not read
+- **Trace only some calls:** `with ls.tracing_context(enabled=True): agent.invoke(...)`; calls outside are not traced if `LANGSMITH_TRACING` is unset
+- **Choose where traces go:** `LANGSMITH_AGENT_ID` and `LANGSMITH_AGENT_ENVIRONMENT`; older project-based workspaces use `LANGSMITH_PROJECT` instead
+- **Add tags and metadata:** `agent.invoke(input, config={"tags": ["production"], "metadata": {"user_id": "u1"}})`, or pass `tags=` and `metadata=` to `tracing_context`
+- In an agent-based workspace, create the agent in LangSmith once before sending traces
+- *Checked:* `langsmith.tracing_context(enabled=False, tags=..., metadata=...)` runs as a context manager. *Not run:* actual tracing (no LangSmith account here)
 - *Source: LangChain docs, `observability.mdx`.*
 
 ## 15.6 Questions from the class

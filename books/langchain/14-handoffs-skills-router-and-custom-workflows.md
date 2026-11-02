@@ -435,6 +435,33 @@ agent = create_agent(model, tools=[search_knowledge_base], checkpointer=InMemory
   - Progressive disclosure is context engineering; it can also load matching few-shot example queries next to the schema.
 - *Checked (scripted model):* a `go_back` tool moved `current_step` from `resolution` to `warranty`, and the step middleware then offered the warranty tool again; a checkpointed agent wrapping a tool saw 1, 3, 5, 7 messages on successive model calls over two turns (memory kept). Summarization settings were not run here; see Ch7.
 
+## Pattern choice and extras from the multi-agent pages (LangChain docs)
+
+- *Source: LangChain docs, `multi-agent/index.mdx`, `handoffs.mdx`, `skills.mdx`, `router.mdx`, `custom-workflow.mdx`.*
+- **Pattern strengths** (the docs' star table, in words):
+  - Subagents: strong for distributed development, parallelism and multi-hop; weak for direct user talk
+  - Handoffs: strong for multi-hop and direct user talk; not for parallelism or distributed teams
+  - Skills: strong for distributed development, multi-hop and user talk; medium parallelism
+  - Router: strong for parallelism; medium for distributed teams and user talk; no multi-hop
+  - *Multi-hop* = calling several subagents in series. Patterns can be mixed: a subagent can use skills, a tool can call a router.
+- **Handoffs**
+  - The name comes from OpenAI (`transfer_to_sales_agent`-style tools).
+  - Every tool that returns a `Command` needs its matching `ToolMessage`, or the history is malformed.
+  - Two builds: one agent with middleware (the default choice) or several agent graphs using `Command.PARENT` (only when a node is a complex graph of its own).
+  - Decide: what context each agent sees, whether the handoff tool also has side effects (such as creating a ticket) or only sets state, and how to keep tokens down.
+  - To give control back to the user, end the turn with an `AIMessage`.
+- **Skills, three ways to extend**
+  - *Dynamic tool registration:* loading a skill also adds its tools (register all tools at build time and narrow the visible set, see Ch10).
+  - *Hierarchical skills:* a skill can name sub-skills in a tree.
+  - *Reference awareness:* the one skill prompt says where scripts or templates live and when to read them, so they load only when needed.
+  - Skills suit one agent with many specialities and no hard rules between them; the idea matches Agent Skills and `llms.txt`.
+- **Router**
+  - Use `Command` to go to one agent, `Send` to fan out to several.
+  - Stateless: every request alone. Stateful: wrap it as a tool (simplest) or keep history in the router (custom history management; tone can jump between agents).
+  - Router = a cheap classification step; supervisor = a full agent that decides turn by turn.
+- **Custom workflow:** any node can be a function, a model call or a whole agent; the page's RAG example mixes a model node (rewrite the query with structured output), a deterministic node (vector search) and an agent node. Use a persistent vector store in production.
+- *Not run:* this section is design guidance; the mechanics are checked in 14.2 to 14.6 and the extras above.
+
 ## 14.7 Choosing a pattern
 
 | Optimise for | Subagents | Handoffs | Skills | Router |

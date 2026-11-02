@@ -315,6 +315,29 @@ result = supervisor_agent.invoke(Command(resume=resume), config)
 - *Not re-run:* these patterns reuse the wrapper-tool and `ToolRuntime` mechanics already checked above.
 
 
+### Subagent design decisions (LangChain docs)
+
+- *Source: LangChain docs, `multi-agent/index.mdx` and `subagents.mdx`.*
+- **Why multi-agent at all:** context management, distributed development (teams own parts), parallelism. A single agent with the right tools is often enough.
+- **Five decisions** you make:
+  - **Sync or async.** Sync: the main agent waits (simple, but the user waits). Async: start a background job and keep talking. "Async" here means a background job, not Python `async`/`await`.
+    - Async uses three tools: **start job** (returns an id), **check status** (pending, running, completed, failed), **get result**.
+    - When it finishes, the app must tell the user, for example by sending a `HumanMessage` like "Check job_123 and summarise".
+  - **Tool per agent** (fine control) or **one dispatch tool** (many agents, teams add agents without changing the coordinator).
+  - **Subagent specs:** how the main agent learns what exists. A prompt list or an `Enum` for under about 10 fixed agents; a `list_agents` search tool for many or changing ones.
+  - **Inputs:** *isolated* (only the task text, the default) or *forked* (the parent's history too).
+  - **Outputs:** only the final message, or extra state keys through a `Command`.
+- **Outputs, two ways:** tell the subagent exactly what its last message must contain; or return a `Command` with a state update plus the `ToolMessage`:
+```python
+return Command(update={
+    "found": result["found"],
+    "messages": [ToolMessage(content=result["messages"][-1].content, tool_call_id=tool_call_id)]})
+```
+- **Subagents by default** use the inherited checkpointer: fresh state each call, interrupts work, parallel calls are safe. LangGraph cannot see them statically, so `get_state(subgraphs=True)` will not list them.
+- **Supervisor vs router:** the supervisor is a full agent that keeps the conversation and decides turn by turn; a router is a classification step.
+- **Subagents do not talk to the user directly** (use an interrupt inside one if you must).
+- *Checked (scripted model):* a tool returning a `Command` copied the subagent's state key into the parent (`found` became `x-found`) and the tool message carried the subagent's text; an `Enum` argument accepted `"writer"` and rejected `"bogus"` with a `ValidationError`. Async jobs and `get_state(subgraphs=True)` were not run.
+
 ## 13.7 Questions from the class
 
 - **Which architecture is best?** It depends. Independent tasks suit parallel. Steps that need the previous step's output suit a chain. Custom workflows are also possible
