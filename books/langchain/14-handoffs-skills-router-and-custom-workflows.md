@@ -560,4 +560,4 @@ Items marked *checked* were run with `langchain` 1.4.7 and `langgraph` 1.2.19, u
 - Live-Class-2026, `classes_transcription_summary/23 - 27 Sep - MCP In LangChain.md` (pattern table and class questions, in [Chapter 13](13-multi-agent-systems-and-subagents.md))
 - Sections marked *checked* and 14.9 are from testing
 
-Previous: [Chapter 13, Multi-agent systems and subagents](13-multi-agent-systems-and-subagents.md) · Next: [Chapter 15, Interview questions](15-interview-questions.md)
+Previous: [Chapter 13, Multi-agent systems and subagents](13-multi-agent-systems-and-subagents.md) · Next: [Chapter 15, Testing agents and tracing](15-testing-agents-and-tracing.md)

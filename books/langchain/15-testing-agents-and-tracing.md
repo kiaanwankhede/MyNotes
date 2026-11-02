@@ -1,0 +1,164 @@
+# Chapter 15: Testing agents and tracing
+
+**After this chapter you can:**
+
+- Unit test an agent with a fake model and no API calls
+- Keep slow, paid tests out of the default test run
+- Assert on structure, not on exact words
+- Check an agent's tool-call trajectory with `agentevals`
+- Turn on LangSmith tracing with environment variables
+
+**Builds on:** [Chapter 6](06-agents-and-memory.md) (agents, checkpointer), [Chapter 13](13-multi-agent-systems-and-subagents.md) (scripted models).
+
+## 15.1 Three layers of testing
+
+- A model decides its own next step, so exact outputs change between runs
+- **Unit tests:** small, deterministic pieces, with an in-memory fake instead of the model
+- **Integration tests:** real network calls, to check keys, schemas and wiring
+- **Evals:** score the **trajectory** (the sequence of messages and tool calls), by matching or by an LLM judge
+- Agent apps lean on integration tests more, since many parts are chained and flaky
+- *Source: LangChain docs, `test/index.mdx`.*
+
+## 15.2 Unit tests with a fake model
+
+- `GenericFakeChatModel` takes an **iterator** of replies, one per call
+- `FakeListChatModel` takes a **list of strings** and **cycles** back to the first when it runs out
+```python
+from langchain_core.language_models import FakeListChatModel
+m = FakeListChatModel(responses=["Paris", "Tower"])
+[m.invoke("x").content for _ in range(3)]   # ['Paris', 'Tower', 'Paris']
+```
+- To script a tool loop, give two replies: a tool call, then the final answer
+- `GenericFakeChatModel` has **no `bind_tools`**, and `create_agent` calls it when tools are passed. Subclass it:
+```python
+class FakeToolCallingModel(GenericFakeChatModel):
+    def bind_tools(self, tools, **kwargs):
+        return self
+
+model = FakeToolCallingModel(messages=iter([
+    AIMessage(content="", tool_calls=[ToolCall(name="get_weather", args={"city": "Tokyo"}, id="c1")]),
+    AIMessage(content="It is 72°F and sunny in Tokyo."),
+]))
+agent = create_agent(model, tools=[get_weather])
+```
+- An iterator is used up. Build a **new fake per test** (a pytest fixture that returns a fresh one)
+- For several turns, add `checkpointer=InMemorySaver()` and reuse one `thread_id`
+- *Checked:* the list model cycled; the subclass ran the tool once and answered; the plain class raised `NotImplementedError`; reusing a finished fake raised `RuntimeError`
+- *Source: LangChain docs, `test/unit-testing.mdx`.*
+
+## 15.3 Integration tests
+
+- **Keep them apart** with a marker, and exclude it by default:
+```ini
+[pytest]
+markers =
+    integration: tests that call real LLM APIs
+addopts = -m "not integration"
+```
+- Run them on purpose: `pytest -m integration`
+- **Keys:** read from environment variables. A fixture can `pytest.skip(...)` when the key is missing. Put `.env` in `.gitignore`; in CI use the secret store
+- **Assert on structure, not content:** the right tool was called, the last message is an `AIMessage`, it is not empty
+- **Cost and speed:** a small model, a token cap (`model_kwargs={"max_tokens": 256}`), one behaviour per test, run them selectively
+- **Record and replay:** `vcrpy` saves HTTP calls into cassette files (`--record-mode=once`). Filter `authorization` and `x-api-key` headers from them. Delete cassettes when prompts, tools or expected steps change
+- *Checked:* with the `pytest.ini` above, the default run deselected the integration test and `-m integration` ran it. Not run: `vcrpy` (not installed), real model calls
+- *Source: LangChain docs, `test/integration-testing.mdx`.*
+
+## 15.4 Evals: scoring the trajectory
+
+- An evaluator is a function: it takes the outputs (and maybe a reference) and returns a score
+- Install `agentevals` (`pip install agentevals`)
+- **Trajectory match**, four modes:
+  - `strict`: same messages and tool calls, same order (the text may differ)
+  - `unordered`: same tool calls, any order
+  - `subset`: the agent calls **no tool outside** the reference
+  - `superset`: the agent calls **at least** the reference tools
+```python
+from agentevals.trajectory.match import create_trajectory_match_evaluator
+ev = create_trajectory_match_evaluator(trajectory_match_mode="strict")
+ev(outputs=result["messages"], reference_outputs=reference_trajectory)["score"]   # True / False
+```
+- `tool_args_match_mode` and `tool_args_match_overrides` tune how arguments are compared
+- **LLM as judge:** `create_trajectory_llm_as_judge(model=..., prompt=TRAJECTORY_ACCURACY_PROMPT)`, with or without a reference. Use it for overall quality when there is no fixed expected path
+- Async versions: put `async` after `create_` (`create_async_trajectory_match_evaluator`)
+- **LangSmith:** log results with the `pytest` plugin (`@pytest.mark.langsmith`) or `client.evaluate(...)` on a dataset
+- *Checked (scripted agent, `agentevals` installed):* a one-tool run against a one-tool reference scored `True` in all four modes; a run with one **extra** tool scored `False` in `strict`, `unordered` and `subset`, and `True` in `superset`. Not run: the LLM judge and LangSmith logging (need keys)
+- *Source: LangChain docs, `test/evals.mdx`.*
+
+## 15.5 Tracing with LangSmith
+
+- A trace records every step: model calls, tool calls, inputs and outputs
+- **No code change.** Set environment variables and run the agent as usual:
+```bash
+export LANGSMITH_TRACING=true
+export LANGSMITH_API_KEY=<your-api-key>
+export LANGSMITH_AGENT_ID="<your-agent-id>"
+export LANGSMITH_AGENT_ENVIRONMENT="local"
+```
+- You need a LangSmith account and an API key
+- *Not run:* no LangSmith account is available here; the variable names are from the docs page, and the page mentions agent-id setup in a component I could not read
+- *Source: LangChain docs, `observability.mdx`.*
+
+## 15.6 Questions from the class
+
+- None in the class material for this chapter. It comes from the LangChain docs only
+
+## 15.7 Interview corner
+
+**1. Why test agents differently from ordinary code?**
+
+- The model chooses the next step, so output text varies. Test structure and trajectory, not exact strings
+- *Stronger answer:* push as much as possible down to deterministic unit tests with a fake model
+
+**2. How do you unit test an agent with no API?**
+
+- Script a fake chat model that returns a tool call and then an answer, and subclass it to add `bind_tools`
+- *Stronger answer:* a fresh fake per test, since the iterator runs out
+
+**3. How do you keep paid tests out of the normal run?**
+
+- A pytest marker plus `addopts = -m "not integration"`; run them with `-m integration`
+
+**4. What is a trajectory evaluator?**
+
+- It compares the sequence of messages and tool calls to a reference, in strict, unordered, subset or superset mode
+- *Stronger answer:* `subset` checks nothing extra was called; `superset` checks nothing required was missed
+
+**5. When would you use an LLM judge?**
+
+- When there is no fixed expected path and you want a quality score
+- *Stronger answer:* it costs tokens and varies, so keep it for evals, not every commit
+
+## 15.8 Added by Claude, not from the sources
+
+- **Test the plumbing offline first.** A scripted model proves your tools, state and middleware work. It does not prove a real model chooses well
+- **Pick the mode to match the risk.** Use `subset` when an extra call is dangerous (a payment tool), `superset` when a missing step is the risk
+- **A trajectory score of `True` does not mean a good answer.** Add an assertion on the final message or a judge
+- **Never record cassettes with real secrets.** Check the filter list before committing cassette files
+
+## Recap
+
+- Three layers: unit (fake model), integration (real model, marked and excluded by default), evals (trajectory)
+- `GenericFakeChatModel` needs a `bind_tools` subclass for agents; a fresh fake per test
+- Assert structure, not words; cap tokens; use small models
+- `agentevals` modes: strict, unordered, subset, superset; or an LLM judge
+- Tracing is on with environment variables, no code change
+
+## Practice
+
+1. Write a fake-model test that proves your agent calls a tool once. Run it twice with a reused fake and read the error
+2. Add the `integration` marker and `pytest.ini`. Show that the default run skips it
+3. Build a reference trajectory and score a run in all four modes. Add an extra tool call and see which modes fail
+4. Add a `check_api_keys` fixture that skips when a key is missing
+
+## How this chapter was checked
+
+- Run offline: the fake models, the pytest marker setup, and the four trajectory modes (with `agentevals` installed from the package registry)
+- **Not run:** `vcrpy`, the LLM judge, LangSmith tracing and logging, any real model
+- Everything else comes from the LangChain docs pages named in each section
+
+## Sources and further reading
+
+- LangChain docs, `src/oss/langchain/test/` (`index`, `unit-testing`, `integration-testing`, `evals`) and `observability.mdx` (github.com/langchain-ai/docs, MIT, commit 433a92c)
+- `agentevals`: github.com/langchain-ai/agentevals
+
+Previous: [Chapter 14, Handoffs, skills, router and custom workflows](14-handoffs-skills-router-and-custom-workflows.md) · Next: [Chapter 16, Interview questions](16-interview-questions.md)

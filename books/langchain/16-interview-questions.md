@@ -1,4 +1,4 @@
-# Chapter 15: Interview questions
+# Chapter 16: Interview questions
 
 **How to use this chapter**
 
@@ -9,7 +9,7 @@
 
 **About the source file.** Its author says every question is grounded in documentation, practitioner writing or reported incidents, and that two kinds of claim were **left out** on purpose: single-source anecdotes with exact percentages, and an exact "about 15 tool calls" degradation threshold. Treat anything like that, wherever you meet it, as one person's experience.
 
-## 15.1 Foundations
+## 16.1 Foundations
 
 **Q1. What is LangChain, and what problem does it solve?**
 
@@ -41,7 +41,7 @@
 - **Not taught in this book yet.** Retrieval comes with the RAG material later. The class notebooks used `InMemoryVectorStore(...).as_retriever(search_kwargs={"k": 2})` ([Chapter 14](14-handoffs-skills-router-and-custom-workflows.md), 14.6)
 - **Inconsistency in the file:** Q5 names **three** search types, and the quick-fire list asks for "two of the **four**". Check the current documentation for the real list
 
-## 15.2 Structured output
+## 16.2 Structured output
 
 **Q6. Why is `with_structured_output()` more reliable than "please reply in JSON"?**
 
@@ -74,7 +74,7 @@
 - A **`Union` of separate Pydantic schemas** as the `response_format`. The model decides which fits, and your code checks which one it got with `isinstance()`
 - *Checked with a scripted model:* a cancellation request returned a `CancelBooking` object, and `isinstance(result, CancelBooking)` was `True`
 
-## 15.3 Tools and agents
+## 16.3 Tools and agents
 
 **Q11. What makes a good tool docstring?**
 
@@ -111,7 +111,7 @@
 - That is a real reason multi-agent patterns exist: specialists with narrower toolsets ([Chapter 13](13-multi-agent-systems-and-subagents.md))
 - The file says the evidence is practitioner discussion and the exact threshold varies by task and model. **No number is given here on purpose**
 
-## 15.4 Production and senior level
+## 16.4 Production and senior level
 
 **Q17. When would you not reach for LangChain?**
 
@@ -149,7 +149,7 @@
 - The hardened fix: an explicit **tool-call ceiling** through middleware ([Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md)) and **real timeouts** on external calls, set before an incident, not during one
 - Related: model and tool retry with backoff ([Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md), 9.5 and 9.9)
 
-## 15.5 Quick-fire round
+## 16.5 Quick-fire round
 
 One or two sentences each, with the chapter that explains it.
 
@@ -257,7 +257,7 @@ These were **not taught in the class sources read**. The answers below come from
 
 *Source: the two assignment notebooks. Assignment 2 has no solutions file here.*
 
-## 15.6 Added by Claude, not from the sources
+## 16.6 Added by Claude, not from the sources
 
 Items marked *checked* were run with `langchain` 1.4.7 and `langgraph` 1.2.19.
 
@@ -298,6 +298,6 @@ Items marked *checked* were run with `langchain` 1.4.7 and `langgraph` 1.2.19.
 
 - Live-Class-2026, `Weekend 05 - 25-26 Jul/09-10 .../Assignment & Questions/LangChain_Interview_Questions_Researched.md.pdf`
 - The CVE-2025-68664 advisory material seen in search results: GitHub security advisory GHSA-c67j-w6g6-q2cm, the Microsoft Security blog on "LangGrinch", and write-ups by SentinelOne, Upwind and Geordie
-- Sections marked *checked* and 15.6 are from testing
+- Sections marked *checked* and 16.6 are from testing
 
-Previous: [Chapter 14, Handoffs, skills, router and custom workflows](14-handoffs-skills-router-and-custom-workflows.md)
+Previous: [Chapter 15, Testing agents and tracing](15-testing-agents-and-tracing.md)
