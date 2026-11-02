@@ -162,6 +162,101 @@ One or two sentences each, with the chapter that explains it.
 7. **What does a checkpointer do, and what breaks without one?** It saves state per thread. Without one, each call starts empty and the agent forgets, and a paused human-in-the-loop run cannot resume ([Chapters 6](06-agents-and-memory.md) and [11](11-runtime-and-human-in-the-loop.md))
 8. **What can `ToolMessage.artifact` carry that `.content` should not?** Structured or large data for your code, such as ids, page numbers or an image, which the model does not need to read ([Chapter 5](05-tools.md), and structured MCP data in [Chapter 12](12-mcp-in-langchain.md))
 
+## Assignments: the questions left out of earlier chapters
+
+Two class assignments (`Assignment_LangChain_Fundamentals_...` with its solutions file, and `Assignment_2_Agents_and_Prebuilt_Middleware`). Their other questions are answered in the chapters named in the master. These are the ones that were not.
+
+### Assignment 1 (GreenPlate): concepts, Q1 to Q11
+
+**Q1. "An agent is a model calling tools in a loop until done. A harness is everything around that loop." What is in the harness?**
+- The system prompt, the tools the model can reach, and middleware that shapes each step. `create_agent` *is* the harness ([Ch 1](01-introduction-to-langchain.md), [Ch 2](02-langchain-family-and-harness-engineering.md))
+
+**Q2. The four Lang products, and which differs in kind?**
+- LangGraph: low-level orchestration, the foundation. LangChain (`create_agent`): a configurable harness on LangGraph. Deep Agents: a batteries-included harness on top (planning, files, subagents)
+- LangSmith differs in kind: an observability platform that watches agents via traces. You do not build with it. Runtime decisions cannot be read from code alone
+
+**Q3. A 2026 tutorial uses `AgentExecutor` or `initialize_agent`.**
+- It predates v1.0 (October 2025). Those are the legacy pattern, now in `langchain-classic`. Use `create_agent`
+
+**Q4. Why a `.env` file?**
+- It keeps a real key out of the notebook. A hardcoded key is exposed the moment the notebook is committed or shared, and automated scanners find leaked keys quickly
+
+**Q5. Plain text, message objects, dictionaries: when each?**
+- Plain text: one standalone request, no history. Message objects: multi-turn chats, multimodal content, explicit system instructions. Dicts: the same as message objects, natural when the data comes from a database or JSON API ([Ch 3](03-models-messages-and-parameters.md))
+
+**Q6. Four things an `AIMessage` carries besides `.content`.**
+- `.tool_calls` (tool requests), `.usage_metadata` (real token counts), `.id`, `.response_metadata` (provider extras such as the exact model). `.content_blocks` also counts
+
+**Q7. Why `AIMessageChunk` and not string pieces?**
+- A partial reply must be combinable into a whole. Chunks add with `+` into a full `AIMessage` and can carry tool-call fragments and metadata that a plain string cannot
+
+**Q8. `.batch()` versus `.batch_as_completed()`.**
+- `.batch()` waits for all and returns in input order. `.batch_as_completed()` yields each result as soon as it finishes, tagged with its input index. Use it to start handling whichever independent request returns first
+
+**Q9. `ToolMessage` `.content` versus `.artifact`.**
+- `.content` is what the model reads. `.artifact` is for the application and is never sent to the model. A RAG tool uses it for a document id or citation link without bloating the model's input ([Ch 5](05-tools.md))
+
+**Q10. A literal `{"status": "ok"}` in a `ChatPromptTemplate`.**
+- The braces are read as template variables and the call fails (`INVALID_PROMPT_INPUT`). Double them: `{{` and `}}`
+
+**Q11. What does `MessagesPlaceholder` do?**
+- It injects a whole **list** of messages as one variable. A string variable can hold only one string, not a structured history
+
+*Source: the assignment's solutions notebook (Part A). Part B and the capstone there are open-ended; the exercises are covered by [Ch 4](04-structured-output.md), [Ch 5](05-tools.md), [Ch 6](06-agents-and-memory.md) and [Ch 7](07-middleware.md).*
+
+### Assignment 2 (NovaBank): the questions that needed later chapters
+
+These were **not taught in the class sources read**. The answers below come from the installed library (`langchain` 1.4.7, its docstrings and signatures) and the earlier chapters, and are my answers, not the class's.
+
+**Q4. The practical `stream_mode` options.**
+- The installed `StreamMode` values are `values`, `updates`, `messages`, `custom`, `debug`, `tasks` and `checkpoints`
+- Practical three: `values` (the whole state after each step), `updates` (only what each step changed), `messages` (model tokens as they arrive, for chat UIs). `custom` carries your own progress events from `stream_writer` ([Ch 11](11-runtime-and-human-in-the-loop.md))
+
+**Q5. Why does naming an agent (`name=`) cost nothing now but matter later?**
+- The `create_agent` docstring: the name is used when the agent is added to another graph as a subgraph node. It matters for multi-agent systems and for readable traces ([Ch 13](13-multi-agent-systems-and-subagents.md))
+
+**Q8. `SummarizationMiddleware` or `ContextEditingMiddleware` for very long, chatty conversations with few simple tools?**
+- `SummarizationMiddleware`. The bulk is conversation turns, which summarising condenses. `ContextEditingMiddleware` (with `ClearToolUsesEdit`) clears old **tool results**, which helps when tools return big outputs ([Ch 7](07-middleware.md), [Ch 9](09-guardrails-to-do-lists-and-tool-resilience.md))
+
+**Q9. Three distinct "retry" mechanisms, and when each.**
+- The library has `ToolRetryMiddleware` (a tool call fails: a flaky balance API), `ModelRetryMiddleware` (the model call fails: a timeout or rate limit), and `ModelFallbackMiddleware` (the primary model is down for good: switch to another model). All three share backoff ideas except fallback
+- My reading: the question's "three" is most likely these. Structured-output self-correction ([Ch 4](04-structured-output.md)) is a fourth, related loop
+
+**Q12. Three PII `apply_to` flags for account numbers.**
+- Signature: `apply_to_input=True`, `apply_to_output=False`, `apply_to_tool_results=False`
+- `apply_to_input`: a customer types their account number; clean it before the model sees it
+- `apply_to_output`: the model might repeat a number from earlier context; clean its reply before the user or logs
+- `apply_to_tool_results`: a balance tool returns a full number; clean the tool result before the model reads it
+- For account numbers, set all three. *Checked:* a custom regex detector for `NB-` plus 8 digits with `strategy="mask"` turned `NB-12345678` into `****5678`; `redact` gave `[REDACTED_NB_ACCOUNT]`, `hash` gave `<nb_account_hash:...>`, and `block` raised `PIIDetectionError` ([Ch 8](08-prebuilt-middleware-limits-fallback-and-pii.md))
+
+**Q13. The `LLMToolEmulator` `model` discrepancy.**
+- Its docstring says the default is `anthropic:claude-sonnet-4-5-20250929`, which needs `langchain-anthropic` installed, and that relying on the implicit default is **deprecated**: pass `model` explicitly. The signature itself shows `model=None`
+- Good habit for any middleware with its own model: an implicit default adds a hidden provider dependency, a hidden cost and a model that may be retired
+
+**Q14. `LLMToolSelectorMiddleware` versus `ProviderToolSearchMiddleware` (15 tools).**
+- Selector: a model reads the query and picks a subset (`max_tools`, `always_include`) before the main call. Works with any provider, costs an extra model call
+- Provider tool search: marks chosen tools as deferred and lets the **provider's own server-side tool search** fetch schemas when needed. Fewer tokens, no extra call from you
+- Constraint: only providers with server-side tool search, currently **Anthropic and OpenAI**. If a tool is deferred and the provider cannot be identified or lacks it, the model call raises `ValueError`
+
+**Q15. A production NovaBank stack from built-ins (no single right answer).**
+- `PIIMiddleware` on input, output and tool results (account numbers)
+- `ModelRetryMiddleware` then `ModelFallbackMiddleware` for model failures
+- `ToolErrorMiddleware` as the **outer** and `ToolRetryMiddleware(on_failure="error")` as the **inner**, for flaky balance lookups. *Checked:* this gave 3 attempts and a safe message with no raw exception text. Reversed, it gave 1 attempt ([Ch 9](09-guardrails-to-do-lists-and-tool-resilience.md), 9.6)
+- `ToolCallLimitMiddleware` tight on `transfer_funds`; `ModelCallLimitMiddleware` looser overall
+- `HumanInTheLoopMiddleware` on `transfer_funds` with all four decisions
+- `SummarizationMiddleware` for long chats
+- Order: hooks before the model run in declared order, so put PII first
+
+*Checked, composition:* with only `ToolRetryMiddleware(on_failure="continue")`, the final tool message **leaked** the raw exception text (`secret internal detail ...`). Adding `ToolErrorMiddleware` outside it removed the leak. Excluding `ValueError` from retries (`retry_on`) gave 1 attempt for a bad-input error that retrying cannot fix.
+
+### Capstones
+
+- **GreenPlate (Assignment 1):** the key's solution combines six ideas: a `ReservationRequest` schema with a `Literal` time slot and a party-size range; two tools; long-term dietary memory through `ToolRuntime.store`; short-term memory with a checkpointer and `thread_id`; `book_private_dining_room` gated by `wrap_model_call` for premium members; and a `context_schema` carrying the restaurant location
+  - Its own reflection: `InMemoryStore` and `InMemorySaver` lose everything on restart (swap for Postgres-backed versions), and `book_table` has no human approval
+- **NovaBank (Assignment 2):** pick six of eight features. A sound choice: a structured request with a constraint, three tools, HITL on transfer, PII masking, a tool retry, and call limits. Justify each in one line, then build it from the Q15 stack
+
+*Source: the two assignment notebooks. Assignment 2 has no solutions file here.*
+
 ## 15.6 Added by Claude, not from the sources
 
 Items marked *checked* were run with `langchain` 1.4.7 and `langgraph` 1.2.19.
@@ -193,6 +288,7 @@ Items marked *checked* were run with `langchain` 1.4.7 and `langgraph` 1.2.19.
 
 ## How this chapter was checked
 
+- Run for the assignment answers (`langchain` 1.4.7, scripted model): a custom-regex `PIIMiddleware` with four strategies; `ToolErrorMiddleware` and `ToolRetryMiddleware` in both orders, alone, and with `retry_on`. Library signatures and docstrings were read for stream modes, `name=`, the PII flags, `LLMToolEmulator` and `ProviderToolSearchMiddleware`
 - Run: the `handle_errors` settings and `Union` with a scripted model; a tool with `ToolRuntime`; the VIP tool filter with and without a declared state key; `method=` and the `ProviderStrategy` refusal on a raw model; and the installed `langchain-core` version
 - Checked through web search results: the facts of CVE-2025-68664 (date, affected and fixed versions, the `lc` key, the changed defaults, the nickname)
 - **Not run:** any real model, retrieval, RAGAS, LangSmith, the hanging-agent scenario, and the claims on when not to use LangChain
