@@ -208,7 +208,7 @@
 - **`ValidationError`.** The error Pydantic raises when data fails a check. [Pydantic, Ch 1](../pydantic/01-why-pydantic-and-basemodel.md)
 - **Vector embeddings.** A word or idea as a point in a high-dimensional space where similar meanings are close. [LLM, Ch 3](../llm/03-inside-the-model.md)
 - **Version negotiation.** The client proposes its latest version; the server accepts it or answers with its own latest. [MCP, Ch 3](../mcp/03-lifecycle-json-rpc-and-capability-negotiation.md)
-- **Vibe coding.** Letting AI write most of an app. It gets you most of the way, but the code still needs a security and data review. _not written up in the books_
+- **Vibe coding.** Letting AI write most of an app. It gets you most of the way, but the code still needs a security and data review. [Python, Ch 2](../python/02-python-refresher.md) (class Q&A)
 - **VS Code and Google Colab.** Colab for learning step by step; VS Code for real multi-file projects. [LLM, Ch 1](../llm/01-course-roadmap-and-prerequisites.md)
 
 ## W
@@ -256,7 +256,7 @@
 
 - **One term added:** "Retriever and RAG" (retrieve first, then answer) comes from the Meridian project, not the source glossaries
 - **One fix to the source wording:** the class glossary says `wrap_tool_call` "stays in declared order" for after-hooks. [Langchain Ch 10](../langchain/10-shell-tools-and-custom-middleware.md) tested this: wrap hooks **nest**, so a wrap hook exits in reverse. The execution-order entry follows that
-- **One term not written up:** "Vibe coding" appears in the source glossary but no book chapter teaches it, so it has no link
+- **"Vibe coding"** is explained only in the class 02 Q&A, so it links to that section of Python Ch 2
 - **Names change:** `langchain-mcp-adapters` and `langchain.mcp` are two different packages (see [Langchain Ch 12](../langchain/12-mcp-in-langchain.md)). The glossary uses the class's wording
 - **Study tip:** read one letter a day and say each entry aloud without looking at the definition
 

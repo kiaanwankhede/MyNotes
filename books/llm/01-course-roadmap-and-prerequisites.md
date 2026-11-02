@@ -183,6 +183,20 @@ From the course repo:
 
 *Source: `Weekend 01 - 27-28 Jun/AI_Industry_Handbook_2026.pdf`, read in full.*
 
+## Questions from the class (class 00)
+
+| Question | Answer |
+|---|---|
+| Is the course useful across experience levels? | Yes: fundamentals for beginners, system-design depth for architects and seniors |
+| Do I need paid tools? | No. Free and open-source tools come first; paid ones are optional and only demoed |
+| How do projects work for busy professionals? | Concepts and mini-projects live, then full code and explanations, so you can run first and deepen later |
+| Will Azure and Microsoft tools be covered? | Yes: dedicated sessions on Azure, Bedrock, Vertex AI and Foundry |
+| I have zero Python. What now? | A Python playlist is shared as preparation |
+
+- Action items from the session: install the academy's mobile app, use its in-app **Messages** tab as the only communication channel, block the weekend slots, watch the Python playlist if new, post a first learning update after class 1
+
+*Source: `classes_transcription_summary/00`, Q&A and action items. Platform rules are left out as admin, not teaching.*
+
 ## 1.9 Interview corner
 
 **Q1. How do you judge an agent system in production?**

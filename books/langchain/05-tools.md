@@ -323,6 +323,36 @@ class VipState(AgentState):
 - **`wrap_model_call` vs the system prompt:** the first removes the tool structurally. The second only asks
 - **Headless tool:** per the key, the schema is registered on the server but execution happens on the client (a browser, for example) via interrupt and resume. Its example is browser geolocation. Not covered in the class material read so far
 
+### More questions from the class (class 10)
+
+Rows not already covered above.
+
+| Question | Answer |
+|---|---|
+| The OpenAI API stops my requests. Do I need a card? | Yes. OpenAI needs at least $5 of prepaid credit before the API works. Groq and OpenRouter are better for learning: free, rate-limited, no card |
+| How do I switch a working setup to another provider? | Swap the model string (`groq:llama-3.3-70b` for `openai:gpt-5-mini`) and make sure the matching key is available. Nothing else changes |
+| My `.env` key does not load, even with `load_dotenv()`. Why? | Usually mundane: a mismatched variable name, stray spaces, or the file not read from the working directory you expect |
+| How do I manage a growing conversation context? | No single technique. Summarise older messages, drop old ones, or mix, chosen by results. Aim: best performance from the least context, since cost scales with tokens ([Ch 7](07-middleware.md), `SummarizationMiddleware`) |
+| How do I build a tool for an internal service behind a VPN? | A tool is just an API call. If your code can call it, you can wrap it |
+| Is model choice a one-time decision? | No. Compare candidate models before any production choice, and again later |
+
+**Learning advice from the same Q&A** (the mentor's view):
+
+- AI coding assistants write as well as the prompt and context you give them. Knowing the basics (Pydantic validation, tool strategy, dynamic loading) is what makes them a multiplier
+- Fundamentals first. Blogs and news give awareness, not a substitute for basics
+- You need not master every cloud or framework in a job post. Ecosystems differ in detail, not philosophy. Going deep on one transfers to the others
+
+*Source: `classes_transcription_summary/10`, the Q&A table. The other rows of that table are covered in 5.4 to 5.10.*
+
+### Two whiteboard sketches (`Langchain-2-Updated.pdf`)
+
+- **Cost of a tool call.** The board says the model is used **at least twice**: once to choose the tool and its arguments, once to summarise the tool's output. It marks each step as about **500 tokens** and adds that the code should have the least moving parts, because simple systems scale
+  - *Checked* in [LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md): one tool use took **2 model calls**
+  - The "500 tokens" figure is the sketch's illustration, not a measurement
+- **Refund policy.** The board sets a CineBot system prompt ("very helpful ... but we don't do refund") beside a "Refund Policy" box. My reading, from the sketch plus the class answer on `return_direct`: an exact rule such as a refund policy is safer as a tool whose output is returned directly (5.10) than as a line the model may reword
+
+*Source: `Langchain-2-Updated.pdf`, text layer. The sketches have little text; the second item is my reading.*
+
 ## 5.11 Interview corner
 
 **1. What does `bind_tools` do?**

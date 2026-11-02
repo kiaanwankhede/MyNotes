@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
 | Question | Answer |
 |---|---|
-| `requirements.txt` or `pyproject.toml`? | UV reads only `pyproject.toml`. Pick one workflow; do not mix `pip install` with `uv add` |
+| `requirements.txt` or `pyproject.toml`? | UV reads only `pyproject.toml`, and honours whichever command (`uv add` or `pip install -r requirements.txt`) was run **last**. Pick one workflow; do not mix them |
 | Must I activate the environment? | No. `uv run` in project mode also works. Both are valid |
 | Change the Python version? | `uv python upgrade` (the command exists in uv 0.11.32) |
 | Already use conda? | Keep it if you like; do not mix with UV in one project |
@@ -249,6 +249,23 @@ uv run currency.py
 | `my-first-project/` | A real `uv init` project |
 
 *Source: the folder's `README.md`.*
+
+## Questions from the class (class 01)
+
+| Question | Answer |
+|---|---|
+| Is the course right for non-tech or semi-tech people? | Doable, but expect roughly **double the class time** in self-effort. It assumes basic developer comfort |
+| GitHub Copilot or Claude Code? | The mentor personally finds Claude Code better for development (his view). GitHub Copilot is covered in the course |
+| Is there a tool to understand an unfamiliar codebase? | No magic tool. Feed the repo and docs to Claude or ChatGPT (for example through a GitHub MCP) and ask for a summary |
+| Help finding AI use cases at work? | A handbook mapping AI opportunities across industries is to be shared (see [LLM Ch 1](../llm/01-course-roadmap-and-prerequisites.md), 1.8) |
+| Should I code along in class? | No. Watch and understand live, then practise with the recording |
+| Do I need Python experience? | Helpful, not mandatory. Beginners should reinforce basics fast |
+| Will Microsoft Copilot Studio be covered? | Only if the mentor can get access |
+
+- After class: install Python 3.10+, UV and VS Code; Windows users install Git Bash or Windows Terminal; redo the commands from the recording
+- Left out: ground rules and two job referrals (not teaching content)
+
+*Source: `classes_transcription_summary/01`, Q&A and action items.*
 
 ## 1.7 Interview corner
 

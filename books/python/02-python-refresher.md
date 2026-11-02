@@ -135,7 +135,7 @@ account_1.deposit(200); account_1.withdraw(50); account_2.withdraw(1000)
 ### The OOP outline from class 01
 
 - `OOPS.py` holds only comments: classes, objects, inheritance, polymorphism, abstraction, encapsulation
-- The summaries explain classes and objects only. This book does not explain the other four
+- The summaries explain classes and objects only. The other four are explained below the class notes, marked as added by me
 
 *Source: `classes_summary/02`, `classes_transcription_summary/02`, `_2_oop_classes.py`, `OOPS.py`.*
 
@@ -312,6 +312,41 @@ create_user(25, "Mayank")   # allowed, no error
 
 *Source: `classes_summary/02`, `classes_transcription_summary/02`.*
 
+### The other four OOP ideas (added by Claude)
+
+The class named inheritance, polymorphism, abstraction and encapsulation but did not explain them (see above). Standard Python, **not from the sources**, all run:
+
+```python
+class SavingsAccount(BankAccount):                 # inheritance: reuse and extend
+    def __init__(self, owner, balance=0.0, rate=0.04):
+        super().__init__(owner, balance)           # run the parent's setup
+        self.rate = rate
+    def add_interest(self):
+        self.deposit(self._balance * self.rate)
+```
+
+- **Inheritance:** a child class gets the parent's fields and methods. *Checked:* a `SavingsAccount` used `deposit` and `owner` from `BankAccount` and passed `isinstance(s, BankAccount)`
+- **Encapsulation:** keep state behind a small interface. A leading underscore (`_balance`) says "internal"; a `@property` with no setter makes it read-only
+  - *Checked:* `s.balance = 5` raised `AttributeError`, but `s._balance = 5` still worked. The underscore is a convention, not a lock
+
+```python
+from abc import ABC, abstractmethod
+
+class Tool(ABC):                                   # abstraction: a contract, no behaviour
+    @abstractmethod
+    def run(self, text: str) -> str: ...
+
+class Shout(Tool):
+    def run(self, text): return text.upper()
+class Reverse(Tool):
+    def run(self, text): return text[::-1]
+```
+
+- **Abstraction:** define *what* every tool must do and hide *how*. *Checked:* `Tool()` and a subclass without `run()` both raised `TypeError: Can't instantiate abstract class`
+- **Polymorphism:** one call, different behaviour. *Checked:* `[t.run("tool") for t in [Shout(), Reverse()]]` gave `['TOOL', 'loot']`
+- **Duck typing:** Python does not require the shared base. A `Duck` class with a `run` method worked in the same list
+- **Why it matters for agents:** an agent holds many tools and calls them the same way. A registry of functions ([Chapter 1](01-setup-and-api-basics.md), 1.4) is the lightweight version of this idea
+
 ## 2.8 The class 02-03 code folder
 
 15 numbered files, from basics to an agent with memory. Run in this order:
@@ -346,6 +381,23 @@ Notes from the folder's README:
 - `_5`, `_7`, `_9`, `_10`, `_12`, `_13` and `_14` make real network calls. The README says its author tested request building, parsing and validation with mocked responses (the build environment blocked those domains), and advises running each once for real
 
 *Source: the folder's `README.md`.*
+
+## Questions from the class (class 02)
+
+| Question | Answer |
+|---|---|
+| Why learn raw-Python agents before LangChain? | Frameworks are mature and convenient (like WhatsApp versus SMS), but learn the fundamentals first |
+| Do frameworks cost more in tokens? | Yes. The mentor says he avoids agent frameworks in his own production work where he can, preferring simple API orchestration to control token cost and execution (his view) |
+| Can Pydantic structure messy LLM output? | Yes: define the shape as a model and extract exactly that ([Pydantic Ch 5](../pydantic/05-validating-llm-output.md)) |
+| Is GraphQL versus REST covered? | Not as a core topic; it may appear in a project (for example observability) |
+| Node.js or TypeScript instead of Python? | LangChain and LangGraph support TypeScript. The language is an implementation detail |
+| DevOps use cases for agents? | Think "mini interns": code review, infrastructure provisioning, repetitive ops tasks |
+| Is "vibe coding" enough to ship an app to the Play Store? | It gets you about 80 to 90 percent of the way. Have a developer review security and data handling before publishing |
+| Guardrails for sensitive data? | Covered later with dedicated guardrail tools ([Langchain Ch 8](../langchain/08-prebuilt-middleware-limits-fallback-and-pii.md)) |
+| When do deployment and AgentOps come? | After fundamentals and frameworks, about 1.5 to 2 months in, on a VPS or cloud |
+| How is 3.0 different from 2.0? | More project and AgentOps focus, with newer tools (Claude Code, latest LangChain) |
+
+*Source: `classes_transcription_summary/02`, Q&A. This answers the glossary term "vibe coding" ([LLM Ch 4](../llm/04-glossary.md)).*
 
 ## 2.9 Interview corner
 
@@ -404,7 +456,7 @@ Notes from the folder's README:
 
 ## How this chapter was checked
 
-- **Run:** `_0`, `_1`, `_2`, `_3`, `_4` (outputs match); the dataclass mutable default and `banana`; decorator order, missing `wraps`, missing `return`; `*args`/`**kwargs`; tuple immutability; slicing and a mixed list; the shared default list
+- **Run:** `_0`, `_1`, `_2`, `_3`, `_4` (outputs match); the added OOP examples (inheritance, read-only property, abstract class, polymorphism, duck typing); the dataclass mutable default and `banana`; decorator order, missing `wraps`, missing `return`; `*args`/`**kwargs`; tuple immutability; slicing and a mixed list; the shared default list
 - **Not run:** `_5`, `_9`, `_10`, `_12` to `_14` against the live API (no network); the notebook `Python_run.ipynb`
 - **Rewritten** from the earlier chapter; the class summaries were not re-opened in this pass
 
