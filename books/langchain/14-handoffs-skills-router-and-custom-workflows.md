@@ -411,6 +411,30 @@ rag_workflow = (StateGraph(RAGState)
 - *Checked:* the notebook's `rewrite_query` is `q.replace("it", "the movie")`. It also changes the letters "it" inside other words: "Is there a showing with it tonight?" became "Is there a showing wthe movieh the movie tonight?". Use a model call, or match whole words
 - In production use a persistent vector store (managed Postgres with pgvector, Pinecone or similar) and `with_structured_output` for the rewrite
 
+## Tutorial extras: go back, history, stateful routers, skill storage (LangChain docs)
+
+- *Source: LangChain docs, `multi-agent/handoffs-customer-support.mdx` (sections 8-9), `router-knowledge-base.mdx` (section 9), `skills-sql-assistant.mdx` (Implementation variations, Progressive disclosure).*
+- **Go back (handoffs):** a "go back" tool is just another `Command(update={"current_step": "warranty_collector"})`.
+  - Add it to the later step's tool list and mention it in that step's prompt.
+  - If most steps need arbitrary jumps, the page says to ask whether a structured workflow is the right tool.
+- **History in handoffs:** add `SummarizationMiddleware(model=..., trigger=("tokens", 4000), keep=("messages", 10))` after the step middleware.
+- **Stateful router:** keep the router stateless and wrap it as a tool inside a conversational agent that has the checkpointer.
+```python
+@tool
+def search_knowledge_base(query: str) -> str:
+    """Search GitHub, Notion and Slack."""
+    return workflow.invoke({"query": query})["final_answer"]
+agent = create_agent(model, tools=[search_knowledge_base], checkpointer=InMemorySaver())
+```
+  - The recommended default. Giving the router itself persistence is possible but, per the docs, can make routing across turns feel inconsistent.
+- **Skills: choices the tutorial did not make**
+  - Storage: in memory (tutorial), file system (Claude Code style), remote (S3, database, API).
+  - Discovery: list in the system prompt (tutorial), scan folders, registry, or a list tool.
+  - Loading: one load (tutorial), paged, searched, or hierarchical.
+  - Size guide (docs call it uncalibrated): under about 1K tokens put it in the prompt; 1-10K load on demand; over 10K use progressive loading.
+  - Progressive disclosure is context engineering; it can also load matching few-shot example queries next to the schema.
+- *Checked (scripted model):* a `go_back` tool moved `current_step` from `resolution` to `warranty`, and the step middleware then offered the warranty tool again; a checkpointed agent wrapping a tool saw 1, 3, 5, 7 messages on successive model calls over two turns (memory kept). Summarization settings were not run here; see Ch7.
+
 ## 14.7 Choosing a pattern
 
 | Optimise for | Subagents | Handoffs | Skills | Router |

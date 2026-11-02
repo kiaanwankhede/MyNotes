@@ -304,6 +304,17 @@ result = supervisor_agent.invoke(Command(resume=resume), config)
 - Sub-agents run **inside tool functions**, so LangGraph cannot see them statically. `get_state(..., subgraphs=True)` on the main graph will not show their state. To inspect nested state during an interrupt, call the sub-agent from a **node** in a custom graph ([Chapter 14](14-handoffs-skills-router-and-custom-workflows.md))
 - Not run here
 
+### What the supervisor gets back (LangChain docs)
+
+- *Source: LangChain docs, `multi-agent/subagents-personal-assistant.mdx` (sections 7-8).*
+- A wrapper tool decides what flows each way.
+  - **Down:** by default the sub-agent sees only the `request` string. Add `runtime: ToolRuntime` to the tool and read `runtime.state["messages"]` to pass the original user message too.
+  - **Up:** return only `result["messages"][-1].text`, or `json.dumps({"status": ..., "event_id": ..., "summary": ...})` for structured data.
+- Tell each sub-agent in its prompt that its **last message must carry all the facts**: the supervisor sees nothing else.
+- Rule from the page: use a supervisor for several distinct domains; for a few tools use one agent.
+- *Not re-run:* these patterns reuse the wrapper-tool and `ToolRuntime` mechanics already checked above.
+
+
 ## 13.7 Questions from the class
 
 - **Which architecture is best?** It depends. Independent tasks suit parallel. Steps that need the previous step's output suit a chain. Custom workflows are also possible
