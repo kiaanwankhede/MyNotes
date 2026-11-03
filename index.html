@@ -86,6 +86,27 @@ article hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 .hljs-title{color:#7a4fb5}.hljs-meta{color:var(--warn)}
 :root[data-theme="dark"] .hljs-string{color:#8fd19e}:root[data-theme="dark"] .hljs-number{color:#f0a37f}:root[data-theme="dark"] .hljs-title{color:#c4a4f0}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .hljs-string{color:#8fd19e}:root:not([data-theme="light"]) .hljs-number{color:#f0a37f}:root:not([data-theme="light"]) .hljs-title{color:#c4a4f0}}
+/* Callouts (GitHub alert syntax: > [!NOTE] etc.) */
+.callout{border:1px solid var(--line);border-left:4px solid var(--c);background:var(--cs);border-radius:10px;padding:10px 16px 6px;margin:1.3em 0}
+.callout .ctitle{font-weight:600;color:var(--c);margin:0 0 4px;font-size:.95rem;letter-spacing:.01em}
+.callout p,.callout li{max-width:none}
+.callout>*:last-child{margin-bottom:6px}
+.callout.note{--c:#2563eb;--cs:#eef4ff}.callout.tip{--c:#15803d;--cs:#ecfaf0}.callout.important{--c:#7c3aed;--cs:#f4efff}
+.callout.warning{--c:#b45309;--cs:#fff6e6}.callout.caution{--c:#c0262d;--cs:#fdeeee}
+:root[data-theme="dark"] .callout.note{--c:#7aa7ff;--cs:#16223a}:root[data-theme="dark"] .callout.tip{--c:#5fd38a;--cs:#12261a}:root[data-theme="dark"] .callout.important{--c:#b896ff;--cs:#221a35}:root[data-theme="dark"] .callout.warning{--c:#f0b45c;--cs:#2c2111}:root[data-theme="dark"] .callout.caution{--c:#ff8a8f;--cs:#2e1517}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .callout.note{--c:#7aa7ff;--cs:#16223a}:root:not([data-theme="light"]) .callout.tip{--c:#5fd38a;--cs:#12261a}:root:not([data-theme="light"]) .callout.important{--c:#b896ff;--cs:#221a35}:root:not([data-theme="light"]) .callout.warning{--c:#f0b45c;--cs:#2c2111}:root:not([data-theme="light"]) .callout.caution{--c:#ff8a8f;--cs:#2e1517}}
+/* Diagrams */
+.mermaid{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin:1.3em 0;text-align:center;overflow-x:auto}
+/* Collapsible interview answers */
+article details.qa{border:1px solid var(--line);border-radius:10px;margin:.7em 0;background:var(--surface)}
+article details.qa>summary{cursor:pointer;padding:10px 14px;font-weight:600;list-style:none}
+article details.qa>summary::-webkit-details-marker{display:none}
+article details.qa>summary::before{content:"▸";display:inline-block;width:1.2em;color:var(--accent)}
+article details.qa[open]>summary::before{content:"▾"}
+article details.qa>*:not(summary){margin-left:14px;margin-right:14px}
+article details.qa>ul,article details.qa>p{margin-top:0}
+/* Level badges in tables */
+article table td:first-child strong{white-space:nowrap}
 @media (max-width:1100px){.shell{grid-template-columns:minmax(0,1fr)}aside.right{display:none}.mtoc{display:block}}
 @media (max-width:760px){
   .brand{display:none}
@@ -117,6 +138,7 @@ article hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
 <script>
 var BOOKS = [
   {slug:'python',title:'Python'},{slug:'pydantic',title:'Pydantic'},{slug:'llm',title:'LLM'},
@@ -190,12 +212,33 @@ function show(){
       html+='<div class="pager"><span>'+(prev?'<a href="#'+hashFor(b.slug,prev.id)+'"><small>Previous</small>'+esc(prev.title)+'</a>':'')+'</span><span>'+(next?'<a href="#'+hashFor(b.slug,next.id)+'"><small>Next</small>'+esc(next.title)+'</a>':'')+'</span></div>';
     }
     doc.innerHTML=html;
+    callouts(doc); diagrams(doc);
     doc.querySelectorAll('pre code').forEach(function(el){try{hljs.highlightElement(el)}catch(e){}});
     document.title=(c?c.title+' - ':'')+b.title+' - Study Notes';
     document.getElementById('main').scrollTop=0;
     buildToc();
     setMenu(false);
   });
+}
+var ALERT={note:'📘 Note',tip:'💡 Tip',important:'🏭 In production',warning:'⚠️ Pitfall',caution:'🔒 Security'};
+function callouts(root){
+  root.querySelectorAll('blockquote').forEach(function(bq){
+    var p=bq.querySelector('p'); if(!p) return;
+    var m=p.innerHTML.match(/^\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(<br>)?\s*/i); if(!m) return;
+    var k=m[1].toLowerCase(); p.innerHTML=p.innerHTML.slice(m[0].length);
+    var title=ALERT[k], first=p.firstElementChild;
+    if(first&&first.tagName==='STRONG'&&p.innerHTML.indexOf('<strong>')===0){title=first.innerHTML; first.remove(); p.innerHTML=p.innerHTML.replace(/^\s*(<br>)?\s*/,'');}
+    if(!p.textContent.trim()&&!p.querySelector('*')) p.remove();
+    var d=document.createElement('div'); d.className='callout '+k;
+    d.innerHTML='<p class="ctitle">'+title+'</p>'; while(bq.firstChild) d.appendChild(bq.firstChild);
+    bq.parentNode.replaceChild(d,bq);
+  });
+}
+var mermaidReady=false;
+function diagrams(root){
+  var els=root.querySelectorAll('pre code.language-mermaid'); if(!els.length||!window.mermaid) return;
+  els.forEach(function(c){var d=document.createElement('div');d.className='mermaid';d.textContent=c.textContent;c.parentNode.parentNode.replaceChild(d,c.parentNode);});
+  try{var dk=isDark();mermaid.initialize({startOnLoad:false,theme:'base',securityLevel:'strict',fontFamily:'Source Sans 3, system-ui, sans-serif',themeVariables:dk?{primaryColor:'#16303a',primaryTextColor:'#e4e9ef',primaryBorderColor:'#5cc0de',lineColor:'#9aa6b4',secondaryColor:'#221a35',tertiaryColor:'#161c24',clusterBkg:'#1b232d',clusterBorder:'#5cc0de',actorBkg:'#16303a',actorBorder:'#5cc0de',actorTextColor:'#e4e9ef',noteBkgColor:'#2c2111',noteTextColor:'#e4e9ef',signalColor:'#e4e9ef',signalTextColor:'#e4e9ef',edgeLabelBackground:'#161c24'}:{primaryColor:'#e1f1f6',primaryTextColor:'#1c2430',primaryBorderColor:'#0b6b8a',lineColor:'#5d6877',secondaryColor:'#f4efff',tertiaryColor:'#ffffff',clusterBkg:'#f7fbfc',clusterBorder:'#0b6b8a',actorBkg:'#e1f1f6',actorBorder:'#0b6b8a',noteBkgColor:'#fff6e6',edgeLabelBackground:'#ffffff'}});mermaid.run({nodes:root.querySelectorAll('.mermaid')});}catch(e){}
 }
 function buildToc(){
   var hs=document.querySelectorAll('#doc h2, #doc h3'), out='<p class="nav-title">On this page</p><ul>';
@@ -223,7 +266,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')setMenu(fals
 function isDark(){return root.getAttribute('data-theme')==='dark'||(!root.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches)}
 function setTheme(t){ if(t){root.setAttribute('data-theme',t)} document.getElementById('theme').textContent=isDark()?'Light':'Dark'; }
 document.getElementById('theme').addEventListener('click',function(){
-  var next=isDark()?'light':'dark'; setTheme(next);
+  var next=isDark()?'light':'dark'; setTheme(next); if(document.querySelector('#doc .mermaid')) show();
   try{localStorage.setItem('notes-theme',next)}catch(e){}
 });
 try{var saved=localStorage.getItem('notes-theme'); if(saved)root.setAttribute('data-theme',saved)}catch(e){}
