@@ -1,5 +1,11 @@
 # Chapter 8: Prebuilt middleware: limits, fallback and PII
 
+> [!NOTE]
+> **📍 At a glance**
+> - **You will build:** limits, fallbacks and PII protection with prebuilt middleware
+> - **Level:** intermediate · **Time:** about 30 minutes
+> - **Builds on:** [Chapter 7](07-middleware.md) (the hooks, summarization, human-in-the-loop). To-do lists, tool selection, tool errors, tool retry and tool emulation are in [Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md).
+
 **After this chapter you can:**
 
 - Cap cost with model call and tool call limits (run vs thread)
@@ -7,8 +13,6 @@
 - Keep personal data away from the model with `PIIMiddleware`, including custom detectors
 - Explain the difference between a guardrail and middleware
 - Combine several middlewares and decide between LangChain and LangGraph
-
-**Builds on:** [Chapter 7](07-middleware.md) (the hooks, summarization, human-in-the-loop). To-do lists, tool selection, tool errors, tool retry and tool emulation are in [Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md).
 
 ## 8.1 `ModelCallLimitMiddleware`
 
@@ -47,6 +51,12 @@ call_limited_agent = create_agent(
 - The run limit **resets on every `invoke`**. The thread limit does not
 - **Without a checkpointer** the thread limit has nothing to remember between calls. In my test a thread limit of 1 never fired across two separate `invoke`s
 
+> [!IMPORTANT]
+> **🏭 In production**
+> - Call limits are your cost circuit-breaker: set a per-run and a per-thread limit on every agent that faces users
+> - Alert when a run hits its limit; it usually means a loop or a confusing tool
+> - *Added by Claude.*
+
 ## 8.2 `ToolCallLimitMiddleware`
 
 **Why:** tool calls add to context size and cost. An agent asked to "find the important emails" could keep digging through years of mail unless capped.
@@ -77,15 +87,26 @@ tool_limited_agent = create_agent(
 - **Run vs thread, class 13 wording:** a run limit of 4 caps the chapatis in one sitting, a thread limit of 10 caps the whole day however it is split. Another picture: the searches inside **one reply** are the run, the total across the **whole chat session** is the thread
 - **A limit rejection is a tool message with an error status, not an interrupt.** An interrupt exists to ask a human for a decision. A limit needs no human input, so the call is refused and reported back as information the model can pass on to the user
 
-### `ToolCallLimitMiddleware`: the exit behaviours and the error (LangChain docs)
+### `ToolCallLimitMiddleware`: the exit behaviours and the error
 
 - Settings from the docs: `tool_name` (one tool; without it the limit covers all tools), `run_limit`, `thread_limit` (needs a checkpointer) and `exit_behavior`. At least one limit is required
 - `exit_behavior`: `'continue'` (default) blocks the extra calls with error messages and lets the model carry on. `'end'` stops gracefully. `'error'` raises **`ToolCallLimitExceededError`**
-- *Checked* with `tool_name="t1"`, `run_limit=1` and a model that asked twice: `continue` gave a final model answer; `end` ended with the message `'t1' tool call limit reached: run limit exceeded (2/1 calls).`; `error` raised `ToolCallLimitExceededError` with the same text
+- ✅ *Verified (details in "How this chapter was checked").*
 
 *Source: `langchain-ai/docs`, `src/oss/langchain/middleware/built-in.mdx` (Tool call limit).*
 
 ## 8.3 `ModelFallbackMiddleware`
+
+```mermaid
+flowchart LR
+    R[Request] --> P[Primary model]
+    P -->|ok| OK([Answer])
+    P -->|error| F1[Fallback model 1]
+    F1 -->|ok| OK
+    F1 -->|error| F2[Fallback model 2]
+    F2 -->|ok| OK
+    F2 -->|error| X([Raise])
+```
 
 **Why:** if the primary model provider has an outage, the app should not simply stop working.
 
@@ -191,6 +212,12 @@ Three more switches (from the library signature, not explained in class 12):
 - `apply_to_output` (default `False`): clean what the model replies
 - `apply_to_tool_results` (default `False`): clean what tools return
 
+> [!IMPORTANT]
+> **🏭 In production**
+> - Regex PII detection misses things (names, free-text addresses); for regulated data add a dedicated detector and keep raw data out of logs too
+> - Decide where PII may go: masking before the model protects you only if traces and logs are masked as well
+> - *Added by Claude.*
+
 ## 8.5 Guardrail vs middleware
 
 > **A guardrail is the concept: protecting the agent from doing something undesirable. Middleware is the mechanism you use to implement it.**
@@ -243,30 +270,58 @@ Where these patterns show up in real work (from the notebook):
 
 ## 8.8 Interview corner
 
-**1. Run limit vs thread limit?**
+**What interviewers listen for:** you treat limits as **cost guardrails**, you know fallback covers provider failure, and you know PII masking has to cover logs and traces too.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. Run limit vs thread limit?</summary>
 
 - Run limit: one `invoke`. Thread limit: the whole conversation, which needs a checkpointer
 - *Stronger answer:* you can limit one tool tightly and the whole run loosely. Set the numbers from domain knowledge
 
-**2. What does model fallback do, and what does it not do?**
+</details>
+
+<details class="qa"><summary>2. What does model fallback do, and what does it not do?</summary>
 
 - It switches to another model when the primary hard-fails (404, bad key, outage)
 - It does **not** route by cost, speed or task. The full history goes to the fallback
 
-**3. Redact vs mask vs hash vs block for PII?**
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>3. Redact vs mask vs hash vs block for PII?</summary>
 
 - Redact removes it, mask hides part, hash replaces it with a hash, block stops the run
 - *Stronger answer:* masking an id your tool needs breaks the tool call. Pick the strategy per field
 
-**4. Guardrail vs middleware?**
+</details>
+
+<details class="qa"><summary>4. Guardrail vs middleware?</summary>
 
 - A guardrail is the goal of keeping the agent from undesirable behaviour. Middleware is the mechanism that implements it
 - *Stronger answer:* give an example, such as PII protection implemented with `PIIMiddleware`
 
-**5. When would you leave LangChain for LangGraph?**
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>5. When would you leave LangChain for LangGraph?</summary>
 
 - When you need precise, deterministic control of state, checkpointer internals, stores or interrupts
 - *Stronger answer:* for most agents, including a simple RAG chatbot, LangChain with middleware is enough
+
+</details>
+
+<details class="qa"><summary>6. Your main LLM provider has an outage. How does your system keep working?</summary>
+
+- `ModelFallbackMiddleware` to a second provider, plus retries with backoff for short blips (Ch9)
+- *Stronger answer:* test the fallback path regularly, keep prompts portable across providers, and alert when fallback traffic rises
+
+</details>
+
+> [!TIP]
+> **🧩 Design question to practise:** *"A health-insurance chatbot must never send member identifiers to the model provider."* Cover PII detection and strategy, inputs vs outputs vs tool results, logging, and a fallback that respects the same rule.
 
 ## 8.9 Added by Claude, not from the sources
 
@@ -288,6 +343,19 @@ PIIMiddleware("pan", detector=r"\b[A-Z]{5}[0-9]{4}[A-Z]\b", strategy="mask")
 ```
 
 - **PII middleware is one layer.** Logs, traces and your own database may still hold the raw text. Check what each of them records
+
+## Cheat sheet
+
+```python
+from langchain.agents.middleware import (ModelCallLimitMiddleware, ToolCallLimitMiddleware,
+    ModelFallbackMiddleware, PIIMiddleware)
+middleware = [
+    ModelCallLimitMiddleware(run_limit=10, thread_limit=50),
+    ToolCallLimitMiddleware(tool_name="search", run_limit=3),
+    ModelFallbackMiddleware("openai:gpt-4o-mini", "anthropic:claude-sonnet-4-6"),
+    PIIMiddleware("email", strategy="redact", apply_to_input=True),
+]
+```
 
 ## Recap
 
@@ -319,6 +387,9 @@ PIIMiddleware("pan", detector=r"\b[A-Z]{5}[0-9]{4}[A-Z]\b", strategy="mask")
   - PII: redact, mask, hash and block, the card checksum, the function detector with `hash`, the regex string, the compiled-regex `TypeError`, the PAN pattern, and declaration order of two hooks
 - **Not run against a live model:** a real provider outage and real tool-call choices. Class output was read from the notebook (cells 57 to 101)
 - The middlewares for to-do lists, tool selection, tool errors, tool retry and tool emulation are in [Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md)
+- **Details by section** (moved here from the ✅ markers):
+  - *`ToolCallLimitMiddleware`: the exit behaviours and the error:* Checked* with `tool_name="t1"`, `run_limit=1` and a model that asked twice: `continue` gave a final model answer; `end` ended with the message `'t1' tool call limit reached: run limit exceeded (2/1 calls).`; `error` raised `ToolCallLimitExceededError` with the same text
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 
 ## Sources and further reading
 

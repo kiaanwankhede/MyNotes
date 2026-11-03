@@ -1,5 +1,11 @@
 # Chapter 6: Agents and memory
 
+> [!NOTE]
+> **📍 At a glance**
+> - **You will build:** the TripMate travel agent with tools, memory, a store and streaming
+> - **Level:** intermediate · **Time:** about 30 minutes
+> - **Builds on:** [Chapter 1](01-introduction-to-langchain.md) (first agent, checkpointer basics) and [Chapter 5](05-tools.md) (tools, `ToolRuntime`, `InMemoryStore`). Middleware is in [Chapter 7](07-middleware.md).
+
 **After this chapter you can:**
 
 - Explain why models, messages, structured output and tools were already "agents"
@@ -8,8 +14,6 @@
 - Give an agent short-term memory (`thread_id`) and long-term memory (`store`)
 - Assemble a full agent with tools, middleware, memory, context and a name
 - Explain headless tools
-
-**Builds on:** [Chapter 1](01-introduction-to-langchain.md) (first agent, checkpointer basics) and [Chapter 5](05-tools.md) (tools, `ToolRuntime`, `InMemoryStore`). Middleware is in [Chapter 7](07-middleware.md).
 
 ## 6.1 Everything so far was already an agent
 
@@ -104,17 +108,30 @@ print(state.next)                  # () when the run finished, otherwise the ste
 
 - Full mechanics (state as checkpoints) belong to LangGraph and are covered there in depth
 
-### Deleting messages with `RemoveMessage` (LangChain docs)
+### Deleting messages with `RemoveMessage`
 
 - *Source: LangChain docs, `short-term-memory.mdx` (Delete messages).*
 - The state key must use the `add_messages` reducer; the default `AgentState` does.
 - Remove some: return `{"messages": [RemoveMessage(id=m.id) for m in messages[:2]]}` from a hook.
 - Remove all: `RemoveMessage(id=REMOVE_ALL_MESSAGES)` from `langgraph.graph.message`.
-- *Checked:* an `after_model` hook with a checkpointer dropped the first two messages, so after two turns the thread held `['b', '2']`; the remove-all hook left `[]`.
+- ✅ *Verified (details in "How this chapter was checked").*
 - Postgres saver install note: `langgraph-checkpoint-postgres "psycopg[binary]"`.
 
 
 ## 6.5 Saver, store, cache or database?
+
+```mermaid
+flowchart LR
+    subgraph Thread["Short-term: one conversation"]
+        CP[(Checkpointer<br/>thread_id)]
+    end
+    subgraph LongTerm["Long-term: across conversations"]
+        ST[(Store<br/>namespace + key)]
+    end
+    A[Agent run] -->|saves every step| CP
+    A -->|reads/writes facts| ST
+    CP -->|same thread_id| A
+```
 
 There is no single right answer. It depends on the use case.
 
@@ -155,6 +172,13 @@ The whiteboard compares the two in-memory classes:
   - Used **automatically** by the graph runtime. Typical use: resume interrupted conversations, keep chat history
   - Namespaces: no. Semantic search: no
   - Lives only while the Python process runs
+
+> [!IMPORTANT]
+> **🏭 In production**
+> - `InMemorySaver` is for development only; use a database saver (for example Postgres) so threads survive restarts and scale across workers
+> - Namespace long-term memory by user or tenant, and never let one user's memory into another's prompt
+> - Set retention: old threads cost storage and may hold personal data you must delete on request
+> - *Added by Claude.*
 
 ## 6.6 Putting it together: the full TripMate agent
 
@@ -233,7 +257,7 @@ How it works:
 - The **implementation** is registered only on the **client**
 - It runs after a short **interrupt and resume** handshake
 
-## Streaming an agent (LangChain docs)
+## 6.8 Streaming an agent
 
 - *Source: LangChain docs, `streaming.mdx` and `event-streaming.mdx`.*
 - `agent.stream(input, stream_mode=...)` modes:
@@ -260,10 +284,10 @@ for c in agent.stream(inp, stream_mode="custom", version="v2"):
   - `stream.tool_calls`: tool run lifecycle (`tool_name`, `input`, `output_deltas`, `output`, `error`).
   - `stream.values`, `stream.output` (final state), `stream.subgraphs`, `stream.extensions`.
   - Async code can read several projections together with `asyncio.gather`.
-- *Checked (scripted model, langchain 1.4.7):* the v2 chunk keys; `updates` gave `model, tools, model`; `values` gave 4 snapshots; `messages` gave tuples; `GraphOutput.interrupts` was `()`; `custom` printed both writer lines; v3 `stream.messages` gave text `It is sunny` and tool call `get_weather {'city': 'SF'}`. **Observed:** in sync code, reading `stream.messages` first left `stream.tool_calls` empty. Use `stream.interleave("messages", "tool_calls")` to get both in order (tested in Ch16), plus `stream.interrupted` and `stream.interrupts` for a paused run.
+- ✅ *Verified (details in "How this chapter was checked").*
 
 
-## 6.8 Questions from the class
+## 6.9 Questions from the class
 
 - **Is `thread_id` a reserved keyword?** No. It is just the identifier the checkpointer looks for in the config. The app decides how ids are made
 - **Can I see what is stored for a thread?** Yes, through the checkpointer's API (6.4). Full mechanics are in LangGraph
@@ -273,39 +297,69 @@ for c in agent.stream(inp, stream_mode="custom", version="v2"):
 - **Is the older (Classic) course content still relevant?** The concepts carry over. The code reflects LangChain Classic, and this course stays on the latest version
 - **How do I choose between store, saver, cache and database?** See 6.5
 
-## 6.9 Interview corner
+## 6.10 Interview corner
 
-**1. Why does an agent forget between runs, and how do you fix it?**
+**What interviewers listen for:** you separate **short-term** (thread) from **long-term** (store) memory, you know what a checkpointer saves, and you think about privacy and retention.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. Why does an agent forget between runs, and how do you fix it?</summary>
 
 - Each `invoke` sees only what you pass in
 - Add a checkpointer and pass the same `thread_id`
 - *Stronger answer:* `InMemorySaver` is per process. Production needs a database-backed saver
 
-**2. Saver vs store?**
+</details>
+
+<details class="qa"><summary>2. Saver vs store?</summary>
 
 - Saver = one conversation's state, tied to a `thread_id`, used automatically
 - Store = long-term data about a user, shared across threads, you call `put` and `get`
 - *Stronger answer:* the store uses namespaces such as `(user_id, "preferences")`, a saver does not
 
-**3. Where does a tool's result go?**
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>3. Where does a tool's result go?</summary>
 
 - Back to the model, never straight to the user
 - *Stronger answer:* that is why a tool call costs at least two model calls, and why `return_direct` exists
 
-**4. What are headless tools?**
+</details>
+
+<details class="qa"><summary>4. What are headless tools?</summary>
 
 - Tools whose definition lives on the server but whose code runs on the user's device (clipboard, location, payments), via interrupt and resume
 
-**5. What is `context_schema` for?**
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>5. What is <code>context_schema</code> for?</summary>
 
 - Declares the per-run data you pass to tools and middleware (`runtime.context`)
 - *Stronger answer:* context is per invocation and immutable. It is the right place for user id and plan, not message history
 
-**6. When would you add a cache?**
+</details>
+
+<details class="qa"><summary>6. When would you add a cache?</summary>
 
 - When the same expensive call repeats and the answer stays valid for a while (weather, currency rates)
 
-## 6.10 Added by Claude, not from the sources
+</details>
+
+<details class="qa"><summary>7. Design memory for an assistant used by 10,000 users.</summary>
+
+- A database checkpointer keyed by `thread_id`, one thread per conversation; a store namespaced per user for durable facts
+- *Stronger answer:* trim or summarise long threads, encrypt and expire personal data, and add a "forget me" path
+
+</details>
+
+> [!TIP]
+> **🧩 Design question to practise:** *"A travel assistant must remember a user's preferences across trips but not leak them to other users."* Cover thread vs store, namespaces, what gets saved, and deletion.
+
+## 6.11 Added by Claude, not from the sources
 
 Not in the course material. Established practice, but check current docs.
 
@@ -315,6 +369,17 @@ Not in the course material. Established practice, but check current docs.
 - **Use parameterised SQL** (`?` placeholders, as in 6.3) in tools. The model controls the arguments, so never build SQL with string formatting
 - **Threads grow every turn.** The checkpointer keeps the whole message list, and you pay for those tokens on every call. [Chapter 7](07-middleware.md) covers summarization
 - **Production savers:** LangGraph ships database-backed checkpointers (for example a Postgres one in a separate package). Check the current package name in the docs
+
+## Cheat sheet
+
+```python
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.store.memory import InMemoryStore
+agent = create_agent(model, tools, checkpointer=InMemorySaver(), store=InMemoryStore())
+cfg = {"configurable": {"thread_id": "trip-42"}}
+agent.invoke({"messages": [("user", "I prefer aisle seats")]}, cfg)
+for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
+```
 
 ## Recap
 
@@ -345,6 +410,10 @@ Not in the course material. Established practice, but check current docs.
 - Run offline with a stand-in model on `langchain` 1.4.7: the full agent assembly (tools, middleware, checkpointer, store, context schema, name), per-run context reaching tools and middleware, `InMemoryStore` put, get and search with a tuple namespace, `get_state`, and the SQLite save and get tools
 - **Not run against a live model or real APIs:** Open-Meteo, Tavily, a persistent saver, headless tools. Those are class statements
 - The TripMate real-tool code is not in the sources read for this chapter, so section 6.3 shows only my own SQLite example
+- **Details by section** (moved here from the ✅ markers):
+  - *Deleting messages with `RemoveMessage`:* Checked: an `after_model` hook with a checkpointer dropped the first two messages, so after two turns the thread held `['b', '2']`; the remove-all hook left `[]`.
+  - *6.8 Streaming an agent:* Checked (scripted model, langchain 1.4.7): the v2 chunk keys; `updates` gave `model, tools, model`; `values` gave 4 snapshots; `messages` gave tuples; `GraphOutput.interrupts` was `()`; `custom` printed both writer lines; v3 `stream.messages` gave text `It is sunny` and tool call `get_weather {'city': 'SF'}`. **Observed:** in sync code, reading `stream.messages` first left `stream.tool_calls` empty. Use `stream.interleave("messages", "tool_calls")` to get both in order (tested in Ch16), plus `stream.interrupted` and `stream.interrupts` for a paused run.
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 
 ## Sources and further reading
 
@@ -352,6 +421,6 @@ Not in the course material. Established practice, but check current docs.
 - Live-Class-2026, `classes_transcription_summary/11 - 01 Aug - LangChain - Agents, Memory, Middleware.md`
 - Live-Class-2026, whiteboards `Langchain-2-Updated.pdf` and `Agent-Middleware-Architecture.pdf` in `Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/`
 - Live-Class-2026, `MIddleware.ipynb` (cells 0 to 56) in the same folder
-- Section 6.10 and the SQLite example in 6.3 are added by Claude and are not from these sources
+- Section 6.11 and the SQLite example in 6.3 are added by Claude and are not from these sources
 
 Previous: [Chapter 5, Tools](05-tools.md) · Next: [Chapter 7, Middleware](07-middleware.md)

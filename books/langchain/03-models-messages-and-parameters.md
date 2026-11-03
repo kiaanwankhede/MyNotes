@@ -1,5 +1,10 @@
 # Chapter 3: Models, messages and parameters
 
+> [!NOTE]
+> **📍 At a glance**
+> - **You will build:** model calls with parameters, messages, streaming, batching and prompt templates
+> - **Level:** beginner · **Time:** about 40 minutes
+
 **After this chapter you can:**
 
 - Call any model through one interface
@@ -108,7 +113,23 @@ paid_model = init_chat_model("openai:gpt-5-mini")
 # local_model = init_chat_model("ollama:llama3.2")   # runs on your machine, no API key
 ```
 
+> [!IMPORTANT]
+> **🏭 In production**
+> - Set `timeout` and `max_tokens` on every production model: a hung call or a runaway answer is a real bill
+> - Use low `temperature` (0 to 0.2) for extraction, classification and tool use; raise it only for creative text
+> - Pin exact model versions in config, not code, so you can roll back when a provider updates a model
+> - *Added by Claude.*
+
 ## 3.4 Messages
+
+```mermaid
+flowchart LR
+    S["SystemMessage<br/>rules and role"] --> MD{{Model}}
+    H["HumanMessage<br/>the question"] --> MD
+    A1["AIMessage<br/>earlier replies, tool calls"] --> MD
+    T["ToolMessage<br/>tool results, tool_call_id"] --> MD
+    MD --> R["AIMessage<br/>content · tool_calls · usage_metadata"]
+```
 
 **Why a message list?** One long string mixes instructions with the user's words, so the model cannot tell them apart. A message list labels each piece with **who said it**.
 
@@ -198,7 +219,7 @@ print(response.usage_metadata)
 - **Cost per user or session:** add up `usage_metadata` across the conversation. It is the exact billed number, not an estimate
 - Streaming, structured output and tool calling all build on reading these fields correctly
 
-## Standard content blocks (LangChain docs)
+### Standard content blocks
 
 - *Source: LangChain docs, `messages.mdx` (Message content, Standard content blocks).*
 - `message.content` is whatever the provider returned (string or provider-shaped list).
@@ -214,7 +235,7 @@ HumanMessage(content_blocks=[
 ])
 ```
 - To store standard blocks in `content` itself (for apps outside LangChain), set env `LC_OUTPUT_VERSION=v1` or pass `output_version="v1"` to the model.
-- *Checked (langchain 1.4.7):* both parses above and the `content_blocks=` constructor gave exactly these shapes. `output_version` was **not** run: it is not an argument of the installed `init_chat_model` signature, so treat it as docs-only.
+- ✅ *Verified (details in "How this chapter was checked").*
 
 ## 3.6 Streaming: it feels fast
 
@@ -333,7 +354,7 @@ result = history_aware_prompt.invoke({
 response = model.invoke(result.to_messages())
 ```
 
-## Model errors, rate limits and profiles (LangChain docs)
+## 3.9 Model errors, rate limits and profiles
 
 - *Source: LangChain docs, `models.mdx` (Model exceptions, Rate limiting, Model profiles, Invocation config, Disable streaming).*
 - **Standard error types** live in `langchain_core.exceptions`, so you catch one type for any provider.
@@ -360,9 +381,15 @@ except ModelTimeoutError:
   - `max_concurrency` limits parallel calls in `batch()`.
 - **Turn token streaming off**: `disable_streaming=True` (any chat model); some providers also accept `streaming=False`.
   - Then `.stream()` returns one chunk with the whole text.
-- *Checked (langchain 1.4.7, scripted model):* the exception names and `is_retryable` values above; a limiter at 5 requests/s with a bucket of 1 made 4 calls take about 0.8 s; `disable_streaming=True` gave one chunk. `model.profile` was not run (needs the provider package).
+- ✅ *Verified (details in "How this chapter was checked").*
 
-## The LangChain error pages (LangChain docs)
+> [!IMPORTANT]
+> **🏭 In production**
+> - Retry only **retryable** errors (rate limit, timeout, server error) with backoff; fail fast on auth and bad requests
+> - Watch `usage_metadata` per request and alert on cost per conversation, not just total spend
+> - *Added by Claude.*
+
+## 3.10 The LangChain error pages
 
 - *Source: LangChain docs, `errors/*.mdx` (7 pages), `install.mdx`.*
 - **`MESSAGE_COERCION_FAILURE`**: a chat model got something that is not message-like.
@@ -381,9 +408,9 @@ except ModelTimeoutError:
   - Fix auth: check the variable name and value, `dotenv` loading, proxy; or pass `api_key=` explicitly.
   - Fix rate limits: a rate limiter, response caching, several providers, a higher quota.
 - **Install:** `pip install -U langchain` (Python 3.10+), then one provider package: `langchain-openai`, `langchain-anthropic`.
-- *Checked (langchain-core):* the coercion dict raised `ValueError: Message dict must contain 'role' and 'content' keys`; a template missing `name` raised `KeyError ... missing variables {'name'}`; a `(role, text)` tuple worked. The JavaScript-only pages were not run.
+- ✅ *Verified (details in "How this chapter was checked").*
 
-## 3.9 Questions from the class
+## 3.11 Questions from the class
 
 - **Does `create_agent` call a tool in a single `invoke`?** Normally yes, it resolves within one invoke
 - **Can the system message change if a different LLM is used?** Yes, whichever model sits behind it
@@ -400,42 +427,81 @@ except ModelTimeoutError:
   - Summarising can lose detail
   - Belongs with agents and memory
 
-## 3.10 Interview corner
+## 3.12 Interview corner
 
-**1. Why `init_chat_model` instead of the provider's own SDK?**
+**What interviewers listen for:** you know what a message list is, you can name the knobs that change cost and reliability (`temperature`, `max_tokens`, `timeout`), and you know which errors are worth retrying.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. Why <code>init_chat_model</code> instead of the provider's own SDK?</summary>
 
 - One interface across providers. Change the string, keep the code
 - *Stronger answer:* it lowers switching cost, but capabilities still differ per model, so check them
 
-**2. What does temperature do, and when would you set it to 0?**
+</details>
+
+<details class="qa"><summary>2. What does temperature do, and when would you set it to 0?</summary>
 
 - Controls randomness. 0 for extraction, classification, anything that should be repeatable
 - *Stronger answer:* 0 is steadier, not guaranteed identical
 
-**3. What is in a model reply besides the text?**
+</details>
+
+<details class="qa"><summary>3. What is in a model reply besides the text?</summary>
 
 - `.tool_calls`, `.usage_metadata` (token counts), `.response_metadata` (model and stop reason), `.id`, `.content_blocks`
 - *Stronger answer:* `usage_metadata` is how you track cost per user
 
-**4. `invoke` vs `stream` vs `batch`?**
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>4. <code>invoke</code> vs <code>stream</code> vs <code>batch</code>?</summary>
 
 - One whole answer / progressive output / many independent requests in parallel
 - *Stronger answer:* streaming improves **perceived** speed, not total time. `batch_as_completed` combines both ideas
 
-**5. Does batching save tokens?**
+</details>
+
+<details class="qa"><summary>5. Does batching save tokens?</summary>
 
 - No. Each request carries its own context. It saves cost (provider batch pricing) and time (fewer round trips)
 
-**6. What is few-shot prompting?**
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>6. What is few-shot prompting?</summary>
 
 - Put example question and answer pairs before the real question so the model copies the pattern
 - *Stronger answer:* often beats adding more instructions
 
-**7. A template that contains example JSON throws `KeyError`. Why?**
+</details>
+
+<details class="qa"><summary>7. A template that contains example JSON throws <code>KeyError</code>. Why?</summary>
 
 - The braces are read as variables. Double them: `{{ }}`
 
-## 3.11 Added by Claude, not from the sources
+</details>
+
+<details class="qa"><summary>8. How do you keep LLM cost under control in production?</summary>
+
+- Count model calls and tokens per task, cap `max_tokens`, trim history, cache repeated answers
+- *Stronger answer:* route easy steps to a smaller model, batch offline work, and alert on cost per conversation from `usage_metadata`
+
+</details>
+
+<details class="qa"><summary>9. Streaming, batching or plain <code>invoke</code>: when do you use each?</summary>
+
+- Streaming for a user waiting on screen; `batch` for many independent offline inputs; `invoke` for one-off calls in code
+- *Stronger answer:* streaming improves perceived latency, not total time; batching is limited by provider rate limits, so set `max_concurrency`
+
+</details>
+
+> [!TIP]
+> **🧩 Design question to practise:** *"Build the model layer for an app that must switch between two providers without code changes."* Cover `init_chat_model`, config-driven model names, timeouts, retryable errors and a fallback (Ch8).
+
+## 3.13 Added by Claude, not from the sources
 
 Not in the course material. Established practice, but check current docs.
 
@@ -444,6 +510,18 @@ Not in the course material. Established practice, but check current docs.
 - **Always set a `timeout`** in production, and decide how many retries you can afford. Retries multiply cost and latency
 - **History grows every turn and you pay for it every turn.** Long chats need trimming or summarising before they hit the context limit or the budget
 - **Do not put secrets in the system prompt.** Users can often coax a model into repeating its instructions
+
+## Cheat sheet
+
+```python
+from langchain.chat_models import init_chat_model
+model = init_chat_model("openai:gpt-4o-mini", temperature=0, max_tokens=500, timeout=30)
+model.invoke("Hi")                                   # one call
+for chunk in model.stream("Hi"): print(chunk.content, end="")
+model.batch(["a", "b"], config={"max_concurrency": 4})
+msgs = [("system", "Be brief"), ("human", "Explain RAG")]
+reply = model.invoke(msgs); reply.usage_metadata     # tokens
+```
 
 ## Recap
 
@@ -468,6 +546,11 @@ Not in the course material. Established practice, but check current docs.
 - The reasoning-token figures (3.5) and the three-SDK comparison (3.1) come from the class notebook output and code. Neither was run here (they need provider keys)
 - Run offline with a stand-in model on `langchain` 1.4.7: message dicts, tuples, bad `role` and missing `content` errors, `name` and `id`, `.batch()`, `.batch_as_completed()`, prompt template filling, the unescaped-brace `KeyError`, the doubled-brace fix, `MessagesPlaceholder`
 - **Not run against a live model:** temperature behaviour, token counts, OpenRouter limits, provider batch pricing. Those are class figures
+- **Details by section** (moved here from the ✅ markers):
+  - *Standard content blocks:* Checked (langchain 1.4.7): both parses above and the `content_blocks=` constructor gave exactly these shapes. `output_version` was **not** run: it is not an argument of the installed `init_chat_model` signature, so treat it as docs-only.
+  - *3.9 Model errors, rate limits and profiles:* Checked (langchain 1.4.7, scripted model): the exception names and `is_retryable` values above; a limiter at 5 requests/s with a bucket of 1 made 4 calls take about 0.8 s; `disable_streaming=True` gave one chunk. `model.profile` was not run (needs the provider package).
+  - *3.10 The LangChain error pages:* Checked (langchain-core): the coercion dict raised `ValueError: Message dict must contain 'role' and 'content' keys`; a template missing `name` raised `KeyError ... missing variables {'name'}`; a `(role, text)` tuple worked. The JavaScript-only pages were not run.
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 
 ## Sources and further reading
 
@@ -475,7 +558,7 @@ Not in the course material. Established practice, but check current docs.
 - Live-Class-2026, `classes_summary/08 - 19 Jul - Inside the Model.md`
 - Live-Class-2026, `classes_transcription_summary/08 - 19 Jul - LangChain - Inside the Model.md`
 - Live-Class-2026, notebooks `02_03_environment_models_messages_student_notes.ipynb`, `04_05_prompt_templates_structured_output_student_notes.ipynb` and `Revision_Parts_1-4.ipynb` in `Weekend 04 - 18-19 Jul/07-08 - .../Notebook For Reference/`
-- Section 3.11 is added by Claude and is not from these sources
+- Section 3.13 is added by Claude and is not from these sources
 - Live-Class-2026, `Weekend 04 - 18-19 Jul/.../Learning/Part 2 - Models/Langchain (1).ipynb` and `Langchain - Colab.ipynb` (reasoning-token output, three-SDK comparison). Both notebooks hold **API keys in their source**. They were not copied. Revoke any that are yours
 - Live-Class-2026, `Weekend 04 - 18-19 Jul/07-08 .../Langchain.pdf` and the Weekend 4 README (whiteboard summary of classes 7 and 8: family, harness, messages, structured output)
 

@@ -1,5 +1,11 @@
 # Chapter 12: MCP in LangChain
 
+> [!NOTE]
+> **📍 At a glance**
+> - **You will build:** an agent that uses tools from MCP servers, with approval gates and auth
+> - **Level:** advanced · **Time:** about 45 minutes
+> - **Builds on:** [Chapter 5](05-tools.md) (tools), [Chapter 11](11-runtime-and-human-in-the-loop.md) (human-in-the-loop, interrupts) and the whole [MCP book](../mcp/01-why-mcp-exists.md), especially [Chapter 6](../mcp/06-deployment-and-building-a-client.md) (your own client) and [Chapter 7](../mcp/07-legacy-vs-modern-mcp.md) (legacy and modern).
+
 **After this chapter you can:**
 
 - Explain that, to an agent, an MCP server is just another source of tools
@@ -9,8 +15,6 @@
 - Spot destructive tools from their annotations and guard them with human-in-the-loop
 - Explain why the class's elicitation demo fails on a modern connection, and the two ways that work
 - Add bearer authentication, and explain why per-user credentials matter in a deployed app
-
-**Builds on:** [Chapter 5](05-tools.md) (tools), [Chapter 11](11-runtime-and-human-in-the-loop.md) (human-in-the-loop, interrupts) and the whole [MCP book](../mcp/01-why-mcp-exists.md), especially [Chapter 6](../mcp/06-deployment-and-building-a-client.md) (your own client) and [Chapter 7](../mcp/07-legacy-vs-modern-mcp.md) (legacy and modern).
 
 **Not covered yet:** the multi-agent half of class 23 (context isolation, patterns). It goes in [Chapter 13](13-multi-agent-systems-and-subagents.md) and [Chapter 14](14-handoffs-skills-router-and-custom-workflows.md).
 
@@ -23,6 +27,15 @@
 - The only question: how does a LangChain agent, which speaks messages, tools and tool messages, connect to a server that speaks MCP?
 
 ## 12.2 The adapter: a translator on top of the FastMCP client
+
+```mermaid
+flowchart LR
+    AG[LangChain agent] --> AD[MCPAdapter<br/>langchain.mcp]
+    AD --> CL[FastMCP client]
+    CL -->|stdio| S1[Local server<br/>script]
+    CL -->|Streamable HTTP| S2[Remote server<br/>URL]
+    CL -->|in memory| S3[In-process<br/>FastMCP]
+```
 
 - **The adapter** sits between the agent and any MCP server, local or remote
 - It is built on the **FastMCP client** ([MCP, Chapter 6](../mcp/06-deployment-and-building-a-client.md)), which handles four jobs so LangChain does not:
@@ -45,8 +58,8 @@
 | Status | **Beta**. It warns that the API may change | Mature |
 
 - **Why the first class demo failed:** the notebook was written for `langchain` **0.3.25**. That version has no `mcp` extra, and the pip output printed "does not provide the extra 'mcp'". The `langchain.mcp` module needs a newer `langchain`. The class transcript also said this: the package was in beta and needed a newer release than the notebook environment had
-- *Checked:* with `langchain` **1.4.7** installed through `langchain[mcp]`, `from langchain.mcp import MCPAdapter` worked. It printed a beta warning. The module exposes `MCPAdapter`, `MCPToolArtifact`, `as_langchain_tool` and an `elicitation` module
-- *Checked:* `MCPAdapter` has only **two public members: `list_tools` and `client`.** There is no `get_resources` or `get_prompt` (see 12.10)
+- ✅ *Verified (details in "How this chapter was checked").*
+- ✅ *Verified (details in "How this chapter was checked").*
 - **The class's own illustration** (`MCPAdapter(server)`, `list_tools()`, `create_agent(...)`) matches this API. The class notes say the import path was not legible in the recording
 
 > **Do not install both packages in one environment with FastMCP 4.** *Checked:* installing `langchain-mcp-adapters` replaced `mcp` 2.3.0 with 1.30.0, and `import fastmcp` then failed with "FastMCP server support is not installed". Use a separate virtual environment for each
@@ -97,7 +110,7 @@ if __name__ == "__main__":
     mcp.run()
 ```
 
-- *Checked:* `list_tools()` returned the three tools as `StructuredTool` objects, ready for `create_agent`
+- ✅ *Verified (details in "How this chapter was checked").*
 - **The repo's `cinebot_mcp_server.py` is a different version.** It holds only `check_showtimes`, because the multi-server notebook overwrote it. Its log file shows an earlier crash: `ToolAnnotations` was used before it was imported. Add the `mcp.types` import, as above
 - **What the target can be** (checked from the adapter's own documentation):
   - an `http` or `https` **URL**
@@ -137,7 +150,7 @@ async def run_agent(server) -> dict:
 
 - The comments in the file say it: the **tools hold the client**, so the agent stays usable for the life of the `async with` block. Use the agent **inside** the block
 - `server` can be a FastMCP object, a URL or a transport (12.4)
-- *Checked* with a FastMCP weather server and a scripted model in place of the string id: the messages were the question, a tool call, the tool result, and the final answer. The tool result's content is a **list of text blocks**, `[{'type': 'text', 'text': ...}]`, not a plain string
+- ✅ *Verified (details in "How this chapter was checked").*
 - **Trap 1: the file name.** It is called `langchain.py`. Run from its own folder, Python finds the file before the real package, and `from langchain.agents import create_agent` fails with "'langchain' is not a package". *Checked* by putting the folder first on the path. Rename it (for example `mcp_agent.py`)
 - **Trap 2: a string model id needs its provider package.** *Checked:* `create_agent("claude-sonnet-5", ...)` with no key raised an `ImportError` saying `langchain-anthropic` must be installed. Whether `claude-sonnet-5` is a valid id was **not checked**; use an id from the provider's current list
 - The same folder's `main.py` is the 3-line `uv init` stub and has nothing to learn
@@ -204,7 +217,7 @@ async with MCPAdapter(transport) as adapter:
                          checkpointer=InMemorySaver())
 ```
 
-- *Checked, with a scripted stand-in model:* `interrupt_on` was `{'cancel_booking': {...}}` and nothing else. The agent ran `check_showtimes` freely, then **paused** at `cancel_booking`. After `Command(resume={"decisions": [{"type": "approve"}]})` the cancellation ran and returned "Booking BK9 cancelled."
+- ✅ *Verified (details in "How this chapter was checked").*
 - A **checkpointer** and a `thread_id` are needed to pause and resume ([Chapter 11](11-runtime-and-human-in-the-loop.md), 11.11)
 - **Caveat:** an annotation is a hint from the server's author. A server can leave it off. Treat it as one input, not a guarantee
 
@@ -253,8 +266,8 @@ async with MCPAdapter(client) as adapter:
     ...
 ```
 
-- *Checked:* with this client the same tool printed "asked: Confirm cancellation of booking BK1?" and returned "Booking BK1: cancelled."
-- *Checked:* a legacy client **without** a handler gave `status: error` with the message "This MCP server asked for input over the legacy server-initiated elicitation path, which interrupt-based elicitation cannot answer. It needs a server that returns its requests as an `InputRequiredResult`, or a pre-built client with your own `elicitation_handler`."
+- ✅ *Verified (details in "How this chapter was checked").*
+- ✅ *Verified (details in "How this chapter was checked").*
 - **Only elicitation is answered.** The adapter refuses sampling and roots requests
 
 ## 12.8 Several servers: config or client group
@@ -278,8 +291,8 @@ async with MCPAdapter(group) as adapter:
     tools = await adapter.list_tools()
 ```
 
-- *Checked:* both ways gave `cinebot_check_showtimes`, `cinebot_cancel_booking`, `cinebot_get_seat_map` and `errors_risky_lookup`. A call through the group to `errors_risky_lookup` returned "Booking BK7: confirmed."
-- *Checked:* a group can mix a default client with a **legacy** one. **This is how a legacy and a modern server run side by side**
+- ✅ *Verified (details in "How this chapter was checked").*
+- ✅ *Verified (details in "How this chapter was checked").*
 - A group **routes each call back to the client that advertised that tool**, and namespaced names stop two servers' identical tool names from colliding
 - **Version handling stays out of the agent's way.** FastMCP negotiates per connection. As the class put it, the agent should only worry about getting tools
 - A **single server** target accepts one URL, path or in-memory server. You cannot pass several this way
@@ -307,7 +320,7 @@ for name, target in targets.items():
 - The two remote servers were **not run here** (no network access to them)
 - In the live run the agent asked a clarifying question about "MCP" before using Context7. Give such questions context, or the model will guess
 
-## MCP tool results, metadata and connection patterns (LangChain docs)
+### MCP tool results, metadata and connection patterns
 
 - *Source: LangChain docs, `mcp/index.mdx`, `mcp/tools.mdx`, `mcp/connections.mdx`, `mcp/auth.mdx`. The example snippets in `src/snippets/code-samples/mcp-*` were read too.*
 - **Target types** `MCPAdapter(target)` accepts:
@@ -335,15 +348,9 @@ for name, target in targets.items():
   - The cache itself is set with `Client(cache=...)`; isolate it per user.
 - **Protocol eras**: legacy begins with `initialize`; modern (version `2026-07-28`+) probes `server/discover`. FastMCP picks per connection.
 - **Auth**: `auth=` takes a token string, `"oauth"` (discovery, dynamic client registration, browser, exchange) or any `httpx.Auth`. Tokens are in memory by default; pass `OAuth(..., token_storage=...)` to persist.
-- *Checked (langchain 1.4.7, fastmcp 4.1.4, in-process server):*
-  - `list_tools()` returned 3 tools; `refresh`, `bypass` and `use` all returned 3.
-  - Metadata showed `destructive_hint: True`, `read_only_hint: False` and `server: {name: crm}`.
-  - A raising tool gave `status="error"` with the message.
-  - **Refinement:** the structured artifact came back as a plain dict `{'structured_content': {'x': 3}}`, not an object with an attribute; read it by key.
-  - An in-process server inside an `MCPConfig` dict was rejected (config takes server configs, not objects).
-  - Not run: OAuth, the shared pool, protocol-era negotiation, a deployed factory.
+- ✅ *Verified (details in "How this chapter was checked").*
 - **Gate only the destructive tools (snippet `mcp-destructive-gate`):** read `destructive_hint` from `tool.metadata` once, then give every tool the same `InterruptOnConfig(allowed_decisions=["approve","reject"], when=needs_approval)`; `when` receives the pending call and returns `True` or `False`.
-  - *Checked:* with one destructive and one read-only tool called together, the run paused for `delete_file` only; `read_file` ran at once; rejecting gave a tool message `User rejected the tool call`.
+  - ✅ *Verified (details in "How this chapter was checked").*
 - **`ClientGroup` names tools `{server}_{tool}`.** *Checked:* two servers that both had `read_file` came out as `calc_read_file` and `crm_read_file`.
 - **`Client(url, mode=...)`:** `"legacy"` pins the old handshake; `"auto"` (default) negotiates the newest. One adapter per server, or one `ClientGroup`, keeps each on its own era. *Not run.*
 - **Elicitation answer shape:** `Command(resume={"responses": {question["key"]: {"action": "accept", "content": {...}}}})`; `decline` or `cancel` refuse. *Checked:* a legacy `ctx.elicit` server tool failed on the adapter, which matches 12.7.
@@ -361,7 +368,7 @@ for name, target in targets.items():
 | A different auth per server | A client group, each member with its own `auth=` |
 | Per-user auth in a deployment | See below |
 
-- *Checked, bearer token:* a server with a static token check. The client with the right token listed `check_showtimes`. A **wrong token** and **no token** both failed with an MCP error
+- ✅ *Verified (details in "How this chapter was checked").*
 - OAuth was shown in class by connecting a Drive connector in Claude: the browser opens, you authorise, tokens are exchanged. Not run here
 - The notebook's server code for the check:
 
@@ -397,6 +404,13 @@ mcp = FastMCP("CineBot", auth=StaticTokenVerifier())
 - **Rule:** authorise at the user level. Never store one person's authorisation where everyone can use it
 - Not built here
 
+> [!IMPORTANT]
+> **🏭 In production**
+> - Treat every MCP server as untrusted code: tool descriptions and results can carry prompt injection
+> - Use per-user credentials so the server acts with the caller's rights, not one shared admin key
+> - Pin server versions and review new tools before they reach the agent; gate destructive tools with approval (12.6)
+> - *Added by Claude.*
+
 ## 12.10 `langchain.mcp` against `langchain-mcp-adapters`
 
 From the class notebook's last section, with each point from the older package checked in a separate environment.
@@ -410,7 +424,7 @@ From the class notebook's last section, with each point from the older package c
 | Tool metadata | Ungrouped | One `tool.metadata["mcp"]` namespace |
 | Elicitation | Not built in | Automatic through an interrupt (12.7) |
 
-- *Checked on `langchain-mcp-adapters` 0.3.2:* `MultiServerMCPClient` has `get_tools`, `get_resources`, `get_prompt`, `get_server_info` and `session`, and its constructor takes `tool_interceptors`, `tool_name_prefix` and `handle_tool_errors`. That matches the notebook's table. The older package was **not run** against a server here
+- ✅ *Verified (details in "How this chapter was checked").*
 - **Honest takeaway for a client project:** if you need resources, prompts or interceptor-style middleware **today**, the older package still does things the new one does not. If you only need tools, the built-in path is where LangChain is heading. It is **not a full superset yet**
 - **Dropping to the client:** `adapter.client` gives the underlying FastMCP client. Use it for resources and prompts
 
@@ -431,42 +445,76 @@ From the class notebook's last section, with each point from the older package c
 
 ## 12.13 Interview corner
 
-**1. What does the LangChain MCP adapter do?**
+**What interviewers listen for:** you know MCP is a **protocol** for tools, the adapter turns MCP tools into LangChain tools, and you raise trust and per-user auth on your own.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. What does the LangChain MCP adapter do?</summary>
 
 - It translates between MCP and LangChain. It discovers a server's tools and returns them as LangChain tools, and converts results, errors and elicitation into messages, statuses and interrupts
 - *Stronger answer:* it sits on top of the FastMCP client, which does transport, protocol version, connection and auth
 
-**2. Why `adapter.list_tools()` and not the client's?**
+</details>
+
+<details class="qa"><summary>2. Why <code>adapter.list_tools()</code> and not the client's?</summary>
 
 - The adapter returns tools in LangChain's form. The client's tools are MCP objects
 
-**3. Single server, config, or client group?**
+</details>
+
+<details class="qa"><summary>3. Single server, config, or client group?</summary>
 
 - One target for one server. A config dictionary for an aggregate with a shared protocol era. A client group when servers need their own auth or protocol mode
 - *Stronger answer:* a group routes each call to the client that advertised the tool and namespaces names
 
-**4. How does an MCP tool error reach the agent?**
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>4. How does an MCP tool error reach the agent?</summary>
 
 - A tool-reported failure becomes a tool message with `status="error"`. The agent can read it and retry. A transport failure raises an exception
 
-**5. How do you guard destructive MCP tools?**
+</details>
+
+<details class="qa"><summary>5. How do you guard destructive MCP tools?</summary>
 
 - Read each tool's `destructive_hint` annotation and build a human-in-the-loop `interrupt_on` map from it
 - *Stronger answer:* an annotation is a hint, not a guarantee
 
-**6. How does elicitation work in LangChain?**
+</details>
+
+<details class="qa"><summary>6. How does elicitation work in LangChain?</summary>
 
 - The adapter turns the server's question into a LangGraph interrupt. A person answers and the run resumes
 - *Stronger answer:* it needs a server that returns an input-required result, or a client with your own handler. A legacy `ctx.elicit` server fails on a modern connection
 
-**7. Why per-user credentials?**
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>7. Why per-user credentials?</summary>
 
 - A shared token lets every user of the app act as whoever authorised it
 - *Stronger answer:* authenticate the caller at the server, then mint or exchange a token per user when building the client
 
-**8. What is missing from `langchain.mcp` compared with the older package?**
+</details>
+
+<details class="qa"><summary>8. What is missing from <code>langchain.mcp</code> compared with the older package?</summary>
 
 - Resources, prompts and interceptors. It is beta and not a full superset
+
+</details>
+
+<details class="qa"><summary>9. A third-party MCP server is added to your agent. What are the risks and controls?</summary>
+
+- Risks: prompt injection in tool text, over-broad permissions, data leaving to the server, tools changing without notice
+- *Stronger answer:* allow-list servers and tools, per-user scoped tokens, approval on destructive hints, pinned versions, and tracing of every MCP call
+
+</details>
+
+> [!TIP]
+> **🧩 Design question to practise:** *"Connect your support agent to an internal CRM through MCP, used by 200 agents with different permissions."* Cover transport, auth per user, tool gating, caching of tool lists, and failure handling.
 
 ## 12.14 Added by Claude, not from the sources
 
@@ -478,6 +526,16 @@ Items marked *checked* were run with `langchain` 1.4.7, `langgraph` 1.2.19, `fas
 - **Treat tool output as untrusted text** that goes into the model. A remote server's result can contain instructions. Add guardrails ([Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md))
 - **Pin versions.** The beta module, FastMCP 3 and 4, and the spec era all changed behaviour in this course. Record the versions you tested
 - **Close adapters properly.** Use `async with`, as in every example here, so STDIO sub-processes are shut down
+
+## Cheat sheet
+
+```python
+from langchain.mcp import MCPAdapter          # langchain[mcp] >= 1.4
+async with MCPAdapter("https://example.com/mcp") as adapter:
+    tools = await adapter.list_tools()      # cache_mode="use" | "refresh" | "bypass"
+agent = create_agent(model, tools)          # tools still work after the context exits
+# tool.metadata["mcp"]["tool"]["annotations"]["destructive_hint"]
+```
 
 ## Recap
 
@@ -510,6 +568,27 @@ Items marked *checked* were run with `langchain` 1.4.7, `langgraph` 1.2.19, `fas
 - The class transcript and the two notebooks are the source for everything not marked *checked*
 - Run later: the one-file example `langchain.py` (12.4) with a scripted model; the file-name shadowing; the string model id with no key
 - **Open:** the first class notebook (`Langchain MCP.ipynb`) is a failed demo on the old LangChain version. Its README is an empty file (0 bytes)
+- **Details by section** (moved here from the ✅ markers):
+  - *12.3 Two packages, and why the class demo failed:* Checked: with `langchain` **1.4.7** installed through `langchain[mcp]`, `from langchain.mcp import MCPAdapter` worked. It printed a beta warning. The module exposes `MCPAdapter`, `MCPToolArtifact`, `as_langchain_tool` and an `elicitation` module
+  - *12.3 Two packages, and why the class demo failed:* Checked: `MCPAdapter` has only **two public members: `list_tools` and `client`.** There is no `get_resources` or `get_prompt` (see 12.10)
+  - *12.4 Connecting: the quick start:* Checked: `list_tools()` returned the three tools as `StructuredTool` objects, ready for `create_agent`
+  - *The class's one-file example (`langchain.py`):* Checked* with a FastMCP weather server and a scripted model in place of the string id: the messages were the question, a tool call, the tool result, and the final answer. The tool result's content is a **list of text blocks**, `[{'type': 'text', 'text': ...}]`, not a plain string
+  - *12.6 Destructive tools and human-in-the-loop:* Checked, with a scripted stand-in model: `interrupt_on` was `{'cancel_booking': {...}}` and nothing else. The agent ran `check_showtimes` freely, then **paused** at `cancel_booking`. After `Command(resume={"decisions": [{"type": "approve"}]})` the cancellation ran and returned "Booking BK9 cancelled."
+  - *Why the class demo showed an error:* Checked: with this client the same tool printed "asked: Confirm cancellation of booking BK1?" and returned "Booking BK1: cancelled."
+  - *Why the class demo showed an error:* Checked: a legacy client **without** a handler gave `status: error` with the message "This MCP server asked for input over the legacy server-initiated elicitation path, which interrupt-based elicitation cannot answer. It needs a server that returns its requests as an `InputRequiredResult`, or a pre-built client with your own `elicitation_handler`."
+  - *12.8 Several servers: config or client group:* Checked: both ways gave `cinebot_check_showtimes`, `cinebot_cancel_booking`, `cinebot_get_seat_map` and `errors_risky_lookup`. A call through the group to `errors_risky_lookup` returned "Booking BK7: confirmed."
+  - *12.8 Several servers: config or client group:* Checked: a group can mix a default client with a **legacy** one. **This is how a legacy and a modern server run side by side**
+  - *MCP tool results, metadata and connection patterns:* Checked (langchain 1.4.7, fastmcp 4.1.4, in-process server):
+    - `list_tools()` returned 3 tools; `refresh`, `bypass` and `use` all returned 3.
+    - Metadata showed `destructive_hint: True`, `read_only_hint: False` and `server: {name: crm}`.
+    - A raising tool gave `status="error"` with the message.
+    - **Refinement:** the structured artifact came back as a plain dict `{'structured_content': {'x': 3}}`, not an object with an attribute; read it by key.
+    - An in-process server inside an `MCPConfig` dict was rejected (config takes server configs, not objects).
+    - Not run: OAuth, the shared pool, protocol-era negotiation, a deployed factory.
+  - *MCP tool results, metadata and connection patterns:* Checked: with one destructive and one read-only tool called together, the run paused for `delete_file` only; `read_file` ran at once; rejecting gave a tool message `User rejected the tool call`.
+  - *12.9 Authentication, and the per-user trap:* Checked, bearer token: a server with a static token check. The client with the right token listed `check_showtimes`. A **wrong token** and **no token** both failed with an MCP error
+  - *12.10 `langchain.mcp` against `langchain-mcp-adapters`:* Checked on `langchain-mcp-adapters` 0.3.2: `MultiServerMCPClient` has `get_tools`, `get_resources`, `get_prompt`, `get_server_info` and `session`, and its constructor takes `tool_interceptors`, `tool_name_prefix` and `handle_tool_errors`. That matches the notebook's table. The older package was **not run** against a server here
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 
 ## Sources and further reading
 

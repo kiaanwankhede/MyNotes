@@ -1,5 +1,10 @@
 # Chapter 5: Tools
 
+> [!NOTE]
+> **📍 At a glance**
+> - **You will build:** tools by hand and with decorators, schemas, ToolRuntime and gated tools
+> - **Level:** beginner to intermediate · **Time:** about 35 minutes
+
 **After this chapter you can:**
 
 - Explain binding and why it does **not** run anything
@@ -76,6 +81,19 @@ print("What your APP can use:", tool_message.artifact)
 - Use when a tool has more to return than the model needs. A retrieval tool returns the passage as `.content` and a document ID as `.artifact` so your app can build a citation link
 
 ## 5.3 Completing the loop by hand, once
+
+```mermaid
+sequenceDiagram
+    participant C as Your code
+    participant M as Model (bind_tools)
+    participant F as Tool function
+    C->>M: messages
+    M-->>C: AIMessage with tool_calls (name, args, id)
+    C->>F: run the function with args
+    F-->>C: result
+    C->>M: messages + ToolMessage(result, tool_call_id=id)
+    M-->>C: final AIMessage
+```
 
 Do it once so `create_agent` feels like a shortcut, not magic.
 
@@ -177,7 +195,7 @@ def get_weather(location: str, config: str) -> str:
 - Calling it directly, I got `TypeError: gw() missing 1 required positional argument: 'config'`, matching the answer key
 - Fix: use a different name
 - Unconfirmed in class: whether nesting `config` or `runtime` inside a schema gets around the restriction
-- *Checked, and a refinement:* `config` as a plain `str` argument defines fine and fails when called. **`runtime` as a plain `str` argument worked** (the call returned normally). What LangChain treats specially is a parameter **annotated as `ToolRuntime`**, which it hides from the model. Do not rely on a plain `runtime: str` working in other versions. Avoid both names
+- ✅ *Verified (details in "How this chapter was checked").*
 
 ## 5.7 Binding versus running, once more
 
@@ -347,48 +365,87 @@ Rows not already covered above.
 ### Two whiteboard sketches (`Langchain-2-Updated.pdf`)
 
 - **Cost of a tool call.** The board says the model is used **at least twice**: once to choose the tool and its arguments, once to summarise the tool's output. It marks each step as about **500 tokens** and adds that the code should have the least moving parts, because simple systems scale
-  - *Checked* in [LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md): one tool use took **2 model calls**
+  - ✅ *Verified (details in "How this chapter was checked").*
   - The "500 tokens" figure is the sketch's illustration, not a measurement
 - **Refund policy.** The board sets a CineBot system prompt ("very helpful ... but we don't do refund") beside a "Refund Policy" box. My reading, from the sketch plus the class answer on `return_direct`: an exact rule such as a refund policy is safer as a tool whose output is returned directly (5.10) than as a line the model may reword
 
 *Source: `Langchain-2-Updated.pdf`, text layer. The sketches have little text; the second item is my reading.*
 
+> [!IMPORTANT]
+> **🏭 In production**
+> - Least privilege: give each agent only the tools its job needs; a read agent should not hold a delete tool
+> - Every tool needs a timeout, a size cap on what it returns, and errors returned as text
+> - Tools that write, send or charge must be idempotent or behind approval, because the model can call them twice
+> - *Added by Claude.*
+
 ## 5.11 Interview corner
 
-**1. What does `bind_tools` do?**
+**What interviewers listen for:** you know the model only **requests** a tool and your code runs it, that the docstring is part of the prompt, and how you keep dangerous tools out of reach.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. What does <code>bind_tools</code> do?</summary>
 
 - Tells the model which tools exist and their schemas
 - It does **not** run anything
 - *Stronger answer:* the model replies with a tool call (name, args, id) and empty content. Your code, or `create_agent`, must run it
 
-**2. Why does `ToolMessage` need a `tool_call_id`?**
+</details>
+
+<details class="qa"><summary>2. Why does <code>ToolMessage</code> need a <code>tool_call_id</code>?</summary>
 
 - Matches the result to the model's request
 - *Stronger answer:* essential when several tools are requested at once
 
-**3. How does the model decide which tool to call?**
+</details>
+
+<details class="qa"><summary>3. How does the model decide which tool to call?</summary>
 
 - From each tool's name, parameter schema and docstring
 - *Stronger answer:* the docstring is effectively prompt text. Say when to use it and when **not** to
 
-**4. `content` vs `artifact` on a `ToolMessage`?**
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>4. <code>content</code> vs <code>artifact</code> on a <code>ToolMessage</code>?</summary>
 
 - Content goes to the model. Artifact is for your app
 - *Stronger answer:* retrieval tools return the passage as content and the document id as artifact for citations
 
-**5. How do you stop the model calling a tool it should not have?**
+</details>
+
+<details class="qa"><summary>5. How do you stop the model calling a tool it should not have?</summary>
 
 - Remove it from the tool list before the call (`wrap_model_call`), not just a prompt instruction
 - *Stronger answer:* do the same check again inside the tool, because defence in depth beats trust
 
-**6. What is `ToolRuntime`?**
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>6. What is <code>ToolRuntime</code>?</summary>
 
 - A parameter that gives the tool state, context, store and more, hidden from the model
 - *Stronger answer:* `context` is per-invocation and immutable. `store` is long-term. `state` is this conversation
 
-**7. Why does `InMemoryStore` not suit production?**
+</details>
+
+<details class="qa"><summary>7. Why does <code>InMemoryStore</code> not suit production?</summary>
 
 - It lives in RAM and is lost on restart. Use a database-backed store
+
+</details>
+
+<details class="qa"><summary>8. Your agent has 60 tools and keeps picking the wrong one. How do you fix it?</summary>
+
+- Better names and docstrings that say when **not** to use a tool; remove overlapping tools
+- *Stronger answer:* show only relevant tools per request (`LLMToolSelectorMiddleware`, Ch9, or filtering in middleware, Ch7), or split into specialist subagents (Ch13)
+
+</details>
+
+> [!TIP]
+> **🧩 Design question to practise:** *"Give an agent safe access to a company's ticketing system."* Cover which tools exist, their argument schemas, read vs write split, approval, and what the tool returns on error.
 
 ## 5.12 Added by Claude, not from the sources
 
@@ -401,6 +458,18 @@ Not in the course material. Established practice, but check current docs.
 - **Return errors as text.** Let the model read "not found" and adapt, instead of crashing the run ([Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md))
 - **Fewer, sharper tools.** Accuracy of tool choice tends to drop as the list grows. That is the reason dynamic loading exists
 - **Make side-effect tools safe to repeat** (idempotent), because loops and retries can call them twice
+
+## Cheat sheet
+
+```python
+from langchain.tools import tool, ToolRuntime
+@tool
+def get_order(order_id: str, runtime: ToolRuntime) -> str:
+    """Look up one order by id. Do not use for refunds."""
+    user = runtime.context.user_id          # app data the model never sees
+    return f"order {order_id} for {user}"
+model.bind_tools([get_order])               # model can now request it
+```
 
 ## Recap
 
@@ -429,6 +498,10 @@ Not in the course material. Established practice, but check current docs.
 - Run offline for the additions: the `Args:` block with and without `parse_docstring=True`, `config` and `runtime` as plain arguments, and the registered-tools listing of a built agent
 - Run offline with a stand-in model on `langchain` 1.4.7: the manual tool loop from 5.3, `ToolMessage` content and artifact, `@tool` name and description override, `args_schema` output, the `config` parameter failure, `runtime` hidden from `.args`, `InMemoryStore` with a tuple namespace, `return_direct`, and gating with both context and a state schema (plus the failing bare-input version)
 - **Not run against a live model:** what a real model returns for `tool_calls`, Tavily, headless tools, `Command`. Those are class or answer-key statements
+- **Details by section** (moved here from the ✅ markers):
+  - *5.6 Two names you cannot use: `config` and `runtime`:* Checked, and a refinement: `config` as a plain `str` argument defines fine and fails when called. **`runtime` as a plain `str` argument worked** (the call returned normally). What LangChain treats specially is a parameter **annotated as `ToolRuntime`**, which it hides from the model. Do not rely on a plain `runtime: str` working in other versions. Avoid both names
+  - *Two whiteboard sketches (`Langchain-2-Updated.pdf`):* Checked* in [LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md): one tool use took **2 model calls**
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 
 ## Sources and further reading
 

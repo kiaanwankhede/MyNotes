@@ -1,5 +1,11 @@
 # Chapter 7: Middleware basics
 
+> [!NOTE]
+> **📍 At a glance**
+> - **You will build:** middleware that filters tools per user, summarises history and asks for approval
+> - **Level:** intermediate · **Time:** about 35 minutes
+> - **Builds on:** [Chapter 5](05-tools.md) (tools, gating) and [Chapter 6](06-agents-and-memory.md) (agents, checkpointer, context). The prebuilt middlewares for limits, fallback and PII are in [Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md). To-do lists, tool selection and tool resilience are in [Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md). [Chapter 11](11-runtime-and-human-in-the-loop.md) goes deeper on runtime and human-in-the-loop.
+
 **After this chapter you can:**
 
 - Explain why not every tool belongs to every user, and how dynamic tool loading solves it
@@ -7,8 +13,6 @@
 - Filter tools by state or by context
 - Compress long conversations with `SummarizationMiddleware`
 - Guard irreversible tools with `HumanInTheLoopMiddleware` and resume a paused run
-
-**Builds on:** [Chapter 5](05-tools.md) (tools, gating) and [Chapter 6](06-agents-and-memory.md) (agents, checkpointer, context). The prebuilt middlewares for limits, fallback and PII are in [Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md). To-do lists, tool selection and tool resilience are in [Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md). [Chapter 11](11-runtime-and-human-in-the-loop.md) goes deeper on runtime and human-in-the-loop.
 
 ## 7.1 The problem: not every tool belongs to every user
 
@@ -37,6 +41,16 @@
 - Not the same as dynamic tool **calling** (the model picking among the tools it sees). See [Chapter 5](05-tools.md), 5.10
 
 ## 7.3 Middleware: cutting into the loop
+
+```mermaid
+flowchart TD
+    BA[before_agent] --> BM[before_model]
+    BM --> WM[wrap_model_call<br/>around the model]
+    WM --> AM[after_model]
+    AM -->|tool calls?| WT[wrap_tool_call<br/>around each tool]
+    WT --> BM
+    AM -->|no tool calls| AA[after_agent]
+```
 
 > Middleware provides a way to more tightly control what happens inside the agent.
 
@@ -170,7 +184,7 @@ More on the options:
 
 > **Pitfall in the class notebook.** An early cell used `trigger=("token", 4000)`. That raises `ValueError: Unsupported context size type token`. The word is **`"tokens"`** (plural)
 
-### More `SummarizationMiddleware` settings (LangChain docs)
+### More `SummarizationMiddleware` settings
 
 From the docs page `middleware/built-in`. Everything marked *checked* was run with a scripted summariser model (`langchain` 1.4.7).
 
@@ -182,9 +196,9 @@ From the docs page `middleware/built-in`. Everything marked *checked* was run wi
 | `summary_prompt` | A custom prompt template. It must contain the `{messages}` placeholder. Replaces the old `summary_prefix` |
 | `trim_tokens_to_summarize` | The most tokens sent to the summariser. Default `4000` |
 
-- *Checked:* `trigger=("messages", 4)` summarised once over three long turns. A **list** `[("tokens", 100000), ("messages", 4)]` also did (the second condition was enough). A **dict** `{"tokens": 10, "messages": 100}` did **not** (the second condition failed)
-- *Checked:* the default prompt is a long template. It starts "Context Extraction Assistant" and asks for four sections: `SESSION INTENT`, `SUMMARY`, `ARTIFACTS` and `NEXT STEPS`
-- *Checked:* with `summary_prompt="Summarise briefly:\n{messages}"`, the summariser received that text with the messages inserted as `<message type="human">...` blocks
+- ✅ *Verified (details in "How this chapter was checked").*
+- ✅ *Verified (details in "How this chapter was checked").*
+- ✅ *Verified (details in "How this chapter was checked").*
 - The docs mark `summary_prefix`, `max_tokens_before_summary` and `messages_to_keep` as **deprecated**. *Checked:* the old names still worked (the summariser ran). Use `trigger` and `keep`
 - The installed signature also has a `summarizer` argument (a callable or runnable in place of `model`). The docs page does not list it, so treat it as unverified
 
@@ -321,6 +335,13 @@ def run_interactive_hitl_demo(agent, config):
 - **No UI comes with it.** You resolve the interrupt in code with `Command(resume=...)`, or wire it to your own interface (a pop-up, an approve and reject button)
 - **Two levels of sign-off** (for example manager then director) are not available out of the box. That needs custom middleware
 
+> [!IMPORTANT]
+> **🏭 In production**
+> - Approval needs a UI and an owner: who approves, how fast, and what happens if nobody answers
+> - Store every approval decision (who, when, what was edited) as an audit log
+> - Keep a checkpointer on the agent, or a paused run cannot resume
+> - *Added by Claude.*
+
 ## 7.7 Questions from the class
 
 - **What if a tool fails or times out?** Recoverable failures are typically retried by the harness. A fatal error (for example no internet) makes the agent fail outright. Retry and error middleware are in [Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md)
@@ -332,38 +353,70 @@ def run_interactive_hitl_demo(agent, config):
 
 ## 7.8 Interview corner
 
-**1. What is middleware in an agent?**
+**What interviewers listen for:** you can name the **hooks** and where each fires, you put security checks in code (middleware) rather than in the prompt, and you know approval needs persistence.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. What is middleware in an agent?</summary>
 
 - Hooks that let you run code before or after the model call, and around tool calls
 - *Stronger answer:* name the six hooks and give one use for each group (logging, transforming, resilience, protection)
 
-**2. Why filter tools instead of telling the model "do not use the VIP tool"?**
+</details>
+
+<details class="qa"><summary>2. Why filter tools instead of telling the model "do not use the VIP tool"?</summary>
 
 - A prompt only asks. A tool that is not on the list **cannot** be called
 - *Stronger answer:* it also saves tokens, because tool schemas are sent on every model call
 
-**3. Why not choose tools with a normal `if/else`?**
+</details>
+
+<details class="qa"><summary>3. Why not choose tools with a normal <code>if/else</code>?</summary>
 
 - Code outside the agent cannot read the agent's live state or store
 
-**4. Your middleware reads `is_vip_member` from state but always sees `False`. Why?**
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>4. Your middleware reads <code>is_vip_member</code> from state but always sees <code>False</code>. Why?</summary>
 
 - The agent only tracks fields it knows about. Add a custom `state_schema`
 - *Stronger answer:* or pass the flag as run `context`, which is the cleaner place for per-user data
 
-**5. How do you make an irreversible tool safe?**
+</details>
+
+<details class="qa"><summary>5. How do you make an irreversible tool safe?</summary>
 
 - Human in the loop: interrupt, then approve, edit, reject or respond
 - *Stronger answer:* it needs a checkpointer, because the run must pause and resume
 
-**6. Is a support bot passing a chat to a human "human in the loop"?**
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>6. Is a support bot passing a chat to a human "human in the loop"?</summary>
 
 - No. That is a **transfer**: the agent leaves. In HITL the agent stays, paused for a decision
 
-**7. What does `SummarizationMiddleware` do, and what is lost?**
+</details>
+
+<details class="qa"><summary>7. What does <code>SummarizationMiddleware</code> do, and what is lost?</summary>
 
 - Replaces old messages with a generated summary when a trigger is hit
 - *Stronger answer:* detail is lost, media is not compressed, the summary call costs tokens, and must-keep facts belong in long-term memory
+
+</details>
+
+<details class="qa"><summary>8. Where do you put an authorisation check: the prompt, middleware or the tool?</summary>
+
+- Never only the prompt. Filter tools in middleware so the model cannot see them
+- *Stronger answer:* check again inside the tool (defence in depth), because middleware can be misconfigured and tools can be reused elsewhere
+
+</details>
+
+> [!TIP]
+> **🧩 Design question to practise:** *"An HR agent can read any employee record for HR staff but only your own for others."* Cover where the role comes from, which hook filters tools, the in-tool check, and logging.
 
 ## 7.9 Added by Claude, not from the sources
 
@@ -380,6 +433,16 @@ Not in the course material. Established practice, but check current docs.
 - **The summarising model sees the whole history**, so it also sees any personal data in it
 - **Fewer tools per call means fewer input tokens per call.** Filtering tools is a cost control as well as a safety control
 - **Gate twice.** Hide the tool with middleware, and check permission again inside the tool ([Chapter 5](05-tools.md), 5.12)
+
+## Cheat sheet
+
+```python
+from langchain.agents.middleware import SummarizationMiddleware, HumanInTheLoopMiddleware
+agent = create_agent(model, tools, checkpointer=InMemorySaver(), middleware=[
+    SummarizationMiddleware(model="openai:gpt-4o-mini", trigger=("tokens", 4000), keep=("messages", 20)),
+    HumanInTheLoopMiddleware(interrupt_on={"send_email": True}),
+])
+```
 
 ## Recap
 
@@ -408,6 +471,11 @@ Not in the course material. Established practice, but check current docs.
   - summarization: the summary message and its `lc_source`, the invalid `"token"` and the valid `"tokens"`
   - HITL: interrupt, `get_state`, approve, edit (both shapes), reject, respond, a disallowed decision, resume without a checkpointer
 - **Not run against a live model:** the quality of a real summary and real tool-call choices. Class output was read from the notebook (cells 0 to 56)
+- **Details by section** (moved here from the ✅ markers):
+  - *More `SummarizationMiddleware` settings:* Checked: `trigger=("messages", 4)` summarised once over three long turns. A **list** `[("tokens", 100000), ("messages", 4)]` also did (the second condition was enough). A **dict** `{"tokens": 10, "messages": 100}` did **not** (the second condition failed)
+  - *More `SummarizationMiddleware` settings:* Checked: the default prompt is a long template. It starts "Context Extraction Assistant" and asks for four sections: `SESSION INTENT`, `SUMMARY`, `ARTIFACTS` and `NEXT STEPS`
+  - *More `SummarizationMiddleware` settings:* Checked: with `summary_prompt="Summarise briefly:\n{messages}"`, the summariser received that text with the messages inserted as `<message type="human">...` blocks
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 
 ## Sources and further reading
 

@@ -1,5 +1,11 @@
 # Chapter 14: Handoffs, skills, router and custom workflows
 
+> [!NOTE]
+> **📍 At a glance**
+> - **You will build:** handoff state machines, on-demand skills, a parallel router and custom workflows
+> - **Level:** advanced · **Time:** about 50 minutes
+> - **Builds on:** [Chapter 7](07-middleware.md) and [Chapter 10](10-shell-tools-and-custom-middleware.md) (middleware hooks), [Chapter 11](11-runtime-and-human-in-the-loop.md) (`ToolRuntime`) and [Chapter 13](13-multi-agent-systems-and-subagents.md) (why multi-agent, subagents). Every example ran with a scripted stand-in model, no API key ([Chapter 13](13-multi-agent-systems-and-subagents.md), 13.5).
+
 **After this chapter you can:**
 
 - Build a handoff state machine where tools change the step and middleware changes the prompt and tools
@@ -8,8 +14,6 @@
 - Fan a query out to several agents in parallel with `Send`, and merge the results
 - Wrap agents in a hand-built LangGraph workflow, including a retrieval pipeline
 - Choose between the five patterns, and combine them
-
-**Builds on:** [Chapter 7](07-middleware.md) and [Chapter 10](10-shell-tools-and-custom-middleware.md) (middleware hooks), [Chapter 11](11-runtime-and-human-in-the-loop.md) (`ToolRuntime`) and [Chapter 13](13-multi-agent-systems-and-subagents.md) (why multi-agent, subagents). Every example ran with a scripted stand-in model, no API key ([Chapter 13](13-multi-agent-systems-and-subagents.md), 13.5).
 
 ## 14.1 Pattern 2: handoffs
 
@@ -26,6 +30,16 @@ Behaviour changes **with state**. Tools update a state variable (`current_step` 
 | **Separate agent subgraphs** | Distinct agents as graph nodes | Each agent is a bespoke build, perhaps a complex graph itself |
 
 ## 14.2 Handoffs with one agent: customer support
+
+```mermaid
+stateDiagram-v2
+    [*] --> warranty_collector
+    warranty_collector --> issue_classifier: record_warranty_status
+    issue_classifier --> resolution_specialist: record_issue_type
+    resolution_specialist --> warranty_collector: go_back_to_warranty
+    resolution_specialist --> issue_classifier: go_back_to_classification
+    resolution_specialist --> [*]: provide_solution
+```
 
 The agent collects the warranty status, classifies the issue, then gives a solution or escalates. **Each step is the same agent in a different configuration.**
 
@@ -114,8 +128,8 @@ support_agent = create_agent(model, tools=all_tools, state_schema=SupportState,
                              middleware=[apply_step_config], checkpointer=checkpointer)
 ```
 
-- *Checked over four turns on one thread:* `current_step` was unset after turn 1 (it stays at the default until a tool runs), then `issue_classifier`, then `resolution_specialist`, then `resolution_specialist` again
-- *Checked:* the tools offered to the model changed per step: `record_warranty_status` only, then `record_issue_type` only, then `provide_solution` and `escalate_to_human`. **The model literally cannot call a tool from another step**
+- ✅ *Verified (details in "How this chapter was checked").*
+- ✅ *Verified (details in "How this chapter was checked").*
 
 | Turn | `current_step` going in | What happens | After |
 |---|---|---|---|
@@ -178,7 +192,7 @@ builder.add_conditional_edges("refunds_agent", route_after_agent, ["booking_agen
 graph = builder.compile()
 ```
 
-- *Checked:* the booking agent called `transfer_to_refunds`, the outer graph moved to `refunds_agent`, which answered. The message list had exactly four entries: the user, the triggering `AIMessage`, the artificial `ToolMessage`, and the refunds agent's reply. `active_agent` ended as `refunds_agent`
+- ✅ *Verified (details in "How this chapter was checked").*
 - **End a turn with an `AIMessage` that has no tool calls**, so the interface knows the agent is done
 - **Prefer one agent plus middleware** for most cases. Use subgraphs when agents are structurally different, not just differently prompted
 
@@ -230,7 +244,7 @@ class SkillMiddleware(AgentMiddleware):
         return handler(request.override(system_message=SystemMessage(content=new_content)))
 ```
 
-- *Checked:* the system prompt on the **first** model call held the skill **names and descriptions** and **not** the schema text. After `load_skill("sales_analytics")`, the **tool result in the history** held the full schema
+- ✅ *Verified (details in "How this chapter was checked").*
 - **Why it is worth it:** less context (only the needed skills load), teams maintain skills separately, it scales to dozens or hundreds of skills, and the history stays simple, with one agent and one thread
 - **Trade-offs:** the **first** load costs one extra tool round trip, and basic skills rely on **prompting, not hard rules**. Enforcing "always load A before B" needs custom logic
 
@@ -250,7 +264,7 @@ def write_sql_query(query: str, vertical: str, runtime: ToolRuntime) -> str:
     return f"SQL Query for {vertical}: validated"
 ```
 
-- *Checked:* writing before loading returned the error. Loading first, then writing, returned "validated". **The constraint is enforced in code, not just suggested in the prompt**
+- ✅ *Verified (details in "How this chapter was checked").*
 - **A real bug in the class code.** *Checked:* the notebook's `load_skill_tracked` returns `"skills_loaded": [skill_name]`. With no reducer, that **replaces** the list. Loading `sales_analytics` and then `inventory_management` left `skills_loaded == ['inventory_management']`, and a later sales query was **refused**
 - **Two fixes, both checked** (both ended with both skills listed and "validated"):
 
@@ -283,6 +297,18 @@ class CustomState(AgentState):
 - **Hierarchical skills:** loading `data_science` could surface `pandas_expert` and `visualization`
 
 ## 14.5 Pattern 4: router
+
+```mermaid
+flowchart LR
+    Q([Query]) --> C[Classify<br/>structured output]
+    C -->|Send| G[GitHub agent]
+    C -->|Send| N[Notion agent]
+    C -->|Send| S[Slack agent]
+    G --> M[Merge with reducer]
+    N --> M
+    S --> M
+    M --> Y[Synthesise answer]
+```
 
 A **classification step** sends a query to specialised agents **in parallel**, and a **synthesis step** combines the answers. It suits distinct **verticals**.
 
@@ -407,11 +433,11 @@ rag_workflow = (StateGraph(RAGState)
 ```
 
 - To run with no key, the class uses `DeterministicFakeEmbedding` in place of `OpenAIEmbeddings`. **Why:** building a vector store with `OpenAIEmbeddings` makes a real network call at once
-- *Checked, and a limit the notebook does not state:* the fake embeddings give **arbitrary, not meaningful, neighbours**. "Interstellar showtimes" returned the Interstellar **review** and a refund policy, and "Can I get a refund?" returned a **Dune showtimes** line first. The plumbing is real. The relevance is not. **Do not read retrieval quality from a run with fake embeddings**
-- *Checked:* the notebook's `rewrite_query` is `q.replace("it", "the movie")`. It also changes the letters "it" inside other words: "Is there a showing with it tonight?" became "Is there a showing wthe movieh the movie tonight?". Use a model call, or match whole words
+- ✅ *Verified (details in "How this chapter was checked").*
+- ✅ *Verified (details in "How this chapter was checked").*
 - In production use a persistent vector store (managed Postgres with pgvector, Pinecone or similar) and `with_structured_output` for the rewrite
 
-## Tutorial extras: go back, history, stateful routers, skill storage (LangChain docs)
+### Tutorial extras: go back, history, stateful routers, skill storage
 
 - *Source: LangChain docs, `multi-agent/handoffs-customer-support.mdx` (sections 8-9), `router-knowledge-base.mdx` (section 9), `skills-sql-assistant.mdx` (Implementation variations, Progressive disclosure).*
 - **Go back (handoffs):** a "go back" tool is just another `Command(update={"current_step": "warranty_collector"})`.
@@ -433,9 +459,9 @@ agent = create_agent(model, tools=[search_knowledge_base], checkpointer=InMemory
   - Loading: one load (tutorial), paged, searched, or hierarchical.
   - Size guide (docs call it uncalibrated): under about 1K tokens put it in the prompt; 1-10K load on demand; over 10K use progressive loading.
   - Progressive disclosure is context engineering; it can also load matching few-shot example queries next to the schema.
-- *Checked (scripted model):* a `go_back` tool moved `current_step` from `resolution` to `warranty`, and the step middleware then offered the warranty tool again; a checkpointed agent wrapping a tool saw 1, 3, 5, 7 messages on successive model calls over two turns (memory kept). Summarization settings were not run here; see Ch7.
+- ✅ *Verified (details in "How this chapter was checked").*
 
-## Pattern choice and extras from the multi-agent pages (LangChain docs)
+### Pattern choice and extras from the multi-agent pages
 
 - *Source: LangChain docs, `multi-agent/index.mdx`, `handoffs.mdx`, `skills.mdx`, `router.mdx`, `custom-workflow.mdx`.*
 - **Pattern strengths** (the docs' star table, in words):
@@ -489,54 +515,98 @@ agent = create_agent(model, tools=[search_knowledge_base], checkpointer=InMemory
 - **Router:** stateless per request, with a classification call every time, but true parallel fan-out
 - **Patterns combine freely.** A subagent can be a router inside. A handoff stage can use skills to manage its own context. **Pick per sub-problem, not once for the whole system**
 
+> [!IMPORTANT]
+> **🏭 In production**
+> - Most production systems are a **custom workflow** with one or two agentic steps, not a fully autonomous swarm
+> - Pick the pattern per sub-problem and measure it: a router that fans out to five sources costs five times as much
+> - *Added by Claude.*
+
 ## 14.8 Interview corner
 
-**1. How do handoffs differ from subagents?**
+**What interviewers listen for:** you can match a **pattern to a problem** (handoffs for sequential steps with the user, router for parallel sources, skills for many specialities), and you explain the cost of each.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. How do handoffs differ from subagents?</summary>
 
 - In handoffs one agent changes its prompt and tools from state, and talks to the user directly. In subagents a supervisor calls other agents as tools and the user only talks to the supervisor
 - *Stronger answer:* handoffs have no live routing reasoning, state decides
 
-**2. How does a handoff step change?**
+</details>
+
+<details class="qa"><summary>2. How does a handoff step change?</summary>
 
 - A tool returns a `Command` updating `current_step` plus a `ToolMessage`. Middleware reads the step on the next model call and swaps prompt and tools
 - *Stronger answer:* tools decide state, state decides configuration
 
-**3. Why can middleware not add a new tool at run time?**
+</details>
+
+<details class="qa"><summary>3. Why can middleware not add a new tool at run time?</summary>
 
 - The agent only knows how to execute the tools it was built with. Middleware can only narrow the visible set
 - *Stronger answer:* register everything up front, and keep the same checkpointer if you rebuild
 
-**4. What must a handoff between separate agents pass on?**
+</details>
+
+<details class="qa"><summary>4. What must a handoff between separate agents pass on?</summary>
 
 - The `AIMessage` that triggered it and an artificial `ToolMessage`, not the whole history, and `graph=Command.PARENT` to redirect the outer graph
 
-**5. What are skills, and how do they save context?**
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>5. What are skills, and how do they save context?</summary>
 
 - Short descriptions in the prompt, full content loaded through a tool only when needed
 - *Stronger answer:* the first load costs a round trip, it relies on prompting unless you enforce it in state, and a tracked list needs a reducer
 
-**6. How do you enforce "load the skill first"?**
+</details>
+
+<details class="qa"><summary>6. How do you enforce "load the skill first"?</summary>
 
 - Track loaded skills in state and make the tool refuse otherwise
 - *Stronger answer:* a plain list key gets replaced, not appended. Use a reducer
 
-**7. Why does a parallel router need a reducer?**
+</details>
+
+<details class="qa"><summary>7. Why does a parallel router need a reducer?</summary>
 
 - Two branches write the same key in one step, and LangGraph cannot merge them without one
 - *Stronger answer:* it raises `InvalidUpdateError` otherwise
 
-**8. How do you give a router memory?**
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>8. How do you give a router memory?</summary>
 
 - Wrap the stateless router as a tool of a conversational agent with a checkpointer
 
-**9. When would you build a custom workflow?**
+</details>
+
+<details class="qa"><summary>9. When would you build a custom workflow?</summary>
 
 - When the four patterns do not fit, or you need deterministic and agentic steps together
 - *Stronger answer:* the router is itself a custom workflow
 
-**10. Which pattern for repeated requests?**
+</details>
+
+<details class="qa"><summary>10. Which pattern for repeated requests?</summary>
 
 - Handoffs or skills, since they are stateful and skip re-routing or re-loading
+
+</details>
+
+<details class="qa"><summary>11. Customer support needs: verify warranty, classify the issue, then resolve. Which pattern and why?</summary>
+
+- Handoffs: a state machine where each step unlocks the next and the agent talks to the user throughout
+- *Stronger answer:* one agent with step middleware, `Command` updates plus a `ToolMessage`, a checkpointer, and "go back" tools; validate allowed transitions
+
+</details>
+
+> [!TIP]
+> **🧩 Design question to practise:** *"An internal assistant answers questions from GitHub, Notion and Slack and remembers the conversation."* Cover router vs supervisor, parallel fan-out, the reducer, synthesis, and wrapping the router as a tool for memory.
 
 ## 14.9 Added by Claude, not from the sources
 
@@ -550,6 +620,16 @@ Items marked *checked* were run with `langchain` 1.4.7 and `langgraph` 1.2.19, u
 - **Validate transitions.** A tool that sets `current_step` can set any string. Use a `Literal` type and check allowed moves
 - **Cap parallelism.** A router that fans out to many agents multiplies cost. Limit the sources a classifier may pick
 - **Log each handoff.** The `active_agent` and `current_step` values are the story of a conversation. Record them with the thread id
+
+## Cheat sheet
+
+| Pattern | Who talks to the user | Parallel? | Best for |
+|---|---|---|---|
+| Subagents | Supervisor only | Yes | Many domains, central control |
+| Handoffs | Each step | No | Sequential steps with the user |
+| Skills | One agent | Partly | Many specialities, load on demand |
+| Router | The synthesiser | Yes | Several sources, one answer |
+| Custom workflow | You decide | You decide | Mixed fixed + agentic steps |
 
 ## Recap
 
@@ -580,6 +660,16 @@ Items marked *checked* were run with `langchain` 1.4.7 and `langgraph` 1.2.19, u
 - The model-call counts, token figures, skills-with-tools, summarisation, the Python-before-3.12 `TypedDict` message, and every "production wiring" cell with a real model were **not run**
 - **No real model was used.** Whether a real model classifies or chooses well was not tested
 - The class notebooks and README are the source for everything not marked *checked*
+- **Details by section** (moved here from the ✅ markers):
+  - *14.2 Handoffs with one agent: customer support:* Checked over four turns on one thread: `current_step` was unset after turn 1 (it stays at the default until a tool runs), then `issue_classifier`, then `resolution_specialist`, then `resolution_specialist` again
+  - *14.2 Handoffs with one agent: customer support:* Checked: the tools offered to the model changed per step: `record_warranty_status` only, then `record_issue_type` only, then `provide_solution` and `escalate_to_human`. **The model literally cannot call a tool from another step**
+  - *14.3 Handoffs between separate agents:* Checked: the booking agent called `transfer_to_refunds`, the outer graph moved to `refunds_agent`, which answered. The message list had exactly four entries: the user, the triggering `AIMessage`, the artificial `ToolMessage`, and the refunds agent's reply. `active_agent` ended as `refunds_agent`
+  - *The SQL assistant project:* Checked: the system prompt on the **first** model call held the skill **names and descriptions** and **not** the schema text. After `load_skill("sales_analytics")`, the **tool result in the history** held the full schema
+  - *Make loading a rule, not a request:* Checked: writing before loading returned the error. Loading first, then writing, returned "validated". **The constraint is enforced in code, not just suggested in the prompt**
+  - *14.6 Pattern 5: custom workflow:* Checked, and a limit the notebook does not state: the fake embeddings give **arbitrary, not meaningful, neighbours**. "Interstellar showtimes" returned the Interstellar **review** and a refund policy, and "Can I get a refund?" returned a **Dune showtimes** line first. The plumbing is real. The relevance is not. **Do not read retrieval quality from a run with fake embeddings**
+  - *14.6 Pattern 5: custom workflow:* Checked: the notebook's `rewrite_query` is `q.replace("it", "the movie")`. It also changes the letters "it" inside other words: "Is there a showing with it tonight?" became "Is there a showing wthe movieh the movie tonight?". Use a model call, or match whole words
+  - *Tutorial extras: go back, history, stateful routers, skill storage:* Checked (scripted model): a `go_back` tool moved `current_step` from `resolution` to `warranty`, and the step middleware then offered the warranty tool again; a checkpointed agent wrapping a tool saw 1, 3, 5, 7 messages on successive model calls over two turns (memory kept). Summarization settings were not run here; see Ch7.
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 
 ## Sources and further reading
 

@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Study Notes Library</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lexend:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* Layout idea: three columns like a docs site. Books on top, chapters left, page outline right. */
 :root{
   --bg:#fbfbf9; --surface:#ffffff; --ink:#1c2430; --muted:#5d6877; --line:#e3e6ea;
   --accent:#0b6b8a; --accent-soft:#e1f1f6; --code-bg:#f3f5f7; --warn:#8a5a00; --warn-soft:#fdf3dc;
-  --font-display:'Source Serif 4',Georgia,serif; --font-body:'Source Sans 3',system-ui,sans-serif; --font-mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --font-display:'Lexend',system-ui,sans-serif; --font-body:'Inter',system-ui,sans-serif; --font-mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
@@ -26,7 +26,7 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:17px;line-height:1.65;display:flex;flex-direction:column}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:18px;line-height:1.7;display:flex;flex-direction:column}
 a{color:var(--accent)}
 button{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -90,6 +90,7 @@ article hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 .callout{border:1px solid var(--line);border-left:4px solid var(--c);background:var(--cs);border-radius:10px;padding:10px 16px 6px;margin:1.3em 0}
 .callout .ctitle{font-weight:600;color:var(--c);margin:0 0 4px;font-size:.95rem;letter-spacing:.01em}
 .callout p,.callout li{max-width:none}
+.callout ul{padding-left:1.15em;margin:.3em 0}
 .callout>*:last-child{margin-bottom:6px}
 .callout.note{--c:#2563eb;--cs:#eef4ff}.callout.tip{--c:#15803d;--cs:#ecfaf0}.callout.important{--c:#7c3aed;--cs:#f4efff}
 .callout.warning{--c:#b45309;--cs:#fff6e6}.callout.caution{--c:#c0262d;--cs:#fdeeee}
@@ -115,9 +116,13 @@ article table td:first-child strong{white-space:nowrap}
   .books button{padding:6px 10px}
   #chbtn{flex:1 1 0;max-width:none}
   #chmenu{top:104px;right:12px;left:12px;width:auto;max-height:calc(100vh - 120px)}
-  body{font-size:16px}
-  article h1{font-size:1.75rem}
-  article h2{font-size:1.3rem}
+  body{font-size:18.5px;line-height:1.72}
+  article h1{font-size:1.8rem}
+  article h2{font-size:1.4rem}
+  article h3{font-size:1.18rem}
+  article pre code{font-size:.8rem}
+  article table{font-size:.9rem}
+  .callout{padding:10px 12px 4px}
   article{padding:24px 18px 48px}
 }
 @media (prefers-reduced-motion:reduce){main{scroll-behavior:auto}#chbtn .car{transition:none}}
@@ -238,7 +243,7 @@ var mermaidReady=false;
 function diagrams(root){
   var els=root.querySelectorAll('pre code.language-mermaid'); if(!els.length||!window.mermaid) return;
   els.forEach(function(c){var d=document.createElement('div');d.className='mermaid';d.textContent=c.textContent;c.parentNode.parentNode.replaceChild(d,c.parentNode);});
-  try{var dk=isDark();mermaid.initialize({startOnLoad:false,theme:'base',securityLevel:'strict',fontFamily:'Source Sans 3, system-ui, sans-serif',themeVariables:dk?{primaryColor:'#16303a',primaryTextColor:'#e4e9ef',primaryBorderColor:'#5cc0de',lineColor:'#9aa6b4',secondaryColor:'#221a35',tertiaryColor:'#161c24',clusterBkg:'#1b232d',clusterBorder:'#5cc0de',actorBkg:'#16303a',actorBorder:'#5cc0de',actorTextColor:'#e4e9ef',noteBkgColor:'#2c2111',noteTextColor:'#e4e9ef',signalColor:'#e4e9ef',signalTextColor:'#e4e9ef',edgeLabelBackground:'#161c24'}:{primaryColor:'#e1f1f6',primaryTextColor:'#1c2430',primaryBorderColor:'#0b6b8a',lineColor:'#5d6877',secondaryColor:'#f4efff',tertiaryColor:'#ffffff',clusterBkg:'#f7fbfc',clusterBorder:'#0b6b8a',actorBkg:'#e1f1f6',actorBorder:'#0b6b8a',noteBkgColor:'#fff6e6',edgeLabelBackground:'#ffffff'}});mermaid.run({nodes:root.querySelectorAll('.mermaid')});}catch(e){}
+  try{var dk=isDark();mermaid.initialize({startOnLoad:false,theme:'base',securityLevel:'strict',fontFamily:'Inter, system-ui, sans-serif',themeVariables:dk?{primaryColor:'#16303a',primaryTextColor:'#e4e9ef',primaryBorderColor:'#5cc0de',lineColor:'#9aa6b4',secondaryColor:'#221a35',tertiaryColor:'#161c24',clusterBkg:'#1b232d',clusterBorder:'#5cc0de',actorBkg:'#16303a',actorBorder:'#5cc0de',actorTextColor:'#e4e9ef',noteBkgColor:'#2c2111',noteTextColor:'#e4e9ef',signalColor:'#e4e9ef',signalTextColor:'#e4e9ef',edgeLabelBackground:'#161c24'}:{primaryColor:'#e1f1f6',primaryTextColor:'#1c2430',primaryBorderColor:'#0b6b8a',lineColor:'#5d6877',secondaryColor:'#f4efff',tertiaryColor:'#ffffff',clusterBkg:'#f7fbfc',clusterBorder:'#0b6b8a',actorBkg:'#e1f1f6',actorBorder:'#0b6b8a',noteBkgColor:'#fff6e6',edgeLabelBackground:'#ffffff'}});mermaid.run({nodes:root.querySelectorAll('.mermaid')});}catch(e){}
 }
 function buildToc(){
   var hs=document.querySelectorAll('#doc h2, #doc h3'), out='<p class="nav-title">On this page</p><ul>';

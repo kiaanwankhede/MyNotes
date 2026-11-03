@@ -1,5 +1,11 @@
 # Chapter 11: Runtime and human-in-the-loop
 
+> [!NOTE]
+> **📍 At a glance**
+> - **You will build:** context-aware tools and prompts, and a full human-in-the-loop approval flow
+> - **Level:** intermediate to advanced · **Time:** about 50 minutes
+> - **Builds on:** [Chapter 6](06-agents-and-memory.md) (checkpointer, store, context basics), [Chapter 7](07-middleware.md) (hooks, first look at HITL) and [Chapter 10](10-shell-tools-and-custom-middleware.md) (hook signatures). MCP, the next topic in the course, starts in the MCP book.
+
 **After this chapter you can:**
 
 - Explain what runtime is and name its five components
@@ -9,8 +15,6 @@
 - Build a personalised system prompt with `dynamic_prompt`
 - Pause an agent for a human with `HumanInTheLoopMiddleware`, read the interrupt and resume it
 - Interrupt only when it matters, with a condition on the tool call's arguments
-
-**Builds on:** [Chapter 6](06-agents-and-memory.md) (checkpointer, store, context basics), [Chapter 7](07-middleware.md) (hooks, first look at HITL) and [Chapter 10](10-shell-tools-and-custom-middleware.md) (hook signatures). MCP, the next topic in the course, starts in the MCP book.
 
 ## 11.1 The problem runtime solves
 
@@ -38,8 +42,8 @@ Good to know:
 
 - `create_agent` runs on **LangGraph's runtime**. LangChain exposes what LangGraph already maintains
 - Every framework has some equivalent under another name. The idea transfers
-- *Checked:* the runtime object also has other members (for example `override`, `merge`, `heartbeat`). The five above are the ones to learn
-- *Checked:* `execution_info` carries `thread_id`, `run_id`, `node_attempt`, `checkpoint_id`, `checkpoint_ns` and `task_id`. Outside a server, `run_id` and `server_info` are `None`
+- ✅ *Verified (details in "How this chapter was checked").*
+- ✅ *Verified (details in "How this chapter was checked").*
 
 ## 11.4 Context: `context_schema` and `context=`
 
@@ -174,8 +178,31 @@ agent.invoke({"messages": [("user", "What's my name?")]}, context=CineBotContext
 
 - This is the concrete mechanism behind a chat assistant that greets a returning user by name, with the name never typed into the current chat
 - The system prompt is **rebuilt on every call** from values in runtime context
-- *Checked:* the model's first message was `You are CineBot. Always address the user as Priya.` and the name did **not** appear in the saved messages
+- ✅ *Verified (details in "How this chapter was checked").*
 - The class notebook cell built the prompt from names that were not defined (`Claude_Instructions`). The version above is the working idea
+
+### Context engineering: the framework
+
+From `context-engineering.mdx`. The idea: agents usually fail not because the model is weak but because the **right context was not passed**. Context engineering is giving the model the right information and tools in the right format.
+
+| Context type | What you control | Transient or persistent |
+|---|---|---|
+| **Model context** | what goes into a model call: instructions, message history, tools, model, response format | transient |
+| **Tool context** | what tools read and write (state, store, runtime context) | persistent |
+| **Life-cycle context** | what happens between steps: summarisation, guardrails, logging | persistent |
+
+| Data source | Also called | Scope |
+|---|---|---|
+| Runtime context | static configuration (user id, keys, permissions) | one conversation |
+| State | short-term memory (messages, files, tool results) | one conversation |
+| Store | long-term memory (preferences, insights) | across conversations |
+
+- Middleware is the mechanism: it updates context and can jump to another step ([Ch 10](10-shell-tools-and-custom-middleware.md))
+- ✅ *Verified (details in "How this chapter was checked").*
+- ✅ *Verified (details in "How this chapter was checked").*
+- Where each kind lives in these notes: system prompt and dynamic prompt ([11.8](11-runtime-and-human-in-the-loop.md)), messages and summarisation ([Ch 7](07-middleware.md)), tools and gating ([Ch 5](05-tools.md), [Ch 7](07-middleware.md)), response format ([Ch 4](04-structured-output.md)), runtime, state and store (11.3 to 11.7)
+
+*Source: `langchain-ai/docs`, `src/oss/langchain/context-engineering.mdx` (Overview). The page's many examples were compared by identifier only; every identifier is already in these notes.*
 
 ## 11.9 Using runtime in middleware: an authorisation gate
 
@@ -220,6 +247,20 @@ def slow_search(q: str, runtime: ToolRuntime) -> str:
 - Whatever you write arrives in the **`custom`** stream. A UI can show it live
 
 ## 11.11 Human-in-the-loop, in depth
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant A as Agent
+    participant H as Human reviewer
+    U->>A: "Refund order 42"
+    A->>A: model asks for refund tool
+    A-->>H: interrupt: action_requests
+    Note over A: run paused, state saved by checkpointer
+    H->>A: Command(resume={"decisions": [{"type": "approve"}]})
+    A->>A: tool runs, model answers
+    A-->>U: "Refund issued"
+```
 
 > Agents run in a loop, the agentic loop you built by hand in raw Python. Human-in-the-loop is the moment a human is deliberately brought **into** that loop.
 
@@ -324,7 +365,7 @@ ask_agent = create_agent(
 - Checked: the tool message the model received was exactly the human's text
 - It is the behaviour you see when a chat assistant pauses to ask you a question instead of guessing. The human supplies **missing information**
 
-### Per-call interrupt mode (LangChain docs)
+### Per-call interrupt mode
 
 From the docs page `human-in-the-loop`. Needs `langchain>=1.4.6`. *Checked* on 1.4.7 with a scripted model: three tools, `read_data` ungated, `write_file` and `execute_sql` gated.
 
@@ -336,8 +377,8 @@ From the docs page `human-in-the-loop`. Needs `langchain>=1.4.6`. *Checked* on 1
 | Schema | none | each interrupt carries a `response_schema` |
 
 - The docs advise per-call mode for new agents and say LangChain plans to make it the default in the next major release
-- *Checked, batched:* 1 interrupt holding both `write_file` and `execute_sql`; no tool ran before the resume
-- *Checked, per call:* 2 interrupts; each value has `type: "tool_approval"`, `tool_call_id`, `name`, `args` and `description`. Resume with `Command(resume={interrupt_id: decision, ...})`
+- ✅ *Verified (details in "How this chapter was checked").*
+- ✅ *Verified (details in "How this chapter was checked").*
 
 ```python
 HumanInTheLoopMiddleware(
@@ -358,28 +399,12 @@ HumanInTheLoopMiddleware(
 
 *Source: `langchain-ai/docs`, `src/oss/langchain/human-in-the-loop.mdx` (Set the interrupt mode, Pause once per tool call).*
 
-## Context engineering: the framework (LangChain docs)
-
-From `context-engineering.mdx`. The idea: agents usually fail not because the model is weak but because the **right context was not passed**. Context engineering is giving the model the right information and tools in the right format.
-
-| Context type | What you control | Transient or persistent |
-|---|---|---|
-| **Model context** | what goes into a model call: instructions, message history, tools, model, response format | transient |
-| **Tool context** | what tools read and write (state, store, runtime context) | persistent |
-| **Life-cycle context** | what happens between steps: summarisation, guardrails, logging | persistent |
-
-| Data source | Also called | Scope |
-|---|---|---|
-| Runtime context | static configuration (user id, keys, permissions) | one conversation |
-| State | short-term memory (messages, files, tool results) | one conversation |
-| Store | long-term memory (preferences, insights) | across conversations |
-
-- Middleware is the mechanism: it updates context and can jump to another step ([Ch 10](10-shell-tools-and-custom-middleware.md))
-- *Checked, transient:* a `wrap_model_call` that replaced the system message changed what the model saw, and the state kept only `human, ai`. A `dynamic_prompt` that read `request.state` did the same and left no system message in state
-- *Checked, persistent:* a `before_model` hook returning `{"messages": [SystemMessage(...)]}` put the note into **state**, and it stayed after the run
-- Where each kind lives in these notes: system prompt and dynamic prompt ([11.8](11-runtime-and-human-in-the-loop.md)), messages and summarisation ([Ch 7](07-middleware.md)), tools and gating ([Ch 5](05-tools.md), [Ch 7](07-middleware.md)), response format ([Ch 4](04-structured-output.md)), runtime, state and store (11.3 to 11.7)
-
-*Source: `langchain-ai/docs`, `src/oss/langchain/context-engineering.mdx` (Overview). The page's many examples were compared by identifier only; every identifier is already in these notes.*
+> [!IMPORTANT]
+> **🏭 In production**
+> - Approvals can wait hours: the checkpointer must be a real database, and the UI must show the exact action and arguments
+> - Decide what happens to unanswered approvals (expire, remind, cancel) before launch
+> - Use runtime **context** for who the user is; never let the model choose the user id
+> - *Added by Claude.*
 
 ## 11.12 Conditional interrupts
 
@@ -476,44 +501,78 @@ def run_interactive_hitl(agent, config):
 
 ## 11.15 Interview corner
 
-**1. What is runtime, and what are its five components?**
+**What interviewers listen for:** you separate **state** (changes during a run) from **context** (fixed per run), you know a pause needs a checkpointer, and you can describe the approve / edit / reject / respond flow.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. What is runtime, and what are its five components?</summary>
 
 - Information that is not conversation history but travels with the agent into every tool and hook
 - `context`, `store`, `stream_writer`, `execution_info`, `server_info`
 - *Stronger answer:* it is LangGraph's runtime, exposed by LangChain
 
-**2. State vs runtime?**
+</details>
+
+<details class="qa"><summary>2. State vs runtime?</summary>
 
 - State: `messages` plus custom fields, mutable, persists across invocations of a thread
 - Runtime: the five components, with context fixed for the run
 - *Stronger answer:* tools get both as `ToolRuntime`. Node hooks get `state` and `runtime`. Wrap hooks get one `request`
 
-**3. `thread_id` vs context?**
+</details>
+
+<details class="qa"><summary>3. <code>thread_id</code> vs context?</summary>
 
 - `thread_id` picks the conversation (checkpointer). Context carries facts for this run
 - *Stronger answer:* freeze the context dataclass, otherwise a tool can change it mid-run
 
-**4. How do you give a tool the current user and their saved preferences without the user typing them?**
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>4. How do you give a tool the current user and their saved preferences without the user typing them?</summary>
 
 - User id in `context`, preferences in the `store`, both read through `ToolRuntime`
 - *Stronger answer:* namespaces are tuples and should be scoped per user
 
-**5. What does `version="v2"` change for HITL?**
+</details>
+
+<details class="qa"><summary>5. What does <code>version="v2"</code> change for HITL?</summary>
 
 - `invoke` returns a `GraphOutput` with `.value` and `.interrupts` instead of a dict
 
-**6. What are the four HITL decisions, and which one is not about an action?**
+</details>
+
+<details class="qa"><summary>6. What are the four HITL decisions, and which one is not about an action?</summary>
 
 - approve, edit, reject, respond. `respond` returns the human's message as the tool result and skips the tool. Use it for tools that only ask a question
 
-**7. How would you ask for approval only for refunds above $100?**
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>7. How would you ask for approval only for refunds above $100?</summary>
 
 - `interrupt_on={"tool": {"allowed_decisions": [...], "when": fn}}` where `fn` receives a `ToolCallRequest` and inspects its arguments
 - *Stronger answer:* make the function fail closed: if the amount is missing, interrupt
 
-**8. Why does HITL need a checkpointer?**
+</details>
+
+<details class="qa"><summary>8. Why does HITL need a checkpointer?</summary>
 
 - The run must pause and resume later. Without one `Command(resume=...)` raises an error
+
+</details>
+
+<details class="qa"><summary>9. State or context: where do user id, role and cart items belong?</summary>
+
+- User id and role: **context** (fixed, from your app, trusted). Cart items: **state** (changes as the run goes)
+- *Stronger answer:* context cannot be changed by the model, which is exactly why identity and permissions belong there
+
+</details>
+
+> [!TIP]
+> **🧩 Design question to practise:** *"An agent books meetings for executives but a human assistant must approve anything over 1 hour."* Cover the conditional interrupt, what the reviewer sees, edit vs reject, and persistence.
 
 ## 11.16 Added by Claude, not from the sources
 
@@ -536,6 +595,20 @@ Not in the course material. Established practice, but check current docs. Items 
 **Cost**
 
 - **Retrieve, do not resend.** For long-running chats keep facts in the store and fetch only what the current message needs. Combine it with summarization ([Chapter 7](07-middleware.md), 7.5) for the recent chat
+
+## Cheat sheet
+
+```python
+from dataclasses import dataclass
+@dataclass
+class Ctx: user_id: str
+agent = create_agent(model, tools, context_schema=Ctx, checkpointer=InMemorySaver(),
+    middleware=[HumanInTheLoopMiddleware(interrupt_on={"refund": True})])
+cfg = {"configurable": {"thread_id": "t1"}}
+r = agent.invoke(inp, cfg, context=Ctx(user_id="u1"))
+r["__interrupt__"]                                  # paused
+agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg, context=Ctx("u1"))
+```
 
 ## Recap
 
@@ -576,6 +649,15 @@ Not in the course material. Established practice, but check current docs. Items 
   - retry and error middleware in both orders with the default `on_failure`
 - **Not run:** a real LangGraph server (so `server_info` and `run_id` were `None`), real model behaviour, a persistent checkpointer or store
 - Class 15 has no code folder beyond the notebook and diagram. The Colab link in the README is not in the repo
+- **Details by section** (moved here from the ✅ markers):
+  - *11.3 The five components of runtime:* Checked: the runtime object also has other members (for example `override`, `merge`, `heartbeat`). The five above are the ones to learn
+  - *11.3 The five components of runtime:* Checked: `execution_info` carries `thread_id`, `run_id`, `node_attempt`, `checkpoint_id`, `checkpoint_ns` and `task_id`. Outside a server, `run_id` and `server_info` are `None`
+  - *11.8 Dynamic prompting with runtime:* Checked: the model's first message was `You are CineBot. Always address the user as Priya.` and the name did **not** appear in the saved messages
+  - *Per-call interrupt mode:* Checked, batched: 1 interrupt holding both `write_file` and `execute_sql`; no tool ran before the resume
+  - *Per-call interrupt mode:* Checked, per call: 2 interrupts; each value has `type: "tool_approval"`, `tool_call_id`, `name`, `args` and `description`. Resume with `Command(resume={interrupt_id: decision, ...})`
+  - *Context engineering: the framework:* Checked, transient: a `wrap_model_call` that replaced the system message changed what the model saw, and the state kept only `human, ai`. A `dynamic_prompt` that read `request.state` did the same and left no system message in state
+  - *Context engineering: the framework:* Checked, persistent: a `before_model` hook returning `{"messages": [SystemMessage(...)]}` put the note into **state**, and it stayed after the run
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 
 ## Sources and further reading
 

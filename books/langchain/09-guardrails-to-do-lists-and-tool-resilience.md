@@ -1,5 +1,11 @@
 # Chapter 9: Guardrails, to-do lists and tool resilience
 
+> [!NOTE]
+> **📍 At a glance**
+> - **You will build:** guardrails, a to-do list, smart tool selection, and retries that survive failures
+> - **Level:** intermediate · **Time:** about 40 minutes
+> - **Builds on:** [Chapter 7](07-middleware.md) (hooks, tool filtering), [Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md) (limits, fallback, PII, guardrail vs middleware). Custom middleware is in [Chapter 10](10-shell-tools-and-custom-middleware.md).
+
 **After this chapter you can:**
 
 - Place each built-in middleware on a guardrail map
@@ -8,8 +14,6 @@
 - Turn a tool failure into a readable message with `ToolErrorMiddleware`
 - Retry flaky tools with backoff using `ToolRetryMiddleware`, and combine it with error handling in the right order
 - Test an agent without real side effects using `LLMToolEmulator`
-
-**Builds on:** [Chapter 7](07-middleware.md) (hooks, tool filtering), [Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md) (limits, fallback, PII, guardrail vs middleware). Custom middleware is in [Chapter 10](10-shell-tools-and-custom-middleware.md).
 
 ## 9.1 A guardrail map
 
@@ -24,7 +28,7 @@
 
 The class opened with real industry mapping: fraud-detection hooks in fintech, PII redaction as a legal requirement in healthcare, refund approval gates in customer support, audit logging in internal tools.
 
-### Custom guardrails: before and after the agent (LangChain docs)
+### Custom guardrails: before and after the agent
 
 The docs page `guardrails` gives two custom examples. Both were run (`langchain` 1.4.7, scripted model).
 
@@ -42,9 +46,9 @@ class ContentFilterMiddleware(AgentMiddleware):
                     "jump_to": "end"}
 ```
 
-  - *Checked:* a banned word ended the run with **0 model calls** and the history `human, ai`. A clean request made 1 model call. The decorator form `@before_agent(can_jump_to=["end"])` behaved the same
+  - ✅ *Verified (details in "How this chapter was checked").*
 - **After agent: a model-based safety check.** `after_agent` runs **once at the end**, on the full answer. Good for safety, quality and compliance scans. The docs example asks a second model to reply `SAFE` or `UNSAFE` and overwrites `last_message.content` when it is unsafe
-  - *Checked:* editing the last message in place and returning `None` did change the final answer. That works by side effect. A clearer way, also *checked*: return `{"messages": [AIMessage(content="I cannot provide that response.", id=last.id)]}`. The same `id` **replaces** the message, leaving one AI message
+  - ✅ *Verified (details in "How this chapter was checked").*
 - **Combining guardrails:** list several in `middleware=[...]`. Cheap deterministic ones go first, so a blocked request never reaches the model-based check
 - Deterministic guardrails are fast and predictable but catch only what you list. Model-based ones are broader but cost a model call and can be wrong ([8.5](08-prebuilt-middleware-limits-fallback-and-pii.md))
 
@@ -247,7 +251,28 @@ delay = initial_delay * backoff_factor ** retry_number
 - To prevent it, **tell the model in the system prompt** not to retry a tool call itself after a failure is reported
 - Reproduced offline with a scripted model: 4 + 4 = 8 tool calls
 
+> [!IMPORTANT]
+> **🏭 In production**
+> - Retry only errors that can succeed later (timeouts, 429, 5xx); a bad argument fails the same way every time
+> - Use exponential backoff with jitter so many clients do not retry in lockstep
+> - Retries repeat side effects: make the tool idempotent first
+> - *Added by Claude.*
+
 ## 9.6 Error and retry together: the order matters
+
+```mermaid
+sequenceDiagram
+    participant A as Agent
+    participant R as ToolRetryMiddleware
+    participant T as Tool
+    A->>R: tool call
+    R->>T: attempt 1
+    T-->>R: timeout
+    Note over R: wait (backoff + jitter)
+    R->>T: attempt 2
+    T-->>R: result
+    R-->>A: ToolMessage
+```
 
 *From testing. Class 13 says only that error handling does not retry.* Both middlewares wrap the tool call, and the **first in the list is the outermost**. An exception travels outwards, so the middleware that should see the raw exception must be **inside**.
 
@@ -306,7 +331,7 @@ mw = ModelRetryMiddleware(max_retries=2, initial_delay=1.0, backoff_factor=2.0, 
 ```
 
 - Defaults: `max_retries=2`, `initial_delay=1.0`, `backoff_factor=2.0`, `max_delay=60.0`, `jitter=True`
-- *Checked with a model that raised `ConnectionError`:* it failed twice and then answered, so **3 attempts** in total. With three failures, `on_failure="continue"` (the default) ended the run with an AI message "Model call failed after 3 attempts with ConnectionError..." and `on_failure="error"` **raised** the error
+- ✅ *Verified (details in "How this chapter was checked").*
 - Put model retry and model fallback ([Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md)) in a deliberate order, as with the tool pair in 9.6
 
 **`ContextEditingMiddleware` with `ClearToolUsesEdit`:** clears **old tool results** when the context grows, to save tokens.
@@ -317,12 +342,12 @@ mw = ContextEditingMiddleware(edits=[ClearToolUsesEdit(trigger=100000, keep=3, p
 ```
 
 - Defaults: `trigger=100000` tokens, `keep=3` most recent tool results, placeholder `[cleared]`. Options include `clear_at_least`, `clear_tool_inputs` and `exclude_tools`
-- *Checked with `trigger=500, keep=2` and five long tool results:* on the model's last call the three oldest tool messages read `[cleared]` and the two newest were intact
+- ✅ *Verified (details in "How this chapter was checked").*
 - **Against summarisation:** this edits tool output **in place** without writing a summary. It is cheaper, and loses the old results
 
 **`FilesystemFileSearchMiddleware(root_path=...)`:** gives the agent search tools over a folder.
 
-- *Checked:* it adds two tools, **`glob_search`** and **`grep_search`**. In a test folder, a glob for `*.txt` and a grep for a word both found the file
+- ✅ *Verified (details in "How this chapter was checked").*
 - Defaults: uses `ripgrep` if available, skips files over 10 MB. **Limit `root_path` to the folder you intend to expose**
 
 **Also on the diagram, not found in the installed version:** a **subagent** middleware and **rubric grading (beta)**, which applies model-as-judge scoring so an agent iterates until a rubric is met. They were only a line each in the class table. `ProviderToolSearchMiddleware` (9.3) and `ShellToolMiddleware` (Chapter 10) are covered elsewhere.
@@ -340,39 +365,71 @@ mw = ContextEditingMiddleware(edits=[ClearToolUsesEdit(trigger=100000, keep=3, p
 
 ## 9.11 Interview corner
 
-**1. Why use `TodoListMiddleware` instead of a prompt that says "make a plan"?**
+**What interviewers listen for:** you know the difference between **retry**, **error handling** and **fallback**, and that retries are only safe for idempotent tools.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. Why use <code>TodoListMiddleware</code> instead of a prompt that says "make a plan"?</summary>
 
 - A prompt does not reliably create a **maintained, structured** list that the model updates every turn. The middleware adds a `write_todos` tool and a `todos` state
 - *Stronger answer:* it costs tokens, so it suits complex multi-step work, not simple requests
 
-**2. Tool selector vs dynamic tool loading?**
+</details>
+
+<details class="qa"><summary>2. Tool selector vs dynamic tool loading?</summary>
 
 - Loading filters by known state (who is asking). The selector filters by the content of the query using a cheaper model
 - *Stronger answer:* if you already know a tool must not reach a user, use plain code, not an LLM
 
-**3. Tool error middleware vs tool retry middleware?**
+</details>
+
+<details class="qa"><summary>3. Tool error middleware vs tool retry middleware?</summary>
 
 - Error: turn a failure into a readable tool message once. Retry: re-run the call with backoff
 - *Stronger answer:* they combine, with error listed first (outermost) and retry second (inner)
 
-**4. Your retry middleware has `max_retries=3` but the tool ran 8 times. Why?**
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>4. Your retry middleware has <code>max_retries=3</code> but the tool ran 8 times. Why?</summary>
 
 - After the failure message, the **model** asked to retry, starting another cycle
 - *Stronger answer:* tell the model in the system prompt not to retry on its own, and use a tool-call limit as a backstop
 
-**5. What is the backoff formula and why jitter?**
+</details>
+
+<details class="qa"><summary>5. What is the backoff formula and why jitter?</summary>
 
 - `delay = initial_delay * backoff_factor ** retry_number`: 1s, 2s, 4s. Waiting longer gives a service time to recover
 - Jitter adds randomness so many clients do not retry at the same moment
 
-**6. Why return the exception **type** instead of the message from `on_error`?**
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>6. Why return the exception <strong>type</strong> instead of the message from <code>on_error</code>?</summary>
 
 - So internal details (paths, queries, secrets) never reach the model or the user
 
-**7. When would you use `LLMToolEmulator`?**
+</details>
+
+<details class="qa"><summary>7. When would you use <code>LLMToolEmulator</code>?</summary>
 
 - In development and tests, to check agent logic without real side effects
 - *Stronger answer:* the output is invented by a model, so it never belongs in production or in results you rely on
+
+</details>
+
+<details class="qa"><summary>8. <code>ToolRetryMiddleware</code>, <code>ModelRetryMiddleware</code> or <code>ModelFallbackMiddleware</code>: which, when?</summary>
+
+- Tool retry: flaky tool or API. Model retry: short provider errors. Fallback: the provider or model is down
+- *Stronger answer:* stack them: retry first for blips, fallback for outages, and a call limit on top so the stack cannot loop forever
+
+</details>
+
+> [!TIP]
+> **🧩 Design question to practise:** *"Your agent calls a flaky third-party weather API that times out 5% of the time."* Cover retries, backoff, a cache (Ch1), what the model sees when it finally fails, and a limit on total attempts.
 
 ## 9.12 Added by Claude, not from the sources
 
@@ -386,7 +443,7 @@ Not in the course material. Established practice, but check current docs. Items 
 ToolRetryMiddleware(max_retries=3, retry_on=(ConnectionError, TimeoutError))
 ```
 
-- *Checked:* with `retry_on=(ConnectionError, TimeoutError)` a `ValueError` tool ran **once**, and the `ValueError` was raised as it was. A `ConnectionError` tool was retried
+- ✅ *Verified (details in "How this chapter was checked").*
 - **Make retried tools safe to repeat.** A retried `book_seats` could book twice. Retry reads freely. For writes, add an idempotency key or do not retry
 - **The default failure message includes the exception text** (for example `Tool 'x' failed after 3 attempts with ValueError: bad`). That can leak internal detail. Put `ToolErrorMiddleware` outside it to control the final wording (9.6)
 
@@ -395,6 +452,17 @@ ToolRetryMiddleware(max_retries=3, retry_on=(ConnectionError, TimeoutError))
 - **The tool selector adds a model call to every model call.** It pays off when you have many tools or large schemas (the class said "15 tools" as the scale). With 3 or 4 tools, skip it. Measure before you adopt it
 - **Emulated results are invented.** Label any test that used the emulator, and do not mix its output into evaluation of real behaviour
 - **A to-do list is extra tokens and extra tool calls.** Use it only where a plan helps
+
+## Cheat sheet
+
+```python
+from langchain.agents.middleware import TodoListMiddleware, LLMToolSelectorMiddleware, ToolRetryMiddleware
+middleware = [
+    TodoListMiddleware(),                                   # plan in steps
+    LLMToolSelectorMiddleware(model="openai:gpt-4o-mini", max_tools=5),
+    ToolRetryMiddleware(max_retries=2, backoff_factor=2.0, initial_delay=1.0),
+]
+```
 
 ## Recap
 
@@ -434,6 +502,14 @@ ToolRetryMiddleware(max_retries=3, retry_on=(ConnectionError, TimeoutError))
   - tool emulator: the real function never ran, and default emulation of all tools
 - **Not run against a live model:** real selector quality, real emulated answers, real service timing. Class output was read from the notebook (cells 98 to 145)
 - Not covered here: custom middleware (class 14), the three retry mechanisms and `ProviderToolSearchMiddleware` (assignment questions only)
+- **Details by section** (moved here from the ✅ markers):
+  - *Custom guardrails: before and after the agent:* Checked: a banned word ended the run with **0 model calls** and the history `human, ai`. A clean request made 1 model call. The decorator form `@before_agent(can_jump_to=["end"])` behaved the same
+  - *Custom guardrails: before and after the agent:* Checked: editing the last message in place and returning `None` did change the final answer. That works by side effect. A clearer way, also *checked*: return `{"messages": [AIMessage(content="I cannot provide that response.", id=last.id)]}`. The same `id` **replaces** the message, leaving one AI message
+  - *9.9 More prebuilt middleware from the class diagram:* Checked with a model that raised `ConnectionError`: it failed twice and then answered, so **3 attempts** in total. With three failures, `on_failure="continue"` (the default) ended the run with an AI message "Model call failed after 3 attempts with ConnectionError..." and `on_failure="error"` **raised** the error
+  - *9.9 More prebuilt middleware from the class diagram:* Checked with `trigger=500, keep=2` and five long tool results: on the model's last call the three oldest tool messages read `[cleared]` and the two newest were intact
+  - *9.9 More prebuilt middleware from the class diagram:* Checked: it adds two tools, **`glob_search`** and **`grep_search`**. In a test folder, a glob for `*.txt` and a grep for a word both found the file
+  - *9.12 Added by Claude, not from the sources:* Checked: with `retry_on=(ConnectionError, TimeoutError)` a `ValueError` tool ran **once**, and the `ValueError` was raised as it was. A `ConnectionError` tool was retried
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 
 ## Sources and further reading
 

@@ -1,5 +1,11 @@
 # Chapter 4: Structured output
 
+> [!NOTE]
+> **📍 At a glance**
+> - **You will build:** typed replies with Pydantic schemas, on a model and on an agent (CineBot)
+> - **Level:** beginner · **Time:** about 35 minutes
+> - **Builds on:** the Pydantic book (`BaseModel`, `Field`, validators) and [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md), where the same idea is done by hand with a JSON instruction.
+
 **After this chapter you can:**
 
 - Make a model reply in a defined, validated shape
@@ -7,8 +13,6 @@
 - Choose between `ProviderStrategy` and `ToolStrategy`
 - Use structured output on an agent, including several schemas
 - Explain what happens when the model breaks a constraint
-
-**Builds on:** the Pydantic book (`BaseModel`, `Field`, validators) and [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md), where the same idea is done by hand with a JSON instruction.
 
 **Running example:** CineBot, a movie-ticket assistant. It parses booking requests (this chapter), checks showtimes ([Chapter 5](05-tools.md)) and finally becomes a real agent (Chapter 6).
 
@@ -70,7 +74,7 @@ print(type(response))    # <class '__main__.Email'>
 - **`"json_mode"`:** an older, looser JSON-only mode
 - You rarely set it. The default is fine
 - **Two layers, two vocabularies.** `method=` belongs to the **raw model**. `ToolStrategy` and `ProviderStrategy` belong to **`create_agent(response_format=...)`**
-- *Checked:* `model.with_structured_output(ProviderStrategy(Schema))` raised `ValueError: Unsupported function` at once. Pick one layer, never both
+- ✅ *Verified (details in "How this chapter was checked").*
 - Class note: wrapping the schema is how you force a strategy. A separate `strategy=` keyword is silently ignored (4.4)
 
 ## 4.3 `BaseModel` or `TypedDict`
@@ -85,6 +89,17 @@ print(type(response))    # <class '__main__.Email'>
 - Unsure? Default to Pydantic
 
 ## 4.4 `ProviderStrategy` and `ToolStrategy`
+
+```mermaid
+flowchart TD
+    Q{Does the model support<br/>native structured output?} -->|Yes| P[ProviderStrategy<br/>provider enforces the schema]
+    Q -->|No or unsure| T[ToolStrategy<br/>schema sent as a fake tool]
+    P --> V[Pydantic validates the reply]
+    T --> V
+    V -->|valid| OK([structured_response])
+    V -->|invalid| E[Error sent back, model retries]
+    E --> V
+```
 
 Two ways LangChain guarantees the shape:
 
@@ -170,8 +185,8 @@ model.profile["tool_calling"]
 - "Just pass a schema" is only safe when the profile says the model supports it
 - With no strategy given, LangChain reads the profile: `ProviderStrategy` if supported, else `ToolStrategy`
 - Older or self-hosted model reporting `False`? Name `ToolStrategy` yourself
-- *Checked from the installed `langchain-openai` data (no network call):* `gpt-5-mini` reported `structured_output` and `tool_calling` as `True` with `max_input_tokens` 272000. `gpt-3.5-turbo` reported both as `False`. The profile is **static library data**, so it can lag a model's real abilities
-- *Checked:* building an agent with `response_format=ToolStrategy(...)`, `ProviderStrategy(...)` or a bare schema on `gpt-3.5-turbo` **did not fail at construction**. Any failure shows up at call time, which was not run here
+- ✅ *Verified (details in "How this chapter was checked").*
+- ✅ *Verified (details in "How this chapter was checked").*
 
 ## 4.8 Structured output on a model versus on an agent
 
@@ -292,7 +307,7 @@ What the message trace shows, in order:
 - **Model level vs agent level?** See 4.8
 - **`Union` with an ambiguous message?** The model decides. It may even try more than one schema before settling
 
-### Tool-strategy extras: tool message text and wrong multi-output (LangChain docs)
+### Tool-strategy extras: tool message text and wrong multi-output
 
 - *Source: LangChain docs, `structured-output.mdx` (Custom tool message content, Error handling).*
 - With `ToolStrategy`, the schema is a fake tool call, so the history gets a `ToolMessage`.
@@ -302,39 +317,76 @@ ToolStrategy(MeetingAction, tool_message_content="Action item captured!")
 ```
 - If the model calls **two** schema tools in one turn (union type), the agent sends `Error: Model incorrectly returned multiple structured responses (A, B)` back as tool messages and lets the model retry.
   - The error exception is `MultipleStructuredOutputsError`; the retry is the default `handle_errors=True`.
-- *Checked (scripted model):* the final message was `Captured!`; a two-schema turn produced the error text twice, then the retry gave `task='y'`.
+- ✅ *Verified (details in "How this chapter was checked").*
+
+> [!IMPORTANT]
+> **🏭 In production**
+> - Treat schema failures as normal: log every validation error with the raw reply, and track the failure rate
+> - Keep schemas small and flat; every extra optional field is another chance to go wrong
+> - Version your schemas: a field rename breaks every consumer downstream, just like an API
+> - *Added by Claude.*
 
 
 ## 4.10 Interview corner
 
-**1. Why not just ask for JSON in the prompt?**
+**What interviewers listen for:** you know **why** free text breaks code, the difference between the provider and tool strategies, and what happens when the model returns something invalid.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. Why not just ask for JSON in the prompt?</summary>
 
 - A prompt only asks. A schema is validated before your code sees it
 - *Stronger answer:* with a schema, bad output triggers a retry loop instead of a silent bug
 
-**2. `BaseModel` or `TypedDict`?**
+</details>
+
+<details class="qa"><summary>2. <code>BaseModel</code> or <code>TypedDict</code>?</summary>
 
 - `BaseModel` validates. `TypedDict` does not
 - *Stronger answer:* default to Pydantic. Use `TypedDict` only for prototypes
 
-**3. `ProviderStrategy` vs `ToolStrategy`?**
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>3. <code>ProviderStrategy</code> vs <code>ToolStrategy</code>?</summary>
 
 - Native provider feature vs a synthetic tool call
 - *Stronger answer:* LangChain picks from `model.profile`. Force `ToolStrategy` on models without native support
 
-**4. When must you use `response_format` on an agent instead of `with_structured_output` on a model?**
+</details>
+
+<details class="qa"><summary>4. When must you use <code>response_format</code> on an agent instead of <code>with_structured_output</code> on a model?</summary>
 
 - When tools and a schema must work together. The model-level version has no tool loop
 - *Stronger answer:* the failure is silent: a valid-looking object built without calling the tool
 
-**5. The model returns `ticket_count=15` but your limit is 10. What happens?**
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>5. The model returns <code>ticket_count=15</code> but your limit is 10. What happens?</summary>
 
 - Validation fails, the error goes back to the model as a `ToolMessage`, the model retries
 - *Stronger answer:* the retry may produce a valid but unwanted value. Add business checks or human review
 
-**6. How do you handle several possible output shapes?**
+</details>
+
+<details class="qa"><summary>6. How do you handle several possible output shapes?</summary>
 
 - `Union` of schemas in `ToolStrategy`, with clear docstrings, then `isinstance` on the result
+
+</details>
+
+<details class="qa"><summary>7. Structured output fails 2% of the time in production. What do you do?</summary>
+
+- Log the failures, look for a pattern (one field, long inputs, one model), then tighten field descriptions and types
+- *Stronger answer:* keep automatic retry on, add a fallback model, split a large schema into two calls, and add the failing cases to an eval set (Ch15)
+
+</details>
+
+> [!TIP]
+> **🧩 Design question to practise:** *"Extract invoice fields (vendor, date, line items, total) from emails into your database."* Cover the schema, validators, retries, how you handle a total that does not match the line items, and what you store when extraction fails.
 
 ## 4.11 Added by Claude, not from the sources
 
@@ -345,6 +397,19 @@ Not in the course material. Established practice, but check current docs.
 - **Field descriptions are part of the prompt.** Precise descriptions and `Literal` values improve accuracy more than a longer system prompt
 - **Each failed validation is another model call.** Retries cost money and time. Keep schemas simple and error hints short so one retry usually fixes it
 - **Test with messy and hostile input**, not only clean examples. Include missing fields, wrong languages and injection attempts
+
+## Cheat sheet
+
+```python
+from pydantic import BaseModel, Field
+class Movie(BaseModel):
+    title: str = Field(description="Exact title")
+    year: int
+model.with_structured_output(Movie).invoke("...")            # on a model
+from langchain.agents.structured_output import ToolStrategy
+agent = create_agent(model, tools, response_format=ToolStrategy(Movie))
+agent.invoke(inp)["structured_response"]                       # on an agent
+```
 
 ## Recap
 
@@ -370,6 +435,12 @@ Not in the course material. Established practice, but check current docs.
 - Run offline for the additions: the `method=` options and defaults of `with_structured_output`, the `ProviderStrategy` refusal on a raw model, the `model.profile` values for `gpt-5-mini` and `gpt-3.5-turbo`, agent construction on `gpt-3.5-turbo` with three `response_format` choices, and the four `handle_errors` settings with a scripted model that first breaks the constraint. **Not run:** any real model, so how a real model reacts to a rejected value was not tested
 - Run offline with a stand-in model on `langchain` 1.4.7: the `ToolStrategy` retry (15 rejected, error returned as a `ToolMessage`, retry with 10), the custom `handle_errors` message, `Union` returning the right class, the `ValidationError` text, and the imports
 - **Not run against a live model:** `with_structured_output`, `model.profile` values, the `bind_tools(...).with_structured_output(...)` failure and the `strategy=` claim. Those are class or answer-key statements
+- **Details by section** (moved here from the ✅ markers):
+  - *How the raw model enforces the schema: `method=`:* Checked: `model.with_structured_output(ProviderStrategy(Schema))` raised `ValueError: Unsupported function` at once. Pick one layer, never both
+  - *4.7 `model.profile`: check before you rely on it:* Checked from the installed `langchain-openai` data (no network call): `gpt-5-mini` reported `structured_output` and `tool_calling` as `True` with `max_input_tokens` 272000. `gpt-3.5-turbo` reported both as `False`. The profile is **static library data**, so it can lag a model's real abilities
+  - *4.7 `model.profile`: check before you rely on it:* Checked: building an agent with `response_format=ToolStrategy(...)`, `ProviderStrategy(...)` or a bare schema on `gpt-3.5-turbo` **did not fail at construction**. Any failure shows up at call time, which was not run here
+  - *Tool-strategy extras: tool message text and wrong multi-output:* Checked (scripted model): the final message was `Captured!`; a two-schema turn produced the error text twice, then the retry gave `task='y'`.
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 
 ## Sources and further reading
 

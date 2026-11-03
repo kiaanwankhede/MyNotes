@@ -1,5 +1,11 @@
 # Chapter 2: LangChain family and harness engineering
 
+> [!NOTE]
+> **📍 At a glance**
+> - **You will build:** a mental map of LangChain, LangGraph, Deep Agents and LangSmith, and a checked environment
+> - **Level:** beginner · **Time:** about 25 minutes
+> - **Builds on:** [Chapter 1](01-introduction-to-langchain.md). Model and message basics are in [Chapter 3](03-models-messages-and-parameters.md).
+
 **After this chapter you can:**
 
 - Tell LangChain, LangGraph, Deep Agents and LangSmith apart
@@ -8,9 +14,17 @@
 - Spot an outdated tutorial from the timeline
 - Set up and sanity-check your environment
 
-**Builds on:** [Chapter 1](01-introduction-to-langchain.md). Model and message basics are in [Chapter 3](03-models-messages-and-parameters.md).
-
 ## 2.1 Four products, four jobs
+
+```mermaid
+flowchart TB
+    DA["Deep Agents<br/>planning · files · subagents"] --> LC["LangChain<br/>create_agent + middleware"]
+    LC --> LG["LangGraph<br/>graph runtime · checkpoints · interrupts"]
+    LG --> M[("Model providers<br/>OpenAI · Anthropic · Google · local")]
+    LS["LangSmith<br/>traces · evals · monitoring"] -.observes.-> DA
+    LS -.observes.-> LC
+    LS -.observes.-> LG
+```
 
 They are **not competitors**. You use as many as the project needs.
 
@@ -48,6 +62,13 @@ LANGSMITH_API_KEY=your-key-here
 
 - Free Developer tier: 5,000 traces a month as of 2026 (class figure, check the current number)
 - Enough for learning. Paid tiers matter only for production traffic
+
+> [!IMPORTANT]
+> **🏭 In production**
+> - Tracing is not optional once real users arrive: without it you cannot answer "why did the agent do that?"
+> - LangSmith is one option; many teams send traces to an OpenTelemetry-based tool they already run. Pick one before launch, not after the first incident
+> - Log the trace id next to every user-facing answer so support can jump straight to the run
+> - *Added by Claude.*
 
 ## 2.3 Agent and harness, in one sentence each
 
@@ -108,7 +129,7 @@ from langchain import AgentExecutor   # ImportError on v1.0+
 - Classic code still runs but is legacy and unmaintained
 - To keep old code running while you migrate: `uv add langchain-classic`
 
-## What LangChain believes, and more of the timeline (LangChain docs)
+### What LangChain believes, and more of the timeline
 
 - *Source: LangChain docs, `philosophy.mdx`, `overview.mdx`, `component-architecture.mdx`. The history is narrative, so nothing here was run.*
 - **Beliefs:** LLMs are powerful and better with outside data; apps will become more agentic; it is early; a prototype is easy but a **reliable** production agent is hard.
@@ -235,7 +256,11 @@ print(result["messages"][-1].content_blocks)   # [{'type': 'text', 'text': '...s
 
 ## 2.10 Interview corner
 
-**1. LangChain vs LangGraph vs Deep Agents vs LangSmith?**
+**What interviewers listen for:** you know the products are **layers**, you can say when to step down from `create_agent` to LangGraph, and you treat observability as part of the build, not an afterthought.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. LangChain vs LangGraph vs Deep Agents vs LangSmith?</summary>
 
 - LangGraph: low-level orchestration and durable execution
 - LangChain: configurable harness on LangGraph
@@ -243,27 +268,51 @@ print(result["messages"][-1].content_blocks)   # [{'type': 'text', 'text': '...s
 - LangSmith: observability and evaluation
 - *Stronger answer:* you combine them. Pick the highest layer that still gives the control you need
 
-**2. What is "harness engineering"?**
+</details>
+
+<details class="qa"><summary>2. What is "harness engineering"?</summary>
 
 - Designing everything around the model: prompt, tools, memory, context, middleware, guardrails
 - *Stronger answer:* the model sets the ceiling, the harness decides how close you get to it
 
-**3. Why trace an agent instead of printing?**
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>3. Why trace an agent instead of printing?</summary>
 
 - Agents decide at run time, so code does not show what happened
 - A trace records every model and tool call with latency and cost
 - *Stronger answer:* traces also feed evaluation and regression tests
 
-**4. How do you recognise an outdated LangChain tutorial?**
+</details>
+
+<details class="qa"><summary>4. How do you recognise an outdated LangChain tutorial?</summary>
 
 - Imports like `AgentExecutor` or `initialize_agent` from `langchain` fail on v1.0+ because they moved to `langchain-classic`
 - *Stronger answer:* check the date and the package version before copying code
 
-**5. Open vs closed models?**
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>5. Open vs closed models?</summary>
 
 - Open weights: self-host, fine-tune, you carry the hosting
 - Closed: API only, you pay per use
 - *Stronger answer:* the choice is usually about data control, cost at scale and capability
+
+</details>
+
+<details class="qa"><summary>6. When would you move from <code>create_agent</code> to a LangGraph <code>StateGraph</code>?</summary>
+
+- When the flow needs explicit branches, loops or parallel steps you must control, or durable long-running steps
+- *Stronger answer:* keep `create_agent` for the tool loop and embed it as a node inside a `StateGraph`; you do not rewrite, you wrap
+
+</details>
+
+> [!TIP]
+> **🧩 Design question to practise:** *"Your bank wants an internal assistant that answers policy questions and drafts emails. Pick the LangChain layers and say why."* Cover the harness, memory, approval for sending, tracing, and what you would not use yet.
 
 ## 2.11 Added by Claude, not from the sources
 
@@ -272,6 +321,16 @@ Not in the course material. Established practice, but check current docs.
 - **Traces can contain sensitive data.** Prompts, tool arguments and outputs may include personal or confidential information. Decide what you send to a hosted tracing service, mask fields where you can, and check the retention and data-location terms
 - **Pin versions.** This ecosystem moved fast (v1.0 in late 2025). Commit `uv.lock`, and pin a major range such as `langchain>=1,<2`, so a fresh install does not break your project
 - **Keep tracing projects separate.** Use a different tracing project (or key) for experiments, staging and production so noise does not bury real runs
+
+## Cheat sheet
+
+| Need | Use |
+|---|---|
+| A tool-calling agent fast | LangChain `create_agent` |
+| Custom branching, durable steps | LangGraph `StateGraph` |
+| Long research or coding tasks with planning and files | Deep Agents |
+| See and evaluate what happened | LangSmith (or an OpenTelemetry tool) |
+| Old `AgentExecutor` code | `langchain-classic`, then migrate |
 
 ## Recap
 
@@ -293,6 +352,7 @@ Not in the course material. Established practice, but check current docs.
 
 - Imports and the `create_agent` signature checked on `langchain` 1.4.7. No live model run
 - Dates, free-tier numbers and model names are class figures. Check before relying on them
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 
 ## Sources and further reading
 

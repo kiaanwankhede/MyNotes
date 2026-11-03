@@ -1,5 +1,11 @@
 # Chapter 13: Multi-agent systems and subagents
 
+> [!NOTE]
+> **📍 At a glance**
+> - **You will build:** a supervisor that delegates to specialist subagents
+> - **Level:** advanced · **Time:** about 40 minutes
+> - **Builds on:** [Chapter 5](05-tools.md) (tools), [Chapter 6](06-agents-and-memory.md) (checkpointer), [Chapter 11](11-runtime-and-human-in-the-loop.md) (`ToolRuntime`, human-in-the-loop) and [Chapter 12](12-mcp-in-langchain.md) (tools from MCP servers). **Next:** [Chapter 14](14-handoffs-skills-router-and-custom-workflows.md) covers the other four patterns.
+
 **After this chapter you can:**
 
 - Explain why one agent with many tools struggles, and what context isolation fixes
@@ -9,8 +15,6 @@
 - Build the subagent pattern: a supervisor that calls agents as tools
 - Control what a subagent receives and what the supervisor gets back
 - Put human approval on actions inside nested subagents
-
-**Builds on:** [Chapter 5](05-tools.md) (tools), [Chapter 6](06-agents-and-memory.md) (checkpointer), [Chapter 11](11-runtime-and-human-in-the-loop.md) (`ToolRuntime`, human-in-the-loop) and [Chapter 12](12-mcp-in-langchain.md) (tools from MCP servers). **Next:** [Chapter 14](14-handoffs-skills-router-and-custom-workflows.md) covers the other four patterns.
 
 ## 13.1 Why one agent is not enough
 
@@ -24,6 +28,12 @@
   - **Parallelisation:** specialised workers run subtasks at the same time
 - **Default to one agent first.** Add more only when tools, context, teams or latency really demand it
 - In LangChain v1 the idea is `Agent = Model + Harness`. A multi-agent system is **several agent objects wired in one of a few well-understood shapes**
+
+> [!IMPORTANT]
+> **🏭 In production**
+> - Start with one agent; add subagents only when you can show context bloat or tool confusion. Every extra agent multiplies model calls, cost and latency
+> - Trace the whole tree: a wrong answer usually starts in a subagent's last message
+> - *Added by Claude.*
 
 ## 13.2 Context bloat and context isolation
 
@@ -104,12 +114,22 @@ model = ScriptedToolModel(responses=[
 ])
 ```
 
-- *Checked:* every example in this chapter and the next ran with this model and no key
+- ✅ *Verified (details in "How this chapter was checked").*
 - **Why it matters:** the interesting parts (wiring, state changes, tool dispatch, handoffs) do not depend on what a real model says
 - **Limit:** it cannot tell you whether a real model **chooses** the right agent. Test that separately with a real model and good descriptions
 - The class notebooks each have a "production wiring" cell with `model="openai:gpt-5-mini"`. Those need your own key and were **not** run here
 
 ## 13.6 Pattern 1: subagents
+
+```mermaid
+flowchart TD
+    U([User]) --> S[Supervisor agent]
+    S -->|tool: schedule_event| C[Calendar subagent]
+    S -->|tool: manage_email| E[Email subagent]
+    C -->|final message only| S
+    E -->|final message only| S
+    S --> U
+```
 
 A **supervisor** agent calls sub-agents **as tools**. It decides which to call, with what input, and how to combine the results.
 
@@ -140,7 +160,7 @@ main_agent = create_agent(model, tools=[call_showtimes_agent])
 ```
 
 - **Wrap each sub-agent as a tool. That is the entire mechanism.** Nothing more exotic
-- *Checked:* the supervisor's trace was four messages (user, its tool call, the tool result, its answer). **The supervisor saw only the sub-agent's final text**, not its inner tool call
+- ✅ *Verified (details in "How this chapter was checked").*
 - The tool's **name and description** are what the supervisor reads to choose
 
 ### The three layers (the personal assistant project)
@@ -191,7 +211,7 @@ def task(agent_name: str, description: str) -> str:
     return result["messages"][-1].content
 ```
 
-- *Checked:* `task` routed to each registered agent by name. An **unknown name raised a bare `KeyError`**, with no helpful message
+- ✅ *Verified (details in "How this chapter was checked").*
 - When the sub-agent has the **same abilities** as the main agent, the point of calling it is **context isolation**: it works in its own window and returns a concise summary
 
 **How the supervisor learns which agents exist:**
@@ -202,7 +222,7 @@ def task(agent_name: str, description: str) -> str:
 | **An `Enum` on the tool argument** | Fewer than about 10, rarely changing | Type-safe, needs a code change |
 | **A discovery tool** (`list_agents(query)`) | More than about 10, or a changing registry | Flexible, adds complexity |
 
-- *Checked:* with the `Enum` (`class AgentName(str, Enum)`), an unknown name was rejected with a `ValidationError` **before** dispatch. The tool schema listed the allowed values
+- ✅ *Verified (details in "How this chapter was checked").*
 - Under about 10 static agents, the simplest option wins
 
 ### What the subagent receives: isolated or forked
@@ -225,7 +245,7 @@ def call_recs_forked(query: str, runtime: ToolRuntime[None, CustomState]) -> str
     return recs_subagent.invoke({"messages": forked})["messages"][-1].content
 ```
 
-- *Checked:* the isolated sub-agent saw only `["Recommend something similar"]`. The forked one saw the parent's earlier message, an **empty message**, and the new ask
+- ✅ *Verified (details in "How this chapter was checked").*
 - **Look at that empty message.** It is the parent's own pending tool-call message. A real provider expects every tool call to be followed by its result, so sending a pending tool call into a fresh sub-agent can be rejected. This was not tested against a live API. Drop that last message before forking
 - The notebook mentions **Deep Agents**, a LangChain library that names these modes `isolated` and `fork` and does forking for you. With plain `create_agent` you build it yourself
 - **Same idea for the project:** pass more context in when a request says "same time as yesterday"
@@ -259,7 +279,7 @@ def call_research(query: str, tool_call_id: Annotated[str, InjectedToolCallId]) 
     })
 ```
 
-- *Checked, and not mentioned in the notebook:* **the extra key is silently dropped unless it is declared in the agent's state schema.** With a plain `create_agent`, `last_research_confidence` was **absent** from the final state. With `state_schema` including `last_research_confidence`, it was `0.92`. Declare every key a tool writes
+- ✅ *Verified (details in "How this chapter was checked").*
 - The notebook ran this tool's `.func` directly, which only shows the `Command` it builds. The graph run above is the real test
 - Use a `Command` only when you need **structured** data (a score, a status, a list of ids) tracked separately from the conversation
 
@@ -293,7 +313,7 @@ for interrupt_ in result["__interrupt__"]:
 result = supervisor_agent.invoke(Command(resume=resume), config)
 ```
 
-- *Checked:* resuming with a **dictionary keyed by interrupt id** worked. Both tools then ran, and the edited email went out with the subject **"Mockups reminder"**
+- ✅ *Verified (details in "How this chapter was checked").*
 - The `edited_action` shape is the one from [Chapter 11](11-runtime-and-human-in-the-loop.md)
 - **Calling a human-in-the-loop sub-agent directly**, outside a checkpointed supervisor run, would try to interrupt with nowhere to resume. The notebook uses a plain calendar agent for its other examples for this reason
 
@@ -304,7 +324,7 @@ result = supervisor_agent.invoke(Command(resume=resume), config)
 - Sub-agents run **inside tool functions**, so LangGraph cannot see them statically. `get_state(..., subgraphs=True)` on the main graph will not show their state. To inspect nested state during an interrupt, call the sub-agent from a **node** in a custom graph ([Chapter 14](14-handoffs-skills-router-and-custom-workflows.md))
 - Not run here
 
-### What the supervisor gets back (LangChain docs)
+### What the supervisor gets back
 
 - *Source: LangChain docs, `multi-agent/subagents-personal-assistant.mdx` (sections 7-8).*
 - A wrapper tool decides what flows each way.
@@ -315,7 +335,7 @@ result = supervisor_agent.invoke(Command(resume=resume), config)
 - *Not re-run:* these patterns reuse the wrapper-tool and `ToolRuntime` mechanics already checked above.
 
 
-### Subagent design decisions (LangChain docs)
+### Subagent design decisions
 
 - *Source: LangChain docs, `multi-agent/index.mdx` and `subagents.mdx`.*
 - **Why multi-agent at all:** context management, distributed development (teams own parts), parallelism. A single agent with the right tools is often enough.
@@ -336,7 +356,7 @@ return Command(update={
 - **Subagents by default** use the inherited checkpointer: fresh state each call, interrupts work, parallel calls are safe. LangGraph cannot see them statically, so `get_state(subgraphs=True)` will not list them.
 - **Supervisor vs router:** the supervisor is a full agent that keeps the conversation and decides turn by turn; a router is a classification step.
 - **Subagents do not talk to the user directly** (use an interrupt inside one if you must).
-- *Checked (scripted model):* a tool returning a `Command` copied the subagent's state key into the parent (`found` became `x-found`) and the tool message carried the subagent's text; an `Enum` argument accepted `"writer"` and rejected `"bogus"` with a `ValidationError`. Async jobs and `get_state(subgraphs=True)` were not run.
+- ✅ *Verified (details in "How this chapter was checked").*
 
 ## 13.7 Questions from the class
 
@@ -351,43 +371,77 @@ return Command(update={
 
 ## 13.8 Interview corner
 
-**1. Why use more than one agent?**
+**What interviewers listen for:** you can explain **context isolation**, you start with a single agent, and you know a subagent is just a tool that wraps another agent.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. Why use more than one agent?</summary>
 
 - Context management, distributed ownership and parallelism. A single agent with dozens of tools picks badly and carries too much context
 - *Stronger answer:* start with one agent and split only when a real limit appears
 
-**2. What is context isolation?**
+</details>
+
+<details class="qa"><summary>2. What is context isolation?</summary>
 
 - A sub-agent does the heavy reading in its own window and returns a short summary, so the parent's context stays small for every later call
 - *Stronger answer:* the demo went from about 178K to about 11K tokens, from architecture and not from a smaller model
 
-**3. Router or hierarchical?**
+</details>
+
+<details class="qa"><summary>3. Router or hierarchical?</summary>
 
 - A router hands the request off and is done. An orchestrator gets the sub-agent's result back and uses it
 - *Stronger answer:* a LangChain router is usually a classification step, not a full agent, and has no multi-turn state
 
-**4. How do you build a subagent in LangChain?**
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>4. How do you build a subagent in LangChain?</summary>
 
 - Wrap an agent in a tool whose body calls `agent.invoke` and returns the final message
 - *Stronger answer:* return only the final message, and tell the sub-agent to restate its results in it
 
-**5. How does a supervisor know which sub-agents exist?**
+</details>
+
+<details class="qa"><summary>5. How does a supervisor know which sub-agents exist?</summary>
 
 - Tool descriptions, a prompt list, an `Enum`, or a discovery tool for large registries
 - *Stronger answer:* routing quality equals description quality
 
-**6. What does a forked subagent see that an isolated one does not?**
+</details>
+
+<details class="qa"><summary>6. What does a forked subagent see that an isolated one does not?</summary>
 
 - The parent's message history. It gets more context at the price of a larger prompt and less isolation
 - *Stronger answer:* drop the parent's pending tool-call message before forking
 
-**7. How do you approve a risky action inside a subagent?**
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>7. How do you approve a risky action inside a subagent?</summary>
 
 - Put human-in-the-loop middleware on the specialist and a checkpointer on the top-level agent. Resume with decisions keyed by interrupt id
 
-**8. Sync or async subagents?**
+</details>
+
+<details class="qa"><summary>8. Sync or async subagents?</summary>
 
 - Sync when the next step needs the result. Async, with a job system and start, status and result tools, when the user should not wait
+
+</details>
+
+<details class="qa"><summary>9. When is a multi-agent system the wrong choice?</summary>
+
+- When one agent with good tools fits in context, when steps are fixed (use a workflow), or when latency matters more than quality
+- *Stronger answer:* multi-agent multiplies calls and failure points; prove the gain with an eval before adding agents
+
+</details>
+
+> [!TIP]
+> **🧩 Design question to practise:** *"A research assistant searches the web, reads PDFs and writes a report."* Decide single agent vs supervisor with subagents, what each subagent receives and returns, and how you cap cost.
 
 ## 13.9 Added by Claude, not from the sources
 
@@ -400,6 +454,17 @@ Items marked *checked* were run with `langchain` 1.4.7 and `langgraph` 1.2.19, u
 - **Evaluate descriptions, not only code.** Run a set of example requests through a real model and check which agent is chosen. The scripted model cannot do this
 - **Watch cost.** Sub-agents add model calls. Measure tokens before and after
 - **Set `recursion_limit` sensibly** for supervisors that loop ([Chapter 1](01-introduction-to-langchain.md))
+
+## Cheat sheet
+
+```python
+research_agent = create_agent(model, [search], system_prompt="Return all facts in your final message.")
+@tool
+def research(query: str) -> str:
+    """Research a question and return the findings."""
+    return research_agent.invoke({"messages": [("user", query)]})["messages"][-1].text
+supervisor = create_agent(model, [research], checkpointer=InMemorySaver())
+```
 
 ## Recap
 
@@ -429,6 +494,16 @@ Items marked *checked* were run with `langchain` 1.4.7 and `langgraph` 1.2.19, u
 - The context-isolation numbers, Agent Flow, sync and async jobs, `checkpointer=True`, state inspection and Deep Agents were **not run**
 - **No real model was used.** Whether a real model picks the right agent was not tested
 - The class transcript and the class repository's notebooks are the source for everything not marked *checked*
+- **Details by section** (moved here from the ✅ markers):
+  - *13.5 Testing without an API key:* Checked: every example in this chapter and the next ran with this model and no key
+  - *The mechanism:* Checked: the supervisor's trace was four messages (user, its tool call, the tool result, its answer). **The supervisor saw only the sub-agent's final text**, not its inner tool call
+  - *Tool per agent, or one dispatch tool:* Checked: `task` routed to each registered agent by name. An **unknown name raised a bare `KeyError`**, with no helpful message
+  - *Tool per agent, or one dispatch tool:* Checked: with the `Enum` (`class AgentName(str, Enum)`), an unknown name was rejected with a `ValidationError` **before** dispatch. The tool schema listed the allowed values
+  - *What the subagent receives: isolated or forked:* Checked: the isolated sub-agent saw only `["Recommend something similar"]`. The forked one saw the parent's earlier message, an **empty message**, and the new ask
+  - *What the supervisor gets back:* Checked, and not mentioned in the notebook: **the extra key is silently dropped unless it is declared in the agent's state schema.** With a plain `create_agent`, `last_research_confidence` was **absent** from the final state. With `state_schema` including `last_research_confidence`, it was `0.92`. Declare every key a tool writes
+  - *Human approval inside nested subagents:* Checked: resuming with a **dictionary keyed by interrupt id** worked. Both tools then ran, and the edited email went out with the subject **"Mockups reminder"**
+  - *Subagent design decisions:* Checked (scripted model): a tool returning a `Command` copied the subagent's state key into the parent (`found` became `x-found`) and the tool message carried the subagent's text; an `Enum` argument accepted `"writer"` and rejected `"bogus"` with a `ValidationError`. Async jobs and `get_state(subgraphs=True)` were not run.
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 
 ## Sources and further reading
 
