@@ -45,3 +45,10 @@ Every chapter in every book follows this. The reader (`index.html`) and GitHub b
 - Class-specific sections ("Questions from the class" and the like) stay where they are, polished. They are not removed.
 - Any current-state claim (versions, companies, framework landscape) is web-checked and sourced.
 - Emojis only as block markers and level badges, not sprinkled in text.
+
+## Highlights (reader feature, nothing to do per chapter)
+- Readers highlight by selecting text and tapping Highlight. Highlights live in the private repo `MyNotes-highlights` (`highlights.json`), not in chapter files.
+- A highlight is found again by its exact text plus 40 characters either side, so adding sections or editing nearby lines keeps it.
+- **Rewriting a sentence that may be highlighted:** keep the key phrase if the meaning is unchanged. A fully rewritten line moves to "Needs attention" on that page, so mention it in the batch summary.
+- Chapter file names are part of the key: renaming a chapter file orphans its highlights, so avoid renames.
+- Headings, bullets, table rows and callouts are all highlightable. "★ Marked only" shows just the highlighted lines under their headings.
