@@ -1,51 +1,61 @@
 # Chapter 1: Why Pydantic, and `BaseModel`
 
+*Type hints describe what you hope for. Pydantic checks what you actually got.*
+
+> [!NOTE]
+> **📍 At a glance**
+> - **You will learn:** why Python hints protect nothing at run time, and how `BaseModel` turns untrusted data into a trusted object
+> - **You will build:** a `SignupForm` that converts sensible input, rejects nonsense and dumps clean data
+> - **Level:** beginner · **Time:** about 30 minutes
+> - **Builds on:** [Python Ch 2](../python/02-python-refresher.md) (dataclasses and type hints)
+
 **After this chapter you can:**
 
 - Say why Python type hints do not protect you, and what Pydantic adds
 - Tell a plain class, a dataclass and a `BaseModel` apart by what each checks
 - Predict how Pydantic converts or rejects `"28"`, `"28eight"`, `28.5` and `"True"`
-- Read a `ValidationError` and use `model_dump()`
-
-**Builds on:** [Python Ch 2](../python/02-python-refresher.md) (dataclasses and the typing problem).
-
-Pydantic checks data at run time. It sits between "something produced data" (a user, an API, an LLM) and "my code may trust it".
+- Read a `ValidationError`, and use `model_dump()` and `model_dump_json()`
+- Configure a model: reject unknown keys, check assignments, freeze it, turn off conversion
+- Answer the "Pydantic v1 vs v2" interview question
 
 ## 1.1 Why Pydantic exists
 
-- In Java or C++, a declared type is enforced. In Python a name can be re-pointed from `int` to `str` to `list` without complaint
-- Friendly for learning. Dangerous in production, where bad input meets downstream systems
-- A wrong type flows on silently until something breaks far away
-- Pydantic is one of the most downloaded packages on PyPI. The OpenAI and Anthropic SDKs use it
-- Mentor's argument for learning it even though AI can write the code: if you do not understand it, you cannot debug or trust what the AI hands you
+- Java or C++ enforce a declared type. Python lets a name move from `int` to `str` to `list` without complaint
+- Friendly while learning. Dangerous in production, where bad input meets databases, payments and other services
+- A wrong type flows on silently and breaks far away from where it entered
+- Pydantic checks data **at the boundary**: the moment it arrives from a user, an API, a file or an LLM
+- It is among the most downloaded packages on PyPI. FastAPI, the OpenAI and Anthropic SDKs, and LangChain all build on it
+- You still need to understand it when AI writes the code: you cannot debug or trust code you cannot read
 
-*Source: Live-Class-2026, `classes_transcription_summary/03`; `classes_summary/03`.*
+```mermaid
+flowchart LR
+    U["Untrusted data<br/>user · API · file · LLM"] --> M{"BaseModel<br/>parse + validate"}
+    M -- "fits the shape" --> T["Trusted object<br/>right types, clean values"]
+    M -- "does not fit" --> E["ValidationError<br/>field, reason, input"]
+    T --> C["Your code"]
+```
 
 ### Three ways to define a blueprint
 
-| Approach | Type checking |
+| Approach | Type checking at run time |
 |---|---|
 | Plain class with your own `__init__` | None |
 | `@dataclass` | None (it only removes boilerplate) |
-| Pydantic `BaseModel` | Full, on every field, automatically |
+| Pydantic `BaseModel` | Every field, automatically |
 
-- *Checked:* the plain class and the dataclass both accepted `age="banana"`. Only `BaseModel` raised
-- The class slide uses a paper customs-declaration form: fields (`Name: str`, `PassportNumber: str`) are the blueprint. The three approaches differ in whether anyone checks the boxes
-- The slide marks `BaseModel` as the one to master. Loose typing in Python and JavaScript becomes a big problem in production
-- The slide also maps validators to fields: `email` needs a validator or `EmailStr`; years of experience needs a validator or a `Field()` limit
-- Editors show the type when you hover a variable, for example `settings: dict[str, str]`
-
-*Source: `Class-3-4.pdf` (class 03 whiteboard).*
+- ✅ *Verified: the plain class and the dataclass both accepted `age="banana"`; only `BaseModel` raised (details at the end).*
+- Think of a paper form: the fields are the blueprint. The three approaches differ only in whether anyone checks the boxes
+- Editors show the hinted type on hover (`settings: dict[str, str]`), but that is help for you, not a check on data
 
 | Dataclass | Pydantic `BaseModel` |
 |---|---|
-| Removes boilerplate only | Removes boilerplate and validates |
+| Removes boilerplate only | Removes boilerplate **and** validates |
 | Nothing enforced at run time | Raises `ValidationError` on bad input |
-| Fine for simple internal structures | Essential for API inputs and outputs and agent tool schemas |
+| Fine for internal structures you build yourself | Essential at the edges: API inputs and outputs, config, tool arguments, LLM replies |
+
+*Source: Live-Class-2026, `classes_summary/03`, `classes_transcription_summary/03`, whiteboard `Class-3-4.pdf`.*
 
 ### The problem in plain Python
-
-From `Pydantic_From_Scratch.ipynb`:
 
 ```python
 def register_user(name, email, age):
@@ -56,27 +66,25 @@ register_user("Aditi", "aditi@example.com", 28)      # born approx. 1998
 register_user("Rohan", "rohan@example.com", 10000)   # born approx. -7974
 ```
 
-- Nothing stops garbage. The second call is a valid `int` but not a sensible age
-- That is the difference between **type validation** and **data validation** ([Chapter 2](02-field-and-special-types.md))
-- I ran both calls and got the outputs in the comments
+- Nothing stops garbage. `10000` is a valid `int` but not a sensible age
+- That is the gap between **type validation** (is it an `int`?) and **data validation** (does the value make sense?), covered in [Chapter 2](02-field-and-special-types.md)
+- ✅ *Verified: both calls give the outputs in the comments.*
 
 **Type hints are not enforced:**
 
 ```python
 age: int = 28
 tags: list[str] = ["python", "pydantic", "fastapi"]
-word_counts: dict[str, int] = {"error": 12, "warning": 5}
 age: int = "twenty-eight"   # Python accepts this; `age` is now a string
 ```
 
-- `1. Why Pydantic.py` shows the same typed lists and dicts, and ends with `from pydantic import BaseModel, EmailStr`
-- Hints describe intent. Only a Pydantic model checks them
+- Hints describe intent. Static checkers (mypy, Pyright) read them before run time; only a Pydantic model checks real data at run time
 
-*Source: `Pydantic_From_Scratch.ipynb` and `1. Why Pydantic.py`.*
+*Source: `Pydantic_From_Scratch.ipynb`, `1. Why Pydantic.py`.*
 
 ## 1.2 `BaseModel`: the shape you are willing to trust
 
-The class opened with the failure Pydantic catches: a messy LLM reply such as `{"amount": "five hundred", "currency": "us dollars"}`.
+A messy LLM reply such as `{"amount": "five hundred", "currency": "us dollars"}` is the classic failure Pydantic catches.
 
 ```python
 from pydantic import BaseModel, ValidationError
@@ -85,27 +93,33 @@ class CurrencyAmount(BaseModel):
     amount: float
     currency: str
 
-good = CurrencyAmount(amount=100, currency="USD")            # fine
-CurrencyAmount(amount="five hundred", currency="USD")        # ValidationError, instantly
-CurrencyAmount(amount="100", currency="USD")                 # "100" becomes 100.0
+CurrencyAmount(amount=100, currency="USD")              # fine
+CurrencyAmount(amount="100", currency="USD")            # "100" becomes 100.0
+CurrencyAmount(amount="five hundred", currency="USD")   # ValidationError, instantly
 ```
 
-### Optional fields and defaults
+### Required, optional and defaults
 
 - A field with a default is optional. Every other field is required
-- No known default? Use `None` (Python has no `null`)
+- No sensible default? Use `None` (Python's "no value")
 
 ```python
 class SignupForm(BaseModel):
-    name: str
+    username: str
+    email: str
     age: int
-    is_interested: bool = False       # default makes it optional
-    nationality: str | None = None    # unknown default: use None
+    newsletter_opt_in: bool = False      # default makes it optional
+    nationality: str | None = None       # unknown: use None
 ```
 
-### Type coercion
+> [!WARNING]
+> **⚠️ Pitfall: `str | None` does not mean optional**
+> - `nationality: str | None` with **no default** is still required; it just accepts `None`
+> - Only `= None` (or another default) makes the key optional
 
-Pydantic forgives a reasonable mismatch and refuses a lossy or ambiguous one. *Checked* on an `age: int` field (Pydantic 2.12.5):
+### Type coercion (lax mode)
+
+Pydantic converts a reasonable mismatch and refuses a lossy or ambiguous one. On an `age: int` field:
 
 | Input | Result |
 |---|---|
@@ -113,43 +127,45 @@ Pydantic forgives a reasonable mismatch and refuses a lossy or ambiguous one. *C
 | `"28.0"` or `28.0` | `28` |
 | `"28eight"` | `ValidationError` |
 | `28.5` | `ValidationError` (a fraction is too lossy to guess) |
-| `True` | `1` (see 1.5) |
+| `True` | `1` |
 
-### Required fields, `bool` coercion and `model_dump`
+- ✅ *Verified on Pydantic 2.13.5 (details at the end).*
+- On a `bool` field: `"True"`, `"yes"`, `"1"` become `True`; `"maybe"` is rejected
+
+### Creating, dumping and reading errors
 
 ```python
-class SignupForm(BaseModel):
-    username: str
-    email: str
-    age: int
-    newsletter_opt_in: bool = False
-
-SignupForm(username="aditi28", email="a@e.com", age=28, newsletter_opt_in="True")
-# newsletter_opt_in=True       the string "True" becomes a real bool
-
-SignupForm(username="Mayank")
-# ValidationError: email and age are missing (error type: missing)
-
 SignupForm(username="a", email="a@e.com", age="28").model_dump()
-# {'username': 'a', 'email': 'a@e.com', 'age': 28, 'newsletter_opt_in': False}
+# {'username': 'a', 'email': 'a@e.com', 'age': 28, 'newsletter_opt_in': False, 'nationality': None}
+
+try:
+    SignupForm(username="Mayank")
+except ValidationError as e:
+    print(e.error_count())            # 2
+    print(e.errors()[0]["loc"], e.errors()[0]["type"])   # ('email',) missing
 ```
 
-- A missing required field is an error, not a default
-- `model_dump()` gives a plain dict, already cleaned (`"28"` is now `28`)
-- With no `Field()` limits, `age=100000` is accepted (leads into Chapter 2)
+| You have | Call |
+|---|---|
+| Keyword arguments | `Model(field=value, ...)` |
+| A dict | `Model.model_validate(data)` |
+| A JSON string | `Model.model_validate_json(text)` |
+| A model, want a dict | `model.model_dump()` |
+| A model, want JSON text | `model.model_dump_json()` |
+| A model, want a changed copy | `model.model_copy(update={...})` |
 
-*Source: `Pydantic_From_Scratch.ipynb` (optional vs mandatory, coercion, `model_dump`).*
+- A missing required field is an error (`missing`), never a silent default
+- `model_dump()` returns values already cleaned (`"28"` is now `28`)
 
 ### The mini-project folder
 
-`8_Pydantic/` is a `uv` project:
+`8_Pydantic/` is a `uv` project used in the class:
 
 | File | What it is |
 |---|---|
 | `1. Why Pydantic.py` | The motivating problem: typed lists and dicts |
 | `Pydantic_From_Scratch.ipynb` | The step-by-step build used in this book |
-| `main.py` | A "Hello from 8-pydantic!" scaffold with no Pydantic |
-| `test.ipynb` | Two empty cells |
+| `main.py`, `test.ipynb` | A scaffold and an empty notebook (nothing to learn) |
 
 ```bash
 uv sync
@@ -158,68 +174,185 @@ uv run main.py
 
 *Source: the folder's `README.md`, `main.py`, `test.ipynb`.*
 
-## 1.3 Interview corner
+## 1.3 Configuring a model with `model_config`
 
-**Q1. Why does Python need Pydantic if it has type hints?**
-- Hints are not enforced at run time. Pydantic checks them when the object is created
+Defaults are forgiving. Production code usually tightens them.
 
-**Q2. Dataclass or `BaseModel`?**
-- A dataclass only removes boilerplate. `BaseModel` also validates and raises `ValidationError`. Use it at the edges: APIs, LLM output, tool arguments
+```python
+from pydantic import BaseModel, ConfigDict
 
-**Q3. What is the difference between type validation and data validation?**
-- Type: is it an `int`? Data: does the value make sense (age 10000)? `Field()` and validators do the second
+class Payment(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",            # unknown keys are an error, not silently dropped
+        validate_assignment=True,  # m.amount = "banana" is checked too
+        str_strip_whitespace=True, # " USD " becomes "USD"
+    )
+    amount: float
+    currency: str
+```
 
-**Q4. What does Pydantic do with `"28"` for an `int` field?**
-- Converts it. It rejects `"28eight"` and `28.5`
+| Setting | Default | Turn it on when |
+|---|---|---|
+| `extra="forbid"` | `"ignore"`: unknown keys dropped | A typo in a key must fail (config files, tool arguments) |
+| `validate_assignment=True` | Off: assignment not checked | Objects are changed after creation |
+| `frozen=True` | Off | Values must never change; the model also becomes hashable |
+| `strict=True` | Off: lax conversion | `"28"` for an `int` should be rejected, not converted |
 
-**Q5. Required or optional?**
-- A field with a default (or `None`) is optional. All others are required
+- ✅ *Verified: `extra="forbid"` gave `extra_forbidden`; without `validate_assignment`, `m.age = "banana"` was stored as a string; `frozen=True` gave `frozen_instance`; strict mode rejected `"28"` even inside JSON text.*
+- A frozen model changes only through `model_copy(update={...})`, which returns a new object
 
-**Q6. How do you turn a model back into a dict or JSON?**
-- `model_dump()` for a dict, `model_dump_json()` for a JSON string
+> [!IMPORTANT]
+> **🏭 In production**
+> - Use **`extra="forbid"`** on config and on anything a model fills in: a misspelled key should fail loudly, not vanish
+> - Use **strict mode** for money, IDs and flags where a guessed conversion is a bug; keep lax mode for messy human input
+> - Validate **once, at the edge**. Inside your code, pass the model around; do not re-check plain dicts everywhere
+>
+> *Added by Claude.*
 
-**Q7. How do you validate a dict or a JSON string?**
-- `Model(**data)` or `Model.model_validate(data)`; `Model.model_validate_json(text)` for raw JSON
+## 1.4 Pydantic v1 vs v2
 
-**Q8. Why do agent frameworks lean on Pydantic?**
-- Tool arguments and structured replies come from a model. They must be checked before use ([Chapter 5](05-validating-llm-output.md))
+You will meet v1 code in older projects, tutorials and AI-generated snippets.
 
-## 1.4 Added by Claude, not from the sources
+| v1 | v2 (current) |
+|---|---|
+| `.dict()`, `.json()` | `.model_dump()`, `.model_dump_json()` |
+| `Model.parse_obj(d)`, `parse_raw(s)` | `Model.model_validate(d)`, `model_validate_json(s)` |
+| `class Config:` inside the model | `model_config = ConfigDict(...)` |
+| `@validator`, `@root_validator` | `@field_validator`, `@model_validator` ([Chapter 3](03-validators.md)) |
+| Validation in pure Python | Core rewritten in Rust (`pydantic-core`), much faster |
 
-All *checked* with Pydantic 2.12.5.
+- ✅ *Verified: in 2.13.5, `.dict()` still works but raises `PydanticDeprecatedSince20`.*
+- New code: always the v2 names. Seeing `.dict()` or `@validator` is a sign the snippet is old
 
-- **Unknown keys are ignored by default.** `Form(..., color="red")` worked and dropped `color`. Use `ConfigDict(extra="forbid")` to reject it
-- **Assignment is not validated by default.** After `m.age = "banana"`, `m.age` was `'banana'`. Set `validate_assignment=True` to check assignments
-- **Strict mode stops coercion.** With `ConfigDict(strict=True)`, `age="28"` was rejected
-- **JSON schema comes free.** `BM.model_json_schema()` returned `properties` and `required`. This is how tools and structured output get their schemas
-- **Surprising coercions:** `"yes"` became `True` for a `bool` field; `"maybe"` was rejected. `True` became `1` for an `int` field. Use strict mode if that matters
-- **`model_dump_json()`** gives a JSON string directly, with cleaned values
+## 1.5 Added by Claude, not from the sources
 
-## 1.5 Recap
+- **The JSON schema comes free.** `Model.model_json_schema()` returns `properties` and `required`. Tool definitions and structured output are built from exactly this ([Chapter 5](05-validating-llm-output.md))
+- **Mutable defaults are safe in Pydantic.** `tags: list[str] = []` gives each instance its own list (✅ *verified*). Plain classes and dataclasses do not protect you here; `Field(default_factory=list)` makes the intent explicit
+- **Validation is not authorisation.** A perfectly valid `user_id` can still belong to someone else. Check permissions separately
+- **Keep raw input when debugging LLM output.** Log the text that failed validation; the error alone rarely shows why the model produced it
 
-- Python hints are not enforced. `BaseModel` checks every field when you create the object
-- Plain class and dataclass: no checks. `BaseModel`: full checks
-- Coercion: `"28"` yes, `"28eight"` no, `28.5` no
-- Defaults make a field optional. `model_dump()` returns a clean dict
-- Extras are ignored and assignment is unchecked unless you configure it
+## 1.6 Interview corner
+
+**What interviewers listen for:** you know hints are not enforced, you validate at the **boundary**, and you know the v2 API and the main `model_config` switches.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. Why does Python need Pydantic if it has type hints?</summary>
+
+- Hints are not enforced at run time. Pydantic checks real data when the object is created
+- *Stronger answer:* static checkers cover your own code; Pydantic covers data from outside, which no static tool can see
+
+</details>
+
+<details class="qa"><summary>2. Dataclass or <code>BaseModel</code>?</summary>
+
+- A dataclass only removes boilerplate. `BaseModel` also validates and converts
+- *Stronger answer:* dataclasses for internal structures you build yourself; `BaseModel` at every boundary: APIs, config, tool arguments, LLM output
+
+</details>
+
+<details class="qa"><summary>3. What happens with <code>"28"</code>, <code>"28eight"</code> and <code>28.5</code> for an <code>int</code> field?</summary>
+
+- `"28"` becomes `28`; the other two are rejected
+- *Stronger answer:* lax mode converts only when nothing is lost; `strict=True` rejects even `"28"`
+
+</details>
+
+<details class="qa"><summary>4. How do you turn a model into a dict or JSON, and back?</summary>
+
+- `model_dump()` / `model_dump_json()` out; `model_validate()` / `model_validate_json()` in
+- *Stronger answer:* `model_validate_json` parses and validates in one step, so JSON errors and field errors come back the same way
+
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>5. A client sends an extra key <code>"colour"</code>. What does Pydantic do?</summary>
+
+- Ignores and drops it by default
+- *Stronger answer:* set `extra="forbid"` where a misspelled key should fail, for example config or tool arguments
+
+</details>
+
+<details class="qa"><summary>6. You set <code>m.age = "banana"</code> after creation. Is it checked?</summary>
+
+- Not by default; the string is stored
+- *Stronger answer:* `validate_assignment=True` checks it, or `frozen=True` forbids changes and you use `model_copy(update=...)`
+
+</details>
+
+<details class="qa"><summary>7. What changed between Pydantic v1 and v2?</summary>
+
+- New method names (`model_dump`, `model_validate`), `model_config`, new validator decorators
+- *Stronger answer:* the core moved to Rust (`pydantic-core`), so validation is much faster; v1 names still run but raise deprecation warnings
+
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>8. Strict or lax mode for a payments API?</summary>
+
+- Strict for amounts, IDs and flags: a guessed conversion is a bug
+- *Stronger answer:* strict per field or per model where correctness matters, lax where humans type input; and use `Decimal`, not `float`, for money ([Chapter 2](02-field-and-special-types.md))
+
+</details>
+
+<details class="qa"><summary>9. Why do agent frameworks lean on Pydantic?</summary>
+
+- Tool arguments and structured replies come from a model and must be checked before use
+- *Stronger answer:* one class gives the JSON schema sent to the model **and** the validator for its reply, so the contract and the check never drift apart
+
+</details>
+
+> [!TIP]
+> **🧩 Design question**
+> - *"An internal service receives JSON from five partner systems. Each partner sometimes adds fields or sends numbers as strings. How do you design validation?"*
+> - Talk about: one model per partner contract, `extra` policy per partner, lax vs strict per field, logging rejected payloads, and returning `errors()` to the partner
+
+## Cheat sheet
+
+```python
+from pydantic import BaseModel, ConfigDict, ValidationError
+class User(BaseModel):
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
+    name: str
+    age: int
+    nickname: str | None = None                # optional
+u = User.model_validate({"name": "A", "age": "28"})   # age -> 28
+u.model_dump(); u.model_dump_json(); u.model_copy(update={"age": 29})
+try: User(name="A")
+except ValidationError as e: e.errors()        # [{'loc': ('age',), 'type': 'missing', ...}]
+```
+
+## Recap
+
+- Python hints are not enforced; `BaseModel` checks every field when the object is created
+- Validate once, at the boundary, then trust the object
+- Lax mode converts only lossless input; strict mode converts nothing
+- A default makes a field optional; `str | None` alone does not
+- `model_config`: `extra="forbid"`, `validate_assignment`, `frozen`, `strict`
+- New code uses the v2 names: `model_dump`, `model_validate`, `model_config`
 
 ## Practice
 
-1. Show with the plain-class, dataclass and `BaseModel` demo why only `BaseModel` rejects `age="banana"`
-2. Predict the result for `age` set to `"28"`, `"28eight"` and `28.5`, then run it
-3. Make a model reject unknown keys, then one that validates assignments
-4. Write `register_user` with a `BaseModel` so `age=10000` is rejected (you need Chapter 2)
+1. Show with a plain class, a dataclass and a `BaseModel` why only `BaseModel` rejects `age="banana"`
+2. Predict the result for `age` set to `"28"`, `"28eight"`, `28.5` and `True`, then run it
+3. Make a model reject unknown keys, then one that validates assignments, then a frozen one
+4. Convert three lines of v1 code (`.dict()`, `parse_obj`, `class Config`) to v2
+5. Write `register_user` with a `BaseModel` so `age=10000` is rejected (needs [Chapter 2](02-field-and-special-types.md))
 
 ## How this chapter was checked
 
-- **Run** (Pydantic 2.12.5): the plain class, dataclass and model with `"banana"`; six `age` inputs; `bool` coercion; missing fields; `model_dump`; a huge age; unknown keys; strict mode; `extra="forbid"`; assignment with and without `validate_assignment`; the JSON schema; `model_dump_json`
-- **Rewritten** from the earlier chapter, built from the class summaries, the whiteboard and the notebook. I did not re-open those in this pass
+- **Run** (Pydantic 2.13.5): the plain class, dataclass and model with `"banana"`; six `age` inputs; `bool` coercion; missing fields and `error_count()`; `model_dump`; unknown keys; `extra="forbid"`; assignment with and without `validate_assignment`; `frozen=True`, hashing and `model_copy`; strict mode on Python and JSON input; `.dict()` deprecation warning; mutable list default; JSON schema
+- **Cheat sheet:** run as written
 - **Not run:** `uv sync` and `main.py` in the mini-project folder
+- The "boundary" and production advice in 1.3 and 1.5 is Added by Claude: standard engineering practice, not from the class
+- The 2026 review added the diagram, 1.3, 1.4, the graded interview layout, the design question and the cheat sheet
 
 ## Sources and further reading
 
-- Live-Class-2026, `classes_summary/03 - 4 Jul - Pydantic Deep Dive.md`
-- Live-Class-2026, `classes_transcription_summary/03 - 4 Jul - Pydantic Deep Dive.md`
-- Live-Class-2026, code folder `.../02-03 - 28 Jun & 4 Jul - .../8_Pydantic/` and the whiteboard `Class-3-4.pdf`
+- Live-Class-2026, `classes_summary/03 - 4 Jul - Pydantic Deep Dive.md` and `classes_transcription_summary/03`
+- Live-Class-2026, code folder `8_Pydantic/` and the whiteboard `Class-3-4.pdf`
+- Pydantic docs: [Models](https://docs.pydantic.dev/latest/concepts/models/), [Configuration](https://docs.pydantic.dev/latest/concepts/config/), [Migration guide v1 to v2](https://docs.pydantic.dev/latest/migration/)
 
 Previous: [Python Ch 2](../python/02-python-refresher.md) · Next: [Chapter 2](02-field-and-special-types.md)
