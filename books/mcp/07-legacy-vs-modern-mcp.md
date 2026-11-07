@@ -1,5 +1,14 @@
 # Chapter 7: Legacy vs modern MCP
 
+*The 2026 spec turns "remember me" into "tell me every time". Know both, because you will meet both.*
+
+> [!NOTE]
+> **📍 At a glance**
+> - **You will learn:** the real spec timeline, the one idea behind the 2026-07-28 changes, what was removed or deprecated, and how a current client behaves
+> - **You will build:** a modern request with `_meta`, and a client that works with the current library
+> - **Level:** intermediate to advanced · **Time:** about 45 minutes
+> - **Builds on:** [Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md) (the legacy handshake). **Leads to:** [Chapter 8](08-interview-questions.md)
+
 **After this chapter you can:**
 
 - Say what changed between the legacy spec (2025-11-25) and the modern spec (2026-07-28), and the one idea behind every change
@@ -34,6 +43,24 @@
 - Every other change below follows from this idea
 
 *Checked on a legacy HTTP server:* the `initialize` reply carried an `mcp-session-id` header, which is what the class showed with `curl`.
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+    rect rgba(127,127,127,0.08)
+    Note over C,S: Legacy 2025-11-25: remember me
+    C->>S: initialize (version, capabilities)
+    S-->>C: result + Mcp-Session-Id
+    C->>S: initialized
+    C->>S: tools/call (session id header)
+    end
+    rect rgba(127,127,127,0.08)
+    Note over C,S: Modern 2026-07-28: tell me every time
+    C->>S: tools/call + _meta (version, capabilities)
+    S-->>C: result (+ handle for any state)
+    end
+```
 
 ## 7.3 What changed, side by side
 
@@ -133,7 +160,7 @@ Every client does five things: **start, handshake, call, use the response, clean
 - **Sampling:** a server borrows the **client's** model, so a light server needs no model key of its own
 - **Modern way:** the tool calls an LLM provider **directly**, with its own key. This is also the spec's suggested migration
 - Class proof: the old sampling pattern fails on the current library. Class's `summarize_week` tool was rewritten to call a provider
-- *Checked:* the server `Context` class in `fastmcp` 4.1.4 has **no `sample` method**, but does have `elicit` and `report_progress`. The `Client` still accepts a `sampling_handler` argument. A full sampling run was not tested
+- ✅ *Verified:* the server `Context` class in `fastmcp` 4.1.4 has **no `sample` method**, but does have `elicit` and `report_progress`. The `Client` still accepts a `sampling_handler` argument. A full sampling run was not tested
 - Whether a tool needs a completion is decided by **the tool's own code**. The framework does not call one for you
 
 ### Elicitation: only on a legacy connection
@@ -171,10 +198,19 @@ async def log_time(employee: str, hours: float, ctx: Context) -> str:
 ### Ping, timeout and cancellation
 
 - **Ping** asks "are you still there?". Removed in the strict modern sense, since nothing persistent is left to ping. In legacy mode `client.ping()` returned `True` in class
-  - *Checked:* `True` in `legacy`, and "Method not found" in `auto`
+  - ✅ *Verified:* `True` in `legacy`, and "Method not found" in `auto`
 - **Timeout and cancellation:** a deliberately slow tool (5 seconds) against a client timeout of 1 second was cancelled with a clear error. A longer timeout let it finish
-  - *Checked:* `Client(..., timeout=1)` and a 5-second tool gave `Request 'tools/call' timed out` after 1.0 seconds. With `timeout=10` and a 2-second tool it returned normally
+  - ✅ *Verified:* `Client(..., timeout=1)` and a 5-second tool gave `Request 'tools/call' timed out` after 1.0 seconds. With `timeout=10` and a 2-second tool it returned normally
   - **Rule:** every sent request should have a timeout. A cancellation notification stops waiting. A progress notification can reset the clock while the server is still working. Progress reporting was not tested
+
+> [!IMPORTANT]
+> **🏭 In production: living through a spec change**
+> - **Support both for a while:** hosts upgrade at different speeds. Check what each client sends and answer accordingly
+> - **Watch the lifecycle labels:** a Deprecated feature still works for at least twelve months; a Removed one does not. Plan migrations from the changelog, not from blog posts
+> - **Stateless requests scale more simply:** any replica can answer any request, so load balancers need no sticky sessions
+> - **Pin SDK versions** and run contract tests against an old and a new client before upgrading
+>
+> *Added by Claude.*
 
 ## 7.6 How LangChain fits in
 
@@ -200,55 +236,111 @@ async def log_time(employee: str, hours: float, ctx: Context) -> str:
 - **Does LangChain's MCP support create servers?** No, only consumes them
 - **Can an OpenRouter key replace a provider key in the client exercises?** Yes, with a small change to the endpoint and model name
 
-## 7.9 Interview corner
-
-**1. What is the single idea behind the modern spec?**
-
-- Stateless requests: no handshake and no session. Every message carries its version and capabilities
-- *Stronger answer:* the gain is that any replica can serve any request, so no sticky routing
-
-**2. Removed or deprecated?**
-
-- Removed: the old handshake, ping, `logging/setLevel`, the session header. Deprecated: Roots, Sampling, Logging, HTTP + SSE
-- *Stronger answer:* deprecated has a twelve-month minimum, and a library may drop code sooner
-
-**3. What replaces sampling?**
-
-- The tool calls an LLM provider directly with its own key
-
-**4. How can a stateless server ask the user a question?**
-
-- Only while handling a request the client sent. In the spec this is MRTR
-- *Stronger answer:* a server never contacts a client out of nowhere
-
-**5. A client meets an old server. What does it do?**
-
-- In `auto` mode it tries `server/discover`, and on failure falls back to `initialize`
-- *Checked:* a modern client really does this
-
-**6. Why does every request now carry `_meta`?**
-
-- Because nobody remembers the client. The version and capabilities travel with each call
-- *Checked:* a request without it was refused
-
-**7. How do you keep state without sessions?**
-
-- Return a handle from a tool (such as a `basket_id`) and pass it back as an argument
-
-**8. Will my legacy server break?**
-
-- No. Adoption is opt-in. Plan to support both, and watch the deprecated list
-
-## 7.10 Added by Claude, not from the sources
+## 7.9 Added by Claude, not from the sources
 
 Items marked *checked* were run with `fastmcp` 4.1.4 and `mcp` 2.3.0.
 
 - **A "legacy mode" client against a modern-only server will fail,** and the reverse is handled by `auto`. Keep `auto` unless you have a reason to pin
-- **Check what your library really speaks.** *Checked:* this version's HTTP server spoke legacy only, while its STDIO server spoke both. Do not assume modern means HTTP
+- **Check what your library really speaks.** ✅ *Verified:* this version's HTTP server spoke legacy only, while its STDIO server spoke both. Do not assume modern means HTTP
 - **The class's "elicitation behind `mode="legacy"`" is one library's behaviour.** The spec's own answer is MRTR. Learn both names
 - **Treat library and spec versions separately.** Several class commands changed between FastMCP 3 and 4 ([Chapter 2](02-primitives-and-architecture.md), 2.8)
 - **Plan migration by risk:** list which servers use sampling, roots, logging, sessions or HTTP + SSE, then migrate those first
 - **Official source to keep open:** the MCP specification's changelog page for 2026-07-28
+
+## 7.10 Interview corner
+
+**What interviewers listen for:** the **one idea** (stateless requests), what replaced sessions (handles, `_meta`), and the difference between Deprecated and Removed
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. What is the single idea behind the modern spec?</summary>
+
+- Stateless requests: no handshake and no session. Every message carries its version and capabilities
+- *Stronger answer:* the gain is that any replica can serve any request, so no sticky routing
+
+</details>
+
+<details class="qa"><summary>2. Removed or deprecated?</summary>
+
+- Removed: the old handshake, ping, `logging/setLevel`, the session header. Deprecated: Roots, Sampling, Logging, HTTP + SSE
+- *Stronger answer:* deprecated has a twelve-month minimum, and a library may drop code sooner
+
+</details>
+
+<details class="qa"><summary>3. What replaces sampling?</summary>
+
+- The tool calls an LLM provider directly with its own key
+
+</details>
+
+<details class="qa"><summary>4. How can a stateless server ask the user a question?</summary>
+
+- Only while handling a request the client sent. In the spec this is MRTR
+- *Stronger answer:* a server never contacts a client out of nowhere
+
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>5. A client meets an old server. What does it do?</summary>
+
+- In `auto` mode it tries `server/discover`, and on failure falls back to `initialize`
+- ✅ *Verified:* a modern client really does this
+
+</details>
+
+<details class="qa"><summary>6. Why does every request now carry <code>_meta</code>?</summary>
+
+- Because nobody remembers the client. The version and capabilities travel with each call
+- ✅ *Verified:* a request without it was refused
+
+</details>
+
+<details class="qa"><summary>7. How do you keep state without sessions?</summary>
+
+- Return a handle from a tool (such as a `basket_id`) and pass it back as an argument
+
+</details>
+
+<details class="qa"><summary>8. Will my legacy server break?</summary>
+
+- No. Adoption is opt-in. Plan to support both, and watch the deprecated list
+
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>9. Your hosted MCP server must serve both old and new clients during the migration. How?</summary>
+
+- Detect the style per request: a legacy `initialize`/session, or a modern request with `_meta`
+- *Stronger answer:* keep both paths behind one tool layer, log which style each client uses, and set a removal date for the legacy path once traffic drops
+
+</details>
+
+<details class="qa"><summary>10. Why did the spec move to stateless requests?</summary>
+
+- Sessions tied a client to one server process, which made scaling and recovery hard
+- *Stronger answer:* stateless requests let any replica answer, survive restarts, and cache results (`ttlMs`, `cacheScope`); state lives in explicit handles instead
+
+</details>
+
+> [!TIP]
+> **🧩 Design question**
+> - *"Plan the upgrade of ten internal MCP servers to the 2026-07-28 spec."*
+> - Talk about: an inventory of features each server uses against the Removed and Deprecated lists, SDK upgrades behind feature flags, dual-mode support, contract tests with old and new clients, staged rollout, and monitoring of errors by client version
+
+## Cheat sheet
+
+| | Legacy 2025-11-25 | Modern 2026-07-28 |
+|---|---|---|
+| Opening | `initialize` → reply → `initialized` | none (optional `server/discover`) |
+| Version and capabilities | once, in the handshake | `_meta` on every request |
+| Session | `Mcp-Session-Id` | none; state via returned **handles** |
+| Server asks the user | its own request (elicitation) | only while answering a client request |
+| Routing | body | `Mcp-Method`, `Mcp-Name` headers |
+| Caching | none | `ttlMs`, `cacheScope` |
+| `ping`, `logging/setLevel` | present | removed |
+| Deprecated vs Removed | | still works ≥ 12 months vs gone |
 
 ## Recap
 
@@ -274,6 +366,7 @@ Items marked *checked* were run with `fastmcp` 4.1.4 and `mcp` 2.3.0.
 
 ## How this chapter was checked
 
+- **2026 review:** the sequence diagram, the production box, the graded interview and the cheat sheet were added (Added by Claude). The cheat-sheet table restates 7.3 and 7.4, which were checked against the changelog earlier
 - Run: a modern request with and without `_meta` over STDIO; the results' `resultType`, `ttlMs` and `cacheScope`; `server/discover` over STDIO and over HTTP; legacy session ids, a stale session id and the stateless flag; `logging/setLevel` on both connections; `ping` in `auto` and `legacy`; elicitation under `legacy` (three branches) and under the default connection; timeouts; the server `Context` methods; and the `mode` option's documentation
 - Checked against the official specification changelog (read through search results): the handshake removal, `_meta`, removed items, deprecated items and suggested migrations, the twelve-month window, MRTR, state handles and tracing keys
 - **Not run or not confirmed:** modern requests over HTTP, `Mcp-Method` and `Mcp-Name` headers, Client ID Metadata Documents, a full sampling run, MRTR elicitation, progress reporting, filess.io, Vercel, LangChain's adapters
@@ -285,6 +378,6 @@ Items marked *checked* were run with `fastmcp` 4.1.4 and `mcp` 2.3.0.
 - Live-Class-2026, `interview-questions/mcp.md` (the specification summary and the replacements list)
 - Model Context Protocol specification, 2026-07-28, changelog: https://modelcontextprotocol.io/specification/2026-07-28/changelog
 - Class resources, not opened: the "legacy vs modern" site and the FastMCP "what's new" page
-- Sections marked *checked* and 7.10 are from testing
+- Sections marked *checked* and 7.9 are from testing
 
 Previous: [Chapter 6, Deployment and building a client](06-deployment-and-building-a-client.md) · Next: [Chapter 8, Interview questions](08-interview-questions.md)

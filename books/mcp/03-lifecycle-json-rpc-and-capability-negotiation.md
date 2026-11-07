@@ -468,7 +468,7 @@ p.terminate()
 <details class="qa"><summary>12. Why is MCP stateful, and what does that cost when you scale?</summary>
 
 - A session starts with a handshake and keeps negotiated capabilities
-- *Stronger answer:* behind a load balancer you need session affinity or a stateless server mode, and reconnect logic when a session is lost
+- *Stronger answer:* behind a load balancer you need session affinity or a stateless server mode, and reconnect logic; the modern 2026-07-28 spec removes the handshake and sessions entirely ([Chapter 7](07-legacy-vs-modern-mcp.md))
 
 </details>
 
@@ -493,6 +493,8 @@ p.terminate()
 | Request | yes | yes |
 | Response (`result` or `error`) | same `id` as the request | no |
 | Notification | no | no |
+
+- This is the **legacy (2025-11-25)** handshake the chapter teaches. The modern 2026-07-28 spec drops it and sends version and capabilities in `_meta` on every request ([Chapter 7](07-legacy-vs-modern-mcp.md))
 
 ## Recap
 

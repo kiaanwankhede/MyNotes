@@ -1,5 +1,14 @@
 # Chapter 6: Deployment and building a client
 
+*Ship a server so anyone can connect, then write the client yourself and see the whole loop with no app in between.*
+
+> [!NOTE]
+> **📍 At a glance**
+> - **You will learn:** one file serving two transports, deploying to Prefect Horizon, connecting hosts to a remote server, servers with no API underneath, and harness engineering: building your own client
+> - **You will build:** a deployed server, and a client loop that lists tools, asks a model, calls tools and answers
+> - **Level:** intermediate · **Time:** about 60 minutes
+> - **Builds on:** [Chapter 5](05-building-mcp-servers.md). **Leads to:** [Chapter 7](07-legacy-vs-modern-mcp.md)
+
 **After this chapter you can:**
 
 - Explain why a local server is not enough, and when to use STDIO or HTTP
@@ -25,6 +34,16 @@
 | Typical use | A personal tool | A team or company tool |
 
 - This is why most serious **shared** servers run over HTTP. The transports themselves are in [Chapter 4](04-operation-transports-and-shutdown.md), 4.7 to 4.11
+
+```mermaid
+flowchart LR
+    D["Local: STDIO<br/>works on my machine"] --> H["HTTP transport<br/>same file"]
+    H --> C["Deploy<br/>(Prefect Horizon, a container, a VPS)"]
+    C --> U["Public URL /mcp"]
+    U --> H1["Claude / ChatGPT connector"]
+    U --> H2["VS Code / Cursor"]
+    U --> H3["Your own client (6.7)"]
+```
 
 ## 6.2 The same file, two transports
 
@@ -53,12 +72,12 @@ from pathlib import Path
 DB_PATH = Path(os.environ.get("TIMETRACK_DB_PATH", "/tmp/timetrack.db"))
 ```
 
-- *Checked:* with no variable the file was `/tmp/timetrack.db`. With `TIMETRACK_DB_PATH` set, it used that path
+- ✅ *Verified:* with no variable the file was `/tmp/timetrack.db`. With `TIMETRACK_DB_PATH` set, it used that path
 - Small guardrails in `database.py` (class): `log_time` rejects hours of zero or less, and `get_project_summary` uses a real `GROUP BY`. A tool exposed to an AI will sometimes receive bad input
 
 ## 6.4 Deploying to Prefect Horizon
 
-**Horizon** is the hosting platform FastMCP's documentation points to. It was called **FastMCP Cloud** before, and is built by Prefect, the company behind FastMCP. *Checked:* the banner printed by `fastmcp` 4.1.4 links to `horizon.prefect.io`.
+**Horizon** is the hosting platform FastMCP's documentation points to. It was called **FastMCP Cloud** before, and is built by Prefect, the company behind FastMCP. ✅ *Verified:* the banner printed by `fastmcp` 4.1.4 links to `horizon.prefect.io`.
 
 The class free-tier note (class 20, not verified): **one developer, up to 200 MCP servers, one-hour log retention.** Code changes deploy automatically through the GitHub connection.
 
@@ -72,7 +91,7 @@ The class free-tier note (class 20, not verified): **one developer, up to 200 MC
 3. **Connect the repo to Horizon.** Sign in with GitHub and pick the repository. Dependencies are found from `pyproject.toml`
 4. **Configure and deploy:** name the server and set the **entry point to `main.py:mcp`**
    - Point at the **`mcp` object**, not the whole `app`
-   - Optional check before deploying: `fastmcp inspect main.py:mcp`. *Checked:* it printed 4 tools, 1 prompt and 1 resource for TimeTrack
+   - Optional check before deploying: `fastmcp inspect main.py:mcp`. ✅ *Verified:* it printed 4 tools, 1 prompt and 1 resource for TimeTrack
    - Horizon installs the libraries and starts the server. Logs are visible during the build
 5. **Get the URL:** `https://your-project-name.fastmcp.app/mcp`. Paste it into any host's connector settings (Claude Desktop, Claude on the web, ChatGPT, Cursor)
 
@@ -82,6 +101,15 @@ The class free-tier note (class 20, not verified): **one developer, up to 200 MC
 - **Horizon is built for the MCP piece.** Check whether a website's static files deploy with it. If not, a general host such as Vercel or Railway can run the whole application. The class resources list a deployed demo and its repository. Neither was opened for these notes
 
 *None of the Horizon steps were run here.*
+
+> [!IMPORTANT]
+> **🏭 In production: before a server goes public**
+> - **Auth on**, TLS only, secrets from the platform's secret store, never in the repo
+> - **Health check and logs:** one structured log line per tool call (tool, duration, outcome, caller), no tokens or personal data
+> - **Limits:** rate limits per caller, timeouts per tool, a maximum result size
+> - **Versioning:** additive changes only to tool names and schemas; announce removals ([Chapter 8](08-interview-questions.md), 8.6)
+>
+> *Added by Claude.*
 
 ## 6.5 Connect a host to the deployed server
 
@@ -118,7 +146,7 @@ if __name__ == "__main__":
 
 - No API, no database. "What is 5 plus 3?" becomes a `tools/call` to `add`
 - **An MCP server is just a server.** What it does inside is up to you
-- *Checked:* a client called `add` on this server and got the result back. A bad argument (`"x"`) came back as a tool error flagged `is_error`
+- ✅ *Verified:* a client called `add` on this server and got the result back. A bad argument (`"x"`) came back as a tool error flagged `is_error`
 
 ## 6.7 Why build your own client?
 
@@ -127,6 +155,23 @@ if __name__ == "__main__":
   - The model does not know the server exists. The server cannot decide anything
   - **Something in the middle must connect them.** Building that layer yourself is harness engineering
 - Every chat app is a harness around a raw model. Claude Desktop and ChatGPT just build and hide it for you
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant C as Your client (harness)
+    participant M as Model API
+    participant S as MCP server
+    C->>S: list_tools()
+    U->>C: question
+    C->>M: question + tools (provider format)
+    M-->>C: tool_use: name, arguments
+    C->>S: call_tool(name, arguments)
+    S-->>C: result
+    C->>M: history + tool result
+    M-->>C: final text
+    C-->>U: answer
+```
 
 **The loop (class diagram, as steps):**
 
@@ -176,13 +221,13 @@ async def run_agent(user_message: str):
 *Not run against the real Anthropic API (no key here). Run with a stand-in for the model and a real FastMCP client and server. Two problems showed up:*
 
 1. **Two tool calls in one model turn break the message order.** The class code appends the assistant message **inside** the loop over blocks, and one user message per result
-   - *Checked:* with a model turn that asked for two tools, the messages became `user, assistant, user, assistant, user`
+   - ✅ *Verified:* with a model turn that asked for two tools, the messages became `user, assistant, user, assistant, user`
    - The model provider's tool-use format expects **one** assistant message followed by **one** user message holding **all** the `tool_result` blocks. Check the current API documentation. This was not tested against the live API
-2. **`str(result)` sends a repr to the model.** *Checked:* it produced `CallToolResult(content=[TextContent(type='text', text='8.0', ...`. Send the text instead
+2. **`str(result)` sends a repr to the model.** ✅ *Verified:* it produced `CallToolResult(content=[TextContent(type='text', text='8.0', ...`. Send the text instead
 
 ### A corrected loop
 
-*Checked with a stand-in model that asks for two tools in one turn, then answers:*
+✅ *Verified with a stand-in model that asks for two tools in one turn, then answers:*
 
 ```python
 async def run_agent(anthropic_client, mcp_client, user_message: str, model: str):
@@ -207,7 +252,7 @@ async def run_agent(anthropic_client, mcp_client, user_message: str, model: str)
 
 - The messages the model saw on its second turn were `user`, `assistant` (two blocks), `user` (two results)
 - With `raise_on_error=False`, a bad argument came back as a result with `is_error` true and a readable message. The loop can pass that to the model instead of crashing
-- The class passed `Client("main.py")`. *Checked:* a string path prints a deprecation warning in `fastmcp` 4.1.4. Use `StdioTransport` or a `Path`
+- The class passed `Client("main.py")`. ✅ *Verified:* a string path prints a deprecation warning in `fastmcp` 4.1.4. Use `StdioTransport` or a `Path`
 - The model name in the class code is the class's choice. Use a current model name from the provider's documentation. Keep the API key in an environment variable, never in code
 
 ## 6.8 Where this leaves you
@@ -225,59 +270,122 @@ async def run_agent(anthropic_client, mcp_client, user_message: str, model: str)
 - **Always use MCP, or sometimes a plain tool?** A plain tool suits a narrow, fixed action (one email channel). MCP earns its place when a **broad surface** must be supported without hand-building dozens of tools
 - **One setup that reaches Postgres, Oracle and a mainframe?** Two options: one custom server with all of them wired in, or an **MCP gateway** that puts several servers behind one entry point
 - **How to stop an AI from changing data on a production database?** A common pattern is an **environment variable** such as `READ_ONLY=true`, read at start-up, that decides which tools are registered. Write tools are never exposed
-  - *Checked:* with the variable unset the server listed `list_rows` and `delete_row`. With `READ_ONLY=true` it listed only `list_rows`
-- **`uv` against `uvx`?** `uv` works inside your project. `uvx` runs a tool in an isolated temporary environment, like `npx`. Use `uvx` for a one-off run. *Checked:* both commands exist on this machine. Behaviour not tested
+  - ✅ *Verified:* with the variable unset the server listed `list_rows` and `delete_row`. With `READ_ONLY=true` it listed only `list_rows`
+- **`uv` against `uvx`?** `uv` works inside your project. `uvx` runs a tool in an isolated temporary environment, like `npx`. Use `uvx` for a one-off run. ✅ *Verified:* both commands exist on this machine. Behaviour not tested
 - **Does a hosting platform care whether my server calls an AI model?** No. A call to a model provider is just another API call
 - **State at three levels (one call, one thread, the whole app)?** Application state lives as long as the process. Session state ties to a session id. **Thread state is the hardest** and has no free built-in mechanism, so you design it in
 
-## 6.10 Interview corner
-
-**1. When do you choose STDIO and when HTTP?**
-
-- STDIO for a personal tool on one machine. HTTP for a shared, hosted server
-- *Stronger answer:* HTTP has a network round trip but centralises power and serves many clients
-
-**2. What does `fastmcp run main.py` start, and what does `uvicorn main:app` start?**
-
-- The first starts only the MCP server object. The second starts the whole app: website, REST and the mounted MCP server
-
-**3. Walk me through deploying an MCP server.**
-
-- Clean repo with `main.py`, `database.py`, `pyproject.toml`, `uv.lock`. `.gitignore` for the environment and local data. Connect to the platform. Entry point `main.py:mcp`. Get a URL ending in `/mcp`
-- *Stronger answer:* the hosted database is a separate file from your local one
-
-**4. Why would you build your own MCP client?**
-
-- A raw model and a server cannot work together alone. The client is the harness that discovers tools, sends them to the model, runs the calls and feeds back the results
-
-**5. Who calls the tool, the model or the client?**
-
-- The client. The model only names the tool and arguments
-
-**6. How do you stop a model from writing to a production database?**
-
-- Do not register write tools, driven by an environment variable. Then the option never exists
-
-**7. Auto-convert or hand-write the tools?** See [Chapter 5](05-building-mcp-servers.md), 5.11
-
-**8. How would you serve several databases behind one MCP entry point?**
-
-- A custom server over all of them, or an MCP gateway in front of several servers
-
-## 6.11 Added by Claude, not from the sources
+## 6.10 Added by Claude, not from the sources
 
 Items marked *checked* were run with `fastmcp` 4.1.4. Check current documentation for deployment details.
 
 - **Measuring concurrency yourself.** The class has `scripts/concurrency_showcase.py`, a dev-only script that fires N `log_time` calls one after another, then N at once, then reads every write back. It prints a speedup and flags lost writes
-  - *Checked* against the class server run locally (N = 8): sequential 0.49 s, concurrent 0.22 s, speedup 2.22x, and **all 8 writes persisted**
+  - ✅ *verified* against the class server run locally (N = 8): sequential 0.49 s, concurrent 0.22 s, speedup 2.22x, and **all 8 writes persisted**
   - The script says "largely serializing" when the speedup is below half of N. With calls this fast (about 60 ms each, each opening its own client) setup cost dominates, so the verdict is a rough hint locally and means more against a slow remote server
   - Its default URL is a Vercel deployment (`time-track-server-iota`). It was not reachable from my environment
 - **Hosted disks may be temporary.** The class default path is `/tmp/timetrack.db`. On many platforms a restart clears that folder. Treat SQLite on a hosted disk as a demo, and use a managed database for real data. This is general practice, not from the class
 - **Never commit secrets.** Keep API keys in environment variables. Add `.env` to `.gitignore`. Rotate a key that was ever committed
 - **Add authentication before sharing a public URL.** Anyone with the URL can write to the shared database
-- **Test the client loop with a stand-in model.** *Checked:* it needs no API key and shows message order problems at once
-- **Handle tool errors in the loop.** *Checked:* `raise_on_error=False` returns an error result the model can read
+- **Test the client loop with a stand-in model.** ✅ *Verified:* it needs no API key and shows message order problems at once
+- **Handle tool errors in the loop.** ✅ *Verified:* `raise_on_error=False` returns an error result the model can read
 - **Pin the MCP library versions** in `pyproject.toml` and `uv.lock`, and expect behaviour differences between major versions. Several things in these notes changed between FastMCP 3 and 4
+
+## 6.11 Interview corner
+
+**What interviewers listen for:** the model never calls the server, your client (harness) does; one server file can serve STDIO and HTTP; and what a server needs before it is public
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. When do you choose STDIO and when HTTP?</summary>
+
+- STDIO for a personal tool on one machine. HTTP for a shared, hosted server
+- *Stronger answer:* HTTP has a network round trip but centralises power and serves many clients
+
+</details>
+
+<details class="qa"><summary>2. What does <code>fastmcp run main.py</code> start, and what does <code>uvicorn main:app</code> start?</summary>
+
+- The first starts only the MCP server object. The second starts the whole app: website, REST and the mounted MCP server
+
+</details>
+
+<details class="qa"><summary>3. Walk me through deploying an MCP server.</summary>
+
+- Clean repo with `main.py`, `database.py`, `pyproject.toml`, `uv.lock`. `.gitignore` for the environment and local data. Connect to the platform. Entry point `main.py:mcp`. Get a URL ending in `/mcp`
+- *Stronger answer:* the hosted database is a separate file from your local one
+
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>4. Why would you build your own MCP client?</summary>
+
+- A raw model and a server cannot work together alone. The client is the harness that discovers tools, sends them to the model, runs the calls and feeds back the results
+
+</details>
+
+<details class="qa"><summary>5. Who calls the tool, the model or the client?</summary>
+
+- The client. The model only names the tool and arguments
+
+</details>
+
+<details class="qa"><summary>6. How do you stop a model from writing to a production database?</summary>
+
+- Do not register write tools, driven by an environment variable. Then the option never exists
+
+</details>
+
+<details class="qa"><summary>7. Auto-convert or hand-write the tools?</summary>
+
+- Convert for speed, hand-write for control, better descriptions and prompts: see [Chapter 5](05-building-mcp-servers.md), 5.9 and 5.12
+
+</details>
+
+<details class="qa"><summary>8. How would you serve several databases behind one MCP entry point?</summary>
+
+- A custom server over all of them, or an MCP gateway in front of several servers
+
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>9. Your deployed MCP server is slow for some users and down for others. How do you investigate?</summary>
+
+- Look at per-tool latency and error logs, then at the platform health and the downstream API
+- *Stronger answer:* trace each call (client → server → downstream), check timeouts and rate limits, add a health endpoint and alerts, and roll back the last change if it correlates
+
+</details>
+
+<details class="qa"><summary>10. When would you build your own MCP client instead of using Claude Desktop?</summary>
+
+- When the agent runs inside your product, on a server, or with a model the desktop apps do not offer
+- *Stronger answer:* you then own the loop: tool filtering, approvals, retries, cost limits and tracing, the same harness concerns as [LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md)
+
+</details>
+
+> [!TIP]
+> **🧩 Design question**
+> - *"Ship an internal MCP server that 50 teams will use from different hosts."*
+> - Talk about: HTTP transport behind SSO-based OAuth, one container image, health checks, structured logs and metrics, rate limits per team, versioned tool contracts, a changelog, and a staging server for hosts to test against
+
+## Cheat sheet
+
+```python
+from fastmcp import Client
+async with Client("http://127.0.0.1:8000/mcp") as c:     # remote: a URL
+    tools = await c.list_tools()                          # give these to the model
+    r = await c.call_tool("log_hours", {"employee": "Asha", "project": "X", "hours": 2})
+    r.data                                                # {'employee': 'Asha', 'project': 'X', 'hours': 2.0}
+```
+
+| Step | Who does it |
+|---|---|
+| List tools | your client |
+| Choose a tool | the model |
+| Call the tool | your client |
+| Run the tool | the server |
+| Write the answer | the model |
 
 ## Recap
 
@@ -303,6 +411,7 @@ Items marked *checked* were run with `fastmcp` 4.1.4. Check current documentatio
 
 ## How this chapter was checked
 
+- **2026 review:** the diagrams, the production box, the graded interview and the cheat sheet were added (Added by Claude). The cheat-sheet client ran against the Chapter 5 cheat-sheet server over HTTP with `fastmcp` 4.1.4; nothing was deployed
 - Run with `fastmcp` 4.1.4 and `mcp` 2.3.0: the TimeTrack `main.py` with `fastmcp run` (STDIO and HTTP); `fastmcp inspect`; the environment-variable database path; the calculator server and a bad argument; the class client loop and the corrected loop, both with a stand-in for the Anthropic client and a real FastMCP client and server; message order with two tool calls; the read-only switch; and three concurrent calls to a synchronous and an asynchronous tool
 - **Not run:** Prefect Horizon, any deployed URL, Claude Desktop, the real Anthropic API, Vercel, Railway, a gateway, `uvx`, authentication
 - The class transcripts are the source for everything not marked *checked*. Where the class and the test disagree (the concurrency claim in 6.8), both are shown
@@ -311,6 +420,6 @@ Items marked *checked* were run with `fastmcp` 4.1.4. Check current documentatio
 
 - Live-Class-2026, `classes_transcription_summary/21 - 19 Sep - MCP Deployment.md` (deployment, the client, FAQ)
 - Live-Class-2026, `classes_transcription_summary/20 - 13 Sep - MCP - The Time Tracker Project.md` (the Horizon free-tier note, auto-conversion)
-- Sections marked *checked* and 6.11 are from testing
+- Sections marked *checked* and 6.10 are from testing
 
 Previous: [Chapter 5, Building MCP servers](05-building-mcp-servers.md) · Next: [Chapter 7, Legacy vs modern MCP](07-legacy-vs-modern-mcp.md) (not written yet)

@@ -1,5 +1,14 @@
 # Chapter 5: Building MCP servers
 
+*From a twenty-line FastMCP server to a real app where a website and an AI assistant share one database.*
+
+> [!NOTE]
+> **📍 At a glance**
+> - **You will learn:** the official SDK vs FastMCP, tools, resources and prompts in code, installing into Claude Desktop, wrapping an existing API two ways, and role-scoped tools
+> - **You will build:** RecipeBox, and TimeTrack: one SQLite database behind a FastAPI website and an MCP server
+> - **Level:** intermediate · **Time:** about 75 minutes
+> - **Builds on:** [Chapter 2](02-primitives-and-architecture.md), [Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), [Chapter 4](04-operation-transports-and-shutdown.md). **Leads to:** [Chapter 6](06-deployment-and-building-a-client.md)
+
 **After this chapter you can:**
 
 - Say how the official `mcp` SDK and FastMCP relate, and why FastMCP is the usual choice
@@ -25,7 +34,7 @@
   - It became so popular that a version of it was folded into the official SDK, with an internal class renamed to avoid confusion
   - The standalone FastMCP is still what most real servers use
 - **FastMCP and FastAPI are not from the same team.** They share a naming style and work well together, because an MCP tool is close to an API endpoint. Do not mix them up in an interview
-- *Checked:* the installed `fastmcp` 4.1.4 lists Jeremiah Lowin among its authors. The installed `mcp` 2.3.0 has a class named `MCPServer`, which fits the "renamed" story. The Prefect detail and the folding-in story were not verified
+- ✅ *Verified:* the installed `fastmcp` 4.1.4 lists Jeremiah Lowin among its authors. The installed `mcp` 2.3.0 has a class named `MCPServer`, which fits the "renamed" story. The Prefect detail and the folding-in story were not verified
 - **Language does not matter** to the protocol. Python or Node is a team choice
 
 ## 5.2 The legacy way, and why it hurt
@@ -38,7 +47,7 @@
   - explicit transport wiring with `stdio_server()`
 - Working, but long and easy to get wrong
 - The class folder's README gives a comparison for the same three tools: about **72 lines** low-level against **31** with FastMCP
-  - *Checked:* counting non-blank, non-comment lines **including the docstring** gives exactly 72 and 31. Without the docstrings it is about 59 against 22
+  - ✅ *Verified:* counting non-blank, non-comment lines **including the docstring** gives exactly 72 and 31. Without the docstrings it is about 59 against 22
 
 ```python
 # the low-level file (mcp 1.x style), the three parts
@@ -104,7 +113,7 @@ if __name__ == "__main__":
 ```
 
 - The class data had more recipes (`# ...` in the notes). Two are enough to run
-- *Checked:* a client saw the three tools, and `search_recipes("quick")` returned both recipes
+- ✅ *Verified:* a client saw the three tools, and `search_recipes("quick")` returned both recipes
 - `get_recipe("999")` raised a `KeyError` inside the tool, which the client saw as a `ToolError`. A friendlier tool would check the id and return a clear message. That is an improvement of mine, not from the class
 
 ### Add a resource and a prompt
@@ -121,7 +130,7 @@ def plan_weekly_meals() -> str:
     return "Using the available recipes, plan a balanced set of meals for the next 7 days..."
 ```
 
-- *Checked:* the client listed the resource `recipe://tags` and the prompt `plan_weekly_meals`, and reading the resource returned the five tags
+- ✅ *Verified:* the client listed the resource `recipe://tags` and the prompt `plan_weekly_meals`, and reading the resource returned the five tags
 - In class the new resource appeared in the Inspector after reconnecting, with **no server restart**. The prompt needed a fresh connect and disconnect. Not re-run here
 
 **Why the resource matters, concretely:**
@@ -132,7 +141,7 @@ def plan_weekly_meals() -> str:
 - The class folder also adds two more prompts in the live build, `search_for_quick_recipes` and `send_email`
   - **Code read:** the server is named `RecipeBox_Updated`, the resource returns a plain list of five valid tags, and `search_recipes` mentions `recipe://tags` in its docstring
   - **Quirk:** `send_email` has nothing to do with email. Its description says "Plan a week's worth of meals" and the text it returns says the same. The name looks like a leftover
-  - *Checked:* both prompts and the resource listed correctly, and the resource returned `["quick","vegetarian","sunday","meat","vegan"]`
+  - ✅ *Verified:* both prompts and the resource listed correctly, and the resource returned `["quick","vegetarian","sunday","meat","vegan"]`
   - The Precoded version has no resource and no prompts. Its `@mcp.tool` has no brackets; the updated one uses `@mcp.tool()`. Both work in 4.1.4
   - The file ends with comments holding the Inspector and `fastmcp install claude-desktop` commands
 
@@ -167,7 +176,7 @@ uv run fastmcp install claude-desktop recipebox_fastmcp.py
 - Two things to notice:
   - It is a **STDIO** server, as Chapter 4 says is natural for a local server
   - The host launches it exactly as you would in a terminal: `uv run --with fastmcp fastmcp run <file>`
-- *Checked:* `fastmcp install mcp-json recipebox.py` printed an entry with `command: uv` and the same `run --with fastmcp fastmcp run <path>` arguments. It had **no** `transport` key. The command also has `--name`, `--with`, `--env` and `--config-path` options. The Claude Desktop install itself was not run
+- ✅ *Verified:* `fastmcp install mcp-json recipebox.py` printed an entry with `command: uv` and the same `run --with fastmcp fastmcp run <path>` arguments. It had **no** `transport` key. The command also has `--name`, `--with`, `--env` and `--config-path` options. The Claude Desktop install itself was not run
 - Use an **absolute path** to the file, and expect the host's own working directory ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.3)
 
 ## 5.6 Connecting a server to a host
@@ -203,6 +212,14 @@ Class 20 recap. There are two ways, and they are the same thing underneath.
 
 ## 5.8 TimeTrack: one database, two front doors
 
+```mermaid
+flowchart LR
+    B["Browser<br/>HTML + app.js"] -->|"REST /api/entries"| API["FastAPI routes"]
+    AI["Claude Desktop / any MCP host"] -->|"MCP /mcp"| M["MCP layer<br/>(written by hand, or converted from the API)"]
+    API --> DB[("SQLite<br/>time_entries")]
+    M --> DB
+```
+
 A timesheet tool, in the same category as Toggl or Clockify. **A browser and an AI assistant read and write the same data.**
 
 **How class 20 built it, in layers:**
@@ -210,7 +227,7 @@ A timesheet tool, in the same category as Toggl or Clockify. **A browser and an 
 1. **Database layer:** SQLite, a `time_entries` table (id, employee name, project, date, hours, description), seeded on first run so the app never starts empty. A small `row_to_dict` helper turns SQLite rows into plain dictionaries
 2. **REST layer with FastAPI, and no MCP yet.** This is how almost every real integration starts: a working product with its own API, built with no thought of MCP. Gmail's and Slack's APIs were not designed "for AI". MCP is added **afterwards**
    - `uv run fastapi dev main.py` gave a Swagger page at `/docs` and a plain HTML, CSS and `app.js` front end. The browser's network tab showed the REST calls behind each action
-   - *Checked:* a FastAPI app with the class's routes served `/docs` (HTTP 200) and listed `/api/entries`, `/api/projects` and `/api/projects/{project}/summary` in its OpenAPI document
+   - ✅ *Verified:* a FastAPI app with the class's routes served `/docs` (HTTP 200) and listed `/api/entries`, `/api/projects` and `/api/projects/{project}/summary` in its OpenAPI document
 3. **MCP layer on top**, in two ways (5.9)
 
 *The class attitude, worth keeping:* AI-assisted coding is expected in this course. The goal is to understand the architecture and decisions well enough to explain and defend them, not to memorise syntax.
@@ -370,12 +387,19 @@ mcp = FastMCP.from_fastapi(app)     # app is your existing FastAPI instance
   - `execute_query_dynamically(query, params)` runs **any SQL the model sends**
   - `timesheet://schema` returns the table layout so the model knows the columns
   - The `@mcp.tool` / `@mcp.resource` versions of the four original tools sit below as comments
-- *Checked* (copy of the file, `fastmcp` 4.1.4): the converted server listed 6 tools. Five were the REST routes with long generated names (for example `api_list_all_entries_api_entries_get`), plus the SQL tool
-- *Checked:* `SELECT * ... WHERE hours > ?` with a parameter worked
+- ✅ *verified* (copy of the file, `fastmcp` 4.1.4): the converted server listed 6 tools. Five were the REST routes with long generated names (for example `api_list_all_entries_api_entries_get`), plus the SQL tool
+- ✅ *Verified:* `SELECT * ... WHERE hours > ?` with a parameter worked
 - *Checked, two bugs in the helper behind it (`execute_query`):*
   - Every row goes through a function that reads the six `time_entries` columns, so `SELECT COUNT(*) AS n` fails with "No item with that key"
   - It never commits. A `DELETE` returned `[]` but the 5 rows were **still there**. A `DROP TABLE` **did** go through, because table changes are committed on their own. After that only `sqlite_sequence` was left
 - **The lesson is the design, not the bugs:** a tool that runs arbitrary SQL gives the model, and anyone who can talk to it, the whole database. Safer: read-only connection, an allow-list of statements, or named tools like the original four. The class file's docstring does not warn about this
+
+> [!CAUTION]
+> **🔒 Security: a raw SQL tool**
+> - A tool that runs any SQL the model writes is a gift to prompt injection: one poisoned input can become `DELETE FROM ...`
+> - In production expose narrow tools (`get_entries(project, from_date, to_date)`), use a read-only database user, and add row limits and timeouts
+>
+> *Added by Claude.*
 
 ### Choosing between them (class guidance)
 
@@ -385,11 +409,21 @@ mcp = FastMCP.from_fastapi(app)     # app is your existing FastAPI instance
   - richer, more AI-friendly descriptions than the API ever needed for human developers
   - **prompts**, which automatic conversion cannot make
 - **A reason companies pick the manual route:** teams are reluctant to change a working, deployed API just to improve its descriptions. A separate hand-built MCP layer leaves trusted code alone
-- If you do convert, **add docstrings** to the routes. *Checked:* a docstring became the tool description
+- If you do convert, **add docstrings** to the routes. ✅ *Verified:* a docstring became the tool description
 
 ## 5.10 Authentication: role-scoped tools
 
-From `server_with_auth.py`. *Checked* by running it over HTTP on port 8000 with `fastmcp` 4.1.4.
+```mermaid
+flowchart LR
+    T["Bearer token"] --> V{"Token verifier"}
+    V -- "invalid / missing" --> X["Rejected"]
+    V -- "valid: client_id + scopes" --> F["Tool list filtered by scope"]
+    F --> U["user: read tools"]
+    F --> A["analyst: + query_db"]
+    F --> AD["admin: + delete_user"]
+```
+
+From `server_with_auth.py`. ✅ *verified* by running it over HTTP on port 8000 with `fastmcp` 4.1.4.
 
 ```python
 auth = StaticTokenVerifier(tokens={
@@ -422,62 +456,138 @@ def query_db(a: int, b: int, c: int) -> int: ...
 - The data in `list_users` and `sales_report` is hard-coded sample data
 - For interviews, the class advised reading up on **JWT and OAuth**. Real servers verify signed tokens from an identity provider, not a fixed dictionary
 
-## 5.11 Interview corner
+> [!IMPORTANT]
+> **🏭 In production: designing a server**
+> - **Few, focused tools** with sharp descriptions ("Use for X. Do not use for Y") beat many overlapping ones
+> - **Return compact, structured data** (ids, totals, the fields the task needs), not whole tables: every byte goes into the model's context
+> - **Paginate and cap results**; make write tools idempotent (an idempotency key) and ask for confirmation on destructive ones
+> - **Real auth** is OAuth 2.1 with short-lived, per-server tokens and one scope per sensitive tool ([Chapter 8](08-interview-questions.md), 8.2 to 8.3); static tokens are for learning only
+>
+> *Added by Claude.*
 
-**1. How do the official SDK and FastMCP relate?**
+## 5.11 Added by Claude, not from the sources
+
+Items marked *checked* were run with `fastmcp` 4.1.4.
+
+- **Return clear tool errors.** ✅ *Verified:* a missing key surfaced as `KeyError: '999'` inside a `ToolError`. Check inputs and raise a message the model can act on
+- **Keep one module for data, thin wrappers for tools.** It is what makes TimeTrack's two front doors safe to change
+- **Pass an explicit transport to the FastMCP client.** ✅ *Verified:* `Client("recipebox.py")` warns that string inference is deprecated and goes in FastMCP 5. Use `StdioTransport` or a `Path`
+- **Use `fastmcp inspect` before deploying.** ✅ *Verified:* it printed the counts of tools, prompts and resources and the library versions
+- **Use absolute paths and `__file__`-based paths** in anything the host launches
+- **Check converted tool names.** ✅ *Verified:* `from_fastapi` produced names such as `get_project_summary_api_projects`. If the names matter, set explicit operation ids on your routes or write the tools by hand. Not tested here
+- **Keep one source of truth.** Whether you convert or wrap, both front doors must call the same data functions
+
+## 5.12 Interview corner
+
+**What interviewers listen for:** you start from an existing product and add MCP as a second front door, design narrow tools with good descriptions, and scope tools by role
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. How do the official SDK and FastMCP relate?</summary>
 
 - The SDK is the base. FastMCP is the popular layer that makes servers easy. Compare Keras and TensorFlow
 - *Stronger answer:* FastMCP and FastAPI are different projects that work well together
 
-**2. What does `@mcp.tool` do for you?**
+</details>
+
+<details class="qa"><summary>2. What does <code>@mcp.tool</code> do for you?</summary>
 
 - It reads the signature and docstring and handles `tools/list` and `tools/call`. No hand-written schema or dispatch
 
-**3. Why add a resource to a tool-only server?**
+</details>
+
+<details class="qa"><summary>3. Why add a resource to a tool-only server?</summary>
 
 - It tells the model the valid values (such as tags) before it calls anything, so it does not guess
 
-**4. How does a host launch a local MCP server?**
+</details>
+
+<details class="qa"><summary>4. How does a host launch a local MCP server?</summary>
 
 - As a STDIO sub-process: `uv run --with fastmcp fastmcp run <file>`, as recorded in the host's config
 
-**5. How would you let a website and an AI assistant share one dataset?**
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>5. How would you let a website and an AI assistant share one dataset?</summary>
 
 - Put the data functions in one module. Call them from both REST routes and MCP tools. Mount the MCP app in the web app
 
-**6. What are the two mistakes when mounting FastMCP in FastAPI?**
+</details>
+
+<details class="qa"><summary>6. What are the two mistakes when mounting FastMCP in FastAPI?</summary>
 
 - Setting the path twice (`/mcp/mcp`) and not passing the MCP `lifespan` when creating the app
 - *Stronger answer:* the second one fails on the first MCP request, not at start-up
 
-**7. Why is a static-token check not enough for production?**
+</details>
+
+<details class="qa"><summary>7. Why is a static-token check not enough for production?</summary>
 
 - It is for learning scope gating. Production needs real tokens and a real flow (JWT, OAuth)
 
-**8. When would you auto-convert a REST API, and when write tools by hand?**
+</details>
+
+<details class="qa"><summary>8. When would you auto-convert a REST API, and when write tools by hand?</summary>
 
 - Auto-convert for speed and to leave trusted code alone. Write by hand to combine calls, write better descriptions, or add prompts
 - *Stronger answer:* converted tool names come from the routes and can be long and unclear, so check what the model will see
 
-**9. Does the MCP server decide which tool to call?**
+</details>
+
+<details class="qa"><summary>9. Does the MCP server decide which tool to call?</summary>
 
 - No. The model decides. The client sends `tools/call`. The server only executes
 
-**10. A server works in a terminal but does not show up in Claude Desktop. What do you check?**
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>10. A server works in a terminal but does not show up in Claude Desktop. What do you check?</summary>
 
 - Whether `command` is a bare `uv` or `python`. Use the full path from `which`
 
-## 5.12 Added by Claude, not from the sources
+</details>
 
-Items marked *checked* were run with `fastmcp` 4.1.4.
+<details class="qa"><summary>11. An enterprise asks you to "MCP-enable" their 200-endpoint REST API. Convert it automatically?</summary>
 
-- **Return clear tool errors.** *Checked:* a missing key surfaced as `KeyError: '999'` inside a `ToolError`. Check inputs and raise a message the model can act on
-- **Keep one module for data, thin wrappers for tools.** It is what makes TimeTrack's two front doors safe to change
-- **Pass an explicit transport to the FastMCP client.** *Checked:* `Client("recipebox.py")` warns that string inference is deprecated and goes in FastMCP 5. Use `StdioTransport` or a `Path`
-- **Use `fastmcp inspect` before deploying.** *Checked:* it printed the counts of tools, prompts and resources and the library versions
-- **Use absolute paths and `__file__`-based paths** in anything the host launches
-- **Check converted tool names.** *Checked:* `from_fastapi` produced names such as `get_project_summary_api_projects`. If the names matter, set explicit operation ids on your routes or write the tools by hand. Not tested here
-- **Keep one source of truth.** Whether you convert or wrap, both front doors must call the same data functions
+- Automatic conversion is fast, but 200 tools overwhelm the model and expose too much
+- *Stronger answer:* convert to prototype, then curate 10 to 20 task-level tools with hand-written descriptions, hide admin endpoints, and add scopes and evaluations
+
+</details>
+
+<details class="qa"><summary>12. How do you stop an analyst-role user from deleting data through the AI assistant?</summary>
+
+- Scope-based tool filtering: tools needing `admin` are never listed or callable for that token
+- *Stronger answer:* enforce again inside the tool and at the database (least-privilege DB user); never rely on the model or the prompt to refuse
+
+</details>
+
+> [!TIP]
+> **🧩 Design question**
+> - *"Expose your company's expense system to AI assistants: employees file claims, managers approve."*
+> - Talk about: tools per role (file_claim, list_my_claims, approve_claim), OAuth scopes per tool, amount limits and approval for large claims, idempotency keys on create, structured compact results, and audit logs
+
+## Cheat sheet
+
+```python
+from fastmcp import FastMCP
+mcp = FastMCP("timetrack")
+
+@mcp.tool
+def log_hours(employee: str, project: str, hours: float) -> dict:
+    """Log hours for an employee on a project. Use for new entries only."""
+    return {"employee": employee, "project": project, "hours": hours}
+
+@mcp.resource("projects://{name}/summary")       # a resource template
+def summary(name: str) -> str:
+    """Total hours for one project."""
+    return f"{name}: 12.5 h"
+
+if __name__ == "__main__":
+    mcp.run(transport="http", host="127.0.0.1", port=8000)   # served at /mcp
+```
 
 ## Recap
 
@@ -505,6 +615,7 @@ Items marked *checked* were run with `fastmcp` 4.1.4.
 
 ## How this chapter was checked
 
+- **2026 review:** the diagrams, the security and production boxes, the graded interview and the cheat sheet were added (Added by Claude). The cheat-sheet server ran over HTTP with `fastmcp` 4.1.4; a URL client called `log_hours` and read `projects://X/summary`
 - Run: the RecipeBox tools, resource and prompt through a client; the notebook's TimeTrack database code with its own asserts; the generated `main.py` served by `uvicorn` in three variants (correct, `path="/mcp"`, no `lifespan`); the REST route; `POST /mcp` with and without the trailing slash; `fastmcp inspect`; `fastmcp install mcp-json`; and the `fastmcp dev inspector` and `fastmcp install claude-desktop` help text
 - Run for class 20: a FastAPI app with the class's four routes, its `/docs` page and OpenAPI paths, `FastMCP.from_fastapi` with calls to the converted tools, and a docstring's effect on the description
 - **Not run:** the Inspector in a browser, the port conflict, the `which uv` failure, VS Code's `MCP: Add Server`, Firecrawl, Claude Desktop (install or connection), ngrok, Prefect Horizon, the website's static files (a stub page stood in), hot reload of a new resource
@@ -517,6 +628,6 @@ Items marked *checked* were run with `fastmcp` 4.1.4.
 - Live-Class-2026, `classes_transcription_summary/20 - 13 Sep - MCP - The Time Tracker Project.md` (connectors and config files, the layered build, the two ways to wrap an API)
 - Live-Class-2026, `classes_summary/18 - 12-13 Sep - Building & Deploying MCP Servers.md` (RecipeBox comparison, authentication, TimeTrack)
 - Live-Class-2026, `Weekend 11 - 12-13 Sep/`: `README.md`, `12-13 Sep - Building & Deploying MCP Servers/README.md`, `MCP-Precoded/README.md`, `TimeTrackProject/timetrack/README.md`, `TimeTrackProject/timetrack_notebook.ipynb`
-- Sections marked *checked*, 5.1's *Checked* line and 5.10 are from testing
+- Sections marked *checked*, 5.1's ✅ *verified* line and 5.10 are from testing
 
 Previous: [Chapter 4, Operation, transports and shutdown](04-operation-transports-and-shutdown.md) · Next: [Chapter 6, Deployment and building a client](06-deployment-and-building-a-client.md)

@@ -1,5 +1,14 @@
 # Chapter 8: Interview questions
 
+*The production questions interviewers ask after "what is MCP?", a quick-fire self-test, and a system design round.*
+
+> [!NOTE]
+> **📍 At a glance**
+> - **What it is:** 8 production questions with tested answers, 24 click-to-reveal quick-fire questions, 4 system design problems and a one-page revision map
+> - **How to use it:** answer aloud first, then reveal; for design problems, follow the answer skeleton below
+> - **Level:** intermediate to senior · **Time:** about 60 minutes per full pass
+> - **Builds on:** every earlier MCP chapter
+
 **How to use this chapter**
 
 - Eight production-style questions from the course's own interview file, each with a short answer
@@ -10,6 +19,18 @@
 **Builds on:** every earlier MCP chapter. Chapters 1 to 7 each end with their own interview corner. This one adds the **production** questions.
 
 **Tip from class:** concepts first. About 90% of candidates can define an MCP server. Fewer can explain what happens underneath, or the legacy-versus-modern history. Be ready to explain **why**, not only **what**.
+
+### The answer skeleton
+
+```mermaid
+flowchart LR
+    A["1. Restate<br/>the goal and constraints"] --> B["2. Mechanism<br/>how MCP does it"]
+    B --> C["3. Failure modes<br/>what breaks, who is hurt"]
+    C --> D["4. Trade-off<br/>what you chose and why"]
+    D --> E["5. Evidence<br/>what you would measure or test"]
+```
+
+- Use it for every production and design question: it shows you think beyond the happy path
 
 ## 8.1 How does the agent discover MCP servers and their capabilities?
 
@@ -54,8 +75,8 @@
 **Three ways out:**
 
 1. **Run stateless** (preferred for request and response tool servers). Each request is self-contained, so any replica serves it
-   - *Checked:* with the stateless flag the server returned **no session id**, and a `tools/list` with no handshake worked
-   - **Correction:** the interview file writes `FastMCP(..., stateless_http=True)`. *Checked:* on `fastmcp` 4.1.4 this raises `TypeError`. The flag now goes to `run` or `http_app`:
+   - ✅ *Verified:* with the stateless flag the server returned **no session id**, and a `tools/list` with no handshake worked
+   - **Correction:** the interview file writes `FastMCP(..., stateless_http=True)`. ✅ *Verified:* on `fastmcp` 4.1.4 this raises `TypeError`. The flag now goes to `run` or `http_app`:
 
 ```python
 mcp.run(transport="http", host="0.0.0.0", port=8000, stateless_http=True)
@@ -121,7 +142,7 @@ Treat the tool **schema and description as an API contract.**
 - **Only additive changes in place:** new tools, new optional parameters
   - A breaking change (renamed or removed parameter) ships as a **new tool name** next to the old one. Remove the old one once no agent uses it
 - **Agents usually load tools once at start-up.** A server change takes effect after the agents restart. Either roll the agents, or handle `notifications/tools/list_changed` to refresh at run time
-  - *Checked:* a tool added to a running server appeared when the client listed tools again. **No `list_changed` notification reached the client** in that in-memory test, and the server does not advertise it by default. Why was not investigated. Do not assume your library sends it
+  - ✅ *Verified:* a tool added to a running server appeared when the client listed tools again. **No `list_changed` notification reached the client** in that in-memory test, and the server does not advertise it by default. Why was not investigated. Do not assume your library sends it
 - **Descriptions change model behaviour.** A docstring edit can change routing. Run server changes through the same **evaluation suite** as agent changes
 - **In CI, snapshot `tools/list` and diff it,** so contract changes show up in review
   - Related: converted tool names can be long and generated ([Chapter 5](05-building-mcp-servers.md), 5.9)
@@ -167,53 +188,219 @@ The July 2026 spec (**2026-07-28**) made MCP **stateless**: every request stands
 - **HTTP + SSE:** Streamable HTTP
 - **Dynamic Client Registration:** Client ID Metadata Documents
 
-- *Checked:* over STDIO a modern server accepted requests with no handshake and refused them without `_meta`. Over HTTP the library tested spoke the legacy protocol only. Full detail and the official changelog link: [Chapter 7](07-legacy-vs-modern-mcp.md)
+- ✅ *Verified:* over STDIO a modern server accepted requests with no handshake and refused them without `_meta`. Over HTTP the library tested spoke the legacy protocol only. Full detail and the official changelog link: [Chapter 7](07-legacy-vs-modern-mcp.md)
 - Dynamic Client Registration and its replacement are from the interview file and were not confirmed in the official page text I could read
 
 ## 8.9 Quick-fire concept questions
 
-One-line answers. The chapter that explains each is in brackets.
+Say the answer, then reveal it. The chapter that explains each is linked.
 
-**Basics**
+### Basics
 
-- What problem does MCP solve? It replaces about N times M custom integrations with about N plus M ([Chapter 1](01-why-mcp-exists.md))
-- Is MCP a paid product or an orchestrator? Neither. It is a free, open specification ([Chapter 1](01-why-mcp-exists.md))
-- Do I always need MCP? No. A plain tool suits a narrow, fixed action ([Chapter 6](06-deployment-and-building-a-client.md), 6.9)
-- Host, client, server? App, one connection per server, a focused program ([Chapter 2](02-primitives-and-architecture.md))
-- Why one client per server? Decoupling, safety, scalability, parallelism ([Chapter 2](02-primitives-and-architecture.md), 2.3)
-- Three primitives? Tools (do), resources (read), prompts (a form) ([Chapter 2](02-primitives-and-architecture.md), 2.6)
-- Who triggers each primitive? Model, application, user ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.1)
+<details class="qa"><summary>1. What problem does MCP solve?</summary>
 
-**Protocol**
+- It replaces about N times M custom integrations with about N plus M ([Chapter 1](01-why-mcp-exists.md))
 
-- Why JSON-RPC and not REST? Lightweight, transport-agnostic, two-way, notifications, standard errors ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.6)
-- What is the `id` for? To match a response to its request ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.5)
-- The three lifecycle phases? Initialization, operation, shutdown ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.4)
-- How does version negotiation work? Client proposes its latest, server answers, client accepts or disconnects ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.8)
-- Why call `tools/list` after negotiation? Negotiation names categories, discovery names tools ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.9)
-- Elicitation or human-in-the-loop? Server asks for missing information, against an approval layer in the app ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.9)
+</details>
 
-**Transports and shutdown**
+<details class="qa"><summary>2. Is MCP a paid product or an orchestrator?</summary>
 
-- STDIO or Streamable HTTP? Local and personal, against remote and shared ([Chapter 4](04-operation-transports-and-shutdown.md), 4.11)
-- How does STDIO shut down? Close input, terminate, kill ([Chapter 4](04-operation-transports-and-shutdown.md), 4.8)
-- Why is there no JSON-RPC at shutdown? The transport does the closing ([Chapter 4](04-operation-transports-and-shutdown.md), 4.6)
-- Does MCP send my data to the model provider? Yes ([Chapter 4](04-operation-transports-and-shutdown.md), 4.4)
+- Neither. It is a free, open specification ([Chapter 1](01-why-mcp-exists.md))
 
-**Building and deploying**
+</details>
 
-- Official SDK or FastMCP? SDK is the base, FastMCP the easy layer ([Chapter 5](05-building-mcp-servers.md), 5.1)
-- Convert an API or write tools? Convert for speed, write for control and prompts ([Chapter 5](05-building-mcp-servers.md), 5.9)
-- Two mounting mistakes in FastAPI? Path set twice, and `lifespan` not passed at construction ([Chapter 5](05-building-mcp-servers.md), 5.8)
-- Who calls the tool, the model or the client? The client ([Chapter 6](06-deployment-and-building-a-client.md), 6.7)
-- How do you make a server read-only? Do not register write tools ([Chapter 6](06-deployment-and-building-a-client.md), 6.9)
+<details class="qa"><summary>3. Do I always need MCP?</summary>
 
-**Legacy and modern**
+- No. A plain tool suits a narrow, fixed action ([Chapter 6](06-deployment-and-building-a-client.md), 6.9)
 
-- What is the one idea behind the modern spec? Stateless requests ([Chapter 7](07-legacy-vs-modern-mcp.md), 7.2)
-- Removed or deprecated? Different lists, twelve-month floor for deprecated ([Chapter 7](07-legacy-vs-modern-mcp.md), 7.4)
+</details>
 
-## 8.10 Added by Claude, not from the sources
+<details class="qa"><summary>4. Host, client, server?</summary>
+
+- App, one connection per server, a focused program ([Chapter 2](02-primitives-and-architecture.md))
+
+</details>
+
+<details class="qa"><summary>5. Why one client per server?</summary>
+
+- Decoupling, safety, scalability, parallelism ([Chapter 2](02-primitives-and-architecture.md), 2.3)
+
+</details>
+
+<details class="qa"><summary>6. Three primitives?</summary>
+
+- Tools (do), resources (read), prompts (a form) ([Chapter 2](02-primitives-and-architecture.md), 2.6)
+
+</details>
+
+<details class="qa"><summary>7. Who triggers each primitive?</summary>
+
+- Model, application, user ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.1)
+
+</details>
+
+### Protocol
+
+<details class="qa"><summary>8. Why JSON-RPC and not REST?</summary>
+
+- Lightweight, transport-agnostic, two-way, notifications, standard errors ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.6)
+
+</details>
+
+<details class="qa"><summary>9. What is the <code>id</code> for?</summary>
+
+- To match a response to its request ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.5)
+
+</details>
+
+<details class="qa"><summary>10. The three lifecycle phases?</summary>
+
+- Initialization, operation, shutdown ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.4)
+
+</details>
+
+<details class="qa"><summary>11. How does version negotiation work?</summary>
+
+- Client proposes its latest, server answers, client accepts or disconnects ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.8)
+
+</details>
+
+<details class="qa"><summary>12. Why call <code>tools/list</code> after negotiation?</summary>
+
+- Negotiation names categories, discovery names tools ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.9)
+
+</details>
+
+<details class="qa"><summary>13. Elicitation or human-in-the-loop?</summary>
+
+- Server asks for missing information, against an approval layer in the app ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.9)
+
+</details>
+
+### Transports and shutdown
+
+<details class="qa"><summary>14. STDIO or Streamable HTTP?</summary>
+
+- Local and personal, against remote and shared ([Chapter 4](04-operation-transports-and-shutdown.md), 4.11)
+
+</details>
+
+<details class="qa"><summary>15. How does STDIO shut down?</summary>
+
+- Close input, terminate, kill ([Chapter 4](04-operation-transports-and-shutdown.md), 4.8)
+
+</details>
+
+<details class="qa"><summary>16. Why is there no JSON-RPC at shutdown?</summary>
+
+- The transport does the closing ([Chapter 4](04-operation-transports-and-shutdown.md), 4.6)
+
+</details>
+
+<details class="qa"><summary>17. Does MCP send my data to the model provider?</summary>
+
+- Yes ([Chapter 4](04-operation-transports-and-shutdown.md), 4.4)
+
+</details>
+
+### Building and deploying
+
+<details class="qa"><summary>18. Official SDK or FastMCP?</summary>
+
+- SDK is the base, FastMCP the easy layer ([Chapter 5](05-building-mcp-servers.md), 5.1)
+
+</details>
+
+<details class="qa"><summary>19. Convert an API or write tools?</summary>
+
+- Convert for speed, write for control and prompts ([Chapter 5](05-building-mcp-servers.md), 5.9)
+
+</details>
+
+<details class="qa"><summary>20. Two mounting mistakes in FastAPI?</summary>
+
+- Path set twice, and `lifespan` not passed at construction ([Chapter 5](05-building-mcp-servers.md), 5.8)
+
+</details>
+
+<details class="qa"><summary>21. Who calls the tool, the model or the client?</summary>
+
+- The client ([Chapter 6](06-deployment-and-building-a-client.md), 6.7)
+
+</details>
+
+<details class="qa"><summary>22. How do you make a server read-only?</summary>
+
+- Do not register write tools ([Chapter 6](06-deployment-and-building-a-client.md), 6.9)
+
+</details>
+
+### Legacy and modern
+
+<details class="qa"><summary>23. What is the one idea behind the modern spec?</summary>
+
+- Stateless requests ([Chapter 7](07-legacy-vs-modern-mcp.md), 7.2)
+
+</details>
+
+<details class="qa"><summary>24. Removed or deprecated?</summary>
+
+- Different lists, twelve-month floor for deprecated ([Chapter 7](07-legacy-vs-modern-mcp.md), 7.4)
+
+</details>
+
+
+## 8.10 System design round
+
+Use the answer skeleton. Each problem lists what a strong answer covers.
+
+<details class="qa"><summary>D1. Give a company's 3 AI assistants access to Salesforce, Jira and Gmail.</summary>
+
+- One MCP server per system, owned by that system's team; hosts connect a client per server
+- OAuth 2.1 per user, short-lived audience-bound tokens, one scope per sensitive tool, no token passthrough (8.2, 8.3)
+- Read tools by default, writes behind approval; compact structured results
+- Additive tool contracts, `tools/list` snapshots in CI (8.6); logs and metrics per tool
+
+</details>
+
+<details class="qa"><summary>D2. A payments MCP server: "transfer money" must never run twice.</summary>
+
+- Idempotency key from the client, stored in the same transaction as the transfer, checked again at execution (8.5)
+- Amount limits, human approval above a threshold, an elicitation or confirmation step
+- Three outcomes kept distinct: success, empty, error with `isError` (8.7); full audit trail
+
+</details>
+
+<details class="qa"><summary>D3. Run one MCP server for 10,000 users across 5 replicas.</summary>
+
+- Streamable HTTP behind TLS and a load balancer; stateless requests (the modern spec) or sticky sessions on legacy (8.4, [Chapter 7](07-legacy-vs-modern-mcp.md))
+- Any shared state in a store (Redis, a database) or returned as handles
+- Rate limits per user, timeouts per tool, health checks, autoscaling on latency
+
+</details>
+
+<details class="qa"><summary>D4. An agent connected to 15 servers picks wrong tools and costs too much.</summary>
+
+- Every server's schemas go into each call: too many tokens, too many similar tools
+- Connect per task, filter tools (a selector step or allow-list), merge overlapping servers, sharpen descriptions
+- Measure tool-choice accuracy and cost per task before and after ([Chapter 2](02-primitives-and-architecture.md))
+
+</details>
+
+### Revision map
+
+| Chapter | The one line to remember |
+|---|---|
+| [1](01-why-mcp-exists.md) | MCP moves integration upkeep to the server owner; it adds no intelligence |
+| [2](02-primitives-and-architecture.md) | Host → one client per server; tools (model), resources (app), prompts (user) |
+| [3](03-lifecycle-json-rpc-and-capability-negotiation.md) | JSON-RPC; initialize → operate → shut down; negotiate version and capabilities |
+| [4](04-operation-transports-and-shutdown.md) | Discover then call; STDIO local, Streamable HTTP remote; results reach the model provider |
+| [5](05-building-mcp-servers.md) | FastMCP; add MCP as a second front door to an existing app; scope tools by role |
+| [6](06-deployment-and-building-a-client.md) | Same file, two transports; your client, not the model, calls the server |
+| [7](07-legacy-vs-modern-mcp.md) | 2026-07-28: stateless requests, `_meta` every call, handles instead of sessions |
+| 8 | OAuth 2.1 + PKCE, idempotency keys, additive contracts, three outcomes |
+
+## 8.11 Added by Claude, not from the sources
 
 Items marked *checked* were run with `fastmcp` 4.1.4.
 
@@ -240,7 +427,8 @@ Items marked *checked* were run with `fastmcp` 4.1.4.
 3. Start a server with and without the stateless flag. Send a request with a made-up session id to each
 4. Send a wrong-type argument to a tool and write down the reply shape
 5. Snapshot a server's `tools/list` to a file, change a docstring, and diff
-6. Draw the three diagrams in 8.10 on paper without notes
+6. Draw the three diagrams in 8.11 on paper without notes
+7. Answer D1 to D4 in 8.10 aloud with the answer skeleton, in five minutes each
 
 ## How this chapter was checked
 
@@ -253,6 +441,7 @@ Items marked *checked* were run with `fastmcp` 4.1.4.
 - Live-Class-2026, `interview-questions/mcp.md`
 - Live-Class-2026, `classes_transcription_summary/22 - 20 Sep - Legacy vs Modern MCP.md` and `21 - 19 Sep - MCP Deployment.md`
 - Model Context Protocol specification, 2026-07-28, changelog: https://modelcontextprotocol.io/specification/2026-07-28/changelog
-- The idempotency example, the corrections and 8.10 are from testing, not from the interview file
+- The idempotency example, the corrections and 8.11 are from testing, not from the interview file
+- 8.10 (system design round and revision map), the answer skeleton and the click-to-reveal quick-fire format were added in the 2026 review (Added by Claude)
 
 Previous: [Chapter 7, Legacy vs modern MCP](07-legacy-vs-modern-mcp.md)
