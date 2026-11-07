@@ -1,13 +1,42 @@
 # Chapter 4: Glossary
 
+*Every term from the course, A to Z, in one line each, with a link to where it is taught.*
+
+> [!NOTE]
+> **📍 At a glance**
+> - **What it is:** 156 entries from the whole course and the 2026 review, plus look-alike pairs that interviewers like to test
+> - **How to use it:** search the page (Ctrl+F or "Find in page"), or start from the topic map below
+> - **Level:** all · **Time:** look-ups; or one letter a day for revision
+> - **Builds on:** every book. Each entry links to the chapter that teaches it
+
 **After this chapter you can:**
 
 - Look up any course term in one line and jump to the chapter that teaches it
 - Tell apart look-alike terms (guardrail and middleware, state and runtime, saver and store)
 
-- 140 entries from the whole course, A to Z. Each has a one-line meaning and a link to where it is taught
 - Definitions are reworded, not copied. Terms from the source glossaries are all here
 - Where the books use a different name from the class, the book's chapter is the link
+
+### Topic map
+
+```mermaid
+flowchart LR
+    M["Model<br/>tokens · context window · temperature"] --> A["Agent<br/>model + memory + tools"]
+    A --> LP["Agentic loop<br/>tool call → tool message → model"]
+    LP --> F["Framework<br/>LangChain create_agent · middleware"]
+    T["Tools<br/>schema · registry · MCP"] --> A
+    V["Validation<br/>Pydantic · structured output"] --> A
+    F --> P["Production<br/>tracing · evals · guardrails · cost"]
+```
+
+| Topic | Start with these terms |
+|---|---|
+| How models work | LLM, Token, Context window, Embedding, Temperature and top-p, Hallucination, Fine-tuning |
+| Agents | Agent, Agentic loop, Tool schema, Memory, Stateless |
+| Validation | `BaseModel`, `Field()`, Validators, Discriminated union, Strict structured output |
+| LangChain | `create_agent`, Middleware, Checkpointer, Store, Runtime |
+| MCP | Host, Client, Server, Primitives, Transports |
+| Production | AgentOps, Guardrail, Backoff, Idempotent call, Prompt caching |
 
 ## A
 
@@ -22,10 +51,12 @@
 - **`*args` and `**kwargs`.** Collect positional and keyword arguments. A decorator's wrapper uses them to pass any call through. [Python, Ch 2](../python/02-python-refresher.md)
 - **`args_schema`.** A Pydantic model attached to a tool for richer argument rules than type hints: ranges, patterns, nested fields. [Langchain, Ch 5](../langchain/05-tools.md)
 - **`artifact` (on `ToolMessage`).** An extra field for rich tool output such as links or ids. The application reads it; the model never sees it. [Langchain, Ch 5](../langchain/05-tools.md)
+- **Async (`async` / `await`).** Lets one program wait on many slow calls (network, disk) at once; `asyncio.gather` runs independent tool calls in parallel. [Python, Ch 2](../python/02-python-refresher.md)
 
 ## B
 
 - **`BaseModel`.** The Pydantic class that checks every field's type when you create an object and raises at once on bad data. [Pydantic, Ch 1](../pydantic/01-why-pydantic-and-basemodel.md)
+- **`BaseSettings` (pydantic-settings).** A Pydantic model that reads configuration and API keys from environment variables or `.env`, and fails at start-up if one is missing. [Pydantic, Ch 2](../pydantic/02-field-and-special-types.md)
 - **Batching (`.batch()`).** Send several independent requests together so they run in parallel. `batch_as_completed()` returns each as it finishes. [Langchain, Ch 3](../langchain/03-models-messages-and-parameters.md)
 - **`before_agent` and `after_agent`.** Hooks that fire once per run, at the start and end. A natural place to open and close a resource. [Langchain, Ch 10](../langchain/10-shell-tools-and-custom-middleware.md)
 - **`before_model` and `wrap_model_call`.** `before_model` observes state. `wrap_model_call` receives the outgoing request and can rewrite the model, tools or prompt. [Langchain, Ch 10](../langchain/10-shell-tools-and-custom-middleware.md)
@@ -55,6 +86,7 @@
 - **Decorator.** A function that wraps another to add behaviour around it. `@tool` is built on the idea. [Python, Ch 2](../python/02-python-refresher.md)
 - **Decorator-based middleware.** A single hook defined by decorating a plain function. Best for one hook at a time. [Langchain, Ch 10](../langchain/10-shell-tools-and-custom-middleware.md)
 - **Deep Agents.** The batteries-included layer on top of LangChain agents: context compression, a virtual file system, sub-agents. The least control. [Langchain, Ch 1](../langchain/01-introduction-to-langchain.md) · [Langchain, Ch 2](../langchain/02-langchain-family-and-harness-engineering.md)
+- **Discriminated union.** "One of several shapes", chosen by a tag field such as `kind`. Validates webhooks, events and agent actions cleanly. [Pydantic, Ch 4](../pydantic/04-nested-models-and-inheritance.md)
 - **Dynamic tool loading.** Changing the tools an agent can see at run time, for example hiding a VIP-only tool. [Langchain, Ch 7](../langchain/07-middleware.md)
 
 ## E
@@ -71,6 +103,7 @@
 - **Few-shot prompting.** Show the model a few example question and answer pairs before the real question, instead of a bloated system prompt. [Langchain, Ch 3](../langchain/03-models-messages-and-parameters.md)
 - **`Field()`.** Adds limits on the value, such as `gt=0` or `min_length=2`, not just the type. [Pydantic, Ch 2](../pydantic/02-field-and-special-types.md)
 - **`field_validator` and `model_validator`.** One checks a single field. The other runs after all fields and sees the whole model, so it can compare fields. [Pydantic, Ch 3](../pydantic/03-validators.md)
+- **Fine-tuning.** Further training a model on your own examples to fix a style, format or narrow skill. Poor at adding facts; try prompting and RAG first. [LLM, Ch 3](03-inside-the-model.md)
 - **Forward-Deployed Engineer (FDE).** A role the course covers alongside Harness Engineering. [LLM, Ch 1](../llm/01-course-roadmap-and-prerequisites.md)
 - **f-string.** A string written `f"..."` where `{ }` is replaced by a value. [Python, Ch 1](../python/01-setup-and-api-basics.md)
 - **Function calling (before MCP).** The 2023 ability of a model to request a call to a described tool. It worked, but each app wired tools its own way. [MCP, Ch 1](../mcp/01-why-mcp-exists.md)
@@ -78,11 +111,13 @@
 
 ## G
 
+- **Generator (`yield`).** A function that hands back values one at a time, on demand. How SDKs stream tokens. [Python, Ch 2](../python/02-python-refresher.md)
 - **Groq.** A fast, free provider (not Elon Musk's "Grok") that hosts open models behind an OpenAI-compatible API. [Python, Ch 3](../python/03-anatomy-of-an-agent.md)
 - **Guardrail.** The goal of keeping an agent from doing something unwanted. Middleware is one mechanism for it. [Langchain, Ch 8](../langchain/08-prebuilt-middleware-limits-fallback-and-pii.md)
 
 ## H
 
+- **Hallucination.** A fluent, confident answer that is false. Reduced by grounding (RAG), tools, validation and evaluation, never fully removed. [LLM, Ch 3](03-inside-the-model.md)
 - **Harness.** Everything wrapped around a raw model: prompt, tools, memory, middleware, guardrails. [Langchain, Ch 2](../langchain/02-langchain-family-and-harness-engineering.md)
 - **Harness engineering.** The discipline of doing that wrapping well. Tools such as Claude Code are examples. [Langchain, Ch 2](../langchain/02-langchain-family-and-harness-engineering.md)
 - **Headless tools.** Tools defined on the server but run on the user's own device, such as clipboard or location, through an interrupt. [Langchain, Ch 6](../langchain/06-agents-and-memory.md)
@@ -95,6 +130,7 @@
 
 ## I
 
+- **Idempotent call.** A call that is safe to repeat with the same result, such as a read. Only idempotent calls should be retried automatically. [Python, Ch 1](../python/01-setup-and-api-basics.md)
 - **`init_chat_model`.** One entry point to any provider: change the `"provider:model"` string and nothing else. [Langchain, Ch 3](../langchain/03-models-messages-and-parameters.md)
 - **Initialization handshake.** The three-step MCP opening: `initialize` request, the server's reply, then the client's `initialized` notice. [MCP, Ch 3](../mcp/03-lifecycle-json-rpc-and-capability-negotiation.md)
 - **`InMemorySaver`.** A checkpointer that keeps history in RAM by `thread_id`. Lost when the process ends. [Langchain, Ch 6](../langchain/06-agents-and-memory.md)
@@ -119,6 +155,7 @@
 - **LLM.** A large language model. It predicts the next token from patterns in text. [LLM, Ch 3](../llm/03-inside-the-model.md)
 - **`LLMToolEmulator`.** Middleware that has a model invent a plausible tool result without running the tool. For testing. [Langchain, Ch 9](../langchain/09-guardrails-to-do-lists-and-tool-resilience.md)
 - **`LLMToolSelectorMiddleware`.** Uses a cheaper model to pick the tools relevant to the query before the main call. Filters by query, not by user state. [Langchain, Ch 9](../langchain/09-guardrails-to-do-lists-and-tool-resilience.md)
+- **Lost in the middle.** Models use information at the start and end of a long prompt better than the middle. Put key facts near the edges. [LLM, Ch 3](03-inside-the-model.md)
 - **Luhn algorithm.** The checksum real card numbers pass. The PII credit-card detector uses it, so a random digit string is not flagged. [Langchain, Ch 8](../langchain/08-prebuilt-middleware-limits-fallback-and-pii.md)
 
 ## M
@@ -154,7 +191,9 @@
 - **Parameters.** The billions of fixed weights set in training. Not the same as tokens. [LLM, Ch 3](../llm/03-inside-the-model.md)
 - **`PIIMiddleware`.** Detects personal data (email, card, custom ids) before it reaches the model and applies a strategy. [Langchain, Ch 8](../langchain/08-prebuilt-middleware-limits-fallback-and-pii.md)
 - **PII strategies.** Four ways to handle detected personal data: `block`, `redact`, `mask`, `hash`. [Langchain, Ch 8](../langchain/08-prebuilt-middleware-limits-fallback-and-pii.md)
+- **Preference tuning (RLHF, DPO).** The training stage where ranked answers teach a model to be helpful, honest and safe. Turns a base model into a chat model. [LLM, Ch 3](03-inside-the-model.md)
 - **Primitive functions.** Tools have `list` and `call`; resources have `list` and `read`; prompts have `list` and `get`. [MCP, Ch 2](../mcp/02-primitives-and-architecture.md) · [MCP, Ch 4](../mcp/04-operation-transports-and-shutdown.md)
+- **Prompt caching.** A provider feature that reuses a repeated prompt prefix (system prompt, tool schemas) at lower cost and latency. [LLM, Ch 3](03-inside-the-model.md) · [Python, Ch 3](../python/03-anatomy-of-an-agent.md)
 - **Prompt injection.** An attempt to override instructions through the message itself. A field limit can stop its effect. [Langchain, Ch 1](../langchain/01-introduction-to-langchain.md)
 - **Provider strategy and tool strategy.** Two ways to get structured output: the provider's native feature, or a synthetic tool call that works almost anywhere. [Langchain, Ch 4](../langchain/04-structured-output.md)
 - **Pydantic.** A library that checks type and value at run time and raises `ValidationError` on bad input. [Pydantic, Ch 1](../pydantic/01-why-pydantic-and-basemodel.md)
@@ -163,6 +202,7 @@
 ## R
 
 - **ReAct.** "Reason plus Act", the first general agent pattern. The model reasons and acts instead of following a fixed chain. [Langchain, Ch 2](../langchain/02-langchain-family-and-harness-engineering.md)
+- **Reasoning model.** A model that spends extra hidden "thinking" tokens before answering. Better at maths, code and planning; slower and costlier. [LLM, Ch 3](03-inside-the-model.md)
 - **Retriever and RAG.** Find the relevant text first, then answer from it. Used in the Meridian project. [Projects, Ch 3](../projects/03-meridian-ai-learner.md)
 - **`return_direct`.** Sends a tool's output straight to the user, skipping the model's rewording. [Langchain, Ch 5](../langchain/05-tools.md)
 - **Runtime.** Information that travels with the agent but is not the conversation: `context`, `store`, `stream_writer`, `execution_info`, `server_info`. [Langchain, Ch 11](../langchain/11-runtime-and-human-in-the-loop.md)
@@ -180,12 +220,15 @@
 - **Streamable HTTP.** The MCP transport for servers anywhere on the internet: JSON-RPC over POST to one `/mcp` URL. Replaced HTTP+SSE. [MCP, Ch 4](../mcp/04-operation-transports-and-shutdown.md)
 - **Streaming (`.stream()`).** Returns output chunk by chunk. It does not make the answer faster, only the wait shorter. [Langchain, Ch 3](../langchain/03-models-messages-and-parameters.md)
 - **`stream_writer`.** Lets a tool send live progress updates while it runs. [Langchain, Ch 11](../langchain/11-runtime-and-human-in-the-loop.md)
+- **Strict mode (Pydantic).** `ConfigDict(strict=True)`: no type conversion, so `"28"` is rejected for an `int`. [Pydantic, Ch 1](../pydantic/01-why-pydantic-and-basemodel.md)
+- **Strict structured output.** Provider-side decoding constrained to a JSON schema. Makes every field required and forbids extras; you still validate values. [Pydantic, Ch 5](../pydantic/05-validating-llm-output.md)
 - **Structured output.** Making a reply fit a defined shape (a Pydantic model) instead of free text. [Langchain, Ch 4](../langchain/04-structured-output.md) · [Pydantic, Ch 5](../pydantic/05-validating-llm-output.md)
 - **`SummarizationMiddleware`.** Condenses older history once a token, message or percent trigger is hit, keeping recent messages in full. [Langchain, Ch 7](../langchain/07-middleware.md)
 - **System, user, assistant messages.** The three roles sent on every call: rules (optional), what the person said, the model's earlier replies. [LLM, Ch 2](../llm/02-the-agentic-loop-in-pure-python.md)
 
 ## T
 
+- **Temperature and top-p.** Sampling settings. Low temperature for facts and code, higher for ideas; change one of the two, not both. [LLM, Ch 3](03-inside-the-model.md) · [Langchain, Ch 3](../langchain/03-models-messages-and-parameters.md)
 - **Thread id.** The key a checkpointer uses to find a conversation's saved history. The application decides when a new thread starts. [Langchain, Ch 6](../langchain/06-agents-and-memory.md)
 - **To-do list middleware.** Gives an agent a persisted plan it updates turn by turn. [Langchain, Ch 9](../langchain/09-guardrails-to-do-lists-and-tool-resilience.md)
 - **Token.** The unit a model reads, writes and bills in, about three quarters of a word. Output costs more than input. [LLM, Ch 3](../llm/03-inside-the-model.md)
@@ -197,11 +240,13 @@
 - **`ToolRuntime`.** A parameter that gives a tool access to state, context, store and more, all hidden from the model. [Langchain, Ch 5](../langchain/05-tools.md)
 - **Tool schema.** The name, description and parameters sent to the model. It never sees the function. [LLM, Ch 2](../llm/02-the-agentic-loop-in-pure-python.md)
 - **Transport layer.** How an MCP client and server are connected: STDIO locally, Streamable HTTP over the internet. [MCP, Ch 4](../mcp/04-operation-transports-and-shutdown.md)
+- **`TypedDict`.** A type hint for the shape of a plain dict, such as a chat message. Checked by editors, not at run time. [Python, Ch 2](../python/02-python-refresher.md)
 
 ## U
 
 - **Union types (multi-intent).** Pass `Union[A, B]` as the schema so the model picks the shape that fits. [Langchain, Ch 4](../langchain/04-structured-output.md)
 - **UV.** One tool for Python versions, environments and dependencies, replacing `pip`, `venv` and `conda`. [Python, Ch 1](../python/01-setup-and-api-basics.md)
+- **`uv.lock`.** The file that pins every dependency version. `uv sync --locked` installs exactly it in CI and Docker. [Python, Ch 1](../python/01-setup-and-api-basics.md)
 
 ## V
 
@@ -226,39 +271,80 @@
 - **Context window vs memory.** The window is per call and fixed. Memory is a separate, lasting mechanism
 - **Provider strategy vs tool strategy.** Native structured output, or a synthetic tool call that fakes it
 
-## Interview corner
-
-**Q1. Guardrail or middleware?**
-- A guardrail is the aim. Middleware is a mechanism that can implement it, along with retries, fallbacks and logging
-
-**Q2. State or runtime context?**
-- State is mutable and persists across calls in a conversation. Runtime context is set when you invoke and does not change
-
-**Q3. Checkpointer or store?**
-- A checkpointer resumes one conversation by `thread_id`. A store holds data across conversations
-
-**Q4. What does "stateless" mean for an LLM call?**
-- The model remembers nothing between calls. The history is resent every time
-
-**Q5. Tool schema or tool function?**
-- The schema (name, description, parameters) goes to the model. The function stays in your code
-
-**Q6. What are the three MCP primitives?**
-- Tools (do), resources (read), prompts (a form to fill in)
-
-**Q7. Why is the agent loop not a DAG?**
-- It cycles back (model, tool, model again)
-
-**Q8. What does `wrap_model_call` do that `before_model` cannot?**
-- It receives the outgoing request and can change the model, tools or prompt. `before_model` only observes
-
 ## Added by Claude, not from the sources
 
 - **One term added:** "Retriever and RAG" (retrieve first, then answer) comes from the Meridian project, not the source glossaries
 - **One fix to the source wording:** the class glossary says `wrap_tool_call` "stays in declared order" for after-hooks. [Langchain Ch 10](../langchain/10-shell-tools-and-custom-middleware.md) tested this: wrap hooks **nest**, so a wrap hook exits in reverse. The execution-order entry follows that
 - **"Vibe coding"** is explained only in the class 02 Q&A, so it links to that section of Python Ch 2
 - **Names change:** `langchain-mcp-adapters` and `langchain.mcp` are two different packages (see [Langchain Ch 12](../langchain/12-mcp-in-langchain.md)). The glossary uses the class's wording
+- **16 entries added in the 2026 review** for topics new in the restyled books (for example Hallucination, Temperature and top-p, Discriminated union, `uv.lock`)
 - **Study tip:** read one letter a day and say each entry aloud without looking at the definition
+
+## Interview corner
+
+**What interviewers listen for:** you can separate look-alike terms precisely and give the one-line reason each exists.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. What does "stateless" mean for an LLM call?</summary>
+
+- The model remembers nothing between calls; the history is resent every time
+
+</details>
+
+<details class="qa"><summary>2. Tool schema or tool function?</summary>
+
+- The schema (name, description, parameters) goes to the model; the function stays in your code
+
+</details>
+
+<details class="qa"><summary>3. What are the three MCP primitives?</summary>
+
+- Tools (do), resources (read), prompts (a template to fill in)
+
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>4. Guardrail or middleware?</summary>
+
+- A guardrail is the aim; middleware is one mechanism that implements it, along with retries, fallbacks and logging
+
+</details>
+
+<details class="qa"><summary>5. State or runtime context? Checkpointer or store?</summary>
+
+- State changes and persists in a conversation; runtime context is fixed for the run
+- *Stronger answer:* a checkpointer resumes one thread by `thread_id`; a store holds facts across threads
+
+</details>
+
+<details class="qa"><summary>6. Why is the agent loop not a DAG?</summary>
+
+- It cycles back: model, tool, model again, until a final answer or a cap
+
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>7. What does <code>wrap_model_call</code> do that <code>before_model</code> cannot?</summary>
+
+- It receives the outgoing request and can change the model, tools or prompt, or retry around the call
+- *Stronger answer:* `before_model` sees state before the call; only a wrap hook controls the call itself
+
+</details>
+
+<details class="qa"><summary>8. Fine-tuning, RAG, prompt caching, reasoning model: which solves "answers are out of date"?</summary>
+
+- RAG: it supplies current documents at question time
+- *Stronger answer:* fine-tuning changes style, caching cuts cost, a reasoning model thinks harder; none of them adds fresh facts
+
+</details>
+
+> [!TIP]
+> **🧩 Design question**
+> - *"Explain to a new teammate, in five terms from this glossary, how a request flows through a production agent."*
+> - A good answer: tokens into the **model**, the **agentic loop** with **tool schemas**, **validation** of tool arguments and output, and **tracing** of every step
 
 ## Recap
 
@@ -278,6 +364,7 @@
 - **Links:** every chapter link was checked to point to a file that exists in this repository. The chapter chosen for each term was picked by searching the books for the term and checking the best match. A few were set by hand
 - **Not checked:** each link was not opened to confirm the section; the chapter is the target, not the section
 - The `wrap` hook order follows the tested result in the Langchain book
+- **2026 review:** 16 entries added for new topics in the restyled Python, Pydantic and LLM chapters, each linked to the chapter that now teaches it; the At-a-glance box, topic map and graded interview were added. Links re-checked automatically
 
 ## Sources and further reading
 

@@ -1,13 +1,20 @@
 # Chapter 1: Course roadmap and prerequisites
 
+*The map before the road trip: where the course sits, what comes in what order, the rules for judging an agent, and the setup you need first.*
+
+> [!NOTE]
+> **📍 At a glance**
+> - **You will learn:** the course stages and where each lives in these books, the four golden rules for production agents and how industry measures them, and the one-time setup
+> - **You will build:** a working setup (Python, UV, VS Code, one free API key, `.env`) and run the first class folder
+> - **Level:** beginner · **Time:** about 30 minutes
+> - **Builds on:** nothing. **Leads to:** [Python Ch 1](../python/01-setup-and-api-basics.md)
+
 **After this chapter you can:**
 
 - Say where the course sits and what each stage covers
-- Name the four golden rules for judging an agent in production
+- Name the four golden rules for judging an agent in production, and the metric for each
 - Find every topic in these notes from the course phases
 - Finish the one-time setup and run the first class folder
-
-The map before the road trip: where the course sits, what comes in what order, the mentor's rules of thumb, and the setup you need before class 01.
 
 ## 1.1 Where the course sits
 
@@ -55,13 +62,21 @@ The induction session gives seven stages:
 6. **Extended frameworks:** ADK, the Claude Agent SDK and more
 7. **Production capstones:** about nine portfolio-grade builds
 
+```mermaid
+flowchart LR
+    P0["0 Foundations<br/>Python · Pydantic · LLM basics"] --> P1["1 Agents in pure Python<br/>brain · memory · tools · loop"]
+    P1 --> P2["2 LangChain in depth<br/>models · tools · middleware"]
+    P2 --> P3["3 LangGraph and beyond<br/>state · MCP · RAG"]
+    P3 --> P4["4 Production capstones<br/>cloud · VPS · CI/CD"]
+```
+
 The repo describes five phases. These notes follow them:
 
 | Phase | Content | Where in these notes |
 |---|---|---|
 | 0 Foundations | Python, Pydantic, AI vocabulary | [Python](../python/01-setup-and-api-basics.md), [Pydantic](../pydantic/01-why-pydantic-and-basemodel.md), [LLM Ch 3](03-inside-the-model.md) |
 | 1 Agents in pure Python | Brain, memory, tools, the loop | [Python Ch 3](../python/03-anatomy-of-an-agent.md), [LLM Ch 2](02-the-agentic-loop-in-pure-python.md) |
-| 2 LangChain in depth | Models, structured output, tools, agents, middleware, runtime | [Langchain book](../langchain/01-introduction-to-langchain.md) (Ch 1 to 15) |
+| 2 LangChain in depth | Models, structured output, tools, agents, middleware, runtime | [Langchain book](../langchain/01-introduction-to-langchain.md) (Ch 1 to 17) |
 | 3 LangGraph and beyond | State, checkpointing, MCP, RAG | [MCP book](../mcp/01-why-mcp-exists.md) (Ch 1 to 8). Checkpointing is in Langchain Ch 6. RAG is shown in [Projects Ch 3](../projects/03-meridian-ai-learner.md). No book yet for LangGraph itself |
 | 4 Production capstones | Deployed on cloud and VPS | [Projects book](../projects/01-cinebot.md) (Ch 1 to 4) |
 
@@ -71,14 +86,14 @@ The repo describes five phases. These notes follow them:
 
 ## 1.4 The four golden rules
 
-The mentor's rules for judging a system **in production**, repeated all course:
+Rules for judging a system **in production**, repeated all course:
 
 1. **Cost**, including token use
 2. **Failure rate**, trending toward zero
 3. **Latency**, the speed of the response
 4. **Quality**: is the output useful?
 
-His line: **"Simple is scalable."** Philosophy from the Q&A:
+The course motto: **"Simple is scalable."** In practice:
 
 - Minimise calls to outside services, APIs and LLMs. Every hop costs time and money
 - Prefer the simplest system that solves the problem. Do not build for scale that never arrives
@@ -86,10 +101,25 @@ His line: **"Simple is scalable."** Philosophy from the Q&A:
 
 *Source: `classes_summary/00`, `classes_transcription_summary/00`.*
 
+> [!IMPORTANT]
+> **🏭 In production: how the four rules are measured**
+>
+> | Rule | Typical metric | Where you see it |
+> |---|---|---|
+> | Cost | Tokens and money **per task** or per conversation | Provider usage data, traces |
+> | Failure rate | Share of runs that error, time out or need a retry | Logs, traces, alerts |
+> | Latency | Time to first token and p95 total time | Traces, monitoring dashboards |
+> | Quality | Pass rate on a fixed set of real test questions | Evaluations re-run on every change |
+>
+> - The four trade against each other: a stronger model raises quality and cost; more tool hops raise quality and latency
+> - Measure all four **before** optimising; teams often fix the wrong one
+>
+> *Added by Claude.*
+
 ## 1.5 How the hands-on learning works
 
 - Each concept gets a mini-project in class
-- The mentor then walks through a full project and shares the package: code, diagrams, explanations
+- A full project is then walked through and shares the package: code, diagrams, explanations
 - Short of time: run the given code with its explanation
 - With time: customise and extend it
 - Built for working professionals. You are never forced to write everything from scratch
@@ -197,39 +227,93 @@ From the course repo:
 
 *Source: `classes_transcription_summary/00`, Q&A and action items. Platform rules are left out as admin, not teaching.*
 
-## 1.9 Interview corner
-
-**Q1. How do you judge an agent system in production?**
-- Cost, failure rate, latency, quality. Watch all four, not one
-
-**Q2. "Simple is scalable." What does it mean here?**
-- Fewer calls and fewer moving parts. Each extra LLM or API hop adds cost and failure points
-
-**Q3. When do you use more than one LLM?**
-- When the problem needs it, such as failover. Not in parallel by default, which doubles cost
-
-**Q4. What is AgentOps?**
-- The deployment and monitoring side of agents in production
-
-**Q5. Why teach the raw-Python loop before LangChain?**
-- So the framework is a convenience, not a mystery ([Chapter 2](02-the-agentic-loop-in-pure-python.md))
-
-**Q6. Why keep keys in `.env` and ship `.env.example`?**
-- A real key must never be committed. The example shows which variables to set
-
-**Q7. Why UV and a `pyproject.toml`?**
-- One tool for versions, environments and dependencies, and a file that rebuilds the same setup elsewhere
-
-**Q8. Colab or VS Code?**
-- Colab to learn line by line without setup. VS Code for real multi-file projects
-
-## 1.10 Added by Claude, not from the sources
+## 1.9 Added by Claude, not from the sources
 
 - **Map the rules to tools.** Cost, latency and failures show up in a trace: LangSmith records each step's time and token cost ([Langchain Ch 2](../langchain/02-langchain-family-and-harness-engineering.md)). Quality needs your own test questions
 - **A key check before you push:** run `git status` and confirm `.env` is not listed; `git check-ignore .env` prints the path when it is ignored
 - **Rotate a leaked key.** If a key ever lands in a commit, revoke it at the provider, not only in the repo. Several keys in this course's source files should be revoked by their owner (see [Langchain Ch 12](../langchain/12-mcp-in-langchain.md), 12.11)
 - **Read the dates.** The README, transcripts and notes were written at different times. The class count (18 versus 23) is one example of drift
 - **FDE in general use** usually means an engineer who works with a customer to build and deploy a solution on site. The course names the role but the sources here do not define it, so check the course material before relying on this reading
+
+## 1.10 Interview corner
+
+**What interviewers listen for:** you judge agents by measurable outcomes (cost, failures, latency, quality), prefer the simplest design that works, and keep secrets out of code.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. How do you judge an agent system in production?</summary>
+
+- Cost, failure rate, latency, quality: watch all four, not one
+- *Stronger answer:* give a metric for each (cost per task, error rate, p95 latency, pass rate on a test set)
+
+</details>
+
+<details class="qa"><summary>2. What is AgentOps?</summary>
+
+- The deployment and monitoring side of agents in production
+- *Stronger answer:* tracing, evaluations, cost tracking, alerts and safe rollouts of new prompts and models
+
+</details>
+
+<details class="qa"><summary>3. Why keep keys in <code>.env</code> and ship <code>.env.example</code>?</summary>
+
+- A real key must never be committed; the example shows which variables to set
+
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>4. "Simple is scalable." What does it mean here?</summary>
+
+- Fewer calls and moving parts; each extra LLM or API hop adds cost, latency and failure points
+- *Stronger answer:* start with one model call; add tools, a loop or more agents only when a measured problem needs them
+
+</details>
+
+<details class="qa"><summary>5. When do you use more than one LLM?</summary>
+
+- When the problem needs it: failover, or a cheap model for easy steps and a strong one for hard ones
+- *Stronger answer:* never in parallel by default, which multiplies cost without a clear gain
+
+</details>
+
+<details class="qa"><summary>6. Why learn the raw-Python loop before LangChain?</summary>
+
+- So the framework is a convenience, not a mystery ([Chapter 2](02-the-agentic-loop-in-pure-python.md))
+- *Stronger answer:* when a framework misbehaves, you debug the loop it runs
+
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>7. Quality is fine but cost tripled last month. How do you investigate?</summary>
+
+- Break cost down per task from traces: which step, which model, how many tokens
+- *Stronger answer:* usual causes are growing history, extra loop turns, a model switch, or retries; fix with trimming, caching, a cheaper model for easy steps, and a budget alert
+
+</details>
+
+<details class="qa"><summary>8. Colab, notebooks or a project in VS Code for a team?</summary>
+
+- Colab or notebooks to explore; a VS Code project for anything shared or deployed
+- *Stronger answer:* a project gives version control, a lock file, tests and CI; notebooks hide state and are hard to review
+
+</details>
+
+> [!TIP]
+> **🧩 Design question**
+> - *"Your manager asks for an 'AI agent' to answer HR policy questions. What do you build first, and how do you know it works?"*
+> - Talk about: the simplest version first (one model call with retrieved policy text), a test set of real questions, the four golden metrics, and adding tools or agents only when a test shows the need
+
+## Cheat sheet
+
+| Item | Remember |
+|---|---|
+| Four golden rules | Cost · failure rate · latency · quality |
+| Motto | Simple is scalable: fewest calls that solve the problem |
+| Study order | Python → Pydantic → LLM → Langchain → MCP → Projects |
+| Setup | Python 3.10+, `uv`, VS Code, one free key, `cp .env.example .env` |
+| Secrets | `.env` in `.gitignore`; check with `git check-ignore .env` |
 
 ## Recap
 
@@ -251,6 +335,7 @@ From the course repo:
 - **Rewritten** from the earlier version of this chapter, which was built from the induction summaries, `PREREQUISITES.md`, the root README, the transcription `Readme.md` and the handbook PDF (read in full at that time). I did not re-open those files in this pass
 - **Checked in the repo:** every link to a chapter in the phase table points to a file that exists
 - **Not run:** `uv`, the setup steps, the git fixes, any link in 1.8
+- The diagram, the metrics box, the graded interview and the cheat sheet were added in the 2026 review (Added by Claude: standard practice)
 - The phase table reflects the books as they stand now. Earlier versions of this chapter listed several as "not written yet"
 
 ## Sources and further reading

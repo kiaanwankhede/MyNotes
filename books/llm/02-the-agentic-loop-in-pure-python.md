@@ -1,17 +1,23 @@
 # Chapter 2: The agentic loop in pure Python
 
+*Every agent framework runs one small loop underneath. Write it by hand once and frameworks stop being magic.*
+
+> [!NOTE]
+> **📍 At a glance**
+> - **You will learn:** message roles, tool schemas, the agentic loop, running several tool calls in one reply, and how to make the loop survive bad model output
+> - **You will build:** `run_agent` from scratch, a terminal chat, and a three-tool Streamlit app
+> - **Level:** intermediate · **Time:** about 60 minutes
+> - **Builds on:** [Python Ch 3](../python/03-anatomy-of-an-agent.md) (stateless calls, three layers, providers, a manual tool call) and [Chapter 3](03-inside-the-model.md). **Leads to:** [Langchain Ch 1](../langchain/01-introduction-to-langchain.md), where `create_agent` runs this loop for you
+
 **After this chapter you can:**
 
 - Say what an agent loop does in three steps, and write it without a framework
 - Write a tool schema and explain why the model never sees your function
 - Explain why the model is called again after a tool runs
 - Run the loop with several tool calls in one reply and a turn cap
-- Spot the failure points: unknown tool names, bad arguments, runaway loops
-
-**Builds on:** [Python Ch 3](../python/03-anatomy-of-an-agent.md) (stateless call, three layers, providers, manual tool call) and [Chapter 3](03-inside-the-model.md) of this book.
+- Make the loop survive unknown tool names, bad arguments, tool crashes and runaway loops
 
 - Every framework (LangChain, LangGraph, CrewAI) runs this same loop underneath
-- The mentor's reason for teaching it by hand: once you build it, the framework stops being a mystery
 
 ## 2.1 What the model needs to know first
 
@@ -134,7 +140,7 @@ message = response.choices[0].message
 
 **Source quirk.** In `_05`, `get_weather_schema` is nested wrongly: `parameters` sits **beside** `function`, not inside it.
 
-- *Checked:* the keys are `type`, `function`, `parameters`, and inside `function` only `name` and `description`
+- ✅ *Verified:* the keys are `type`, `function`, `parameters`, and inside `function` only `name` and `description`
 - The model would not receive the parameters. `get_complete_weather_schema` later in the file is correct and matches the code above
 
 - The file needs an OpenAI-compatible provider (Groq, OpenRouter or OpenAI). Anthropic's tool response has a different shape (a later module)
@@ -143,13 +149,26 @@ message = response.choices[0].message
 
 ## 2.4 The agentic loop
 
-- The core idea. The mentor warned it is hard to teach, and no agent course starts from raw Python
+- The core idea, and the one most worth knowing cold
 - The three steps:
   1. Send the message history **and** the tool schemas to the model
   2. Plain text back: that is the final answer. Return it
   3. A tool request: run it with the model's arguments, **append the result**, go to step 1
 - The model decides each time whether it has enough or needs another tool
 - A cap stops runaway loops. The class pseudo-code called it `max_iterations` (4). The files call it `max_turns`
+
+```mermaid
+flowchart TD
+    S["messages + tool schemas"] --> M["Call the model"]
+    M --> Q{"Reply has tool_calls?"}
+    Q -- "no" --> F["Final answer: append and return"]
+    Q -- "yes" --> R["Append the assistant message with tool_calls"]
+    R --> T["Run EVERY requested tool"]
+    T --> A["Append one tool message per call<br/>(same tool_call_id)"]
+    A --> C{"turns < max_turns?"}
+    C -- "yes" --> M
+    C -- "no" --> X["Stop: 'Reached max_turns'"]
+```
 
 ```python
 def run_agent(messages: list, max_turns: int = 5) -> str:
@@ -187,7 +206,7 @@ def run_agent(messages: list, max_turns: int = 5) -> str:
 - Its output reaches it only when you append it as a message and send everything back
 - Each result carries the `tool_call_id` of the request it answers, so the model can match them
 
-**Checked** (the `_07` loop, real OpenAI client, local stand-in server):
+*✅ *verified** (the `_07` loop, real OpenAI client, local stand-in server):
 
 - One call: history was user, assistant (`content` empty plus `tool_calls`), `tool` (`Tokyo: 22C, partly cloudy`, same id), then the final assistant text. **2 model calls**
 - Three calls in one reply (two weather, one calculator): one assistant message, then **three tool messages in order**, then the final answer
@@ -269,8 +288,8 @@ def calculator(expression: str) -> str:
 ```
 
 - The rejection comes back as the tool **result**, so the model can read it and react
-- *Checked:* `2 * (3 + 4)` gave `14`; `1; import os` and `__import__('os')` were rejected; `1/0` gave "Could not evaluate: division by zero"
-- *Checked:* with the network down, `convert_currency` returned "Currency service unavailable: offline" and did not crash
+- ✅ *Verified:* `2 * (3 + 4)` gave `14`; `1; import os` and `__import__('os')` were rejected; `1/0` gave "Could not evaluate: division by zero"
+- ✅ *Verified:* with the network down, `convert_currency` returned "Currency service unavailable: offline" and did not crash
 
 **Memory in a web page.**
 
@@ -333,46 +352,155 @@ uv run streamlit run _07_streamlit_app.py
 
 *Source: `classes_transcription_summary/05`.*
 
-## 2.9 Interview corner
+## 2.9 Hardening the loop
 
-**Q1. What is an agent loop, in three steps?**
-- Send history and tool schemas. If the reply is text, return it. If it asks for tools, run them, append results, repeat
+The class loop crashes on three kinds of bad model output (2.10). Production loops turn every failure into a message the model can read and fix.
 
-**Q2. Does the model run the tool?**
-- No. It returns a request (name and arguments). Your code runs the function and sends the result back
+```python
+import json
 
-**Q3. What is a tool schema, and why does the description matter?**
-- Name, description, parameters. The model picks tools from the description, so it must say exactly when to use it
+def run_tool(call) -> str:
+    """Run one tool call. Never raise: return an error the model can act on."""
+    name = call.function.name
+    fn = TOOLS_BY_NAME.get(name)
+    if fn is None:
+        return f"Error: unknown tool {name!r}. Available tools: {sorted(TOOLS_BY_NAME)}"
+    try:
+        args = json.loads(call.function.arguments or "{}")
+    except json.JSONDecodeError as e:
+        return f"Error: arguments were not valid JSON ({e.msg}). Send a JSON object."
+    try:
+        return str(fn(**args))
+    except TypeError as e:
+        return f"Error: wrong arguments for {name}: {e}"
+    except Exception as e:
+        return f"Error: {name} failed: {type(e).__name__}: {e}"
+```
 
-**Q4. Why must the loop run every tool call in a reply?**
-- A model can request several at once. Each result needs a `tool` message with the matching `tool_call_id`
+- In `run_agent`, replace the two lines that parse and call with `result = run_tool(call)`
+- ✅ *Verified: an unknown tool, invalid JSON, a wrong argument name and a tool that raises all came back as `Error: ...` strings; a good call returned the tool's result.*
 
-**Q5. What stops an infinite loop?**
-- `max_turns`. Without it a confused model can call tools forever and run up cost
+| Failure | Plain loop | Hardened loop |
+|---|---|---|
+| Unknown tool name | `KeyError`, run stops | Error message listing real tools |
+| Bad JSON arguments | `JSONDecodeError` | Error asking for a JSON object |
+| Wrong argument name | `TypeError` | Error naming the bad argument |
+| Tool raises | exception escapes | Error with the exception type |
+| Model never stops | `max_turns` | `max_turns` **plus** a token or cost budget |
+| Tool hangs | blocks the turn | a timeout per tool ([Python Ch 1](../python/01-setup-and-api-basics.md), 1.7) |
 
-**Q6. Why does the assistant message with `tool_calls` go into the history?**
-- The later `tool` messages answer those requests. Without them the history does not make sense to the model
-
-**Q7. Where does this loop live in LangChain?**
-- Inside `create_agent`. You give it model, tools and a prompt; it runs the same loop
-
-**Q8. How does Streamlit keep an agent's memory?**
-- In `st.session_state`, because the script re-runs on every interaction
+> [!IMPORTANT]
+> **🏭 In production**
+> - **Log every step** (model call, tool name, arguments, duration, tokens) under one trace id. The `messages` list is the whole agent state
+> - **Run independent tool calls in parallel** when a reply asks for several ([Python Ch 2](../python/02-python-refresher.md), 2.9)
+> - **Gate risky tools** (payments, emails, deletes) behind an allow-list and human approval ([Langchain Ch 11](../langchain/11-runtime-and-human-in-the-loop.md))
+> - **Keep error messages short and safe:** enough for the model to fix its call, never stack traces or secrets
+>
+> *Added by Claude.*
 
 ## 2.10 Added by Claude, not from the sources
 
 Items marked *checked* were run against a local stand-in for the OpenAI API, with the real `openai` client.
 
-- **The loop crashes on three kinds of bad model output.** *Checked* on the `_07` loop:
+- **The loop crashes on three kinds of bad model output.** ✅ *verified* on the `_07` loop:
   - Unknown tool name (`book_flight`): `KeyError`
   - Arguments that are not valid JSON: `JSONDecodeError`
   - Wrong argument name (`town` for `city`): `TypeError`
   - Fix: wrap the call in `try`, and return the error text as the `tool` message so the model can correct itself
-- **A wrong city does not crash.** `get_weather("Oslo")` returned "No weather data for 'Oslo'." and the model answered from that. *Checked*
+- **A wrong city does not crash.** `get_weather("Oslo")` returned "No weather data for 'Oslo'." and the model answered from that. ✅ *verified*
 - **`eval` with `*` allowed can hang.** The character check lets `9**9**9` through, and it did not finish in 3 seconds when run (killed). Limit exponents, or use a maths parser instead of `eval`
 - **Add a timeout and a call budget.** `max_turns` limits loops, but one slow tool can still stall a turn
 - **Log the history.** The full `messages` list is the whole agent state. Printing it is the best debugging tool
-- **Mind the cost.** Every loop turn resends the whole history (see [Chapter 3](03-inside-the-model.md), 3.5)
+- **Mind the cost.** Every loop turn resends the whole history (see [Chapter 3](03-inside-the-model.md), 3.8)
+
+## 2.11 Interview corner
+
+**What interviewers listen for:** the model only **asks** for tools, your code runs them; every result goes back with its `tool_call_id`; and the loop has caps and never crashes on bad model output.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. What is an agent loop, in three steps?</summary>
+
+- Send history and tool schemas; if the reply is text, return it; if it asks for tools, run them, append results, repeat
+- *Stronger answer:* it is a `while` loop around a stateless model; the `messages` list is the entire state
+
+</details>
+
+<details class="qa"><summary>2. Does the model run the tool?</summary>
+
+- No. It returns a request (name and JSON arguments); your code runs the function and sends the result back
+
+</details>
+
+<details class="qa"><summary>3. What is a tool schema, and why does the description matter?</summary>
+
+- Name, description and parameters, sent to the model
+- *Stronger answer:* the model chooses tools from the description alone, so say exactly when to use it and when not to
+
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>4. Why must the loop run every tool call in a reply?</summary>
+
+- A model can ask for several at once; each needs a `tool` message with its `tool_call_id`
+- *Stronger answer:* a missing result makes most APIs reject the next request
+
+</details>
+
+<details class="qa"><summary>5. Why does the assistant message with <code>tool_calls</code> go into the history?</summary>
+
+- The `tool` messages answer those requests; without them the history is inconsistent
+
+</details>
+
+<details class="qa"><summary>6. What stops an infinite loop?</summary>
+
+- `max_turns`
+- *Stronger answer:* plus a token or cost budget and per-tool timeouts, because one turn can still be slow or expensive
+
+</details>
+
+<details class="qa"><summary>7. Where does this loop live in LangChain? How does Streamlit keep memory?</summary>
+
+- Inside `create_agent`; Streamlit keeps it in `st.session_state` because the script re-runs on every click
+
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>8. The model calls a tool that does not exist, with broken JSON. What should happen?</summary>
+
+- Return an error as the tool result, not raise
+- *Stronger answer:* list the valid tools or the expected format so the model can self-correct on the next turn; count these errors as a quality metric
+
+</details>
+
+<details class="qa"><summary>9. How would you make this loop production-ready?</summary>
+
+- Error-safe tool runner, caps, timeouts, logging
+- *Stronger answer:* tracing per step, parallel independent calls, retries with backoff on the model API, approval for risky tools, memory trimming, and evaluations on recorded conversations
+
+</details>
+
+> [!TIP]
+> **🧩 Design question**
+> - *"Build a travel assistant with tools for flights, hotels and weather, which may book things."*
+> - Talk about: schemas with clear descriptions, read-only vs booking tools, human approval before booking, parallel lookups, a hardened tool runner, turn and cost caps, and traces for every run
+
+## Cheat sheet
+
+```python
+for _ in range(max_turns):
+    msg = client.chat.completions.create(model=m, messages=messages, tools=TOOL_SCHEMAS).choices[0].message
+    if not msg.tool_calls:
+        messages.append({"role": "assistant", "content": msg.content}); break
+    messages.append({"role": "assistant", "content": msg.content, "tool_calls": [
+        {"id": c.id, "type": "function", "function": {"name": c.function.name, "arguments": c.function.arguments}}
+        for c in msg.tool_calls]})
+    for c in msg.tool_calls:                                            # every call
+        messages.append({"role": "tool", "tool_call_id": c.id, "content": run_tool(c)})
+```
 
 ## Recap
 
@@ -381,7 +509,7 @@ Items marked *checked* were run against a local stand-in for the OpenAI API, wit
 - Run **every** tool call in a reply. Match each result to its `tool_call_id`
 - `max_turns` caps the loop. Memory is just a list
 - Bugs to know in the class files: `_05` schema nesting, `_06` `NameError` and double `get_currency`
-- Bad model output (unknown tool, bad JSON, wrong args) crashes the plain loop. Handle it
+- Bad model output (unknown tool, bad JSON, wrong args) crashes the plain loop. `run_tool` turns every failure into a readable message
 
 ## Practice
 
@@ -401,6 +529,8 @@ Items marked *checked* were run against a local stand-in for the OpenAI API, wit
   - `_06`: a reply with no tool call, the first tool call (the `NameError`), the schemas versus the callable tools, and the default `max_turns`
   - `_05`: the schema keys, `ask_ai_to_choose` with a tool reply and a casual reply
   - the `output` file parses as JSON with 8 messages
+- **Run in the 2026 review:** `run_tool` with five scripted calls; the cheat-sheet loop with a scripted client (two tool calls, then text)
+- 2.9, the diagram, the production box and the graded interview were added in the 2026 review (Added by Claude)
 - **Not run:** a real model or provider, the Streamlit page, files `_01` to `_04`, the Frankfurter API
 - The class summaries are the source for everything not marked *checked*. They were not re-opened in this rewrite; the text comes from the earlier version of the chapter
 
