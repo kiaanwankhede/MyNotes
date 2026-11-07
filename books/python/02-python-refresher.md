@@ -1,14 +1,22 @@
 # Chapter 2: Python refresher
 
+*Every data shape, class and wrapper an agent framework uses, in plain Python first.*
+
+> [!NOTE]
+> **📍 At a glance**
+> - **You will learn:** the data structures agents pass around, classes and dataclasses, decorators, error handling, and the modern Python (type hints, generators, `with`, `async`, logging) that agent code is full of
+> - **You will build:** a `BankAccount` with a guard clause, a stacked decorator, and three "tool calls" that run in parallel
+> - **Level:** beginner · **Time:** about 60 minutes
+> - **Builds on:** [Chapter 1](01-setup-and-api-basics.md). **Leads to:** [Chapter 3](03-anatomy-of-an-agent.md) and the [Pydantic book](../pydantic/01-why-pydantic-and-basemodel.md)
+
 **After this chapter you can:**
 
 - Use lists, tuples, dicts and a list of dicts, and write a list comprehension
 - Build a class with state and a guard clause, and a dataclass without boilerplate
 - Write and stack decorators with `functools.wraps`
 - Handle errors with `try/except/finally`
+- Read type hints, generators, context managers and `async`/`await` in agent code, and log instead of print
 - Say why Python needs Pydantic
-
-**Builds on:** [Chapter 1](01-setup-and-api-basics.md). **Leads to:** [Chapter 3](03-anatomy-of-an-agent.md) and the [Pydantic book](../pydantic/01-why-pydantic-and-basemodel.md).
 
 Each topic is here because agents lean on it later.
 
@@ -35,7 +43,7 @@ if has_ticket and has_id:
     print("Ready to board.")
 ```
 
-- *Checked* (`_0_basics_refresher.py`): prints "A light jacket should be enough.", `True True False`, "Ready to board."
+- ✅ *verified* (`_0_basics_refresher.py`): prints "A light jacket should be enough.", `True True False`, "Ready to board."
 
 ### Lists
 
@@ -54,14 +62,14 @@ print(cities[0:2])        # slice -> ['Tokyo', 'Delhi']
 cities.append("Paris")    # add to the end
 ```
 
-- A list can mix types. `Python_run.ipynb` uses `["Tokyo", "Delhi", "London", 1]` and it accepts the number. *Checked*
+- A list can mix types. `Python_run.ipynb` uses `["Tokyo", "Delhi", "London", 1]` and it accepts the number. ✅ *verified*
 - The notebook has a note to compare arrays and lists, but nothing under it, so this book does not make that comparison
 
 *Source: `classes_summary/02`, `classes_transcription_summary/02`, `_1_data_structures.py`, `Python_run.ipynb`.*
 
 ### Tuples
 
-- Like a list that cannot change after creation. *Checked:* assigning to an item raised `TypeError`
+- Like a list that cannot change after creation. ✅ *Verified:* assigning to an item raised `TypeError`
 - **Unpacking** splits it into variables:
 
 ```python
@@ -93,7 +101,7 @@ readings = [
 warm_cities = [r["city"] for r in readings if r["temperature_c"] > 20]   # ['Tokyo', 'Delhi']
 ```
 
-- *Checked* (`_1_data_structures.py`): `None` for the missing key, the dict with `humidity` added, and `['Tokyo', 'Delhi']`
+- ✅ *verified* (`_1_data_structures.py`): `None` for the missing key, the dict with `humidity` added, and `['Tokyo', 'Delhi']`
 
 *Source: `_1_data_structures.py`.*
 
@@ -127,7 +135,7 @@ account_2 = BankAccount(owner="Krish", balance=500)
 account_1.deposit(200); account_1.withdraw(50); account_2.withdraw(1000)
 ```
 
-- *Checked* (`_2_oop_classes.py`): "Insufficient funds: tried to withdraw 1000, balance is 500"; Mayank ends at 1150 with two history lines; Krish stays at 500 with none. The objects do not share state
+- ✅ *verified* (`_2_oop_classes.py`): "Insufficient funds: tried to withdraw 1000, balance is 500"; Mayank ends at 1150 with two history lines; Krish stays at 500 with none. The objects do not share state
 - `self` is "this particular object"
 - `__init__` runs when the object is created and sets starting values
 - `if amount > self.balance` is a **guard clause**: reject a bad request before it corrupts state. Agents need the same habit
@@ -163,8 +171,15 @@ print(Book(title="Atomic Habits", author="James Clear"))
 ```
 
 - A dataclass prints itself readably with no extra code
-- **Pitfall 1: mutable defaults.** A list, dict or set default needs `field(default_factory=...)`. *Checked:* `tags: list = []` raises `ValueError: mutable default <class 'list'> for field tags is not allowed`
-- **Pitfall 2: no validation.** *Checked:* `Book(title="x", pages_read="banana")` succeeds and stores the string. Pydantic fixes this ([Pydantic Ch 1](../pydantic/01-why-pydantic-and-basemodel.md))
+> [!WARNING]
+> **⚠️ Pitfall 1: mutable defaults**
+> - A list, dict or set default needs `field(default_factory=...)`
+> - ✅ *Verified:* `tags: list = []` raises `ValueError: mutable default <class 'list'> for field tags is not allowed`
+
+> [!WARNING]
+> **⚠️ Pitfall 2: no validation**
+> - ✅ *Verified:* `Book(title="x", pages_read="banana")` succeeds and stores the string
+> - Pydantic fixes this ([Pydantic Ch 1](../pydantic/01-why-pydantic-and-basemodel.md))
 
 *Source: `classes_summary/02`, `classes_transcription_summary/02`.*
 
@@ -202,10 +217,28 @@ def slow_greeting(name):
     return f"Hello there, {name}!"
 ```
 
-- `functools.wraps` keeps the original name. *Checked:* without it the name was `w`, the wrapper's
-- Forget `return result` and the wrapped function gives back `None`. *Checked*
-- `*args` collects positional arguments; `**kwargs` collects keywords as a dict. *Checked:* `f(1, 2, x=3)` gave `((1, 2), {'x': 3})`
-- **Stacking:** the one nearest the function wraps first. *Checked:* the call order was `announce start`, `timed start`, body, `timed end`, `announce end`
+```mermaid
+sequenceDiagram
+    participant Caller
+    participant A as @announce wrapper
+    participant T as @timed wrapper
+    participant F as slow_greeting
+    Caller->>A: slow_greeting("Asha")
+    A->>A: print "Starting..."
+    A->>T: call
+    T->>T: start timer
+    T->>F: call
+    F-->>T: "Hello there, Asha!"
+    T->>T: print time taken
+    T-->>A: result
+    A->>A: print "Finished..."
+    A-->>Caller: result
+```
+
+- `functools.wraps` keeps the original name. ✅ *Verified:* without it the name was `w`, the wrapper's
+- Forget `return result` and the wrapped function gives back `None`. ✅ *verified*
+- `*args` collects positional arguments; `**kwargs` collects keywords as a dict. ✅ *Verified:* `f(1, 2, x=3)` gave `((1, 2), {'x': 3})`
+- **Stacking:** the one nearest the function wraps first. ✅ *Verified:* the call order was `announce start`, `timed start`, body, `timed end`, `announce end`
 - **Why it matters:** the `@tool` decorator ([Chapter 1](01-setup-and-api-basics.md), 1.4) uses this exact pattern
 
 *Source: `classes_summary/02`, `classes_transcription_summary/02`, `_4_decorators.py`.*
@@ -263,7 +296,7 @@ except KeyError:
     print("No humidity data available -- that's fine, we'll skip it.")
 ```
 
-- *Checked* (`_3_error_handling.py`): the output matches the comments. `5.0 0 0`; `finally` printed after both the good and the bad value
+- ✅ *verified* (`_3_error_handling.py`): the output matches the comments. `5.0 0 0`; `finally` printed after both the good and the bad value
 - The summaries list this file only as `try`/`except`/`finally` with a missing key; the examples are from the file
 
 *Source: `_3_error_handling.py`.*
@@ -325,9 +358,9 @@ class SavingsAccount(BankAccount):                 # inheritance: reuse and exte
         self.deposit(self._balance * self.rate)
 ```
 
-- **Inheritance:** a child class gets the parent's fields and methods. *Checked:* a `SavingsAccount` used `deposit` and `owner` from `BankAccount` and passed `isinstance(s, BankAccount)`
+- **Inheritance:** a child class gets the parent's fields and methods. ✅ *Verified:* a `SavingsAccount` used `deposit` and `owner` from `BankAccount` and passed `isinstance(s, BankAccount)`
 - **Encapsulation:** keep state behind a small interface. A leading underscore (`_balance`) says "internal"; a `@property` with no setter makes it read-only
-  - *Checked:* `s.balance = 5` raised `AttributeError`, but `s._balance = 5` still worked. The underscore is a convention, not a lock
+  - ✅ *Verified:* `s.balance = 5` raised `AttributeError`, but `s._balance = 5` still worked. The underscore is a convention, not a lock
 
 ```python
 from abc import ABC, abstractmethod
@@ -342,8 +375,8 @@ class Reverse(Tool):
     def run(self, text): return text[::-1]
 ```
 
-- **Abstraction:** define *what* every tool must do and hide *how*. *Checked:* `Tool()` and a subclass without `run()` both raised `TypeError: Can't instantiate abstract class`
-- **Polymorphism:** one call, different behaviour. *Checked:* `[t.run("tool") for t in [Shout(), Reverse()]]` gave `['TOOL', 'loot']`
+- **Abstraction:** define *what* every tool must do and hide *how*. ✅ *Verified:* `Tool()` and a subclass without `run()` both raised `TypeError: Can't instantiate abstract class`
+- **Polymorphism:** one call, different behaviour. ✅ *Verified:* `[t.run("tool") for t in [Shout(), Reverse()]]` gave `['TOOL', 'loot']`
 - **Duck typing:** Python does not require the shared base. A `Duck` class with a `run` method worked in the same list
 - **Why it matters for agents:** an agent holds many tools and calls them the same way. A registry of functions ([Chapter 1](01-setup-and-api-basics.md), 1.4) is the lightweight version of this idea
 
@@ -399,42 +432,224 @@ Notes from the folder's README:
 
 *Source: `classes_transcription_summary/02`, Q&A. This answers the glossary term "vibe coding" ([LLM Ch 4](../llm/04-glossary.md)).*
 
-## 2.9 Interview corner
+## 2.9 Python you will meet in agent code
 
-**Q1. List or tuple? Dict or list?**
-- List: changeable, ordered. Tuple: fixed. Dict: values by key. A list of dicts is the shape of chat messages and tool results
+Not from the class files. Every agent framework uses these, so you need to read them fluently.
 
-**Q2. Why does a dataclass reject `tags: list = []`?**
-- A mutable default would be shared by all instances. Use `field(default_factory=list)`
+### Type hints on tool functions
 
-**Q3. Dataclass or Pydantic model?**
-- A dataclass has no run-time checks. Pydantic validates. Use it at the edges: APIs, LLM output
+```python
+from typing import Literal, TypedDict
 
-**Q4. What does `functools.wraps` do?**
-- Copies the original function's name and docstring onto the wrapper, which frameworks read
+class Message(TypedDict):
+    role: Literal["system", "user", "assistant", "tool"]
+    content: str
 
-**Q5. What are `*args` and `**kwargs`?**
-- Collect positional and keyword arguments so a wrapper can pass any call through
+def get_weather(city: str, unit: Literal["c", "f"] = "c") -> dict:
+    """Return the current weather for `city`."""
+    ...
+```
 
-**Q6. In what order do stacked decorators run?**
-- Applied bottom up; called outside in. The top decorator's "before" runs first, its "after" last
+- Frameworks read the hints and docstring to build the tool schema a model sees ([Langchain Ch 5](../langchain/05-tools.md))
+- `TypedDict` describes the shape of a plain dict, such as a chat message. Editors check it; nothing checks it at run time
 
-**Q7. `try/except/else/finally`: what does `finally` guarantee?**
-- It runs whether or not an error happened, even with a `return` in the `try`
+### Generators: how streaming works
 
-**Q8. What is a guard clause?**
-- An early check that rejects bad input before it changes state
+```python
+def stream_words(text):
+    for word in text.split():
+        yield word + " "            # hands back one piece, then pauses here
 
-**Q9. Why does Python need Pydantic?**
-- Hints are not enforced, so bad values flow on silently
+for piece in stream_words("tokens arrive one at a time"):
+    print(piece, end="", flush=True)
+```
+
+- A function with `yield` returns a generator: values are produced **on demand**, one at a time
+- LLM SDKs stream replies the same way: `for chunk in client.stream(...)` ([Langchain Ch 3](../langchain/03-models-messages-and-parameters.md), 3.6)
+
+### Context managers: `with`
+
+```python
+import time
+from contextlib import contextmanager
+
+@contextmanager
+def timer(label):
+    start = time.perf_counter()
+    try:
+        yield
+    finally:
+        print(f"{label}: {(time.perf_counter() - start) * 1000:.0f} ms")
+
+with timer("tool call"):
+    time.sleep(0.05)
+```
+
+- `with` guarantees clean-up (closing a file, a network client, a database connection) even when an error happens
+- You will see `with open(...)`, `with httpx.Client() as client:` and `async with` in MCP and agent code
+
+### `async` and `await`: many slow calls at once
+
+```python
+import asyncio
+
+async def call_tool(name, seconds):
+    await asyncio.sleep(seconds)     # stands in for a network call
+    return f"{name} done"
+
+async def main():
+    return await asyncio.gather(
+        call_tool("weather", 0.2), call_tool("currency", 0.2), call_tool("news", 0.2))
+
+print(asyncio.run(main()))           # about 0.2 s in total, not 0.6 s
+```
+
+- ✅ *Verified: three 0.2-second calls finished together in about 0.2 seconds.*
+- `async` helps when the program **waits** (network, disk). It does not speed up heavy computation
+- LangChain, MCP and FastAPI all offer async versions (`ainvoke`, `async with`, `async def` endpoints)
+
+```mermaid
+flowchart LR
+    subgraph S["Sequential: 0.6 s"]
+        A1["weather 0.2 s"] --> A2["currency 0.2 s"] --> A3["news 0.2 s"]
+    end
+    subgraph P["asyncio.gather: 0.2 s"]
+        B1["weather 0.2 s"]
+        B2["currency 0.2 s"]
+        B3["news 0.2 s"]
+    end
+```
+
+### Logging instead of `print`
+
+```python
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+log = logging.getLogger("agent")
+
+log.info("tool=%s duration_ms=%.1f", "get_weather", 12.3)
+log.warning("retrying after 429")
+```
+
+- Levels (`DEBUG`, `INFO`, `WARNING`, `ERROR`) let you turn detail up or down without editing code
+- Logs carry a time and a source, and go to files or monitoring systems; `print` does not
+
+> [!IMPORTANT]
+> **🏭 In production**
+> - **Log, do not print.** Include the tool name, duration and outcome; never the API key or full personal data
+> - **Use `async` for agents that call several tools or users at once**; keep CPU-heavy work out of the event loop
+> - **Type-hint every tool.** It documents the code, feeds the tool schema, and lets an editor catch mistakes before the model does
+>
+> *Added by Claude.*
 
 ## 2.10 Added by Claude, not from the sources
 
-- **Mutable default arguments bite in functions too.** *Checked:* `def bad(x, acc=[])` gave `[1, 2]` for both calls, because the list is shared. Use `None` and create a new list inside
+- **Mutable default arguments bite in functions too.** ✅ *Verified:* `def bad(x, acc=[])` gave `[1, 2]` for both calls, because the list is shared. Use `None` and create a new list inside
 - **Catch the exception you expect.** A bare `except:` hides bugs. The files catch named errors
 - **`dict.get` for optional keys; `[]` for required ones.** The first returns `None`, the second raises `KeyError`, which is what you want for a key that must be there
 - **A dict key lookup that fails in a tool** is better returned as a message than raised, so the model can read it ([LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md))
 - **Test files from the code folder in order,** and compare each output with the comments. All of `_0` to `_4` matched
+
+## 2.11 Interview corner
+
+**What interviewers listen for:** you know the data shapes agents pass around, how decorators wrap tools, and when `async` actually helps.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. List, tuple or dict?</summary>
+
+- List: ordered and changeable. Tuple: fixed. Dict: values by key
+- *Stronger answer:* a list of dicts is the shape of chat messages and tool results
+
+</details>
+
+<details class="qa"><summary>2. What is a guard clause?</summary>
+
+- An early check that rejects bad input before it changes state
+- *Stronger answer:* every tool needs one, because a model chooses its arguments
+
+</details>
+
+<details class="qa"><summary>3. What does <code>finally</code> guarantee?</summary>
+
+- It runs whether or not an error happened, even after a `return` in the `try`
+
+</details>
+
+<details class="qa"><summary>4. Why does Python need Pydantic?</summary>
+
+- Hints are not enforced at run time, so bad values flow on silently
+
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>5. Why does a dataclass reject <code>tags: list = []</code>, and what is the same bug in a function?</summary>
+
+- One list would be shared by every instance; use `field(default_factory=list)`
+- *Stronger answer:* `def f(x, acc=[])` has the same bug; default to `None` and create the list inside
+
+</details>
+
+<details class="qa"><summary>6. What does <code>functools.wraps</code> do, and why do tool frameworks care?</summary>
+
+- Copies the original name and docstring onto the wrapper
+- *Stronger answer:* frameworks read `__name__` and `__doc__` to name and describe the tool; without `wraps` every tool is called `wrapper`
+
+</details>
+
+<details class="qa"><summary>7. In what order do stacked decorators run?</summary>
+
+- Applied bottom up; called outside in. The top one's "before" runs first and its "after" last
+
+</details>
+
+<details class="qa"><summary>8. What is a generator, and why do LLM SDKs use them?</summary>
+
+- A function with `yield` that produces values one at a time, on demand
+- *Stronger answer:* streaming: the first tokens show while the rest are still being generated
+
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>9. Your agent calls three tools that each take 2 seconds. How do you make the turn faster?</summary>
+
+- Run the independent calls concurrently: `asyncio.gather` (or threads for sync clients)
+- *Stronger answer:* only independent calls can run together; respect each API's rate limit, set timeouts, and handle one failure without losing the other results (`return_exceptions=True`)
+
+</details>
+
+<details class="qa"><summary>10. When does <code>async</code> not help?</summary>
+
+- CPU-heavy work (parsing big files, maths) blocks the event loop
+- *Stronger answer:* move it to a worker process or thread pool; `async` is for waiting, not computing
+
+</details>
+
+> [!TIP]
+> **🧩 Design question**
+> - *"Design a production `@tool` decorator. What should it record and enforce?"*
+> - Talk about: `functools.wraps`, registration by name, schema from type hints and docstring, timing, logging with secrets redacted, catching exceptions and returning them as messages, an optional timeout and retry
+
+## Cheat sheet
+
+```python
+import asyncio, functools
+from dataclasses import dataclass, field
+warm = [r["city"] for r in readings if r["temperature_c"] > 20]   # comprehension
+@dataclass
+class Book:
+    title: str
+    tags: list = field(default_factory=list)                       # never = []
+def logged(func):
+    @functools.wraps(func)                                         # keep name + docstring
+    def wrapper(*args, **kwargs):
+        try: return func(*args, **kwargs)                          # return the result!
+        except ValueError as e: return f"Error: {e}"
+    return wrapper
+async def main(): return await asyncio.gather(*(call_tool(n, 0.1) for n in ("a", "b")))
+```
 
 ## Recap
 
@@ -443,6 +658,7 @@ Notes from the folder's README:
 - Dataclass removes boilerplate but not bad data
 - A decorator wraps behaviour; use `functools.wraps` and return the result
 - `try/except/finally` handles expected failures
+- Type hints feed tool schemas; generators stream; `with` cleans up; `async` overlaps waiting; `logging` replaces `print`
 - Python does not enforce types: that is Pydantic's job
 
 ## Practice
@@ -453,17 +669,24 @@ Notes from the folder's README:
 4. Catch `KeyError` and `ValueError` separately and use `finally` once
 5. Run `_0` to `_4` in order and match each output to this chapter
 6. Fix `def bad(x, acc=[])`
+7. Run three fake tool calls with `asyncio.gather` and time it against running them one by one
+8. Write a generator that yields words and print them as a stream
 
 ## How this chapter was checked
 
 - **Run:** `_0`, `_1`, `_2`, `_3`, `_4` (outputs match); the added OOP examples (inheritance, read-only property, abstract class, polymorphism, duck typing); the dataclass mutable default and `banana`; decorator order, missing `wraps`, missing `return`; `*args`/`**kwargs`; tuple immutability; slicing and a mixed list; the shared default list
 - **Not run:** `_5`, `_9`, `_10`, `_12` to `_14` against the live API (no network); the notebook `Python_run.ipynb`
-- **Rewritten** from the earlier chapter; the class summaries were not re-opened in this pass
+- **Run in the 2026 review:** every code block in 2.9 (type hints, generator, context manager, `asyncio.gather` timing, logging)
+- **Cheat sheet:** run with sample `readings` and a stub `call_tool`
+- 2.9, the diagrams, the pitfall boxes and the graded interview were added in the 2026 review (Added by Claude: standard Python practice)
+- The body was written earlier from the class files; the class summaries were not re-opened in this pass
 
 ## Sources and further reading
 
 - Live-Class-2026, `classes_summary/02 - 28 Jun - Python Refresher.md`
 - Live-Class-2026, `classes_transcription_summary/02 - 28 June - Python Refresher.md`
 - Live-Class-2026, code folder `Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/`: `_0` to `_5`, `Python_run.ipynb` and the folder `README.md`
+
+- Python docs: [asyncio](https://docs.python.org/3/library/asyncio.html), [logging HOWTO](https://docs.python.org/3/howto/logging.html), [contextlib](https://docs.python.org/3/library/contextlib.html)
 
 Previous: [Chapter 1](01-setup-and-api-basics.md) · Next: [Chapter 3, Anatomy of an agent](03-anatomy-of-an-agent.md)

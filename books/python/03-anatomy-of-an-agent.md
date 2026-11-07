@@ -1,5 +1,14 @@
 # Chapter 3: Anatomy of an agent
 
+*An agent is plumbing between a brain, a memory and some tools. Build each part by hand and you will recognise it in every framework.*
+
+> [!NOTE]
+> **📍 At a glance**
+> - **You will learn:** why LLM calls are stateless, how a model, a chatbot and an agent differ, how to call four providers, and what separates a toy agent from a production one
+> - **You will build:** read and fix the class `Agent` (files `_11` to `_14`) so it sends its system prompt, keeps tool results and trims its memory
+> - **Level:** beginner to intermediate · **Time:** about 60 minutes
+> - **Builds on:** [Chapter 2](02-python-refresher.md), [Pydantic Ch 5](../pydantic/05-validating-llm-output.md), [LLM Ch 3](../llm/03-inside-the-model.md). **Leads to:** [LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md) (the loop)
+
 **After this chapter you can:**
 
 - Explain why LLM calls are stateless
@@ -7,8 +16,7 @@
 - Name the parts of an agent: brain, memory, tools
 - Call four providers and read each response shape
 - Read the class's `Agent` class (files `_11` to `_14`) and spot what it does not do yet
-
-**Builds on:** [Chapter 2](02-python-refresher.md), [Pydantic Ch 5](../pydantic/05-validating-llm-output.md), [LLM Ch 3](../llm/03-inside-the-model.md). **Leads to:** [LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md) (the loop).
+- List what a production agent adds: bounded memory, caught errors, retries, cost tracking, tracing
 
 ## 3.1 The big idea: LLM calls are stateless
 
@@ -66,7 +74,7 @@ class Agent:
 ```
 
 - `decide_tool` is a placeholder. String matching is not how real decisions work. The next class has the model choose by meaning
-- *Checked:* the chatbot's history grew by 2 per question (2, then 4). The agent used the tool for "what is the weather?" and answered normally for "tell me about Tokyo"
+- ✅ *Verified:* the chatbot's history grew by 2 per question (2, then 4). The agent used the tool for "what is the weather?" and answered normally for "tell me about Tokyo"
 - *Checked, the weakness:* "WEATHER?" matched (it lower-cases); "whether it rains" did not
 
 *Source: `classes_summary/04`, `Project 0/_01_ai_model_vs_chatbot_vs_agent.py`.*
@@ -77,10 +85,27 @@ class Agent:
 - **Memory:** the chat history, in a database or in memory
 - **Tools:** web search, a calculator, a calendar
 - The agent itself is only plumbing between these three. LangChain, LangGraph and CrewAI all do this
-- Mentor's analogy: hiring an intern
+- Analogy: hiring an intern
   - A laptop with no skills (a weak brain) can do little
   - A brilliant brain with no tools cannot act in the world
   - The brain sets a hard ceiling. A cheap, weak model fails on complex tasks however good the orchestration
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant A as Agent code
+    participant B as Brain (LLM)
+    participant T as Tool
+    U->>A: "Search for Virat Kohli's latest innings"
+    A->>B: system prompt + history + question + tool descriptions
+    B-->>A: tool call: web_search(query=...)
+    A->>T: run web_search
+    T-->>A: raw results
+    A->>B: same messages + tool result
+    B-->>A: final answer
+    A->>A: save exchange to memory
+    A-->>U: answer
+```
 
 ### The three-step build-up shown in class
 
@@ -129,7 +154,7 @@ def ask_groq(question: str) -> str:
     return response.choices[0].message.content
 ```
 
-- *Checked* against local stand-in servers with the real SDKs: `ask_openai` and `ask_anthropic` both returned their text, through the two different response shapes. The Anthropic request carried only `model`, `max_tokens` and `messages`
+- ✅ *verified* against local stand-in servers with the real SDKs: `ask_openai` and `ask_anthropic` both returned their text, through the two different response shapes. The Anthropic request carried only `model`, `max_tokens` and `messages`
 - `ask_openai` also **prints the whole response object** (a debug line left in the file)
 
 ### A fake client with the same shape (`_6_fake_ai_call.py`)
@@ -149,7 +174,7 @@ print(response.choices[0].message.content)
 
 - That shape is what Groq, OpenRouter and OpenAI use. Anthropic is the exception
 - The file has a second, plain-dict fake: `fake_ai(model, max_tokens, messages)` returns `{"choices": [{"message": {"content": reply}}]}`
-- **Pitfall:** the file runs that second version at module level, outside `if __name__ == "__main__":`. Importing `_6_fake_ai_call` (as `_7`, `_11` to `_14` do) prints its extra lines. *Checked* when running `_11` to `_14`
+- **Pitfall:** the file runs that second version at module level, outside `if __name__ == "__main__":`. Importing `_6_fake_ai_call` (as `_7`, `_11` to `_14` do) prints its extra lines. ✅ *verified* when running `_11` to `_14`
 
 *Source: `_6_fake_ai_call.py`. Run offline.*
 
@@ -175,9 +200,16 @@ def call_fallback(question: str) -> str:
     return response.choices[0].message.content
 ```
 
-- *Checked* with no keys: "No GROQ_API_KEY set. Stand-in: ..." and "No OPENROUTER_API_KEY set. Stand-in: ...", plus a note that the paid call is not made
+- ✅ *verified* with no keys: "No GROQ_API_KEY set. Stand-in: ..." and "No OPENROUTER_API_KEY set. Stand-in: ...", plus a note that the paid call is not made
 - The OpenRouter walk-through (key, free model, token counts) is in [LLM Ch 3](../llm/03-inside-the-model.md)
 - In the agent class, `ask_ai()` picks whichever key is set in `.env`, free first. Reused for the rest of the course
+> [!CAUTION]
+> **🔒 Security: API keys**
+> - Keys live in `.env`, which must be in `.gitignore`; the class code reads them with `load_dotenv()` and `os.environ`
+> - A key pushed to a public repo is found by scanners within minutes: revoke it at once, do not just delete the commit
+>
+> *Added by Claude.*
+
 - **Check model names before you copy.** `claude-3-5-haiku-20241022` and `gpt-4o-mini` were current when the class ran (July 2026) and may be retired
 
 *Source: `_7_ai_call_free_and_paid.py`, `classes_summary/04`, `Project 0/_02_calling_the_ai_paid_and_free.py`.*
@@ -238,7 +270,7 @@ class Agent:
 - `_14` runs its "memory" demo **at import**, not inside `__main__`, so importing it prints text
 - The file ends by saying the missing piece is the brain choosing a tool itself, "the actual agent loop"
 
-**Checked** (no keys; the live currency call fails in the sandbox but is caught):
+*✅ *verified** (no keys; the live currency call fails in the sandbox but is caught):
 
 - `_11`: the transcript held two lines (user, assistant: the stand-in's reply)
 - `_12`: the currency tool logged `[tool call] convert_currency({'amount': 100.0, 'from_currency': 'USD', 'to_currency': 'INR'}) -> ...` and returned the "Couldn't reach" message
@@ -264,31 +296,50 @@ class Agent:
 | Are the LLM and the embedding model the same? | No, they are separate specialised models |
 | Do parameters change as users chat? | No. They are fixed after training |
 
-## 3.9 Interview corner
+## 3.9 From toy agent to production agent
 
-**Q1. What are the three parts of an agent?**
-- Brain (the model), memory (the history), tools. The agent is the code that joins them
+The class `Agent` teaches the parts. A production agent keeps the same parts and hardens each one.
 
-**Q2. Why is the brain called twice when a tool is used?**
-- Once to choose the tool, again to turn the tool's result into an answer
+| Part | Class `Agent` (`_11` to `_14`) | Production |
+|---|---|---|
+| System prompt | stored, never sent | always sent first; versioned and tested |
+| Memory | a list that grows forever | per user or thread; trimmed or summarised; stored in a database |
+| Tool results | not in memory | saved as `tool` messages so the next turn can see them |
+| Tool errors | raise and stop the run | caught and returned as text the model can read |
+| Provider failures | silent fallback to a stand-in | timeouts, retries with backoff on 429 and 5xx, then a clear error |
+| Cost | unknown | `usage` tokens logged per call; budget limits |
+| Visibility | `print` | structured logs and traces (LangSmith, OpenTelemetry) |
+| Security | `eval` behind a character check | sandboxed tools, allow-lists, least-privilege keys, human approval for risky actions |
 
-**Q3. Model, chatbot, agent: what separates them?**
-- A model is one stateless call. A chatbot adds history. An agent adds tools it can choose
+A minimal fixed `ask`:
 
-**Q4. How do you swap providers without rewriting code?**
-- OpenAI, Groq and OpenRouter share an SDK and shape: change `base_url`, key and model. Anthropic differs (`messages.create`, `content[0].text`)
+```python
+MAX_TURNS = 20                                      # keep the last 20 messages
 
-**Q5. What is a fake client for?**
-- Runs the code with no key or network, with the same shape as the real one. Tests and teaching
+def build_request(system_prompt, messages, question):
+    recent = messages[-MAX_TURNS:]                  # bounded memory
+    return [{"role": "system", "content": system_prompt}, *recent,
+            {"role": "user", "content": question}]
 
-**Q6. Where does an agent's memory live?**
-- In a list of messages the agent resends. Short-term in memory; long-term needs a store
+def ask(client, model, system_prompt, messages, question):
+    request = build_request(system_prompt, messages, question)
+    response = client.chat.completions.create(model=model, max_tokens=300, messages=request)
+    answer = response.choices[0].message.content
+    messages += [{"role": "user", "content": question}, {"role": "assistant", "content": answer}]
+    return answer
+```
 
-**Q7. Why does the system prompt matter, and what bug do the class files have?**
-- It sets behaviour. The class `Agent` stores it but never sends it
+- ✅ *Verified with a recording stand-in client: the first message sent was the system prompt, and after 15 turns the request held 1 + 20 + 1 messages, not 31.*
+- Cutting a fixed number of messages is the simplest policy; summarising older turns keeps more meaning ([Langchain Ch 7](../langchain/07-middleware.md) does this with middleware)
+- Read the cost from the response: `response.usage.prompt_tokens` and `completion_tokens` on OpenAI-style APIs, `usage.input_tokens` and `output_tokens` on Anthropic
 
-**Q8. Why must tool errors be caught?**
-- A model, not a person, chooses the arguments. A crash in a tool should become a message, not stop the run
+> [!IMPORTANT]
+> **🏭 In production**
+> - **Cost grows with history.** Every turn resends everything, so a long chat costs more per message. Trim, summarise, or use the provider's prompt caching
+> - **Wrap providers behind one function** (`ask(messages) -> text`) so switching models is a configuration change, not a rewrite
+> - **Trace every turn:** which prompt, which tools, how many tokens, how long. You cannot fix what you cannot see
+>
+> *Added by Claude.*
 
 ## 3.10 Added by Claude, not from the sources
 
@@ -297,6 +348,87 @@ class Agent:
 - **Names change fast.** Treat every model id in these files as an example
 - **Put copied tool code in one module.** `_12` to `_14` repeat about 50 lines. A shared module avoids three versions drifting apart
 
+## 3.11 Interview corner
+
+**What interviewers listen for:** statelessness and what it costs, the brain–tool–brain loop, and how you would harden a toy agent.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. What are the three parts of an agent?</summary>
+
+- Brain (the model), memory (the history), tools; the agent is the code that joins them
+- *Stronger answer:* the brain sets the ceiling: weak model, weak agent, however good the code
+
+</details>
+
+<details class="qa"><summary>2. Model, chatbot, agent: what separates them?</summary>
+
+- A model is one stateless call; a chatbot adds history; an agent adds tools it chooses itself
+
+</details>
+
+<details class="qa"><summary>3. Why is the brain called twice when a tool is used?</summary>
+
+- Once to choose the tool, again to turn the tool's result into an answer
+
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>4. How do you swap providers without rewriting code?</summary>
+
+- OpenAI, Groq and OpenRouter share an SDK and shape: change `base_url`, key and model
+- *Stronger answer:* Anthropic differs (`messages.create`, `content[0].text`, system prompt as a separate parameter), so hide providers behind one adapter function
+
+</details>
+
+<details class="qa"><summary>5. Where does an agent's memory live?</summary>
+
+- In a list of messages resent each call; long-term memory needs a store
+- *Stronger answer:* scope it per user or thread, and bound it (trim or summarise)
+
+</details>
+
+<details class="qa"><summary>6. What bugs does the class <code>Agent</code> have?</summary>
+
+- System prompt never sent; tool results not stored; fallback ignores history; tool errors escape
+- *Stronger answer:* each is a one-to-four-line fix (3.10), and each is a classic production incident
+
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>7. The agent's cost per conversation doubled after launch. Why, and what do you do?</summary>
+
+- Calls are stateless, so every turn resends the whole growing history
+- *Stronger answer:* measure `usage` per call, trim or summarise old turns, cache the stable prefix (system prompt, tool schemas), and use a cheaper model for simple steps
+
+</details>
+
+<details class="qa"><summary>8. A tool raises an exception mid-conversation. What should happen?</summary>
+
+- Catch it and return the error as a tool message
+- *Stronger answer:* the model can retry with better arguments or explain the failure; log it with the trace id, and never leak internal details or secrets in the message
+
+</details>
+
+> [!TIP]
+> **🧩 Design question**
+> - *"Design memory for a support agent used by 10,000 customers."*
+> - Talk about: a thread id per conversation, messages in a database, a bounded window plus a running summary, long-term facts per customer stored separately, privacy and deletion, and cost per conversation
+
+## Cheat sheet
+
+```python
+messages = [{"role": "system", "content": "You are concise."},
+            {"role": "user", "content": "Hi"}]                       # resend all of it every call
+r = client.chat.completions.create(model=MODEL, max_tokens=200, messages=messages)
+text, used = r.choices[0].message.content, r.usage                  # OpenAI, Groq, OpenRouter
+a = anthropic.messages.create(model=MODEL, max_tokens=200, system="You are concise.",
+                              messages=[{"role": "user", "content": "Hi"}])
+text = a.content[0].text                                            # Anthropic shape
+```
+
 ## Recap
 
 - LLM calls are stateless; memory is the history resent
@@ -304,6 +436,7 @@ class Agent:
 - Brain, memory, tools. The brain is called again after a tool runs
 - OpenAI, Groq and OpenRouter share a shape; Anthropic differs
 - The class `Agent` (`_11` to `_14`) holds brain, tools and a list, but does not send its system prompt, store tool results or catch tool errors
+- Production adds: system prompt always sent, bounded memory, caught tool errors, retries, cost and trace logging
 - Next: the model chooses the tool ([LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md))
 
 ## Practice
@@ -314,12 +447,15 @@ class Agent:
 4. Run `_04` and point to the one line that means "we decided"
 5. Make `_14`'s agent send its system prompt, and prove it with a recording stand-in
 6. Make `use_tool` return an error message instead of raising
+7. Add a 20-message window to the class `Agent` and log the token usage of each call
 
 ## How this chapter was checked
 
 - **Run:** `_01` (chatbot history, agent keyword match); `_02`'s `ask_openai` and `ask_anthropic` against local stand-in servers; `_6` and `_7` with no keys; `_11` to `_14` with no keys; the recording stand-in tests for `system_prompt`, tool results and tool errors
 - **Not run:** `_02` with real keys, Groq, OpenRouter, `_04` end to end, the live currency API
-- **Rewritten** from the earlier chapter; the class summaries and whiteboard were not re-opened in this pass. Section 3.7 is new, from reading and running `_11` to `_14`
+- **Run in the 2026 review:** the 3.9 `build_request`/`ask` code with a recording stand-in client (system prompt first, window of 20 messages); the cheat sheet against stand-in OpenAI-shape and Anthropic-shape clients
+- 3.9, the sequence diagram, the security and production boxes and the graded interview were added in the 2026 review (Added by Claude: standard practice)
+- The body was written earlier; the class summaries and whiteboard were not re-opened in this pass. Section 3.7 came from reading and running `_11` to `_14`
 
 ## Sources and further reading
 

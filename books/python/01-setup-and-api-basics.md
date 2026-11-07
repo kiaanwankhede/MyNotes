@@ -1,13 +1,21 @@
 # Chapter 1: Setup and API basics
 
+*Everything an agent is built from, before any AI: a clean project, plain Python, and a safe API call.*
+
+> [!NOTE]
+> **📍 At a glance**
+> - **You will learn:** UV projects and virtual environments, Python basics with their agent meaning, safe HTTP calls, and what a "tool" really is
+> - **You will build:** a `uv` project, a currency API call with timeout and error handling, and a `@tool` registry
+> - **Level:** beginner · **Time:** about 45 minutes
+> - **Builds on:** [LLM Ch 1](../llm/01-course-roadmap-and-prerequisites.md) (the setup checklist). **Leads to:** [Chapter 2](02-python-refresher.md)
+
 **After this chapter you can:**
 
 - Set up a Python project with UV and explain each file it creates
 - Write the basic Python an agent is built from
 - Call a web API with `requests`, with a timeout and error handling
+- Make that call production-ready: a session, retries with backoff, and keys from `.env`
 - Explain what a "tool" is in plain Python, and why the registry exists
-
-**Builds on:** [LLM Ch 1](../llm/01-course-roadmap-and-prerequisites.md) (the setup checklist). **Leads to:** [Chapter 2](02-python-refresher.md).
 
 ## 1.1 The development environment
 
@@ -71,7 +79,18 @@ deactivate                   # walk out
 
 *Source: the class 01 whiteboard. An earlier version of this chapter said `uv.lock` comes from `uv init`; the slide says otherwise, so that line was corrected.*
 
-*Checked with uv 0.11.32:* `uv init` created `.git`, `.gitignore`, `.python-version`, `README.md`, `main.py` and `pyproject.toml`, and **no** `.venv` or `uv.lock`. The first `uv run main.py` then created both `.venv` and `uv.lock`, even with no dependencies. `requires-python` in `pyproject.toml` was `>=3.13`, matching `.python-version`.
+✅ *Verified with uv 0.11.32:* `uv init` created `.git`, `.gitignore`, `.python-version`, `README.md`, `main.py` and `pyproject.toml`, and **no** `.venv` or `uv.lock`. The first `uv run main.py` then created both `.venv` and `uv.lock`, even with no dependencies. `requires-python` in `pyproject.toml` was `>=3.13`, matching `.python-version`.
+
+```mermaid
+flowchart LR
+    I["uv init demo"] --> F["pyproject.toml<br/>.python-version<br/>main.py, README, .git"]
+    F --> A["uv add requests"]
+    A --> P["pyproject.toml lists it"]
+    A --> L["uv.lock pins every version"]
+    A --> V[".venv gets the packages"]
+    L --> S["teammate / CI:<br/>uv sync --locked"]
+    S --> V2["identical .venv"]
+```
 
 To run the class scaffold `my-first-project` on a fresh machine:
 
@@ -91,7 +110,7 @@ if __name__ == "__main__":
 ```
 
 - The class asked you to look up `if __name__ == "__main__":` yourself and promised an explanation later
-- The block runs only when the file is **run directly**, not when it is imported. *Checked:* a file printing `__name__` showed `__main__` when run and `nm` when imported
+- The block runs only when the file is **run directly**, not when it is imported. ✅ *Verified:* a file printing `__name__` showed `__main__` when run and `nm` when imported
 
 | Question | Answer |
 |---|---|
@@ -126,7 +145,7 @@ for day_temp in forecast:
         print(f"{day_temp}°C — mild day")
 ```
 
-- *Checked:* it prints the four types, `That's 72.5°F.`, `No umbrella needed.`, then mild, warm, mild. The closing line prints only when run directly
+- ✅ *Verified:* it prints the four types, `That's 72.5°F.`, `No umbrella needed.`, then mild, warm, mild. The closing line prints only when run directly
 - `notebook.ipynb` repeats the variables (with `city = "Delhi"`) and the f-string demo
 - **No type declarations:** `x = 5`, not `int x = 5`
 - **f-strings** put variables, even small calculations, into text
@@ -204,8 +223,18 @@ def calculator(expression: str) -> float:
     return eval(expression)  # safe here ONLY because of the character check above
 ```
 
-- **Pitfall.** `eval` is dangerous on arbitrary text. Acceptable here only because the character check runs first
-- The class feeds it `"12 + ; DROP TABLE users;"` to show the guard rejects it. The habit matters more once a model chooses the string
+> [!CAUTION]
+> **🔒 Security: `eval` on text a model chose**
+> - `eval` runs any Python. It is acceptable here only because the character check runs first
+> - The class feeds it `"12 + ; DROP TABLE users;"` to show the guard rejects it
+> - Even with the guard, `9**9**9` passes and hangs the process (1.8). In real tools use a proper expression parser, never `eval`
+```mermaid
+flowchart LR
+    M["Model replies:<br/>call get_weather(city='Tokyo')"] --> R{"TOOL_REGISTRY<br/>lookup by name"}
+    R -- found --> T["get_weather('Tokyo')"] --> O["result back to the model"]
+    R -- unknown name --> E["error message back to the model"]
+```
+
 - **Why the registry exists:** when a model answers "call `get_weather`", your code must find the real function by name. The registry is the lookup
 - Three tools are registered: `get_current_time`, `calculator`, `get_weather`
 
@@ -222,13 +251,13 @@ if __name__ == "__main__":
 ```
 
 - Why the `try/except`: a tool that crashes the program on bad input cannot be trusted when an AI calls it
-- *Checked:* three `[tool call]` lines (the calculator returned `60`, the weather tool `22°C, partly cloudy`), then `Registered tools: ['get_current_time', 'calculator', 'get_weather']`, then the "Caught cleanly" line
+- ✅ *Verified:* three `[tool call]` lines (the calculator returned `60`, the weather tool `22°C, partly cloudy`), then `Registered tools: ['get_current_time', 'calculator', 'get_weather']`, then the "Caught cleanly" line
 
 *Source: `classes_summary/01`, `functions or tools.py`, `tools.py`. A comment in `tools.py` names the agent loop as "Class 4"; the course index puts it in Class 05, so that number is not repeated.*
 
 ## 1.5 Why frameworks come last
 
-- The mentor's rule: an agent is a concept. Learn it in plain Python first, then use LangChain
+- Rule of thumb: an agent is a concept. Learn it in plain Python first, then use LangChain
 - This book and the [Pydantic book](../pydantic/01-why-pydantic-and-basemodel.md) are that plain-Python phase
 
 ## 1.6 Run the class code
@@ -267,48 +296,167 @@ uv run currency.py
 
 *Source: `classes_transcription_summary/01`, Q&A and action items.*
 
-## 1.7 Interview corner
+## 1.7 Production-grade HTTP calls
 
-**Q1. Why UV and not pip plus venv?**
-- One tool for Python version, environment and dependencies, with a lock file for repeatable installs
+The class call is correct for learning. In a service that runs all day, add four things.
 
-**Q2. What is a virtual environment, and why use one?**
-- An isolated set of packages per project, so projects with different versions do not conflict
+```python
+import os
+import requests
+from dotenv import load_dotenv
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
-**Q3. `pyproject.toml` or `requirements.txt`?**
-- `pyproject.toml` records the Python version and dependencies; UV reads it. Do not mix workflows in a project
+load_dotenv()                                   # reads .env into os.environ
+API_KEY = os.environ["WEATHER_API_KEY"]         # fails at start-up if missing
 
-**Q4. What does `uv.lock` do?**
-- Pins every dependency, direct and indirect, so everyone installs the same versions. It is generated; do not edit it
+session = requests.Session()                    # reuses connections between calls
+retry = Retry(total=3, backoff_factor=0.5,      # waits 0.5 s, 1 s, 2 s between tries
+              status_forcelist=[429, 500, 502, 503, 504],
+              allowed_methods=["GET"])          # only retry calls that are safe to repeat
+session.mount("https://", HTTPAdapter(max_retries=retry))
 
-**Q5. What does `if __name__ == "__main__":` do?**
-- Runs the block only when the file is executed directly, not when imported
+r = session.get("https://api.example.com/weather", params={"city": "Tokyo"},
+                headers={"Authorization": f"Bearer {API_KEY}"},
+                timeout=(3.05, 10))             # (connect, read) seconds
+r.raise_for_status()
+```
 
-**Q6. Why always pass `timeout` to `requests`?**
-- Without it a call can wait forever and freeze your program or agent
+- **Session:** one connection pool instead of a new handshake per call, noticeably faster for many calls
+- **Retries with backoff:** temporary failures (rate limits, a busy server) usually pass on a second try. `Retry` also honours a server's `Retry-After` header by default
+- **Two timeouts:** a short one for connecting, a longer one for reading the answer
+- **Keys from `.env`** via `python-dotenv` (`uv add python-dotenv`), never in the code
+- ✅ *Verified (requests 2.34.2, urllib3 2.8.0): the session and retry policy build as written, and `respect_retry_after_header` is `True`; no live call was made.*
 
-**Q7. What is a tool, in plain Python?**
-- A function with a clear docstring that returns a value. A registry lets code find it by the name a model gives
+| Response | Retry? | What to do |
+|---|---|---|
+| Timeout, connection error | Yes, if the call is safe to repeat | Backoff, then return a clear message |
+| `429` Too Many Requests | Yes | Wait (`Retry-After`), then retry; reduce your call rate |
+| `500`, `502`, `503`, `504` | Yes, a few times | Backoff; alert if it continues |
+| `400`, `422` | No | Your request is wrong: fix the arguments |
+| `401`, `403` | No | Key missing, wrong or without permission |
+| `404` | No | Wrong URL or the item does not exist |
 
-**Q8. Why guard a calculator tool before `eval`?**
-- `eval` runs any code. Check the input first; better still, avoid `eval`
+> [!IMPORTANT]
+> **🏭 In production**
+> - **Only retry idempotent calls** (reads, or writes with an idempotency key). Retrying a payment `POST` can charge twice
+> - **Many calls at once?** `httpx.AsyncClient` with `asyncio.gather` runs them in parallel ([Chapter 2](02-python-refresher.md), 2.9)
+> - **Log the status code and duration**, never the `Authorization` header
+> - **Pin dependencies in deployment:** `uv sync --locked` fails if `uv.lock` is out of date, so CI and Docker install exactly what you tested
+>
+> *Added by Claude.*
 
 ## 1.8 Added by Claude, not from the sources
 
-- **`uv init` does not ignore `.env`.** *Checked:* the generated `.gitignore` lists only Python build files and `.venv`. The "`.env` is git-ignored" line in the prerequisites is about the **course repo's** root file. In your own project, add `.env` to `.gitignore` before the first commit
-- **`uv init --no-vcs` is rejected.** *Checked* with uv 0.11.32: "unexpected argument '--no-vcs'". The working form is `uv init --vcs none`, which made a project with no `.git`
+- **`uv init` does not ignore `.env`.** ✅ *Verified:* the generated `.gitignore` lists only Python build files and `.venv`. The "`.env` is git-ignored" line in the prerequisites is about the **course repo's** root file. In your own project, add `.env` to `.gitignore` before the first commit
+- **`uv init --no-vcs` is rejected.** ✅ *verified* with uv 0.11.32: "unexpected argument '--no-vcs'". The working form is `uv init --vcs none`, which made a project with no `.git`
 - **`eval` can still hang.** The character check allows `*`, so `9**9**9` passes and does not finish ([LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md), 2.10)
 - **Two Frankfurter URLs appear in the course** (`api.frankfurter.app` here, `api.frankfurter.dev/v1` in Chapter 2). Neither was reachable from my sandbox, so I cannot say which is current
 - **Use `python3 -m pip` or `uv pip`,** not a bare `pip`, so the package lands in the interpreter you mean
 - **Docstrings matter twice.** For you, and as the description a framework sends to the model ([Langchain Ch 5](../langchain/05-tools.md))
 
+## 1.9 Interview corner
+
+**What interviewers listen for:** reproducible environments (lock files), every network call with a timeout and error handling, and safe handling of input that a model chooses.
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. Why UV and not pip plus venv?</summary>
+
+- One tool for the Python version, the environment and dependencies, with a lock file
+- *Stronger answer:* `uv.lock` plus `uv sync --locked` gives the same install on every laptop, CI run and container
+
+</details>
+
+<details class="qa"><summary>2. What is a virtual environment, and why use one?</summary>
+
+- An isolated set of packages per project, so different projects' versions never conflict
+
+</details>
+
+<details class="qa"><summary>3. What does <code>if __name__ == "__main__":</code> do?</summary>
+
+- Runs the block only when the file is executed directly, not when it is imported
+- *Stronger answer:* keeps demo code from running when another module imports your tools
+
+</details>
+
+<details class="qa"><summary>4. What is a tool, in plain Python?</summary>
+
+- A function with a clear docstring and a return value; a registry finds it by the name a model gives
+- *Stronger answer:* the docstring and type hints become the description and schema the model reads
+
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>5. <code>pyproject.toml</code>, <code>requirements.txt</code> or <code>uv.lock</code>?</summary>
+
+- `pyproject.toml` lists what you depend on; `uv.lock` pins exact versions of everything, including indirect packages
+- *Stronger answer:* commit both, never edit the lock by hand, and do not mix `uv add` with `pip install -r` in one project
+
+</details>
+
+<details class="qa"><summary>6. Why always pass <code>timeout</code> to <code>requests</code>?</summary>
+
+- Without it a call can wait forever and freeze the program or agent
+- *Stronger answer:* use a (connect, read) pair, and treat a timeout as a normal, handled outcome
+
+</details>
+
+<details class="qa"><summary>7. Why guard a calculator tool before <code>eval</code>?</summary>
+
+- `eval` runs any code; a model or an attacker chooses the string
+- *Stronger answer:* the guard still lets `9**9**9` hang the process; use a real expression parser
+
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>8. An API your agent calls sometimes hangs and sometimes returns 429. Fix it.</summary>
+
+- Timeouts on every call; retry 429 and 5xx with exponential backoff and `Retry-After`
+- *Stronger answer:* cap total retries, retry only idempotent calls, add a circuit breaker so a dead service fails fast, and return a readable message to the model
+
+</details>
+
+<details class="qa"><summary>9. Where do API keys live, from laptop to production?</summary>
+
+- `.env` (git-ignored) on a laptop, read with `python-dotenv`
+- *Stronger answer:* in production, a secret manager injects them as environment variables; rotate them, scope them to least privilege, never log them
+
+</details>
+
+> [!TIP]
+> **🧩 Design question**
+> - *"An agent needs three external APIs: weather, currency and news. How do you structure the code?"*
+> - Talk about: one small client module per API with a shared session, timeouts and retries; typed tool functions with docstrings; a registry; errors returned as messages; keys from the environment; logging of status and duration
+
+## Cheat sheet
+
+```bash
+uv init demo && cd demo
+uv add requests python-dotenv      # updates pyproject.toml + uv.lock, creates .venv
+uv run main.py                     # no activation needed
+uv sync --locked                   # CI / Docker: install exactly what uv.lock says
+echo ".env" >> .gitignore          # before the first commit
+```
+
+```python
+r = requests.get(url, params={"q": "x"}, timeout=(3.05, 10))
+r.raise_for_status()               # HTTP errors become exceptions
+data = r.json()
+```
+
 ## Recap
 
 - Terminal, Python 3.10+, UV, VS Code. Check both `python3` and `python`
+- `uv.lock` + `uv sync --locked` = the same install everywhere
 - Virtual environment = a room. `uv init` makes the project files; `uv sync` or `uv run` makes `.venv` and `uv.lock`
 - Types, f-strings and docstrings are the agent vocabulary
 - API call: request, `timeout`, `raise_for_status`, `try/except`
 - A tool = function + docstring + registry entry. Guard its input
+- Production calls: session, timeouts, retries with backoff for 429 and 5xx only, keys from `.env`
 
 ## Practice
 
@@ -317,17 +465,23 @@ uv run currency.py
 3. Re-run `currency.py` and check the rate against a web search
 4. Run `tools.py`, then break `calculator("2 + ; DROP TABLE")` on purpose
 5. Put `.env` into the `.gitignore` of a new project
+6. Add a `Retry` policy to `currency.py` and list which status codes it retries
 
 ## How this chapter was checked
 
 - **Run:** `Python_foundamentals.py`, `tools.py`, `functions or tools.py`; `uv init` and `uv run` (file lists before and after, `.gitignore`, `.python-version`); `--no-vcs` versus `--vcs none`; `uv python upgrade --help`; the `__name__` demo
 - **Not run:** `currency.py` and the live API; installing Python, UV or VS Code; `uv add requests` (no network)
-- **Rewritten** from the earlier chapter; the class summaries and the whiteboard were not re-opened in this pass
+- **Run in the 2026 review:** the 1.7 session and retry set-up (no live call), `uv sync --help` for `--locked`, the cheat-sheet `uv` commands
+- **Cheat sheet:** the `uv` commands were run in a scratch folder; the Python lines need a live URL and were not run
+- 1.7, the diagrams, the security box and the graded interview were added in the 2026 review (Added by Claude: standard practice)
+- The body was written earlier from the class summaries and whiteboard, which were not re-opened in this pass
 
 ## Sources and further reading
 
 - Live-Class-2026, `classes_summary/01 - 27 Jun - Python Setup & API Basics.md`
 - Live-Class-2026, `classes_transcription_summary/01 - 27 June - Python Setup & API Basics.md`
 - Live-Class-2026, code folder `Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/` (all files, its `README.md`, `my-first-project` and `Class-1-Python-and-AI.pdf`)
+
+- Docs: [uv projects](https://docs.astral.sh/uv/guides/projects/), [Requests advanced usage](https://requests.readthedocs.io/en/latest/user/advanced/)
 
 Next: [Chapter 2, Python refresher](02-python-refresher.md)
