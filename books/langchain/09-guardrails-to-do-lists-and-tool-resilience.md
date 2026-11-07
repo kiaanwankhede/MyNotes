@@ -510,6 +510,7 @@ middleware = [
   - *9.9 More prebuilt middleware from the class diagram:* Checked: it adds two tools, **`glob_search`** and **`grep_search`**. In a test folder, a glob for `*.txt` and a grep for a word both found the file
   - *9.12 Added by Claude, not from the sources:* Checked: with `retry_on=(ConnectionError, TimeoutError)` a `ValueError` tool ran **once**, and the `ValueError` was raised as it was. A `ConnectionError` tool was retried
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+- **Cheat sheet:** ran `TodoListMiddleware` and `ToolRetryMiddleware` in an agent; `LLMToolSelectorMiddleware` was constructed only, because running it makes a real selector-model call (needs an API key). Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

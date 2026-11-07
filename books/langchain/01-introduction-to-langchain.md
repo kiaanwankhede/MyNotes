@@ -449,6 +449,7 @@ agent.invoke({"messages": [{"role": "user", "content": "..."}]},
 - Run offline with a stand-in model on `langchain` 1.4.7: message order, matching tool-call id, `pretty_print`, checkpointer memory per `thread_id`, `recursion_limit` in config (default seen: 10007), and the `cached` helper
 - **Not** run against a live model (needs a provider key). Check model names and prompts before running
 - The diagrams, tables and "In production" boxes were added in the 2026 book review; the framework landscape and production users come from the web sources below
+- **Cheat sheet:** ran `create_agent` with a scripted fake model that makes one tool call; the `thread_id` and `recursion_limit` config was accepted. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

@@ -670,6 +670,7 @@ Items marked *checked* were run with `langchain` 1.4.7 and `langgraph` 1.2.19, u
   - *14.6 Pattern 5: custom workflow:* Checked: the notebook's `rewrite_query` is `q.replace("it", "the movie")`. It also changes the letters "it" inside other words: "Is there a showing with it tonight?" became "Is there a showing wthe movieh the movie tonight?". Use a model call, or match whole words
   - *Tutorial extras: go back, history, stateful routers, skill storage:* Checked (scripted model): a `go_back` tool moved `current_step` from `resolution` to `warranty`, and the step middleware then offered the warranty tool again; a checkpointed agent wrapping a tool saw 1, 3, 5, 7 messages on successive model calls over two turns (memory kept). Summarization settings were not run here; see Ch7.
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+- **Cheat sheet:** it is a table, so there was nothing to run.
 
 ## Sources and further reading
 

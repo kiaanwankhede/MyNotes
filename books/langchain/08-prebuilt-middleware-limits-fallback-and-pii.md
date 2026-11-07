@@ -390,6 +390,7 @@ middleware = [
 - **Details by section** (moved here from the ✅ markers):
   - *`ToolCallLimitMiddleware`: the exit behaviours and the error:* Checked* with `tool_name="t1"`, `run_limit=1` and a model that asked twice: `continue` gave a final model answer; `end` ended with the message `'t1' tool call limit reached: run limit exceeded (2/1 calls).`; `error` raised `ToolCallLimitExceededError` with the same text
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+- **Cheat sheet:** ran all four middleware in one agent; the email address was redacted from the stored input; the call limits and the model fallback were constructed but not triggered. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

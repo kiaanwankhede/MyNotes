@@ -502,6 +502,7 @@ model.bind_tools([get_order])               # model can now request it
   - *5.6 Two names you cannot use: `config` and `runtime`:* Checked, and a refinement: `config` as a plain `str` argument defines fine and fails when called. **`runtime` as a plain `str` argument worked** (the call returned normally). What LangChain treats specially is a parameter **annotated as `ToolRuntime`**, which it hides from the model. Do not rely on a plain `runtime: str` working in other versions. Avoid both names
   - *Two whiteboard sketches (`Langchain-2-Updated.pdf`):* Checked* in [LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md): one tool use took **2 model calls**
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+- **Cheat sheet:** ran a `ToolRuntime` tool inside an agent and confirmed `runtime.context.user_id` reached the tool; `bind_tools` was constructed, not called. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

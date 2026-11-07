@@ -590,6 +590,7 @@ agent = create_agent(model, tools, middleware=[log_calls, time_tools, Guard()])
   - *10.11 Agent jumps, tracing and state composition:* Checked: the same hook **without** `can_jump_to` also ended the run for `'end'`. The docs still ask you to declare it, and the other targets need it, so declare it
   - *10.11 Agent jumps, tracing and state composition:* Checked: `TracePolicy`, `omit_payload` and `configure_trace_policy` import from `langchain.agents.middleware`, a class with `trace_policy` builds, and the global set and clear run. Whether the trace really omits the payload needs LangSmith and was **not** checked
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+- **Cheat sheet:** ran `before_model`, `wrap_tool_call` and an `AgentMiddleware` subclass together in one agent with a tool call. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

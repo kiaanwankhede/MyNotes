@@ -441,6 +441,7 @@ agent.invoke(inp)["structured_response"]                       # on an agent
   - *4.7 `model.profile`: check before you rely on it:* Checked: building an agent with `response_format=ToolStrategy(...)`, `ProviderStrategy(...)` or a bare schema on `gpt-3.5-turbo` **did not fail at construction**. Any failure shows up at call time, which was not run here
   - *Tool-strategy extras: tool message text and wrong multi-output:* Checked (scripted model): the final message was `Captured!`; a two-schema turn produced the error text twice, then the retry gave `task='y'`.
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+- **Cheat sheet:** ran `create_agent(..., response_format=ToolStrategy(Movie))` and read `structured_response`; `with_structured_output(Movie)` was constructed on a real model object, not called. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

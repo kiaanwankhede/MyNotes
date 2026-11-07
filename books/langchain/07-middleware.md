@@ -476,6 +476,7 @@ agent = create_agent(model, tools, checkpointer=InMemorySaver(), middleware=[
   - *More `SummarizationMiddleware` settings:* Checked: the default prompt is a long template. It starts "Context Extraction Assistant" and asks for four sections: `SESSION INTENT`, `SUMMARY`, `ARTIFACTS` and `NEXT STEPS`
   - *More `SummarizationMiddleware` settings:* Checked: with `summary_prompt="Summarise briefly:\n{messages}"`, the summariser received that text with the messages inserted as `<message type="human">...` blocks
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+- **Cheat sheet:** ran both middleware in one agent; a `send_email` call paused with `__interrupt__`; the summarization trigger (4000 tokens) was constructed but not reached. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

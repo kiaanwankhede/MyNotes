@@ -242,6 +242,7 @@ retriever.invoke("question")
     - `RunnableGenerator(a) | RunnableGenerator(b)` with `atransform` chained two async generators correctly
     - Not run: AssemblyAI, Cartesia, WebSocket, any real audio, the reference app in `voice-sandwich-demo`
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+- **Cheat sheet:** ran the splitter, `InMemoryVectorStore` with a fake embedding and an MMR retriever; `start_index` metadata was present; real embeddings were not used. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

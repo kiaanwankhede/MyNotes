@@ -353,6 +353,7 @@ Not in the course material. Established practice, but check current docs.
 - Imports and the `create_agent` signature checked on `langchain` 1.4.7. No live model run
 - Dates, free-tier numbers and model names are class figures. Check before relying on them
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+- **Cheat sheet:** it is a table, so there was nothing to run.
 
 ## Sources and further reading
 

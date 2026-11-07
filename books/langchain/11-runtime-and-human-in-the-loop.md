@@ -658,6 +658,7 @@ agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg, context=
   - *Context engineering: the framework:* Checked, transient: a `wrap_model_call` that replaced the system message changed what the model saw, and the state kept only `human, ai`. A `dynamic_prompt` that read `request.state` did the same and left no system message in state
   - *Context engineering: the framework:* Checked, persistent: a `before_model` hook returning `{"messages": [SystemMessage(...)]}` put the note into **state**, and it stayed after the run
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+- **Cheat sheet:** ran the context-schema agent: a `refund` call paused with `__interrupt__`, and `Command(resume={"decisions": [{"type": "approve"}]})` completed the tool call. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

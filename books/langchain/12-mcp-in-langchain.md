@@ -589,6 +589,7 @@ agent = create_agent(model, tools)          # tools still work after the context
   - *12.9 Authentication, and the per-user trap:* Checked, bearer token: a server with a static token check. The client with the right token listed `check_showtimes`. A **wrong token** and **no token** both failed with an MCP error
   - *12.10 `langchain.mcp` against `langchain-mcp-adapters`:* Checked on `langchain-mcp-adapters` 0.3.2: `MultiServerMCPClient` has `get_tools`, `get_resources`, `get_prompt`, `get_server_info` and `session`, and its constructor takes `tool_interceptors`, `tool_name_prefix` and `handle_tool_errors`. That matches the notebook's table. The older package was **not run** against a server here
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+- **Cheat sheet:** ran `MCPAdapter` against a local FastMCP server over HTTP, listed its tools and built an agent from them; the `destructive_hint` metadata line was not exercised. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

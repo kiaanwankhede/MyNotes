@@ -504,6 +504,7 @@ supervisor = create_agent(model, [research], checkpointer=InMemorySaver())
   - *Human approval inside nested subagents:* Checked: resuming with a **dictionary keyed by interrupt id** worked. Both tools then ran, and the edited email went out with the subject **"Mockups reminder"**
   - *Subagent design decisions:* Checked (scripted model): a tool returning a `Command` copied the subagent's state key into the parent (`found` became `x-found`) and the tool message carried the subagent's text; an `Enum` argument accepted `"writer"` and rejected `"bogus"` with a `ValidationError`. Async jobs and `get_state(subgraphs=True)` were not run.
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+- **Cheat sheet:** ran a supervisor that called a subagent wrapped as a tool and read `.text` from the subagent's last message. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 
