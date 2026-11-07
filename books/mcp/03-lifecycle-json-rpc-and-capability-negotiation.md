@@ -1,5 +1,14 @@
 # Chapter 3: Lifecycle, JSON-RPC and capability negotiation
 
+*Every MCP connection follows the same script: shake hands, agree on a version and abilities, then work.*
+
+> [!NOTE]
+> **📍 At a glance**
+> - **You will learn:** who triggers each primitive, the protocol call behind each, the three lifecycle phases, JSON-RPC 2.0, the initialization handshake, version and capability negotiation, and elicitation
+> - **You will build:** a server with all three primitives, and a "wiretap" that shows the real messages
+> - **Level:** intermediate · **Time:** about 60 minutes
+> - **Builds on:** [Chapter 2](02-primitives-and-architecture.md). **Leads to:** [Chapter 4](04-operation-transports-and-shutdown.md)
+
 **After this chapter you can:**
 
 - Add a resource and a prompt to a tools-only server, and list and read them
@@ -121,6 +130,23 @@ def server_notes() -> str:
 
 ## 3.4 The three lifecycle phases
 
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+    Note over C,S: 1. Initialization
+    C->>S: initialize {protocolVersion, capabilities, clientInfo}
+    S-->>C: result {protocolVersion, capabilities, serverInfo}
+    C->>S: notifications/initialized
+    Note over C,S: 2. Operation
+    C->>S: tools/list
+    S-->>C: tools [name, description, inputSchema]
+    C->>S: tools/call {name, arguments}
+    S-->>C: result {content, isError}
+    Note over C,S: 3. Shutdown
+    C--xS: close the transport (no JSON-RPC message)
+```
+
 - Every MCP connection goes through three phases, **always in this order**:
   1. **Initialization:** the handshake. Meet for the first time, agree on a version, declare capabilities
   2. **Operation:** the real work. Discover and use tools, resources and prompts
@@ -191,7 +217,7 @@ Client → Server : 3. initialized (notification: no id, no reply)
 - **Two ordering rules:** before the server answers `initialize`, the client sends nothing except pings. Before the server receives `initialized`, it sends nothing except pings
 - In class this was shown live in Claude Desktop's MCP log on macOS (`~/Library/Logs/Claude/mcp.log`), against a real local server (Apple Notes over STDIO)
 
-*Checked:* a real server answered `initialize` with its version, the capabilities `logging`, `prompts`, `resources` and `tools`, and its name. The client then sent `{"jsonrpc":"2.0","method":"notifications/initialized"}` with no id.
+✅ *Verified:* a real server answered `initialize` with its version, the capabilities `logging`, `prompts`, `resources` and `tools`, and its name. The client then sent `{"jsonrpc":"2.0","method":"notifications/initialized"}` with no id.
 
 ## 3.8 Version negotiation
 
@@ -203,8 +229,8 @@ Client → Server : 3. initialized (notification: no id, no reply)
 - Analogy from class: Windows and a game agreeing on DirectX. They settle on the highest version both share
 - Real consequence: a serious client, such as one built for a company, must decide **which historical versions it supports** and handle each difference in behaviour. "Connect to whatever URL I am given" is not enough. Class flagged this as interview depth
 
-*Checked:* asking a real server for version `2099-01-01` made it answer with `2025-11-25`, its own latest.
-- **Modern clients try a newer call first.** *Checked with `mcp` 2.3.0:* the client's first message to a server was **`server/discover`** (version `2026-07-28`), not `initialize`
+✅ *Verified:* asking a real server for version `2099-01-01` made it answer with `2025-11-25`, its own latest.
+- **Modern clients try a newer call first.** ✅ *Verified with `mcp` 2.3.0:* the client's first message to a server was **`server/discover`** (version `2026-07-28`), not `initialize`
   - A server that answered "Method not found" made the client **fall back** to the old handshake: `initialize` with version `2025-11-25`
   - A current `fastmcp` 4.1.4 server answered `server/discover` directly, with `supportedVersions` and its capabilities
   - This is the "newer discovery call, then fall back" that class 18 saw in a debugging tool. The legacy and modern handshakes get their own chapter ([Chapter 7](07-legacy-vs-modern-mcp.md), not written yet)
@@ -233,7 +259,7 @@ Client → Server : 3. initialized (notification: no id, no reply)
 - Discovery (`tools/list`) says **which** tools, their names, descriptions and argument schemas
 - A client therefore still calls `tools/list` after the handshake (class 18 student question)
 
-*Checked:* a real server's answer listed the capabilities `logging`, `prompts`, `resources` and `tools`, and no `completions`. A server only declares what it has. In the newer `server/discover` answer each capability carried flags such as `listChanged` and `subscribe` (all `false` here).
+✅ *Verified:* a real server's answer listed the capabilities `logging`, `prompts`, `resources` and `tools`, and no `completions`. A server only declares what it has. In the newer `server/discover` answer each capability carried flags such as `listChanged` and `subscribe` (all `false` here).
 
 ### Elicitation
 
@@ -244,6 +270,14 @@ Client → Server : 3. initialized (notification: no id, no reply)
   - HITL is a safety layer in the AI application: approve, edit or reject a tool call ([Langchain, Chapter 11](../langchain/11-runtime-and-human-in-the-loop.md))
   - Elicitation is a native MCP request from a **server** for information it is missing
 - Not run in these notes. It needs a client with an elicitation handler
+
+> [!IMPORTANT]
+> **🏭 In production**
+> - **Check capabilities before you use a feature.** Call `resources/subscribe` or send elicitation only if the other side declared it; otherwise expect an error
+> - **Log the negotiated protocol version** for every connection. Version mismatches are a common cause of "works locally, fails in production"
+> - **Pin SDK versions** for client and server together, and upgrade them deliberately
+>
+> *Added by Claude.*
 
 ## 3.10 Seeing the real messages: the wiretap
 
@@ -276,7 +310,7 @@ Client → Server : 3. initialized (notification: no id, no reply)
   - `--log FILE` appends the same text to a file. It writes the **colour codes too**, meant for `tail -f` in a terminal
   - `--no-color` is for plain text editors. `mcp_wiretap_no_color.py` is the same tool with colour removed from the code (4.5 KB against 6.7 KB)
   - When the real server exits, it prints and logs `real server exited with code N`
-- *Checked:* I put it in front of the RecipeBox server and sent `initialize`, `initialized` and a `tools/call`. The replies came back unchanged
+- ✅ *Verified:* I put it in front of the RecipeBox server and sent `initialize`, `initialized` and a `tools/call`. The replies came back unchanged
   - Log: 3 client-to-server and 2 server-to-client banners (the `initialized` notification has no reply)
   - Colour codes were in stderr and log by default. With `--no-color`, and in the `no_color` file, there were none
 - **Limits:** it reads **line by line**, so it fits STDIO servers that send one JSON message per line. It does not tap HTTP servers
@@ -316,60 +350,13 @@ A whiteboard project from the handout. Aim: **MCP concepts without writing a lin
 - **Who builds what for Gmail?** The service provider builds the **server**. The host builds the **client**. Claude's Gmail client is Anthropic's work
 - **Reference server from the class:** `Link.txt` points to a Gmail MCP server on GitHub (`theposch/gmail-mcp`). It was shared as a reference and not read for these notes
 
-## 3.13 Interview corner
-
-**1. Who decides when a tool, a resource and a prompt are used?**
-
-- The model decides tools. The application decides resources. The user picks prompts
-- *Stronger answer:* a resource never changes anything, and resources and prompts are optional
-
-**2. What are the three lifecycle phases?**
-
-- Initialization, operation, shutdown, always in that order
-
-**3. Walk me through the handshake.**
-
-- Client sends `initialize` with a version, capabilities and info. Server replies with the same id. Client sends an `initialized` notification
-- *Stronger answer:* before each side hears the other, only pings are allowed
-
-**4. Why JSON-RPC and not REST?**
-
-- Lightweight, transport-agnostic, two-way, notifications built in, standard error codes
-- *Stronger answer:* two-way means the server can start a request, which suits progress on long tasks. It is not the same as async or a WebSocket
-
-**5. What is the `id` for? What if it is missing?**
-
-- It matches a response to its request, since responses can arrive out of order
-- A message with no id is a notification and gets no reply
-
-**6. How does version negotiation work?**
-
-- Client sends its latest version. Server answers with that or its own latest. Client accepts or disconnects
-- *Stronger answer:* a real client must decide which historical versions it supports
-
-**7. Is JSON-RPC an MCP invention?**
-
-- No. It is a general existing specification that MCP adopted
-
-**8. Why does the client call `tools/list` if negotiation said the server has tools?**
-
-- Negotiation names a category. Discovery fetches the names, descriptions and schemas
-
-**9. What is elicitation, and is it human-in-the-loop?**
-
-- A server asking the user for missing information through the client, mid-task. No. HITL is an application-side approval layer on tool calls
-
-**10. A client connects to an old server. What happens?**
-
-- *Checked:* a modern client tries `server/discover` first. On "Method not found" it falls back to `initialize`. A serious client supports both
-
-## 3.14 Added by Claude, not from the sources
+## 3.13 Added by Claude, not from the sources
 
 Not in the course material. Items marked *checked* were tested with `fastmcp` 4.1.4.
 
-- **Read resources by the URI the server lists.** *Checked:* the server normalised `file://server-notes` to `file://server-notes/`, and the raw request without the slash failed
-- **Never rely on the working directory in a server.** *Checked:* a relative path failed when the server was started from another folder. Use `Path(__file__)`
-- **Two kinds of failure, two shapes.** *Checked:* a protocol problem (unknown method) is a JSON-RPC `error`. A tool problem (unknown tool) is a `result` with `isError: true`. Handle both in a client
+- **Read resources by the URI the server lists.** ✅ *Verified:* the server normalised `file://server-notes` to `file://server-notes/`, and the raw request without the slash failed
+- **Never rely on the working directory in a server.** ✅ *Verified:* a relative path failed when the server was started from another folder. Use `Path(__file__)`
+- **Two kinds of failure, two shapes.** ✅ *Verified:* a protocol problem (unknown method) is a JSON-RPC `error`. A tool problem (unknown tool) is a `result` with `isError: true`. Handle both in a client
 - **Match responses by id.** Never assume replies arrive in the order you sent requests
 - **Watch the wire with a model-free client.** The raw STDIO test below needs no host and no model. It is the fastest way to see the real messages
 - **Check the current specification.** Version dates and which features are deprecated change. The version strings above come from the test, not from this chapter's sources
@@ -396,6 +383,117 @@ print([x["name"] for x in recv()["result"]["prompts"]])
 p.terminate()
 ```
 
+## 3.14 Interview corner
+
+**What interviewers listen for:** the three phases in order, what a JSON-RPC request, response, notification and error look like, and why both version and capabilities are negotiated
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. Who decides when a tool, a resource and a prompt are used?</summary>
+
+- The model decides tools. The application decides resources. The user picks prompts
+- *Stronger answer:* a resource never changes anything, and resources and prompts are optional
+
+</details>
+
+<details class="qa"><summary>2. What are the three lifecycle phases?</summary>
+
+- Initialization, operation, shutdown, always in that order
+
+</details>
+
+<details class="qa"><summary>3. Walk me through the handshake.</summary>
+
+- Client sends `initialize` with a version, capabilities and info. Server replies with the same id. Client sends an `initialized` notification
+- *Stronger answer:* before each side hears the other, only pings are allowed
+
+</details>
+
+<details class="qa"><summary>4. Why JSON-RPC and not REST?</summary>
+
+- Lightweight, transport-agnostic, two-way, notifications built in, standard error codes
+- *Stronger answer:* two-way means the server can start a request, which suits progress on long tasks. It is not the same as async or a WebSocket
+
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>5. What is the <code>id</code> for? What if it is missing?</summary>
+
+- It matches a response to its request, since responses can arrive out of order
+- A message with no id is a notification and gets no reply
+
+</details>
+
+<details class="qa"><summary>6. How does version negotiation work?</summary>
+
+- Client sends its latest version. Server answers with that or its own latest. Client accepts or disconnects
+- *Stronger answer:* a real client must decide which historical versions it supports
+
+</details>
+
+<details class="qa"><summary>7. Is JSON-RPC an MCP invention?</summary>
+
+- No. It is a general existing specification that MCP adopted
+
+</details>
+
+<details class="qa"><summary>8. Why does the client call <code>tools/list</code> if negotiation said the server has tools?</summary>
+
+- Negotiation names a category. Discovery fetches the names, descriptions and schemas
+
+</details>
+
+<details class="qa"><summary>9. What is elicitation, and is it human-in-the-loop?</summary>
+
+- A server asking the user for missing information through the client, mid-task. No. HITL is an application-side approval layer on tool calls
+
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>10. A client connects to an old server. What happens?</summary>
+
+- ✅ *Verified:* a modern client tries `server/discover` first. On "Method not found" it falls back to `initialize`. A serious client supports both
+
+</details>
+
+<details class="qa"><summary>11. Client and server support different protocol versions. What happens?</summary>
+
+- The client proposes its version; the server answers with that version if supported, otherwise with its own latest
+- *Stronger answer:* if the client cannot use the server's version it should disconnect cleanly; log the negotiated version to debug mismatches
+
+</details>
+
+<details class="qa"><summary>12. Why is MCP stateful, and what does that cost when you scale?</summary>
+
+- A session starts with a handshake and keeps negotiated capabilities
+- *Stronger answer:* behind a load balancer you need session affinity or a stateless server mode, and reconnect logic when a session is lost
+
+</details>
+
+> [!TIP]
+> **🧩 Design question**
+> - *"You must expose a reporting system to AI hosts that may be older or newer than your server. How do you handle compatibility?"*
+> - Talk about: version negotiation, declaring only capabilities you implement, feature checks before optional calls, contract tests against two client versions, and a deprecation policy
+
+## Cheat sheet
+
+```json
+{"jsonrpc": "2.0", "id": 1, "method": "initialize",
+ "params": {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "me", "version": "1"}}}
+{"jsonrpc": "2.0", "method": "notifications/initialized"}
+{"jsonrpc": "2.0", "id": 2, "method": "tools/list"}
+{"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "add", "arguments": {"a": 2, "b": 3}}}
+{"jsonrpc": "2.0", "id": 3, "error": {"code": -32601, "message": "Method not found"}}
+```
+
+| Message | Has `id`? | Expects a reply? |
+|---|---|---|
+| Request | yes | yes |
+| Response (`result` or `error`) | same `id` as the request | no |
+| Notification | no | no |
+
 ## Recap
 
 - **Tool:** model decides. **Resource:** application reads. **Prompt:** user picks. Resources and prompts are optional
@@ -413,7 +511,7 @@ p.terminate()
 
 1. Add `server_notes` and `structured_escalation` to your warm-up server. Confirm all three primitives in the Inspector
 2. Move the notes path to `Path(__file__)` and start the server from a different folder
-3. Run the raw client from 3.14. Add `resources/list`, `resources/read` and `prompts/get`
+3. Run the raw client from 3.13. Add `resources/list`, `resources/read` and `prompts/get`
 4. Trigger an unknown method and an unknown tool. Compare the two reply shapes
 5. Find the three handshake messages in your own host's MCP log
 6. Write by hand a JSON-RPC request and response for a hypothetical `send_email` tool, with a matching `id`
@@ -425,6 +523,7 @@ p.terminate()
 
 ## How this chapter was checked
 
+- **2026 review:** the lifecycle diagram, the production box, the graded interview and the cheat sheet were added (Added by Claude). The cheat-sheet messages follow the shapes already checked in 3.5 and 3.10
 - Run with `fastmcp` 4.1.4: the full three-primitive server from the class notebook; `resources/list`, `resources/read`, `prompts/list` and `prompts/get` over raw JSON-RPC on STDIO; the `initialize` answer and capabilities; the `initialized` notification; an unknown method and an unknown tool; two back-to-back requests; a future protocol version; the first message a current client sends (`server/discover`) and its fallback to `initialize`; the trailing-slash URI behaviour; and the working-directory failure with a read from a different folder
 - **Not run:** elicitation, the Inspector in a browser, Claude Desktop and its log files, the wiretap scripts, the Tavily and Gmail project, templates and subscriptions
 - The class write-ups, notebook and handouts are the source for everything not marked *checked*. The three handout PDFs are whiteboard images, read as text and as images
@@ -435,6 +534,6 @@ p.terminate()
 - Live-Class-2026, `classes_summary/17 - 6 Sep - MCP Primitives, Architecture & Wiretap.md`
 - Live-Class-2026, `classes_transcription_summary/17 - 5 Sep - MCP Deep Dive — Primitives, Lifecycle & JSON-RPC.md`
 - Live-Class-2026, `Weekend 10 - 5-6 Sep/README.md`, and under `06 Sep - MCP Primitives & Architecture/`: `README.md`, `v4a_primitives_notebook.ipynb`, `MCP-Lifecycle.pdf`, `MCP-Primitives.pdf`, `AI-Updater-Project.pdf`, `claude_desktop_config.example.json`, `Link.txt`
-- Sections 3.3 (Checked), 3.5 and 3.7 to 3.8 (the *checked* lines) and 3.14 are from testing, not from the class sources
+- Sections 3.3 (Checked), 3.5 and 3.7 to 3.8 (the *checked* lines) and 3.13 are from testing, not from the class sources
 
 Previous: [Chapter 2, Primitives and architecture](02-primitives-and-architecture.md) · Next: [Chapter 4, Operation, transports and shutdown](04-operation-transports-and-shutdown.md)

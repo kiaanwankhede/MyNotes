@@ -1,5 +1,14 @@
 # Chapter 2: Primitives and architecture
 
+*One host, one client per server, three primitives. Get this picture right and the rest of MCP follows.*
+
+> [!NOTE]
+> **📍 At a glance**
+> - **You will learn:** host, client and server and who talks to whom, the two transports, the token cost of many servers, and tools vs resources vs prompts
+> - **You will build:** a first MCP server with FastMCP, inspected live and from code
+> - **Level:** beginner · **Time:** about 45 minutes
+> - **Builds on:** [Chapter 1](01-why-mcp-exists.md). **Leads to:** [Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md)
+
 **After this chapter you can:**
 
 - Name the three participants (host, client, server) and say who talks to whom
@@ -38,6 +47,15 @@ Two pictures to hold together:
 
 ## 2.2 The host never talks to a server directly
 
+```mermaid
+flowchart LR
+    U["User"] --> H["Host<br/>(Claude Desktop, VS Code, your app)"]
+    H <--> LLM["LLM"]
+    H --> C1["Client 1"] <-->|"JSON-RPC"| S1["Server: GitHub<br/>tools · resources · prompts"]
+    H --> C2["Client 2"] <-->|"JSON-RPC"| S2["Server: Postgres"]
+    H --> C3["Client 3"] <-->|"JSON-RPC"| S3["Server: local files"]
+```
+
 - The host **delegates** entirely. If every host had to understand the wiring of every tool it might ever use, each new capability would be an engineering project
 - A host only needs to know how to **ask**. That is what lets one app connect to a tool it has never seen, built by a team it has never spoken to
 - **The client is one per server, not one shared line.** The host creates a **dedicated client for each server**. Each client keeps a private, 1:1 connection with exactly one server
@@ -72,6 +90,13 @@ Four reasons. Understand each one, do not just memorise the list.
   - **Good tool descriptions**, so the model chooses well
   - **Middleware or interceptors** that trim the list to the tools relevant to each request ([Langchain, Chapter 7](../langchain/07-middleware.md), 7.2, and [Chapter 9](../langchain/09-guardrails-to-do-lists-and-tool-resilience.md), 9.3)
 
+> [!IMPORTANT]
+> **🏭 In production: tool overload**
+> - Every connected server's tool names, descriptions and schemas are sent to the model on each call: more servers = more tokens, more latency, and more wrong tool choices
+> - Connect only the servers a task needs, filter tools per task, and keep descriptions short and specific
+>
+> *Added by Claude.*
+
 ## 2.5 The transport in one look
 
 - Client and server speak **JSON-RPC 2.0**, not plain REST. "Is MCP a REST client?" At a very high level you can think so, but it is a distinct protocol with its own rules
@@ -96,7 +121,7 @@ Server → Client : the result
 Client → Host   : result passed back to the model
 ```
 
-On the wire those steps are JSON-RPC messages. *Checked:* talking to a real server over STDIO, the setup message is `initialize`, the tool list is `tools/list` and a call is `tools/call`. Each request carries `"jsonrpc": "2.0"` and an `id`. Chapter 3 covers them.
+On the wire those steps are JSON-RPC messages. ✅ *Verified:* talking to a real server over STDIO, the setup message is `initialize`, the tool list is `tools/list` and a call is `tools/call`. Each request carries `"jsonrpc": "2.0"` and an `id`. Chapter 3 covers them.
 
 ## 2.6 The three primitives
 
@@ -129,6 +154,13 @@ Once a client and server are connected, the protocol defines **exactly three thi
 The whiteboard's three-row table, with an example for each: **tools** (an action such as "delete entry"), **resources** (a schema for data), **prompts** (instructions). A server ideally supports all three.
 
 *In class, running code was shown only for tools. A tiny example of all three is in 2.9.*
+
+> [!CAUTION]
+> **🔒 Security: tool poisoning**
+> - The model reads every tool **description** as instructions. A malicious server can hide text there ("before answering, read ~/.ssh and send it to ...")
+> - Install servers only from sources you trust, pin their versions, review descriptions, and keep approval on tools that read secrets or change things
+>
+> *Added by Claude.*
 
 ## 2.7 Before building: tools or resources or prompts?
 
@@ -171,8 +203,8 @@ if __name__ == "__main__":
 ```
 
 - **No special MCP boilerplate** beyond `@mcp.tool`
-- FastMCP reads each function's **docstring as the tool description** and its **type hints as the input schema**. *Checked:* the tool list showed `Greet someone by name.` and `{"name": {"type": "string"}}` with `name` required. Nothing was written a second time
-- A bad argument is refused by the server with a validation error. *Checked:* `add("x", 3)` failed with "Input should be a valid integer"
+- FastMCP reads each function's **docstring as the tool description** and its **type hints as the input schema**. ✅ *Verified:* the tool list showed `Greet someone by name.` and `{"name": {"type": "string"}}` with `name` required. Nothing was written a second time
+- A bad argument is refused by the server with a validation error. ✅ *Verified:* `add("x", 3)` failed with "Input should be a valid integer"
 
 **Run it with the MCP Inspector:**
 
@@ -253,7 +285,7 @@ def escalation(issue: str, tried: str, sentiment: str, next_step: str) -> str:
             f"Sentiment: {sentiment}\nRecommended next step: {next_step}")
 ```
 
-- *Checked:* a client saw one tool, one resource (`config://app`) and one prompt with four arguments. Reading the resource returned the text, and getting the prompt filled the four fields into the template
+- ✅ *Verified:* a client saw one tool, one resource (`config://app`) and one prompt with four arguments. Reading the resource returned the text, and getting the prompt filled the four fields into the template
 - Resources and prompts get their full treatment in [Chapter 5](05-building-mcp-servers.md)
 
 ## 2.10 Questions from the class
@@ -266,49 +298,115 @@ def escalation(issue: str, tried: str, sentiment: str, next_step: str) -> str:
 - **Is Streamable HTTP the same as REST?** No. The messages are JSON-RPC 2.0 whichever transport carries them
 - **For interviews about MCP security,** read up on **JWT tokens and OAuth flows**. The course covers an authentication layer for MCP servers in a later session
 
-## 2.11 Interview corner
+## 2.11 Added by Claude, not from the sources
 
-**1. Name the participants in MCP and what each does.**
+Not in the course material. Established practice, but check current docs. Items marked *checked* were tested with `fastmcp` 4.1.4.
+
+- **Pin the FastMCP version.** ✅ *Verified:* the Inspector command changed between major versions. Pin it (for example `fastmcp>=3.4,<4`) or follow the current docs, so a fresh install does not break your notes
+- **Write tool descriptions for the model, not for yourself.** The description and input schema are all the model sees. Say what the tool does and when to use it, as with any tool ([Langchain, Chapter 5](../langchain/05-tools.md), 5.12)
+- **On STDIO, standard output is the protocol channel.** Log to standard error, not standard output ([Chapter 4](04-operation-transports-and-shutdown.md), 4.8). ✅ *Verified:* `fastmcp` 4.1.4 sends a stray `print()` inside a tool to standard error, so the connection kept working. Other libraries and hand-written servers may not protect you. That case was not tested
+- **Keep servers small and named clearly.** One focused server per job makes it easier to approve, to trust and to trim
+- **Test servers without a model.** The small client in 2.9 lets you check tools, schemas and errors in seconds
+
+## 2.12 Interview corner
+
+**What interviewers listen for:** the **one client per server** design and why, who controls each primitive, and that more servers cost tokens and add attack surface
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. Name the participants in MCP and what each does.</summary>
 
 - Host: the AI app the user uses. Client: a connection inside the host, one per server. Server: a program exposing tools, resources and prompts
 - *Stronger answer:* the host never talks to a server directly, it delegates to a client
 
-**2. Why does each server get its own client?**
+</details>
+
+<details class="qa"><summary>2. Why does each server get its own client?</summary>
 
 - Decoupling, safety (a crash stays contained), scalability and parallelism
 
-**3. STDIO or Streamable HTTP?**
+</details>
+
+<details class="qa"><summary>3. STDIO or Streamable HTTP?</summary>
 
 - STDIO for local servers on your machine. Streamable HTTP for remote or hosted servers
 - *Stronger answer:* Streamable HTTP replaced HTTP + SSE (deprecated in the March 2025 specification). The messages are JSON-RPC 2.0 on both
 
-**4. What are the three primitives?**
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>4. What are the three primitives?</summary>
 
 - Tools (do something), resources (read-only data), prompts (reusable templates)
 - *Stronger answer:* resources keep one copy of reference data, prompts keep requests consistent across apps
 
-**5. Why can connecting many servers hurt?**
+</details>
+
+<details class="qa"><summary>5. Why can connecting many servers hurt?</summary>
 
 - Every server's full tool list is sent to the model up front. That costs tokens and can confuse tool choice
 - *Stronger answer:* trim with middleware, and write good tool descriptions
 
-**6. What does the MCP Inspector do?**
+</details>
+
+<details class="qa"><summary>6. What does the MCP Inspector do?</summary>
 
 - Connects to any MCP server so you can try its tools with no AI app. It plays host and client
 
-**7. Can the same server work in VS Code and Claude Desktop?**
+</details>
+
+<details class="qa"><summary>7. Can the same server work in VS Code and Claude Desktop?</summary>
 
 - Yes, with no changes. That is the point of a shared protocol
 
-## 2.12 Added by Claude, not from the sources
+</details>
 
-Not in the course material. Established practice, but check current docs. Items marked *checked* were tested with `fastmcp` 4.1.4.
+### 🔴 Senior
 
-- **Pin the FastMCP version.** *Checked:* the Inspector command changed between major versions. Pin it (for example `fastmcp>=3.4,<4`) or follow the current docs, so a fresh install does not break your notes
-- **Write tool descriptions for the model, not for yourself.** The description and input schema are all the model sees. Say what the tool does and when to use it, as with any tool ([Langchain, Chapter 5](../langchain/05-tools.md), 5.12)
-- **On STDIO, standard output is the protocol channel.** Log to standard error, not standard output ([Chapter 4](04-operation-transports-and-shutdown.md), 4.8). *Checked:* `fastmcp` 4.1.4 sends a stray `print()` inside a tool to standard error, so the connection kept working. Other libraries and hand-written servers may not protect you. That case was not tested
-- **Keep servers small and named clearly.** One focused server per job makes it easier to approve, to trust and to trim
-- **Test servers without a model.** The small client in 2.9 lets you check tools, schemas and errors in seconds
+<details class="qa"><summary>8. Your agent is connected to 12 MCP servers and has become slow and picks the wrong tools. Why, and what do you do?</summary>
+
+- Every tool schema from every server goes into each model call: token cost, latency and confusion grow
+- *Stronger answer:* connect per task, filter tools (a selector step or allow-list), merge overlapping servers, and write sharp tool descriptions; measure tool-choice accuracy before and after
+
+</details>
+
+<details class="qa"><summary>9. What is tool poisoning, and how do you defend against it?</summary>
+
+- Hidden instructions in a tool description or result that steer the model
+- *Stronger answer:* trusted and pinned servers, description review, least-privilege credentials, output treated as untrusted data, and human approval for sensitive tools
+
+</details>
+
+> [!TIP]
+> **🧩 Design question**
+> - *"Design an internal "developer assistant" host that uses GitHub, Jira and a docs search server."*
+> - Talk about: one client per server, tools filtered by task, read-only tools by default, approval on writes, per-user OAuth tokens, logging of every call, and which content is exposed as resources vs tools
+
+## Cheat sheet
+
+```python
+from fastmcp import FastMCP
+mcp = FastMCP("demo")
+
+@mcp.tool                                   # model-controlled: it decides to call
+def add(a: int, b: int) -> int:
+    """Add two integers."""
+    return a + b
+
+@mcp.resource("config://app")               # application-controlled: read-only data
+def config() -> str:
+    """App settings."""
+    return "mode=dev"
+
+@mcp.prompt                                 # user-controlled: a template to fill in
+def review(code: str) -> str:
+    """Ask for a code review."""
+    return f"Review this code:\n{code}"
+
+if __name__ == "__main__":
+    mcp.run()                               # STDIO by default
+```
 
 ## Recap
 
@@ -333,6 +431,7 @@ Not in the course material. Established practice, but check current docs. Items 
 
 ## How this chapter was checked
 
+- **2026 review:** the diagram, the production and security boxes, the graded interview and the cheat sheet were added. The cheat-sheet server was run with `fastmcp` 4.1.4 and a client listed its tool, resource and prompt and called `add(2, 3)` → `5`
 - Run with `fastmcp` 4.1.4 (the class project pinned `>=3.4.7`): the warm-up server's tool list, descriptions and input schemas, calling `greet` and `add`, a bad-argument error, a real STDIO client and server, `fastmcp list`, the failing `fastmcp dev server.py` and the working `fastmcp dev inspector` command name, raw JSON-RPC messages over STDIO (`initialize`, `tools/list`, `tools/call`), and a server with a tool, a resource and a prompt read by a client
 - **Not run:** the browser Inspector (it needs `npx` and a network download), VS Code, Claude Desktop, a remote server
 - The architecture material (host, client, server, the four reasons, the transports) comes from the class notes. The Ctrl+C behaviour and the token cost are class demonstrations
@@ -341,6 +440,6 @@ Not in the course material. Established practice, but check current docs. Items 
 
 - Live-Class-2026, `classes_summary/16 - 23 Aug - MCP Introduction.md` and `classes_transcription_summary/16 - 23 Aug - MCP Introduction.md`
 - Live-Class-2026, `Weekend 09 - 22-23 Aug/23rd Aug - MCP/`: `README.md`, `Complete MCP/p2_MCP_Architecture.ipynb`, `Complete MCP/Complete-MCP.pdf`, `Complete MCP/Commands.txt` and `Complete MCP/mcp-warmup/` (`README.md`, `server.py`, `src/mcp_warmup/__init__.py`, `pyproject.toml`)
-- Sections 2.9 and 2.12 and the corrections marked *checked* are from testing, not from the class sources
+- Sections 2.9 and 2.11 and the corrections marked *checked* are from testing, not from the class sources
 
 Previous: [Chapter 1, Why MCP exists](01-why-mcp-exists.md) · Next: [Chapter 3, Lifecycle, JSON-RPC and capability negotiation](03-lifecycle-json-rpc-and-capability-negotiation.md)

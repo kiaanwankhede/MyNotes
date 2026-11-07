@@ -1,5 +1,14 @@
 # Chapter 4: Operation, transports and shutdown
 
+*Discover, call, and close cleanly, over a local pipe or over HTTP, without leaking data you did not mean to send.*
+
+> [!NOTE]
+> **📍 At a glance**
+> - **You will learn:** the two steps of operation, what a tool looks like to the model, failed calls, what leaves your machine, STDIO vs Streamable HTTP, shutdown on each, and how to harden a transport
+> - **You will build:** watch operation live, talk to a server over raw HTTP, and run a client against a STDIO server
+> - **Level:** intermediate · **Time:** about 55 minutes
+> - **Builds on:** [Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md). **Leads to:** [Chapter 5](05-building-mcp-servers.md)
+
 **After this chapter you can:**
 
 - Describe the operation phase: discovery, then calling
@@ -12,6 +21,24 @@
 **Builds on:** [Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md) (handshake, JSON-RPC). **Next:** [Chapter 5](05-building-mcp-servers.md) builds real servers.
 
 ## 4.1 The operation phase: two steps
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant H as Host + LLM
+    participant C as Client
+    participant S as Server
+    C->>S: tools/list (once, at start: no LLM tokens)
+    S-->>C: [get_weather: description, inputSchema]
+    U->>H: "Weather in Pune?"
+    H->>H: LLM sees the tool schemas, asks for get_weather(city="Pune")
+    H->>C: call it
+    C->>S: tools/call {name: get_weather, arguments: {city: "Pune"}}
+    S-->>C: result {content: "31°C", isError: false}
+    C-->>H: result
+    H->>H: LLM writes the answer (tool result now sent to the model provider)
+    H-->>U: "It's 31°C in Pune"
+```
 
 - After the handshake, operation has exactly two steps:
   - **Discovery:** `tools/list` (and `resources/list`, `prompts/list`)
@@ -107,7 +134,7 @@ print("Hello Mayank from Python file")
 - Run it from a terminal. The **terminal is the client**, the Python file is started as a **sub-process** and is the **server**
 - What the terminal sends becomes the file's input. What the file prints is what the terminal shows
 - **Every STDIO MCP connection is this pattern:** launch a sub-process, send in on `stdin`, read out on `stdout`. Only the content is JSON-RPC
-- *Checked:* the script, given `Mayank` on standard input, printed the prompt, the name and the greeting
+- ✅ *Verified:* the script, given `Mayank` on standard input, printed the prompt, the name and the greeting
 
 **Benefits:**
 
@@ -136,7 +163,7 @@ Almost always started by the **client**, in this order:
 | Terminate (SIGTERM) | Exit code -15 |
 | Kill (SIGKILL) | Exit code -9 |
 
-**Standard output is the protocol channel.** Never write your own text there from a hand-written server. Log to standard error. *Checked:* `fastmcp` 4.1.4 sent a stray `print()` from inside a tool to standard error and the call still worked. Other libraries may not do this. That case was not tested
+**Standard output is the protocol channel.** Never write your own text there from a hand-written server. Log to standard error. ✅ *Verified:* `fastmcp` 4.1.4 sent a stray `print()` from inside a tool to standard error and the call still worked. Other libraries may not do this. That case was not tested
 
 ## 4.9 Transport 2: Streamable HTTP
 
@@ -179,6 +206,14 @@ httpx.post(u, headers=H, json={"jsonrpc": "2.0", "id": 2, "method": "tools/list"
 
 ## 4.11 Choosing a transport
 
+```mermaid
+flowchart TD
+    Q{"Where does the server run?"} -- "same machine as the host" --> L{"One user, launched by the host?"}
+    L -- "yes" --> ST["STDIO<br/>sub-process, stdin/stdout"]
+    L -- "no, shared by several apps" --> HL["Streamable HTTP on 127.0.0.1<br/>with Origin checks"]
+    Q -- "another machine / the cloud" --> HR["Streamable HTTP<br/>TLS + auth + rate limits"]
+```
+
 | | STDIO | Streamable HTTP |
 |---|---|---|
 | Where the server runs | Same machine, as a sub-process | Anywhere with a URL |
@@ -199,52 +234,133 @@ httpx.post(u, headers=H, json={"jsonrpc": "2.0", "id": 2, "method": "tools/list"
 - **Are connectors the same as MCP servers?** Yes. Claude uses friendlier words for a general audience
 - **Is a "production-grade" project claim on a resume fine if it was not deployed at scale?** Describe it honestly and frame it around the problem solved. Shallow claims get exposed
 
-## 4.13 Interview corner
+## 4.13 Hardening a transport
 
-**1. What are the two steps of the operation phase?**
+| Risk | Where | What to do |
+|---|---|---|
+| Stray output corrupts the protocol | STDIO | Never write anything but MCP messages to `stdout`; send logs to `stderr` |
+| A web page talks to your local server (DNS rebinding) | local HTTP | Bind to `127.0.0.1`, not `0.0.0.0`; validate the `Origin` and `Host` headers |
+| Anyone on the internet can call your tools | remote HTTP | TLS, authentication (the spec's OAuth-based flow, or an API key behind a gateway), per-user tokens, rate limits |
+| Sessions break behind a load balancer | remote HTTP | Sticky sessions, or a stateless HTTP mode; reconnect when a session is lost |
+| Secrets in logs | both | Never log `Authorization` headers or tool arguments that hold personal data |
 
-- Discovery (`tools/list` and friends), then calling (`tools/call` with a name and arguments)
-- *Stronger answer:* discovery is automatic and uses no LLM tokens
+- ✅ *Verified (`fastmcp` 4.1.4): a STDIO server that printed to `stdout`, at start-up and inside a tool, still worked with FastMCP's own client.* The specification still forbids non-MCP output on `stdout`, and other clients may fail on it, so treat it as a rule
+- ✅ *Verified (`fastmcp` 4.1.4): `FastMCP.http_app()` accepts `stateless_http`, `host_origin_protection`, `allowed_hosts`, `allowed_origins` and `session_idle_timeout`.* Their behaviour was not exercised here
 
-**2. Does MCP send my data to the model?**
-
-- Yes. Tool results go to the host, then to the model provider. Restrict access, add middleware, or self-host your server
-
-**3. Why does shutdown depend on the transport?**
-
-- No JSON-RPC messages are exchanged at shutdown. Closing is done by the transport
-
-**4. How does a STDIO server shut down?**
-
-- Client closes input, then sends terminate, then kill. Server-initiated shutdown is rare
-- *Stronger answer:* the three signals were tested: close gives exit 0, terminate -15, kill -9
-
-**5. How does a request travel over Streamable HTTP?**
-
-- A POST to `/mcp` with the JSON-RPC body. The server returns a session id header. The reply is in event-stream format
-
-**6. STDIO or Streamable HTTP?**
-
-- STDIO for local and personal. Streamable HTTP for remote, shared, hosted. Same JSON-RPC either way
-
-**7. What does a tool failure look like to a client?**
-
-- An `error` object for protocol failures, and a result flagged `isError` for tool failures. Handle both
-
-**8. How would you give a locked-down company an MCP integration?**
-
-- Build a custom, self-hosted server, possibly containerised, so data stays inside the organisation
+> [!CAUTION]
+> **🔒 Security**
+> - A local HTTP server bound to `0.0.0.0` is reachable by your whole network; one with no `Origin` check can be reached from a browser tab
+> - Tool results go to the model provider (4.4): never return secrets or more personal data than the task needs
+>
+> *Added by Claude.*
 
 ## 4.14 Added by Claude, not from the sources
 
 Items marked *checked* were tested with `fastmcp` 4.1.4 and `mcp` 2.3.0. Check current documentation.
 
-- **Use the session id.** *Checked:* over HTTP the server issued `mcp-session-id`. A client that drops it on later requests loses its session
+- **Use the session id.** ✅ *Verified:* over HTTP the server issued `mcp-session-id`. A client that drops it on later requests loses its session
 - **Send the `Accept` header with both types.** The client in 4.9 asks for `application/json, text/event-stream`. A plain GET without it got 406
-- **A mounted app redirects `/mcp` to `/mcp/`.** *Checked* on the TimeTrack app ([Chapter 5](05-building-mcp-servers.md)): `POST /mcp` returned **307** to `/mcp/`. Clients that do not follow redirects on POST will fail. Configure the URL with the trailing slash
-- **Pass an explicit transport to the FastMCP client.** *Checked:* `Client("server.py")` printed a deprecation warning that string inference will go in FastMCP 5. Use `StdioTransport` or a `Path`
+- **A mounted app redirects `/mcp` to `/mcp/`.** ✅ *verified* on the TimeTrack app ([Chapter 5](05-building-mcp-servers.md)): `POST /mcp` returned **307** to `/mcp/`. Clients that do not follow redirects on POST will fail. Configure the URL with the trailing slash
+- **Pass an explicit transport to the FastMCP client.** ✅ *Verified:* `Client("server.py")` printed a deprecation warning that string inference will go in FastMCP 5. Use `StdioTransport` or a `Path`
 - **STDIO sub-process rule:** the working directory and the environment belong to the **host** that launched the server. See the relative-path failure in Chapter 3, 3.3
 - **Treat tool output as untrusted input to the model.** A tool that returns text from a web page or an email can carry instructions. Add guardrails before the model sees it. This is general practice, not from the sources
+
+## 4.15 Interview corner
+
+**What interviewers listen for:** discovery vs calling, what data leaves the machine, when to pick STDIO or Streamable HTTP, and how each is shut down and secured
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. What are the two steps of the operation phase?</summary>
+
+- Discovery (`tools/list` and friends), then calling (`tools/call` with a name and arguments)
+- *Stronger answer:* discovery is automatic and uses no LLM tokens
+
+</details>
+
+<details class="qa"><summary>2. Does MCP send my data to the model?</summary>
+
+- Yes. Tool results go to the host, then to the model provider. Restrict access, add middleware, or self-host your server
+
+</details>
+
+<details class="qa"><summary>3. Why does shutdown depend on the transport?</summary>
+
+- No JSON-RPC messages are exchanged at shutdown. Closing is done by the transport
+
+</details>
+
+<details class="qa"><summary>4. How does a STDIO server shut down?</summary>
+
+- Client closes input, then sends terminate, then kill. Server-initiated shutdown is rare
+- *Stronger answer:* the three signals were tested: close gives exit 0, terminate -15, kill -9
+
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>5. How does a request travel over Streamable HTTP?</summary>
+
+- A POST to `/mcp` with the JSON-RPC body. The server returns a session id header. The reply is in event-stream format
+
+</details>
+
+<details class="qa"><summary>6. STDIO or Streamable HTTP?</summary>
+
+- STDIO for local and personal. Streamable HTTP for remote, shared, hosted. Same JSON-RPC either way
+
+</details>
+
+<details class="qa"><summary>7. What does a tool failure look like to a client?</summary>
+
+- An `error` object for protocol failures, and a result flagged `isError` for tool failures. Handle both
+
+</details>
+
+<details class="qa"><summary>8. How would you give a locked-down company an MCP integration?</summary>
+
+- Build a custom, self-hosted server, possibly containerised, so data stays inside the organisation
+
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>9. You must run one MCP server for 1,000 users. Which transport, and what else?</summary>
+
+- Streamable HTTP behind TLS, with authentication and per-user authorisation
+- *Stronger answer:* stateless mode or sticky sessions for scaling, rate limits, audit logs, health checks, and short-lived tokens; STDIO is only for local, single-user servers
+
+</details>
+
+<details class="qa"><summary>10. A STDIO server works in one client but breaks in another. First thing you check?</summary>
+
+- Whether the server writes anything other than MCP messages to `stdout` (print statements, banners)
+- *Stronger answer:* move all logging to `stderr`, then compare the negotiated protocol versions and capabilities
+
+</details>
+
+> [!TIP]
+> **🧩 Design question**
+> - *"Your company wants Claude Desktop on employee laptops to use an internal HR database through MCP. Design it."*
+> - Talk about: a remote Streamable HTTP server (not a copy on every laptop), SSO-based OAuth, read-only tools by default, row-level access per employee, PII minimisation in results, audit logs, and a policy on which model providers may see the data
+
+## Cheat sheet
+
+| | STDIO | Streamable HTTP |
+|---|---|---|
+| Runs | sub-process of the host | any web server, local or remote |
+| Messages | `stdin` / `stdout` lines | `POST /mcp`, event-stream replies, `mcp-session-id` |
+| Auth | inherits the user's machine | TLS + OAuth or API key |
+| Shutdown | close stdin, terminate, kill | close the connection or `DELETE /mcp` |
+| Logs go to | `stderr` only | normal server logs |
+
+```python
+from pathlib import Path
+from fastmcp import Client
+async with Client(Path("server.py")) as c:      # STDIO: launches the server as a sub-process
+    tools = await c.list_tools()                 # discovery
+    r = await c.call_tool("add", {"a": 2, "b": 3})   # calling; r.data == 5
+```
 
 ## Recap
 
@@ -269,6 +385,7 @@ Items marked *checked* were tested with `fastmcp` 4.1.4 and `mcp` 2.3.0. Check c
 
 ## How this chapter was checked
 
+- **2026 review:** the diagrams, 4.13, the security box, the graded interview and the cheat sheet were added (Added by Claude). The cheat-sheet client ran against the Chapter 2 cheat-sheet server with `fastmcp` 4.1.4 (`r.data == 5`); the `stdout` and `http_app` checks are described in 4.13
 - Run: the `input()` demo; a RecipeBox server through a FastMCP client; an unknown method, an unknown tool and a raising tool; the STDIO shutdown ladder (close input, SIGTERM, SIGKILL); a FastMCP server over Streamable HTTP with raw POST, GET and DELETE calls; the `mcp-session-id` header; and the `print()` inside a tool on STDIO
 - **Not run:** Context7, Apple Notes, Claude Desktop, any third-party inspector, the Excalidraw server, reconnect after an unexpected close, MIME types, the old HTTP + SSE transport
 - The class material is the source for everything not marked *checked*. Where the class and the test disagree (4.3), both are shown
