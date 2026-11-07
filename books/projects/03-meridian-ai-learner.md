@@ -1,5 +1,16 @@
 # Chapter 3: Meridian AI learner
 
+*A full-stack GenAI app: grounded answers from your PDFs, and a team of agents that audits purchase requests, deployed on Google Cloud.*
+
+> [!NOTE]
+> **📍 Project card**
+> - **Problem:** answer questions from company documents, and review purchase requests from several angles before a manager decides
+> - **Stack:** FastAPI, Pydantic, LangChain, Gemini, embeddings + Vertex AI Vector Search, Cloud Storage, Docker, Cloud Run, Secret Manager, GitHub Actions, structlog
+> - **You practise:** RAG end to end, multi-agent review with a final synthesis step, layered code, tests without the cloud, deployment and cost control
+> - **Status:** a learning project with fictional data; backend run locally with stand-ins for Google services; nothing deployed
+> - **Level:** advanced · **Time to rebuild:** a day or more
+> - **Builds on:** [Langchain Ch 4](../langchain/04-structured-output.md), [Ch 5](../langchain/05-tools.md), [Ch 6](../langchain/06-agents-and-memory.md), [LLM Ch 3](../llm/03-inside-the-model.md), [Pydantic](../pydantic/01-why-pydantic-and-basemodel.md)
+
 **After this chapter you can:**
 
 - Explain what Meridian does and name every technology in it
@@ -41,11 +52,21 @@
 
 ## 3.3 How it fits together
 
+```mermaid
+flowchart LR
+    B["Browser (React)"] --> API["FastAPI backend<br/>api/"]
+    API --> R["rag/"]
+    API --> AG["agent/"]
+    R --> P["PDF → chunks (overlap)"] --> E["Embeddings"] --> V[("Vertex AI<br/>Vector Search")]
+    V --> GQ["Gemini answers<br/>from retrieved text"]
+    AG --> RK["Risk agent"]
+    AG --> TX["Tax agent"]
+    AG --> CT["Control agent"]
+    RK --> CFO["CFO memo"]
+    TX --> CFO
+    CT --> CFO
 ```
-Browser (React) -> FastAPI backend
-                    |- Document Q&A:  PDF -> pieces -> embeddings -> Vector Search -> Gemini
-                    '- Purchase audit: Risk / Tax / Control agents (with tools) -> CFO memo
-```
+
 
 - **Frontend** talks to the backend through one file only (`src/lib/api.ts`)
 - **Backend** is FastAPI. It has two feature areas: `rag/` and `agent/`
@@ -297,7 +318,7 @@ uvicorn api.main:app --app-dir backend --reload --port 8080
 | sample PDFs | exactly 4 PDFs load and split |
 | severity | `add_severity` copies the level; nothing is added without one |
 
-- *Checked:* **9 passed** with the pinned versions (`pytest` 8.4.2, `httpx` 0.28.1). It took about 9 seconds
+- ✅ *Verified:* **9 passed** with the pinned versions (`pytest` 8.4.2, `httpx` 0.28.1). It took about 9 seconds
 - What they do **not** cover: a real PDF upload, the GCS routes, failures, CORS, the frontend route (see 3.12)
 
 ## 3.9 Deploying to Google Cloud
@@ -339,59 +360,155 @@ gcloud run services delete meridian-ai-cloud-run --region=us-central1
 gcloud projects delete YOUR_PROJECT_ID     # removes everything
 ```
 
+## From demo to production
+
+| Area | In the project | Needed for production |
+|---|---|---|
+| Audit checks | From the model's general knowledge (only FX is live) | Official data sources as tools; rules enforced in code |
+| Decision | "RED ALERT means reject" in the prompt | A code check on the structured result, then a human approver |
+| Speed | Specialists one after another | Run the three in parallel, then the CFO step |
+| RAG quality | Spot checks against sample PDFs | Retrieval and groundedness evaluations; citations shown |
+| Security | `allow_origins=["*"]` with credentials | Exact origins, auth, least-privilege service account |
+| Cost | Index endpoint bills hourly | Undeploy when idle, budgets and alerts |
+
+## Talking about this project
+
+> [!TIP]
+> **🎤 60-second pitch**
+> - **Problem:** finance staff needed answers from policy PDFs and a first review of purchase requests
+> - **What I built:** a FastAPI backend with two features: RAG over uploaded PDFs on Vertex AI Vector Search with Gemini, and three specialist agents (risk, tax, control) whose findings a CFO step turns into a memo; containerised for Cloud Run with CI from GitHub Actions
+> - **Key decisions:** layered packages (`api` → `rag`, `agent` → `config`, `logger`), lazy cloud clients so the API starts without Google, tests with `TestClient` and stand-ins
+> - **How I verified it:** an offline test suite with stand-ins for Google services; expected answers from the sample PDFs; my own duty arithmetic for the README example
+> - **Honest limits:** fictional data, model-knowledge checks, not deployed by me; I can explain exactly what would make it production-ready
+
 ## 3.11 Interview corner
 
-**Q1. What is RAG and why use it?**
+**What interviewers listen for:** you can trace a request through RAG and the agent team, name the trade-offs (cost, latency, trust), and say honestly what the demo cannot do
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. What is RAG and why use it?</summary>
+
 - Retrieve relevant text first, then let the model answer from it
 - It grounds answers in your documents, avoids retraining, and allows "I don't know"
 
-**Q2. What is an embedding?**
+</details>
+
+<details class="qa"><summary>2. What is an embedding?</summary>
+
 - A vector that captures meaning. Similar meaning gives nearby vectors
 - Search by meaning, not by keyword
 
-**Q3. Why split the PDF into pieces?**
+</details>
+
+<details class="qa"><summary>3. Why split the PDF into pieces?</summary>
+
 - The unit you retrieve must be small and focused. A whole PDF is too big and too noisy
 
-**Q4. Why separate `api`, `rag` and `agent`?**
+</details>
+
+<details class="qa"><summary>4. Why separate <code>api</code>, <code>rag</code> and <code>agent</code>?</summary>
+
 - One job per package, testable alone, dependencies run one way
 
-**Q5. Why run several agents instead of one prompt?**
+</details>
+
+<details class="qa"><summary>5. Why run several agents instead of one prompt?</summary>
+
 - Each has a focused instruction and tools. A final step combines them
 - Cost: more model calls, more time
 
-**Q6. What does a service account do in CI?**
+</details>
+
+<details class="qa"><summary>6. What does a service account do in CI?</summary>
+
 - It lets a program (GitHub Actions) act in your cloud without a person's login
 - Give it the minimum permissions and rotate or delete its key
 
-**Q7. What is the cost trap in this project?**
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>7. What is the cost trap in this project?</summary>
+
 - A vector index endpoint bills hourly while deployed, idle or not
 
-**Q8. Why use `lru_cache` on the model and store getters?**
+</details>
+
+<details class="qa"><summary>8. Why use <code>lru_cache</code> on the model and store getters?</summary>
+
 - They connect on first use and are reused. The API can start and answer `/health` before Google is set up
 
-**Q9. Why overlap chunks?**
+</details>
+
+<details class="qa"><summary>9. Why overlap chunks?</summary>
+
 - A sentence cut at a boundary still appears whole in one of the two neighbours. Cost: some repeated text
 
-**Q10. The audit says "approved". Should you trust it?**
+</details>
+
+<details class="qa"><summary>10. The audit says "approved". Should you trust it?</summary>
+
 - No. The checks come from general model knowledge. Treat it as a demo
 
-**Q11. How would you make the three specialists run in parallel?**
+</details>
+
+<details class="qa"><summary>11. How would you make the three specialists run in parallel?</summary>
+
 - They do not depend on each other, so run them together (threads or async) and join the results before the CFO call. Total time becomes the slowest agent, not the sum
 
-**Q12. Where does the "RED ALERT means reject" rule live, and is that safe?**
+</details>
+
+<details class="qa"><summary>12. Where does the "RED ALERT means reject" rule live, and is that safe?</summary>
+
 - In the CFO prompt text. Safe only if the model always obeys. For a hard rule, check the result in code
 
-**Q13. Why is a model-backed sanctions check weak?**
+</details>
+
+<details class="qa"><summary>13. Why is a model-backed sanctions check weak?</summary>
+
 - The model answers from training knowledge, which can be stale or wrong. A real check calls an official list
 
-**Q14. Why run `ingest_pdf` in a thread pool?**
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>14. Why run <code>ingest_pdf</code> in a thread pool?</summary>
+
 - It is slow and blocking. Inside an `async` route it would freeze the whole server for everyone until it finished
 
-**Q15. What is wrong with `allow_origins=["*"]` plus `allow_credentials=True`?**
+</details>
+
+<details class="qa"><summary>15. What is wrong with <code>allow_origins=["*"]</code> plus <code>allow_credentials=True</code>?</summary>
+
 - Any website can call your API from a browser with the user's cookies. Browsers forbid `*` with credentials, so the framework echoes the caller's origin, which is worse. List exact origins
 
-**Q16. Why test with `monkeypatch` and `TestClient`?**
+</details>
+
+<details class="qa"><summary>16. Why test with <code>monkeypatch</code> and <code>TestClient</code>?</summary>
+
 - You test the routes and the wiring without Google or a key. Fast, free, repeatable. The cost: the real integration is untested
+
+</details>
+
+<details class="qa"><summary>17. How would you evaluate the document Q&A part?</summary>
+
+- A fixed set of questions with known answers from the sample PDFs; check the answer and the retrieved chunks
+- *Stronger answer:* measure retrieval (was the right chunk in the top k?) separately from answering (is the answer grounded and correct?), and re-run on every change to chunking, embeddings or prompts
+
+</details>
+
+<details class="qa"><summary>18. The Google Cloud bill is higher than expected. Where do you look first?</summary>
+
+- The Vector Search index endpoint, which bills every hour it is deployed, idle or not
+- *Stronger answer:* undeploy it when unused, set budgets and alerts, scale Cloud Run to zero, and track cost per question and per audit
+
+</details>
+
+> [!TIP]
+> **🧩 Design question**
+> - *"Turn Meridian's purchase audit into a tool a finance team can rely on."*
+> - Talk about: real data sources (sanctions lists, tariff tables) as tools instead of model memory, hard rules enforced in code, the three specialists in parallel, structured outputs validated with Pydantic, a human approver, evaluation on past requests, and an audit trail
 
 ## 3.12 Added by Claude, not from the sources
 
@@ -428,6 +545,17 @@ gcloud projects delete YOUR_PROJECT_ID     # removes everything
 - **`exc_info` is not rendered** (see 3.8). Add structlog's exception formatter if you want tracebacks in the logs
 - **Pin model names in config.** The README warns that model names are retired; the default shown there is its own and was not checked
 
+## Cheat sheet
+
+| Task | Command or rule |
+|---|---|
+| Install | `python3.12 -m venv .venv && source .venv/bin/activate && pip install -r requirements-dev.txt` |
+| Configure | `cp .env.example .env`, set `GOOGLE_API_KEY` |
+| Run | `uvicorn api.main:app --app-dir backend --reload --port 8080`, then open `/docs` |
+| Test | `pytest backend/tests` → 9 passed, no cloud needed |
+| Needs the cloud | document Q&A (Vector Search) |
+| Biggest cost | the Vector Search index endpoint: undeploy when idle |
+
 ## Recap
 
 - Two jobs: RAG over your PDFs, and a three-agent purchase audit with a CFO memo
@@ -448,6 +576,8 @@ gcloud projects delete YOUR_PROJECT_ID     # removes everything
 7. Write the shutdown commands in order for your own project IDs
 
 ## How this chapter was checked
+
+- **2026 review:** the project card, architecture diagram, "From demo to production", the pitch, graded interview and cheat sheet were added (Added by Claude); sections 3.1 to 3.10 and 3.12 are unchanged. The cheat-sheet commands are copied from 3.7 and were not re-run
 
 - Read fully: `README.md`, `DEPLOY.md`, four sample PDFs, `.env.example`, the settings, logger and five `rag/` files, the `agent/` files plus `generate_json.py`, and the `api/` and `tests/` files
 - Computed in Python: the figures in 3.12

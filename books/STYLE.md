@@ -53,3 +53,13 @@ Every chapter in every book follows this. The reader (`index.html`) and GitHub b
 - Chapter file names are part of the key: renaming a chapter file orphans its highlights, so avoid renames.
 - Headings, bullets, table rows and callouts are all highlightable. "★ Marked only" shows just the highlighted lines under their headings.
 - **My highlights page** (`#highlights`, also in the chapter menu and the ⚙ panel): every highlight across all books, grouped by book and chapter, with search, book filter, Open in chapter, Remove and Copy all. Chapter titles come from `SUMMARY.md`, so keep titles and file names there accurate.
+
+## Project chapters (Projects book)
+Project chapters use a write-up shape instead of the lesson shape:
+- Title, italic one-line subtitle, then a `> [!NOTE]` **📍 Project card**: Problem, Stack, You practise, Status (honest: class example / run locally / deployed), Level and time to rebuild, Builds on
+- A `> [!WARNING]` **Short write-up** box when the material is thin
+- An **Architecture** Mermaid diagram right after "What it is"
+- The numbered body sections (keep their numbers: the master cites them)
+- Unnumbered **From demo to production** table (area · in the project · needed for production)
+- Unnumbered **Talking about this project** with a `> [!TIP]` **🎤 60-second pitch** (problem, what I built, key decisions, how I verified it, next or honest limits)
+- Interview corner (graded `qa` blocks, senior questions, 🧩 design question), Added by Claude, Cheat sheet (files, commands or design choices), Recap, Practice, How checked, Sources

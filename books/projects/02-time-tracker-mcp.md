@@ -1,5 +1,16 @@
 # Chapter 2: Time Tracker (MCP)
 
+*One SQLite database, two front doors: a website for people and an MCP server for AI assistants.*
+
+> [!NOTE]
+> **📍 Project card**
+> - **Problem:** employees log hours in a web app; managers want to ask an AI assistant about the same data
+> - **Stack:** SQLite, FastAPI (REST), FastMCP (MCP), an MCP client project with nine demos
+> - **You practise:** adding MCP to an existing app, sharing one data layer, client demos (sampling, elicitation, progress), deployment risks
+> - **Status:** class project, run locally with `fastmcp` 4.1.4; the public demo URLs were not reachable from here
+> - **Level:** intermediate · **Time to rebuild:** about 2 hours
+> - **Builds on:** [MCP Ch 5](../mcp/05-building-mcp-servers.md), [MCP Ch 6](../mcp/06-deployment-and-building-a-client.md), [MCP Ch 7](../mcp/07-legacy-vs-modern-mcp.md)
+
 **After this chapter you can:**
 
 - Describe the TimeTrack project and how it grew across the classes
@@ -17,6 +28,17 @@
 - A time-logging app: employees log hours against projects
 - **SQLite** database, **FastAPI** REST routes, and a **FastMCP** server
 - Four core tools: `log_time`, `get_timesheet`, `get_project_summary`, `list_projects`
+
+### Architecture
+
+```mermaid
+flowchart LR
+    B["Browser<br/>static site"] -->|"REST /api/..."| F["FastAPI routes"]
+    H["Claude Desktop / VS Code<br/>or the client project"] -->|"MCP /mcp"| M["FastMCP tools<br/>log_time · get_timesheet ·<br/>get_project_summary · list_projects"]
+    F --> D["database.py<br/>(shared db.* functions)"]
+    M --> D
+    D --> S[("SQLite<br/>time_entries")]
+```
 
 ## 2.2 The three folders
 
@@ -46,7 +68,7 @@
 - REST routes and MCP tools call the **same `db.*` functions**
 - A write through one is visible through the other
 
-**Checked** (local, `fastmcp` 4.1.4):
+*✅ *verified** (local, `fastmcp` 4.1.4):
 
 - `POST /api/entries` returned 200; MCP `list_projects` then showed the new project
 - `get_timesheet("Priya Nair")` returned `[('MCP Mastery', 3.5)]`
@@ -92,7 +114,7 @@
 | Needs a key in | the client | the **server** process |
 | Works in `fastmcp` 4.1.4 | no, `Context` has no `sample` | yes |
 
-*Checked* `summarize_week` through a local stand-in for the Anthropic API (the real SDK ran; only the HTTP server was fake):
+✅ *verified* `summarize_week` through a local stand-in for the Anthropic API (the real SDK ran; only the HTTP server was fake):
 
 - The prompt sent had the real rows as `- Website Redesign: 6.5h (Homepage layout)` lines
 - The stand-in's reply came back as the tool result
@@ -102,8 +124,8 @@
 ## 2.7 The raw SQL tool, and why it is dangerous
 
 - `execute_query_dynamically(query, params)` runs whatever SQL the model sends
-- *Checked* on a copy: a `SELECT` with a parameter worked. `SELECT COUNT(*)` failed because every row is forced into the six columns
-- *Checked:* a `DELETE` returned an empty list and **deleted nothing** (the helper never commits). A `DROP TABLE` **did** go through
+- ✅ *verified* on a copy: a `SELECT` with a parameter worked. `SELECT COUNT(*)` failed because every row is forced into the six columns
+- ✅ *Verified:* a `DELETE` returned an empty list and **deleted nothing** (the helper never commits). A `DROP TABLE` **did** go through
 - Safer designs: named tools only, a read-only connection, or an allow-list of statements. Detail in MCP Ch5, 5.9
 
 ## 2.8 The nine client demos
@@ -137,7 +159,7 @@
 
 - Translates MCP tools to Anthropic's format: `name`, `description`, `input_schema`
 - Keeps the conversation in one `messages` list. Loops until `stop_reason` is not `tool_use`
-- *Checked* with a stand-in that asked for two tools at once: **one** assistant message, then **one** user message holding both results. The order is right here, unlike the class's earlier loop (MCP Ch6)
+- ✅ *verified* with a stand-in that asked for two tools at once: **one** assistant message, then **one** user message holding both results. The order is right here, unlike the class's earlier loop (MCP Ch6)
 - Weakness: the result is sent as `str(result)`, a Python repr. Send `result.data` or its text instead
 
 **Environment trap (05):**
@@ -168,27 +190,85 @@
 - **The README is out of date:** it still says `ctx.sample()` is used in `main.py`. The code has already removed it
 - **A public URL with no login** lets anyone write to the shared database
 
+## From demo to production
+
+| Area | In the class version | Needed for production |
+|---|---|---|
+| Database | SQLite, sometimes on `/tmp` (lost on restart) | Managed Postgres with backups and migrations |
+| Access | Open URL | OAuth with scopes; employees see their own hours, managers their team |
+| Tools | Includes a run-any-SQL tool | Only named tools; read-only DB user for reads |
+| Protocol | Mixed `fastmcp` versions | Pinned versions; support the modern stateless spec |
+| Testing | Manual demos | Automated write-then-read tests through REST and MCP |
+
+## Talking about this project
+
+> [!TIP]
+> **🎤 60-second pitch**
+> - **Problem:** time data lived in a web app; managers wanted to ask questions about it in plain language
+> - **What I built:** an MCP server mounted beside the existing FastAPI app, both using the same database functions, plus a client project that exercises sampling, elicitation and progress
+> - **Key decisions:** reuse the data layer rather than duplicate logic; named tools over raw SQL; database path from an environment variable for read-only hosts
+> - **How I verified it:** wrote through REST and read through MCP, and the reverse; ran the nine client demos
+> - **Next:** auth with scopes, Postgres, and the modern protocol
+
 ## 2.11 Interview corner
 
-**Q1. Why mount MCP in the same app as REST?**
+**What interviewers listen for:** you can explain why MCP was added **beside** an existing REST app, what is risky in the class version, and what changes on the newest protocol
+
+### 🟢 Basic
+
+<details class="qa"><summary>1. Why mount MCP in the same app as REST?</summary>
+
 - Share one database and one deployment. People use the website, agents use MCP
 
-**Q2. A tool needs an API key and the server runs over STDIO. Why does `export KEY=...` not work?**
+</details>
+
+<details class="qa"><summary>2. A tool needs an API key and the server runs over STDIO. Why does <code>export KEY=...</code> not work?</summary>
+
 - The SDK passes only a safe subset of environment variables to the child process
 - Pass the key through the transport's `env`
 
-**Q3. What changed for `ctx.elicit()` and `ping()` on the newest protocol?**
+</details>
+
+### 🟡 Intermediate
+
+<details class="qa"><summary>3. What changed for <code>ctx.elicit()</code> and <code>ping()</code> on the newest protocol?</summary>
+
 - No back-channel from server to client. Elicitation moves to a "return an input-required result and be called again" pattern; ping is removed
 - `mode="legacy"` restores the old handshake
 
-**Q4. Why is a "run any SQL" tool a bad idea?**
+</details>
+
+<details class="qa"><summary>4. Why is a "run any SQL" tool a bad idea?</summary>
+
 - It hands the model the entire database. Use named tools, read-only access, or an allow-list
 
-**Q5. How do you test an agent loop without an API key?**
+</details>
+
+<details class="qa"><summary>5. How do you test an agent loop without an API key?</summary>
+
 - Point the SDK at a local fake server, or use a scripted model. Check that two tool calls make one assistant message and one result message
 
-**Q6. When would you not mount REST beside MCP?**
+</details>
+
+### 🔴 Senior
+
+<details class="qa"><summary>6. When would you not mount REST beside MCP?</summary>
+
 - When only agents use the data. A plain MCP server is simpler
+
+</details>
+
+<details class="qa"><summary>7. A scanner finds your public TimeTrack MCP URL with no auth. What is exposed, and what do you fix first?</summary>
+
+- Every tool: anyone can read all timesheets and write entries; the raw SQL tool exposes the whole database
+- *Stronger answer:* take it offline or add auth at once, remove `execute_query`, add per-user scopes and rate limits, rotate anything stored, and review logs for misuse
+
+</details>
+
+> [!TIP]
+> **🧩 Design question**
+> - *"Make TimeTrack ready for a 500-person company."*
+> - Talk about: Postgres instead of SQLite on `/tmp`, migrations, SSO-based OAuth with scopes (employee vs manager), no raw SQL, row-level access (own hours vs team), audit log, rate limits, and tests that write then read back through both front doors
 
 ## 2.12 Added by Claude, not from the sources
 
@@ -197,6 +277,17 @@
 - **The stand-in API trick:** the Anthropic SDK honours `ANTHROPIC_BASE_URL`. A 30-line local server tests server-side model calls with no key. Stdio needs the variable forwarded through `env`, too
 - **Writes that never commit** fail silently in SQLite. Test a write by reading it back
 - The live Vercel URLs in demo 03 and in the concurrency script are not reachable from my environment
+
+## Cheat sheet
+
+| File or tool | Role |
+|---|---|
+| `database.py` | the one data layer: `log_time`, `get_timesheet`, `list_projects`, `get_project_summary` |
+| `main.py` (server) | FastAPI website + FastMCP mounted at `/mcp` |
+| `main.py` (client project) | seven tools for the client demos |
+| `client/01` to `09` | demos: listing, calling, sampling, elicitation, progress and more |
+| `TIMETRACK_DB_PATH` | where the database lives (default `/tmp/timetrack.db`) |
+| `execute_query` | the raw SQL tool: remove before production |
 
 ## Recap
 
@@ -216,6 +307,8 @@
 6. Make the demos repeatable with a temporary database
 
 ## How this chapter was checked
+
+- **2026 review:** the project card, architecture diagram, "From demo to production", the pitch, graded interview and cheat sheet were added (Added by Claude); sections 2.1 to 2.10 are unchanged
 
 - **Read fully:** both client READMEs, `database.py` (both versions), all three `main*.py`, `dummy.py`, the nine demos and their older versions (compared by differences), `concurrency_showcase.py`, the change-log text, both deployment notes
 - **Run:** the shared-data test in 2.4; demos 01, 02, 06, 07, 08, 09; demos 04 and 05 against a local stand-in for the API; the `auto` versus `legacy` comparison; `main_to_understand.py` with SQL statements; the concurrency script against a local server
