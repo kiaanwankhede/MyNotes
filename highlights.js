@@ -11,6 +11,7 @@
   var doc = document.getElementById('doc');
   var store = loadStore(), cur = null, idx = null, orphans = [];
   var only = false, busy = false, again = false, timer = null, status = 'local', errMsg = '';
+  var pageMode = false, focusId = null, fBook = '', fText = '';
   var pending = null, barMode = null, removeIds = [], barTouch = false, barTimer = null, selTimer = null;
   try { only = localStorage.getItem(LS_ONLY) === '1'; } catch (e) {}
 
@@ -75,7 +76,12 @@
     return Object.keys(store.items).map(function (k) { return store.items[k]; })
       .filter(function (h) { return !h.del && cur && h.book === cur.book && h.ch === cur.ch; });
   }
-  function apply(book, ch) { cur = { book: book, ch: ch || '_intro' }; render(); }
+  function apply(book, ch) { pageMode = false; cur = { book: book, ch: ch || '_intro' }; render(); focus(); }
+  function focus() {
+    if (!focusId) return; var m = doc.querySelector('mark.hl[data-id="' + focusId + '"]'); focusId = null; if (!m) return;
+    m.scrollIntoView({ block: 'center' }); var all = doc.querySelectorAll('mark.hl[data-id="' + m.getAttribute('data-id') + '"]');
+    all.forEach(function (x) { x.classList.add('flash'); }); setTimeout(function () { all.forEach(function (x) { x.classList.remove('flash'); }); }, 2200);
+  }
   function render() {
     if (!cur) return;
     unwrapAll();
@@ -160,7 +166,71 @@
   function removeId(id) {
     var h = store.items[id]; if (!h) return;
     store.items[id] = { id: id, del: 1, book: h.book, ch: h.ch, u: Date.now() };
-    saveStore(); render(); schedule();
+    saveStore(); if (pageMode) page(); else render(); schedule();
+  }
+
+
+  /* ---------- "My highlights" page ---------- */
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
+  function allItems() { return Object.keys(store.items).map(function (k) { return store.items[k]; }).filter(function (h) { return !h.del; }); }
+  function page() {
+    pageMode = true; cur = null;
+    var items = allItems(), slugs = {}; items.forEach(function (h) { slugs[h.book] = 1; });
+    var bs = BOOKS.filter(function (b) { return slugs[b.slug]; });
+    Promise.all(bs.map(function (b) { return loadBook(b); })).then(function () { if (pageMode) draw(items, bs); });
+  }
+  function draw(items, bs) {
+    doc.innerHTML = ''; doc.classList.remove('hlonly');
+    doc.appendChild(el('h1', '', '★ My highlights'));
+    var bar = el('div', 'hlctl'), sel = el('select'), inp = el('input'), cp = el('button', '', 'Copy all');
+    sel.setAttribute('aria-label', 'Filter by book'); sel.appendChild(new Option('All books', ''));
+    bs.forEach(function (b) { sel.appendChild(new Option(b.title, b.slug)); }); sel.value = fBook;
+    inp.type = 'search'; inp.placeholder = 'Search highlights'; inp.value = fText; inp.setAttribute('aria-label', 'Search highlights');
+    cp.type = 'button'; bar.appendChild(sel); bar.appendChild(inp); bar.appendChild(cp); doc.appendChild(bar);
+    var count = el('p', 'hlstat'), list = el('div'); doc.appendChild(count); doc.appendChild(list);
+    function visible() {
+      var q = fText.trim().toLowerCase();
+      return items.filter(function (h) { return (!fBook || h.book === fBook) && (!q || h.text.toLowerCase().indexOf(q) >= 0); });
+    }
+    function chTitle(b, id) { var c = (b.chapters || []).filter(function (x) { return x.id === id; })[0]; return c ? c.title : null; }
+    function chOrder(b, id) { var i = (b.chapters || []).map(function (x) { return x.id; }).indexOf(id); return i < 0 ? 999 : i; }
+    function paint() {
+      var vis = visible(); list.innerHTML = '';
+      count.textContent = vis.length ? vis.length + ' highlight' + (vis.length > 1 ? 's' : '') + (items.length !== vis.length ? ' (of ' + items.length + ')' : '') : '';
+      if (!items.length) { list.appendChild(el('p', 'hlnone', 'No highlights yet. Select text in any chapter and tap Highlight.')); return; }
+      if (!vis.length) { list.appendChild(el('p', 'hlnone', 'No highlights match.')); return; }
+      bs.forEach(function (b) {
+        var mine = vis.filter(function (h) { return h.book === b.slug; }); if (!mine.length) return;
+        list.appendChild(el('h2', '', b.title));
+        var chs = {}; mine.forEach(function (h) { (chs[h.ch] = chs[h.ch] || []).push(h); });
+        Object.keys(chs).sort(function (x, y) { return chOrder(b, x) - chOrder(b, y); }).forEach(function (id) {
+          var t = chTitle(b, id), hd = el('h3'), a = el('a', '', t ? t : (id === '_intro' ? b.title + ' (intro)' : id + ' (chapter not found)'));
+          if (t || id === '_intro') a.href = '#' + b.slug + (id === '_intro' ? '' : '-' + id); hd.appendChild(a); list.appendChild(hd);
+          chs[id].sort(function (x, y) { return x.u - y.u; }).forEach(function (h) {
+            var row = el('div', 'hlitem'), q = el('blockquote', '', h.text), acts = el('div', 'hlacts');
+            if (t || id === '_intro') { var o = el('a', 'hlopen', 'Open in chapter'); o.href = a.href; o.addEventListener('click', function () { focusId = h.id; }); acts.appendChild(o); }
+            var rm = el('button', '', 'Remove'); rm.type = 'button'; rm.addEventListener('click', function () { removeId(h.id); }); acts.appendChild(rm);
+            row.appendChild(q); row.appendChild(acts); list.appendChild(row);
+          });
+        });
+      });
+    }
+    sel.addEventListener('change', function () { fBook = sel.value; paint(); });
+    inp.addEventListener('input', function () { fText = inp.value; paint(); });
+    cp.addEventListener('click', function () {
+      var out = [], vis = visible();
+      bs.forEach(function (b) {
+        var mine = vis.filter(function (h) { return h.book === b.slug; }); if (!mine.length) return; out.push('## ' + b.title);
+        var last = null; mine.sort(function (x, y) { return chOrder(b, x.ch) - chOrder(b, y.ch) || x.u - y.u; }).forEach(function (h) {
+          if (h.ch !== last) { last = h.ch; out.push('### ' + (chTitle(b, h.ch) || h.ch)); } out.push('- ' + h.text.replace(/\s+/g, ' '));
+        });
+      });
+      var txt = out.join('\n');
+      function done() { cp.textContent = 'Copied ✓'; setTimeout(function () { cp.textContent = 'Copy all'; }, 1800); }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function () {});
+      else { var ta = el('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (e) {} ta.remove(); }
+    });
+    paint(); document.getElementById('main').scrollTop = 0; updateUi();
   }
 
   /* ---------- bottom button ---------- */
@@ -248,7 +318,7 @@
       return r.json().then(function (j) { var d = {}; try { d = JSON.parse(b64d(j.content)); } catch (e) {} return { items: d.items || {}, sha: j.sha }; });
     }).then(function (rem) {
       var m = merge(store.items, rem.items);
-      if (m.local) { store.items = m.items; saveStore(); render(); }
+      if (m.local) { store.items = m.items; saveStore(); if (pageMode) page(); else render(); }
       if (!m.remote && rem.sha) return;
       var body = { message: 'Update highlights', content: b64e(JSON.stringify({ v: 1, items: m.items })) };
       if (rem.sha) body.sha = rem.sha;
@@ -278,7 +348,7 @@
     '<li>GitHub → Settings → Developer settings → Fine-grained tokens → Generate new token.</li>' +
     '<li>Repository access: only <code>' + CFG.repo + '</code>. Permissions → Contents: Read and write.</li>' +
     '<li>Copy the token and paste it above, once on each device.</li></ol></details>' +
-    '<div class="hlrow"><button type="button" id="hlexp">Export</button><label class="hlfile">Import<input type="file" id="hlimp" accept="application/json" hidden></label></div>' +
+    '<div class="hlrow"><button type="button" id="hlall">★ My highlights</button><button type="button" id="hlexp">Export</button><label class="hlfile">Import<input type="file" id="hlimp" accept="application/json" hidden></label></div>' +
     '<div id="hlorph"></div></div>';
   document.body.appendChild(panel);
   function openPanel() {
@@ -299,6 +369,7 @@
   }
   function closePanel() { panel.hidden = true; }
   document.getElementById('hlclose').addEventListener('click', closePanel);
+  document.getElementById('hlall').addEventListener('click', function () { closePanel(); location.hash = 'highlights'; });
   panel.addEventListener('click', function (e) { if (e.target === panel) closePanel(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePanel(); });
   document.getElementById('hlsave').addEventListener('click', function () {
@@ -323,7 +394,7 @@
     }; rd.readAsText(f); e.target.value = '';
   });
 
-  window.HL = { apply: apply, sync: sync, render: render };
+  window.HL = { apply: apply, sync: sync, render: render, page: page };
   setStatus(token() ? 'busy' : 'local');
   sync();
 })();

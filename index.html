@@ -108,6 +108,11 @@ mark.hl{background:var(--hl);color:inherit;border-radius:3px;cursor:pointer;-web
 .hlstat{color:var(--muted);margin:.3em 0 .8em}
 #hlpanel label{display:block;font-size:.9rem;color:var(--muted);margin-top:.6em}
 #hltoken{width:100%;box-sizing:border-box;font-size:16px;padding:9px 10px;margin:4px 0 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.hlctl{display:flex;flex-wrap:wrap;gap:8px;margin:.6em 0}.hlctl select,.hlctl input{font:inherit;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}.hlctl input{flex:1 1 160px;min-width:0}.hlctl button{font:inherit;font-size:.95rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 14px;cursor:pointer}
+.hlitem{border:1px solid var(--line);border-left:4px solid #e0b400;border-radius:10px;background:var(--surface);padding:2px 14px 10px;margin:.7em 0}.hlitem blockquote{border:0;color:var(--ink);margin:.6em 0 .4em;padding:0}
+.hlacts{display:flex;gap:10px;align-items:center}.hlacts a{font-size:.92rem}.hlacts button{font:inherit;font-size:.88rem;border:1px solid var(--line);background:none;color:var(--muted);border-radius:8px;padding:4px 10px;cursor:pointer}
+mark.hl.flash{outline:2px solid var(--accent);outline-offset:1px}
+.hlnav{font-weight:600}
 .hlrow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
 .hlhelp{margin:6px 0 10px;font-size:.92rem}.hlhelp ol{padding-left:1.2em;margin:.4em 0}
 #hlpanel label.hlfile{display:inline-block;margin-top:0;color:var(--ink);font-size:.9rem}
@@ -214,7 +219,7 @@ function renderBooks(){
   }).join('');
 }
 function renderLeft(b){
-  var h='<p class="nav-title">'+esc(b.title)+'</p>', cur=null;
+  var h='<a href="#highlights" class="hlnav">★ My highlights</a><p class="nav-title">'+esc(b.title)+'</p>', cur=null;
   (b.chapters||[]).forEach(function(c,i){
     if(c.id===state.ch) cur=(i+1)+'. '+c.title;
     h+='<a href="#'+hashFor(b.slug,c.id)+'" class="'+(c.written?'':'draft')+'"'+(c.id===state.ch?' aria-current="page"':'')+'>'+(i+1)+'. '+esc(c.title)+(c.written?'':'<span class="tag">soon</span>')+'</a>';
@@ -228,6 +233,13 @@ function fixLinks(html){
   });
 }
 function show(){
+  if(location.hash==='#highlights'&&window.HL){
+    var my0=++token, b0=bookOf(state.book); renderBooks();
+    document.querySelectorAll('#books button').forEach(function(x){x.setAttribute('aria-current','false')});
+    document.getElementById('right').innerHTML=''; document.title='My highlights - Study Notes';
+    loadBook(b0).then(function(){ if(my0!==token)return; renderLeft(b0); document.getElementById('chlbl').textContent='★ My highlights'; });
+    HL.page(); setMenu(false); return;
+  }
   var p=parseHash(), my=++token; state.book=p.book; renderBooks();
   var b=bookOf(p.book), doc=document.getElementById('doc');
   if(!b.chapters){ doc.innerHTML='<p>Loading '+esc(b.title)+'...</p>'; document.getElementById('chmenu').innerHTML=''; document.getElementById('right').innerHTML=''; }
