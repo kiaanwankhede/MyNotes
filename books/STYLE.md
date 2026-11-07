@@ -63,3 +63,8 @@ Project chapters use a write-up shape instead of the lesson shape:
 - Unnumbered **From demo to production** table (area · in the project · needed for production)
 - Unnumbered **Talking about this project** with a `> [!TIP]` **🎤 60-second pitch** (problem, what I built, key decisions, how I verified it, next or honest limits)
 - Interview corner (graded `qa` blocks, senior questions, 🧩 design question), Added by Claude, Cheat sheet (files, commands or design choices), Recap, Practice, How checked, Sources
+
+## Registering a new book (reader)
+- Add one entry to `books.json`: `slug` (folder name under `books/`), `title`, `shelf` (Foundations, GenAI & Agents, Projects or SAP; add a new shelf name to `shelves` if needed) and a one-line `blurb`.
+- The book needs `books/<slug>/SUMMARY.md` and `README.md`. No change to `index.html` is needed; the library page and the "Book ▾" picker read `books.json`.
+- Empty shelves are hidden, so the SAP shelf appears when its first book is registered.

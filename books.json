@@ -1,0 +1,11 @@
+{
+  "shelves": ["Foundations", "GenAI & Agents", "Projects", "SAP"],
+  "books": [
+    {"slug": "python", "title": "Python", "shelf": "Foundations", "blurb": "API basics, the Python you need for agents, and the anatomy of one."},
+    {"slug": "pydantic", "title": "Pydantic", "shelf": "Foundations", "blurb": "Models, validators and checking LLM output."},
+    {"slug": "llm", "title": "LLM", "shelf": "Foundations", "blurb": "How models work, the agentic loop, and a glossary."},
+    {"slug": "langchain", "title": "Langchain", "shelf": "GenAI & Agents", "blurb": "Agents, tools, memory and LangGraph."},
+    {"slug": "mcp", "title": "MCP", "shelf": "GenAI & Agents", "blurb": "Model Context Protocol: servers, clients, security."},
+    {"slug": "projects", "title": "Projects", "shelf": "Projects", "blurb": "CineBot, Time Tracker, Meridian and AI Updater, ready to talk about."}
+  ]
+}

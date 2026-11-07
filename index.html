@@ -158,13 +158,27 @@ article table td:first-child strong{white-space:nowrap}
   article{padding:24px 18px 48px}
 }
 @media (prefers-reduced-motion:reduce){main{scroll-behavior:auto}#chbtn .car{transition:none}}
+.bkbtn{border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-weight:600;padding:7px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;max-width:60vw;overflow:hidden;text-overflow:ellipsis}
+.bkbtn:hover{background:var(--accent-soft)}
+.brand{cursor:pointer;text-decoration:none;color:inherit}
+#bkmenu{position:fixed;z-index:70;top:54px;left:12px;width:min(360px,calc(100vw - 24px));max-height:75vh;overflow-y:auto;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:10px}
+#bkmenu[hidden]{display:none}
+#bkq{width:100%;box-sizing:border-box;font-size:16px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);margin-bottom:6px}
+.shelf{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:10px 4px 4px}
+#bkmenu a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);text-decoration:none}
+#bkmenu a:hover,#bkmenu a[aria-current="true"]{background:var(--accent-soft);color:var(--accent)}
+.lib h1{margin-bottom:.2em}.lib .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:8px 0 22px}
+.lib .card{display:block;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:12px 16px;text-decoration:none;color:var(--ink)}
+.lib .card:hover{border-color:var(--accent)}.lib .card b{display:block;font-size:1.05rem;margin-bottom:2px}.lib .card span{color:var(--muted);font-size:.92rem}
+.lib h2{font-size:1rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border:0;margin:1.2em 0 .2em}
 </style>
 </head>
 <body>
 <header>
   
-  <div class="brand">Study Notes</div>
-  <div class="books" id="books" role="tablist" aria-label="Books"></div>
+  <a class="brand" href="#library">Study Notes</a>
+  <div class="books" id="books"></div>
+<div id="bkmenu" hidden></div>
   <button id="chbtn" class="icon-btn" aria-haspopup="true" aria-expanded="false" aria-controls="chmenu"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex:none"><path d="M3 5h14M3 10h14M3 15h14"/></svg><span class="lbl" id="chlbl">Chapters</span><svg class="car" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 4l4 4 4-4"/></svg></button>
   <button id="hlt" class="icon-btn" aria-pressed="false">★ Marked only</button>
   <button id="hlset" class="icon-btn" aria-label="Highlights and sync settings">⚙<span class="dot local"></span></button>
@@ -184,6 +198,7 @@ var BOOKS = [
   {slug:'python',title:'Python'},{slug:'pydantic',title:'Pydantic'},{slug:'llm',title:'LLM'},
   {slug:'langchain',title:'Langchain'},{slug:'mcp',title:'MCP'},{slug:'projects',title:'Projects'}
 ];
+var SHELVES=['Foundations','GenAI & Agents','Projects','SAP'];
 var root = document.documentElement;
 var state = {book: BOOKS[0].slug, ch: null};
 var token = 0;
@@ -214,9 +229,27 @@ function parseHash(){
   return {book:BOOKS[0].slug,ch:undefined};
 }
 function renderBooks(){
-  document.getElementById('books').innerHTML=BOOKS.map(function(b){
-    return '<button role="tab" data-book="'+b.slug+'" aria-current="'+(b.slug===state.book)+'">'+esc(b.title)+'</button>';
-  }).join('');
+  var b=bookOf(state.book), lib=(location.hash===''||location.hash==='#library'||location.hash==='#highlights');
+  document.getElementById('books').innerHTML='<button class="bkbtn" id="bk" aria-haspopup="true" aria-expanded="false">\ud83d\udcda '+esc(lib&&location.hash!=='#highlights'?'Library':b.title)+' \u25be</button>';
+  document.getElementById('bkmenu').innerHTML='<input id="bkq" type="search" placeholder="Find a book" autocomplete="off"><div id="bklist"></div>';
+  fillBk('');
+}
+function fillBk(q){
+  q=q.toLowerCase(); var h='<a href="#library">\ud83c\udfe0 Library home</a>';
+  SHELVES.forEach(function(sh){
+    var bs=BOOKS.filter(function(b){return (b.shelf||'Other')===sh&&(!q||(b.title+' '+(b.blurb||'')).toLowerCase().indexOf(q)>=0)});
+    if(bs.length) h+='<p class="shelf">'+esc(sh)+'</p>'+bs.map(function(b){return '<a href="#'+b.slug+'" data-book="'+b.slug+'" aria-current="'+(b.slug===state.book)+'">'+esc(b.title)+'</a>'}).join('');
+  });
+  document.getElementById('bklist').innerHTML=h;
+}
+function setBk(open){var m=document.getElementById('bkmenu');m.hidden=!open;var k=document.getElementById('bk');if(k)k.setAttribute('aria-expanded',open);if(open){var q=document.getElementById('bkq');q.value='';fillBk('');if(innerWidth>700)q.focus()}}
+function libraryPage(){
+  var h='<div class="lib"><h1>Library</h1><p style="color:var(--muted)">Pick a book. Your highlights are under \u2605 My highlights in any chapter menu.</p>';
+  SHELVES.forEach(function(sh){
+    var bs=BOOKS.filter(function(b){return (b.shelf||'Other')===sh}); if(!bs.length) return;
+    h+='<h2>'+esc(sh)+'</h2><div class="grid">'+bs.map(function(b){return '<a class="card" href="#'+b.slug+'"><b>'+esc(b.title)+'</b><span>'+esc(b.blurb||'')+'</span></a>'}).join('')+'</div>';
+  });
+  return h+'</div>';
 }
 function renderLeft(b){
   var h='<a href="#highlights" class="hlnav">★ My highlights</a><p class="nav-title">'+esc(b.title)+'</p>', cur=null;
@@ -235,10 +268,13 @@ function fixLinks(html){
 function show(){
   if(location.hash==='#highlights'&&window.HL){
     var my0=++token, b0=bookOf(state.book); renderBooks();
-    document.querySelectorAll('#books button').forEach(function(x){x.setAttribute('aria-current','false')});
     document.getElementById('right').innerHTML=''; document.title='My highlights - Study Notes';
     loadBook(b0).then(function(){ if(my0!==token)return; renderLeft(b0); document.getElementById('chlbl').textContent='★ My highlights'; });
     HL.page(); setMenu(false); return;
+  }
+  if(location.hash===''||location.hash==='#library'){
+    ++token; renderBooks(); document.getElementById('doc').innerHTML=libraryPage(); document.getElementById('right').innerHTML='';
+    document.getElementById('chmenu').innerHTML=''; document.getElementById('chlbl').textContent='Chapters'; document.title='Library - Study Notes'; setMenu(false); setBk(false); return;
   }
   var p=parseHash(), my=++token; state.book=p.book; renderBooks();
   var b=bookOf(p.book), doc=document.getElementById('doc');
@@ -296,8 +332,11 @@ function buildToc(){
   if(hs.length){var m=document.createElement('details');m.className='mtoc';m.innerHTML='<summary>On this page</summary>'+out.replace('<p class="nav-title">On this page</p>','');var d=document.getElementById('doc');var h1=d.querySelector('h1');if(h1&&h1.nextSibling){h1.parentNode.insertBefore(m,h1.nextSibling)}else{d.insertBefore(m,d.firstChild)}}
 }
 document.addEventListener('click',function(e){
+  if(e.target.closest('#bk')){e.stopPropagation();setBk(document.getElementById('bkmenu').hidden);return;}
   var t=e.target.closest('[data-book]');
-  if(t){var b=bookOf(t.getAttribute('data-book')); location.hash=b.slug; return;}
+  if(t){var b=bookOf(t.getAttribute('data-book')); location.hash=b.slug; setBk(false); e.preventDefault(); return;}
+  if(!e.target.closest('#bkmenu')) setBk(false);
+  if(e.target.closest('#bkmenu a')) setBk(false);
   var a=e.target.closest('aside.right a, .mtoc a');
   if(a){e.preventDefault(); var el=document.getElementById(a.getAttribute('data-t')); if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
 });
@@ -310,7 +349,8 @@ window.addEventListener('hashchange',function(){ if(/^#s\d+$/.test(location.hash
 function setMenu(open){var m=document.getElementById('chmenu');m.hidden=!open;document.getElementById('chbtn').setAttribute('aria-expanded',open)}
 document.getElementById('chbtn').addEventListener('click',function(e){e.stopPropagation();setMenu(document.getElementById('chmenu').hidden)});
 document.addEventListener('click',function(e){var m=document.getElementById('chmenu');if(!m.hidden&&!e.target.closest('#chmenu'))setMenu(false)});
-document.addEventListener('keydown',function(e){if(e.key==='Escape')setMenu(false)});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){setMenu(false);setBk(false)}});
+document.addEventListener('input',function(e){if(e.target.id==='bkq')fillBk(e.target.value)});
 function isDark(){return root.getAttribute('data-theme')==='dark'||(!root.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches)}
 function setTheme(t){ if(t){root.setAttribute('data-theme',t)} document.getElementById('theme').textContent=isDark()?'Light':'Dark'; }
 document.getElementById('theme').addEventListener('click',function(){
@@ -319,7 +359,10 @@ document.getElementById('theme').addEventListener('click',function(){
 });
 try{var saved=localStorage.getItem('notes-theme'); if(saved)root.setAttribute('data-theme',saved)}catch(e){}
 setTheme();
-show();
+getText('books.json').then(function(t){
+  try{var j=JSON.parse(t); if(j.books&&j.books.length){BOOKS=j.books; if(j.shelves)SHELVES=j.shelves;}}catch(e){}
+  state.book=BOOKS[0].slug; show();
+});
 </script>
 </body>
 </html>
