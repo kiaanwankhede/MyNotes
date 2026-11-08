@@ -561,3 +561,5 @@ flowchart LR
 ---
 
 *Previous: [Chapter 4: Setting up Joule](04-setting-up-joule.md)*
+
+*Next: [Chapter 6: Build your first Joule skill](06-first-joule-skill.md)*
