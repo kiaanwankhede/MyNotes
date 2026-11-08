@@ -397,6 +397,35 @@ flowchart LR
 - The blog links to its own set-up blog and a Mobile Start announcement; the Discovery Center mission for this topic is in 5.7a
 - **Not in the blog:** click-by-click wizard fields (the screenshots are readable only as step names)
 
+## 5.7c Where to look next: the partner resource hub
+
+*Source: SAP Community blog *SAP Business AI Platform - Resource Hub for SAP Partners* (SAP; text and all 8 images read). It is an **index of links**; I read the index, not the pages behind it.*
+
+- **Sections of the hub:** onboarding, commercialization (pricing, test/demo/development licences), activating SAP Business AI (embedded AI), activating Joule (common guidelines and per product), AI agents (Joule Studio), troubleshooting, support, product updates and roadmap, customer success stories
+- **Joule activation topics it lists:** unified setup, SuccessFactors (including mobile), S/4HANA Public and Private, Microsoft 365 Copilot, **Joule for Consultants**, Mobile Start, Build Work Zone Advanced edition, SAP Analytics Cloud, BTP cockpit
+- **Support components:** `CA-JOULE` (Joule), `CA-JOULE-CLT-COP` (Joule and Microsoft 365 Copilot), `CA-GAIF-SCC` (Joule for Consultants); also an "SAP Business AI Activation Advisory" service for partners
+
+**Discovery Center missions the hub links (not opened).**
+
+| Topic | Mission |
+|---|---|
+| Establish a unified Joule instance | [Mission 4538 (hub link)](https://discovery-center.cloud.sap/missiondetail/4538/4826/) |
+| Activate Joule for SuccessFactors | [Mission 4451](https://discovery-center.cloud.sap/missiondetail/4451/4737/) |
+| Activate Joule with S/4HANA Cloud Public Edition | [Mission 4452](https://discovery-center.cloud.sap/missiondetail/4452/4738/) |
+| Enable Joule for Consultants | [Mission 4633](https://discovery-center.cloud.sap/missiondetail/4633/4922/) |
+| Setup of Joule in Mobile Start | [Mission 4649](https://discovery-center.cloud.sap/missiondetail/4649/) |
+| Set up Joule Studio and start with Joule skills | [Mission 4651](https://discovery-center.cloud.sap/missiondetail/4651/4940/) |
+| Build custom Joule skills for SAP and non-SAP systems | [Mission 4643](https://discovery-center.cloud.sap/missiondetail/4643/) |
+
+**What the images show.**
+
+- **A hub map** of the sections above (hand-drawn style)
+- **Discovery Center screen** listing "SAP Business AI" agents and features
+- **Two landscape diagrams** (SuccessFactors and S/4HANA Public Cloud), like the ones in 5.3 and 5.4b
+- **A Joule for Consultants diagram:** business user to a standalone Joule web client, then Cloud Identity Services, then the customer subaccount with Joule and consulting capabilities
+- **A Mobile Start diagram:** Build Work Zone with SAP Start, mobile services, alert notification and theme designer; optional Cloud Connector to on-premise; Joule; Cloud Identity Services
+- **Two product screens:** Joule in SuccessFactors mobile and in a benefits-enrolment page
+
 ## 5.8 Added by Claude, not from the sources
 
 *My own reasoning; the course does not say it.*
@@ -513,6 +542,7 @@ flowchart LR
 - **Architecture Center page (5.4b):** text and both diagrams read; the downloadable draw.io files, the resource links and the related missions are **not read**; numbered-step legends in the diagrams were too small to read
 - **Work Zone blog (5.7b):** text and all 5 images read; the linked blogs, roadmap and community groups are **not read**
 - **Ariba blog (5.5a) and Analytical Insights blog (5.6a):** text and all images read (Ariba has none, Analytical Insights has 2); the linked setup guides, SSO blog, data-centre list and SAC Just Ask blog are **not read**
+- **Partner hub (5.7c):** index text and all 8 images read; every page it links to is **not read**
 - **Not run:** no BTP account or Joule tenant was used; quizzes not submitted
 - **Dated points:** Joule for Developers "promo SKU until Sep 2026" is past that date today; Signavio's Work Zone note says "planned for next release"; check SAP Help
 
@@ -524,7 +554,8 @@ flowchart LR
 - SAP Community blog, *Joule enablement process blog - How to get started with Joule in Ariba* (text read; no images): https://community.sap.com/t5/spend-management-blog-posts-by-sap/joule-enablement-process-blog-how-to-get-started-with-joule-in-ariba/ba-p/14259019
 - SAP Community blog, *Introducing Analytical Insights in Joule* (text and both images read): https://community.sap.com/t5/technology-blog-posts-by-sap/introducing-analytical-insights-in-joule-empowering-smarter-decisions/ba-p/14083673
 - Linked, not read: [Joule integration with SAP Ariba - setup guide](https://community.sap.com/t5/technology-blog-posts-by-sap/joule-integration-with-sap-ariba-setup-guide/ba-p/14240003); [Ariba SSO with Cloud Identity Services](https://community.sap.com/t5/technology-blog-posts-by-sap/overview-sap-ariba-sso-with-sap-cloud-identity-services-identity/ba-p/13665483); [Analytical Insights in Joule - setup guide](https://community.sap.com/t5/technology-blog-posts-by-sap/analytical-insights-in-joule-setup-guide/ba-p/14096274)
-- Discovery Center missions: see 5.7a
+- SAP Community blog, *SAP Business AI Platform - Resource Hub for SAP Partners* (index and all 8 images read; linked pages not read): https://community.sap.com/t5/technology-blog-posts-by-sap/sap-business-ai-resource-hub-for-sap-partners/ba-p/14285942
+- Discovery Center missions: see 5.7a and 5.7c
 - SAP Learning, *Setting Up Joule Across your Organizational System Landscapes* (all lessons, images and quizzes read): https://learning.sap.com/courses/setting-up-joule-across-your-organizational-system-landscapes
 
 ---
