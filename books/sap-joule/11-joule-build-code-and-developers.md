@@ -240,3 +240,5 @@
 ---
 
 *Previous: [Chapter 10: Pro-code agents and the A2A protocol](10-pro-code-agents-a2a.md)*
+
+*Next: [Chapter 12: Intent-based agents in Joule Studio](12-intent-based-agents-lab.md)*
