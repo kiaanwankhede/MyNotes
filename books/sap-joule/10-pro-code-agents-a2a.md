@@ -273,3 +273,5 @@ flowchart LR
 ---
 
 *Previous: [Chapter 9: An MCP server for mobile development](09-mdk-mcp.md)*
+
+*Next: [Chapter 11: Joule in SAP Build Code, for ABAP developers, and in Joule Work](11-joule-build-code-and-developers.md)*

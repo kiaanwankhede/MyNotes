@@ -11,3 +11,4 @@
 * [Chapter 8: Joule agents hands-on](08-agents-hands-on.md)
 * [Chapter 9: An MCP server for mobile development](09-mdk-mcp.md)
 * [Chapter 10: Pro-code agents and the A2A protocol](10-pro-code-agents-a2a.md)
+* [Chapter 11: Joule in SAP Build Code, for ABAP developers, and in Joule Work](11-joule-build-code-and-developers.md)
