@@ -484,11 +484,19 @@ flowchart LR
 
 ## How this chapter was checked
 
+> [!CAUTION]
+> **🔴 NOT READ — read this before relying on the chapter**
+>
+> | What was not read | Why / what it means |
+> |---|---|
+> | Feature Catalog, Roadmap Explorer | Linked from the lessons; not opened |
+> | Videos in the lessons | Not watched; text only |
+> | Joule for Consultants course | Linked; a separate course, not read |
+> | Any live SAP system | Nothing was run or tested |
+
 - **Read fully (11 lessons, SAP Learning, 8 Nov 2026, no login needed):** Discovering Joule; Understanding the Value Provided by Joule; Identifying Roles and Personas; Getting to Know Joule Work; AI Assistants in Joule; Joule Agents; Joule Skills; Understanding Joule's Architecture; Activating Joule; Understanding the Commercial Model; Staying Up to Date with SAP Business AI
 - **Quizzes read fully:** all 5 unit quizzes (19 questions), in 1.14. SAP shows no answer key, so the answers are my reading of the lessons
-- **Not read:** every link the lessons point to (Feature Catalog, Roadmap Explorer, videos, the Joule for Consultants course)
 - **Gap:** the architecture lesson's zone diagram did not come through as text, so the zone list is from the descriptions below it
-- **Not run:** this chapter has no code; no SAP system was used
 - **Numbers and prices** are SAP's statements in the course, unverified elsewhere
 - The two different skill counts (1,300 and 1,800) are kept as found
 

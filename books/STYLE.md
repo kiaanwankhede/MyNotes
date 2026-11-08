@@ -68,3 +68,8 @@ Project chapters use a write-up shape instead of the lesson shape:
 - Add one entry to `books.json`: `slug` (folder name under `books/`), `title`, `shelf` (Foundations, GenAI & Agents, Projects or SAP; add a new shelf name to `shelves` if needed) and a one-line `blurb`.
 - The book needs `books/<slug>/SUMMARY.md` and `README.md`. No change to `index.html` is needed; the library page and the "Book ▾" picker read `books.json`.
 - Empty shelves are hidden, so the SAP shelf appears when its first book is registered.
+
+## Not-read table (required)
+
+- Every chapter's "How this chapter was checked" opens with a `> [!CAUTION]` block (red) titled "NOT READ", with a table: what was not read, and why.
+- Items are either read fully or listed there. No "partly" wording elsewhere.

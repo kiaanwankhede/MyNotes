@@ -367,9 +367,16 @@ New topic = new conversation.
 
 ## How this chapter was checked
 
+> [!CAUTION]
+> **🔴 NOT READ — read this before relying on the chapter**
+>
+> | What was not read | Why / what it means |
+> |---|---|
+> | Videos and demos in the lessons | Not watched; text only |
+> | Product pages linked in the use-case lesson | Not opened |
+> | Any Joule tenant | Nothing was run or tested |
+
 - **Read fully (7 lessons and 2 quizzes, SAP Learning, 8 Nov 2026, no login needed):** AI in Everyday Work; How to Interact with Joule; Where You Can Use Joule; Writing Effective Prompts; Managing Conversations with Joule; Querying Business Data with Joule; Joule in Action Across Business Functions; and the two unit quizzes (18 questions, answers my reading, no SAP key)
-- **Not read:** the embedded videos and demos, and the product pages the use-case section links to
-- **Not run:** no Joule tenant was used
 - **Differences kept as found:** four patterns (Chapter 1) vs five (this course); embedded Joule here vs Joule Work in Chapter 1
 - **Facts to confirm before relying on them:** the 8-hour conversation expiry and the supported-products list
 

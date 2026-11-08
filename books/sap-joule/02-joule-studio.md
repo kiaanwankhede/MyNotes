@@ -217,6 +217,35 @@ sequenceDiagram
 > - These are SAP's own pages and linked reports; I did not open the reports. Treat them as vendor claims, not benchmarks.
 > - The page also promotes a 17 November TechEd recap webcast (not attended).
 
+### 2.9b Community blog: example use cases (SJ011)
+
+*Source: an SAP Community blog by a self-described newcomer to SAP. It is one person's view, not SAP documentation.*
+
+- **Claim:** Studio is low-code/no-code; agents answer questions from SAP data, send reminders or alerts, trigger workflows, and guide users
+- **Use cases the blog lists:**
+
+| Use case | What the agent does |
+|---|---|
+| HR self-service | Answers "how many vacation days left?", bank-detail update process, probation end date |
+| Onboarding assistant | Guides a new joiner through week one: paperwork, introductions, daily checklists |
+| Procurement alerts | Watches key suppliers; notifies managers when a PO is stuck or overdue |
+| Project summary | Daily briefing on overdue tasks, timesheet gaps, resource bottlenecks |
+| Compliance checker | Finds staff with missing mandatory training or unsigned policies; sends reminders |
+| IT helpdesk | Answers "how do I reset my SAP password?" and where to raise a ticket |
+
+- **Client benefits listed:** self-service for users, less IT dependency for small tasks, reminders and guidance, faster onboarding, consistency across regions
+- **Getting started, as the blog gives it:** run on SAP BTP, open SAP Build and Joule Studio, build one small agent, train it with real process examples and test in Preview, roll out with the right permissions
+- **Screenshots (my reading of them):**
+  - SAP Build "Create Project" dialog with four choices: Application, Automated Process, **AI Agent and Joule Skill** (tagged New), Business Site
+  - A **Logistics Agent** editor: model size choice (small/medium/large), LLM provider choice (Anthropic, Google, Mistral, OpenAI), a base and an advanced model, and three tools (weather and risk retrieval, documents, transport initiation and tracking)
+  - A **skill flow**: trigger "when skill is called", then Transportation Process, Fetch Tracking Status, Confirmation Message, End
+
+> [!WARNING]
+> **Likely older than the course**
+> - The blog's steps and screenshots use SAP Build with a drag-and-drop editor. Section 2.1–2.9 describes the newer intent-based Studio (prompt, PRD, spec). The page did not show a publication date that I captured.
+> - Treat the use cases as ideas; confirm the click path in the current product before teaching it.
+> - The blog's "no technical skills needed" is an author's view. The course says a developer reviews the PRD and spec (section 2.3).
+
 ## 2.10 Added by Claude, not from the sources
 
 *My own mapping and advice. The course does not say these things.*
@@ -401,10 +430,20 @@ sequenceDiagram
 
 ## How this chapter was checked
 
+> [!CAUTION]
+> **🔴 NOT READ — read this before relying on the chapter**
+>
+> | What was not read | Why / what it means |
+> |---|---|
+> | Demo videos in the lessons | Not watched; text only |
+> | Three "Explore further" lessons (Govern pillar, interoperability, AI Agent Hub) | Not read |
+> | Course screenshots | Not seen |
+> | Product page links: customer reports, Florida Crystals video, product tour, TechEd webcast | Separate resources; not opened |
+> | Linked demo video in the community blog (2.9b) | Not watched |
+> | Any Joule Studio tenant | Nothing was built or tested |
+
 - **Read fully (7 lessons and 4 quizzes, SAP Learning, 8 Nov 2026, no login needed):** What is the SAP Business AI Platform?; Introducing Joule Studio; Building Solutions with Joule Studio; Creating an AI Agent with Joule Studio; Understanding SAP-Delivered Agent Extensions; Extending a Standard Agent Using Joule Studio; Creating n8n Workflows in Joule Studio; and the four unit quizzes (7 questions, answers my reading, no SAP key)
-- **Not read:** the demo videos and the three "Explore further" lessons (Govern pillar, interoperability, AI Agent Hub); screenshots were not seen
 - **Product page (SJ010, read in full on 8 Nov 2026):** all page text and all five FAQ answers. The linked reports, customer video, product tour and webcast are separate resources and were not opened
-- **Not run:** no Joule Studio tenant was used
 - **Wording differences:** Datasphere and Business Data Fabric here vs Business Data Cloud in Chapter 1; kept as found
 - **Example detail:** the n8n lesson names Claude 3.5 Sonnet as an example model; that is a lesson example, not a recommendation
 
@@ -413,6 +452,7 @@ sequenceDiagram
 - SAP Learning, *Introducing Joule Studio* (course): https://learning.sap.com/courses/introducing-joule-studio
 - Lessons read, under the same course path: What is the SAP Business AI Platform?; Introducing Joule Studio; Building Solutions with Joule Studio; Creating an AI Agent with Joule Studio; Understanding SAP-Delivered Agent Extensions; Extending a Standard Agent Using Joule Studio; Creating n8n Workflows in Joule Studio
 - Quizzes: the four unit quiz pages under the same course path
+- SAP Community blog, *Gamechanger Alert: Meet SAP Joule Studio for Real-World Impact* (read in full, text and its 3 screenshots, 8 Nov 2026): https://community.sap.com/t5/human-capital-management-blog-posts-by-members/gamechanger-alert-meet-sap-joule-studio-for-real-world-impact/ba-p/14133749
 - SAP, *Joule Studio* product page (read in full, including the five FAQ answers, 8 Nov 2026): https://www.sap.com/products/artificial-intelligence/joule-studio.html
 
 *Next: [Chapter 3: Joule for business users](03-joule-for-business-users.md)*
