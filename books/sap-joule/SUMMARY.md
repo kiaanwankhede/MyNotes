@@ -13,3 +13,4 @@
 * [Chapter 10: Pro-code agents and the A2A protocol](10-pro-code-agents-a2a.md)
 * [Chapter 11: Joule in SAP Build Code, for ABAP developers, and in Joule Work](11-joule-build-code-and-developers.md)
 * [Chapter 12: Intent-based agents in Joule Studio: ten business scenarios](12-intent-based-agents-lab.md)
+* [Chapter 13: More Joule Studio scenarios: sales, supply chain, data products, agent extensions and n8n workflows](13-more-agent-scenarios-extensions-n8n.md)

@@ -289,3 +289,5 @@ flowchart LR
 ---
 
 *Previous: [Chapter 11: Joule in SAP Build Code, for ABAP developers, and in Joule Work](11-joule-build-code-and-developers.md)*
+
+*Next: [Chapter 13: More Joule Studio scenarios: sales, supply chain, data products, agent extensions and n8n workflows](13-more-agent-scenarios-extensions-n8n.md)*
