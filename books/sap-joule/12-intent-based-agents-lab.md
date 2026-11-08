@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **You will learn:** the intent-based development pipeline, how to write an intent statement, what a generated PRD fixes (automation level, LLM limits, guardrails), and how ten SAP sample agents use it
 > - **Level:** beginner · **Time:** about 45 minutes of reading
-> - **Sources:** ten SAP Developer tutorials (Agent Lab), read 8 November 2026 (text only)
+> - **Sources:** ten SAP Developer tutorials (Agent Lab), read 8 to 9 November 2026 (text and screenshots)
 > - **Builds on:** [Chapter 10](10-pro-code-agents-a2a.md) (A2A and MCP) and [Chapter 11](11-joule-build-code-and-developers.md) (Joule Work)
 
 **After this chapter you can:**
@@ -22,7 +22,7 @@
 > - All ten tutorials run on a **pre-release Joule Studio** (Agent Lab); screens, names and behaviour may change
 > - They are for **learning, not production**; the tutorials say deployment to production is not done from Joule Studio
 > - The scenarios and figures are **illustrative** (fictional companies and sample data)
-> - Screenshots were **not viewed**; I ran nothing
+> - I ran nothing; the screenshot notes in 12.5 are from viewing the pictures, not from using the product
 
 > [!CAUTION]
 > **Write-backs**
@@ -108,7 +108,7 @@ flowchart LR
 - **LLM** classifies and writes the letter; a **deterministic engine** reconciles
 - **Guardrails:** read-only APIs, low-confidence goes to a human, API outage queues requests and notifies, letters pass template validation
 - **Three MCP servers:** business partner, GL account line items, accounting documents
-- Result in the tutorial: 92% intent fit, 42 tests, 100% pass
+- Result in the tutorial text: 92% intent fit, 42 tests, 100% pass (the screenshot shows 135 tests, see 12.5)
 
 ### Budget variance: SJ062
 
@@ -152,7 +152,41 @@ flowchart LR
 - SAP Ariba is explicitly **out of scope**
 - Troubleshooting tips: scorecard tests need evaluation templates and scoring periods; threshold mismatch between PRD and tests needs reconciling
 
-## 12.5 Added by Claude, not from the sources
+## 12.5 What the screenshots add
+
+*Viewed on 9 November 2026: SJ059 (4 images), SJ060 (19), SJ061 (18), SJ062 (23), SJ063 (16), SJ064 (11), SJ065 (20), SJ066 (23), SJ067 (32), SJ068 (16). Some are placeholder graphics.*
+
+- **The create screen differs by lab version:**
+  - Three tiles in some tutorials: Agent, Data Product, Extension (SJ060, SJ061, SJ062, SJ066)
+  - Four tiles in others: Agent, **n8n Workflow**, Data Product or **Application**, Extension (SJ063, SJ064, SJ065, SJ067, SJ068)
+  - The create dialog has Solution, Name, Intent Statement and a **Quick Create** checkbox
+- **Joule Studio layout:** Develop and Manage tabs, Deploy and Actions buttons, a Solution Progress list (Intent Summary, Requirements, Specifications, Solution Artifacts, Testing, Preview) and a File tree
+  - The newest screens show a bar: Intent → Requirement → Specification → Solution → Testing → Deployment, with View, Design and Code switches
+- **Business goals screen (SJ060):** Joule proposes a metrics table and you pick Confirm, Edit, Add or Remove, then Submit Answer
+  - Proposed values: time-to-close down 20%, 90% of tasks in the correct sequence, escalation handling time down 50%, blocked-task resolution within 15 minutes
+  - SJ062 asked for two measurable goals, for example "from 5 days to same-day"
+- **Test overviews do not always match the text:**
+
+| Tutorial | Text says | Screenshot shows |
+|---|---|---|
+| SJ060 | verify all tests pass | 168 tests, 158 passed, 10 failed (94.05%); one test group shows a very low percentage I could not read |
+| SJ061 | 42-test suite | 135 tests, 135 passed |
+| SJ062 | all pass | 33 of 33 |
+| SJ065 | all pass | 157 of 157 |
+| SJ066 | all pass | 148 of 148 |
+| SJ067 | all pass | 58 of 58 |
+| SJ068 | all pass | 113 of 113; coverage threshold 70%, overall 76% |
+
+- **Generated names differ from the typed name:** SJ066's intent page is titled "Sales Goal Coach Agent" and the artifact is `sales-goal-coach-agent`; SJ062's is "Cost Increase Detection & Budget Adjustment Agent"; SJ068's agent is `supplier-performance-monitor-agent`
+- **SJ060 build summary:** 49 specification items, a LangGraph agent, three runtime skills (task analysis, blocker diagnosis with four blocker types, escalation management), two SAP API-based MCP servers plus a mock-data server
+- **SJ061 architecture:** agent, S/4HANA MCP tools, a letter-generation skill and an OpenTelemetry audit logger
+- **SJ064 solution view:** a CAP app with Aging Dashboard and Reminder Activity tabs, an n8n workflow canvas ("Payment Reminder Sequence") with an **Execute workflow** button, and an agent chat; Joule also asked clarifying questions about the landscape even without a Quick Create tick
+- **SJ067 deployment:** a Deployment tab with Current Deployment, Deployment History and a **Try now** button; the deployed agent shows suggested prompts. Both tabs of the text were read: "Ideate and Plan" means deselect Quick Create, answer clarifying questions, then type `Create requirements`, `Create specification` and `Build solution for this project`
+- **SJ063 "Ideate and Plan":** uncheck Quick Create and answer the clarifying questions in the table (users, pain points, data, escalation, landscape, success)
+- **SJ059 in Joule Work:** the progress list shows Joule handing the request to a "Financial Closing Assistant", although the reply says it cannot see live data
+- **Not readable:** a yellow notice in the SJ065 deploy dialog, small percentages on some test screens, and the intent fit numbers on small thumbnails
+
+## 12.6 Added by Claude, not from the sources
 
 *My own reasoning; the sources do not say it.*
 
@@ -161,7 +195,7 @@ flowchart LR
 - **Sample data hides real data problems:** the tutorials need configured cockpits, scorecards or CRM data in a real tenant
 - **Fit scores differ by run:** treat 80 to 90% as a prompt to read the gaps, not as proof
 
-## 12.6 Interview corner
+## 12.7 Interview corner
 
 **What interviewers listen for:** you can describe the pipeline, name the guardrails and say where a human stays in the loop.
 
@@ -197,11 +231,11 @@ flowchart LR
 
 **🧩 Design question:** design an agent for purchase-order approvals. Name the data, the rule engine, what the LLM does, the human gate and three guardrails.
 
-## 12.7 Discovery Center missions (links, not read)
+## 12.8 Discovery Center missions (links, not read)
 
 - [Build custom Joule skills for SAP and non-SAP systems](https://discovery-center.cloud.sap/missiondetail/4643/)
 
-## 12.8 Cheat sheet
+## 12.9 Cheat sheet
 
 | Topic | Remember |
 |---|---|
@@ -230,10 +264,9 @@ flowchart LR
 
 ## How this chapter was checked
 
-- **Read fully (text):** SJ059 to SJ068
+- **Read fully (text and screenshots):** SJ059 to SJ068
 - **Not read:**
-  - all screenshots and images
-  - the "Ideate and Plan" tab text in SJ063 and SJ067 (the page text showed only the Quick Create tab)
+  - small text inside some screenshots (see 12.5)
   - the "Related learning" lists and linked tutorials, videos, and Discovery Center missions
 - **Not run:** nothing was built or deployed
 - **Dated points:** pre-release Agent Lab content (tutorial dates October 2026)
@@ -251,7 +284,7 @@ flowchart LR
 - SAP Developer, *Build a Sales Goal Advisor Agent with Joule Studio, CRM, and SAP SuccessFactors* (read): https://developers.sap.com/tutorials/build-a-sales-goal-advisor-agent
 - SAP Developer, *Use Joule Studio to Create an HR Onboarding Assistant* (read): https://developers.sap.com/tutorials/joule-studio-hr-onboarding-assistant
 - SAP Developer, *Build a Supplier Performance Assistant Agent with Joule Studio and SAP S/4HANA Cloud* (read): https://developers.sap.com/tutorials/build-a-supplier-performance-assistant-agent
-- Discovery Center missions: see 12.7
+- Discovery Center missions: see 12.8
 
 ---
 

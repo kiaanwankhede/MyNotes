@@ -22,7 +22,7 @@
 > - Notes from tutorials and blogs; **I ran nothing**
 > - **Licensing dates in the ABAP blog contradict each other** (see 11.4); check SAP Note 3571857 before you rely on them
 > - SJ048, SJ051 and SJ052 could not be read (dead or redirected links); they are not in this chapter
-> - Screenshots of SJ058 and of the SJ053 quiz were **not viewed**
+> - The SJ053 quiz answer options are not shown on the page, so they are not covered
 
 > [!CAUTION]
 > **Credentials**
@@ -30,29 +30,32 @@
 
 ## 11.1 Set up SAP Build Code on a trial (SJ053)
 
-*Source: SAP Developer tutorial "Setup SAP Build Code in SAP BTP", 10 minutes, 2 steps (text read).*
+*Source: SAP Developer tutorial "Setup SAP Build Code in SAP BTP", 10 minutes, 2 steps (text and all 8 screenshots read).*
 
 - **Before you start:** a BTP trial account in region **US10** (the trial is only offered there)
 - **Step 1, run the booster:**
   - In the trial account, **unsubscribe from SAP Business Application Studio** first
   - Projects made in it are lost, so back them up
-  - Open **Boosters**, search "SAP Build Code" (one booster per service plan) and run it
-  - The booster checks authorizations, providers and regions; then choose **Navigate to Subaccount**
+  - Open **Boosters**, search "SAP Build Code" (one booster per service plan); the card is titled **Get Started with SAP Build Code**, press **Start**
+  - The booster page has Overview, Components and Additional Resources tabs and an architecture diagram
+  - The booster checks authorizations, providers and regions
+  - Success message: "Booster executed successfully. Your subaccount is ready for SAP Build Code Trial"; then choose **Navigate to Subaccount**
 - **Step 2, verify:**
   - Go to **Services → Instances and Subscriptions**
-  - Check you have subscriptions to **SAP Business Application Studio** and **SAP Build Code**
-  - Open SAP Build Code to reach the **Build lobby**
+  - Check you have subscriptions to **SAP Business Application Studio** (plan trial) and **SAP Build Code** (plan free)
+  - Open SAP Build Code to reach the **Build lobby** ("Welcome to SAP Build"; a new lobby says "There are no projects available")
 
 > [!IMPORTANT]
 > The booster adds roles in the **default IdP** only. With a custom IdP you may also need the roles **Build Code Administrator** and **Build Code Developer**.
 
 ## 11.2 Prompt-driven development of a CAP app (SJ050)
 
-*Source: SAP Community blog "Prompt-driven development: full-stack CAP apps from a user story" (text read).*
+*Source: SAP Community blog "Prompt-driven development: full-stack CAP apps from a user story" (text and all 17 screenshots read).*
 
 - **Prerequisites:** free BTP trial plus SAP Build Code (11.1)
 - **Create the project:**
-  - In the Build lobby: Application → Full-Stack → **full-stack Node.js**
+  - In the Build lobby choose Create, then a five-step wizard: **Objective** (Application, Automated Process or Business Site), **Category** (Full-Stack, Frontend, Backend, Mobile), **Type** (the screenshot lists CAP Node.js, CAP Java and two ABAP full-stack types), **Name** (with description and the Full-Stack dev space) and **Summary**
+  - Pick Application → Full-Stack → **full-stack Node.js**
   - The blog names it "Contract Management"
 - **Generate:**
   - Open the project in Business Application Studio and open **Joule** from the activity bar
@@ -60,6 +63,7 @@
   - Joule splits the work into steps, each with a suggested prompt
   - Replace each step's text with the complete user story, run, and accept the code
 - **Add a UI:** ask for a Fiori elements app, run it, open the contract list and then a contract
+  - The screenshots show a generated data model diagram, a list of five contracts with filters, and a detail page with a **Parties Involved** table
 - **The sample story:**
   - A contract administrator manages contracts and "parties involved"
   - Two acceptance scenarios: list all contracts without pressing Go; view contract details
@@ -67,9 +71,9 @@
 
 ## 11.3 Joule in an existing CAP project (SJ054)
 
-*Source: member blog "Enabling support for existing CAP projects in SAP Build Code", an English translation (text read).*
+*Source: member blog "Enabling support for existing CAP projects in SAP Build Code", an English translation (text and all 6 screenshots read).*
 
-- **Problem:** in a project made with `cds init`, Joule shows **Not Available**; only lobby or low-code projects are supported
+- **Problem:** in a project made with `cds init`, Joule shows **Not Available**; the screen says Joule is only available for projects created in a **Full-Stack Application Using Productivity Tools** dev space
 - **Fix:** add `"lcap": true` to `package.json`
   - Works for **CAP Node.js only**, not Java
 - **Steps:**
@@ -77,6 +81,7 @@
   2. Add the setting
   3. Install the low-code event handler module (the generated code uses it)
   4. Refresh the browser and open Joule
+- **Screenshots:** `package.json` with `"lcap": true` as a top-level key; the Joule panel with an **Open Guide** button; a generated handler file marked "auto-generated by Application Logic" that calls a low-code event handler
 - **Checked in the blog** by adding `cds add tiny-sample`, generating logic with Joule and deploying to Cloud Foundry
 
 > [!CAUTION]
@@ -114,7 +119,7 @@
 
 ## 11.5 Joule Work and Spaces (SJ058)
 
-*Source: SAP Developer tutorial "Get productive with Joule Work", 15 minutes, 6 steps, by DJ Adams (text read; screenshots not viewed).*
+*Source: SAP Developer tutorial "Get productive with Joule Work", 15 minutes, 6 steps, by DJ Adams (text read; the page has no screenshots, only the SAP logo and author photo).*
 
 - **Platform:** the **SAP Business AI Platform (BAIP)** joins BTP and Business Data Cloud to build, run and scale agents and apps
 - **Joule Work:** a central workspace where agents do the busywork
@@ -216,12 +221,13 @@
 
 ## How this chapter was checked
 
-- **Read fully:** the text of SJ050, SJ053, SJ054, SJ055 and SJ058; the SJ057 README; the SJ056 landing page
+- **Read fully:** the text of SJ050, SJ053, SJ054, SJ055 and SJ058; the 8 screenshots of SJ053; the SJ057 README; the SJ056 landing page
+- **Images:** SJ058 has none; SJ050 (17), SJ053 (8) and SJ054 (6) viewed; the one SJ055 licensing diagram was viewed earlier, with small text
 - **Not read:**
   - SJ048, SJ051, SJ052 (dead or redirected links)
   - the ten lessons of SJ056
   - the module folders of SJ057
-  - screenshots of SJ058 and the answer options of the SJ053 quiz
+  - the answer options of the SJ053 quiz (not shown on the page)
   - linked blogs, SAP Notes, Discovery Center missions
 - **Not run:** nothing was built or deployed
 - **Dated points:** the ABAP licensing dates in SJ055 contradict each other
