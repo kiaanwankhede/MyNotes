@@ -169,6 +169,25 @@ flowchart LR
 
 **Step 4: test.** Open Joule with the diamond icon and ask, for example, "Show purchase orders". The blog also lists SAP Note 3545050 (business objects enabled for Joule).
 
+**What the screenshots add (all 43 body images viewed).**
+
+- **Landscape picture, 7 numbered steps at runtime:**
+  1. User starts on the solution home page
+  2. User authentication (Identity Authentication)
+  3. User starts the Joule UI
+  4. Joule dialog handling (Joule Assistant and capabilities)
+  5. Transactional: data access (through destination and connectivity service to the OData service)
+  6. Navigational: link resolving (through Build Work Zone and the content channel)
+  7. Search: help and customer documents (Document Grounding, with Microsoft SharePoint shown as the document source)
+  - Dashed lines are config and design time (content exposure, CDM design-time access); solid lines are end-user runtime
+- **Five-box flow** for the `SAP_COM_0193` part: create communication user, create communication system, assign the user to the system, create the arrangement, activate it
+- **Role collections** shown on the admin user: Connectivity and Destination Administrator, Destination Administrator, `Launchpad_Admin`, Subaccount Administrator
+- **Subscriptions screen:** Joule and Build Work Zone standard edition both show plan "foundation"
+- **Joule service URL:** opening it in a browser shows "The service is up and running"; this is the URL you paste into the content security policy
+- **`SAP_COM_0193`** is labelled "Identity Provisioning Integration" in the scenario list
+- **Final test:** Joule opens as a side panel with "How can I guide you?" and suggested prompts; "show purchase orders" returns a list of orders
+- **Dated:** the screenshots come from a demo tenant created in **September 2024**; screens may look different now
+
 > [!IMPORTANT]
 > **Why this matters:** the course lesson (5.4) only says "use the Booster". This blog shows what the Booster leaves for you: the `NavigationService` destination, the `SAP_COM_0193` arrangement, the content security policy and the IPS source and target systems.
 
@@ -365,13 +384,13 @@ flowchart LR
 
 - **Read fully:** all 17 lessons (text and every image: lesson 1 has 1, lesson 2 has 3, the other 15 have none) and all 5 unit quizzes
 - **Not read:** the Discovery Center missions (links added in 5.7a, not opened), SAP Community guides, SAP Help pages, SAP Note 3523238, SAP Note 2791410, the Architecture Center page and the WalkMe page the lessons link to; the lesson-1 video and any demos on the course page
-- **Setup blog (5.4a):** text read fully; its 36 screenshots, the two attached JSON templates and the demo video are **not read**
+- **Setup blog (5.4a):** text and all 43 body images read (37 screenshots and diagrams, 6 small pointer icons or dialogs); the two attached JSON templates and the demo video are **not read**
 - **Not run:** no BTP account or Joule tenant was used; quizzes not submitted
 - **Dated points:** Joule for Developers "promo SKU until Sep 2026" is past that date today; Signavio's Work Zone note says "planned for next release"; check SAP Help
 
 ## Sources and further reading
 
-- SAP Community blog, *Joule in SAP S/4HANA Cloud Public Edition - Setup Guide* (text read; screenshots not viewed): https://community.sap.com/t5/technology-blog-posts-by-sap/joule-in-sap-s-4hana-cloud-public-edition-setup-guide/ba-p/13965333
+- SAP Community blog, *Joule in SAP S/4HANA Cloud Public Edition - Setup Guide* (text and all screenshots read): https://community.sap.com/t5/technology-blog-posts-by-sap/joule-in-sap-s-4hana-cloud-public-edition-setup-guide/ba-p/13965333
 - Discovery Center missions: see 5.7a
 - SAP Learning, *Setting Up Joule Across your Organizational System Landscapes* (all lessons, images and quizzes read): https://learning.sap.com/courses/setting-up-joule-across-your-organizational-system-landscapes
 
