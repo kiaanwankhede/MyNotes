@@ -20,7 +20,7 @@
 
 > [!WARNING]
 > **What this chapter is**
-> - It is one SAP course plus one setup blog (5.4a). Most lessons are **short (prerequisites and links), not click-by-click steps**. The steps live in the linked Discovery Center missions and SAP Help pages.
+> - It is one SAP course plus one setup blog (5.4a) and one Architecture Center page (5.4b). Most lessons are **short (prerequisites and links), not click-by-click steps**. The steps live in the linked Discovery Center missions and SAP Help pages.
 > - No BTP account or Joule tenant was used.
 > - Some points differ from [Chapter 4](04-setting-up-joule.md); see 5.8.
 
@@ -190,6 +190,45 @@ flowchart LR
 
 > [!IMPORTANT]
 > **Why this matters:** the course lesson (5.4) only says "use the Booster". This blog shows what the Booster leaves for you: the `NavigationService` destination, the `SAP_COM_0193` arrangement, the content security policy and the IPS source and target systems.
+
+## 5.4b S/4HANA Cloud: the reference architecture and release limits
+
+*Source: SAP Architecture Center page *Joule in SAP S/4HANA Cloud Private & Public Edition* (page updated 29 Oct 2025; diagrams dated 19 Dec 2025). The page carries SAP's own warning that content over a year old may be out of date.*
+
+- **Private Edition:** only for **RISE with SAP** customers; BTP is the integration hub
+  - Capabilities named: conversational search filter, transactional, navigational
+  - Navigation points users to Fiori apps in Procurement, Finance, Sales and Service; example tasks are creating purchase orders and uploading supplier invoices
+- **Public Edition:** the page says Joule is **natively integrated** and needs no extra configuration
+  - This differs from 5.4a, where the setup blog still lists manual steps after the Booster. Treat the page as the marketing-level view and 5.4a as the setup view
+- **Both:** Joule respects S/4HANA authorizations; **principal propagation** means users see and do only what they are already allowed to
+- **Transactions need active OData services** in the back end (for example, creating a PO)
+- **Setup is per tenant** and cannot be transported
+
+**Private Edition requirements (from the page).**
+
+| Part | Requirement |
+|---|---|
+| S/4HANA release | **2021 or later**; some Joule capabilities depend on the release |
+| UI5 version | Minimum patch level, for example release 2023 needs 1.120.0 or higher; release 2022 needs 1.108.33 or higher |
+| OData services | Activated for each transactional capability |
+| Joule service | Entitlement plan **foundation** |
+| Build Work Zone, standard edition | Entitlement plan **foundation**; surfaces the Joule UI in the Fiori Launchpad |
+| Identity Authentication | Identity provider; trust and single sign-on |
+| Identity Provisioning | Connectivity (application) plan; syncs users and roles from S/4HANA to the subaccount |
+| Cloud Foundry | Enabled in the subaccount (for example Standard plan) |
+| Cloud Connector | Secure tunnel from BTP to the private S/4HANA system, without opening a firewall |
+
+- **BTP Booster** ("Joule - End-to-End Setup Guide") automates service instances, Cloud Foundry enablement and destinations
+
+**What the two diagrams show (both viewed).**
+
+- **Shared parts:** user and application client; SAP Cloud Identity Services (Identity Directory, Authentication, Provisioning) with trust to S/4HANA and Build; an optional third-party identity provider (trust and SCIM); the **Joule subaccount** (multi-cloud) with Joule (SAP-delivered and custom skills), SAP AI Core (AI models, Document Grounding), SAP Build (Apps, Code, Work Zone, Process Automation, **Joule Studio** with Joule skill and AI agent), and the Destination service
+- **Flows named:** content exposure and CDM design-time access (config time); content consumption and back-end data access (runtime); S/4HANA exposes an **OData API** and a **CDM provider**
+- **Private diagram (5 numbered steps):** adds a separate **S/4HANA PCE connectivity subaccount** (Connectivity and Destination services), the **Cloud Connector** inside the customer system, an **SAP for Me** box (premium packages) and S/4 Central Finance and Central Procurement as example apps
+- **Public diagram (7 numbered steps):** no Cloud Connector; the connectivity service sits beside the Destination service; step 7 is **Document Grounding** reading Microsoft SharePoint customer documents
+- The numbered-step legend is too small to read in the images, so I do not list what each number means
+
+**Resources the page lists:** Joule product overview; the Private Edition community blog; *Navigational and Transactional capabilities with Joule in S/4HANA Cloud Private Edition*; related Discovery Center missions (not opened).
 
 ## 5.5 Lines of business
 
@@ -385,12 +424,14 @@ flowchart LR
 - **Read fully:** all 17 lessons (text and every image: lesson 1 has 1, lesson 2 has 3, the other 15 have none) and all 5 unit quizzes
 - **Not read:** the Discovery Center missions (links added in 5.7a, not opened), SAP Community guides, SAP Help pages, SAP Note 3523238, SAP Note 2791410, the Architecture Center page and the WalkMe page the lessons link to; the lesson-1 video and any demos on the course page
 - **Setup blog (5.4a):** text and all 43 body images read (37 screenshots and diagrams, 6 small pointer icons or dialogs); the two attached JSON templates and the demo video are **not read**
+- **Architecture Center page (5.4b):** text and both diagrams read; the downloadable draw.io files, the resource links and the related missions are **not read**; numbered-step legends in the diagrams were too small to read
 - **Not run:** no BTP account or Joule tenant was used; quizzes not submitted
 - **Dated points:** Joule for Developers "promo SKU until Sep 2026" is past that date today; Signavio's Work Zone note says "planned for next release"; check SAP Help
 
 ## Sources and further reading
 
 - SAP Community blog, *Joule in SAP S/4HANA Cloud Public Edition - Setup Guide* (text and all screenshots read): https://community.sap.com/t5/technology-blog-posts-by-sap/joule-in-sap-s-4hana-cloud-public-edition-setup-guide/ba-p/13965333
+- SAP Architecture Center, *Joule in SAP S/4HANA Cloud Private & Public Edition* (text and both diagrams read): https://architecture.learning.sap.com/docs/ref-arch/ebe268
 - Discovery Center missions: see 5.7a
 - SAP Learning, *Setting Up Joule Across your Organizational System Landscapes* (all lessons, images and quizzes read): https://learning.sap.com/courses/setting-up-joule-across-your-organizational-system-landscapes
 
