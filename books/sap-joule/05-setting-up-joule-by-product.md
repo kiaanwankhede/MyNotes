@@ -20,7 +20,7 @@
 
 > [!WARNING]
 > **What this chapter is**
-> - It is one SAP course. Most lessons are **short (prerequisites and links), not click-by-click steps**. The steps live in the linked Discovery Center missions and SAP Help pages.
+> - It is one SAP course plus one setup blog (5.4a). Most lessons are **short (prerequisites and links), not click-by-click steps**. The steps live in the linked Discovery Center missions and SAP Help pages.
 > - No BTP account or Joule tenant was used.
 > - Some points differ from [Chapter 4](04-setting-up-joule.md); see 5.8.
 
@@ -118,6 +118,59 @@ flowchart LR
 - Both need Build Work Zone **standard edition** in the BTP subaccount and IAS (IPS typically used)
 - **Private Edition references:** SAP Community setup guide; common set-up issues (trusted domains, Joule formations, Cloud Connector, IPS errors); custom roles for Joule (business catalogs, semantic objects, Fiori app IDs, target mappings); SAP Note 3523238 (navigation and transaction features, enabled Fiori apps)
 - **Public Edition references:** a Discovery Center mission and a setup guide (entitlements, trust, Booster, authorization propagation)
+
+## 5.4a S/4HANA Cloud Public Edition: the setup steps
+
+*Source: SAP Community blog *Joule in SAP S/4HANA Cloud Public Edition - Setup Guide* (SAP RIG team). It starts **after** the Joule Booster has run. Blog scope: a **greenfield** setup with new Joule activations.*
+
+- **What Joule does in Public Edition:** quick navigation, instant insights on business data (for example purchase orders, outbound deliveries), and help that summarises enablement content
+- **Setup is per tenant:** it cannot be transported, so repeat it on test, then on production (SAP recommends test first)
+- **Blog prerequisites:** Joule service, Build Work Zone standard edition (foundation or standard plan), Cloud Foundry, an admin role, and Cloud Identity Services tenant linked to the subaccount
+- **Support component** for problems: `CA-FLP-EXT-JOU`
+
+**Step 1: check what the Booster created.**
+
+- Work Zone **provider ID** (Channel Manager shows the S/4HANA content provider; note the ID for IPS later)
+- **Destination certificates** in BTP Connectivity
+- **Four destinations** made by the Booster: S/4HANA SSO, Joule design time, Joule run time (default), Joule run time (data)
+- **One destination you create yourself:** `NavigationService` (name is case-sensitive)
+  - Type HTTP, proxy Internet, authentication `OAuth2UserTokenExchange`
+  - URL, client ID, client secret and token URL come from the Work Zone service key (`portal-service` URL, `uaa` values)
+  - Token service URL type Dedicated; enable "Use default JDK trust store"
+- **Communication arrangements** in S/4HANA: `SAP_COM_0882` and `SAP_COM_0647`, linked to the destination certificates
+- **Cloud Identity Services:** applications `das-ias` and `document grounding` exist
+  - If the system uses another identity provider (Entra, Okta), set the same conditional authentication for `das-ias` so Joule reuses the session
+
+**Step 2: prepare S/4HANA content.**
+
+- **Content exposure (`SAP_COM_0647`):** Exposure Role Selection is usually "All"
+  - With "All", SAP advises **no more than 3000 apps per role, group or catalog** (SAP Note 3107801 covers refresh errors)
+  - Or switch to selection and mark each role "Exposed to BTP" in *Maintain Business Roles*
+- **`SAP_COM_0193` (for IPS to read users and role assignments):**
+  1. Create a communication user (blog uses Basic authentication; certificates also work; password at least 20 characters)
+  2. Create a communication system for the S/4HANA system (host name without `https://`)
+  3. Add the user under inbound communication
+  4. Create the arrangement (the blog names it `Joule_Communication_0193`)
+  5. Link the system and user in the arrangement
+- **Content Security Policy:** add the Joule service URL under *Manage Content Security Policy*, trusted sites, `UI_RESOURCE_SCRIPTS`, "Managed by Customer"
+
+**Step 3: Identity Provisioning (IPS) in Cloud Identity Services.**
+
+- Add the S/4HANA system as a **trusted domain** first
+- Create a **source system** (S/4HANA) and a **target system** (Identity Authentication and Build Work Zone)
+  - The blog attaches JSON templates (rename the `.txt` files to `.json`)
+  - Source properties: API URL from the `SAP_COM_0193` arrangement, and the communication user
+  - Add the filter `cFLGExposure eq true` **only** if role selection is set to selected roles
+  - Target properties: `cflp.providerId`, token URL, `portal-service` URL, client ID as user, client secret as password
+  - If you hit authorization problems, give the subaccount user the `Launchpad_admin` role
+- Refresh the Work Zone content channel, then run the source system **Read Job** ("Run Now")
+- Check **Provisioning Logs** for user and group statistics
+- **Schedule the job**: users, groups and roles must stay in sync with Work Zone
+
+**Step 4: test.** Open Joule with the diamond icon and ask, for example, "Show purchase orders". The blog also lists SAP Note 3545050 (business objects enabled for Joule).
+
+> [!IMPORTANT]
+> **Why this matters:** the course lesson (5.4) only says "use the Booster". This blog shows what the Booster leaves for you: the `NavigationService` destination, the `SAP_COM_0193` arrangement, the content security policy and the IPS source and target systems.
 
 ## 5.5 Lines of business
 
@@ -312,11 +365,13 @@ flowchart LR
 
 - **Read fully:** all 17 lessons (text and every image: lesson 1 has 1, lesson 2 has 3, the other 15 have none) and all 5 unit quizzes
 - **Not read:** the Discovery Center missions (links added in 5.7a, not opened), SAP Community guides, SAP Help pages, SAP Note 3523238, SAP Note 2791410, the Architecture Center page and the WalkMe page the lessons link to; the lesson-1 video and any demos on the course page
+- **Setup blog (5.4a):** text read fully; its 36 screenshots, the two attached JSON templates and the demo video are **not read**
 - **Not run:** no BTP account or Joule tenant was used; quizzes not submitted
 - **Dated points:** Joule for Developers "promo SKU until Sep 2026" is past that date today; Signavio's Work Zone note says "planned for next release"; check SAP Help
 
 ## Sources and further reading
 
+- SAP Community blog, *Joule in SAP S/4HANA Cloud Public Edition - Setup Guide* (text read; screenshots not viewed): https://community.sap.com/t5/technology-blog-posts-by-sap/joule-in-sap-s-4hana-cloud-public-edition-setup-guide/ba-p/13965333
 - Discovery Center missions: see 5.7a
 - SAP Learning, *Setting Up Joule Across your Organizational System Landscapes* (all lessons, images and quizzes read): https://learning.sap.com/courses/setting-up-joule-across-your-organizational-system-landscapes
 
