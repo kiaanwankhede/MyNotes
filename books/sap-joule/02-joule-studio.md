@@ -430,17 +430,8 @@ sequenceDiagram
 
 ## How this chapter was checked
 
-> [!CAUTION]
-> **🔴 NOT READ — read this before relying on the chapter**
->
-> | What was not read | Why / what it means |
-> |---|---|
-> | Demo videos in the lessons | Not watched; text only |
-> | Three "Explore further" lessons (Govern pillar, interoperability, AI Agent Hub) | Not read |
-> | Course screenshots | Not seen |
-> | Product page links: customer reports, Florida Crystals video, product tour, TechEd webcast | Separate resources; not opened |
-> | Linked demo video in the community blog (2.9b) | Not watched |
-> | Any Joule Studio tenant | Nothing was built or tested |
+- **Not read:** the demo videos and the three "Explore further" lessons (Govern pillar, interoperability, AI Agent Hub); course screenshots were not seen; from the product page: linked customer reports, the Florida Crystals video, the product tour and the webcast; from the blog: its linked demo video
+- **Not run:** no Joule Studio tenant was used
 
 - **Read fully (7 lessons and 4 quizzes, SAP Learning, 8 Nov 2026, no login needed):** What is the SAP Business AI Platform?; Introducing Joule Studio; Building Solutions with Joule Studio; Creating an AI Agent with Joule Studio; Understanding SAP-Delivered Agent Extensions; Extending a Standard Agent Using Joule Studio; Creating n8n Workflows in Joule Studio; and the four unit quizzes (7 questions, answers my reading, no SAP key)
 - **Product page (SJ010, read in full on 8 Nov 2026):** all page text and all five FAQ answers. The linked reports, customer video, product tour and webcast are separate resources and were not opened
