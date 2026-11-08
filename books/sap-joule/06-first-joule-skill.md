@@ -88,6 +88,17 @@ flowchart LR
 > [!IMPORTANT]
 > **Quiz in the tutorial:** "Which additional parameters must be configured in your destinations?" The answer options were not visible in the page text; by the tutorial text it is the three properties above.
 
+## 6.2a The same set-up as a 4-part workshop (SJ030)
+
+*Source: SAP Community blog, Part 1 of 4, about 5 minutes (text and all 4 screenshots read).*
+
+- **Series:** Part 1 environment setup, Part 2 actions with OData V4, Part 3 conversational skills, Part 4 process automation integration (parts 2–4 are **not read**)
+- **Goal of Part 1:** a development environment so skills can reach S/4HANA Cloud
+- **Steps:** Lobby → **Control Tower** → **Environments** → **Create** (name, description) → open it → **Joule** tab
+- **Expect:** the tab is empty and you cannot launch the standalone assistant until you deploy a skill
+- **Prerequisites:** a BTP tenant set up for Joule Studio; the S/4HANA destination set up first; basic destination knowledge
+- **Same as 6.2:** this repeats the environment step of tutorial 1; it adds only the workshop plan
+
 ## 6.3 Tutorial 2: action projects
 
 *Source: SAP Developer tutorial *Create Action Projects* (20 min, 3 steps; 21 images read). The skill group page lists it second.*
@@ -186,6 +197,64 @@ flowchart LR
   - You switched off the generated response, so you **must add a Send Message** that describes the end of the skill
 - **Why it matters:** these are the rules of a valid skill: connected outputs, at least one activity, and a closing message when Joule's own reply is off
 
+## 6.5a Tutorial 4: filter an action (SJ027)
+
+*Source: SAP Developer tutorial, 20 min, 7 steps (text and all 35 images read).*
+
+- **Goal:** let the user pass a first name, so the action returns only matching business partners
+- **Step 1: copy the action project**
+  - Take the version published to the library, then **Versions → Save As New Project** (named `FilterBusinessPartners`)
+  - On the `GET Retrieves business partner general data` action, **Input** tab: **Add → New Field**, Key and Label `FirstName`
+  - Open the `$filter` value → **Condition Editor**: Column `FirstName`, Condition *equal to*, Criteria `${FirstName}`
+  - Test with `Jane`, then **Save, Release, Publish**
+- **Step 2: new skill** `SearchWithFirstName`
+  - Description: retrieve employees with a given first name (John or Jane)
+  - **Allow Joule to generate a response:** on
+  - Input `FirstName` (required); output `Employees`, type Any, **List** ticked
+- **Step 3:** add **Call Action**, choose the filtered action, destination variable `S4HANA_MOCK`, map `FirstName`
+- **Step 4:** in **End**, map `Employees` to the action's results list
+- **Step 5:** Release (1.0.0), **Show Project Version**, Deploy, map `S4HANA_MOCK`
+- **Step 6:** test in standalone Joule, ask if "Jane" is in the system, then correct to John; a list of people appears and you can pick one for details
+- **Quiz (step 7):** where do you configure the data mapping for Joule's generated reply? Answer options were not shown; by the tutorial it is the **End** element mapping
+- **Why it matters:** the filter lives in the action; the skill only passes the input
+
+> [!TIP]
+> The "Choose what happens next" menu offers: Run Process, Call Action, Run Automation, Send Message, Launch Joule Skill, Check Condition.
+
+## 6.5b Tutorial 5: run a process from a skill (SJ028)
+
+*Source: SAP Developer tutorial, 30 min, 10 steps (text and all 46 images read).*
+
+- **Idea:** a skill can start an SAP Build Process Automation process
+- **Limit:** you can pass values **in**, but cannot get output **back**: "fire and forget"
+- **Must do:** the process must be **released, deployed and published to the library** (publish is done in the Lobby, **Versions** tab → **Publish to Library**)
+
+```mermaid
+flowchart LR
+  A[Process project] --> B[Release]
+  B --> C[Deploy]
+  C --> D[Publish to Library]
+  D --> E[Skill: Run Process]
+  E --> F[Send Message]
+```
+
+- **Steps 1–3: the process**
+  - Lobby → Create → **Automated Process** → Process; name `InitiateSecurityChecksViaEmail`
+  - Process `SendEmailToSecurity`; four required **Process Inputs**: EmployeeID, BadgeStatus, FirstName, LastName
+  - Add an **Email** step (To, Subject `Lost Badge`, body built from the inputs by value binding)
+  - Needs **email configured for Process Automation**
+- **Steps 4–5: the skill** `BadgeSecurity`
+  - Switch **off** Allow Joule to generate a response
+  - Four required inputs matching the process; no skill outputs
+- **Steps 6–7:** **Run Process → Browse All Processes** → add your process → map each input from the Skill Content panel; then **Send Message** with title "Security has been informed" and the parameters mapped in the text
+- **Steps 8–9:** Release, Deploy, then Control Tower → Environments → your environment → **Joule** tab → Launch → New Conversation
+  - Test sentence: report that the old badge of a named employee has status LOST
+  - Check the run in **Monitoring > Process and Workflow Instances**
+- **Quiz (step 10):** where do you choose "Publish to Library"? In the **Lobby** (project **Versions** tab)
+
+> [!WARNING]
+> If the process is not published to the library, **Browse All Processes** will not show it (you will see "No Process Available").
+
 ## 6.6 The rest of the group (not part of this chapter)
 
 *From the group page (read; no images). Group: *Build Your First Joule Skill in Joule Studio, Classic Edition*, beginner, 120 minutes, 5 tutorials.*
@@ -195,10 +264,10 @@ flowchart LR
 | 1 | Setup Environment and Connectivity for Joule Skills (6.2) | 20 min |
 | 2 | Create Action Projects (6.3) | 20 min |
 | 3 | Create and Deploy a Joule Skill (6.4) | 30 min |
-| 4 | Create a Filter in an Action Project | 20 min |
-| 5 | Consume an Automated Process in a Joule Skill | 30 min |
+| 4 | Create a Filter in an Action Project (6.5a) | 20 min |
+| 5 | Consume an Automated Process in a Joule Skill (6.5b) | 30 min |
 
-- Tutorials 4 and 5 are separate master items and are **not read yet**
+- Tutorials 4 and 5 are now covered in 6.5a and 6.5b
 
 ## 6.7 Added by Claude, not from the sources
 
@@ -298,8 +367,8 @@ flowchart LR
 
 ## How this chapter was checked
 
-- **Read fully:** the three tutorials (text and all images: 13, 21 and 43) and the group page (no images). I opened all collapsed steps
-- **Not read:** the quiz answer options (they were not shown on the page), the tutorials' linked set-up page and Discovery Center missions, the two remaining group tutorials (filter and automated process), the "related learning" lists
+- **Read fully:** five tutorials (text and all images: 13, 21, 43, 35 and 46) and the group page (no images). I opened all collapsed steps
+- **Not read:** workshop parts 2–4 of SJ030 (separate pages), the quiz answer options (they were not shown on the page), the tutorials' linked set-up page and Discovery Center missions, the "related learning" lists
 - **Not run:** no tenant or account was used; nothing was built or tested
 - **Dated points:** tutorials created July 2025, updated August 2026; screens may differ in a newer edition
 - **Omitted on purpose:** a shared demo login printed in step 8 of the skill tutorial (see the caution box)
@@ -311,8 +380,12 @@ flowchart LR
 - SAP Developer tutorial, *Create Action Projects* (text and images read): https://developers.sap.com/tutorials/joulestudio-skill-action-create
 - SAP Developer tutorial, *Use Joule Studio, Classic Edition to Create and Deploy a Joule Skill* (text and images read): https://developers.sap.com/tutorials/joulestudio-skill-create
 - SAP Developer group page, *Build Your First Joule Skill in Joule Studio, Classic Edition* (read): https://developers.sap.com/tutorials/group-build-your-first-joule-skill-in-joule-studio-classic-edition
+- SAP Developer tutorial, *Create a Filter in an Action Project* (read): https://developers.sap.com/tutorials/joulestudio-skill-action-filter
+- SAP Developer tutorial, *Consume an Automated Process in a Joule Skill* (read): https://developers.sap.com/tutorials/joulestudio-skill-process
+- SAP Community blog, *Building Joule Skills for Sales Order Queries in S/4HANA Cloud, Part 1* (read): https://community.sap.com/t5/artificial-intelligence-blogs-posts/building-joule-skills-for-sales-order-queries-in-s-4hana-cloud-part-1/bc-p/14267490
 - Discovery Center missions: see 6.9
 
 ---
 
 *Previous: [Chapter 5: Setting up Joule product by product](05-setting-up-joule-by-product.md)*
+*Next: [Chapter 7: Your first Joule agent](07-first-joule-agent.md)*

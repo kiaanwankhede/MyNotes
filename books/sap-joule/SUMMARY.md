@@ -7,3 +7,4 @@
 * [Chapter 4: Setting up Joule](04-setting-up-joule.md)
 * [Chapter 5: Setting up Joule product by product](05-setting-up-joule-by-product.md)
 * [Chapter 6: Build your first Joule skill](06-first-joule-skill.md)
+* [Chapter 7: Your first Joule agent](07-first-joule-agent.md)
