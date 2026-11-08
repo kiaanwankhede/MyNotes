@@ -198,12 +198,18 @@ sequenceDiagram
 
 ### 2.9a What the product page adds (SJ010)
 
-- **Three build targets:** agents, n8n workflows, and **apps** (custom interfaces and business logic; marked **"Coming soon"** on the page)
-- **One prompt to start:** create agents and n8n workflows from a single prompt; low-code and pro-code both supported
-- **Business context:** process insights, data relationships and enterprise architecture shape what Studio builds; it also helps find where to apply AI
+- **Three build targets:** agents, n8n workflows, and **apps** (custom interfaces and business logic; marked **"Coming soon"**)
+- **FAQ "what can I build":** AI agents and skills (task execution, decision support); workflows and integrations for SAP and non-SAP systems
+- **Who it is for:** business users (guided low-code), pro-code developers (IDEs, Git, CI/CD), IT teams and architects (security, governance, runtime, scale)
+- **One prompt to start:** create agents and n8n workflows from a single prompt
+- **Business context Studio uses (FAQ):**
+  - *Landscape:* existing architecture, central agent repository, compliance policies, identity controls
+  - *Application:* data models, object relationships, content, functionality, KPIs
+  - *Process:* operational gaps, bottlenecks, improvement recommendations
+  - *Best practices:* process templates, development guidelines, process and industry benchmarks
+- **Governance (FAQ):** identity and access (incl. SAP Cloud Identity Services); pre-launch testing; continuous evaluation; visibility into agent behaviour, decisions and failures; managed runtime, lifecycle, security, compliance
 - **Users reach agents** through conversations in Joule Work ([Chapter 1](01-what-is-joule.md))
-- **Runtime:** managed by SAP, no infrastructure to run, governed and secured to SAP standards
-- **Certification:** SAP advertised a limited-time free exam voucher for *Agentic Development using Joule Studio*; offers change, so check the page
+- **Certification:** a limited-time free exam voucher for *Agentic Development using Joule Studio* was advertised; offers change
 
 > [!WARNING]
 > **Marketing claims, not tested**
@@ -397,7 +403,7 @@ sequenceDiagram
 
 - **Read fully (7 lessons and 4 quizzes, SAP Learning, 8 Nov 2026, no login needed):** What is the SAP Business AI Platform?; Introducing Joule Studio; Building Solutions with Joule Studio; Creating an AI Agent with Joule Studio; Understanding SAP-Delivered Agent Extensions; Extending a Standard Agent Using Joule Studio; Creating n8n Workflows in Joule Studio; and the four unit quizzes (7 questions, answers my reading, no SAP key)
 - **Not read:** the demo videos and the three "Explore further" lessons (Govern pillar, interoperability, AI Agent Hub); screenshots were not seen
-- **Product page (SJ010, read 8 Nov 2026):** main text read; the five FAQ answers (collapsed), the tour, videos and linked reports were not read
+- **Product page (SJ010, read in full on 8 Nov 2026):** all page text and all five FAQ answers. The linked reports, customer video, product tour and webcast are separate resources and were not opened
 - **Not run:** no Joule Studio tenant was used
 - **Wording differences:** Datasphere and Business Data Fabric here vs Business Data Cloud in Chapter 1; kept as found
 - **Example detail:** the n8n lesson names Claude 3.5 Sonnet as an example model; that is a lesson example, not a recommendation
@@ -407,6 +413,6 @@ sequenceDiagram
 - SAP Learning, *Introducing Joule Studio* (course): https://learning.sap.com/courses/introducing-joule-studio
 - Lessons read, under the same course path: What is the SAP Business AI Platform?; Introducing Joule Studio; Building Solutions with Joule Studio; Creating an AI Agent with Joule Studio; Understanding SAP-Delivered Agent Extensions; Extending a Standard Agent Using Joule Studio; Creating n8n Workflows in Joule Studio
 - Quizzes: the four unit quiz pages under the same course path
-- SAP, *Joule Studio* product page (read 8 Nov 2026; FAQ answers are collapsed and were not opened; videos, tour and linked reports not read): https://www.sap.com/products/artificial-intelligence/joule-studio.html
+- SAP, *Joule Studio* product page (read in full, including the five FAQ answers, 8 Nov 2026): https://www.sap.com/products/artificial-intelligence/joule-studio.html
 
 *Next: [Chapter 3: Joule for business users](03-joule-for-business-users.md)*
