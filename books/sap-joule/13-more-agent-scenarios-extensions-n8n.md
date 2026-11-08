@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **You will learn:** how the same intent-to-deploy pipeline from [Chapter 12](12-intent-based-agents-lab.md) builds sales, supply-chain and billing solutions, how to extend a standard SAP agent, and how Joule Studio builds n8n workflows
 > - **Level:** beginner · **Time:** about 40 minutes of reading
-> - **Sources:** ten SAP Developer tutorials (SJ069 to SJ078) and two partner blogs (SJ079, SJ082), read 9 November 2026 (text and screenshots)
+> - **Sources:** ten SAP Developer tutorials (SJ069 to SJ078) and two partner blogs and three news items (SJ079, SJ082, SJ086, SJ088, SJ089), read 9 November 2026 (text and screenshots)
 > - **Builds on:** [Chapter 12](12-intent-based-agents-lab.md) (the pipeline, PRD, guardrails)
 
 **After this chapter you can:**
@@ -162,9 +162,9 @@ flowchart LR
 - **SJ078:** after build, add intent `Add an SAP Task Center node within the N8N workflow to send workflow approvals to the manager`, then add an **SAP Agent** node (triggers an agent from another solution) and execute the workflow
 - **Preview limits (SJ077):** do not choose Execute workflow or Deploy; configuration of the AI node and live runs are not in the preview
 
-## 13.7 Real-world examples from partners (SJ079, SJ082)
+## 13.7 Real-world examples and market context (SJ079, SJ082, SJ086, SJ088, SJ089)
 
-*Sources: SJ079 (sovanta blog, with Endress+Hauser) and SJ082 (Mindset Consulting blog). Both are vendor or partner write-ups, not SAP documentation; no figures are published in either.*
+*Sources: SJ079 (sovanta blog, with Endress+Hauser), SJ082 (Mindset Consulting blog), SJ086 (SAP News), SJ088 (SAPinsider) and SJ089 (CX Today). Blogs and press are partner, vendor or trade-press views, not SAP documentation; SAP's own claims in them are not independently verified.*
 
 ### SJ079: purchasing anomaly agent (sovanta and Endress+Hauser)
 
@@ -192,6 +192,32 @@ flowchart LR
 - **"Mindset stack":** journey and discovery, pipes (trust and architecture), data, and experience
 - **Not in this post:** the "157 MCP tools" and "human approval on writes" points that my master noted; they are not on the page I read (likely in the linked posts, not read)
 - **Images:** two author photos only
+
+### SJ086: Joule in S/4HANA Cloud and supply chain (SAP News, December 2024)
+
+- **Not Joule Studio:** an announcement that Joule is available in S/4HANA Cloud Public Edition (November 2024 release) and in supply-chain applications (Integrated Business Planning, product data management); Asset Performance Management is early access
+- **Joule uses named:** quick navigation to apps, instant insights (for example purchase orders, outbound deliveries), and pointers to enablement content
+- **Claim quoted from "a recent study":** AI-powered tools cut administrative time by 30% (SAP's wording; the study is not named)
+- **Customers:** AGILITA AG (a GROW with SAP customer, found apps and help documentation faster) and TE Connectivity (activated Joule in Integrated Business Planning; first tests used help documentation; wants plan explanations and scenario comparison later)
+- **Date warning:** the master link `?p=230358` redirects to this 2024 post; it describes early use, not agents
+- **Image:** one decorative banner
+
+### SJ088: Joule agents for Ariba and Fieldglass (SAPinsider)
+
+- **Planned for June 2026 general availability:** a Joule agent in Ariba Intake Management (routes requests across SAP and non-SAP systems, checks policy, categorises spend), AI-assisted contract creation in Ariba Contracts, and gate-pass time capture in Fieldglass
+- **Runtime:** the Joule Agent Runtime is free until 31 December 2026 for Ariba and Fieldglass customers
+- **Also stated:** next-generation Ariba available since March 2026; at least 60% of agentic capabilities to be back-ported to current-generation Ariba; an 11-assistant rollout (five in June, six in September 2026); 70% less manual time for AI-assisted statement-of-work creation (SAP's figure)
+- **Wording check:** the article says "planned"; it is not proof the features are live
+- **Images:** six stock or logo pictures, no diagrams
+
+### SJ089: a sceptical view (CX Today, 28 July 2026)
+
+- **Argument:** at SAP's Q2 2026 earnings call, evidence of AI agents was mostly in finance, procurement and ERP, with little proof for customer service
+- **Facts reported:** Joule Work to launch in Q3; an "AI Agent Hub" to govern SAP and non-SAP agents and MCP servers; beta programs oversubscribed
+- **SAP examples cited (SAP's claims):** an Amadeus agent clearing about 40,000 incorrect transactions; Lemvigh-Müller over 90% touchless processing and 98% matching accuracy; PwC cutting a billing task from 35 to 5 minutes; up to 30% lower ERP migration cost
+- **Pricing:** SAP said agents would be priced on value (an intent, not a model with disclosed results)
+- **Use for learning:** treat vendor numbers as claims; ask for the baseline and who measured
+- **Image:** one stock photo of an SAP office
 
 ## 13.8 What the screenshots add
 
@@ -282,11 +308,11 @@ flowchart LR
 
 ## How this chapter was checked
 
-- **Read fully (text and screenshots):** SJ069 to SJ079, SJ082
+- **Read fully (text and screenshots):** SJ069 to SJ079, SJ082, SJ086, SJ088, SJ089, SJ086, SJ088, SJ089
 - **Not read:**
   - fine print inside small screenshots (see 13.8)
   - the "Related learning" lists, videos, linked tutorials and Discovery Center missions
-  - SJ080, SJ081 and SJ083: only the landing pages loaded; the PDF decks were not opened (not in this chapter)
+  - SJ080, SJ081, SJ083, SJ084 and SJ085: PDFs I could not open (not in this chapter); SJ087: page gone (410)
   - linked catalogue and team posts from SJ082
   - the downloadable sample file `agent_lab_journal_entry.xlsx` (SJ075)
 - **Not run:** nothing was built or deployed
@@ -307,6 +333,9 @@ flowchart LR
 - SAP Developer, *Use Joule Studio to Create an IT Incident Triage and Auto Routing Agent with N8N, SAP Task Center Node and SAP Agent Node* (read): https://developers.sap.com/tutorials/joule-studio-n8n-workflow-create
 - sovanta, *Beyond PoC: How sovanta Detects Purchasing Anomalies with a Custom Joule Agent* (read): https://community.sap.com/t5/technology-blog-posts-by-members/beyond-poc-how-sovanta-detects-purchasing-anomalies-with-a-custom-joule/ba-p/14257926
 - Mindset Consulting, *Twenty Joule Agents. Sapphire 2026.* (read): https://www.mindsetconsulting.com/twenty-joule-agents-sapphire-2026/
+- SAP News, *Joule in SAP S/4HANA Cloud and Supply Chain* (read): https://news.sap.com/2024/12/joule-available-sap-s4hana-cloud-supply-chain-management/
+- SAPinsider, *SAP Joule Agents Reach Ariba and Fieldglass* (read): https://sapinsider.org/blogs/sap-delivers-joule-agents-across-ariba-and-fieldglass-in-june-2026/
+- CX Today, *SAP Talks Up AI Agents, but Where Are the CX Wins?* (read): https://cxtoday.com/sap-ai-agents-customer-service-wins
 - Discovery Center missions: see 13.11
 
 ---
