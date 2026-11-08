@@ -183,6 +183,23 @@ flowchart LR
 | Experience without embedding | WalkMe |
 | Back-end automation | Joule Studio skills |
 
+## 5.7a Discovery Center missions the lessons link to
+
+*Links taken from the lesson pages. I did not open the missions (see "How this chapter was checked").*
+
+| Topic | Mission |
+|---|---|
+| Unified Joule instance | [Mission 4538](https://discovery-center.cloud.sap/missiondetail/4538/) |
+| S/4HANA Cloud Public Edition | [Activate Joule with SAP S/4HANA Cloud Public Edition](https://discovery-center.cloud.sap/missiondetail/4452/4738/) |
+| SuccessFactors | [Activate Joule for SAP SuccessFactors](https://discovery-center.cloud.sap/missiondetail/4451/4737/) |
+| Ariba | [Activate Joule with SAP Ariba](https://discovery-center.cloud.sap/missiondetail/4697/?tab=overview) |
+| Integrated Business Planning | [Mission for SAP IBP](https://discovery-center.cloud.sap/missiondetail/4631/4920/) |
+| Build Work Zone and Mobile Start | [Activate Joule with SAP Build Work Zone and SAP Mobile Start](https://discovery-center.cloud.sap/missiondetail/4649/4938/) |
+| Microsoft 365 Copilot | [Activate Joule with Microsoft 365 Copilot](https://discovery-center.cloud.sap/missiondetail/4741/5025/) |
+| Custom skills for SAP and non-SAP systems | [Mission 4643](https://discovery-center.cloud.sap/missiondetail/4643/) |
+
+- The Private Edition, Concur, Signavio, IPD, Digital Manufacturing, Document Grounding, Analytical Insights and Joule for Developers lessons link to Community guides or SAP Help instead, not to a Discovery Center mission
+
 ## 5.8 Added by Claude, not from the sources
 
 *My own reasoning; the course does not say it.*
@@ -294,12 +311,13 @@ flowchart LR
 ## How this chapter was checked
 
 - **Read fully:** all 17 lessons (text and every image: lesson 1 has 1, lesson 2 has 3, the other 15 have none) and all 5 unit quizzes
-- **Not read:** the Discovery Center missions, SAP Community guides, SAP Help pages, SAP Note 3523238, SAP Note 2791410, the Architecture Center page and the WalkMe page the lessons link to; the lesson-1 video and any demos on the course page
+- **Not read:** the Discovery Center missions (links added in 5.7a, not opened), SAP Community guides, SAP Help pages, SAP Note 3523238, SAP Note 2791410, the Architecture Center page and the WalkMe page the lessons link to; the lesson-1 video and any demos on the course page
 - **Not run:** no BTP account or Joule tenant was used; quizzes not submitted
 - **Dated points:** Joule for Developers "promo SKU until Sep 2026" is past that date today; Signavio's Work Zone note says "planned for next release"; check SAP Help
 
 ## Sources and further reading
 
+- Discovery Center missions: see 5.7a
 - SAP Learning, *Setting Up Joule Across your Organizational System Landscapes* (all lessons, images and quizzes read): https://learning.sap.com/courses/setting-up-joule-across-your-organizational-system-landscapes
 
 ---
