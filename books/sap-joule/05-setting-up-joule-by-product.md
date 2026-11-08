@@ -20,7 +20,7 @@
 
 > [!WARNING]
 > **What this chapter is**
-> - It is one SAP course plus one setup blog (5.4a) one Architecture Center page (5.4b) and one Work Zone blog (5.7b). Most lessons are **short (prerequisites and links), not click-by-click steps**. The steps live in the linked Discovery Center missions and SAP Help pages.
+> - It is one SAP course plus one setup blog (5.4a) one Architecture Center page (5.4b), one Work Zone blog (5.7b) and two feature blogs (5.5a, 5.6a). Most lessons are **short (prerequisites and links), not click-by-click steps**. The steps live in the linked Discovery Center missions and SAP Help pages.
 > - No BTP account or Joule tenant was used.
 > - Some points differ from [Chapter 4](04-setting-up-joule.md); see 5.8.
 
@@ -248,6 +248,31 @@ flowchart LR
 - SuccessFactors is the **reference scenario**: SaaS embedding, identity at runtime, navigation and transactions in a real context
 - Guided help: Discovery Center missions (they automate parts of setup with BTP tooling)
 
+## 5.5a Ariba in detail: the enablement blog
+
+*Source: SAP Community blog *Joule enablement process blog - How to get started with Joule in Ariba* (SAP Solution Value Advisor; text read, no images). Limits are stated "as of Q3 2025 release".*
+
+- **Applications named:** Guided Buying, Guided Sourcing, Supplier Management, in a **supported data centre**
+- **Prerequisites:**
+  - Licence for one or more of those Ariba apps
+  - Enterprise global account on BTP
+  - Ariba integrated with **Identity Authentication**
+  - **Navigation service** of Build Work Zone set up (navigation and role-based access)
+  - A subaccount created for Joule
+- **Activation:** enable the **Joule Base SKU (8019544)** or **Joule Premium SKU (8019164)** from the SAP Store, then set up Cloud Identity Services and Build Work Zone
+- **Features:** answers from SAP Help, Document Grounding for your own FAQs and policies, natural-language navigation, open apps in new tabs with the conversation kept, direct entry to back-end tasks
+
+| Ariba app | Transactional skills (examples) | Navigational |
+|---|---|---|
+| Guided Buying | Status of a purchase requisition, recent requisitions, approvers | View requisition |
+| Guided Sourcing | List sourcing events, RFx status, send reminder emails | My Tasks, Sourcing Event |
+| Supplier Management | Supplier primary contact, suppliers in registration or invited status | n/a |
+
+- **Languages:** English, German, French, Spanish, Portuguese, Japanese, Korean, Chinese, Vietnamese, Greek, Polish
+- **Cost:** the skills listed are part of **Joule Base** and use **no AI units**
+- **Limit:** no multi-tenant consolidation yet, so **run the Booster in every child realm** (multi-ERP setups)
+- **Links in the blog:** supported data centres (SAP Help), Ariba SSO with Cloud Identity Services (community blog), and the Ariba setup guide (community blog). The Ariba Discovery Center mission is in 5.7a
+
 ## 5.6 Advanced capabilities
 
 - **Document Grounding:**
@@ -268,6 +293,30 @@ flowchart LR
   - Also available in S/4HANA Cloud Public Edition for ABAP Cloud, within released APIs and extension points
   - **Not** a runtime feature for end users
   - The course says it is a **promo SKU until Sep 2026**, so it does not show in BTP entitlements
+
+## 5.6a Analytical Insights in detail: the announcement blog
+
+*Source: SAP Community blog *Introducing Analytical Insights in Joule: Empowering Smarter Decisions* (SAP author; text and both images read). From the Q2 2025 era; check the current state.*
+
+- **What it is:** natural-language questions answered as **charts and metrics**, using SAP Analytics Cloud, over harmonised data in **SAP Business Data Cloud**
+- **Languages (at the time):** English, French, German, Italian, Spanish
+- **Question types it supports:** descriptive ("total revenue for Q1"), comparative (2023 versus 2024), time series (sales by month), top or bottom N
+- **Data quality:** answers depend on the data the **data administrators** make available; they own its quality
+- **Model disambiguation:** a user can name the model in the question; if several match, Joule asks which one
+  - The screenshot shows "show me sales" returning two choices (a sample sales model and a sample sales model with currency), each with a Select button
+  - The other image shows a query waiting for a reply ("show me sales commission by agent for model bike sales")
+
+**How administrators prepare data ("just ask" in SAP Analytics Cloud).**
+
+1. **Index models:** supported are SAP Datasphere analytic models (through a tunnelled Datasphere connection in a Business Data Cloud setup) and indexed acquired models; added in "Manage Models"
+2. **Add business semantics:** synonyms (for example "revenue" to "total sales") and rules that add context (for example add "by sales agents" when a query lacks it)
+3. **Manage access and rollout:** only indexed models are reachable; Business Data Cloud security and compliance apply
+
+- **Prerequisites:** Joule entitlement, Build Work Zone, **SAP Analytics Cloud Enterprise licence**
+  - Available to fast-track customers; for standard-release customers with the **Q2 2025** quarterly release
+  - **Not available** when SAC access comes only through LoB-application licences for embedded analytics
+- **Roadmap in the blog:** Datasphere live data sources outside Business Data Cloud, more languages, better understanding of complex questions
+- **Links:** the setup-guide blog (community) and the SAC "Just Ask" initial release blog; the course lesson in 5.6 has no Discovery Center mission link
 
 ## 5.7 Work Zone, Mobile Start, Microsoft 365 and non-SAP apps
 
@@ -463,6 +512,7 @@ flowchart LR
 - **Setup blog (5.4a):** text and all 43 body images read (37 screenshots and diagrams, 6 small pointer icons or dialogs); the two attached JSON templates and the demo video are **not read**
 - **Architecture Center page (5.4b):** text and both diagrams read; the downloadable draw.io files, the resource links and the related missions are **not read**; numbered-step legends in the diagrams were too small to read
 - **Work Zone blog (5.7b):** text and all 5 images read; the linked blogs, roadmap and community groups are **not read**
+- **Ariba blog (5.5a) and Analytical Insights blog (5.6a):** text and all images read (Ariba has none, Analytical Insights has 2); the linked setup guides, SSO blog, data-centre list and SAC Just Ask blog are **not read**
 - **Not run:** no BTP account or Joule tenant was used; quizzes not submitted
 - **Dated points:** Joule for Developers "promo SKU until Sep 2026" is past that date today; Signavio's Work Zone note says "planned for next release"; check SAP Help
 
@@ -471,6 +521,9 @@ flowchart LR
 - SAP Community blog, *Joule in SAP S/4HANA Cloud Public Edition - Setup Guide* (text and all screenshots read): https://community.sap.com/t5/technology-blog-posts-by-sap/joule-in-sap-s-4hana-cloud-public-edition-setup-guide/ba-p/13965333
 - SAP Architecture Center, *Joule in SAP S/4HANA Cloud Private & Public Edition* (text and both diagrams read): https://architecture.learning.sap.com/docs/ref-arch/ebe268
 - SAP Community blog, *Joule is Now Integrated into SAP Build Work Zone!* (text and all 5 images read): https://community.sap.com/t5/application-development-and-automation-blog-posts/joule-is-now-integrated-into-sap-build-work-zone/ba-p/13961162
+- SAP Community blog, *Joule enablement process blog - How to get started with Joule in Ariba* (text read; no images): https://community.sap.com/t5/spend-management-blog-posts-by-sap/joule-enablement-process-blog-how-to-get-started-with-joule-in-ariba/ba-p/14259019
+- SAP Community blog, *Introducing Analytical Insights in Joule* (text and both images read): https://community.sap.com/t5/technology-blog-posts-by-sap/introducing-analytical-insights-in-joule-empowering-smarter-decisions/ba-p/14083673
+- Linked, not read: [Joule integration with SAP Ariba - setup guide](https://community.sap.com/t5/technology-blog-posts-by-sap/joule-integration-with-sap-ariba-setup-guide/ba-p/14240003); [Ariba SSO with Cloud Identity Services](https://community.sap.com/t5/technology-blog-posts-by-sap/overview-sap-ariba-sso-with-sap-cloud-identity-services-identity/ba-p/13665483); [Analytical Insights in Joule - setup guide](https://community.sap.com/t5/technology-blog-posts-by-sap/analytical-insights-in-joule-setup-guide/ba-p/14096274)
 - Discovery Center missions: see 5.7a
 - SAP Learning, *Setting Up Joule Across your Organizational System Landscapes* (all lessons, images and quizzes read): https://learning.sap.com/courses/setting-up-joule-across-your-organizational-system-landscapes
 
