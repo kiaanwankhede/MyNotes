@@ -149,6 +149,11 @@ flowchart LR
 | **Tools** (via MCP) | Access to more systems and services | Connect an extra data source |
 | **Hooks** | Logic before or after the agent runs | Notify a team when an AP invoice is flagged |
 
+> [!WARNING]
+> **Availability, from a course image**
+> - The lesson's diagram labels **Instructions: "Available at launch"**, **Tools (MCP): "Planned"**, **Hooks: "Planned"**. The lesson text does not say this.
+> - The catalog screenshot still lists pre-hooks, post-hooks, MCP servers and instruction per agent, and the worked example uses a post-hook. Confirm current availability before you promise Tools or Hooks to a customer.
+
 - Not every agent supports every point; the **Agent Catalog** shows each agent's supported extension points
 - Check them before you write requirements
 
@@ -245,6 +250,35 @@ sequenceDiagram
 > - The blog's steps and screenshots use SAP Build with a drag-and-drop editor. Section 2.1–2.9 describes the newer intent-based Studio (prompt, PRD, spec). The page did not show a publication date that I captured.
 > - Treat the use cases as ideas; confirm the click path in the current product before teaching it.
 > - The blog's "no technical skills needed" is an author's view. The course says a developer reviews the PRD and spec (section 2.3).
+
+### 2.9c What the course screenshots add (all 43 viewed)
+
+*My reading of the images; the lesson text is covered above. Screens come from the lessons, not from a tenant I used.*
+
+- **Platform picture (lesson 1):** an **SAP Autonomous Suite** layer (domains: Finance, Spend, SCM, HCM, CX, Industry AI; partner agents from firms such as KPMG, Accenture, Deloitte, IBM, PwC, EY, Capgemini, NTT; third-party agents, with Anthropic and NVIDIA logos) sits above an **Agent Gateway**, then the **SAP Business AI Platform** with three blocks
+  - *Build:* Joule Studio, n8n, Vercel, VS Code, Claude Code, Cursor, SAP Integration Suite
+  - *Contextualize and Reason:* SAP Knowledge Graph, SAP and non-SAP models, SAP Business Data Cloud, Business Data Fabric (Databricks, Microsoft, Google Cloud, Snowflake logos)
+  - *Govern:* SAP AI Agent Hub, **Value Realization**, Joule Studio Runtime, Identity/Access/Security
+- **Trust gap (lesson 2):** a slide states "79%–89%" LLM accuracy "is not enough" for autonomous work (footnoted on the slide; I did not see the source)
+- **Eight capabilities** of Studio, around the three principles: (1) build the right agents (process analytics, ROI), (2) specify the right solution (clarifying questions, PRD), (3) understand SAP natively (domain models), (4) start from proven SAP patterns, (5) collaborate in your tools (web, IDE, CLI), (6) one solution for apps, agents and workflows, (7) run securely with context, (8) govern at scale
+- **Context sources picture:** LeanIX (locate), Business Data Cloud (observe), Knowledge Graph (connect), Signavio (validate), **SAP RPT-1** (anticipate predictions)
+- **Who does what, by entry point (lesson 3 table):**
+
+| Stage | Business user (Joule Studio) | Developer (Studio, IDE or CLI) |
+|---|---|---|
+| Business intent | State the problem and outcomes | n/a |
+| PRD | Iterate and publish to Git with Joule | Clone from Git, review the PRD |
+| Spec | n/a | Iterate on the specification |
+| Solution | Give feedback on the preview | Implement in Studio, IDE or CLI |
+| Testing | Confirm it meets business needs | Test with AI-based assistance |
+| Deployment | Launch from Joule Work | Deploy to Git and the SAP managed runtime |
+
+- **Tools named:** Claude Code, Cursor, Cline, OpenCode, Codex ("and more")
+- **Home screen "What do you want to create?":** **Agent, n8n Workflow, Application, Data Product, Extension** (Chapter 2 line in 2.5 lists the first four options without Data Product)
+- **Agent Catalog:** filters by Line of Business and Extension Points; example cards: AP Invoice Agent, AR Dunning Insights Agent, Asset Operations Assistant, Bank Relationship Agent, Batch Optimization Agent; the lesson says **200+ ready-made agents** (finance, supply chain, HR, procurement, CX)
+- **Sourcing Negotiation Agent card:** description says it works with SAP Ariba Sourcing through the **A2A** protocol
+- **Create Agent Extension dialog:** Solution (new), Agent, Name, intent statement, and a **Quick Create** checkbox ("skip clarifying questions")
+- **n8n example (lesson 6):** a "PO Processing AI Agent with SAP S/4HANA and SAP Task Center": five must-have requirements; four assets built together (an AI agent, an n8n workflow, two MCP servers); a testing view showing **107 passed, 0 failed, 77% coverage**; a **Confirm Deploy** dialog that asks you to pick the target system for each connection
 
 ## 2.10 Added by Claude, not from the sources
 
@@ -430,7 +464,8 @@ sequenceDiagram
 
 ## How this chapter was checked
 
-- **Not read:** the demo videos and the three "Explore further" lessons (Govern pillar, interoperability, AI Agent Hub); course screenshots were not seen; from the product page: linked customer reports, the Florida Crystals video, the product tour and the webcast; from the blog: its linked demo video
+- **Course screenshots (8 Nov 2026):** all 43 viewed (the four quiz pages have none); my reading of them is in 2.9c
+- **Not read:** the demo videos and the three "Explore further" lessons (Govern pillar, interoperability, AI Agent Hub); from the product page: linked customer reports, the Florida Crystals video, the product tour and the webcast; from the blog: its linked demo video
 - **Not run:** no Joule Studio tenant was used
 
 - **Read fully (7 lessons and 4 quizzes, SAP Learning, 8 Nov 2026, no login needed):** What is the SAP Business AI Platform?; Introducing Joule Studio; Building Solutions with Joule Studio; Creating an AI Agent with Joule Studio; Understanding SAP-Delivered Agent Extensions; Extending a Standard Agent Using Joule Studio; Creating n8n Workflows in Joule Studio; and the four unit quizzes (7 questions, answers my reading, no SAP key)
