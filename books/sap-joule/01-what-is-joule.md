@@ -338,6 +338,135 @@ flowchart LR
 | What costs? | Premium AI by AI Units; custom-agent runtime by consumption |
 | How is it started? | SAP for Me, SAP-Managed Joule (customer-managed for old setups) |
 
+## 1.14 Course quiz review (19 questions)
+
+- The course has a short quiz at the end of each of its 5 units; SAP does not show an answer key
+- **Answers below are worked out from the lesson text (mine, not SAP's key).** Wording is shortened; try each before you open it
+
+**Unit 1: Getting to Know Joule (pass mark 6 of 7)**
+
+<details class="qa"><summary>1. HR queries now take 40% less time. Which value pillar is that?</summary>
+
+- **Answer:** Employee experience and productivity (the "new human advantage" pillar).
+- The other options (TCO, integration, governance) are not what that figure shows.
+</details>
+
+<details class="qa"><summary>2. What most clearly separates Joule from a generic AI assistant?</summary>
+
+- **Answer:** It understands your processes, roles and data context.
+- It is not a separate login, not trained only on public data, and not only for developers.
+</details>
+
+<details class="qa"><summary>3. Where is Joule available?</summary>
+
+- **Answer:** Across multiple SAP cloud applications.
+- It is not limited to one product.
+</details>
+
+<details class="qa"><summary>4. Best description of Joule?</summary>
+
+- **Answer:** An AI assistant embedded across SAP applications that understands business context.
+- It does not replace Fiori and is not only a customer-service bot.
+</details>
+
+<details class="qa"><summary>5. How should the productivity benchmarks be read?</summary>
+
+- **Answer:** As indicative figures that vary by role, industry and deployment.
+- They are not guarantees, SLAs or minimums.
+</details>
+
+<details class="qa"><summary>6. Who gains most from retrieving and summarising information across apps without switching screens?</summary>
+
+- **Answer:** The business user.
+- This is the day-to-day user embedded in SAP apps.
+</details>
+
+<details class="qa"><summary>7. Which is one of the three value pillars?</summary>
+
+- **Answer:** Improving employee productivity through AI-assisted task execution.
+- Server consolidation, user provisioning and replacing ERP modules are not pillars.
+</details>
+
+**Unit 2: Meeting the Joule Ecosystem (pass mark 5 of 6)**
+
+<details class="qa"><summary>8. Which is NOT a Joule Work surface?</summary>
+
+- **Answer:** The SAP Fiori tile launcher.
+- The surfaces are web client, mobile app and desktop.
+</details>
+
+<details class="qa"><summary>9. An agent inside Ariba suggests savings and updates a supplier without the user leaving the app. Which mode?</summary>
+
+- **Answer:** Embedded mode.
+- Conversational needs a chat request; system-triggered needs an event or schedule.
+</details>
+
+<details class="qa"><summary>10. Skill vs agent?</summary>
+
+- **Answer:** A skill runs a predefined task deterministically; an agent reasons across steps and orchestrates several skills.
+- Skills are not only for business users, and agents are not the only ones that reach third parties.
+</details>
+
+<details class="qa"><summary>11. A trade-compliance agent watches rule changes and proposes reclassifications with nobody asking. Which mode?</summary>
+
+- **Answer:** System-triggered mode (event or system signal).
+- "Manual" and "proactive" are not the course's modes.
+</details>
+
+<details class="qa"><summary>12. "What is our travel reimbursement policy?" Which skill type?</summary>
+
+- **Answer:** Informational.
+- It looks up documents; it does not run a process, navigate or chart.
+</details>
+
+<details class="qa"><summary>13. What are Spaces for?</summary>
+
+- **Answer:** A dynamic, AI-generated work area around one business outcome.
+- Not archiving, not a Fiori launchpad replacement, not a notification list.
+</details>
+
+**Unit 3: Connecting Joule to Your Enterprise (pass mark 1 of 1)**
+
+<details class="qa"><summary>14. How is Joule Work structured and run?</summary>
+
+- **Answer:** A layered system of three zones (experience, build, execution) on a shared platform; SAP manages the experience and build layers; agents run inside the customer's authorization boundaries.
+- It is not one monolith run by customer IT, and routing and governance are central, not left to each agent.
+</details>
+
+**Unit 4: Understanding Joule's Prerequisites (pass mark 3 of 4)**
+
+<details class="qa"><summary>15. What does SAP manage under SAP-Managed Joule?</summary>
+
+- **Answer:** Infrastructure, runtime, application integration and lifecycle updates.
+- Business process configuration, training and data migration stay with you.
+</details>
+
+<details class="qa"><summary>16. Which tool starts Joule provisioning?</summary>
+
+- **Answer:** SAP for Me.
+- Not BTP Cockpit, Joule Studio or Cloud ALM.
+</details>
+
+<details class="qa"><summary>17. Who gets Joule Assistants at no extra cost?</summary>
+
+- **Answer:** RISE with SAP customers.
+- Not all cloud customers, and not only Premium add-on buyers.
+</details>
+
+<details class="qa"><summary>18. What are AI Units?</summary>
+
+- **Answer:** A consumption-based metric for using Premium AI capabilities.
+- Not a user limit, an agent limit or a flat unlimited tier.
+</details>
+
+**Unit 5: Identifying Your Sources for the Latest Updates (pass mark 1 of 1)**
+
+<details class="qa"><summary>19. Why stay current with Joule and SAP Business AI?</summary>
+
+- **Answer:** To get new features and integrations and stay competitive.
+- Not to avoid shutdowns, meet quarterly upgrades or get discounts.
+</details>
+
 ## Recap
 
 - Joule is the engagement layer of SAP's Autonomous Enterprise; Joule Work is where you use it
@@ -356,7 +485,8 @@ flowchart LR
 ## How this chapter was checked
 
 - **Read fully (11 lessons, SAP Learning, 8 Nov 2026, no login needed):** Discovering Joule; Understanding the Value Provided by Joule; Identifying Roles and Personas; Getting to Know Joule Work; AI Assistants in Joule; Joule Agents; Joule Skills; Understanding Joule's Architecture; Activating Joule; Understanding the Commercial Model; Staying Up to Date with SAP Business AI
-- **Not read:** the unit overview pages, the four quizzes, and every link the lessons point to (Feature Catalog, Roadmap Explorer, videos, the Joule for Consultants course)
+- **Quizzes read fully:** all 5 unit quizzes (19 questions), in 1.14. SAP shows no answer key, so the answers are my reading of the lessons
+- **Not read:** every link the lessons point to (Feature Catalog, Roadmap Explorer, videos, the Joule for Consultants course)
 - **Gap:** the architecture lesson's zone diagram did not come through as text, so the zone list is from the descriptions below it
 - **Not run:** this chapter has no code; no SAP system was used
 - **Numbers and prices** are SAP's statements in the course, unverified elsewhere
@@ -365,6 +495,7 @@ flowchart LR
 ## Sources and further reading
 
 - SAP Learning, *Introducing Joule* (course): https://learning.sap.com/courses/introducing-joule
+- Quizzes: the five unit quiz pages under the same course path
 - Lessons read, under the same course path: Discovering Joule; Understanding the Value Provided by Joule; Identifying Roles and Personas; Getting to Know Joule Work; Getting to Know AI Assistants in Joule; Getting to Know Joule Agents; Getting to Know Joule Skills; Understanding Joule's Architecture; Activating Joule; Understanding the Commercial Model; Staying Up to Date with SAP Business AI
 
 *Next in this book: Joule Studio (SJ008), not written yet.*
