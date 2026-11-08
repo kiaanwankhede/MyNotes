@@ -183,3 +183,4 @@ flowchart LR
 ---
 
 *Previous: [Chapter 6: Build your first Joule skill](06-first-joule-skill.md)*
+*Next: [Chapter 8: Joule agents hands-on](08-agents-hands-on.md)*
