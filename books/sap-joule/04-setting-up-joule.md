@@ -252,3 +252,5 @@ flowchart TD
 ---
 
 *Previous: [Chapter 3: Joule for business users](03-joule-for-business-users.md)*
+
+*Next: [Chapter 5: Setting up Joule product by product](05-setting-up-joule-by-product.md)*
