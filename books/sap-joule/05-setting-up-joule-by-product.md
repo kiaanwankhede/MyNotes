@@ -20,7 +20,7 @@
 
 > [!WARNING]
 > **What this chapter is**
-> - It is one SAP course plus one setup blog (5.4a) and one Architecture Center page (5.4b). Most lessons are **short (prerequisites and links), not click-by-click steps**. The steps live in the linked Discovery Center missions and SAP Help pages.
+> - It is one SAP course plus one setup blog (5.4a) one Architecture Center page (5.4b) and one Work Zone blog (5.7b). Most lessons are **short (prerequisites and links), not click-by-click steps**. The steps live in the linked Discovery Center missions and SAP Help pages.
 > - No BTP account or Joule tenant was used.
 > - Some points differ from [Chapter 4](04-setting-up-joule.md); see 5.8.
 
@@ -311,6 +311,43 @@ flowchart LR
 
 - The Private Edition, Concur, Signavio, IPD, Digital Manufacturing, Document Grounding, Analytical Insights and Joule for Developers lessons link to Community guides or SAP Help instead, not to a Discovery Center mission
 
+## 5.7b Joule in Build Work Zone: the announcement blog
+
+*Source: SAP Community blog *Joule is Now Integrated into SAP Build Work Zone!* (SAP author; text and all 5 images read). It is an announcement from around early 2025; it says the advanced edition is "coming in 2025", so check the current state.*
+
+- **What was announced:** Joule is integrated into **Build Work Zone standard edition, SAP Start and SAP Mobile Start**
+- **Value:** one Joule window that answers from **all connected back-end systems**, so users do not switch tools
+- **What users can do:** navigate to the right app, get how-to answers, run transactions in natural language, get answers from business documents
+  - Joule also guides you inside a Work Zone site (managing content, finding features)
+  - Example: "Has my purchase order been approved?" returns the status and key details in the Joule window
+- **Prerequisites (blog):**
+  - Identity Authentication for login (switch to Cloud Identity Services first if you have not)
+  - Prerequisites for Work Zone standard edition **and** for Joule completed before the Booster
+  - Not available in a **BTP trial account**
+- **Activation:** run the **Joule Booster**, then a new setting appears in the site
+
+```mermaid
+flowchart LR
+  A["Run Joule Booster"] --> B["Site Settings"]
+  B --> C["Services: enable Joule"]
+  C --> D["Joule icon in the site header"]
+```
+
+**The Booster wizard (from the screenshots).** Seven steps are shown in the header:
+
+1. Check Prerequisites
+2. Set Up Subaccount (choose subaccount; org and space shown; Joule integration plan)
+3. Select Integrations (the list in the image: Asset Performance Management, Build Work Zone standard edition, Integrated Business Planning, Product Lifecycle Management, S/4HANA Cloud Private Edition, S/4HANA Cloud Public Edition, Signavio, SuccessFactors)
+4. Select Capabilities (capability packages to provision, from the same product list)
+5. Set Up Integrations
+6. Validations
+7. Review
+
+- **Two images show the Joule window:** an HR-style start screen ("How can I help you?" with suggestions like View Manager) and a procurement home page with Joule beside the Work Zone tiles
+- **Two choices in the wizard matter:** where Joule is **enabled** (integrations) and which products' **capability packages** it gets (capabilities)
+- The blog links to its own set-up blog and a Mobile Start announcement; the Discovery Center mission for this topic is in 5.7a
+- **Not in the blog:** click-by-click wizard fields (the screenshots are readable only as step names)
+
 ## 5.8 Added by Claude, not from the sources
 
 *My own reasoning; the course does not say it.*
@@ -425,6 +462,7 @@ flowchart LR
 - **Not read:** the Discovery Center missions (links added in 5.7a, not opened), SAP Community guides, SAP Help pages, SAP Note 3523238, SAP Note 2791410, the Architecture Center page and the WalkMe page the lessons link to; the lesson-1 video and any demos on the course page
 - **Setup blog (5.4a):** text and all 43 body images read (37 screenshots and diagrams, 6 small pointer icons or dialogs); the two attached JSON templates and the demo video are **not read**
 - **Architecture Center page (5.4b):** text and both diagrams read; the downloadable draw.io files, the resource links and the related missions are **not read**; numbered-step legends in the diagrams were too small to read
+- **Work Zone blog (5.7b):** text and all 5 images read; the linked blogs, roadmap and community groups are **not read**
 - **Not run:** no BTP account or Joule tenant was used; quizzes not submitted
 - **Dated points:** Joule for Developers "promo SKU until Sep 2026" is past that date today; Signavio's Work Zone note says "planned for next release"; check SAP Help
 
@@ -432,6 +470,7 @@ flowchart LR
 
 - SAP Community blog, *Joule in SAP S/4HANA Cloud Public Edition - Setup Guide* (text and all screenshots read): https://community.sap.com/t5/technology-blog-posts-by-sap/joule-in-sap-s-4hana-cloud-public-edition-setup-guide/ba-p/13965333
 - SAP Architecture Center, *Joule in SAP S/4HANA Cloud Private & Public Edition* (text and both diagrams read): https://architecture.learning.sap.com/docs/ref-arch/ebe268
+- SAP Community blog, *Joule is Now Integrated into SAP Build Work Zone!* (text and all 5 images read): https://community.sap.com/t5/application-development-and-automation-blog-posts/joule-is-now-integrated-into-sap-build-work-zone/ba-p/13961162
 - Discovery Center missions: see 5.7a
 - SAP Learning, *Setting Up Joule Across your Organizational System Landscapes* (all lessons, images and quizzes read): https://learning.sap.com/courses/setting-up-joule-across-your-organizational-system-landscapes
 
