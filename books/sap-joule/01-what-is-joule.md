@@ -8,7 +8,7 @@
 > - **You will build:** nothing yet; a clear mental model you can explain in 2 minutes
 > - **Level:** beginner · **Time:** about 40 minutes
 > - **Source:** SAP Learning course *Introducing Joule* (free, 11 lessons), read 8 November 2026
-> - **Leads to:** Joule Studio (next chapter, not written yet)
+> - **Leads to:** [Chapter 2: Joule Studio](02-joule-studio.md)
 
 **After this chapter you can:**
 
@@ -498,4 +498,4 @@ flowchart LR
 - Quizzes: the five unit quiz pages under the same course path
 - Lessons read, under the same course path: Discovering Joule; Understanding the Value Provided by Joule; Identifying Roles and Personas; Getting to Know Joule Work; Getting to Know AI Assistants in Joule; Getting to Know Joule Agents; Getting to Know Joule Skills; Understanding Joule's Architecture; Activating Joule; Understanding the Commercial Model; Staying Up to Date with SAP Business AI
 
-*Next in this book: Joule Studio (SJ008), not written yet.*
+*Next: [Chapter 2: Joule Studio](02-joule-studio.md)*
