@@ -381,3 +381,5 @@ New topic = new conversation.
 - Quizzes: the two unit quiz pages under the same course path
 
 *Previous: [Chapter 2: Joule Studio](02-joule-studio.md)*
+
+*Next: [Chapter 4: Setting up Joule](04-setting-up-joule.md)*
