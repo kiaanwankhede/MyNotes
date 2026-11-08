@@ -391,3 +391,5 @@ sequenceDiagram
 - SAP Learning, *Introducing Joule Studio* (course): https://learning.sap.com/courses/introducing-joule-studio
 - Lessons read, under the same course path: What is the SAP Business AI Platform?; Introducing Joule Studio; Building Solutions with Joule Studio; Creating an AI Agent with Joule Studio; Understanding SAP-Delivered Agent Extensions; Extending a Standard Agent Using Joule Studio; Creating n8n Workflows in Joule Studio
 - Quizzes: the four unit quiz pages under the same course path
+
+*Next: [Chapter 3: Joule for business users](03-joule-for-business-users.md)*
