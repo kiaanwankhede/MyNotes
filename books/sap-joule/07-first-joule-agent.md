@@ -99,6 +99,16 @@ flowchart LR
 
 - **Tip:** if the environment details page is blank, refresh the browser
 
+## 7.3a The course lesson: building an agent, in overview (SJ034)
+
+*Source: SAP Learning lesson "Building Joule agents with Joule Studio, classic edition", 3 min (text and 3 screenshots read; the screenshots show a "Recruiting Agent" with small, hard-to-read text). The master link was dead; the lesson now sits in the course "Getting Started with Joule Studio, classic edition".*
+
+- **No step-by-step:** the lesson says a full tutorial is not possible without a live system, so it gives an overview
+- **Flow:** open the SAP Build Lobby, choose the Joule agent and skill project type → name the agent and state its goal and instructions (Joule can help draft them) → **choose an LLM** → **configure MCP and inject tools** → **test** in the live simulator
+- **Components named:** Actions, Automations, Tools, AI models
+- **Next lesson:** building agents with AI assistance (not read)
+- **Also seen, not an item:** the lesson before it in the same course lists five agent parts: goals and instructions, planning and reasoning engine, tools, memory module, integration layer; and compares agents (complex, autonomous) with skills (rule-based, predefined paths)
+
 ## 7.4 Added by Claude, not from the sources
 
 *My own reasoning; the sources do not say it.*
@@ -170,7 +180,7 @@ flowchart LR
 ## How this chapter was checked
 
 - **Read fully:** CodeJam introduction (5 steps, 5 images; the first image is a diagram whose text is not legible) and the Hello World blog (all text, 19 images)
-- **Not read:** the CodeJam tutorials 1–3 and later ones, the video, the additional-resource blogs and docs, the two linked set-up blogs, the "related learning" lists, Discovery Center missions
+- **Not read:** the other lessons of the SAP Learning course, the CodeJam tutorials 1–3 and later ones, the video, the additional-resource blogs and docs, the two linked set-up blogs, the "related learning" lists, Discovery Center missions
 - **Not run:** nothing was built or tested
 - **Small text:** some screenshot text was too small to read
 
@@ -178,6 +188,7 @@ flowchart LR
 
 - SAP Developer tutorial, *Joule Studio CodeJam: Introduction* (read): https://developers.sap.com/tutorials/joule-studio-codejam-0-overview/
 - SAP Community blog, *Creating a Hello World Joule Agent* (read): https://community.sap.com/t5/artificial-intelligence-blogs-posts/creating-a-hello-world-joule-agent/ba-p/14326323
+- SAP Learning lesson, *Building Joule agents with Joule Studio, classic edition* (read): https://learning.sap.com/courses/getting-started-with-joule-studio-classic-edition/building-joule-agents-with-joule-studio-classic-edition_c0cc36a2-6f76-4d03-b6d0-abed14a82eda
 - Discovery Center missions: see 7.6
 
 ---

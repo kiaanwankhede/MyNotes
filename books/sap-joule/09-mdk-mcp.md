@@ -168,3 +168,4 @@ flowchart LR
 ---
 
 *Previous: [Chapter 8: Joule agents hands-on](08-agents-hands-on.md)*
+*Next: [Chapter 10: Pro-code agents and the A2A protocol](10-pro-code-agents-a2a.md)*

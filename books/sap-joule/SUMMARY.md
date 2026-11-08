@@ -10,3 +10,4 @@
 * [Chapter 7: Your first Joule agent](07-first-joule-agent.md)
 * [Chapter 8: Joule agents hands-on](08-agents-hands-on.md)
 * [Chapter 9: An MCP server for mobile development](09-mdk-mcp.md)
+* [Chapter 10: Pro-code agents and the A2A protocol](10-pro-code-agents-a2a.md)
