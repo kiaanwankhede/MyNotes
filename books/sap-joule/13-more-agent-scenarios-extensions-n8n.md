@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **You will learn:** how the same intent-to-deploy pipeline from [Chapter 12](12-intent-based-agents-lab.md) builds sales, supply-chain and billing solutions, how to extend a standard SAP agent, and how Joule Studio builds n8n workflows
 > - **Level:** beginner · **Time:** about 40 minutes of reading
-> - **Sources:** ten SAP Developer tutorials (SJ069 to SJ078), read 9 November 2026 (text and screenshots)
+> - **Sources:** ten SAP Developer tutorials (SJ069 to SJ078) and two partner blogs (SJ079, SJ082), read 9 November 2026 (text and screenshots)
 > - **Builds on:** [Chapter 12](12-intent-based-agents-lab.md) (the pipeline, PRD, guardrails)
 
 **After this chapter you can:**
@@ -162,7 +162,38 @@ flowchart LR
 - **SJ078:** after build, add intent `Add an SAP Task Center node within the N8N workflow to send workflow approvals to the manager`, then add an **SAP Agent** node (triggers an agent from another solution) and execute the workflow
 - **Preview limits (SJ077):** do not choose Execute workflow or Deploy; configuration of the AI node and live runs are not in the preview
 
-## 13.7 What the screenshots add
+## 13.7 Real-world examples from partners (SJ079, SJ082)
+
+*Sources: SJ079 (sovanta blog, with Endress+Hauser) and SJ082 (Mindset Consulting blog). Both are vendor or partner write-ups, not SAP documentation; no figures are published in either.*
+
+### SJ079: purchasing anomaly agent (sovanta and Endress+Hauser)
+
+- **Problem:** sales reps cannot see changes in a customer's buying pattern across a large product range
+  - Examples: a sudden rise or fall in one product area, a shift to unexpected measuring principles, recent orders of products heading for order stop
+- **Built with:** the agent builder in Joule Studio (the "classic" low-code builder with skills)
+- **Data sources:** a SAP HANA Cloud operational data hub and a product knowledge base reached through an internal RAG tool
+- **Text-to-SQL pipeline:** the agent is grounded (document grounding in SAP AI Core) with the database schema, example SQL queries and background documentation
+- **Two custom Joule skills:** one runs a SQL query through a proxy connector; one reads the product knowledge base
+- **Workaround:** SAP Build Actions did not fully support dynamic outputs, so the team handled changing query results themselves
+- **Flow:** question in plain language → agent chooses the source → writes SQL from schema and examples → result enriched from product documentation → plain-language summary → follow-ups
+- **Extra value:** it also finds successor products for items in order stop and compares old and new product
+- **Their outlook:** agent-to-agent collaboration, and a native database tool that could replace the Text-to-SQL workaround
+- **Architecture diagram (viewed):** natural-language question → Joule agent in Joule Studio (SAP Build) → two skills via SAP Build Process Automation actions → destination → proxy connector in a Cloud Foundry space → HANA Cloud; the knowledge base is reached over HTTPS; AI models and document grounding sit in SAP AI Core; a model named "MistralAI" is labelled on the diagram
+- **Second image:** a Joule test chat showing a measuring-principle anomaly answer and a list of products in order stop (customer names blurred)
+
+### SJ082: twenty Joule agents on a real BTP tenant (Mindset Consulting)
+
+- **What it is:** an opinion and overview post by the company's CEO ahead of SAP Sapphire 2026; the detail sits in linked posts and a catalogue I did not open
+- **Claims in the post:** twenty agents built on a real BTP tenant with real MCP and S/4HANA, running live; the team trained 40+ people
+- **Points about the market (author's view):**
+  - Joule Studio, MCP support and an MCP gateway in Integration Suite are positioned as the route for non-SAP agents
+  - An SAP API policy (named v.4.2026a in the post) says agent calls to SAP APIs should go through SAP-endorsed paths such as Joule or Integration Suite; the author thinks many customers are not compliant yet
+  - Business Data Cloud matters because agents quote wrong numbers when the data is untrusted
+- **"Mindset stack":** journey and discovery, pipes (trust and architecture), data, and experience
+- **Not in this post:** the "157 MCP tools" and "human approval on writes" points that my master noted; they are not on the page I read (likely in the linked posts, not read)
+- **Images:** two author photos only
+
+## 13.8 What the screenshots add
 
 *Viewed 9 November 2026: SJ069 (32 images, both tabs), SJ070 (read earlier), SJ071 (10), SJ072 (18), SJ073 (12), SJ074 (9), SJ075 (21), SJ076 (15), SJ077 (13), SJ078 (15). Most are small, so I read layout and highlights, not fine print.*
 
@@ -175,13 +206,13 @@ flowchart LR
 - **SJ077:** one screenshot shows a different sample solution ("Month-End Financial Close Controller") in an early step; it does not match the invoice scenario, so I did not use it
 - **SJ078:** an n8n canvas with many nodes and the SAP Agent node picker
 
-## 13.8 Added by Claude, not from the sources
+## 13.9 Added by Claude, not from the sources
 
 - **Pattern for all ten:** name the user, the data, the decision and the guardrail in the intent; keep reads automatic and writes human-approved
 - **Choosing a type:** new reasoning task → agent; reusable analytics → data product; tweak a standard SAP agent → extension; chained steps with approvals → n8n workflow
 - **Engine versus LLM:** use an engine whenever the answer must be the same every time (rolls, totals); use the LLM for wording and classification
 
-## 13.9 Interview corner
+## 13.10 Interview corner
 
 **What interviewers listen for:** you pick the right solution type and say where the human sits.
 
@@ -217,12 +248,12 @@ flowchart LR
 
 **🧩 Design question:** design an extension for the Journal Entry Agent that blocks postings to a closed period. Choose the layer (pre-hook, tool, instruction, post-hook), the data it reads and who is told.
 
-## 13.10 Discovery Center missions (links, not read)
+## 13.11 Discovery Center missions (links, not read)
 
 - [Build custom Joule skills for SAP and non-SAP systems](https://discovery-center.cloud.sap/missiondetail/4643/)
 - The tutorials also list the missions **Joule Studio Agent Lab** and **2026 SAP TechEd Berlin Dev Garage & Agent Lab**; I did not capture their links, so none is added here
 
-## 13.11 Cheat sheet
+## 13.12 Cheat sheet
 
 | Topic | Remember |
 |---|---|
@@ -251,10 +282,12 @@ flowchart LR
 
 ## How this chapter was checked
 
-- **Read fully (text and screenshots):** SJ069 to SJ078
+- **Read fully (text and screenshots):** SJ069 to SJ079, SJ082
 - **Not read:**
-  - fine print inside small screenshots (see 13.7)
+  - fine print inside small screenshots (see 13.8)
   - the "Related learning" lists, videos, linked tutorials and Discovery Center missions
+  - SJ080, SJ081 and SJ083: only the landing pages loaded; the PDF decks were not opened (not in this chapter)
+  - linked catalogue and team posts from SJ082
   - the downloadable sample file `agent_lab_journal_entry.xlsx` (SJ075)
 - **Not run:** nothing was built or deployed
 - **Dated points:** pre-release Agent Lab content (October 2026)
@@ -272,7 +305,9 @@ flowchart LR
 - SAP Developer, *Use Joule Studio to Extend the AP Invoice Agent using Agent Extensions* (read): https://developers.sap.com/tutorials/joule-studio-agent-extension
 - SAP Developer, *How to create an Invoice Exception Agent with an n8n Workflow* (read): https://developers.sap.com/tutorials/create-invoice-exception-agent-with-n8n
 - SAP Developer, *Use Joule Studio to Create an IT Incident Triage and Auto Routing Agent with N8N, SAP Task Center Node and SAP Agent Node* (read): https://developers.sap.com/tutorials/joule-studio-n8n-workflow-create
-- Discovery Center missions: see 13.10
+- sovanta, *Beyond PoC: How sovanta Detects Purchasing Anomalies with a Custom Joule Agent* (read): https://community.sap.com/t5/technology-blog-posts-by-members/beyond-poc-how-sovanta-detects-purchasing-anomalies-with-a-custom-joule/ba-p/14257926
+- Mindset Consulting, *Twenty Joule Agents. Sapphire 2026.* (read): https://www.mindsetconsulting.com/twenty-joule-agents-sapphire-2026/
+- Discovery Center missions: see 13.11
 
 ---
 
