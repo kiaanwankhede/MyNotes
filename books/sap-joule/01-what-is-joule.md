@@ -224,6 +224,22 @@ flowchart LR
 - **Subscribe:** "What's new" on SAP Help (SAP login), the SAP Business AI newsletter
 - **Ask and learn:** SAP Community, SAP Developer Center, SAP Learning live sessions ("Beyond Hype")
 
+### 1.10a What the course images add (all 7 viewed)
+
+*My reading of the images. The course has 7 images in all (the five quiz pages and five of the eleven lessons have none).*
+
+- **Autonomous Enterprise slide (lesson 1):** three promises: "your best people can do their best work", "your business responds before teams convene", "you move fast because you can trust the system" (every AI action governed, auditable and traceable)
+- **Five key elements slide (lesson 2):** (1) Joule as the engagement layer for data, workflows and agents, (2) SAP Autonomous Suite runs work end to end, (3) Industry AI embeds process knowledge and compliance rules, (4) SAP Business AI Platform gives context, unified data, governance, (5) acceleration through RISE and GROW
+- **Value at three levels (lesson 3):** for **your people** (one interface, AI in the flow of work, outputs grounded in context), for **IT and operations** (central governance, full visibility into agent behaviour, no vendor sprawl, custom agents in Studio), for **the business** (better decisions, faster ROI, AI that scales)
+- **Joule Work slide:** four labels (Dynamic, Proactive, Agentic, Intent-based) over three screens: Conversations, Spaces, Develop
+- **Assistants slide:** three ideas: business context, deep role awareness, get work done end to end
+- **Finance example slide:** a **Financial Closing Assistant** coordinating six agents (Accounting Accruals, Analytical Business Insights, Asset Accounting Anomaly Detection, Financial Consistency Analysis, Intercompany Matching and Reconciliation, Journal Entry); the slide quotes **10–20% cut to close cycle time** and **20–30% productivity gains** (SAP's figures; see 1.9, treat as marketing)
+- **Architecture picture:** extra boxes beyond the table in 1.6
+  - *SAP-managed Joule:* Mobile Services, Joule Voice, Spaces, a compositional design system, a desktop middleware, plus an EL mobile app and web client
+  - *SAP-managed Build Core Services:* Build Solutions (agents, n8n, apps) and Joule Studio
+  - *Agent zone:* a deployment API, an **n8n runtime**, a managed runtime for customer deployments, with agents (skills, agentic frameworks), Node apps and CAP apps
+  - *Shared services:* Business Knowledge Graph, Enterprise Knowledge Exploration, Agent Gateway, AI Agent Hub, UMS, Business Content Service, **Alert Notification Service**, Task Center, Products
+
 ## 1.11 Added by Claude, not from the sources
 
 *Everything in this section is my own mapping, not SAP's wording.*
@@ -484,6 +500,7 @@ flowchart LR
 
 ## How this chapter was checked
 
+- **Course images (8 Nov 2026):** all 7 viewed; see 1.10a
 - **Not read:** every link the lessons point to (Feature Catalog, Roadmap Explorer, videos, the Joule for Consultants course)
 - **Not run:** this chapter has no code; no SAP system was used
 
