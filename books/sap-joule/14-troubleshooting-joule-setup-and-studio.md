@@ -321,3 +321,7 @@ flowchart TD
 
 *Previous: [Chapter 13: More Joule Studio scenarios](13-more-agent-scenarios-extensions-n8n.md)*
 
+
+---
+
+*Next: [Chapter 15: Keeping current: Q2 2026 release news, pricing and the golden path](15-release-news-pricing-golden-path.md)*

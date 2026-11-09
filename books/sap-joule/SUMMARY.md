@@ -15,3 +15,4 @@
 * [Chapter 12: Intent-based agents in Joule Studio: ten business scenarios](12-intent-based-agents-lab.md)
 * [Chapter 13: More Joule Studio scenarios: sales, supply chain, data products, agent extensions and n8n workflows](13-more-agent-scenarios-extensions-n8n.md)
 * [Chapter 14: Troubleshooting Joule setup and Joule Studio](14-troubleshooting-joule-setup-and-studio.md)
+* [Chapter 15: Keeping current: Q2 2026 release news, pricing and the golden path](15-release-news-pricing-golden-path.md)
