@@ -156,6 +156,18 @@ The whiteboard's plus and minus list:
 - **How is MCP different from calling a REST API directly?** The end result can be the same, but with a raw API **you** maintain the wrapper, auth and error handling in every project. With MCP the server owner maintains it once
 - **Is MCP a REST client?** At a very high level you can think of it that way. It is a distinct protocol built on **JSON-RPC 2.0**, not REST ([Chapter 2](02-primitives-and-architecture.md), 2.5)
 
+### Where MCP sits among the options (*added by Claude*)
+
+| You need | Use | Why |
+|---|---|---|
+| A few tools inside one agent you own | **plain function tools** (`@tool`) | no server, no protocol, fastest to build and test |
+| The same tools in several hosts or teams (Claude Desktop, IDEs, your agents) | **MCP server** | write once, every MCP host can use it |
+| A whole **agent** (with its own reasoning and tools) to delegate a task to another agent, possibly another company's | **A2A** (agent-to-agent protocol) | exchanges tasks and results between agents, not individual tool calls |
+| A fixed integration between two backends with no model involved | **plain REST/gRPC API** | MCP adds nothing when no AI host is calling |
+
+- MCP = **model ↔ tools/data**; A2A = **agent ↔ agent**. They complement each other: an A2A agent often uses MCP servers internally
+- A common path: start with `@tool` functions, move them into an MCP server once a second app needs them
+
 ## 1.9 Added by Claude, not from the sources
 
 Not in the course material. Established practice, but check current docs. Items marked *checked* were tested with `fastmcp` 4.1.4.
