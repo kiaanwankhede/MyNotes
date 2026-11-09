@@ -465,6 +465,64 @@ def query_db(a: int, b: int, c: int) -> int: ...
 >
 > *Added by Claude.*
 
+## 5.10b Test your server like code, not by clicking (*added by Claude*)
+
+The Inspector is great for exploring; a test suite is what stops regressions. FastMCP's `Client` can talk to the server object **in memory**: no subprocess, no port, runs in a second.
+
+```python
+# server.py
+from fastmcp import FastMCP
+from fastmcp.exceptions import ToolError
+
+mcp = FastMCP("orders")
+ORDERS = {"A-1": "shipped"}
+
+@mcp.tool(annotations={"readOnlyHint": True})
+def get_order(order_id: str) -> dict:
+    """Look up one order by id (format 'A-123')."""
+    if order_id not in ORDERS:
+        raise ToolError(f"No order {order_id}. Ask the user to check the id.")   # message the model sees
+    return {"order_id": order_id, "status": ORDERS[order_id]}                   # structured result
+
+@mcp.tool(annotations={"destructiveHint": True})
+def cancel_order(order_id: str) -> str:
+    """Cancel an order. Irreversible."""
+    ORDERS.pop(order_id, None)
+    return "cancelled"
+```
+
+```python
+# test_server.py   (pytest.ini: asyncio_mode = auto)
+import pytest
+from fastmcp import Client
+from fastmcp.exceptions import ToolError
+from server import mcp
+
+@pytest.fixture
+async def client():
+    async with Client(mcp) as c:          # in-memory transport
+        yield c
+
+async def test_get_order(client):
+    r = await client.call_tool("get_order", {"order_id": "A-1"})
+    assert r.data == {"order_id": "A-1", "status": "shipped"}
+
+async def test_unknown_order(client):
+    with pytest.raises(ToolError, match="No order"):
+        await client.call_tool("get_order", {"order_id": "Z-9"})
+
+async def test_risky_tool_is_marked(client):
+    tools = {t.name: t for t in await client.list_tools()}
+    assert tools["cancel_order"].annotations.destructive_hint is True
+```
+
+- **`ToolError`** sends your message to the client as a tool error, so write it for the model ("ask the user to check the id"); other exceptions may be masked depending on server settings
+- **Return a dict** (structured content) when the caller needs fields; `r.data` gives it back typed
+- **Annotations** (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) are hints a host can use to ask for approval; test that risky tools carry them. They are **hints, not security**: enforce permissions in the tool
+- Run the same tests in CI on every change; add one for every bug a user reports
+
+✅ *Verified on `fastmcp` 4.1.6: four tests passed (tool list, structured result, `ToolError` raised client-side with the message, annotations present). The library warns that reading `destructiveHint` is deprecated in favour of `destructive_hint`, which the code above uses.*
+
 ## 5.11 Added by Claude, not from the sources
 
 Items marked *checked* were run with `fastmcp` 4.1.4.
