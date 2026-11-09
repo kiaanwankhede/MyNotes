@@ -581,4 +581,9 @@
 
 ---
 
+
 *Previous: [Chapter 15: Keeping current: Q2 2026 release news, pricing and the golden path](15-release-news-pricing-golden-path.md)*
+
+---
+
+*Next: [Chapter 17: SAP Joule for Consultants: the full course](17-joule-for-consultants-course.md)*

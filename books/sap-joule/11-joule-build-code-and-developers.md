@@ -136,7 +136,7 @@
 
 - **SJ056, "Introducing SAP Joule for Consultants" (landing page only):**
   - 1 h 14 min, beginner, two units: "Discovering SAP Joule for Consultants" (5 lessons, 37 min) and "Applying SAP Joule for Consultants" (5 lessons, 37 min)
-  - **The ten lessons were not opened**
+  - **The lessons are now covered in [Chapter 17](17-joule-for-consultants-course.md)**
 - **SJ057, GitHub sample (README only):** now in the **SAP-archive** organisation
   - Scenario: a mobile app built in SAP Build Apps talks to a CAP backend (Build Code with Joule) and a RAP backend (ABAP environment)
   - Story: a technician reports a faulty device; an admin assigns a processor; RAP calculates the processor's location from latitude and longitude stored in CAP
