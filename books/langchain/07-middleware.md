@@ -204,6 +204,38 @@ From the docs page `middleware/built-in`. Everything marked *checked* was run wi
 
 *Source: `langchain-ai/docs`, `src/oss/langchain/middleware/built-in.mdx` (Summarization section).*
 
+### Cheaper alternative: trim instead of summarise (*added by Claude*)
+
+Summarising costs an extra model call. When old turns don't matter (FAQ bots, task assistants), just drop them before each model call:
+
+```python
+from langchain.agents.middleware import before_model, AgentState
+from langchain_core.messages import trim_messages, RemoveMessage
+from langgraph.graph.message import REMOVE_ALL_MESSAGES
+
+@before_model
+def keep_recent(state: AgentState, runtime):
+    msgs = state["messages"]
+    if len(msgs) <= 20:
+        return None
+    kept = trim_messages(msgs, strategy="last", token_counter=len, max_tokens=20,
+                         start_on="human", include_system=True)   # never start mid tool-call
+    return {"messages": [RemoveMessage(id=REMOVE_ALL_MESSAGES), *kept]}
+```
+
+| | Trim | Summarise |
+|---|---|---|
+| Extra model call | none | one per trigger |
+| Keeps old facts | no | yes, condensed |
+| Predictable | fully | depends on summary quality |
+| Use for | short tasks, FAQ, support triage | long projects, planning, tutoring |
+
+- `start_on="human"` keeps the window from opening on an orphan `ToolMessage`, which most providers reject
+- `token_counter=len` counts messages; pass the model (or a tokenizer function) to count real tokens
+- Lasting facts belong in the **store** ([Chapter 6](06-agents-and-memory.md)), not in a long thread
+
+✅ *Verified offline over five turns with a checkpointer: the model received 1, 3, 3, 3, 3 messages: the window stayed bounded instead of growing to 9.*
+
 ## 7.6 `HumanInTheLoopMiddleware`
 
 When an agent can do something **irreversible**, a human should sign off first.

@@ -322,6 +322,23 @@ Not in the course material. Established practice, but check current docs.
 - **Pin versions.** This ecosystem moved fast (v1.0 in late 2025). Commit `uv.lock`, and pin a major range such as `langchain>=1,<2`, so a fresh install does not break your project
 - **Keep tracing projects separate.** Use a different tracing project (or key) for experiments, staging and production so noise does not bury real runs
 
+### Old code → v1, side by side (*added by Claude*)
+
+AI assistants and tutorials still produce pre-v1 code. Translate it like this:
+
+| You see (Classic) | Write instead (v1) |
+|---|---|
+| `initialize_agent(...)`, `AgentExecutor(agent, tools)` | `create_agent(model, tools, system_prompt=...)` |
+| `LLMChain(llm, prompt)` | `prompt \| model` (or call the model directly) |
+| `ConversationBufferMemory`, `memory=` | `checkpointer=InMemorySaver()` + `thread_id` |
+| `ConversationSummaryMemory` | `SummarizationMiddleware` ([Ch 7](07-middleware.md)) |
+| `output_parser=` / `PydanticOutputParser` | `with_structured_output(Model)` or `response_format=` ([Ch 4](04-structured-output.md)) |
+| `from langchain.llms import OpenAI` | `init_chat_model("openai:...")` or `from langchain_openai import ChatOpenAI` |
+| `from langgraph.prebuilt import create_react_agent` | `from langchain.agents import create_agent` |
+| callbacks for logging/limits | middleware ([Ch 7](07-middleware.md)–[10](10-shell-tools-and-custom-middleware.md)) |
+
+- If you must run old code unchanged: `pip install langchain-classic` and import from `langchain_classic`; migrate when you next touch it
+
 ## Cheat sheet
 
 | Need | Use |
