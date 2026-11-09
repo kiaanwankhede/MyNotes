@@ -118,6 +118,10 @@ An Agent never runs "just because." It is always triggered in one of three modes
 
 ## 1.4 Where a developer actually touches this
 
+> [!TIP]
+> **💡 Before you can reach any of this**
+> Joule Studio isn't open by default. Your org needs a qualifying SAP cloud subscription with Joule Base entitled and active — a one-time acceptance of SAP's AI terms, done by an admin, not something you configure in code — plus SAP-Managed Joule provisioned. If you're trying to build in Joule Studio and can't reach it, that's almost always an entitlement/activation gap on the SAP for Me side, not a Joule Studio bug. Check with whoever manages your org's SAP subscription before assuming something's broken. (This course covers the activation workflow and licensing tiers in detail — deliberately left out here as admin/licensing, not developer, material.)
+
 Two developer-facing surfaces came up in this course, both of which are presumably the subject of later chapters:
 
 - **Joule Studio** — intent-to-deployment. You describe the problem in plain language; it asks clarifying questions, enriches your intent using SAP LeanIX/Signavio/Domain Models/Knowledge Graph context, then generates a PRD and technical spec, and AI coding agents turn that into production code. You can stay in Joule Studio's browser environment, or export and keep working in **VS Code, Cursor, or Claude Code**. It explicitly supports building with **LangChain, LangGraph, Pydantic AI, and LlamaIndex** — you're not locked into one framework. Output runs on SAP's managed runtime (no infra config).
@@ -243,7 +247,7 @@ This is the same retrieve-then-generate shape you'd build by hand with any vecto
 - All 11 lessons and all 5 unit quizzes of "Introducing Joule" (learning.sap.com/courses/introducing-joule) were read in full, 9 Nov 2026. Linked videos, the external architecture-center link, and "Related resources" live sessions were not opened.
 - All 7 images across the course's lessons were viewed. 3 are used in this chapter (saved to `images/`, never hotlinked): the Joule Work interfaces screenshot, the assistant-value illustration, and SAP's official architecture diagram. The other 4 (the Autonomous Enterprise vision graphic, the value-pillars graphic, the "Joule Delivers Value" graphic, and the Reimagine Finance stats slide) illustrate the marketing/ROI content this chapter deliberately left out, so they weren't saved.
 - Nothing in this chapter is code yet, so nothing was run.
-- Sections on activation (SAP for Me), licensing (Joule Base vs Premium AI, SKUs, AI Unit pricing tiers), the "staying current" resource list, and consultant-only features (Expert Workspaces, Landscape Awareness, SAP Joule for Consultants pricing) were deliberately left out of this chapter as licensing/change-management/end-user material, per the book's developer-only scope.
+- Sections on activation (SAP for Me), licensing (Joule Base vs Premium AI, SKUs, AI Unit pricing tiers), the "staying current" resource list, and consultant-only features (Expert Workspaces, Landscape Awareness, SAP Joule for Consultants pricing) were deliberately left out of this chapter as licensing/change-management/end-user material, per the book's developer-only scope. One distilled line from each survives: the entitlement/activation gap note in the 1.4 TIP box, and the per-action cost note in the 1.4 🏭 box.
 
 ## Sources and further reading
 
