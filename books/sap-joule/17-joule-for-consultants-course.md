@@ -219,3 +219,5 @@
 ---
 
 *Previous: [Chapter 16: The fusion sample: Build Code with Joule, a RAP service and SAP Build Apps](16-fusion-sample-build-code-rap-build-apps.md)*
+
+*Next: [Chapter 18: The Joule onboarding guide: customer-managed provisioning, step by step](18-onboarding-guide-customer-managed-provisioning.md)*
