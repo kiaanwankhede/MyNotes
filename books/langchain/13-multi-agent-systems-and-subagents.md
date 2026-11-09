@@ -324,7 +324,7 @@ result = supervisor_agent.invoke(Command(resume=resume), config)
 - Sub-agents run **inside tool functions**, so LangGraph cannot see them statically. `get_state(..., subgraphs=True)` on the main graph will not show their state. To inspect nested state during an interrupt, call the sub-agent from a **node** in a custom graph ([Chapter 14](14-handoffs-skills-router-and-custom-workflows.md))
 - Not run here
 
-### What the supervisor gets back
+### Passing context down and results up
 
 - *Source: LangChain docs, `multi-agent/subagents-personal-assistant.mdx` (sections 7-8).*
 - A wrapper tool decides what flows each way.

@@ -2,6 +2,23 @@
 
 Notes built from the Live Class 2026 course and other sources. Chapters are in study order.
 
+## Study path for a Gen AI developer
+
+| Goal | Read | Then build |
+|---|---|---|
+| Ship a first tool-calling agent | Ch 1 → 3 → 5 | a two-tool agent with streaming and a `recursion_limit` |
+| Reliable, typed outputs | Ch 4 | an extraction agent with a `Literal` + optional-field schema |
+| Memory that survives | Ch 6 | per-user store + per-conversation `thread_id` |
+| Control the loop | Ch 7 → 8 → 9 → 10 | summarisation, retries/fallback, PII masking, one custom middleware |
+| Safe actions | Ch 11 | human approval on every write/send/pay tool |
+| External tools | Ch 12 | connect one MCP server; handle auth per user |
+| Several agents | Ch 13 → 14 | supervisor + 2 subagents; then compare with a router |
+| Prove it works | Ch 15 | a 20-case eval set run before every prompt change |
+| Interview prep | Ch 17, plus each chapter's Interview corner and Cheat sheet | |
+
+- **Fast revision:** read only the 🏭 *In production* boxes, the Interview corners and the Cheat sheets
+- Sections marked *added by Claude* are industry practice beyond the class; the ✅ marks show what was run
+
 ## Live Colab notebooks
 
 The notebooks the mentor shared and ran live, by class. Links are from the course repo's `COLAB_NOTEBOOKS.md` and were **not opened**. If one asks you to sign in, tell the mentor.
