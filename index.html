@@ -261,6 +261,7 @@ function renderLeft(b){
   document.getElementById('chlbl').textContent=cur||(b.title+' chapters');
 }
 function fixLinks(html){
+  html=html.replace(/src="(images\/[^"]+)"/g,function(m,p){return 'src="books/'+state.book+'/'+p+'"';});
   return html.replace(/href="(?:\.\.\/([a-z]+)\/)?([0-9]{2}-[^"#]+)\.md"/g,function(m,bk,id){
     return 'href="#'+hashFor(bk||state.book,id)+'"';
   });

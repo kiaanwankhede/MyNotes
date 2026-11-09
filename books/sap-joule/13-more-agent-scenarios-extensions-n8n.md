@@ -629,6 +629,20 @@ flowchart LR
 
 ![Spend supplier assistant, figure 21](images/ch13-s11-spendsupplier-21.png)
 
+### Images: Beyond PoC: Sovanta purchasing anomalies
+
+*Source: [Beyond PoC: Sovanta purchasing anomalies](https://community.sap.com/t5/technology-blog-posts-by-members/beyond-poc-how-sovanta-detects-purchasing-anomalies-with-a-custom-joule/ba-p/14257926)*
+
+![Sovanta blog, figure 1](images/ch13-s1-sovanta-01.png)
+
+![Sovanta blog, figure 2](images/ch13-s1-sovanta-02.png)
+
+### Images: SAP News: Joule in S/4HANA Cloud and Supply Chain
+
+*Source: [SAP News: Joule in S/4HANA Cloud and Supply Chain](https://news.sap.com/2024/12/joule-available-sap-s4hana-cloud-supply-chain-management/)*
+
+![SAP News article, figure 1](images/ch13-s12-newssap-01.jpg)
+
 ## Recap
 
 - Four solution types: agent, data product, extension, n8n workflow
@@ -679,3 +693,7 @@ flowchart LR
 ---
 
 *Previous: [Chapter 12: Intent-based agents in Joule Studio: ten business scenarios](12-intent-based-agents-lab.md)*
+
+---
+
+*Next: [Chapter 14: Troubleshooting Joule setup and Joule Studio](14-troubleshooting-joule-setup-and-studio.md)*

@@ -663,6 +663,52 @@ flowchart LR
 
 ![Skill process tutorial, figure 46](images/ch06-s7-skillprocess-46.webp)
 
+### Images: Tutorial: Create a skill action
+
+*Source: [Tutorial: Create a skill action](https://developers.sap.com/tutorials/joulestudio-skill-action-create)*
+
+![Action create tutorial, figure 1](images/ch06-s4-actioncreate-01.webp)
+
+![Action create tutorial, figure 2](images/ch06-s4-actioncreate-02.webp)
+
+![Action create tutorial, figure 3](images/ch06-s4-actioncreate-03.webp)
+
+![Action create tutorial, figure 4](images/ch06-s4-actioncreate-04.webp)
+
+![Action create tutorial, figure 5](images/ch06-s4-actioncreate-05.webp)
+
+![Action create tutorial, figure 6](images/ch06-s4-actioncreate-06.webp)
+
+![Action create tutorial, figure 7](images/ch06-s4-actioncreate-07.webp)
+
+![Action create tutorial, figure 8](images/ch06-s4-actioncreate-08.webp)
+
+![Action create tutorial, figure 9](images/ch06-s4-actioncreate-09.webp)
+
+![Action create tutorial, figure 10](images/ch06-s4-actioncreate-10.webp)
+
+![Action create tutorial, figure 11](images/ch06-s4-actioncreate-11.webp)
+
+![Action create tutorial, figure 12](images/ch06-s4-actioncreate-12.webp)
+
+![Action create tutorial, figure 13](images/ch06-s4-actioncreate-13.webp)
+
+![Action create tutorial, figure 14](images/ch06-s4-actioncreate-14.webp)
+
+![Action create tutorial, figure 15](images/ch06-s4-actioncreate-15.webp)
+
+![Action create tutorial, figure 16](images/ch06-s4-actioncreate-16.webp)
+
+![Action create tutorial, figure 17](images/ch06-s4-actioncreate-17.webp)
+
+![Action create tutorial, figure 18](images/ch06-s4-actioncreate-18.webp)
+
+![Action create tutorial, figure 19](images/ch06-s4-actioncreate-19.webp)
+
+![Action create tutorial, figure 20](images/ch06-s4-actioncreate-20.webp)
+
+![Action create tutorial, figure 21](images/ch06-s4-actioncreate-21.webp)
+
 ## Recap
 
 - A skill is built on actions, which are built on destinations, which live in an environment

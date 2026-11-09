@@ -228,6 +228,112 @@
 
 ![Build Code setup tutorial, figure 8](images/ch11-s3-buildcodesetup-08.webp)
 
+### Images: Joule for developers (SAP Community blog)
+
+*Source: [Joule for developers (SAP Community blog)](https://community.sap.com/t5/technology-blog-posts-by-sap/joule-for-developers/ba-p/14420721)*
+
+![Joule for developers, figure 1](images/ch11-s1-jouleforDevs-01.png)
+
+### Images: Prompt-driven development: full-stack CAP apps
+
+*Source: [Prompt-driven development: full-stack CAP apps](https://community.sap.com/t5/technology-blog-posts-by-sap/prompt-driven-development-building-full-stack-sap-cap-apps-from-user/ba-p/14288653)*
+
+![Prompt-driven development, figure 1](images/ch11-s2-promptdriven-01.png)
+
+![Prompt-driven development, figure 2](images/ch11-s2-promptdriven-02.png)
+
+![Prompt-driven development, figure 3](images/ch11-s2-promptdriven-03.png)
+
+![Prompt-driven development, figure 4](images/ch11-s2-promptdriven-04.png)
+
+![Prompt-driven development, figure 5](images/ch11-s2-promptdriven-05.png)
+
+![Prompt-driven development, figure 6](images/ch11-s2-promptdriven-06.png)
+
+![Prompt-driven development, figure 7](images/ch11-s2-promptdriven-07.png)
+
+![Prompt-driven development, figure 8](images/ch11-s2-promptdriven-08.png)
+
+![Prompt-driven development, figure 9](images/ch11-s2-promptdriven-09.png)
+
+![Prompt-driven development, figure 10](images/ch11-s2-promptdriven-10.png)
+
+![Prompt-driven development, figure 11](images/ch11-s2-promptdriven-11.png)
+
+![Prompt-driven development, figure 12](images/ch11-s2-promptdriven-12.png)
+
+![Prompt-driven development, figure 13](images/ch11-s2-promptdriven-13.png)
+
+![Prompt-driven development, figure 14](images/ch11-s2-promptdriven-14.png)
+
+![Prompt-driven development, figure 15](images/ch11-s2-promptdriven-15.png)
+
+![Prompt-driven development, figure 16](images/ch11-s2-promptdriven-16.png)
+
+![Prompt-driven development, figure 17](images/ch11-s2-promptdriven-17.png)
+
+### Images: Enabling support for existing CAP projects in SAP Build Code
+
+*Source: [Enabling support for existing CAP projects in SAP Build Code](https://community.sap.com/t5/technology-blog-posts-by-members/enabling-support-for-existing-cap-projects-in-sap-build-code/ba-p/13676571)*
+
+![CAP projects blog, figure 1](images/ch11-s5-capprojects-01.png)
+
+![CAP projects blog, figure 2](images/ch11-s5-capprojects-02.png)
+
+![CAP projects blog, figure 3](images/ch11-s5-capprojects-03.png)
+
+![CAP projects blog, figure 4](images/ch11-s5-capprojects-04.png)
+
+![CAP projects blog, figure 5](images/ch11-s5-capprojects-05.png)
+
+### Images: Course: Introducing SAP Joule for Consultants, lesson pages
+
+*Source: [Course: Introducing SAP Joule for Consultants, lesson pages](https://learning.sap.com/courses/introducing-sap-joule-for-consultants)*
+
+![Joule for Consultants course, figure 1](images/ch11-s6-consultants-L01-01.png)
+
+![Joule for Consultants course, figure 2](images/ch11-s6-consultants-L01-02.png)
+
+![Joule for Consultants course, figure 3](images/ch11-s6-consultants-L02-01.png)
+
+![Joule for Consultants course, figure 4](images/ch11-s6-consultants-L04-01.png)
+
+![Joule for Consultants course, figure 5](images/ch11-s6-consultants-L05-01.png)
+
+![Joule for Consultants course, figure 6](images/ch11-s6-consultants-L06-01.png)
+
+![Joule for Consultants course, figure 7](images/ch11-s6-consultants-L06-02.png)
+
+![Joule for Consultants course, figure 8](images/ch11-s6-consultants-L07-01.png)
+
+![Joule for Consultants course, figure 9](images/ch11-s6-consultants-L07-02.png)
+
+![Joule for Consultants course, figure 10](images/ch11-s6-consultants-L07-03.png)
+
+![Joule for Consultants course, figure 11](images/ch11-s6-consultants-L07-04.png)
+
+![Joule for Consultants course, figure 12](images/ch11-s6-consultants-L07-05.png)
+
+![Joule for Consultants course, figure 13](images/ch11-s6-consultants-L07-06.png)
+
+![Joule for Consultants course, figure 14](images/ch11-s6-consultants-L08-01.png)
+
+![Joule for Consultants course, figure 15](images/ch11-s6-consultants-L08-02.png)
+
+![Joule for Consultants course, figure 16](images/ch11-s6-consultants-L11-01.png)
+
+![Joule for Consultants course, figure 17](images/ch11-s6-consultants-L12-01.png)
+
+![Joule for Consultants course, figure 18](images/ch11-s6-consultants-L12-02.png)
+
+![Joule for Consultants course, figure 19](images/ch11-s6-consultants-L12-03.png)
+
+![Joule for Consultants course, figure 20](images/ch11-s6-consultants-L12-04.png)
+
+![Joule for Consultants course, figure 21](images/ch11-s6-consultants-L12-05.png)
+
+![Joule for Consultants course, figure 22](images/ch11-s6-consultants-L12-06.png)
+
 ## Recap
 
 - Set up Build Code with the booster, then verify the two subscriptions

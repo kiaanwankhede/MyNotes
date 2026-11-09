@@ -180,6 +180,58 @@ flowchart LR
 
 ![CodeJam overview, figure 4](images/ch07-s2-codejam0-04.webp)
 
+### Images: Creating a Hello World Joule agent (SAP Community blog)
+
+*Source: [Creating a Hello World Joule agent (SAP Community blog)](https://community.sap.com/t5/artificial-intelligence-blogs-posts/creating-a-hello-world-joule-agent/ba-p/14326323)*
+
+![Hello World agent blog, figure 1](images/ch07-s1-helloworld-01.png)
+
+![Hello World agent blog, figure 2](images/ch07-s1-helloworld-02.png)
+
+![Hello World agent blog, figure 3](images/ch07-s1-helloworld-03.png)
+
+![Hello World agent blog, figure 4](images/ch07-s1-helloworld-04.png)
+
+![Hello World agent blog, figure 5](images/ch07-s1-helloworld-05.png)
+
+![Hello World agent blog, figure 6](images/ch07-s1-helloworld-06.png)
+
+![Hello World agent blog, figure 7](images/ch07-s1-helloworld-07.png)
+
+![Hello World agent blog, figure 8](images/ch07-s1-helloworld-08.png)
+
+![Hello World agent blog, figure 9](images/ch07-s1-helloworld-09.png)
+
+![Hello World agent blog, figure 10](images/ch07-s1-helloworld-10.png)
+
+![Hello World agent blog, figure 11](images/ch07-s1-helloworld-11.png)
+
+![Hello World agent blog, figure 12](images/ch07-s1-helloworld-12.png)
+
+![Hello World agent blog, figure 13](images/ch07-s1-helloworld-13.png)
+
+![Hello World agent blog, figure 14](images/ch07-s1-helloworld-14.png)
+
+![Hello World agent blog, figure 15](images/ch07-s1-helloworld-15.png)
+
+![Hello World agent blog, figure 16](images/ch07-s1-helloworld-16.png)
+
+![Hello World agent blog, figure 17](images/ch07-s1-helloworld-17.png)
+
+![Hello World agent blog, figure 18](images/ch07-s1-helloworld-18.png)
+
+![Hello World agent blog, figure 19](images/ch07-s1-helloworld-19.png)
+
+### Images: Course lesson: Building Joule agents in Joule Studio, classic edition
+
+*Source: [Course lesson: Building Joule agents in Joule Studio, classic edition](https://learning.sap.com/courses/getting-started-with-joule-studio-classic-edition/building-joule-agents-with-joule-studio-classic-edition_c0cc36a2-6f76-4d03-b6d0-abed14a82eda)*
+
+![Classic-edition course lesson, figure 1](images/ch07-s3-courselesson-01.png)
+
+![Classic-edition course lesson, figure 2](images/ch07-s3-courselesson-02.png)
+
+![Classic-edition course lesson, figure 3](images/ch07-s3-courselesson-03.png)
+
 ## Recap
 
 - Skills do one fixed task; agents choose tools

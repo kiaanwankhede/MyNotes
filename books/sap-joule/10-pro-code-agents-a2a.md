@@ -299,6 +299,40 @@ flowchart LR
 
 ![Supplier disruption agent tutorial, figure 26](images/ch10-s5-supplierdisruption-26.webp)
 
+### Images: Integrating Joule with code-based agents: three paths
+
+*Source: [Integrating Joule with code-based agents: three paths](https://community.sap.com/t5/technology-blog-posts-by-sap/integrating-joule-with-code-based-agents-three-paths-forward/ba-p/14370520)*
+
+![Three paths blog, figure 1](images/ch10-s2-threepaths-01.png)
+
+![Three paths blog, figure 2](images/ch10-s2-threepaths-02.png)
+
+![Three paths blog, figure 3](images/ch10-s2-threepaths-03.png)
+
+![Three paths blog, figure 4](images/ch10-s2-threepaths-04.png)
+
+![Three paths blog, figure 5](images/ch10-s2-threepaths-05.png)
+
+![Three paths blog, figure 6](images/ch10-s2-threepaths-06.png)
+
+![Three paths blog, figure 7](images/ch10-s2-threepaths-07.png)
+
+![Three paths blog, figure 8](images/ch10-s2-threepaths-08.png)
+
+### Images: Joule A2A: secure code-based agents with IAS
+
+*Source: [Joule A2A: secure code-based agents with IAS](https://community.sap.com/t5/technology-blog-posts-by-sap/joule-a2a-secure-code-based-agents-with-ias/ba-p/14367792)*
+
+![A2A with IAS blog, figure 1](images/ch10-s3-a2aias-01.png)
+
+![A2A with IAS blog, figure 2](images/ch10-s3-a2aias-02.png)
+
+### Images: Reference architecture: Integrating AI agents with Joule (outbound A2A)
+
+*Source: [Reference architecture: Integrating AI agents with Joule (outbound A2A)](https://architecture.learning.sap.com/docs/ref-arch/ae6821)*
+
+![A2A reference architecture, figure 1](images/ch10-s1-refarch-01.svg)
+
 ## Recap
 
 - Low-code agents are wired to Joule for you; pro-code agents speak A2A
