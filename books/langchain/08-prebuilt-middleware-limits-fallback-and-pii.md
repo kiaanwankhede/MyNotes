@@ -259,6 +259,46 @@ Where these patterns show up in real work (from the notebook):
 
 **Observability:** there is no universal best choice. LangFuse integrates easily with the LangChain family. For RAG, test dedicated evaluation tools. Early results are often deceptively easy, so real quality needs more testing than the basics.
 
+### A production starter stack (*added by Claude*)
+
+One agent with the middleware from Chapters 7 to 11 combined. Order matters: the list runs **top to bottom on the way in** (before hooks) and wraps from the outside in.
+
+```python
+from langchain.agents.middleware import (
+    PIIMiddleware, ModelCallLimitMiddleware, ToolCallLimitMiddleware, ModelRetryMiddleware,
+    ModelFallbackMiddleware, ToolRetryMiddleware, SummarizationMiddleware, HumanInTheLoopMiddleware)
+
+agent = create_agent(
+    model="openai:gpt-4o-mini",
+    tools=[search_orders, send_email],
+    checkpointer=saver,                                                    # needed for HITL + memory
+    middleware=[
+        PIIMiddleware("email", strategy="redact", apply_to_input=True),   # 1 clean input first
+        ModelCallLimitMiddleware(thread_limit=50, run_limit=10, exit_behavior="end"),  # 2 cost cap
+        ToolCallLimitMiddleware(run_limit=20),
+        ModelRetryMiddleware(max_retries=2),                               # 3 transient errors
+        ModelFallbackMiddleware("anthropic:claude-haiku-4-5"),             # 4 provider outage
+        ToolRetryMiddleware(max_retries=2),
+        SummarizationMiddleware(model="openai:gpt-4o-mini",
+                                trigger=("tokens", 8000), keep=("messages", 20)),  # 5 long chats
+        HumanInTheLoopMiddleware(interrupt_on={"send_email": True}),       # 6 risky actions
+    ],
+)
+```
+
+| Layer | Protects against |
+|---|---|
+| PII redaction | personal data reaching the model, logs and traces |
+| Call limits | runaway loops and surprise bills |
+| Retry → fallback | rate limits, timeouts, provider outages |
+| Summarisation | context overflow and growing cost per turn |
+| Human approval | irreversible actions done wrongly |
+
+- Start with this, then remove what a use case doesn't need; add tracing ([Chapter 15](15-testing-agents-and-tracing.md)) on top
+- Model names are examples; put them in config
+
+✅ *Verified offline with scripted models: the stack built and ran; the stored user message read `mail me at [REDACTED_EMAIL]`.*
+
 ## 8.7 Questions from the class
 
 - **Why not just prompt "do not call the tool more than twice"?** A prompt is not reliable. A limit in code is (8.1)
