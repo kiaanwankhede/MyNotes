@@ -103,6 +103,34 @@ ev(outputs=result["messages"], reference_outputs=reference_trajectory)["score"] 
 > - Track cost and latency per eval run next to accuracy, so a "better" prompt that doubles cost is visible
 > - *Added by Claude.*
 
+### Your first eval set, with no extra library (*added by Claude*)
+
+Start here before adopting `agentevals` or LangSmith datasets: a list of real questions, the tool each **should** use, and one fact the answer must contain.
+
+```python
+CASES = [
+    {"q": "Weather in Tokyo?", "tool": "get_weather", "must_contain": "22"},
+    {"q": "Hi!",               "tool": None,          "must_contain": "hello"},
+]
+
+def run_case(agent, case) -> bool:
+    msgs = agent.invoke({"messages": [{"role": "user", "content": case["q"]}]})["messages"]
+    called = [tc["name"] for m in msgs for tc in getattr(m, "tool_calls", [])]
+    ok_tool = (case["tool"] in called) if case["tool"] else not called   # right tool, or none
+    ok_text = case["must_contain"].lower() in msgs[-1].content.lower()
+    return ok_tool and ok_text
+
+results = [run_case(agent, c) for c in CASES]
+print(f"pass rate: {sum(results)}/{len(results)}")
+```
+
+- **Two checks per case:** the trajectory (right tool, or no tool) and the outcome (key fact present). Most regressions show up in one of them
+- Grow `CASES` from real traces: every bug report becomes a case
+- Run it before every prompt, model or tool change; a falling pass rate blocks the change
+- Later, swap the checks for `agentevals` trajectory matching or an LLM judge for open-ended answers, and log runs to LangSmith
+
+✅ *Verified offline with scripted fake models: both cases passed (`pass rate: 2/2`).*
+
 ## 15.5 Tracing with LangSmith
 
 - A trace records every step: model calls, tool calls, inputs and outputs
