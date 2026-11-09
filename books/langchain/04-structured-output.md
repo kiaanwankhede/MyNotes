@@ -6,6 +6,16 @@
 > - **Level:** beginner · **Time:** about 35 minutes
 > - **Builds on:** the Pydantic book (`BaseModel`, `Field`, validators) and [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md), where the same idea is done by hand with a JSON instruction.
 
+**After this chapter you can:**
+
+- Make a model reply in a defined, validated shape
+- Choose between `BaseModel` and `TypedDict`
+- Choose between `ProviderStrategy` and `ToolStrategy`
+- Use structured output on an agent, including several schemas
+- Explain what happens when the model breaks a constraint
+
+**Running example:** CineBot, a movie-ticket assistant. It parses booking requests (this chapter), checks showtimes ([Chapter 5](05-tools.md)) and finally becomes a real agent (Chapter 6).
+
 ## 4.1 The problem
 
 Free text is not wrong, it is just **not a contract**. Your code cannot depend on its shape.
@@ -316,6 +326,7 @@ ToolStrategy(MeetingAction, tool_message_content="Action item captured!")
 > - Version your schemas: a field rename breaks every consumer downstream, just like an API
 > - *Added by Claude.*
 
+
 ## 4.10 Interview corner
 
 **What interviewers listen for:** you know **why** free text breaks code, the difference between the provider and tool strategies, and what happens when the model returns something invalid.
@@ -399,6 +410,38 @@ from langchain.agents.structured_output import ToolStrategy
 agent = create_agent(model, tools, response_format=ToolStrategy(Movie))
 agent.invoke(inp)["structured_response"]                       # on an agent
 ```
+
+## Recap
+
+- Free text is not a contract. A schema is
+- `model.with_structured_output(Schema)` returns an object. Use Pydantic when correctness matters
+- Strategy is picked from `model.profile`: provider-native, else tool-based
+- Model-level has **no tool loop**. For tools plus schema use `response_format` on an agent
+- `Union` lets one agent return different shapes. Docstrings guide the choice
+- Constraints are enforced outside the model. Errors go back to it for a retry
+
+## Practice
+
+1. Run the three customer messages through plain text, then `SupportTicket`, and compare
+2. Check `type(response)` after `with_structured_output()` with a Pydantic model
+3. Rewrite `SupportTicket` as a `TypedDict` and find what it no longer rejects
+4. Compare `gpt-3.5-turbo` and a current model with `.profile`
+5. Build a `Union` of two intents (for example a food-order assistant) and print which class you got
+6. Send the 15-ticket injection message to an agent with `ge=1, le=10` and read the trace for the error and retry
+7. Assignment B1.3, B2.1, B2.3 (a `FoodOrder` extraction, a two-schema reservation agent, a deliberate constraint failure) use a restaurant assistant called GreenPlate. Do them without looking at the solutions
+
+## How this chapter was checked
+
+- Run offline for the additions: the `method=` options and defaults of `with_structured_output`, the `ProviderStrategy` refusal on a raw model, the `model.profile` values for `gpt-5-mini` and `gpt-3.5-turbo`, agent construction on `gpt-3.5-turbo` with three `response_format` choices, and the four `handle_errors` settings with a scripted model that first breaks the constraint. **Not run:** any real model, so how a real model reacts to a rejected value was not tested
+- Run offline with a stand-in model on `langchain` 1.4.7: the `ToolStrategy` retry (15 rejected, error returned as a `ToolMessage`, retry with 10), the custom `handle_errors` message, `Union` returning the right class, the `ValidationError` text, and the imports
+- **Not run against a live model:** `with_structured_output`, `model.profile` values, the `bind_tools(...).with_structured_output(...)` failure and the `strategy=` claim. Those are class or answer-key statements
+- **Details by section** (moved here from the ✅ markers):
+  - *How the raw model enforces the schema: `method=`:* Checked: `model.with_structured_output(ProviderStrategy(Schema))` raised `ValueError: Unsupported function` at once. Pick one layer, never both
+  - *4.7 `model.profile`: check before you rely on it:* Checked from the installed `langchain-openai` data (no network call): `gpt-5-mini` reported `structured_output` and `tool_calling` as `True` with `max_input_tokens` 272000. `gpt-3.5-turbo` reported both as `False`. The profile is **static library data**, so it can lag a model's real abilities
+  - *4.7 `model.profile`: check before you rely on it:* Checked: building an agent with `response_format=ToolStrategy(...)`, `ProviderStrategy(...)` or a bare schema on `gpt-3.5-turbo` **did not fail at construction**. Any failure shows up at call time, which was not run here
+  - *Tool-strategy extras: tool message text and wrong multi-output:* Checked (scripted model): the final message was `Captured!`; a two-schema turn produced the error text twice, then the retry gave `task='y'`.
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+- **Cheat sheet:** ran `create_agent(..., response_format=ToolStrategy(Movie))` and read `structured_response`; `with_structured_output(Movie)` was constructed on a real model object, not called. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

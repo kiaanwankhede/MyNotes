@@ -6,6 +6,16 @@
 > - **Level:** intermediate to advanced · **Time:** about 50 minutes
 > - **Builds on:** [Chapter 6](06-agents-and-memory.md) (checkpointer, store, context basics), [Chapter 7](07-middleware.md) (hooks, first look at HITL) and [Chapter 10](10-shell-tools-and-custom-middleware.md) (hook signatures). MCP, the next topic in the course, starts in the MCP book.
 
+**After this chapter you can:**
+
+- Explain what runtime is and name its five components
+- Pass per-run data with `context_schema` and `context=`
+- Read context and long-term memory inside tools with `ToolRuntime`
+- Say exactly what state, runtime and tool runtime each hold, and who receives what
+- Build a personalised system prompt with `dynamic_prompt`
+- Pause an agent for a human with `HumanInTheLoopMiddleware`, read the interrupt and resume it
+- Interrupt only when it matters, with a condition on the tool call's arguments
+
 ## 11.1 The problem runtime solves
 
 - CineBot needs facts that are **not part of the conversation**: which customer is talking, whether they are a VIP, which cinema location this session belongs to
@@ -472,6 +482,23 @@ def run_interactive_hitl(agent, config):
 - Approve, reject, edit and respond appear under other names in other frameworks. The practice differs a little, the concept does not
 - This class used the **correct `edited_action` shape**. The class 11 demo used `args` directly, which raises an error (checked in [Chapter 7](07-middleware.md), 7.6)
 
+## 11.14 Questions from the class
+
+- **State vs runtime context?** Mutability and persistence (11.7). State is mutable and persists across invocations in a conversation. Context is for static per-run values. The mentor first answered this the wrong way round and corrected it after the break
+- **Does a change persist the same way inside a tool and inside `wrap_tool_call`?** Only **state** changes carry forward across tool calls in one invocation. Context stays fixed
+- **Can I name my decorated middleware functions anything?** Decorator-based, yes. Class-based, no: the method name must match the hook
+- **Does declaration order of several middlewares matter?** Yes. `before_*` and `wrap_*` in declared order, `after_*` reversed ([Chapter 10](10-shell-tools-and-custom-middleware.md), 10.8)
+- **Retry and error middleware: does order matter?** The class said to declare retry first. **My test says the opposite.** See 11.16
+- **Why is every reply in my structured format, even "hi", when I set `response_format` and tools?** Expected. Once structured output is set, the agent always tries to shape its final answer that way. It is separate from a tool's `return_direct`, which sends a tool's raw result past the model
+- **MCP vs defining tools in LangChain?** In a simple sense the same: MCP is a collection of tools in a standard protocol. The "agent calls a tool" mechanic does not change. MCP changes how tools are packaged, discovered and shared
+- **When LangGraph instead of LangChain?** When LangChain's default control is not enough. Every `create_agent` already builds a LangGraph graph. LangGraph lets you reach into that graph
+- **How does Google's ADK compare?** Near-identical once names are stripped away: multi-agent, human-in-the-loop, graph workflows, models. The same is true of AutoGen. Evaluating another framework is mostly a vocabulary exercise
+- **Is RAG always used for agent memory?** No. For retrieving documents by meaning, RAG fits. For persisting and looking up structured data, a plain database works just as well
+- **Keep an on-premise model current with changing company policy: fine-tune or RAG?** RAG. Fine-tuning is slow, expensive and will not track fast-changing policy
+- **Voice-driven document editor?** Build voice-to-text directly. For light workloads, free long-context models are enough
+- **What does the mentor look for when hiring for agentic AI roles?** Software engineering fundamentals and real problem-solving over memorised framework syntax. You should be able to explain **why** code does what it does, including basics such as what Pydantic is for
+- **How do I cut token use in a long-running conversation?** Use long-term memory (the `store`, through runtime). Retrieve only the memories relevant to the current message instead of resending the whole history. Whether to load all, load some or summarise is your design choice. LangChain does not do it for you
+
 ## 11.15 Interview corner
 
 **What interviewers listen for:** you separate **state** (changes during a run) from **context** (fixed per run), you know a pause needs a checkpointer, and you can describe the approve / edit / reject / respond flow.
@@ -582,6 +609,56 @@ r = agent.invoke(inp, cfg, context=Ctx(user_id="u1"))
 r["__interrupt__"]                                  # paused
 agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg, context=Ctx("u1"))
 ```
+
+## Recap
+
+- **Runtime** = what travels with the agent but is not conversation: `context`, `store`, `stream_writer`, `execution_info`, `server_info`
+- **State** = `messages` plus custom fields, mutable, persists across invocations of a thread
+- Tools get `ToolRuntime` (runtime + state + config + tool call id). Node hooks get `state` and `runtime`. Wrap hooks get one `request`
+- Pass per-run data with `context_schema` and `context=`. **Freeze** the dataclass. Namespaces in the store are **tuples**
+- `dynamic_prompt` rebuilds the system prompt from context on every call
+- **HITL:** needs a checkpointer. `version="v2"` gives `.interrupts` and `.value`. Resume with `Command(resume={"decisions": [...]})` on the same thread
+- `True` = all four decisions, `False` = never pause. `respond` returns the human's words as the tool result
+- **Conditional interrupts:** `"when": fn(ToolCallRequest) -> bool`. Make it fail closed
+
+## Practice
+
+1. Recreate `CineBotContext` and confirm `context=` at invocation is readable without being part of the conversation
+2. Build `fetch_customer_preferences` with `ToolRuntime` and a real `InMemoryStore`. Confirm the preferences persist across separate `invoke()` calls. Then use the string namespace `("users")` and see the silent miss
+3. Define a hook with zero parameters and see the error. Then catch the arguments as `a, b` and see it work
+4. Build the `dynamic_prompt` example and confirm the system prompt changes with the context
+5. Recreate `unguarded_agent` vs `guarded_agent`: one cancels at once, the other pauses
+6. Practise all four decisions (`approve`, `edit`, `reject`, `respond`) against the same agent
+7. Build `is_large_refund` and show a small amount sails through and a large one interrupts. Then make it fail closed
+8. Test mutability: try changing `runtime.context` mid-run (with and without `frozen=True`), then change a state field and see it persist across tool calls and across invokes
+9. Assignment 2 (NovaBank), the parts this chapter prepares you for. The assignment has no answer key:
+   - A1 Q3: `thread_id` vs `context`, one example of data for each, and why swapping them causes a real bug (11.7)
+   - B1.2: a `context_schema` with `account_tier` read by a tool through `runtime.context` ([Chapter 6](06-agents-and-memory.md))
+   - A2 Q7 and B2.1: the four HITL decisions for `transfer_funds` ([Chapter 7](07-middleware.md))
+10. Set up VS Code ahead of the MCP module. It is taught there, not in Colab
+
+## How this chapter was checked
+
+- Run offline with a stand-in model on `langchain` 1.4.7 and `langgraph` 1.2.19:
+  - `context_schema` with `dynamic_prompt` (the system message, and the name absent from the saved messages)
+  - a tool with `ToolRuntime[...]` reading context and the store, the string vs tuple namespace, and `runtime` hidden from the tool's arguments
+  - hook parameter names (`a, b`), the members of the `Runtime` object and the fields of `execution_info`
+  - state vs context: a counter in state persisting across tool calls and invokes, a mutable context changing mid-run, and a frozen one raising `FrozenInstanceError`
+  - `stream_writer` with `stream_mode="custom"`
+  - HITL: the unguarded agent, a dict result vs `version="v2"`, `.interrupts` and `.value`, `True` and `False` in `interrupt_on`, `description_prefix`, `respond` with a question-only tool, `when=` with $25 and $500, and the interactive loop with approve, edit and reject
+  - retry and error middleware in both orders with the default `on_failure`
+- **Not run:** a real LangGraph server (so `server_info` and `run_id` were `None`), real model behaviour, a persistent checkpointer or store
+- Class 15 has no code folder beyond the notebook and diagram. The Colab link in the README is not in the repo
+- **Details by section** (moved here from the ✅ markers):
+  - *11.3 The five components of runtime:* Checked: the runtime object also has other members (for example `override`, `merge`, `heartbeat`). The five above are the ones to learn
+  - *11.3 The five components of runtime:* Checked: `execution_info` carries `thread_id`, `run_id`, `node_attempt`, `checkpoint_id`, `checkpoint_ns` and `task_id`. Outside a server, `run_id` and `server_info` are `None`
+  - *11.8 Dynamic prompting with runtime:* Checked: the model's first message was `You are CineBot. Always address the user as Priya.` and the name did **not** appear in the saved messages
+  - *Per-call interrupt mode:* Checked, batched: 1 interrupt holding both `write_file` and `execute_sql`; no tool ran before the resume
+  - *Per-call interrupt mode:* Checked, per call: 2 interrupts; each value has `type: "tool_approval"`, `tool_call_id`, `name`, `args` and `description`. Resume with `Command(resume={interrupt_id: decision, ...})`
+  - *Context engineering: the framework:* Checked, transient: a `wrap_model_call` that replaced the system message changed what the model saw, and the state kept only `human, ai`. A `dynamic_prompt` that read `request.state` did the same and left no system message in state
+  - *Context engineering: the framework:* Checked, persistent: a `before_model` hook returning `{"messages": [SystemMessage(...)]}` put the note into **state**, and it stayed after the run
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+- **Cheat sheet:** ran the context-schema agent: a `refund` call paused with `__interrupt__`, and `Command(resume={"decisions": [{"type": "approve"}]})` completed the tool call. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

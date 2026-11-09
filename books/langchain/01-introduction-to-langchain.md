@@ -9,6 +9,14 @@
 > - **Level:** beginner · **Time:** about 45 minutes
 > - **Builds on:** the hand-written agent loop in [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md)
 
+**After this chapter you can:**
+
+- Explain what an agent is, in one sentence
+- Build one with `create_agent()`
+- Read every message it returns
+- Give it memory
+- Answer the common interview questions on all of the above
+
 ## 1.1 Why a framework
 
 - **Agent** = a model that decides the next step, calls tools, and loops until it has an answer
@@ -415,6 +423,33 @@ agent.invoke({"messages": [{"role": "user", "content": "..."}]},
              config={"configurable": {"thread_id": "t1"}, "recursion_limit": 25})
 # result["messages"]: Human → AI(tool call, id) → Tool(same id) → AI(answer)
 ```
+
+## Recap
+
+- Agent = **model + harness**. `create_agent()` is the harness
+- You give `model`, `tools`, `system_prompt`. `invoke` runs the loop
+- Result = human → AI (tool call) → tool result (same id) → final AI
+- Tool descriptions come from name, type hints, **docstring**
+- Memory = **checkpointer + thread_id**. In-memory is lost when the process ends
+- Make the model **verify with tools** and allow "cannot verify"
+- Cache by how fast the data changes
+- Frameworks trade some visibility and speed for a lot of plumbing. Count model calls: they are the cost
+
+## Practice
+
+1. New project with `uv add langchain langchain-openai langchain-anthropic`, plus `.env`, `.gitignore`, `.env.example`
+2. Build the weather agent. Print the messages and match each to a step of the hand-built loop
+3. Add `InMemorySaver` and `thread_id`. Show it remembers within a thread and forgets across threads
+4. Write a tool with a clear docstring, then make it vague and watch tool choice get worse
+5. Run the line-counting agent from 1.7 on a real text and check its numbers yourself
+6. Set `recursion_limit=3` and give the agent a task that needs more steps. Read the error
+
+## How this chapter was checked
+
+- Run offline with a stand-in model on `langchain` 1.4.7: message order, matching tool-call id, `pretty_print`, checkpointer memory per `thread_id`, `recursion_limit` in config (default seen: 10007), and the `cached` helper
+- **Not** run against a live model (needs a provider key). Check model names and prompts before running
+- The diagrams, tables and "In production" boxes were added in the 2026 book review; the framework landscape and production users come from the web sources below
+- **Cheat sheet:** ran `create_agent` with a scripted fake model that makes one tool call; the `thread_id` and `recursion_limit` config was accepted. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

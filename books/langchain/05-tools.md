@@ -5,6 +5,17 @@
 > - **You will build:** tools by hand and with decorators, schemas, ToolRuntime and gated tools
 > - **Level:** beginner to intermediate · **Time:** about 35 minutes
 
+**After this chapter you can:**
+
+- Explain binding and why it does **not** run anything
+- Return a tool result to the model with `ToolMessage`
+- Write tools with `@tool`, custom names and `args_schema`
+- Avoid the reserved names `config` and `runtime`
+- Use `ToolRuntime` for state, context and memory
+- Gate a tool so the model never sees it
+
+**This is the LangChain version of** the by-hand loop in [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md). Running example: CineBot (see [Chapter 4](04-structured-output.md)).
+
 ## 5.1 Binding: making the model aware
 
 - A model cannot know `get_weather()` exists just because it is in the same file
@@ -459,6 +470,39 @@ def get_order(order_id: str, runtime: ToolRuntime) -> str:
     return f"order {order_id} for {user}"
 model.bind_tools([get_order])               # model can now request it
 ```
+
+## Recap
+
+- **Binding** = awareness only. The model **requests** a call. Your code or the agent **runs** it
+- Result goes back as a `ToolMessage` with the same `tool_call_id`. `.content` for the model, `.artifact` for your app
+- `@tool` takes name and docstring from the function. Override with arguments
+- `args_schema` adds descriptions, limits, defaults. Field names must match the parameters
+- Never name a parameter `config` or `runtime` (except `runtime: ToolRuntime`)
+- `ToolRuntime` gives state, context, store, stream writer and more, hidden from the model
+- Gate by **removing** tools, using context or a state schema. A prompt only asks
+
+## Practice
+
+1. `bind_tools()` on a simple function, `.invoke()`, inspect `response.tool_calls`. Remember nothing has executed
+2. Call the real function yourself and send the result back as a `ToolMessage`
+3. Build a `ToolMessage` with `.artifact` and confirm the model's answer never mentions it
+4. Write a `@tool` with a clear docstring, then override its name and description and compare
+5. Make an `args_schema` with a constraint and a default. Print `.args` with and without it
+6. Give a tool a parameter called `config` and watch the failure when an agent calls it
+7. Add `runtime: ToolRuntime` and print `.args` to confirm the model never sees it
+8. Rebuild save and recall genre tools with `InMemoryStore` and prove memory survives two `.invoke()` calls
+9. Assignment B1.1, B2.2, B3.1, B3.2: a table-availability tool, an order tool with `args_schema`, a dietary-preference memory pair, and a gated private-dining tool (GreenPlate). For B3.2 use context or a state schema, not a bare input key
+
+## How this chapter was checked
+
+- Run offline for the additions: the `Args:` block with and without `parse_docstring=True`, `config` and `runtime` as plain arguments, and the registered-tools listing of a built agent
+- Run offline with a stand-in model on `langchain` 1.4.7: the manual tool loop from 5.3, `ToolMessage` content and artifact, `@tool` name and description override, `args_schema` output, the `config` parameter failure, `runtime` hidden from `.args`, `InMemoryStore` with a tuple namespace, `return_direct`, and gating with both context and a state schema (plus the failing bare-input version)
+- **Not run against a live model:** what a real model returns for `tool_calls`, Tavily, headless tools, `Command`. Those are class or answer-key statements
+- **Details by section** (moved here from the ✅ markers):
+  - *5.6 Two names you cannot use: `config` and `runtime`:* Checked, and a refinement: `config` as a plain `str` argument defines fine and fails when called. **`runtime` as a plain `str` argument worked** (the call returned normally). What LangChain treats specially is a parameter **annotated as `ToolRuntime`**, which it hides from the model. Do not rely on a plain `runtime: str` working in other versions. Avoid both names
+  - *Two whiteboard sketches (`Langchain-2-Updated.pdf`):* Checked* in [LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md): one tool use took **2 model calls**
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+- **Cheat sheet:** ran a `ToolRuntime` tool inside an agent and confirmed `runtime.context.user_id` reached the tool; `bind_tools` was constructed, not called. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

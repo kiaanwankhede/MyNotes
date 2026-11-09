@@ -459,6 +459,32 @@ Items marked ✅ were run with `langchain` 1.4.7 and `langgraph` 1.2.19.
 - **Separate fact from folklore.** The file itself leaves out percentages and thresholds it could not verify. Do the same
 - **Retrieval and evaluation are missing from the book so far.** Q5 and Q19 need that material before you can answer them in depth
 
+## Recap
+
+- Chain is fixed, agent decides. `create_agent` replaced `AgentExecutor` in v1.0
+- Structured output: schema as a contract. `method=` on a model, strategies on an agent. Validation errors feed back and retry. Catch `StructuredOutputValidationError`, not `ValueError`
+- Tools: the docstring is the pitch. Bind is a request, the agent runs it. `ToolRuntime` is hidden from the model. Filter tools in middleware, and declare the state key
+- `thread_id` is history, `context` is per-run data
+- Tracing, tool-call ceilings and timeouts are how you debug a hang
+- CVE-2025-68664: serialization injection through the `lc` key, fixed in 0.3.81 and 1.2.5
+
+## Practice
+
+1. Answer Q1 to Q21 aloud in under a minute each, then compare
+2. Run the `handle_errors` check: a scripted model that asks for 15 then 10, with each setting
+3. Build the VIP filter with and without the state key and note what the model is offered
+4. Check your own `langchain-core` version against the CVE
+5. Draw the middleware hook order from memory
+6. Write a two-sentence answer to "when would you not use LangChain?" from your own work
+
+## How this chapter was checked
+
+- Run for the assignment answers (`langchain` 1.4.7, scripted model): a custom-regex `PIIMiddleware` with four strategies; `ToolErrorMiddleware` and `ToolRetryMiddleware` in both orders, alone, and with `retry_on`. Library signatures and docstrings were read for stream modes, `name=`, the PII flags, `LLMToolEmulator` and `ProviderToolSearchMiddleware`
+- Run: the `handle_errors` settings and `Union` with a scripted model; a tool with `ToolRuntime`; the VIP tool filter with and without a declared state key; `method=` and the `ProviderStrategy` refusal on a raw model; and the installed `langchain-core` version
+- Checked through web search results: the facts of CVE-2025-68664 (date, affected and fixed versions, the `lc` key, the changed defaults, the nickname)
+- **Not run:** any real model, retrieval, RAGAS, LangSmith, the hanging-agent scenario, and the claims on when not to use LangChain
+- The question file is the source for every question and for the short answers marked as from it
+
 ## Sources and further reading
 
 - Live-Class-2026, `Weekend 05 - 25-26 Jul/09-10 .../Assignment & Questions/LangChain_Interview_Questions_Researched.md.pdf`

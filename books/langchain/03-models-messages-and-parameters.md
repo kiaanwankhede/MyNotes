@@ -5,6 +5,17 @@
 > - **You will build:** model calls with parameters, messages, streaming, batching and prompt templates
 > - **Level:** beginner · **Time:** about 40 minutes
 
+**After this chapter you can:**
+
+- Call any model through one interface
+- Set the parameters that matter
+- Build message lists (and few-shot prompts)
+- Read everything inside a model reply
+- Choose between `invoke`, `stream` and `batch`
+- Write prompt templates without the brace bug
+
+**Before this:** [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md) (the loop by hand), [Chapter 1](01-introduction-to-langchain.md) and [Chapter 2](02-langchain-family-and-harness-engineering.md).
+
 ## 3.1 The first model call
 
 `init_chat_model` is LangChain's universal entry point. Change the provider string, the rest of the code stays the same.
@@ -399,6 +410,23 @@ except ModelTimeoutError:
 - **Install:** `pip install -U langchain` (Python 3.10+), then one provider package: `langchain-openai`, `langchain-anthropic`.
 - ✅ *Verified (details in "How this chapter was checked").*
 
+## 3.11 Questions from the class
+
+- **Does `create_agent` call a tool in a single `invoke`?** Normally yes, it resolves within one invoke
+- **Can the system message change if a different LLM is used?** Yes, whichever model sits behind it
+- **System message = "skill"?** No, different concepts
+- **Advantage of message dicts over classes?** No functional advantage
+- **Does batching increase latency?** Only if you wait for the whole batch. `batch_as_completed` avoids that
+- **Is every AI call a standard API request and response?** Yes. LangChain, OpenRouter, Claude and the raw `chat.completions` calls from the LLM book are all the same kind of request and response. No framework adds magic
+- **Routing a query to one of several specialised agents** (each with a big Markdown knowledge file)
+  - Treat each agent like a tool and give the router only a short name and description
+  - Routing can be an `if` statement or a small classification call
+  - Belongs with the multi-agent chapter
+- **A `memory.md` pattern for multi-day builds**
+  - Keep a running summary file the AI updates after each session and read only that next time
+  - Summarising can lose detail
+  - Belongs with agents and memory
+
 ## 3.12 Interview corner
 
 **What interviewers listen for:** you know what a message list is, you can name the knobs that change cost and reliability (`temperature`, `max_tokens`, `timeout`), and you know which errors are worth retrying.
@@ -494,6 +522,36 @@ model.batch(["a", "b"], config={"max_concurrency": 4})
 msgs = [("system", "Be brief"), ("human", "Explain RAG")]
 reply = model.invoke(msgs); reply.usage_metadata     # tokens
 ```
+
+## Recap
+
+- `init_chat_model("provider:model")` = one entry point for all providers
+- Parameters: `temperature`, `max_tokens`, `timeout`, `max_retries`
+- Messages: system, human, AI, tool. Objects or dicts, same result
+- Few-shot = example exchanges before the real question
+- A reply has text, tool calls, token usage and metadata
+- `.stream()` = feels fast. `.batch()` = parallel and cheaper, **not** fewer tokens
+- Templates separate structure from variables. Double literal braces
+
+## Practice
+
+1. Set `temperature`, `max_tokens`, `timeout` and `max_retries` explicitly and see what changes
+2. Rebuild the few-shot pattern and compare with a system-message-only version
+3. Run `.stream()` on a long prompt, then `.batch()` on three questions, then `batch_as_completed()`
+4. Print `.usage_metadata` on a real call and compare with your provider's dashboard
+5. If you have the RAM, run the same prompt through a local Ollama model and compare quality
+
+## How this chapter was checked
+
+- The reasoning-token figures (3.5) and the three-SDK comparison (3.1) come from the class notebook output and code. Neither was run here (they need provider keys)
+- Run offline with a stand-in model on `langchain` 1.4.7: message dicts, tuples, bad `role` and missing `content` errors, `name` and `id`, `.batch()`, `.batch_as_completed()`, prompt template filling, the unescaped-brace `KeyError`, the doubled-brace fix, `MessagesPlaceholder`
+- **Not run against a live model:** temperature behaviour, token counts, OpenRouter limits, provider batch pricing. Those are class figures
+- **Details by section** (moved here from the ✅ markers):
+  - *Standard content blocks:* Checked (langchain 1.4.7): both parses above and the `content_blocks=` constructor gave exactly these shapes. `output_version` was **not** run: it is not an argument of the installed `init_chat_model` signature, so treat it as docs-only.
+  - *3.9 Model errors, rate limits and profiles:* Checked (langchain 1.4.7, scripted model): the exception names and `is_retryable` values above; a limiter at 5 requests/s with a bucket of 1 made 4 calls take about 0.8 s; `disable_streaming=True` gave one chunk. `model.profile` was not run (needs the provider package).
+  - *3.10 The LangChain error pages:* Checked (langchain-core): the coercion dict raised `ValueError: Message dict must contain 'role' and 'content' keys`; a template missing `name` raised `KeyError ... missing variables {'name'}`; a `(role, text)` tuple worked. The JavaScript-only pages were not run.
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+- **Cheat sheet:** ran `invoke`, `stream`, `batch` with `max_concurrency` and read `usage_metadata` on a fake model; `init_chat_model("openai:gpt-4o-mini", temperature=0, max_tokens=500, timeout=30)` was constructed, not called. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

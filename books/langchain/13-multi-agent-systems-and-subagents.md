@@ -6,6 +6,16 @@
 > - **Level:** advanced · **Time:** about 40 minutes
 > - **Builds on:** [Chapter 5](05-tools.md) (tools), [Chapter 6](06-agents-and-memory.md) (checkpointer), [Chapter 11](11-runtime-and-human-in-the-loop.md) (`ToolRuntime`, human-in-the-loop) and [Chapter 12](12-mcp-in-langchain.md) (tools from MCP servers). **Next:** [Chapter 14](14-handoffs-skills-router-and-custom-workflows.md) covers the other four patterns.
 
+**After this chapter you can:**
+
+- Explain why one agent with many tools struggles, and what context isolation fixes
+- Name the common multi-agent shapes and tell a router from a hierarchy
+- Name LangChain's five patterns and pick one for a problem
+- Test a multi-agent graph with no API key
+- Build the subagent pattern: a supervisor that calls agents as tools
+- Control what a subagent receives and what the supervisor gets back
+- Put human approval on actions inside nested subagents
+
 ## 13.1 Why one agent is not enough
 
 - The simplest setup: **one agent with a pile of tools** (email, calendar, search, a spreadsheet)
@@ -324,6 +334,7 @@ result = supervisor_agent.invoke(Command(resume=resume), config)
 - Rule from the page: use a supervisor for several distinct domains; for a few tools use one agent.
 - *Not re-run:* these patterns reuse the wrapper-tool and `ToolRuntime` mechanics already checked above.
 
+
 ### Subagent design decisions
 
 - *Source: LangChain docs, `multi-agent/index.mdx` and `subagents.mdx`.*
@@ -346,6 +357,17 @@ return Command(update={
 - **Supervisor vs router:** the supervisor is a full agent that keeps the conversation and decides turn by turn; a router is a classification step.
 - **Subagents do not talk to the user directly** (use an interrupt inside one if you must).
 - ✅ *Verified (details in "How this chapter was checked").*
+
+## 13.7 Questions from the class
+
+- **Which architecture is best?** It depends. Independent tasks suit parallel. Steps that need the previous step's output suit a chain. Custom workflows are also possible
+- **Do they differ in cost?** Not by design. The saving in the demo came from isolation
+- **Is a classifier-style technique like Pydantic schemas?** No, different problems. The technique's name is garbled in the recording
+- **Can agents be defined in `agents.md` or `skills.md`?** Some tools support that for **defining** agents. At run time they work the same way
+- **Does summarising the chat every N messages work?** Not always: cost grows with message count and code-heavy context skews the summary. Splitting heavy work into a sub-agent keeps the main context clean
+- **Interviews: definitions or depth?** Depth. Basic definitions are unlikely. Topics such as middleware are less commonly known, so explain them properly
+- **Two tools return conflicting results. What do you do?** An interview question the class deferred to the GCP project
+- **Next weekend:** a LangChain project on GCP (about $300 free-trial credit), then the other patterns in depth, then a dedicated A2A session
 
 ## 13.8 Interview corner
 
@@ -443,6 +465,46 @@ def research(query: str) -> str:
     return research_agent.invoke({"messages": [("user", query)]})["messages"][-1].text
 supervisor = create_agent(model, [research], checkpointer=InMemorySaver())
 ```
+
+## Recap
+
+- One agent with many tools picks badly and drags context. **Context isolation** keeps the parent small: a sub-agent reads, the parent sees a summary
+- Shapes: chain, parallel, router, feedback loop, hierarchical, planner and executor. A router does not get results back. A hierarchy does
+- LangChain's five patterns: **subagents, handoffs, skills, router, custom workflow**. They combine
+- **Test with a scripted model.** Real model choices need a separate test
+- **Subagent = an agent wrapped in a tool.** Return only the final message. Prompt specialists to restate their results
+- Isolated or forked input. A forked history needs its pending tool call removed
+- Return text, or a `Command` for structured data, with the key declared in the state schema
+- Nested human-in-the-loop: middleware on specialists, a checkpointer on the top-level agent, resume by interrupt id
+
+## Practice
+
+1. Build a calendar sub-agent and an email sub-agent. Wrap them as tools and add a supervisor
+2. Test each specialist on its own before wiring it in
+3. Add human-in-the-loop to the specialists. Send a request that calls both and approve one, edit the other
+4. Build a dispatch tool `task(agent_name, description)` with an `Enum`, then with a discovery tool
+5. Fork a sub-agent's input from `runtime.state["messages"]`. Print what it receives and remove the pending tool call
+6. Return a `Command` from a tool with a state key. Run it with and without the key in `state_schema`
+7. List one task from your work for each shape in 13.3 and mark which needs results returned to the top
+8. Rewrite the names and descriptions of two overlapping agents so a model can tell them apart
+
+## How this chapter was checked
+
+- Run with a scripted stand-in model: a supervisor and sub-agent trace; the dispatch tool, an unknown name, and an `Enum` argument; forked and isolated sub-agent input; a `Command` tool with and without the state key declared; and human-in-the-loop on two nested sub-agents, with both interrupts approved or edited by id and the edited subject confirmed
+- The context-isolation numbers, Agent Flow, sync and async jobs, `checkpointer=True`, state inspection and Deep Agents were **not run**
+- **No real model was used.** Whether a real model picks the right agent was not tested
+- The class transcript and the class repository's notebooks are the source for everything not marked *checked*
+- **Details by section** (moved here from the ✅ markers):
+  - *13.5 Testing without an API key:* Checked: every example in this chapter and the next ran with this model and no key
+  - *The mechanism:* Checked: the supervisor's trace was four messages (user, its tool call, the tool result, its answer). **The supervisor saw only the sub-agent's final text**, not its inner tool call
+  - *Tool per agent, or one dispatch tool:* Checked: `task` routed to each registered agent by name. An **unknown name raised a bare `KeyError`**, with no helpful message
+  - *Tool per agent, or one dispatch tool:* Checked: with the `Enum` (`class AgentName(str, Enum)`), an unknown name was rejected with a `ValidationError` **before** dispatch. The tool schema listed the allowed values
+  - *What the subagent receives: isolated or forked:* Checked: the isolated sub-agent saw only `["Recommend something similar"]`. The forked one saw the parent's earlier message, an **empty message**, and the new ask
+  - *What the supervisor gets back:* Checked, and not mentioned in the notebook: **the extra key is silently dropped unless it is declared in the agent's state schema.** With a plain `create_agent`, `last_research_confidence` was **absent** from the final state. With `state_schema` including `last_research_confidence`, it was `0.92`. Declare every key a tool writes
+  - *Human approval inside nested subagents:* Checked: resuming with a **dictionary keyed by interrupt id** worked. Both tools then ran, and the edited email went out with the subject **"Mockups reminder"**
+  - *Subagent design decisions:* Checked (scripted model): a tool returning a `Command` copied the subagent's state key into the parent (`found` became `x-found`) and the tool message carried the subagent's text; an `Enum` argument accepted `"writer"` and rejected `"bogus"` with a `ValidationError`. Async jobs and `get_state(subgraphs=True)` were not run.
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+- **Cheat sheet:** ran a supervisor that called a subagent wrapped as a tool and read `.text` from the subagent's last message. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 
