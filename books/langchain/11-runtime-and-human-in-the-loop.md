@@ -592,4 +592,4 @@ agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg, context=
 - `Assignment_2_Agents_and_Prebuilt_Middleware.ipynb` (questions only)
 - Section 11.16 and the corrections marked *checked* are from testing, not from the class sources
 
-Previous: [Chapter 10, Shell tools and custom middleware](10-shell-tools-and-custom-middleware.md) · Next: [Chapter 12, MCP in LangChain](12-mcp-in-langchain.md) (not written yet)
+Previous: [Chapter 10, Shell tools and custom middleware](10-shell-tools-and-custom-middleware.md) · Next: [Chapter 12, MCP in LangChain](12-mcp-in-langchain.md)

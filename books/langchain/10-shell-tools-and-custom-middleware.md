@@ -524,4 +524,4 @@ agent = create_agent(model, tools, middleware=[log_calls, time_tools, Guard()])
 - `Assignment_2_Agents_and_Prebuilt_Middleware.ipynb` (questions only)
 - Section 10.14 and the corrections marked *checked* are from testing, not from the class sources
 
-Previous: [Chapter 9, Guardrails, to-do lists and tool resilience](09-guardrails-to-do-lists-and-tool-resilience.md) · Next: [Chapter 11, Runtime and human-in-the-loop](11-runtime-and-human-in-the-loop.md) (not written yet)
+Previous: [Chapter 9, Guardrails, to-do lists and tool resilience](09-guardrails-to-do-lists-and-tool-resilience.md) · Next: [Chapter 11, Runtime and human-in-the-loop](11-runtime-and-human-in-the-loop.md)

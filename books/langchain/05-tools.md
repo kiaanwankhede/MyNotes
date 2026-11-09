@@ -471,4 +471,4 @@ model.bind_tools([get_order])               # model can now request it
 - Section 5.12 is added by Claude and is not from these sources
 - Live-Class-2026, `Student_Reference_Structured_Output_and_Tools.ipynb` and `Langchain_Till_Agents.ipynb` (Weekend 5). The `parse_docstring` and `runtime` findings are from testing
 
-Previous: [Chapter 4](04-structured-output.md) · Next: [Chapter 6, Agents and memory](06-agents-and-memory.md) (not written yet)
+Previous: [Chapter 4](04-structured-output.md) · Next: [Chapter 6, Agents and memory](06-agents-and-memory.md)

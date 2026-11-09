@@ -454,4 +454,4 @@ middleware = [
 - Live-Class-2026, `Weekend 07 - 8-9 Aug/Agent-Middleware-Architecture.png` (the table of prebuilt middleware used in 9.9) and the `.excalidraw` versions of the diagram
 - Section 9.9 is checked by testing against `langchain` 1.4.7
 
-Previous: [Chapter 8, Prebuilt middleware](08-prebuilt-middleware-limits-fallback-and-pii.md) · Next: [Chapter 10, Shell tools and custom middleware](10-shell-tools-and-custom-middleware.md) (not written yet)
+Previous: [Chapter 8, Prebuilt middleware](08-prebuilt-middleware-limits-fallback-and-pii.md) · Next: [Chapter 10, Shell tools and custom middleware](10-shell-tools-and-custom-middleware.md)
