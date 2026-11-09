@@ -478,6 +478,28 @@ def run_interactive_hitl(agent, config):
 ```
 
 - **The loop is always: invoke, check for interrupts, collect a decision, resume with a `Command`**
+
+**The same loop in a web app: two HTTP requests, not one `input()`** (*added by Claude*)
+
+```python
+# POST /chat  → may pause
+r = agent.invoke({"messages": [{"role": "user", "content": text}]},
+                 {"configurable": {"thread_id": session_id}})
+if "__interrupt__" in r:
+    req = r["__interrupt__"][0].value["action_requests"][0]
+    return {"status": "needs_approval", "tool": req["name"], "args": req["args"]}   # show buttons
+return {"status": "done", "reply": r["messages"][-1].content}
+
+# POST /approve  (minutes or hours later, maybe another server)
+r = agent.invoke(Command(resume={"decisions": [{"type": decision}]}),
+                 {"configurable": {"thread_id": session_id}})
+```
+
+- The pause lives in the **checkpointer**, not in memory: use a database saver so any server can resume it, and a restart doesn't lose pending approvals
+- `agent.get_state(config).next` is non-empty while a decision is pending; use it to show "waiting for approval" when the user reloads the page
+- Check **who** is approving (the same user, or a manager role) in the `/approve` endpoint; the interrupt itself doesn't know
+
+✅ *Verified offline: a `refund` call paused with `{'order_id': 'A-1'}`, `get_state(...).next` was non-empty, and a later `Command(resume=approve)` on the same `thread_id` ran the tool (`refunded A-1`) and finished.*
 - A real UI replaces `input()` with buttons (as chat products do). The loop underneath is the same in every framework
 - Approve, reject, edit and respond appear under other names in other frameworks. The practice differs a little, the concept does not
 - This class used the **correct `edited_action` shape**. The class 11 demo used `args` directly, which raises an error (checked in [Chapter 7](07-middleware.md), 7.6)
