@@ -6,14 +6,6 @@
 > - **Level:** beginner · **Time:** about 25 minutes
 > - **Builds on:** [Chapter 1](01-introduction-to-langchain.md). Model and message basics are in [Chapter 3](03-models-messages-and-parameters.md).
 
-**After this chapter you can:**
-
-- Tell LangChain, LangGraph, Deep Agents and LangSmith apart
-- Say why tracing matters and turn it on
-- Define "agent" and "harness" in one sentence each
-- Spot an outdated tutorial from the timeline
-- Set up and sanity-check your environment
-
 ## 2.1 Four products, four jobs
 
 ```mermaid
@@ -331,29 +323,6 @@ Not in the course material. Established practice, but check current docs.
 | Long research or coding tasks with planning and files | Deep Agents |
 | See and evaluate what happened | LangSmith (or an OpenTelemetry tool) |
 | Old `AgentExecutor` code | `langchain-classic`, then migrate |
-
-## Recap
-
-- LangGraph = foundation, LangChain = harness on it, Deep Agents = on top of that, LangSmith = observability
-- Agent = model calling tools in a loop. Harness = everything around the loop
-- The model sets the ceiling
-- Trace with `LANGSMITH_TRACING=true`
-- Outdated tutorial? Look for `AgentExecutor`
-- Sanity check = the quickstart agent. Restart the kernel after creating `.env`
-
-## Practice
-
-1. Set up a fresh project and run the sanity check in both Colab and VS Code
-2. Turn on `LANGSMITH_TRACING=true` and read one trace from start to finish
-3. Learn the timeline well enough to spot an outdated tutorial
-4. Answer the four self-check questions without looking back
-
-## How this chapter was checked
-
-- Imports and the `create_agent` signature checked on `langchain` 1.4.7. No live model run
-- Dates, free-tier numbers and model names are class figures. Check before relying on them
-- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
-- **Cheat sheet:** it is a table, so there was nothing to run.
 
 ## Sources and further reading
 

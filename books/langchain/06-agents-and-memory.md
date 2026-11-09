@@ -6,15 +6,6 @@
 > - **Level:** intermediate · **Time:** about 30 minutes
 > - **Builds on:** [Chapter 1](01-introduction-to-langchain.md) (first agent, checkpointer basics) and [Chapter 5](05-tools.md) (tools, `ToolRuntime`, `InMemoryStore`). Middleware is in [Chapter 7](07-middleware.md).
 
-**After this chapter you can:**
-
-- Explain why models, messages, structured output and tools were already "agents"
-- Describe the agentic loop and where tokens are spent
-- Tell memory saver, memory store, cache and database apart, and pick one
-- Give an agent short-term memory (`thread_id`) and long-term memory (`store`)
-- Assemble a full agent with tools, middleware, memory, context and a name
-- Explain headless tools
-
 ## 6.1 Everything so far was already an agent
 
 - **Agent = model + harness.** Around the model you add tools, context, sub-agents, memory, skills, middleware: anything that helps you get the most from the model
@@ -116,7 +107,6 @@ print(state.next)                  # () when the run finished, otherwise the ste
 - Remove all: `RemoveMessage(id=REMOVE_ALL_MESSAGES)` from `langgraph.graph.message`.
 - ✅ *Verified (details in "How this chapter was checked").*
 - Postgres saver install note: `langgraph-checkpoint-postgres "psycopg[binary]"`.
-
 
 ## 6.5 Saver, store, cache or database?
 
@@ -286,17 +276,6 @@ for c in agent.stream(inp, stream_mode="custom", version="v2"):
   - Async code can read several projections together with `asyncio.gather`.
 - ✅ *Verified (details in "How this chapter was checked").*
 
-
-## 6.9 Questions from the class
-
-- **Is `thread_id` a reserved keyword?** No. It is just the identifier the checkpointer looks for in the config. The app decides how ids are made
-- **Can I see what is stored for a thread?** Yes, through the checkpointer's API (6.4). Full mechanics are in LangGraph
-- **Does `InMemorySaver` have a time limit?** No. It lasts as long as the Python process. A persistent store such as Postgres removes that limit
-- **Does running a tool cost money like a model call?** No. Only model calls use tokens
-- **Will the course cover training a model?** No. It is about using and harnessing existing models
-- **Is the older (Classic) course content still relevant?** The concepts carry over. The code reflects LangChain Classic, and this course stays on the latest version
-- **How do I choose between store, saver, cache and database?** See 6.5
-
 ## 6.10 Interview corner
 
 **What interviewers listen for:** you separate **short-term** (thread) from **long-term** (store) memory, you know what a checkpointer saves, and you think about privacy and retention.
@@ -380,41 +359,6 @@ cfg = {"configurable": {"thread_id": "trip-42"}}
 agent.invoke({"messages": [("user", "I prefer aisle seats")]}, cfg)
 for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
 ```
-
-## Recap
-
-- Agent = model + harness. Models, messages, structured output and tools are its parts
-- The loop: message, model decides, tool runs, result goes **back to the model**, repeat, then final answer
-- Tool use costs at least two model calls. Tools themselves cost no tokens
-- Default = no memory. Add `checkpointer` + `thread_id`
-- Saver = one chat. Store = about a user, across chats. Cache = repeat calls. Database = everything else
-- `store`, `context_schema`, `middleware`, `name` go into `create_agent` alongside tools and the checkpointer
-- Headless tools: defined on the server, run on the user's device
-
-## Practice
-
-1. Reproduce the whiteboard before and after: two `invoke()` calls without a checkpointer, then the same two with `InMemorySaver()` and a fixed `thread_id`. Then change the `thread_id` and confirm it forgets
-2. Build one **real** tool from a free public API that needs no key, instead of a hard-coded placeholder
-3. Add `save_trip` and `get_saved_trips` with SQLite and show the data survives a restart
-4. Walk through the TripMate build: real weather, real search, real SQLite persistence
-5. Revise saver vs store vs cache vs database until the differences are automatic
-6. Print `get_state(config).values["messages"]` for a thread and read it
-7. Assignment 2 (NovaBank banking assistant), the parts this chapter prepares you for. The assignment has no answer key:
-   - A1 Q1 to Q3: describe the loop; what else `thread_id` needs; `thread_id` vs `context`
-   - B1.1: two tools plus a checkpointer, proving memory across two `.invoke()` calls
-   - B1.2: a `context_schema` with `account_tier` that a tool reads through `runtime.context`
-   - (A1 Q4 on `stream_mode` and Q5 on `name=` are not taught in the sources read so far)
-
-## How this chapter was checked
-
-- Run offline with a stand-in model on `langchain` 1.4.7: the full agent assembly (tools, middleware, checkpointer, store, context schema, name), per-run context reaching tools and middleware, `InMemoryStore` put, get and search with a tuple namespace, `get_state`, and the SQLite save and get tools
-- **Not run against a live model or real APIs:** Open-Meteo, Tavily, a persistent saver, headless tools. Those are class statements
-- The TripMate real-tool code is not in the sources read for this chapter, so section 6.3 shows only my own SQLite example
-- **Details by section** (moved here from the ✅ markers):
-  - *Deleting messages with `RemoveMessage`:* Checked: an `after_model` hook with a checkpointer dropped the first two messages, so after two turns the thread held `['b', '2']`; the remove-all hook left `[]`.
-  - *6.8 Streaming an agent:* Checked (scripted model, langchain 1.4.7): the v2 chunk keys; `updates` gave `model, tools, model`; `values` gave 4 snapshots; `messages` gave tuples; `GraphOutput.interrupts` was `()`; `custom` printed both writer lines; v3 `stream.messages` gave text `It is sunny` and tool call `get_weather {'city': 'SF'}`. **Observed:** in sync code, reading `stream.messages` first left `stream.tool_calls` empty. Use `stream.interleave("messages", "tool_calls")` to get both in order (tested in Ch16), plus `stream.interrupted` and `stream.interrupts` for a paused run.
-- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
-- **Cheat sheet:** ran the checkpointer, store, thread id and `stream_mode="updates"`; the thread state held the messages. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

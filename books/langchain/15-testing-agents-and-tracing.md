@@ -6,14 +6,6 @@
 > - **Level:** intermediate · **Time:** about 20 minutes
 > - **Builds on:** [Chapter 6](06-agents-and-memory.md) (agents, checkpointer), [Chapter 13](13-multi-agent-systems-and-subagents.md) (scripted models).
 
-**After this chapter you can:**
-
-- Unit test an agent with a fake model and no API calls
-- Keep slow, paid tests out of the default test run
-- Assert on structure, not on exact words
-- Check an agent's tool-call trajectory with `agentevals`
-- Turn on LangSmith tracing with environment variables
-
 ## 15.1 Three layers of testing
 
 ```mermaid
@@ -121,10 +113,6 @@ export LANGSMITH_AGENT_ENVIRONMENT="local"
 - ✅ *Verified (details in "How this chapter was checked").*
 - *Source: LangChain docs, `observability.mdx`.*
 
-## 15.6 Questions from the class
-
-- None in the class material for this chapter. It comes from the LangChain docs only
-
 ## 15.7 Interview corner
 
 **What interviewers listen for:** you test the **plumbing offline**, assert on structure not words, and have an eval set that gates releases.
@@ -196,34 +184,6 @@ from agentevals.trajectory.match import create_trajectory_match_evaluator
 ev = create_trajectory_match_evaluator(trajectory_match_mode="superset")
 ev(outputs=result["messages"], reference_outputs=reference)["score"]
 ```
-
-## Recap
-
-- Three layers: unit (fake model), integration (real model, marked and excluded by default), evals (trajectory)
-- `GenericFakeChatModel` needs a `bind_tools` subclass for agents; a fresh fake per test
-- Assert structure, not words; cap tokens; use small models
-- `agentevals` modes: strict, unordered, subset, superset; or an LLM judge
-- Tracing is on with environment variables, no code change
-
-## Practice
-
-1. Write a fake-model test that proves your agent calls a tool once. Run it twice with a reused fake and read the error
-2. Add the `integration` marker and `pytest.ini`. Show that the default run skips it
-3. Build a reference trajectory and score a run in all four modes. Add an extra tool call and see which modes fail
-4. Add a `check_api_keys` fixture that skips when a key is missing
-
-## How this chapter was checked
-
-- Run offline: the fake models, the pytest marker setup, and the four trajectory modes (with `agentevals` installed from the package registry)
-- **Not run:** `vcrpy`, the LLM judge, LangSmith tracing and logging, any real model
-- Everything else comes from the LangChain docs pages named in each section
-- **Details by section** (moved here from the ✅ markers):
-  - *15.2 Unit tests with a fake model:* Checked: the list model cycled; the subclass ran the tool once and answered; the plain class raised `NotImplementedError`; reusing a finished fake raised `RuntimeError`
-  - *15.3 Integration tests:* Checked: with the `pytest.ini` above, the default run deselected the integration test and `-m integration` ran it. Not run: `vcrpy` (not installed), real model calls
-  - *15.4 Evals: scoring the trajectory:* Checked (scripted agent, `agentevals` installed): a one-tool run against a one-tool reference scored `True` in all four modes; a run with one **extra** tool scored `False` in `strict`, `unordered` and `subset`, and `True` in `superset`. Not run: the LLM judge and LangSmith logging (need keys)
-  - *15.5 Tracing with LangSmith:* Checked: `langsmith.tracing_context(enabled=False, tags=..., metadata=...)` runs as a context manager. *Not run:* actual tracing (no LangSmith account here)
-- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
-- **Cheat sheet:** defined `FakeToolModel` and ran the `agentevals` trajectory evaluator in `superset` mode on a matching trajectory (score passed); the `pytest.ini` line was not run. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

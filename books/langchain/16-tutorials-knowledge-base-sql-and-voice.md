@@ -6,13 +6,6 @@
 > - **Level:** intermediate to advanced · **Time:** about 20 minutes
 > - **Builds on:** [Chapter 5](05-tools.md) (tools), [Chapter 6](06-agents-and-memory.md) (agents, streaming), [Chapter 11](11-runtime-and-human-in-the-loop.md) (human-in-the-loop).
 
-**After this chapter you can:**
-
-- Build a semantic search over documents: `Document`, splitter, embeddings, vector store, retriever
-- Build a SQL agent with three tools, a safe prompt and human approval before each query
-- Explain the voice-agent "sandwich" and chain its three stages as async generators
-- Read `stream_events(version="v3")` with `interleave`, `interrupted` and `interrupts`
-
 ## 16.1 Knowledge base: semantic search over a PDF
 
 ```mermaid
@@ -129,10 +122,6 @@ async for event in pipeline.atransform(audio_stream): ...
 ```
 - ✅ *Verified (details in "How this chapter was checked").*
 
-## 16.4 Questions from the class
-
-- None in the class material for this chapter. It comes from the LangChain docs only
-
 ## 16.5 Interview corner
 
 **What interviewers listen for:** you can draw the **index vs query** pipeline, you know retrieval quality must be measured, and you lock down the database rather than trusting the prompt.
@@ -203,46 +192,6 @@ store = InMemoryVectorStore(embeddings); store.add_documents(splits)
 retriever = store.as_retriever(search_type="mmr", search_kwargs={"k": 4})
 retriever.invoke("question")
 ```
-
-## Recap
-
-- Semantic search = split, embed, store, search; the retriever is the Runnable
-- SQL agent = three tools plus a strict prompt plus approval on the query tool
-- Voice sandwich = speech to text, agent, text to speech, each an async generator
-- `stream_events(version="v3")`: `interleave`, `interrupted`, `interrupts`
-- Fake components prove wiring, not quality
-
-## Practice
-
-1. Build a small store with a fake embedding. Run all four search calls and the retriever
-2. Set `score_threshold` to 5 and read the error. Fix it
-3. Make a two-table SQLite file, run the three tools, then add approval and approve and reject a query
-4. Chain two `RunnableGenerator`s of your own and feed them a few numbers
-5. Make the SQL tool read-only with a `mode=ro` connection and try an `INSERT`
-
-## How this chapter was checked
-
-- Run offline: the knowledge-base pipeline with fake embeddings, the docs' SQL tools on my own SQLite file with a scripted agent and approval, the voice agent stage with a fake transcript stream, and `RunnableGenerator` chaining
-- **Not run:** real embeddings, the Nike PDF, the Chinook database, any real model, AssemblyAI, Cartesia, WebSockets, Studio
-- The `mode=ro` tip in 16.6 was run: a read worked and an `INSERT` raised `OperationalError`
-- **Details by section** (moved here from the ✅ markers):
-  - *16.1 Knowledge base: semantic search over a PDF:* Checked (langchain-core 1.7.3, `DeterministicFakeEmbedding`, `InMemoryVectorStore`):
-    - A blank one-page PDF loaded with the helper (1 page); a repeated text split into 9 chunks with `start_index` in the metadata
-    - `similarity_search` returned 4 Documents by default; `similarity_search_with_score` gave a float; search by vector and async search worked
-    - `@chain` and `as_retriever(...)` both batched to one result each; the store has no `invoke`, the retriever has
-    - `"mmr"` worked; `similarity_score_threshold` needs `score_threshold` as a float **between 0 and 1** or it raises a `ValidationError`
-    - **Fake embeddings test the plumbing only, not relevance.** The Nike PDF examples were not run (no download)
-  - *16.2 SQL agent:* Checked (scripted model, own 2-table SQLite file, the docs' tool code run as written):
-    - List tables, schema with an unknown name (error text), a query, and a bad column (`Error: no such column: bad`) all behaved as described
-    - Without approval the run ended `human, ai, tool, ai, tool, ai`; with approval it paused at `sql_db_query` after the list-tables call (`interrupted` was `True`), the description began `Tool execution pending approval`, and after resume `sql_db_query` ran and `interrupted` was `False`
-    - **Docs mismatch:** the sample output lists a fourth tool, `sql_db_query_checker`, but the page's code defines only three tools
-    - Not run: the Chinook download (blocked), a real model, Studio
-  - *16.3 Voice agent: the sandwich:* Checked (scripted model, fake speech-to-text stream, no audio):
-    - The agent stage turned two `stt_output` events into `agent_chunk` events, and the model saw 2, 4, 6 messages over the run, so memory held across turns
-    - `RunnableGenerator(a) | RunnableGenerator(b)` with `atransform` chained two async generators correctly
-    - Not run: AssemblyAI, Cartesia, WebSocket, any real audio, the reference app in `voice-sandwich-demo`
-- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
-- **Cheat sheet:** ran the splitter, `InMemoryVectorStore` with a fake embedding and an MMR retriever; `start_index` metadata was present; real embeddings were not used. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

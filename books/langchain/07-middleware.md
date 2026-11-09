@@ -6,14 +6,6 @@
 > - **Level:** intermediate · **Time:** about 35 minutes
 > - **Builds on:** [Chapter 5](05-tools.md) (tools, gating) and [Chapter 6](06-agents-and-memory.md) (agents, checkpointer, context). The prebuilt middlewares for limits, fallback and PII are in [Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md). To-do lists, tool selection and tool resilience are in [Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md). [Chapter 11](11-runtime-and-human-in-the-loop.md) goes deeper on runtime and human-in-the-loop.
 
-**After this chapter you can:**
-
-- Explain why not every tool belongs to every user, and how dynamic tool loading solves it
-- Name the six middleware hooks and where each sits in the agent loop
-- Filter tools by state or by context
-- Compress long conversations with `SummarizationMiddleware`
-- Guard irreversible tools with `HumanInTheLoopMiddleware` and resume a paused run
-
 ## 7.1 The problem: not every tool belongs to every user
 
 - CineBot has a standard booking tool, a VIP lounge tool and an admin tool
@@ -342,15 +334,6 @@ def run_interactive_hitl_demo(agent, config):
 > - Keep a checkpointer on the agent, or a paused run cannot resume
 > - *Added by Claude.*
 
-## 7.7 Questions from the class
-
-- **What if a tool fails or times out?** Recoverable failures are typically retried by the harness. A fatal error (for example no internet) makes the agent fail outright. Retry and error middleware are in [Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md)
-- **Can an agent discover brand-new tools at run time?** Yes. This is where MCP and middleware meet
-- **Why not a plain `if/else` for the tool list?** It cannot read the agent's live state or store (7.2)
-- **Two levels of human approval?** Needs custom middleware (7.6)
-- **Does summarization share the agent's main context?** No. It works on its own separate text
-- **Does a support bot handing a chat to a human count as HITL?** No, that is a transfer (7.6)
-
 ## 7.8 Interview corner
 
 **What interviewers listen for:** you can name the **hooks** and where each fires, you put security checks in code (middleware) rather than in the prompt, and you know approval needs persistence.
@@ -443,40 +426,6 @@ agent = create_agent(model, tools, checkpointer=InMemorySaver(), middleware=[
     HumanInTheLoopMiddleware(interrupt_on={"send_email": True}),
 ])
 ```
-
-## Recap
-
-- Not every tool belongs to every user. **Change the tool list at run time**, do not ask the model to behave
-- **Dynamic tool loading:** filter pre-registered tools, or register tools dynamically (MCP)
-- Six hooks: `before_agent`, `before_model`, `wrap_model_call`, `after_model`, `wrap_tool_call`, `after_agent`
-- Filter with `request.override(tools=...)`. Per-user flags need a **state schema** or **context**
-- `SummarizationMiddleware`: `model`, `trigger=("tokens", n)`, `keep=("messages", n)`. Text only, and lossy
-- `HumanInTheLoopMiddleware`: needs a **checkpointer**. Resume with `Command(resume={"decisions": [...]})`. Four decisions: approve, edit, reject, respond. It is **not** a transfer
-
-## Practice
-
-1. Recreate the VIP middleware. **Deliberately trigger the "state field not tracked" bug**, then fix it with a custom state schema
-2. Write middleware from scratch that filters tools by `request.state`
-3. Recreate `SummarizationMiddleware` with your own `trigger` and `keep`, and watch a long conversation compress
-4. Build the `cancel_booking` HITL demo, run `run_interactive_hitl_demo()` yourself and try **all four** decisions
-5. Open the whiteboard `Agent-Middleware-Architecture.excalidraw` in excalidraw.com and trace the full loop diagram by hand
-6. Assignment 2 (NovaBank), the parts this chapter prepares you for. The assignment has no answer key:
-   - A2 Q7: a realistic NovaBank `transfer_funds` situation for each of the four HITL decisions
-   - B2.1: guard `transfer_funds` with all four decisions, resume with an `edit` that changes the amount, and confirm the edited amount was used (remember the `edited_action` shape)
-
-## How this chapter was checked
-
-- Run offline with a stand-in model on `langchain` 1.4.7:
-  - tool filtering with state schema and with context, and the deprecated `request.tools` assignment
-  - summarization: the summary message and its `lc_source`, the invalid `"token"` and the valid `"tokens"`
-  - HITL: interrupt, `get_state`, approve, edit (both shapes), reject, respond, a disallowed decision, resume without a checkpointer
-- **Not run against a live model:** the quality of a real summary and real tool-call choices. Class output was read from the notebook (cells 0 to 56)
-- **Details by section** (moved here from the ✅ markers):
-  - *More `SummarizationMiddleware` settings:* Checked: `trigger=("messages", 4)` summarised once over three long turns. A **list** `[("tokens", 100000), ("messages", 4)]` also did (the second condition was enough). A **dict** `{"tokens": 10, "messages": 100}` did **not** (the second condition failed)
-  - *More `SummarizationMiddleware` settings:* Checked: the default prompt is a long template. It starts "Context Extraction Assistant" and asks for four sections: `SESSION INTENT`, `SUMMARY`, `ARTIFACTS` and `NEXT STEPS`
-  - *More `SummarizationMiddleware` settings:* Checked: with `summary_prompt="Summarise briefly:\n{messages}"`, the summariser received that text with the messages inserted as `<message type="human">...` blocks
-- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
-- **Cheat sheet:** ran both middleware in one agent; a `send_email` call paused with `__interrupt__`; the summarization trigger (4000 tokens) was constructed but not reached. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 

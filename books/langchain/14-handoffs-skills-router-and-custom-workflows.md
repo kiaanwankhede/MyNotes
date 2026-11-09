@@ -6,15 +6,6 @@
 > - **Level:** advanced · **Time:** about 50 minutes
 > - **Builds on:** [Chapter 7](07-middleware.md) and [Chapter 10](10-shell-tools-and-custom-middleware.md) (middleware hooks), [Chapter 11](11-runtime-and-human-in-the-loop.md) (`ToolRuntime`) and [Chapter 13](13-multi-agent-systems-and-subagents.md) (why multi-agent, subagents). Every example ran with a scripted stand-in model, no API key ([Chapter 13](13-multi-agent-systems-and-subagents.md), 13.5).
 
-**After this chapter you can:**
-
-- Build a handoff state machine where tools change the step and middleware changes the prompt and tools
-- Hand control between separate agents with `Command(graph=Command.PARENT)`
-- Load specialist knowledge on demand with skills, and track what was loaded
-- Fan a query out to several agents in parallel with `Send`, and merge the results
-- Wrap agents in a hand-built LangGraph workflow, including a retrieval pipeline
-- Choose between the five patterns, and combine them
-
 ## 14.1 Pattern 2: handoffs
 
 Behaviour changes **with state**. Tools update a state variable (`current_step` or `active_agent`) that survives across turns, and the system reads it to change the prompt and tools, or to route to another agent.
@@ -630,47 +621,6 @@ Items marked *checked* were run with `langchain` 1.4.7 and `langgraph` 1.2.19, u
 | Skills | One agent | Partly | Many specialities, load on demand |
 | Router | The synthesiser | Yes | Several sources, one answer |
 | Custom workflow | You decide | You decide | Mixed fixed + agentic steps |
-
-## Recap
-
-- **Handoffs:** state decides configuration, tools decide state. One agent with middleware, or separate agents with `Command(goto=..., graph=Command.PARENT)`
-- Every `Command` update needs a `ToolMessage`. Register every tool at construction. Reuse the checkpointer if you rebuild
-- Pass only the triggering `AIMessage` and an artificial `ToolMessage` between agents
-- **Skills:** descriptions up front, `load_skill` for the content. Enforce loading in state, with a reducer
-- **Router:** classify with structured output, `Send` to fan out, a **reducer** on any key written in parallel, then synthesise. Wrap it as a tool for memory
-- **Custom workflow:** a hand-built graph with agents in nodes. It can hold all the others
-- Fake embeddings test the plumbing, not relevance
-- Patterns combine. Pick per sub-problem
-
-## Practice
-
-1. Build the support state machine. Print the tools offered at each step and the value of `current_step` after each turn
-2. Offer a tool in middleware that was never registered. Read the error. Fix it
-3. Return a `Command` with no `ToolMessage` and read the error
-4. Build the two-agent handoff graph with `Command.PARENT`. Print the four messages
-5. Build the SQL assistant with two skills. Load both, then try a query for the first. Fix the list with a reducer
-6. Build a router with `Send`. Remove the reducer and read the error
-7. Wrap the router as a tool of a conversational agent with a checkpointer
-8. Build the retrieval pipeline with fake embeddings, then say why its results cannot be trusted
-9. Combine two patterns: a supervisor whose sub-agent is a router
-
-## How this chapter was checked
-
-- Run with a scripted stand-in model: the four-turn support state machine and the tools offered at each step; the missing-`ToolMessage` error; the unregistered-tool error; the `requires` check; going back with the same checkpointer; the `Command.PARENT` subgraph handoff; router fan-out with and without a reducer; skills injected into the prompt and loaded into history; the tracked-skills gate, the replacement bug and two fixes; the fake-embedding retrieval; and the naive `replace`
-- The model-call counts, token figures, skills-with-tools, summarisation, the Python-before-3.12 `TypedDict` message, and every "production wiring" cell with a real model were **not run**
-- **No real model was used.** Whether a real model classifies or chooses well was not tested
-- The class notebooks and README are the source for everything not marked *checked*
-- **Details by section** (moved here from the ✅ markers):
-  - *14.2 Handoffs with one agent: customer support:* Checked over four turns on one thread: `current_step` was unset after turn 1 (it stays at the default until a tool runs), then `issue_classifier`, then `resolution_specialist`, then `resolution_specialist` again
-  - *14.2 Handoffs with one agent: customer support:* Checked: the tools offered to the model changed per step: `record_warranty_status` only, then `record_issue_type` only, then `provide_solution` and `escalate_to_human`. **The model literally cannot call a tool from another step**
-  - *14.3 Handoffs between separate agents:* Checked: the booking agent called `transfer_to_refunds`, the outer graph moved to `refunds_agent`, which answered. The message list had exactly four entries: the user, the triggering `AIMessage`, the artificial `ToolMessage`, and the refunds agent's reply. `active_agent` ended as `refunds_agent`
-  - *The SQL assistant project:* Checked: the system prompt on the **first** model call held the skill **names and descriptions** and **not** the schema text. After `load_skill("sales_analytics")`, the **tool result in the history** held the full schema
-  - *Make loading a rule, not a request:* Checked: writing before loading returned the error. Loading first, then writing, returned "validated". **The constraint is enforced in code, not just suggested in the prompt**
-  - *14.6 Pattern 5: custom workflow:* Checked, and a limit the notebook does not state: the fake embeddings give **arbitrary, not meaningful, neighbours**. "Interstellar showtimes" returned the Interstellar **review** and a refund policy, and "Can I get a refund?" returned a **Dune showtimes** line first. The plumbing is real. The relevance is not. **Do not read retrieval quality from a run with fake embeddings**
-  - *14.6 Pattern 5: custom workflow:* Checked: the notebook's `rewrite_query` is `q.replace("it", "the movie")`. It also changes the letters "it" inside other words: "Is there a showing with it tonight?" became "Is there a showing wthe movieh the movie tonight?". Use a model call, or match whole words
-  - *Tutorial extras: go back, history, stateful routers, skill storage:* Checked (scripted model): a `go_back` tool moved `current_step` from `resolution` to `warranty`, and the step middleware then offered the warranty tool again; a checkpointed agent wrapping a tool saw 1, 3, 5, 7 messages on successive model calls over two turns (memory kept). Summarization settings were not run here; see Ch7.
-- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
-- **Cheat sheet:** it is a table, so there was nothing to run.
 
 ## Sources and further reading
 

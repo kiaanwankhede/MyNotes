@@ -6,16 +6,6 @@
 > - **Level:** intermediate to advanced · **Time:** about 45 minutes
 > - **Builds on:** [Chapter 7](07-middleware.md) (the hooks and the loop), [Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md) and [Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md) (the prebuilt middlewares). Runtime and human-in-the-loop in depth are in [Chapter 11](11-runtime-and-human-in-the-loop.md).
 
-**After this chapter you can:**
-
-- Explain how coding assistants edit real files, and wire a shell into an agent
-- Choose an execution policy and know what each one does and does not protect
-- Name the six hooks, and say which run once and which run on every loop
-- Write custom middleware with decorators and with a class
-- Switch models at run time with `wrap_model_call`
-- Extend a prebuilt middleware by subclassing
-- Predict the order in which several middlewares run
-
 ## 10.1 `ShellToolMiddleware`: build your own "Claude Code"
 
 **The question:** how do Claude Code, Cursor or GitHub Copilot create and edit real files on your machine?
@@ -425,23 +415,6 @@ def check_blocked(state: AgentState, runtime: Runtime):
 
 *Source: `langchain-ai/docs`, `src/oss/langchain/middleware/custom.mdx` (Agent jumps, Configure tracing, State updates, Custom stream transformers, Best practices).*
 
-## 10.12 Questions from the class
-
-- **What can `wrap_model_call` change?** Anything on the outgoing request: model, messages, system message, tool choice, tools, response format, state, runtime, settings (10.5)
-- **Is LangChain's execution graph a DAG?** No. The loop can cycle (model, tool, model again). LangGraph exposes that graph and lets you control it. LangChain builds and runs it for you
-- **Does my code or LangChain decide hook order?** LangChain. It builds the graph and calls each hook at its declared point (10.8)
-- **Should I mix LangChain, LangGraph and other frameworks in one project?** Generally no. Pick one framework and build several agents in it. Connect truly separate systems with A2A (agent to agent) or a plain API
-- **Multi-agent: LangChain or LangGraph?** The end user sees the same agent. LangGraph gives deeper control of the graph, for example custom state changes. LangChain already supports multi-agent setups
-- **Parallel child agents lose data when they report to a coordinator.** Use a **shared memory store** (in-memory, Postgres or any database) that every agent can read and write. Do not rely on data passing implicitly between agent calls. Whether parent and child state is shared natively was left to confirm
-- **Should an agent validate a user's login or session?** No. That is plain code. Reserve agents for points that need intelligence or tool access
-- **Can a browser app get the terminal access Claude Code has?** No. Browsers are deliberately sandboxed. You need an installed application (a VS Code extension) or an access layer such as MCP, never raw browser automation
-- **Does every step cost tokens?** No. Tokens are used **only when the model is called**. Your own Python logic costs none. A tool run triggered by a model decision adds no holding cost, and prompt caching reduces cost
-- **Is it safe for an agent to read a one-time password from email or SMS?** Only through an explicit, legitimate integration (an MCP connection or a messaging tool) with the user's knowledge. Never by simulated browser or screen automation. That is a serious security anti-pattern
-- **Testing changes across many microservices without shell or browser access?** Use containers (Docker) or Kubernetes sandboxes. Do not build an app that asks for broad shell or browser access just to validate changes
-- **After I edited a transfer amount and approved it, why did the agent ask for approval again?** That second request came from the **model**. It saw a partial transfer completed and reasoned that a balance remained. It is the model's judgement, not scripted by `HumanInTheLoopMiddleware`
-- **Does memory depend on which LLM I use?** No. The checkpointer and thread memory are LangChain mechanisms, independent of the model. Inconsistent remembering is more likely a setup issue, so re-test
-- **Why does my Groq/Llama agent call a `BraveSearch` tool I never defined?** Likely a model-specific quirk: some open models expect a particular search tool. Switching model or providing that tool fixed it. Not a bug in your code
-
 ## 10.13 Interview corner
 
 **What interviewers listen for:** you know the six hooks and the **onion** order of wrap hooks, when to write a class vs a decorator, and that a shell tool needs a sandbox, not trust.
@@ -542,55 +515,6 @@ class Guard(AgentMiddleware):
     def wrap_model_call(self, request, handler): return handler(request)
 agent = create_agent(model, tools, middleware=[log_calls, time_tools, Guard()])
 ```
-
-## Recap
-
-- Shell access is the trick behind coding assistants. The agent runs commands **where its code runs**. The model only decides which command
-- Policies: host (full access), Docker (isolated), Codex sandbox. `workspace_root` is a starting folder, not a jail
-- Six hooks. `before_agent` and `after_agent` run **once**. The other four run on every loop pass. There is no `before_tool`, use `wrap_tool_call`
-- `before_model` observes state and runtime. `wrap_model_call` receives and can rewrite the **request**
-- Return `None` to change nothing, or a dict to update state. Hooks must accept `state` and `runtime`
-- Decorators for one hook, classes for several hooks, state, async and reuse. Class state lives on the instance
-- Subclassing: an overridden hook **replaces** the parent's
-- Order: `before_*` declared order, `after_*` reversed, `wrap_*` nested. A stack, last in, first out
-
-## Practice
-
-1. Recreate the `ShellToolMiddleware` demo: create a file, run a script, clean up. Read the message history and map each step
-2. Write a `before_agent` and `after_agent` pair that simulates connecting to and disconnecting from a resource. Confirm the print order
-3. Build `dynamic_model_selection` with your own two models and your own threshold
-4. Convert a decorator-based middleware into a class-based `AgentMiddleware` and add internal state (a call counter)
-5. Subclass `PIIMiddleware` and add one new hook it did not have. Then override one of its existing hooks and watch what you lose
-6. Attach three middlewares with a `print` in every hook and verify "before in order, after reversed, wrap nested"
-7. Put `HumanInTheLoopMiddleware` on the shell tool so every command needs approval
-8. Assignment 2 (NovaBank), the part this chapter now lets you answer. The assignment has no answer key:
-   - A2 Q6: the exact rule for how `before_*`, `after_*` and `wrap_*` hooks order themselves when combined, and why `before_*` and `after_*` differ (10.8)
-   - (A1 Q4 and Q5, Q8, Q9, Q12 to Q15 and the capstone still need later material)
-
-## How this chapter was checked
-
-- Run offline with a stand-in model on `langchain` 1.4.7:
-  - shell tool: its tool schema, a write, run and delete cycle on disk, `cd /` working under the host policy, `startup_commands`, the command timeout, and `HumanInTheLoopMiddleware` pausing the shell before it ran
-  - decorators: the connect and disconnect order, `before_model` once per loop pass, returning a dict, and the no-parameter `TypeError`
-  - `dynamic_model_selection` switching models after 10 messages
-  - the class-based counter, and one instance shared by two agents
-  - subclassing `PIIMiddleware` (a new hook, an overridden hook, and `ExtendedModelResponse` with an undeclared state key)
-  - the execution order for three middlewares, including the nesting of `wrap_*`
-  - two instances of one custom class raising the duplicate-name `AssertionError`, and a `name` override fixing it
-  - the `ModelRequest` fields and the list of hook methods on `AgentMiddleware`
-- **Not run:** a real model choosing shell commands, a Docker or Codex sandbox, an SSH session, or a Colab environment. Those are class statements
-- Class 14 has no code folder in the repo. The `custom_middleware.py` file the transcript mentions is not there
-- **Details by section** (moved here from the ✅ markers):
-  - *10.5 `wrap_model_call`: gating and dynamic model selection:* Checked: with two stand-in models, the basic one answered up to 10 messages of history and the advanced one answered from 12
-  - *10.7 Extending a prebuilt middleware:* Checked: a subclass whose `before_model` just returns `None` **left the email unredacted**
-  - *10.7 Extending a prebuilt middleware:* Checked: the `messages` update was applied. The `"trace_layer"` key was **silently dropped**, because no state field with that name was declared. Declare custom state fields with `state_schema` ([Chapter 7](07-middleware.md), 7.4)
-  - *10.10 Custom middleware examples:* Checked (scripted model): the monitor logged `('ok','ok')` then `('bad','failed:nope')` and the `ValueError` still reached the caller; a three-message history picked the second model and a one-message history picked the first.
-  - *10.10 Custom middleware examples:* Checked earlier (scripted model): the type was `SystemMessage` for a string prompt; the override with a subset sent only `a_tool`; the unregistered-tool case raised the `ValueError`. The `cache_control` block itself was built but not sent to Anthropic.
-  - *10.11 Agent jumps, tracing and state composition:* Checked: a reply containing `BLOCKED` ended the run with the replacement message after **1** model call. After a tool turn it ended after **2** calls
-  - *10.11 Agent jumps, tracing and state composition:* Checked: the same hook **without** `can_jump_to` also ended the run for `'end'`. The docs still ask you to declare it, and the other targets need it, so declare it
-  - *10.11 Agent jumps, tracing and state composition:* Checked: `TracePolicy`, `omit_payload` and `configure_trace_policy` import from `langchain.agents.middleware`, a class with `trace_policy` builds, and the global set and clear run. Whether the trace really omits the payload needs LangSmith and was **not** checked
-- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
-- **Cheat sheet:** ran `before_model`, `wrap_tool_call` and an `AgentMiddleware` subclass together in one agent with a tool call. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
 
