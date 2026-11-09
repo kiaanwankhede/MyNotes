@@ -400,6 +400,37 @@ Use the answer skeleton. Each problem lists what a strong answer covers.
 | [7](07-legacy-vs-modern-mcp.md) | 2026-07-28: stateless requests, `_meta` every call, handles instead of sessions |
 | 8 | OAuth 2.1 + PKCE, idempotency keys, additive contracts, three outcomes |
 
+## 8.10b Debugging round (*added by Claude*)
+
+<details class="qa"><summary>1. The server works in the Inspector but the host shows no tools.</summary>
+
+- STDIO: something printed to `stdout` (a `print`, a library banner) corrupted the stream; send logs to `stderr` ([Ch 4](04-operation-transports-and-shutdown.md))
+- Wrong command or path in the host config, or the env lacks the packages: run the exact command from the config in a terminal
+- Host caches the tool list: restart the host or reconnect
+
+</details>
+
+<details class="qa"><summary>2. The model never picks your MCP tool.</summary>
+
+- Read the tool's description and schema as the model sees them (`list_tools`): vague name, no "use when"
+- Too many tools from many servers dilute choice: prefix names, disable unused servers, or load tools per task
+
+</details>
+
+<details class="qa"><summary>3. Remote server works locally, fails after deploy behind a load balancer.</summary>
+
+- Stateful sessions land on another replica: sticky sessions or stateless HTTP mode (8.4)
+- Missing or stripped auth header, wrong path (`/mcp`), or `Host`/`Origin` checks rejecting the public name
+
+</details>
+
+<details class="qa"><summary>4. A tool returns "success" but nothing happened.</summary>
+
+- The tool swallowed an exception and returned text: raise `ToolError` on failure so `isError` is set ([Ch 5](05-building-mcp-servers.md), 5.10b)
+- Distinguish **failure** from **empty result** explicitly (8.7) and test both
+
+</details>
+
 ## 8.11 Added by Claude, not from the sources
 
 Items marked *checked* were run with `fastmcp` 4.1.4.
