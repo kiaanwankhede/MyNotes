@@ -519,6 +519,406 @@ flowchart LR
 | Non-SAP | Joule Studio or WalkMe; no public Joule API |
 | Microsoft 365 | Opt-in; starts in Teams |
 
+## Screenshots and figures from the sources
+
+*Images saved from the source pages, in the order they appear there.*
+
+### Images: Joule is now integrated into SAP Build Work Zone
+
+*Source: [Joule is now integrated into SAP Build Work Zone](https://community.sap.com/t5/application-development-and-automation-blog-posts/joule-is-now-integrated-into-sap-build-work-zone/ba-p/13961162)*
+
+![Build Work Zone blog, figure 1](images/ch05-s2-buildworkzone-01.jpg)
+
+![Build Work Zone blog, figure 2](images/ch05-s2-buildworkzone-02.png)
+
+![Build Work Zone blog, figure 3](images/ch05-s2-buildworkzone-03.jpg)
+
+![Build Work Zone blog, figure 4](images/ch05-s2-buildworkzone-04.jpg)
+
+![Build Work Zone blog, figure 5](images/ch05-s2-buildworkzone-05.jpg)
+
+### Images: Analytical Insights in Joule: setup guide
+
+*Source: [Analytical Insights in Joule: setup guide](https://community.sap.com/t5/technology-blog-posts-by-sap/analytical-insights-in-joule-setup-guide/ba-p/14096274)*
+
+![Analytical Insights setup guide, figure 1](images/ch05-s4-analyticsetup-01.png)
+
+![Analytical Insights setup guide, figure 2](images/ch05-s4-analyticsetup-02.png)
+
+![Analytical Insights setup guide, figure 3](images/ch05-s4-analyticsetup-03.png)
+
+![Analytical Insights setup guide, figure 4](images/ch05-s4-analyticsetup-04.png)
+
+![Analytical Insights setup guide, figure 5](images/ch05-s4-analyticsetup-05.png)
+
+![Analytical Insights setup guide, figure 6](images/ch05-s4-analyticsetup-06.png)
+
+![Analytical Insights setup guide, figure 7](images/ch05-s4-analyticsetup-07.png)
+
+![Analytical Insights setup guide, figure 8](images/ch05-s4-analyticsetup-08.png)
+
+![Analytical Insights setup guide, figure 9](images/ch05-s4-analyticsetup-09.png)
+
+![Analytical Insights setup guide, figure 10](images/ch05-s4-analyticsetup-10.png)
+
+![Analytical Insights setup guide, figure 11](images/ch05-s4-analyticsetup-11.png)
+
+![Analytical Insights setup guide, figure 12](images/ch05-s4-analyticsetup-12.png)
+
+![Analytical Insights setup guide, figure 13](images/ch05-s4-analyticsetup-13.png)
+
+![Analytical Insights setup guide, figure 14](images/ch05-s4-analyticsetup-14.png)
+
+![Analytical Insights setup guide, figure 15](images/ch05-s4-analyticsetup-15.png)
+
+![Analytical Insights setup guide, figure 16](images/ch05-s4-analyticsetup-16.png)
+
+![Analytical Insights setup guide, figure 17](images/ch05-s4-analyticsetup-17.png)
+
+![Analytical Insights setup guide, figure 18](images/ch05-s4-analyticsetup-18.png)
+
+![Analytical Insights setup guide, figure 19](images/ch05-s4-analyticsetup-19.png)
+
+![Analytical Insights setup guide, figure 20](images/ch05-s4-analyticsetup-20.png)
+
+![Analytical Insights setup guide, figure 21](images/ch05-s4-analyticsetup-21.png)
+
+![Analytical Insights setup guide, figure 22](images/ch05-s4-analyticsetup-22.png)
+
+![Analytical Insights setup guide, figure 23](images/ch05-s4-analyticsetup-23.png)
+
+![Analytical Insights setup guide, figure 24](images/ch05-s4-analyticsetup-24.png)
+
+![Analytical Insights setup guide, figure 25](images/ch05-s4-analyticsetup-25.png)
+
+![Analytical Insights setup guide, figure 26](images/ch05-s4-analyticsetup-26.png)
+
+![Analytical Insights setup guide, figure 27](images/ch05-s4-analyticsetup-27.png)
+
+![Analytical Insights setup guide, figure 28](images/ch05-s4-analyticsetup-28.png)
+
+![Analytical Insights setup guide, figure 29](images/ch05-s4-analyticsetup-29.png)
+
+![Analytical Insights setup guide, figure 30](images/ch05-s4-analyticsetup-30.png)
+
+![Analytical Insights setup guide, figure 31](images/ch05-s4-analyticsetup-31.png)
+
+![Analytical Insights setup guide, figure 32](images/ch05-s4-analyticsetup-32.png)
+
+![Analytical Insights setup guide, figure 33](images/ch05-s4-analyticsetup-33.png)
+
+![Analytical Insights setup guide, figure 34](images/ch05-s4-analyticsetup-34.png)
+
+![Analytical Insights setup guide, figure 35](images/ch05-s4-analyticsetup-35.png)
+
+![Analytical Insights setup guide, figure 36](images/ch05-s4-analyticsetup-36.png)
+
+![Analytical Insights setup guide, figure 37](images/ch05-s4-analyticsetup-37.png)
+
+![Analytical Insights setup guide, figure 38](images/ch05-s4-analyticsetup-38.png)
+
+![Analytical Insights setup guide, figure 39](images/ch05-s4-analyticsetup-39.png)
+
+![Analytical Insights setup guide, figure 40](images/ch05-s4-analyticsetup-40.png)
+
+![Analytical Insights setup guide, figure 41](images/ch05-s4-analyticsetup-41.png)
+
+![Analytical Insights setup guide, figure 42](images/ch05-s4-analyticsetup-42.png)
+
+![Analytical Insights setup guide, figure 43](images/ch05-s4-analyticsetup-43.png)
+
+![Analytical Insights setup guide, figure 44](images/ch05-s4-analyticsetup-44.png)
+
+![Analytical Insights setup guide, figure 45](images/ch05-s4-analyticsetup-45.png)
+
+### Images: Introducing Analytical Insights in Joule
+
+*Source: [Introducing Analytical Insights in Joule](https://community.sap.com/t5/technology-blog-posts-by-sap/introducing-analytical-insights-in-joule-empowering-smarter-decisions/ba-p/14083673)*
+
+![Analytical Insights intro, figure 1](images/ch05-s5-analyticintro-01.gif)
+
+![Analytical Insights intro, figure 2](images/ch05-s5-analyticintro-02.png)
+
+### Images: Joule in SAP S/4HANA Cloud Public Edition: setup guide
+
+*Source: [Joule in SAP S/4HANA Cloud Public Edition: setup guide](https://community.sap.com/t5/technology-blog-posts-by-sap/joule-in-sap-s-4hana-cloud-public-edition-setup-guide/ba-p/13965333)*
+
+![S/4HANA Public Edition setup, figure 1](images/ch05-s6-s4publicsetup-01.png)
+
+![S/4HANA Public Edition setup, figure 2](images/ch05-s6-s4publicsetup-02.png)
+
+![S/4HANA Public Edition setup, figure 3](images/ch05-s6-s4publicsetup-03.png)
+
+![S/4HANA Public Edition setup, figure 4](images/ch05-s6-s4publicsetup-04.png)
+
+![S/4HANA Public Edition setup, figure 5](images/ch05-s6-s4publicsetup-05.png)
+
+![S/4HANA Public Edition setup, figure 6](images/ch05-s6-s4publicsetup-06.png)
+
+![S/4HANA Public Edition setup, figure 7](images/ch05-s6-s4publicsetup-07.png)
+
+![S/4HANA Public Edition setup, figure 8](images/ch05-s6-s4publicsetup-08.png)
+
+![S/4HANA Public Edition setup, figure 9](images/ch05-s6-s4publicsetup-09.png)
+
+![S/4HANA Public Edition setup, figure 10](images/ch05-s6-s4publicsetup-10.png)
+
+![S/4HANA Public Edition setup, figure 11](images/ch05-s6-s4publicsetup-11.png)
+
+![S/4HANA Public Edition setup, figure 12](images/ch05-s6-s4publicsetup-12.png)
+
+![S/4HANA Public Edition setup, figure 13](images/ch05-s6-s4publicsetup-13.png)
+
+![S/4HANA Public Edition setup, figure 14](images/ch05-s6-s4publicsetup-14.png)
+
+![S/4HANA Public Edition setup, figure 15](images/ch05-s6-s4publicsetup-15.png)
+
+![S/4HANA Public Edition setup, figure 16](images/ch05-s6-s4publicsetup-16.png)
+
+![S/4HANA Public Edition setup, figure 17](images/ch05-s6-s4publicsetup-17.png)
+
+![S/4HANA Public Edition setup, figure 18](images/ch05-s6-s4publicsetup-18.png)
+
+![S/4HANA Public Edition setup, figure 19](images/ch05-s6-s4publicsetup-19.png)
+
+![S/4HANA Public Edition setup, figure 20](images/ch05-s6-s4publicsetup-20.png)
+
+![S/4HANA Public Edition setup, figure 21](images/ch05-s6-s4publicsetup-21.png)
+
+![S/4HANA Public Edition setup, figure 22](images/ch05-s6-s4publicsetup-22.png)
+
+![S/4HANA Public Edition setup, figure 23](images/ch05-s6-s4publicsetup-23.png)
+
+![S/4HANA Public Edition setup, figure 24](images/ch05-s6-s4publicsetup-24.png)
+
+![S/4HANA Public Edition setup, figure 25](images/ch05-s6-s4publicsetup-25.png)
+
+![S/4HANA Public Edition setup, figure 26](images/ch05-s6-s4publicsetup-26.png)
+
+![S/4HANA Public Edition setup, figure 27](images/ch05-s6-s4publicsetup-27.png)
+
+![S/4HANA Public Edition setup, figure 28](images/ch05-s6-s4publicsetup-28.png)
+
+![S/4HANA Public Edition setup, figure 29](images/ch05-s6-s4publicsetup-29.png)
+
+![S/4HANA Public Edition setup, figure 30](images/ch05-s6-s4publicsetup-30.png)
+
+![S/4HANA Public Edition setup, figure 31](images/ch05-s6-s4publicsetup-31.png)
+
+![S/4HANA Public Edition setup, figure 32](images/ch05-s6-s4publicsetup-32.png)
+
+![S/4HANA Public Edition setup, figure 33](images/ch05-s6-s4publicsetup-33.png)
+
+![S/4HANA Public Edition setup, figure 34](images/ch05-s6-s4publicsetup-34.png)
+
+![S/4HANA Public Edition setup, figure 35](images/ch05-s6-s4publicsetup-35.png)
+
+![S/4HANA Public Edition setup, figure 36](images/ch05-s6-s4publicsetup-36.png)
+
+![S/4HANA Public Edition setup, figure 37](images/ch05-s6-s4publicsetup-37.png)
+
+![S/4HANA Public Edition setup, figure 38](images/ch05-s6-s4publicsetup-38.png)
+
+![S/4HANA Public Edition setup, figure 39](images/ch05-s6-s4publicsetup-39.png)
+
+![S/4HANA Public Edition setup, figure 40](images/ch05-s6-s4publicsetup-40.png)
+
+![S/4HANA Public Edition setup, figure 41](images/ch05-s6-s4publicsetup-41.png)
+
+![S/4HANA Public Edition setup, figure 42](images/ch05-s6-s4publicsetup-42.png)
+
+![S/4HANA Public Edition setup, figure 43](images/ch05-s6-s4publicsetup-43.png)
+
+![S/4HANA Public Edition setup, figure 44](images/ch05-s6-s4publicsetup-44.png)
+
+![S/4HANA Public Edition setup, figure 45](images/ch05-s6-s4publicsetup-45.png)
+
+![S/4HANA Public Edition setup, figure 46](images/ch05-s6-s4publicsetup-46.png)
+
+![S/4HANA Public Edition setup, figure 47](images/ch05-s6-s4publicsetup-47.png)
+
+![S/4HANA Public Edition setup, figure 48](images/ch05-s6-s4publicsetup-48.png)
+
+![S/4HANA Public Edition setup, figure 49](images/ch05-s6-s4publicsetup-49.png)
+
+![S/4HANA Public Edition setup, figure 50](images/ch05-s6-s4publicsetup-50.png)
+
+![S/4HANA Public Edition setup, figure 51](images/ch05-s6-s4publicsetup-51.png)
+
+![S/4HANA Public Edition setup, figure 52](images/ch05-s6-s4publicsetup-52.png)
+
+![S/4HANA Public Edition setup, figure 53](images/ch05-s6-s4publicsetup-53.png)
+
+![S/4HANA Public Edition setup, figure 54](images/ch05-s6-s4publicsetup-54.png)
+
+### Images: Joule integration with SAP Ariba: setup guide
+
+*Source: [Joule integration with SAP Ariba: setup guide](https://community.sap.com/t5/technology-blog-posts-by-sap/joule-integration-with-sap-ariba-setup-guide/ba-p/14240003)*
+
+![Ariba setup guide, figure 1](images/ch05-s7-aribasetup-01.png)
+
+![Ariba setup guide, figure 2](images/ch05-s7-aribasetup-02.png)
+
+![Ariba setup guide, figure 3](images/ch05-s7-aribasetup-03.png)
+
+![Ariba setup guide, figure 4](images/ch05-s7-aribasetup-04.png)
+
+![Ariba setup guide, figure 5](images/ch05-s7-aribasetup-05.png)
+
+![Ariba setup guide, figure 6](images/ch05-s7-aribasetup-06.png)
+
+![Ariba setup guide, figure 7](images/ch05-s7-aribasetup-07.png)
+
+![Ariba setup guide, figure 8](images/ch05-s7-aribasetup-08.png)
+
+![Ariba setup guide, figure 9](images/ch05-s7-aribasetup-09.png)
+
+![Ariba setup guide, figure 10](images/ch05-s7-aribasetup-10.png)
+
+![Ariba setup guide, figure 11](images/ch05-s7-aribasetup-11.png)
+
+![Ariba setup guide, figure 12](images/ch05-s7-aribasetup-12.png)
+
+![Ariba setup guide, figure 13](images/ch05-s7-aribasetup-13.png)
+
+![Ariba setup guide, figure 14](images/ch05-s7-aribasetup-14.png)
+
+![Ariba setup guide, figure 15](images/ch05-s7-aribasetup-15.png)
+
+![Ariba setup guide, figure 16](images/ch05-s7-aribasetup-16.png)
+
+![Ariba setup guide, figure 17](images/ch05-s7-aribasetup-17.png)
+
+![Ariba setup guide, figure 18](images/ch05-s7-aribasetup-18.png)
+
+![Ariba setup guide, figure 19](images/ch05-s7-aribasetup-19.png)
+
+![Ariba setup guide, figure 20](images/ch05-s7-aribasetup-20.png)
+
+![Ariba setup guide, figure 21](images/ch05-s7-aribasetup-21.png)
+
+![Ariba setup guide, figure 22](images/ch05-s7-aribasetup-22.png)
+
+![Ariba setup guide, figure 23](images/ch05-s7-aribasetup-23.png)
+
+![Ariba setup guide, figure 24](images/ch05-s7-aribasetup-24.png)
+
+![Ariba setup guide, figure 25](images/ch05-s7-aribasetup-25.png)
+
+![Ariba setup guide, figure 26](images/ch05-s7-aribasetup-26.png)
+
+![Ariba setup guide, figure 27](images/ch05-s7-aribasetup-27.png)
+
+![Ariba setup guide, figure 28](images/ch05-s7-aribasetup-28.png)
+
+![Ariba setup guide, figure 29](images/ch05-s7-aribasetup-29.png)
+
+![Ariba setup guide, figure 30](images/ch05-s7-aribasetup-30.png)
+
+![Ariba setup guide, figure 31](images/ch05-s7-aribasetup-31.png)
+
+![Ariba setup guide, figure 32](images/ch05-s7-aribasetup-32.png)
+
+![Ariba setup guide, figure 33](images/ch05-s7-aribasetup-33.png)
+
+![Ariba setup guide, figure 34](images/ch05-s7-aribasetup-34.png)
+
+![Ariba setup guide, figure 35](images/ch05-s7-aribasetup-35.png)
+
+![Ariba setup guide, figure 36](images/ch05-s7-aribasetup-36.png)
+
+![Ariba setup guide, figure 37](images/ch05-s7-aribasetup-37.png)
+
+![Ariba setup guide, figure 38](images/ch05-s7-aribasetup-38.png)
+
+![Ariba setup guide, figure 39](images/ch05-s7-aribasetup-39.png)
+
+![Ariba setup guide, figure 40](images/ch05-s7-aribasetup-40.png)
+
+![Ariba setup guide, figure 41](images/ch05-s7-aribasetup-41.png)
+
+![Ariba setup guide, figure 42](images/ch05-s7-aribasetup-42.png)
+
+![Ariba setup guide, figure 43](images/ch05-s7-aribasetup-43.png)
+
+![Ariba setup guide, figure 44](images/ch05-s7-aribasetup-44.png)
+
+![Ariba setup guide, figure 45](images/ch05-s7-aribasetup-45.png)
+
+![Ariba setup guide, figure 46](images/ch05-s7-aribasetup-46.png)
+
+![Ariba setup guide, figure 47](images/ch05-s7-aribasetup-47.png)
+
+![Ariba setup guide, figure 48](images/ch05-s7-aribasetup-48.png)
+
+![Ariba setup guide, figure 49](images/ch05-s7-aribasetup-49.png)
+
+![Ariba setup guide, figure 50](images/ch05-s7-aribasetup-50.png)
+
+![Ariba setup guide, figure 51](images/ch05-s7-aribasetup-51.png)
+
+![Ariba setup guide, figure 52](images/ch05-s7-aribasetup-52.png)
+
+![Ariba setup guide, figure 53](images/ch05-s7-aribasetup-53.png)
+
+![Ariba setup guide, figure 54](images/ch05-s7-aribasetup-54.png)
+
+![Ariba setup guide, figure 55](images/ch05-s7-aribasetup-55.png)
+
+### Images: Overview: SAP Ariba SSO with SAP Cloud Identity Services
+
+*Source: [Overview: SAP Ariba SSO with SAP Cloud Identity Services](https://community.sap.com/t5/technology-blog-posts-by-sap/overview-sap-ariba-sso-with-sap-cloud-identity-services-identity/ba-p/13665483)*
+
+![Ariba SSO overview, figure 1](images/ch05-s8-aribasso-01.png)
+
+![Ariba SSO overview, figure 2](images/ch05-s8-aribasso-02.png)
+
+![Ariba SSO overview, figure 3](images/ch05-s8-aribasso-03.png)
+
+![Ariba SSO overview, figure 4](images/ch05-s8-aribasso-04.png)
+
+![Ariba SSO overview, figure 5](images/ch05-s8-aribasso-05.png)
+
+![Ariba SSO overview, figure 6](images/ch05-s8-aribasso-06.png)
+
+### Images: SAP Business AI Platform: resource hub for SAP partners
+
+*Source: [SAP Business AI Platform: resource hub for SAP partners](https://community.sap.com/t5/technology-blog-posts-by-sap/sap-business-ai-resource-hub-for-sap-partners/ba-p/14285942)*
+
+![Partner resource hub, figure 1](images/ch05-s9-partnerhub-01.gif)
+
+![Partner resource hub, figure 2](images/ch05-s9-partnerhub-02.png)
+
+![Partner resource hub, figure 3](images/ch05-s9-partnerhub-03.jpg)
+
+![Partner resource hub, figure 4](images/ch05-s9-partnerhub-04.png)
+
+![Partner resource hub, figure 5](images/ch05-s9-partnerhub-05.jpg)
+
+![Partner resource hub, figure 6](images/ch05-s9-partnerhub-06.png)
+
+![Partner resource hub, figure 7](images/ch05-s9-partnerhub-07.png)
+
+![Partner resource hub, figure 8](images/ch05-s9-partnerhub-08.png)
+
+### Images: Reference architecture: Joule in SAP S/4HANA Cloud
+
+*Source: [Reference architecture: Joule in SAP S/4HANA Cloud](https://architecture.learning.sap.com/docs/ref-arch/ebe268)*
+
+![Joule reference architecture, figure 1](images/ch05-s10-refarch-01.svg)
+
+### Images: Course: Setting up Joule across your system landscapes
+
+*Source: [Course: Setting up Joule across your system landscapes](https://learning.sap.com/courses/setting-up-joule-across-your-organizational-system-landscapes)*
+
+![Setup course, figure 1](images/ch05-s11-course-L01-01.png)
+
+![Setup course, figure 2](images/ch05-s11-course-L02-01.png)
+
+![Setup course, figure 3](images/ch05-s11-course-L02-02.png)
+
+![Setup course, figure 4](images/ch05-s11-course-L02-03.png)
+
 ## Recap
 
 - Identity decides whether setup works: OIDC, one tenant, one Global User ID

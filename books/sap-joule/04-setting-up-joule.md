@@ -221,6 +221,36 @@ flowchart TD
 | Add a system | Formation process; Booster cannot be re-run |
 | EU | EU11 for SAP EU Access |
 
+## Screenshots and figures from the sources
+
+*Images saved from the source pages, in the order they appear there.*
+
+### Images: Joule Unified Setup (SAP Community blog)
+
+*Source: [Joule Unified Setup (SAP Community blog)](https://community.sap.com/t5/technology-blog-posts-by-sap/joule-unified-setup-bridging-simplicity-and-performance/ba-p/13924542)*
+
+![Joule unified setup, figure 1](images/ch04-s1-unifiedsetup-01.png)
+
+![Joule unified setup, figure 2](images/ch04-s1-unifiedsetup-02.png)
+
+![Joule unified setup, figure 3](images/ch04-s1-unifiedsetup-03.png)
+
+![Joule unified setup, figure 4](images/ch04-s1-unifiedsetup-04.png)
+
+![Joule unified setup, figure 5](images/ch04-s1-unifiedsetup-05.png)
+
+![Joule unified setup, figure 6](images/ch04-s1-unifiedsetup-06.png)
+
+![Joule unified setup, figure 7](images/ch04-s1-unifiedsetup-07.png)
+
+![Joule unified setup, figure 8](images/ch04-s1-unifiedsetup-08.png)
+
+![Joule unified setup, figure 9](images/ch04-s1-unifiedsetup-09.png)
+
+![Joule unified setup, figure 10](images/ch04-s1-unifiedsetup-10.png)
+
+![Joule unified setup, figure 11](images/ch04-s1-unifiedsetup-11.png)
+
 ## Recap
 
 - Joule is a BTP service that relies on Build Work Zone and Cloud Identity Services

@@ -349,6 +349,40 @@ New topic = new conversation.
 | Where | SAP apps (shell bar), Mobile Start, Microsoft 365 Copilot |
 | Data | Ask step by step, then act on the insight |
 
+## Screenshots and figures from the sources
+
+*Images saved from the source pages, in the order they appear there.*
+
+### Images: Getting Started with Joule for Business Users course, lesson pages
+
+*Source: [Getting Started with Joule for Business Users course, lesson pages](https://learning.sap.com/courses/getting-started-with-joule-for-business-users)*
+
+![Business users course, figure 1](images/ch03-s1-course-U2-01.png)
+
+![Business users course, figure 2](images/ch03-s1-course-U2-02.png)
+
+![Business users course, figure 3](images/ch03-s1-course-U2-03.png)
+
+![Business users course, figure 4](images/ch03-s1-course-U2-04.png)
+
+![Business users course, figure 5](images/ch03-s1-course-U2-05.png)
+
+![Business users course, figure 6](images/ch03-s1-course-U2-06.png)
+
+![Business users course, figure 7](images/ch03-s1-course-U2-07.png)
+
+![Business users course, figure 8](images/ch03-s1-course-U3-01.png)
+
+![Business users course, figure 9](images/ch03-s1-course-U3-02.png)
+
+![Business users course, figure 10](images/ch03-s1-course-U6-01.png)
+
+![Business users course, figure 11](images/ch03-s1-course-U6-02.png)
+
+![Business users course, figure 12](images/ch03-s1-course-U6-03.png)
+
+![Business users course, figure 13](images/ch03-s1-course-U6-04.png)
+
 ## Recap
 
 - Joule moves work from "navigate and assemble" to "ask, understand, act"
