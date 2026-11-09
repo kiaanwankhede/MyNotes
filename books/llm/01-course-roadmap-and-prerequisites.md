@@ -1,347 +1,97 @@
-# Chapter 1: Course roadmap and prerequisites
+# Chapter 1: Roadmap, golden rules and setup
 
-*The map before the road trip: where the course sits, what comes in what order, the rules for judging an agent, and the setup you need first.*
+*Where each topic lives in these books, the four rules for judging an agent in production, and the one-time setup.*
 
 > [!NOTE]
 > **📍 At a glance**
-> - **You will learn:** the course stages and where each lives in these books, the four golden rules for production agents and how industry measures them, and the one-time setup
-> - **You will build:** a working setup (Python, UV, VS Code, one free API key, `.env`) and run the first class folder
-> - **Level:** beginner · **Time:** about 30 minutes
-> - **Builds on:** nothing. **Leads to:** [Python Ch 1](../python/01-setup-and-api-basics.md)
+> - **You will learn:** the study order, the four golden rules and their metrics, and the setup every code folder needs
+> - **Level:** beginner · **Time:** about 10 minutes
+> - **Leads to:** [Python Ch 1](../python/01-setup-and-api-basics.md)
 
-**After this chapter you can:**
+---
 
-- Say where the course sits and what each stage covers
-- Name the four golden rules for judging an agent in production, and the metric for each
-- Find every topic in these notes from the course phases
-- Finish the one-time setup and run the first class folder
-
-## 1.1 Where the course sits
-
-Krish Naik Academy places each learner on one of three paths:
-
-| Path | For whom |
-|---|---|
-| Traditional | Data science, then GenAI, then agentic AI |
-| Modern | Some experience, faster ramp-up |
-| Advanced | Highly experienced, quick implementation |
-
-- Agentic AI 3.0 sits **between Modern and Advanced**
-- Built for people who want fundamentals to specialisation without starting from zero
-- A separate no-code agentic AI batch exists for managers who want to skip coding
-
-*Source: Live-Class-2026, `classes_summary/00` and `classes_transcription_summary/00`.*
-
-## 1.2 Agentic 2.0 versus 3.0
-
-| | Agentic 2.0 | Agentic 3.0 |
-|---|---|---|
-| Focus | Understanding agents | Using and deploying agents |
-| Frameworks | Older LangChain and LangGraph | Latest LangChain, MCP, A2A, Claude Agent SDK |
-| Tools | Basic | Claude Code, OpenClaude, Hermes/Nemo agents |
-| Projects | Simpler builds | Production-grade, multi-agent, CI/CD-driven |
-| New roles | None | Harness Engineering, Forward-Deployed Engineer (FDE) |
-
-- 2.0 comes free with 3.0 enrolment but is **not a prerequisite**
-- New hot topics are added as the field changes (example: n8n, added in 2.0)
-- Azure and Microsoft AI Foundry, Bedrock and Vertex AI each get dedicated sessions
-- **A2A** is the agent-to-agent protocol the roadmap places beside MCP and LangGraph
-- **AgentOps**, the deployment and monitoring side, comes after fundamentals and frameworks, about 1.5 to 2 months in
-
-*Source: `classes_transcription_summary/00`, `classes_summary/00`, the Q&A in `classes_transcription_summary/02`.*
-
-## 1.3 The curriculum arc
-
-The induction session gives seven stages:
-
-1. **Foundations:** LLMs and model providers (OpenAI, Anthropic, others)
-2. **Core frameworks and protocols:** LangChain, LangGraph, MCP, A2A, RAG, context engineering
-3. **Mini-projects:** each concept applied by hand
-4. **Interim projects:** deployed on cloud and a VPS
-5. **Coding agent ecosystem:** Claude Code, OpenClaude, Hermes/Nemo agents
-6. **Extended frameworks:** ADK, the Claude Agent SDK and more
-7. **Production capstones:** about nine portfolio-grade builds
+## 1.1 Study map
 
 ```mermaid
 flowchart LR
-    P0["0 Foundations<br/>Python · Pydantic · LLM basics"] --> P1["1 Agents in pure Python<br/>brain · memory · tools · loop"]
-    P1 --> P2["2 LangChain in depth<br/>models · tools · middleware"]
-    P2 --> P3["3 LangGraph and beyond<br/>state · MCP · RAG"]
-    P3 --> P4["4 Production capstones<br/>cloud · VPS · CI/CD"]
+    P0["Foundations<br/>Python · Pydantic · LLM basics"] --> P1["Agents in pure Python<br/>loop · tools · memory"]
+    P1 --> P2["LangChain<br/>models · tools · middleware"]
+    P2 --> P3["LangGraph, MCP, RAG"]
+    P3 --> P4["Production projects<br/>cloud · VPS · CI/CD"]
 ```
 
-The repo describes five phases. These notes follow them:
+| Phase | Where in these notes |
+|---|---|
+| Foundations | [Python](../python/01-setup-and-api-basics.md), [Pydantic](../pydantic/01-why-pydantic-and-basemodel.md), [LLM Ch 3](03-inside-the-model.md) |
+| Agents in pure Python | [Python Ch 3](../python/03-anatomy-of-an-agent.md), [LLM Ch 2](02-the-agentic-loop-in-pure-python.md) |
+| LangChain | [Langchain book](../langchain/01-introduction-to-langchain.md) |
+| MCP, checkpointing, RAG | [MCP book](../mcp/01-why-mcp-exists.md), Langchain Ch 6, [Projects Ch 3](../projects/03-meridian-ai-learner.md) |
+| Production projects | [Projects book](../projects/01-cinebot.md) |
 
-| Phase | Content | Where in these notes |
+- Later course topics: A2A (agent-to-agent protocol), coding agents (Claude Code), Claude Agent SDK / ADK, cloud AI platforms (Azure AI Foundry, Bedrock, Vertex AI), **AgentOps** (deploy and monitor)
+
+## 1.2 The four golden rules
+
+| Rule | Metric | Where you see it |
 |---|---|---|
-| 0 Foundations | Python, Pydantic, AI vocabulary | [Python](../python/01-setup-and-api-basics.md), [Pydantic](../pydantic/01-why-pydantic-and-basemodel.md), [LLM Ch 3](03-inside-the-model.md) |
-| 1 Agents in pure Python | Brain, memory, tools, the loop | [Python Ch 3](../python/03-anatomy-of-an-agent.md), [LLM Ch 2](02-the-agentic-loop-in-pure-python.md) |
-| 2 LangChain in depth | Models, structured output, tools, agents, middleware, runtime | [Langchain book](../langchain/01-introduction-to-langchain.md) (Ch 1 to 17) |
-| 3 LangGraph and beyond | State, checkpointing, MCP, RAG | [MCP book](../mcp/01-why-mcp-exists.md) (Ch 1 to 8). Checkpointing is in Langchain Ch 6. RAG is shown in [Projects Ch 3](../projects/03-meridian-ai-learner.md). No book yet for LangGraph itself |
-| 4 Production capstones | Deployed on cloud and VPS | [Projects book](../projects/01-cinebot.md) (Ch 1 to 4) |
+| **Cost** | Tokens and money per task | Provider usage, traces |
+| **Failure rate** | % runs that error, time out or retry | Logs, traces, alerts |
+| **Latency** | Time to first token, p95 total | Traces, dashboards |
+| **Quality** | Pass rate on a fixed real test set | Evals on every change |
 
-- The repo README says it covers classes 00 to 18. Its transcript folder goes to class 23 (MCP in LangChain), so the README is out of date there
+- **"Simple is scalable":** fewest LLM/API hops that solve the problem; each hop adds cost, latency and a failure point
+- Start with one model call; add tools, loops or more agents only when a test shows the need
+- Use several LLMs only for a reason (failover, cheap model for easy steps); never in parallel by default
+- The rules trade off: a stronger model raises quality *and* cost. **Measure all four before optimising**
 
-*Source: `classes_summary/00`, `classes_transcription_summary/00`, root `README.md`.*
+## 1.3 One-time setup
 
-## 1.4 The four golden rules
-
-Rules for judging a system **in production**, repeated all course:
-
-1. **Cost**, including token use
-2. **Failure rate**, trending toward zero
-3. **Latency**, the speed of the response
-4. **Quality**: is the output useful?
-
-The course motto: **"Simple is scalable."** In practice:
-
-- Minimise calls to outside services, APIs and LLMs. Every hop costs time and money
-- Prefer the simplest system that solves the problem. Do not build for scale that never arrives
-- Use several LLMs only when needed, such as failover. Calling models in parallel by default doubles cost
-
-*Source: `classes_summary/00`, `classes_transcription_summary/00`.*
-
-> [!IMPORTANT]
-> **🏭 In production: how the four rules are measured**
->
-> | Rule | Typical metric | Where you see it |
-> |---|---|---|
-> | Cost | Tokens and money **per task** or per conversation | Provider usage data, traces |
-> | Failure rate | Share of runs that error, time out or need a retry | Logs, traces, alerts |
-> | Latency | Time to first token and p95 total time | Traces, monitoring dashboards |
-> | Quality | Pass rate on a fixed set of real test questions | Evaluations re-run on every change |
->
-> - The four trade against each other: a stronger model raises quality and cost; more tool hops raise quality and latency
-> - Measure all four **before** optimising; teams often fix the wrong one
->
-> *Added by Claude.*
-
-## 1.5 How the hands-on learning works
-
-- Each concept gets a mini-project in class
-- A full project is then walked through and shares the package: code, diagrams, explanations
-- Short of time: run the given code with its explanation
-- With time: customise and extend it
-- Built for working professionals. You are never forced to write everything from scratch
-
-*Source: `classes_transcription_summary/00`.*
-
-## 1.6 Recurring projects and tooling
-
-| Project | First appears | What it is |
-|---|---|---|
-| Project Zero | Class 04 | Hand-built raw-Python agent: model, tools, memory, Streamlit UI |
-| CineBot | Class 09 | Movie-ticket agent, the vehicle for structured output and tools |
-| TripMate | Class 11 | Travel planner with real weather, search and SQLite storage |
-
-- CineBot is gathered in [Projects Ch 1](../projects/01-cinebot.md)
-- Python 3.10 or newer, managed with **UV**. Every code folder has its own `pyproject.toml`
-- Free LLM access: Groq and OpenRouter. Paid: OpenAI and Anthropic
-- Keys go in `.env`, never committed. Each project ships a `.env.example`
-- Google Colab for line-by-line learning. VS Code for real multi-file projects
-- Excalidraw for the diagrams drawn live
-
-*Source: root `README.md`.*
-
-## 1.7 Prerequisites and first-time setup
-
-Do this once, before class 01. Why UV and VS Code: [Python Ch 1](../python/01-setup-and-api-basics.md).
-
-1. **Python 3.10 or newer.** Check with `python3 --version`
-   - Projects pin 3.13. Each folder pins its exact version in `.python-version`, which UV reads
-2. **UV.** Mac or Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`. Windows: Git Bash or Windows Terminal and the UV docs
-3. **VS Code.** The course uses `.py` scripts, a real terminal and debugging, not only notebooks
-4. **One free LLM API key.** Every class folder needs one provider key:
-
-| Provider | Cost | Where |
-|---|---|---|
-| Groq | Free, fast, quickest to sign up | console.groq.com/keys |
-| OpenRouter | Free tier. `model="openrouter/free"` routes to a free model so it does not go stale | openrouter.ai/keys |
-| OpenAI | Paid | platform.openai.com/api-keys |
-| Anthropic | Paid | console.anthropic.com |
-
-5. **The `.env` workflow**, the same in every folder. Never edit `.env.example`. Copy it:
+1. **Python 3.10+** (projects pin 3.13 in `.python-version`)
+2. **uv:** `curl -LsSf https://astral.sh/uv/install.sh | sh`
+3. **VS Code** for real projects; Colab only for exploring
+4. **One API key:** Groq or OpenRouter (free tiers), OpenAI or Anthropic (paid)
+5. **The `.env` workflow** in every folder:
 
 ```bash
-cd "Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics"
 uv sync
-cp .env.example .env
-# open .env and paste in at least one real key, e.g. GROQ_API_KEY=...
+cp .env.example .env      # paste a real key, e.g. GROQ_API_KEY=...
 uv run main.py
 ```
 
-- `.env` is git-ignored at the repo root. Only `.env.example` ships, with placeholders
-- The code files also fall back to a stand-in when no key is set ([Python Ch 3](../python/03-anatomy-of-an-agent.md), 3.4)
+- `.env` is git-ignored; only `.env.example` ships. Check with `git check-ignore .env`
+- **A leaked key must be revoked at the provider**, not just deleted from the repo
 
-**If `git clone` or `git pull` fails** (the repo's own table):
-
-| Symptom | Fix |
+| Git problem | Fix |
 |---|---|
-| `invalid path '...'` or `unable to checkout working tree` | A bad filename slipped in. Report the path, then `git restore --source=HEAD :/` and `git pull` after it is fixed |
-| `Filename too long` (Windows) | `git config --global core.longpaths true`; clone to a short path such as `C:\src\` |
-| `Your local changes would be overwritten by merge` | `git stash -u`, `git pull`, `git stash pop` |
-| A folder never shows on GitHub | It has its own `.git` (created by `uv init`). Delete `<folder>/.git`, or create projects with `uv init --vcs none` (the repo's table says `--no-vcs`; *checked* with uv 0.11.32, that flag is rejected) |
+| `Filename too long` (Windows) | `git config --global core.longpaths true` |
+| Local changes block `pull` | `git stash -u`, `git pull`, `git stash pop` |
+| Folder missing on GitHub | It has its own `.git` from `uv init`; delete it or use `uv init --vcs none` |
 
-**Checklist before class 01:**
+## Interview corner
 
-- Python 3.10+ and UV installed (`uv --version` runs)
-- VS Code installed
-- One free API key in hand
-- Saturday and Sunday, 8 to 11 AM IST, blocked on your calendar
+<details class="qa"><summary>1. How do you judge an agent in production?</summary>
 
-*Source: `PREREQUISITES.md`, `classes_summary/00`.*
-
-## 1.8 Further reading
-
-From the course repo:
-
-- Running notes, class links, Colab links, doubt-solving chatbot: bugs-sleep-6uj.craft.me/agentic3
-- Course code: github.com/mayank953/Live-Class-2026
-- Topic sites: Mastering Pydantic (pydantic-with-mayank.netlify.app), AI Terms (ai-terms-with-mayank.netlify.app), Agents with Pure Python (python-agents-with-mayank.netlify.app), Claude and AI (ai-automation-with-mayank.netlify.app), AI Memory Lab (context-with-mayank.netlify.app)
-- MCP: lifecycle guide (mcp-lifecycle.netlify.app) and conversation simulator (mcp-lifecycle-simulator.netlify.app)
-- Transformer Explainer: poloclub.github.io/transformer-explainer
-
-*Source: transcription folder `Readme.md` and root `README.md`. These links were not opened.*
-
-**The AI Industry Handbook**
-
-- A PDF in the repo: the *Industry-Ready AI Handbook* (2026 edition), a business companion to an ET Masterclass
-- 22 pages: ten industries (manufacturing, healthcare, banking, retail, hospitality, FMCG, real estate, media and marketing, IT and consulting, energy) plus a fashion bonus
-- Also: India's AI market, AI uses by job role, a tool list, a 30-day starter plan
-- It may be the industry handbook the class 01 Q&A promised. That is not confirmed
-- It is marked "Not for redistribution", so these notes carry none of its figures or company claims. Open the PDF itself
-
-*Source: `Weekend 01 - 27-28 Jun/AI_Industry_Handbook_2026.pdf`, read in full.*
-
-## Questions from the class (class 00)
-
-| Question | Answer |
-|---|---|
-| Is the course useful across experience levels? | Yes: fundamentals for beginners, system-design depth for architects and seniors |
-| Do I need paid tools? | No. Free and open-source tools come first; paid ones are optional and only demoed |
-| How do projects work for busy professionals? | Concepts and mini-projects live, then full code and explanations, so you can run first and deepen later |
-| Will Azure and Microsoft tools be covered? | Yes: dedicated sessions on Azure, Bedrock, Vertex AI and Foundry |
-| I have zero Python. What now? | A Python playlist is shared as preparation |
-
-- Action items from the session: install the academy's mobile app, use its in-app **Messages** tab as the only communication channel, block the weekend slots, watch the Python playlist if new, post a first learning update after class 1
-
-*Source: `classes_transcription_summary/00`, Q&A and action items. Platform rules are left out as admin, not teaching.*
-
-## 1.9 Added by Claude, not from the sources
-
-- **Map the rules to tools.** Cost, latency and failures show up in a trace: LangSmith records each step's time and token cost ([Langchain Ch 2](../langchain/02-langchain-family-and-harness-engineering.md)). Quality needs your own test questions
-- **A key check before you push:** run `git status` and confirm `.env` is not listed; `git check-ignore .env` prints the path when it is ignored
-- **Rotate a leaked key.** If a key ever lands in a commit, revoke it at the provider, not only in the repo. Several keys in this course's source files should be revoked by their owner (see [Langchain Ch 12](../langchain/12-mcp-in-langchain.md), 12.11)
-- **Read the dates.** The README, transcripts and notes were written at different times. The class count (18 versus 23) is one example of drift
-- **FDE in general use** usually means an engineer who works with a customer to build and deploy a solution on site. The course names the role but the sources here do not define it, so check the course material before relying on this reading
-
-## 1.10 Interview corner
-
-**What interviewers listen for:** you judge agents by measurable outcomes (cost, failures, latency, quality), prefer the simplest design that works, and keep secrets out of code.
-
-### 🟢 Basic
-
-<details class="qa"><summary>1. How do you judge an agent system in production?</summary>
-
-- Cost, failure rate, latency, quality: watch all four, not one
-- *Stronger answer:* give a metric for each (cost per task, error rate, p95 latency, pass rate on a test set)
+- Cost per task, failure rate, p95 latency, pass rate on a test set, all four together
 
 </details>
 
-<details class="qa"><summary>2. What is AgentOps?</summary>
+<details class="qa"><summary>2. Quality is fine but cost tripled. How do you investigate?</summary>
 
-- The deployment and monitoring side of agents in production
-- *Stronger answer:* tracing, evaluations, cost tracking, alerts and safe rollouts of new prompts and models
-
-</details>
-
-<details class="qa"><summary>3. Why keep keys in <code>.env</code> and ship <code>.env.example</code>?</summary>
-
-- A real key must never be committed; the example shows which variables to set
+- Break cost down per step from traces; usual causes are growing history, extra loop turns, a model switch or retries; fix with trimming, caching, a cheaper model for easy steps, budget alerts
 
 </details>
 
-### 🟡 Intermediate
+<details class="qa"><summary>3. What is AgentOps?</summary>
 
-<details class="qa"><summary>4. "Simple is scalable." What does it mean here?</summary>
-
-- Fewer calls and moving parts; each extra LLM or API hop adds cost, latency and failure points
-- *Stronger answer:* start with one model call; add tools, a loop or more agents only when a measured problem needs them
-
-</details>
-
-<details class="qa"><summary>5. When do you use more than one LLM?</summary>
-
-- When the problem needs it: failover, or a cheap model for easy steps and a strong one for hard ones
-- *Stronger answer:* never in parallel by default, which multiplies cost without a clear gain
-
-</details>
-
-<details class="qa"><summary>6. Why learn the raw-Python loop before LangChain?</summary>
-
-- So the framework is a convenience, not a mystery ([Chapter 2](02-the-agentic-loop-in-pure-python.md))
-- *Stronger answer:* when a framework misbehaves, you debug the loop it runs
-
-</details>
-
-### 🔴 Senior
-
-<details class="qa"><summary>7. Quality is fine but cost tripled last month. How do you investigate?</summary>
-
-- Break cost down per task from traces: which step, which model, how many tokens
-- *Stronger answer:* usual causes are growing history, extra loop turns, a model switch, or retries; fix with trimming, caching, a cheaper model for easy steps, and a budget alert
-
-</details>
-
-<details class="qa"><summary>8. Colab, notebooks or a project in VS Code for a team?</summary>
-
-- Colab or notebooks to explore; a VS Code project for anything shared or deployed
-- *Stronger answer:* a project gives version control, a lock file, tests and CI; notebooks hide state and are hard to review
+- Running agents in production: tracing, evals, cost tracking, alerts, safe rollout of new prompts and models
 
 </details>
 
 > [!TIP]
-> **🧩 Design question**
-> - *"Your manager asks for an 'AI agent' to answer HR policy questions. What do you build first, and how do you know it works?"*
-> - Talk about: the simplest version first (one model call with retrieved policy text), a test set of real questions, the four golden metrics, and adding tools or agents only when a test shows the need
+> **🧩 Design question:** "Build an AI agent for HR policy questions." Start with one call over retrieved policy text, a real test set and the four metrics; add tools or agents only when a test fails.
 
-## Cheat sheet
+---
 
-| Item | Remember |
-|---|---|
-| Four golden rules | Cost · failure rate · latency · quality |
-| Motto | Simple is scalable: fewest calls that solve the problem |
-| Study order | Python → Pydantic → LLM → Langchain → MCP → Projects |
-| Setup | Python 3.10+, `uv`, VS Code, one free key, `cp .env.example .env` |
-| Secrets | `.env` in `.gitignore`; check with `git check-ignore .env` |
-
-## Recap
-
-- Three paths. 3.0 sits between Modern and Advanced
-- Seven stages in class; five phases in the repo; all mapped to these books
-- Four golden rules: cost, failure rate, latency, quality. "Simple is scalable"
-- Setup: Python 3.10+, UV, VS Code, one free key, the `.env` copy workflow
-- Fix git problems with the table. Keep keys out of Git
-
-## Practice
-
-1. Place yourself on the three paths and say why 3.0 fits (or does not)
-2. Name the four golden rules and give one example of each from a system you know
-3. Finish the setup checklist and run `uv run main.py` in the class 01 folder
-4. Open the phase table and note which book you will study first
-
-## How this chapter was checked
-
-- **Rewritten** from the earlier version of this chapter, which was built from the induction summaries, `PREREQUISITES.md`, the root README, the transcription `Readme.md` and the handbook PDF (read in full at that time). I did not re-open those files in this pass
-- **Checked in the repo:** every link to a chapter in the phase table points to a file that exists
-- **Not run:** `uv`, the setup steps, the git fixes, any link in 1.8
-- The diagram, the metrics box, the graded interview and the cheat sheet were added in the 2026 review (Added by Claude: standard practice)
-- The phase table reflects the books as they stand now. Earlier versions of this chapter listed several as "not written yet"
-
-## Sources and further reading
-
-- Live-Class-2026, `classes_summary/00 - 21 Jun - Course Induction & Roadmap.md`
-- Live-Class-2026, `classes_transcription_summary/00 - 21 June - Course Induction & Roadmap.md`
-- Live-Class-2026, `PREREQUISITES.md`, root `README.md` and `classes_transcription_summary/Readme.md`
+*Source: Live-Class-2026 class 00 (induction), `PREREQUISITES.md`, root `README.md`; metrics table added by Claude.*
 
 Next: [Chapter 2, The agentic loop in pure Python](02-the-agentic-loop-in-pure-python.md)

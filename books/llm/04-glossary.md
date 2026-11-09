@@ -7,15 +7,8 @@
 > - **What it is:** 156 entries from the whole course and the 2026 review, plus look-alike pairs that interviewers like to test
 > - **How to use it:** search the page (Ctrl+F or "Find in page"), or start from the topic map below
 > - **Level:** all · **Time:** look-ups; or one letter a day for revision
-> - **Builds on:** every book. Each entry links to the chapter that teaches it
 
-**After this chapter you can:**
-
-- Look up any course term in one line and jump to the chapter that teaches it
-- Tell apart look-alike terms (guardrail and middleware, state and runtime, saver and store)
-
-- Definitions are reworded, not copied. Terms from the source glossaries are all here
-- Where the books use a different name from the class, the book's chapter is the link
+- Definitions are reworded; each links to the chapter that teaches the term
 
 ### Topic map
 
@@ -271,104 +264,6 @@ flowchart LR
 - **Context window vs memory.** The window is per call and fixed. Memory is a separate, lasting mechanism
 - **Provider strategy vs tool strategy.** Native structured output, or a synthetic tool call that fakes it
 
-## Added by Claude, not from the sources
-
-- **One term added:** "Retriever and RAG" (retrieve first, then answer) comes from the Meridian project, not the source glossaries
-- **One fix to the source wording:** the class glossary says `wrap_tool_call` "stays in declared order" for after-hooks. [Langchain Ch 10](../langchain/10-shell-tools-and-custom-middleware.md) tested this: wrap hooks **nest**, so a wrap hook exits in reverse. The execution-order entry follows that
-- **"Vibe coding"** is explained only in the class 02 Q&A, so it links to that section of Python Ch 2
-- **Names change:** `langchain-mcp-adapters` and `langchain.mcp` are two different packages (see [Langchain Ch 12](../langchain/12-mcp-in-langchain.md)). The glossary uses the class's wording
-- **16 entries added in the 2026 review** for topics new in the restyled books (for example Hallucination, Temperature and top-p, Discriminated union, `uv.lock`)
-- **Study tip:** read one letter a day and say each entry aloud without looking at the definition
-
-## Interview corner
-
-**What interviewers listen for:** you can separate look-alike terms precisely and give the one-line reason each exists.
-
-### 🟢 Basic
-
-<details class="qa"><summary>1. What does "stateless" mean for an LLM call?</summary>
-
-- The model remembers nothing between calls; the history is resent every time
-
-</details>
-
-<details class="qa"><summary>2. Tool schema or tool function?</summary>
-
-- The schema (name, description, parameters) goes to the model; the function stays in your code
-
-</details>
-
-<details class="qa"><summary>3. What are the three MCP primitives?</summary>
-
-- Tools (do), resources (read), prompts (a template to fill in)
-
-</details>
-
-### 🟡 Intermediate
-
-<details class="qa"><summary>4. Guardrail or middleware?</summary>
-
-- A guardrail is the aim; middleware is one mechanism that implements it, along with retries, fallbacks and logging
-
-</details>
-
-<details class="qa"><summary>5. State or runtime context? Checkpointer or store?</summary>
-
-- State changes and persists in a conversation; runtime context is fixed for the run
-- *Stronger answer:* a checkpointer resumes one thread by `thread_id`; a store holds facts across threads
-
-</details>
-
-<details class="qa"><summary>6. Why is the agent loop not a DAG?</summary>
-
-- It cycles back: model, tool, model again, until a final answer or a cap
-
-</details>
-
-### 🔴 Senior
-
-<details class="qa"><summary>7. What does <code>wrap_model_call</code> do that <code>before_model</code> cannot?</summary>
-
-- It receives the outgoing request and can change the model, tools or prompt, or retry around the call
-- *Stronger answer:* `before_model` sees state before the call; only a wrap hook controls the call itself
-
-</details>
-
-<details class="qa"><summary>8. Fine-tuning, RAG, prompt caching, reasoning model: which solves "answers are out of date"?</summary>
-
-- RAG: it supplies current documents at question time
-- *Stronger answer:* fine-tuning changes style, caching cuts cost, a reasoning model thinks harder; none of them adds fresh facts
-
-</details>
-
-> [!TIP]
-> **🧩 Design question**
-> - *"Explain to a new teammate, in five terms from this glossary, how a request flows through a production agent."*
-> - A good answer: tokens into the **model**, the **agentic loop** with **tool schemas**, **validation** of tool arguments and output, and **tracing** of every step
-
-## Recap
-
-- 140 entries, A to Z, each linked to its teaching chapter
-- The look-alike list is the fastest revision for interviews
-- If a term is missing, search the book that owns the topic and add it here
-
-## Practice
-
-1. Pick ten entries at random and explain each without looking
-2. Use the look-alike list: write one sentence that separates each pair
-3. Find a term you use at work that is missing here and write its entry
-
-## How this chapter was checked
-
-- **Terms and meanings** come from the two source glossaries (about 141 entries, some only pointing to another entry, a few merged here into one line). Definitions were reworded
-- **Links:** every chapter link was checked to point to a file that exists in this repository. The chapter chosen for each term was picked by searching the books for the term and checking the best match. A few were set by hand
-- **Not checked:** each link was not opened to confirm the section; the chapter is the target, not the section
-- The `wrap` hook order follows the tested result in the Langchain book
-- **2026 review:** 16 entries added for new topics in the restyled Python, Pydantic and LLM chapters, each linked to the chapter that now teaches it; the At-a-glance box, topic map and graded interview were added. Links re-checked automatically
-
-## Sources and further reading
-
-- Live-Class-2026, `GLOSSARY.md` (a short table with links to the class summaries)
-- Live-Class-2026, `classes_transcription_summary/glossary.md` (about 140 entries). The source glossaries link to a different GitHub repository; those links are not reused here
+*Source: Live-Class-2026 `GLOSSARY.md` and `classes_transcription_summary/glossary.md`, reworded; 16 entries added by Claude for the restyled books.*
 
 Previous: [Chapter 3, Inside the model](03-inside-the-model.md)
