@@ -69,6 +69,43 @@ await vector_store.asimilarity_search("...")                           # async
 > - Store source and page metadata so every answer can cite where it came from
 > - *Added by Claude.*
 
+### Retrieval as an agent tool, with citations (*added by Claude*)
+
+The agentic version of RAG: the model decides **when** to search, and every chunk arrives labelled with its source.
+
+```python
+from langchain.tools import tool
+
+@tool(response_format="content_and_artifact")
+def search_policies(query: str):
+    """Search internal policy documents. Use for any question about company rules, refunds or leave."""
+    docs = vector_store.similarity_search(query, k=4)
+    text = "\n\n".join(f"[{d.metadata['source']} p.{d.metadata['page']}] {d.page_content}" for d in docs)
+    return text, docs                       # text → model; docs → your app (artifact)
+
+agent = create_agent(
+    "openai:gpt-4o-mini", tools=[search_policies],
+    system_prompt=("Answer only from search_policies results and cite them as [file p.N]. "
+                   "If the results don't contain the answer, say you don't know."),
+)
+```
+
+- `content_and_artifact`: the model sees the labelled text; the raw `Document`s ride along on `ToolMessage.artifact` for your UI (clickable sources) and for evaluation
+- The **citation format in the tool output** plus the **"say you don't know" rule** in the prompt are what cut hallucination, more than a bigger model
+
+**Measure retrieval before tuning prompts:**
+
+```python
+def hit_rate(cases, k=4):                    # cases: [{"q": ..., "source": "policy.pdf"}]
+    hits = sum(any(d.metadata["source"] == c["source"] for d in vector_store.similarity_search(c["q"], k=k))
+               for c in cases)
+    return hits / len(cases)
+```
+
+- Low hit rate → fix chunking, metadata filters, embeddings or add hybrid search / re-ranking; a better prompt cannot fix a missing chunk
+
+✅ *Verified offline (in-memory store, fake embeddings): the tool returned a `ToolMessage` whose content was the labelled text and whose `artifact` held the 2 documents. Retrieval quality itself was not measured (fake embeddings are not semantic).*
+
 ## 16.2 SQL agent
 
 - *Source: LangChain docs, `sql-agent.mdx` and its code snippets (`sql-agent-*.mdx`).*
