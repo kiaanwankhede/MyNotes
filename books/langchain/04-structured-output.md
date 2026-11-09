@@ -398,6 +398,40 @@ Not in the course material. Established practice, but check current docs.
 - **Each failed validation is another model call.** Retries cost money and time. Keep schemas simple and error hints short so one retry usually fixes it
 - **Test with messy and hostile input**, not only clean examples. Include missing fields, wrong languages and injection attempts
 
+### A production extraction schema, end to end (*added by Claude*)
+
+The rules above, in one schema for a real job: turning customer emails into tickets.
+
+```python
+from typing import Literal
+from pydantic import BaseModel, Field
+from langchain.agents import create_agent
+from langchain.agents.structured_output import ToolStrategy
+
+class Ticket(BaseModel):
+    """A support ticket extracted from a customer email."""          # the class docstring is sent too
+    category: Literal["billing", "bug", "account", "other"] = Field(
+        description="Pick the closest; 'other' if unsure")             # closed set → easy routing
+    order_id: str | None = Field(default=None,
+        description="Format 'A-123'; null if not mentioned. Never invent one.")
+    summary: str = Field(description="One sentence, under 25 words")
+
+agent = create_agent("openai:gpt-4o-mini", tools=[], response_format=ToolStrategy(Ticket))
+ticket = agent.invoke({"messages": [{"role": "user", "content": email_text}]})["structured_response"]
+```
+
+| Design choice | Why |
+|---|---|
+| `Literal[...]` for anything you branch on | the model can't invent a new category; your `if` never misses |
+| `X \| None = None` + "never invent" | missing data becomes `None`, not a hallucinated id |
+| Format and length in `description` | descriptions are prompt text the model reads per field |
+| An `"other"` escape value | forcing a fit produces confident wrong labels |
+| Flat, few fields | each extra level of nesting raises failure rates |
+
+- Downstream, treat `ticket.order_id` as **untrusted** until you look it up in your system
+
+✅ *Verified offline with a scripted model: `structured_response` came back as `Ticket(category='billing', order_id=None, summary='Charged twice')`.*
+
 ## Cheat sheet
 
 ```python
