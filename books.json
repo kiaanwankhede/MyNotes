@@ -43,6 +43,12 @@
       "blurb": "CineBot, Time Tracker, Meridian and AI Updater, ready to talk about."
     },
     {
+      "slug": "sap-joule",
+      "title": "SAP Joule",
+      "shelf": "SAP",
+      "blurb": "Skills, agents, Joule Studio, extensibility, APIs, grounding, integration and testing."
+    },
+    {
       "slug": "sap-ai",
       "title": "SAP AI",
       "shelf": "SAP",

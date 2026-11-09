@@ -73,6 +73,12 @@
     "AI Updater"
    ]
   },
+  "SAP Joule": {
+   "folder": "books/sap-joule",
+   "chapters": [
+    "What Joule actually is"
+   ]
+  },
   "SAP AI": {
    "folder": "books/sap-ai",
    "chapters": []
