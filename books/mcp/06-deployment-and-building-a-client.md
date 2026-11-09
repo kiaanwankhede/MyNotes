@@ -275,6 +275,43 @@ async def run_agent(anthropic_client, mcp_client, user_message: str, model: str)
 - **Does a hosting platform care whether my server calls an AI model?** No. A call to a model provider is just another API call
 - **State at three levels (one call, one thread, the whole app)?** Application state lives as long as the process. Session state ties to a session id. **Thread state is the hardest** and has no free built-in mechanism, so you design it in
 
+## 6.9b Self-hosting: a container with a health check (*added by Claude*)
+
+When a managed platform isn't an option (company cloud, data residency), the server is just an ASGI web app.
+
+```python
+# app.py
+from fastmcp import FastMCP
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+
+mcp = FastMCP("orders")
+# ... @mcp.tool functions ...
+
+@mcp.custom_route("/health", methods=["GET"])
+async def health(request: Request) -> JSONResponse:
+    return JSONResponse({"status": "ok"})          # for the load balancer / Kubernetes probe
+
+app = mcp.http_app(path="/mcp")                     # MCP endpoint at /mcp
+```
+
+```dockerfile
+FROM python:3.13-slim
+WORKDIR /app
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY pyproject.toml uv.lock ./
+RUN uv sync --locked --no-dev
+COPY . .
+EXPOSE 8000
+CMD ["uv", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+- `0.0.0.0` is right **inside a container** (the platform controls exposure); put TLS and authentication in front (gateway or the spec's OAuth flow, see 4.13)
+- More than one replica with stateful sessions needs sticky sessions or stateless HTTP mode ([Chapter 8](08-interview-questions.md), 8.4)
+- Keys come from the platform's secret store as environment variables, never baked into the image
+
+✅ *Verified on `fastmcp` 4.1.6: `GET /health` on `mcp.http_app()` returned `200 {"status": "ok"}` (Starlette test client). The Dockerfile was not built here.*
+
 ## 6.10 Added by Claude, not from the sources
 
 Items marked *checked* were run with `fastmcp` 4.1.4. Check current documentation for deployment details.
