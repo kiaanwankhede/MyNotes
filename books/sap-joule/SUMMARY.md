@@ -30,3 +30,4 @@
 * [Chapter 27: Document grounding, part 2: metadata, status, access control, pricing and regions](27-document-grounding-part-2-metadata-status-access-control-pricing.md)
 * [Chapter 28: Multi-system support, troubleshooting and constraints](28-multi-system-support-troubleshooting-and-constraints.md)
 * [Chapter 29: Customer case studies: Bosch, WEL Networks, Uniper, Zensar and Capgemini](29-customer-case-studies-bosch-wel-uniper-zensar-capgemini.md)
+* [Chapter 30: Best practices for building custom Joule agents in Joule Studio](30-best-practices-for-building-joule-agents.md)
