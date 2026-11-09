@@ -382,7 +382,33 @@ def monitor_tool(request, handler):
         print("failed:", e); raise
 ```
 - ✅ *Verified (details in "How this chapter was checked").*
-- ✅ *Verified (details in "How this chapter was checked").*
+
+### Cost tracking per run (*added by Claude*)
+
+Every model reply carries `usage_metadata`; an `after_model` hook can add it up, so you see cost per user or conversation instead of only the monthly bill.
+
+```python
+from langchain.agents.middleware import after_model, AgentState
+from langgraph.runtime import Runtime
+
+PRICE_PER_M = {"in": 0.15, "out": 0.60}            # $/million tokens: check your model's price
+
+@after_model
+def track_tokens(state: AgentState, runtime: Runtime):
+    u = state["messages"][-1].usage_metadata or {}
+    tin, tout = u.get("input_tokens", 0), u.get("output_tokens", 0)
+    cost = tin / 1e6 * PRICE_PER_M["in"] + tout / 1e6 * PRICE_PER_M["out"]
+    log.info("tokens_in=%d tokens_out=%d cost_usd=%.5f", tin, tout, cost)
+    return None                                     # observe only; change nothing
+
+agent = create_agent(model, tools=tools, middleware=[track_tokens])
+```
+
+- Add a `user_id` or `thread_id` from `runtime.context` to the log line, then sum per user in your log tool
+- Pair it with the call-limit middleware ([Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md)): tracking shows the cost, limits cap it
+- LangSmith shows the same numbers per trace if tracing is on ([Chapter 15](15-testing-agents-and-tracing.md))
+
+✅ *Verified offline: with a fake model reporting 12 input and 3 output tokens, the hook recorded exactly `in=12, out=3`.*
 
 ## 10.11 Agent jumps, tracing and state composition
 
