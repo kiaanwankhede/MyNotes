@@ -521,6 +521,27 @@ agent = create_agent(model, tools=[search_knowledge_base], checkpointer=InMemory
 > - Pick the pattern per sub-problem and measure it: a router that fans out to five sources costs five times as much
 > - *Added by Claude.*
 
+### A decision path you can say out loud (*added by Claude*)
+
+```mermaid
+flowchart TD
+    S["New use case"] --> A{"One domain, &lt; ~10 tools?"}
+    A -- yes --> SA["Single agent + middleware<br/>(Ch 1–11)"]
+    A -- no --> B{"Fixed order of steps?"}
+    B -- yes --> CW["Custom workflow<br/>(code steps + 1–2 agent steps)"]
+    B -- no --> C{"User talks to one specialist<br/>for several turns?"}
+    C -- yes --> H["Handoffs"]
+    C -- no --> D{"Independent parts that can run<br/>in parallel, each with big context?"}
+    D -- yes --> SU["Subagents (supervisor)"]
+    D -- no --> E{"Mainly about which<br/>instructions to load?"}
+    E -- yes --> SK["Skills"]
+    E -- no --> R["Router"]
+```
+
+- Start at the top every time; most answers stop at "single agent" or "custom workflow"
+- Moving down the tree adds model calls, latency and debugging cost: justify each step with a measured problem (tool-choice errors, context overflow, slow serial calls)
+- In an interview, name the **signal** that pushed you to the next pattern, not just the pattern
+
 ## 14.8 Interview corner
 
 **What interviewers listen for:** you can match a **pattern to a problem** (handoffs for sequential steps with the user, router for parallel sources, skills for many specialities), and you explain the cost of each.
