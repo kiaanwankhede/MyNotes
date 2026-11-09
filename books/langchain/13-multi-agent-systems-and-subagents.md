@@ -189,6 +189,14 @@ main_agent = create_agent(model, tools=[call_showtimes_agent])
 - **Three-tool pattern:** `start_job` (returns a job id), `check_status` (pending, running, completed, failed) and `get_result`. When a job finishes, send a message such as "check job_123 and summarise" back into the conversation
 - Not run here. It needs a job system
 
+**Parallel subagents in one turn** (*added by Claude*)
+
+- When the supervisor asks for several subagent tools **in one reply** (flights + hotels), `create_agent` runs those tool calls concurrently, so the turn takes as long as the slowest one, not the sum
+- To get this, make the subagents **independent** (no subagent needs another's output) and say so in the supervisor prompt: "Call independent research tools together in one step"
+- Dependent steps (book hotel *after* choosing flight) stay sequential by design
+
+✅ *Verified offline: two subagent tools that each sleep 0.5 s, requested in one model reply, finished the whole run in 0.51 s.*
+
 ### Tool per agent, or one dispatch tool
 
 | | Tool per agent | Single dispatch tool |
