@@ -155,6 +155,53 @@ def reserve(movie: str, seats: int) -> str:
 
 - Ready-made tools exist. Class example: web search through Tavily (`from langchain_tavily import TavilySearch`, install the package and set an API key)
 
+### Writing a description the model can route on (*added by Claude*)
+
+| Weak | Strong |
+|---|---|
+| `"""Get order."""` | `"""Look up one order's status and delivery date by order id (format 'A-123'). Use for 'where is my order' questions. Do NOT use for refunds."""` |
+| `"""Search."""` | `"""Search the public web for news after 2025. Use only when the answer needs recent facts not in the knowledge base."""` |
+
+- Four parts: **what** it does, **when** to use it, **when not** to, and the **argument format**
+- If two tools could both fit a question, their descriptions are not specific enough
+
+### Test a tool alone, before giving it to an agent (*added by Claude*)
+
+```python
+fetch_order.invoke({"order_id": "A-1"})                 # run it like the agent would
+fetch_order.tool_call_schema.model_json_schema()        # exactly what the model will see
+```
+
+- Most "the agent is dumb" bugs are a tool returning junk or a schema the model can't read. Check both in isolation first, then in the loop
+
+### Async tools and tool errors (*added by Claude*)
+
+```python
+@tool
+async def fetch_order(order_id: str) -> str:
+    """Look up an order by its id (e.g. 'A-123'). Use for any order-status question."""
+    return await orders_api.get(order_id)               # non-blocking I/O
+
+from langchain_core.tools import StructuredTool, ToolException
+
+def lookup_stock(sku: str) -> str:
+    """Find stock for a SKU."""
+    raise ToolException(f"SKU {sku} not found")         # a "business" error, not a crash
+
+stock = StructuredTool.from_function(
+    lookup_stock,
+    handle_tool_error=lambda e: f"Error: {e}. Ask the user for a valid SKU.",
+)
+stock.invoke({"sku": "X9"})    # 'Error: SKU X9 not found. Ask the user for a valid SKU.'
+```
+
+- `async def` tools run with `agent.ainvoke` / `astream`; when the model asks for several tools in one turn, async lets their network calls overlap
+- `ToolException` + `handle_tool_error` turns an expected failure into a **message the model can act on** (ask again, try another tool) instead of stopping the run
+- `handle_tool_error=True` returns the exception text as-is; a function lets you add guidance for the model
+- For agent-wide handling of *unexpected* errors, use the tool-error middleware ([Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md))
+
+✅ *Verified on `langchain-core` offline: the async tool returned `A-1: shipped` via `ainvoke`; `tool_call_schema` carried the docstring as description; `handle_tool_error=True` returned `SKU X9 not found`, and the function form returned the guided message shown.*
+
 ## 5.5 Argument schemas: `args_schema` and `Field()`
 
 Plain type hints work but tell the model little. A Pydantic schema gives descriptions, limits and defaults.
