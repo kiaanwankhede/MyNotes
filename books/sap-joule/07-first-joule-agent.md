@@ -164,6 +164,22 @@ flowchart LR
 | Grounding | Context from documents |
 | MCP | Standard link to external tools |
 
+## Screenshots and figures from the sources
+
+*Images saved from the source pages, in the order they appear there.*
+
+### Images: CodeJam overview tutorial
+
+*Source: [CodeJam overview tutorial](https://developers.sap.com/tutorials/joule-studio-codejam-0-overview/)*
+
+![CodeJam overview, figure 1](images/ch07-s2-codejam0-01.webp)
+
+![CodeJam overview, figure 2](images/ch07-s2-codejam0-02.webp)
+
+![CodeJam overview, figure 3](images/ch07-s2-codejam0-03.webp)
+
+![CodeJam overview, figure 4](images/ch07-s2-codejam0-04.webp)
+
 ## Recap
 
 - Skills do one fixed task; agents choose tools

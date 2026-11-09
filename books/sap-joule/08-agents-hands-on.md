@@ -196,6 +196,216 @@ flowchart TD
 | Skills under an agent | Switch off direct start; remove confirmation messages |
 | Sub-agent | An agent used as a tool; no direct calls |
 
+## Screenshots and figures from the sources
+
+*Images saved from the source pages, in the order they appear there.*
+
+### Images: CodeJam 6: the agent
+
+*Source: [CodeJam 6: the agent](https://developers.sap.com/tutorials/joule-studio-codejam-6-agent)*
+
+![CodeJam 6, figure 1](images/ch08-s1-codejam6-01.webp)
+
+![CodeJam 6, figure 2](images/ch08-s1-codejam6-02.webp)
+
+![CodeJam 6, figure 3](images/ch08-s1-codejam6-03.webp)
+
+![CodeJam 6, figure 4](images/ch08-s1-codejam6-04.webp)
+
+![CodeJam 6, figure 5](images/ch08-s1-codejam6-05.webp)
+
+![CodeJam 6, figure 6](images/ch08-s1-codejam6-06.webp)
+
+![CodeJam 6, figure 7](images/ch08-s1-codejam6-07.webp)
+
+![CodeJam 6, figure 8](images/ch08-s1-codejam6-08.webp)
+
+![CodeJam 6, figure 9](images/ch08-s1-codejam6-09.webp)
+
+![CodeJam 6, figure 10](images/ch08-s1-codejam6-10.webp)
+
+![CodeJam 6, figure 11](images/ch08-s1-codejam6-11.webp)
+
+![CodeJam 6, figure 12](images/ch08-s1-codejam6-12.webp)
+
+![CodeJam 6, figure 13](images/ch08-s1-codejam6-13.webp)
+
+![CodeJam 6, figure 14](images/ch08-s1-codejam6-14.webp)
+
+![CodeJam 6, figure 15](images/ch08-s1-codejam6-15.webp)
+
+![CodeJam 6, figure 16](images/ch08-s1-codejam6-16.webp)
+
+![CodeJam 6, figure 17](images/ch08-s1-codejam6-17.webp)
+
+### Images: CodeJam 7: test the agent
+
+*Source: [CodeJam 7: test the agent](https://developers.sap.com/tutorials/joule-studio-codejam-7-test-agent)*
+
+![CodeJam 7, figure 1](images/ch08-s2-codejam7-01.webp)
+
+![CodeJam 7, figure 2](images/ch08-s2-codejam7-02.webp)
+
+![CodeJam 7, figure 3](images/ch08-s2-codejam7-03.webp)
+
+![CodeJam 7, figure 4](images/ch08-s2-codejam7-04.webp)
+
+![CodeJam 7, figure 5](images/ch08-s2-codejam7-05.webp)
+
+![CodeJam 7, figure 6](images/ch08-s2-codejam7-06.webp)
+
+![CodeJam 7, figure 7](images/ch08-s2-codejam7-07.webp)
+
+![CodeJam 7, figure 8](images/ch08-s2-codejam7-08.webp)
+
+![CodeJam 7, figure 9](images/ch08-s2-codejam7-09.webp)
+
+### Images: CodeJam 8: sub-agent with MCP
+
+*Source: [CodeJam 8: sub-agent with MCP](https://developers.sap.com/tutorials/joule-studio-codejam-8-subagent-mcp)*
+
+![CodeJam 8, figure 1](images/ch08-s3-codejam8-01.webp)
+
+![CodeJam 8, figure 2](images/ch08-s3-codejam8-02.webp)
+
+![CodeJam 8, figure 3](images/ch08-s3-codejam8-03.webp)
+
+![CodeJam 8, figure 4](images/ch08-s3-codejam8-04.webp)
+
+![CodeJam 8, figure 5](images/ch08-s3-codejam8-05.webp)
+
+![CodeJam 8, figure 6](images/ch08-s3-codejam8-06.webp)
+
+![CodeJam 8, figure 7](images/ch08-s3-codejam8-07.webp)
+
+![CodeJam 8, figure 8](images/ch08-s3-codejam8-08.webp)
+
+![CodeJam 8, figure 9](images/ch08-s3-codejam8-09.webp)
+
+![CodeJam 8, figure 10](images/ch08-s3-codejam8-10.webp)
+
+![CodeJam 8, figure 11](images/ch08-s3-codejam8-11.webp)
+
+![CodeJam 8, figure 12](images/ch08-s3-codejam8-12.webp)
+
+![CodeJam 8, figure 13](images/ch08-s3-codejam8-13.webp)
+
+![CodeJam 8, figure 14](images/ch08-s3-codejam8-14.webp)
+
+![CodeJam 8, figure 15](images/ch08-s3-codejam8-15.webp)
+
+![CodeJam 8, figure 16](images/ch08-s3-codejam8-16.webp)
+
+![CodeJam 8, figure 17](images/ch08-s3-codejam8-17.webp)
+
+![CodeJam 8, figure 18](images/ch08-s3-codejam8-18.webp)
+
+![CodeJam 8, figure 19](images/ch08-s3-codejam8-19.webp)
+
+![CodeJam 8, figure 20](images/ch08-s3-codejam8-20.webp)
+
+![CodeJam 8, figure 21](images/ch08-s3-codejam8-21.webp)
+
+### Images: Tutorial: Create an agent
+
+*Source: [Tutorial: Create an agent](https://developers.sap.com/tutorials/joulestudio-agent-create)*
+
+![Agent create tutorial, figure 1](images/ch08-s4-agentcreate-01.webp)
+
+![Agent create tutorial, figure 2](images/ch08-s4-agentcreate-02.webp)
+
+![Agent create tutorial, figure 3](images/ch08-s4-agentcreate-03.webp)
+
+![Agent create tutorial, figure 4](images/ch08-s4-agentcreate-04.webp)
+
+![Agent create tutorial, figure 5](images/ch08-s4-agentcreate-05.webp)
+
+![Agent create tutorial, figure 6](images/ch08-s4-agentcreate-06.webp)
+
+![Agent create tutorial, figure 7](images/ch08-s4-agentcreate-07.webp)
+
+![Agent create tutorial, figure 8](images/ch08-s4-agentcreate-08.webp)
+
+![Agent create tutorial, figure 9](images/ch08-s4-agentcreate-09.webp)
+
+![Agent create tutorial, figure 10](images/ch08-s4-agentcreate-10.webp)
+
+![Agent create tutorial, figure 11](images/ch08-s4-agentcreate-11.webp)
+
+![Agent create tutorial, figure 12](images/ch08-s4-agentcreate-12.webp)
+
+![Agent create tutorial, figure 13](images/ch08-s4-agentcreate-13.webp)
+
+![Agent create tutorial, figure 14](images/ch08-s4-agentcreate-14.webp)
+
+![Agent create tutorial, figure 15](images/ch08-s4-agentcreate-15.webp)
+
+![Agent create tutorial, figure 16](images/ch08-s4-agentcreate-16.webp)
+
+![Agent create tutorial, figure 17](images/ch08-s4-agentcreate-17.webp)
+
+![Agent create tutorial, figure 18](images/ch08-s4-agentcreate-18.webp)
+
+![Agent create tutorial, figure 19](images/ch08-s4-agentcreate-19.webp)
+
+![Agent create tutorial, figure 20](images/ch08-s4-agentcreate-20.webp)
+
+![Agent create tutorial, figure 21](images/ch08-s4-agentcreate-21.webp)
+
+![Agent create tutorial, figure 22](images/ch08-s4-agentcreate-22.webp)
+
+### Images: Tutorial: Document grounding
+
+*Source: [Tutorial: Document grounding](https://developers.sap.com/tutorials/joulestudio-document-grounding)*
+
+![Document grounding tutorial, figure 1](images/ch08-s5-docgrounding-01.webp)
+
+![Document grounding tutorial, figure 2](images/ch08-s5-docgrounding-02.webp)
+
+![Document grounding tutorial, figure 3](images/ch08-s5-docgrounding-03.webp)
+
+![Document grounding tutorial, figure 4](images/ch08-s5-docgrounding-04.webp)
+
+![Document grounding tutorial, figure 5](images/ch08-s5-docgrounding-05.webp)
+
+![Document grounding tutorial, figure 6](images/ch08-s5-docgrounding-06.webp)
+
+![Document grounding tutorial, figure 7](images/ch08-s5-docgrounding-07.webp)
+
+![Document grounding tutorial, figure 8](images/ch08-s5-docgrounding-08.webp)
+
+![Document grounding tutorial, figure 9](images/ch08-s5-docgrounding-09.webp)
+
+![Document grounding tutorial, figure 10](images/ch08-s5-docgrounding-10.webp)
+
+![Document grounding tutorial, figure 11](images/ch08-s5-docgrounding-11.webp)
+
+![Document grounding tutorial, figure 12](images/ch08-s5-docgrounding-12.webp)
+
+![Document grounding tutorial, figure 13](images/ch08-s5-docgrounding-13.webp)
+
+![Document grounding tutorial, figure 14](images/ch08-s5-docgrounding-14.webp)
+
+![Document grounding tutorial, figure 15](images/ch08-s5-docgrounding-15.webp)
+
+![Document grounding tutorial, figure 16](images/ch08-s5-docgrounding-16.webp)
+
+![Document grounding tutorial, figure 17](images/ch08-s5-docgrounding-17.webp)
+
+![Document grounding tutorial, figure 18](images/ch08-s5-docgrounding-18.webp)
+
+![Document grounding tutorial, figure 19](images/ch08-s5-docgrounding-19.webp)
+
+![Document grounding tutorial, figure 20](images/ch08-s5-docgrounding-20.webp)
+
+![Document grounding tutorial, figure 21](images/ch08-s5-docgrounding-21.webp)
+
+![Document grounding tutorial, figure 22](images/ch08-s5-docgrounding-22.webp)
+
+![Document grounding tutorial, figure 23](images/ch08-s5-docgrounding-23.webp)
+
+![Document grounding tutorial, figure 24](images/ch08-s5-docgrounding-24.webp)
+
 ## Recap
 
 - An agent plans, calls tools and reflects; its text fields steer it

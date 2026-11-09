@@ -351,6 +351,318 @@ flowchart LR
 | Deploy | Map destination variables to real destinations |
 | Test | Environment, Joule tab, Launch |
 
+## Screenshots and figures from the sources
+
+*Images saved from the source pages, in the order they appear there.*
+
+### Images: Sales order queries blog (SAP Community)
+
+*Source: [Sales order queries blog (SAP Community)](https://community.sap.com/t5/artificial-intelligence-blogs-posts/building-joule-skills-for-sales-order-queries-in-s-4hana-cloud-part-1/bc-p/14267490)*
+
+![Sales order skill blog, figure 1](images/ch06-s1-salesorderblog-01.png)
+
+![Sales order skill blog, figure 2](images/ch06-s1-salesorderblog-02.png)
+
+![Sales order skill blog, figure 3](images/ch06-s1-salesorderblog-03.png)
+
+![Sales order skill blog, figure 4](images/ch06-s1-salesorderblog-04.png)
+
+![Sales order skill blog, figure 5](images/ch06-s1-salesorderblog-05.png)
+
+![Sales order skill blog, figure 6](images/ch06-s1-salesorderblog-06.png)
+
+![Sales order skill blog, figure 7](images/ch06-s1-salesorderblog-07.png)
+
+### Images: Tutorial: Set up environment and connectivity
+
+*Source: [Tutorial: Set up environment and connectivity](https://developers.sap.com/tutorials/joulestudio-skill-environment-setup)*
+
+![Environment setup tutorial, figure 1](images/ch06-s3-envsetup-01.png)
+
+![Environment setup tutorial, figure 2](images/ch06-s3-envsetup-02.png)
+
+![Environment setup tutorial, figure 3](images/ch06-s3-envsetup-03.webp)
+
+![Environment setup tutorial, figure 4](images/ch06-s3-envsetup-04.webp)
+
+![Environment setup tutorial, figure 5](images/ch06-s3-envsetup-05.webp)
+
+![Environment setup tutorial, figure 6](images/ch06-s3-envsetup-06.webp)
+
+![Environment setup tutorial, figure 7](images/ch06-s3-envsetup-07.webp)
+
+![Environment setup tutorial, figure 8](images/ch06-s3-envsetup-08.webp)
+
+![Environment setup tutorial, figure 9](images/ch06-s3-envsetup-09.webp)
+
+![Environment setup tutorial, figure 10](images/ch06-s3-envsetup-10.webp)
+
+![Environment setup tutorial, figure 11](images/ch06-s3-envsetup-11.webp)
+
+![Environment setup tutorial, figure 12](images/ch06-s3-envsetup-12.webp)
+
+![Environment setup tutorial, figure 13](images/ch06-s3-envsetup-13.webp)
+
+### Images: Tutorial: Filter an action
+
+*Source: [Tutorial: Filter an action](https://developers.sap.com/tutorials/joulestudio-skill-action-filter)*
+
+![Action filter tutorial, figure 1](images/ch06-s5-actionfilter-01.webp)
+
+![Action filter tutorial, figure 2](images/ch06-s5-actionfilter-02.webp)
+
+![Action filter tutorial, figure 3](images/ch06-s5-actionfilter-03.webp)
+
+![Action filter tutorial, figure 4](images/ch06-s5-actionfilter-04.webp)
+
+![Action filter tutorial, figure 5](images/ch06-s5-actionfilter-05.webp)
+
+![Action filter tutorial, figure 6](images/ch06-s5-actionfilter-06.webp)
+
+![Action filter tutorial, figure 7](images/ch06-s5-actionfilter-07.webp)
+
+![Action filter tutorial, figure 8](images/ch06-s5-actionfilter-08.webp)
+
+![Action filter tutorial, figure 9](images/ch06-s5-actionfilter-09.webp)
+
+![Action filter tutorial, figure 10](images/ch06-s5-actionfilter-10.webp)
+
+![Action filter tutorial, figure 11](images/ch06-s5-actionfilter-11.webp)
+
+![Action filter tutorial, figure 12](images/ch06-s5-actionfilter-12.webp)
+
+![Action filter tutorial, figure 13](images/ch06-s5-actionfilter-13.webp)
+
+![Action filter tutorial, figure 14](images/ch06-s5-actionfilter-14.webp)
+
+![Action filter tutorial, figure 15](images/ch06-s5-actionfilter-15.webp)
+
+![Action filter tutorial, figure 16](images/ch06-s5-actionfilter-16.webp)
+
+![Action filter tutorial, figure 17](images/ch06-s5-actionfilter-17.webp)
+
+![Action filter tutorial, figure 18](images/ch06-s5-actionfilter-18.webp)
+
+![Action filter tutorial, figure 19](images/ch06-s5-actionfilter-19.webp)
+
+![Action filter tutorial, figure 20](images/ch06-s5-actionfilter-20.webp)
+
+![Action filter tutorial, figure 21](images/ch06-s5-actionfilter-21.webp)
+
+![Action filter tutorial, figure 22](images/ch06-s5-actionfilter-22.webp)
+
+![Action filter tutorial, figure 23](images/ch06-s5-actionfilter-23.webp)
+
+![Action filter tutorial, figure 24](images/ch06-s5-actionfilter-24.webp)
+
+![Action filter tutorial, figure 25](images/ch06-s5-actionfilter-25.webp)
+
+![Action filter tutorial, figure 26](images/ch06-s5-actionfilter-26.webp)
+
+![Action filter tutorial, figure 27](images/ch06-s5-actionfilter-27.webp)
+
+![Action filter tutorial, figure 28](images/ch06-s5-actionfilter-28.webp)
+
+![Action filter tutorial, figure 29](images/ch06-s5-actionfilter-29.webp)
+
+![Action filter tutorial, figure 30](images/ch06-s5-actionfilter-30.webp)
+
+![Action filter tutorial, figure 31](images/ch06-s5-actionfilter-31.webp)
+
+![Action filter tutorial, figure 32](images/ch06-s5-actionfilter-32.webp)
+
+![Action filter tutorial, figure 33](images/ch06-s5-actionfilter-33.webp)
+
+![Action filter tutorial, figure 34](images/ch06-s5-actionfilter-34.webp)
+
+![Action filter tutorial, figure 35](images/ch06-s5-actionfilter-35.webp)
+
+### Images: Tutorial: Create a skill
+
+*Source: [Tutorial: Create a skill](https://developers.sap.com/tutorials/joulestudio-skill-create)*
+
+![Skill create tutorial, figure 1](images/ch06-s6-skillcreate-01.webp)
+
+![Skill create tutorial, figure 2](images/ch06-s6-skillcreate-02.webp)
+
+![Skill create tutorial, figure 3](images/ch06-s6-skillcreate-03.webp)
+
+![Skill create tutorial, figure 4](images/ch06-s6-skillcreate-04.webp)
+
+![Skill create tutorial, figure 5](images/ch06-s6-skillcreate-05.webp)
+
+![Skill create tutorial, figure 6](images/ch06-s6-skillcreate-06.webp)
+
+![Skill create tutorial, figure 7](images/ch06-s6-skillcreate-07.webp)
+
+![Skill create tutorial, figure 8](images/ch06-s6-skillcreate-08.webp)
+
+![Skill create tutorial, figure 9](images/ch06-s6-skillcreate-09.webp)
+
+![Skill create tutorial, figure 10](images/ch06-s6-skillcreate-10.webp)
+
+![Skill create tutorial, figure 11](images/ch06-s6-skillcreate-11.webp)
+
+![Skill create tutorial, figure 12](images/ch06-s6-skillcreate-12.webp)
+
+![Skill create tutorial, figure 13](images/ch06-s6-skillcreate-13.webp)
+
+![Skill create tutorial, figure 14](images/ch06-s6-skillcreate-14.webp)
+
+![Skill create tutorial, figure 15](images/ch06-s6-skillcreate-15.webp)
+
+![Skill create tutorial, figure 16](images/ch06-s6-skillcreate-16.webp)
+
+![Skill create tutorial, figure 17](images/ch06-s6-skillcreate-17.webp)
+
+![Skill create tutorial, figure 18](images/ch06-s6-skillcreate-18.webp)
+
+![Skill create tutorial, figure 19](images/ch06-s6-skillcreate-19.webp)
+
+![Skill create tutorial, figure 20](images/ch06-s6-skillcreate-20.webp)
+
+![Skill create tutorial, figure 21](images/ch06-s6-skillcreate-21.webp)
+
+![Skill create tutorial, figure 22](images/ch06-s6-skillcreate-22.webp)
+
+![Skill create tutorial, figure 23](images/ch06-s6-skillcreate-23.webp)
+
+![Skill create tutorial, figure 24](images/ch06-s6-skillcreate-24.webp)
+
+![Skill create tutorial, figure 25](images/ch06-s6-skillcreate-25.webp)
+
+![Skill create tutorial, figure 26](images/ch06-s6-skillcreate-26.webp)
+
+![Skill create tutorial, figure 27](images/ch06-s6-skillcreate-27.webp)
+
+![Skill create tutorial, figure 28](images/ch06-s6-skillcreate-28.webp)
+
+![Skill create tutorial, figure 29](images/ch06-s6-skillcreate-29.webp)
+
+![Skill create tutorial, figure 30](images/ch06-s6-skillcreate-30.webp)
+
+![Skill create tutorial, figure 31](images/ch06-s6-skillcreate-31.webp)
+
+![Skill create tutorial, figure 32](images/ch06-s6-skillcreate-32.webp)
+
+![Skill create tutorial, figure 33](images/ch06-s6-skillcreate-33.webp)
+
+![Skill create tutorial, figure 34](images/ch06-s6-skillcreate-34.webp)
+
+![Skill create tutorial, figure 35](images/ch06-s6-skillcreate-35.webp)
+
+![Skill create tutorial, figure 36](images/ch06-s6-skillcreate-36.webp)
+
+![Skill create tutorial, figure 37](images/ch06-s6-skillcreate-37.webp)
+
+![Skill create tutorial, figure 38](images/ch06-s6-skillcreate-38.webp)
+
+![Skill create tutorial, figure 39](images/ch06-s6-skillcreate-39.webp)
+
+![Skill create tutorial, figure 40](images/ch06-s6-skillcreate-40.webp)
+
+![Skill create tutorial, figure 41](images/ch06-s6-skillcreate-41.webp)
+
+![Skill create tutorial, figure 42](images/ch06-s6-skillcreate-42.webp)
+
+![Skill create tutorial, figure 43](images/ch06-s6-skillcreate-43.webp)
+
+### Images: Tutorial: Skill process
+
+*Source: [Tutorial: Skill process](https://developers.sap.com/tutorials/joulestudio-skill-process)*
+
+![Skill process tutorial, figure 1](images/ch06-s7-skillprocess-01.webp)
+
+![Skill process tutorial, figure 2](images/ch06-s7-skillprocess-02.webp)
+
+![Skill process tutorial, figure 3](images/ch06-s7-skillprocess-03.webp)
+
+![Skill process tutorial, figure 4](images/ch06-s7-skillprocess-04.webp)
+
+![Skill process tutorial, figure 5](images/ch06-s7-skillprocess-05.webp)
+
+![Skill process tutorial, figure 6](images/ch06-s7-skillprocess-06.webp)
+
+![Skill process tutorial, figure 7](images/ch06-s7-skillprocess-07.webp)
+
+![Skill process tutorial, figure 8](images/ch06-s7-skillprocess-08.webp)
+
+![Skill process tutorial, figure 9](images/ch06-s7-skillprocess-09.webp)
+
+![Skill process tutorial, figure 10](images/ch06-s7-skillprocess-10.webp)
+
+![Skill process tutorial, figure 11](images/ch06-s7-skillprocess-11.webp)
+
+![Skill process tutorial, figure 12](images/ch06-s7-skillprocess-12.webp)
+
+![Skill process tutorial, figure 13](images/ch06-s7-skillprocess-13.webp)
+
+![Skill process tutorial, figure 14](images/ch06-s7-skillprocess-14.webp)
+
+![Skill process tutorial, figure 15](images/ch06-s7-skillprocess-15.webp)
+
+![Skill process tutorial, figure 16](images/ch06-s7-skillprocess-16.webp)
+
+![Skill process tutorial, figure 17](images/ch06-s7-skillprocess-17.webp)
+
+![Skill process tutorial, figure 18](images/ch06-s7-skillprocess-18.webp)
+
+![Skill process tutorial, figure 19](images/ch06-s7-skillprocess-19.webp)
+
+![Skill process tutorial, figure 20](images/ch06-s7-skillprocess-20.webp)
+
+![Skill process tutorial, figure 21](images/ch06-s7-skillprocess-21.webp)
+
+![Skill process tutorial, figure 22](images/ch06-s7-skillprocess-22.webp)
+
+![Skill process tutorial, figure 23](images/ch06-s7-skillprocess-23.webp)
+
+![Skill process tutorial, figure 24](images/ch06-s7-skillprocess-24.webp)
+
+![Skill process tutorial, figure 25](images/ch06-s7-skillprocess-25.webp)
+
+![Skill process tutorial, figure 26](images/ch06-s7-skillprocess-26.webp)
+
+![Skill process tutorial, figure 27](images/ch06-s7-skillprocess-27.webp)
+
+![Skill process tutorial, figure 28](images/ch06-s7-skillprocess-28.webp)
+
+![Skill process tutorial, figure 29](images/ch06-s7-skillprocess-29.webp)
+
+![Skill process tutorial, figure 30](images/ch06-s7-skillprocess-30.webp)
+
+![Skill process tutorial, figure 31](images/ch06-s7-skillprocess-31.webp)
+
+![Skill process tutorial, figure 32](images/ch06-s7-skillprocess-32.webp)
+
+![Skill process tutorial, figure 33](images/ch06-s7-skillprocess-33.webp)
+
+![Skill process tutorial, figure 34](images/ch06-s7-skillprocess-34.webp)
+
+![Skill process tutorial, figure 35](images/ch06-s7-skillprocess-35.webp)
+
+![Skill process tutorial, figure 36](images/ch06-s7-skillprocess-36.webp)
+
+![Skill process tutorial, figure 37](images/ch06-s7-skillprocess-37.webp)
+
+![Skill process tutorial, figure 38](images/ch06-s7-skillprocess-38.webp)
+
+![Skill process tutorial, figure 39](images/ch06-s7-skillprocess-39.webp)
+
+![Skill process tutorial, figure 40](images/ch06-s7-skillprocess-40.webp)
+
+![Skill process tutorial, figure 41](images/ch06-s7-skillprocess-41.webp)
+
+![Skill process tutorial, figure 42](images/ch06-s7-skillprocess-42.webp)
+
+![Skill process tutorial, figure 43](images/ch06-s7-skillprocess-43.webp)
+
+![Skill process tutorial, figure 44](images/ch06-s7-skillprocess-44.webp)
+
+![Skill process tutorial, figure 45](images/ch06-s7-skillprocess-45.webp)
+
+![Skill process tutorial, figure 46](images/ch06-s7-skillprocess-46.webp)
+
 ## Recap
 
 - A skill is built on actions, which are built on destinations, which live in an environment

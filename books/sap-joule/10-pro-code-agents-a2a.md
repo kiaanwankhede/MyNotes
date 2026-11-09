@@ -239,6 +239,66 @@ flowchart LR
 | CLI flow | `jl login`, `jl init`, intent, PRD, spec, execute, deploy |
 | Labels | Confirmed Fact, Assumption, Recommendation |
 
+## Screenshots and figures from the sources
+
+*Images saved from the source pages, in the order they appear there.*
+
+### Images: Tutorial: Supplier disruption response agent
+
+*Source: [Tutorial: Supplier disruption response agent](https://developers.sap.com/tutorials/build-a-supplier-disruption-response-agent-on-sap)*
+
+![Supplier disruption agent tutorial, figure 1](images/ch10-s5-supplierdisruption-01.webp)
+
+![Supplier disruption agent tutorial, figure 2](images/ch10-s5-supplierdisruption-02.webp)
+
+![Supplier disruption agent tutorial, figure 3](images/ch10-s5-supplierdisruption-03.webp)
+
+![Supplier disruption agent tutorial, figure 4](images/ch10-s5-supplierdisruption-04.webp)
+
+![Supplier disruption agent tutorial, figure 5](images/ch10-s5-supplierdisruption-05.webp)
+
+![Supplier disruption agent tutorial, figure 6](images/ch10-s5-supplierdisruption-06.webp)
+
+![Supplier disruption agent tutorial, figure 7](images/ch10-s5-supplierdisruption-07.webp)
+
+![Supplier disruption agent tutorial, figure 8](images/ch10-s5-supplierdisruption-08.webp)
+
+![Supplier disruption agent tutorial, figure 9](images/ch10-s5-supplierdisruption-09.webp)
+
+![Supplier disruption agent tutorial, figure 10](images/ch10-s5-supplierdisruption-10.webp)
+
+![Supplier disruption agent tutorial, figure 11](images/ch10-s5-supplierdisruption-11.webp)
+
+![Supplier disruption agent tutorial, figure 12](images/ch10-s5-supplierdisruption-12.webp)
+
+![Supplier disruption agent tutorial, figure 13](images/ch10-s5-supplierdisruption-13.webp)
+
+![Supplier disruption agent tutorial, figure 14](images/ch10-s5-supplierdisruption-14.webp)
+
+![Supplier disruption agent tutorial, figure 15](images/ch10-s5-supplierdisruption-15.webp)
+
+![Supplier disruption agent tutorial, figure 16](images/ch10-s5-supplierdisruption-16.webp)
+
+![Supplier disruption agent tutorial, figure 17](images/ch10-s5-supplierdisruption-17.webp)
+
+![Supplier disruption agent tutorial, figure 18](images/ch10-s5-supplierdisruption-18.webp)
+
+![Supplier disruption agent tutorial, figure 19](images/ch10-s5-supplierdisruption-19.webp)
+
+![Supplier disruption agent tutorial, figure 20](images/ch10-s5-supplierdisruption-20.webp)
+
+![Supplier disruption agent tutorial, figure 21](images/ch10-s5-supplierdisruption-21.webp)
+
+![Supplier disruption agent tutorial, figure 22](images/ch10-s5-supplierdisruption-22.webp)
+
+![Supplier disruption agent tutorial, figure 23](images/ch10-s5-supplierdisruption-23.webp)
+
+![Supplier disruption agent tutorial, figure 24](images/ch10-s5-supplierdisruption-24.webp)
+
+![Supplier disruption agent tutorial, figure 25](images/ch10-s5-supplierdisruption-25.webp)
+
+![Supplier disruption agent tutorial, figure 26](images/ch10-s5-supplierdisruption-26.webp)
+
 ## Recap
 
 - Low-code agents are wired to Joule for you; pro-code agents speak A2A

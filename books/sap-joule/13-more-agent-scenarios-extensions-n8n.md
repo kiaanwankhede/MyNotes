@@ -291,6 +291,344 @@ flowchart LR
 | Engine vs LLM | Engine decides, LLM narrates |
 | Production | Not deployed from Joule Studio |
 
+## Screenshots and figures from the sources
+
+*Images saved from the source pages, in the order they appear there.*
+
+### Images: Tutorial: AI sales assistant agent
+
+*Source: [Tutorial: AI sales assistant agent](https://developers.sap.com/tutorials/build-an-ai-sales-assistant-agent)*
+
+![AI sales assistant, figure 1](images/ch13-s2-aisalesassistant-01.webp)
+
+![AI sales assistant, figure 2](images/ch13-s2-aisalesassistant-02.webp)
+
+![AI sales assistant, figure 3](images/ch13-s2-aisalesassistant-03.webp)
+
+![AI sales assistant, figure 4](images/ch13-s2-aisalesassistant-04.webp)
+
+![AI sales assistant, figure 5](images/ch13-s2-aisalesassistant-05.webp)
+
+![AI sales assistant, figure 6](images/ch13-s2-aisalesassistant-06.webp)
+
+![AI sales assistant, figure 7](images/ch13-s2-aisalesassistant-07.webp)
+
+![AI sales assistant, figure 8](images/ch13-s2-aisalesassistant-08.webp)
+
+![AI sales assistant, figure 9](images/ch13-s2-aisalesassistant-09.webp)
+
+![AI sales assistant, figure 10](images/ch13-s2-aisalesassistant-10.webp)
+
+![AI sales assistant, figure 11](images/ch13-s2-aisalesassistant-11.webp)
+
+![AI sales assistant, figure 12](images/ch13-s2-aisalesassistant-12.webp)
+
+![AI sales assistant, figure 13](images/ch13-s2-aisalesassistant-13.webp)
+
+![AI sales assistant, figure 14](images/ch13-s2-aisalesassistant-14.webp)
+
+### Images: Tutorial: Cable roll optimizer agent
+
+*Source: [Tutorial: Cable roll optimizer agent](https://developers.sap.com/tutorials/cable-roll-optimizer-agent)*
+
+![Cable roll optimizer, figure 1](images/ch13-s3-cableroll-01.webp)
+
+![Cable roll optimizer, figure 2](images/ch13-s3-cableroll-02.webp)
+
+![Cable roll optimizer, figure 3](images/ch13-s3-cableroll-03.webp)
+
+![Cable roll optimizer, figure 4](images/ch13-s3-cableroll-04.webp)
+
+![Cable roll optimizer, figure 5](images/ch13-s3-cableroll-05.webp)
+
+![Cable roll optimizer, figure 6](images/ch13-s3-cableroll-06.webp)
+
+![Cable roll optimizer, figure 7](images/ch13-s3-cableroll-07.webp)
+
+![Cable roll optimizer, figure 8](images/ch13-s3-cableroll-08.webp)
+
+![Cable roll optimizer, figure 9](images/ch13-s3-cableroll-09.webp)
+
+![Cable roll optimizer, figure 10](images/ch13-s3-cableroll-10.webp)
+
+![Cable roll optimizer, figure 11](images/ch13-s3-cableroll-11.webp)
+
+![Cable roll optimizer, figure 12](images/ch13-s3-cableroll-12.webp)
+
+![Cable roll optimizer, figure 13](images/ch13-s3-cableroll-13.webp)
+
+![Cable roll optimizer, figure 14](images/ch13-s3-cableroll-14.webp)
+
+![Cable roll optimizer, figure 15](images/ch13-s3-cableroll-15.webp)
+
+![Cable roll optimizer, figure 16](images/ch13-s3-cableroll-16.webp)
+
+![Cable roll optimizer, figure 17](images/ch13-s3-cableroll-17.webp)
+
+### Images: Tutorial: Create an agent extension
+
+*Source: [Tutorial: Create an agent extension](https://developers.sap.com/tutorials/create-agent-extension)*
+
+![Agent extension, figure 1](images/ch13-s4-createagentext-01.webp)
+
+![Agent extension, figure 2](images/ch13-s4-createagentext-02.webp)
+
+![Agent extension, figure 3](images/ch13-s4-createagentext-03.webp)
+
+![Agent extension, figure 4](images/ch13-s4-createagentext-04.webp)
+
+![Agent extension, figure 5](images/ch13-s4-createagentext-05.webp)
+
+![Agent extension, figure 6](images/ch13-s4-createagentext-06.webp)
+
+![Agent extension, figure 7](images/ch13-s4-createagentext-07.webp)
+
+![Agent extension, figure 8](images/ch13-s4-createagentext-08.webp)
+
+![Agent extension, figure 9](images/ch13-s4-createagentext-09.webp)
+
+![Agent extension, figure 10](images/ch13-s4-createagentext-10.webp)
+
+![Agent extension, figure 11](images/ch13-s4-createagentext-11.webp)
+
+![Agent extension, figure 12](images/ch13-s4-createagentext-12.webp)
+
+![Agent extension, figure 13](images/ch13-s4-createagentext-13.webp)
+
+![Agent extension, figure 14](images/ch13-s4-createagentext-14.webp)
+
+![Agent extension, figure 15](images/ch13-s4-createagentext-15.webp)
+
+![Agent extension, figure 16](images/ch13-s4-createagentext-16.webp)
+
+![Agent extension, figure 17](images/ch13-s4-createagentext-17.webp)
+
+![Agent extension, figure 18](images/ch13-s4-createagentext-18.webp)
+
+![Agent extension, figure 19](images/ch13-s4-createagentext-19.webp)
+
+![Agent extension, figure 20](images/ch13-s4-createagentext-20.webp)
+
+![Agent extension, figure 21](images/ch13-s4-createagentext-21.webp)
+
+### Images: Tutorial: Invoice exception agent with n8n
+
+*Source: [Tutorial: Invoice exception agent with n8n](https://developers.sap.com/tutorials/create-invoice-exception-agent-with-n8n)*
+
+![Invoice exception n8n, figure 1](images/ch13-s5-invoiceexcn8n-01.webp)
+
+![Invoice exception n8n, figure 2](images/ch13-s5-invoiceexcn8n-02.webp)
+
+![Invoice exception n8n, figure 3](images/ch13-s5-invoiceexcn8n-03.webp)
+
+![Invoice exception n8n, figure 4](images/ch13-s5-invoiceexcn8n-04.webp)
+
+![Invoice exception n8n, figure 5](images/ch13-s5-invoiceexcn8n-05.webp)
+
+![Invoice exception n8n, figure 6](images/ch13-s5-invoiceexcn8n-06.webp)
+
+![Invoice exception n8n, figure 7](images/ch13-s5-invoiceexcn8n-07.webp)
+
+![Invoice exception n8n, figure 8](images/ch13-s5-invoiceexcn8n-08.webp)
+
+![Invoice exception n8n, figure 9](images/ch13-s5-invoiceexcn8n-09.webp)
+
+![Invoice exception n8n, figure 10](images/ch13-s5-invoiceexcn8n-10.webp)
+
+![Invoice exception n8n, figure 11](images/ch13-s5-invoiceexcn8n-11.webp)
+
+![Invoice exception n8n, figure 12](images/ch13-s5-invoiceexcn8n-12.webp)
+
+![Invoice exception n8n, figure 13](images/ch13-s5-invoiceexcn8n-13.webp)
+
+### Images: Tutorial: Joule Studio agent extension
+
+*Source: [Tutorial: Joule Studio agent extension](https://developers.sap.com/tutorials/joule-studio-agent-extension)*
+
+![Studio agent extension, figure 1](images/ch13-s6-studioagentext-01.webp)
+
+![Studio agent extension, figure 2](images/ch13-s6-studioagentext-02.webp)
+
+![Studio agent extension, figure 3](images/ch13-s6-studioagentext-03.webp)
+
+![Studio agent extension, figure 4](images/ch13-s6-studioagentext-04.webp)
+
+![Studio agent extension, figure 5](images/ch13-s6-studioagentext-05.webp)
+
+![Studio agent extension, figure 6](images/ch13-s6-studioagentext-06.webp)
+
+![Studio agent extension, figure 7](images/ch13-s6-studioagentext-07.webp)
+
+![Studio agent extension, figure 8](images/ch13-s6-studioagentext-08.webp)
+
+![Studio agent extension, figure 9](images/ch13-s6-studioagentext-09.webp)
+
+![Studio agent extension, figure 10](images/ch13-s6-studioagentext-10.webp)
+
+![Studio agent extension, figure 11](images/ch13-s6-studioagentext-11.webp)
+
+![Studio agent extension, figure 12](images/ch13-s6-studioagentext-12.webp)
+
+![Studio agent extension, figure 13](images/ch13-s6-studioagentext-13.webp)
+
+![Studio agent extension, figure 14](images/ch13-s6-studioagentext-14.webp)
+
+![Studio agent extension, figure 15](images/ch13-s6-studioagentext-15.webp)
+
+### Images: Tutorial: BDC agent
+
+*Source: [Tutorial: BDC agent](https://developers.sap.com/tutorials/joule-studio-bdc-agent-create)*
+
+![BDC agent, figure 1](images/ch13-s7-bdcagent-01.png)
+
+![BDC agent, figure 2](images/ch13-s7-bdcagent-02.png)
+
+![BDC agent, figure 3](images/ch13-s7-bdcagent-03.png)
+
+![BDC agent, figure 4](images/ch13-s7-bdcagent-04.png)
+
+![BDC agent, figure 5](images/ch13-s7-bdcagent-05.png)
+
+![BDC agent, figure 6](images/ch13-s7-bdcagent-06.png)
+
+![BDC agent, figure 7](images/ch13-s7-bdcagent-07.png)
+
+![BDC agent, figure 8](images/ch13-s7-bdcagent-08.png)
+
+![BDC agent, figure 9](images/ch13-s7-bdcagent-09.png)
+
+### Images: Tutorial: CX agent
+
+*Source: [Tutorial: CX agent](https://developers.sap.com/tutorials/joule-studio-cx-agent-create)*
+
+![CX agent, figure 1](images/ch13-s8-cxagent-01.webp)
+
+![CX agent, figure 2](images/ch13-s8-cxagent-02.png)
+
+![CX agent, figure 3](images/ch13-s8-cxagent-03.png)
+
+![CX agent, figure 4](images/ch13-s8-cxagent-04.png)
+
+![CX agent, figure 5](images/ch13-s8-cxagent-05.png)
+
+![CX agent, figure 6](images/ch13-s8-cxagent-06.png)
+
+![CX agent, figure 7](images/ch13-s8-cxagent-07.png)
+
+![CX agent, figure 8](images/ch13-s8-cxagent-08.png)
+
+![CX agent, figure 9](images/ch13-s8-cxagent-09.png)
+
+![CX agent, figure 10](images/ch13-s8-cxagent-10.png)
+
+### Images: Tutorial: n8n workflow
+
+*Source: [Tutorial: n8n workflow](https://developers.sap.com/tutorials/joule-studio-n8n-workflow-create)*
+
+![n8n workflow, figure 1](images/ch13-s9-n8nworkflow-01.png)
+
+![n8n workflow, figure 2](images/ch13-s9-n8nworkflow-02.png)
+
+![n8n workflow, figure 3](images/ch13-s9-n8nworkflow-03.png)
+
+![n8n workflow, figure 4](images/ch13-s9-n8nworkflow-04.png)
+
+![n8n workflow, figure 5](images/ch13-s9-n8nworkflow-05.png)
+
+![n8n workflow, figure 6](images/ch13-s9-n8nworkflow-06.png)
+
+![n8n workflow, figure 7](images/ch13-s9-n8nworkflow-07.png)
+
+![n8n workflow, figure 8](images/ch13-s9-n8nworkflow-08.png)
+
+![n8n workflow, figure 9](images/ch13-s9-n8nworkflow-09.png)
+
+![n8n workflow, figure 10](images/ch13-s9-n8nworkflow-10.png)
+
+![n8n workflow, figure 11](images/ch13-s9-n8nworkflow-11.png)
+
+![n8n workflow, figure 12](images/ch13-s9-n8nworkflow-12.png)
+
+![n8n workflow, figure 13](images/ch13-s9-n8nworkflow-13.png)
+
+![n8n workflow, figure 14](images/ch13-s9-n8nworkflow-14.png)
+
+![n8n workflow, figure 15](images/ch13-s9-n8nworkflow-15.png)
+
+### Images: Tutorial: SCM equipment assistant
+
+*Source: [Tutorial: SCM equipment assistant](https://developers.sap.com/tutorials/joule-studio-scm-equipment-assistant)*
+
+![SCM equipment assistant, figure 1](images/ch13-s10-scmequipment-01.png)
+
+![SCM equipment assistant, figure 2](images/ch13-s10-scmequipment-02.png)
+
+![SCM equipment assistant, figure 3](images/ch13-s10-scmequipment-03.png)
+
+![SCM equipment assistant, figure 4](images/ch13-s10-scmequipment-04.png)
+
+![SCM equipment assistant, figure 5](images/ch13-s10-scmequipment-05.png)
+
+![SCM equipment assistant, figure 6](images/ch13-s10-scmequipment-06.png)
+
+![SCM equipment assistant, figure 7](images/ch13-s10-scmequipment-07.png)
+
+![SCM equipment assistant, figure 8](images/ch13-s10-scmequipment-08.png)
+
+![SCM equipment assistant, figure 9](images/ch13-s10-scmequipment-09.png)
+
+![SCM equipment assistant, figure 10](images/ch13-s10-scmequipment-10.png)
+
+![SCM equipment assistant, figure 11](images/ch13-s10-scmequipment-11.png)
+
+![SCM equipment assistant, figure 12](images/ch13-s10-scmequipment-12.png)
+
+### Images: Tutorial: Spend supplier assistant
+
+*Source: [Tutorial: Spend supplier assistant](https://developers.sap.com/tutorials/joule-studio-spend-supplier-assistant)*
+
+![Spend supplier assistant, figure 1](images/ch13-s11-spendsupplier-01.webp)
+
+![Spend supplier assistant, figure 2](images/ch13-s11-spendsupplier-02.png)
+
+![Spend supplier assistant, figure 3](images/ch13-s11-spendsupplier-03.png)
+
+![Spend supplier assistant, figure 4](images/ch13-s11-spendsupplier-04.png)
+
+![Spend supplier assistant, figure 5](images/ch13-s11-spendsupplier-05.png)
+
+![Spend supplier assistant, figure 6](images/ch13-s11-spendsupplier-06.png)
+
+![Spend supplier assistant, figure 7](images/ch13-s11-spendsupplier-07.png)
+
+![Spend supplier assistant, figure 8](images/ch13-s11-spendsupplier-08.png)
+
+![Spend supplier assistant, figure 9](images/ch13-s11-spendsupplier-09.png)
+
+![Spend supplier assistant, figure 10](images/ch13-s11-spendsupplier-10.png)
+
+![Spend supplier assistant, figure 11](images/ch13-s11-spendsupplier-11.png)
+
+![Spend supplier assistant, figure 12](images/ch13-s11-spendsupplier-12.png)
+
+![Spend supplier assistant, figure 13](images/ch13-s11-spendsupplier-13.png)
+
+![Spend supplier assistant, figure 14](images/ch13-s11-spendsupplier-14.png)
+
+![Spend supplier assistant, figure 15](images/ch13-s11-spendsupplier-15.png)
+
+![Spend supplier assistant, figure 16](images/ch13-s11-spendsupplier-16.png)
+
+![Spend supplier assistant, figure 17](images/ch13-s11-spendsupplier-17.png)
+
+![Spend supplier assistant, figure 18](images/ch13-s11-spendsupplier-18.png)
+
+![Spend supplier assistant, figure 19](images/ch13-s11-spendsupplier-19.png)
+
+![Spend supplier assistant, figure 20](images/ch13-s11-spendsupplier-20.png)
+
+![Spend supplier assistant, figure 21](images/ch13-s11-spendsupplier-21.png)
+
 ## Recap
 
 - Four solution types: agent, data product, extension, n8n workflow

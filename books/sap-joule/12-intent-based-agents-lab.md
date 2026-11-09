@@ -247,6 +247,386 @@ flowchart LR
 | Deploy | Twice to confirm; Manage tab for logs |
 | Production | Not deployed from Joule Studio |
 
+## Screenshots and figures from the sources
+
+*Images saved from the source pages, in the order they appear there.*
+
+### Images: Tutorial: Balance confirmation agent
+
+*Source: [Tutorial: Balance confirmation agent](https://developers.sap.com/tutorials/balance-confirmation-agent)*
+
+![Balance confirmation agent, figure 1](images/ch12-s1-balanceconf-01.webp)
+
+![Balance confirmation agent, figure 2](images/ch12-s1-balanceconf-02.webp)
+
+![Balance confirmation agent, figure 3](images/ch12-s1-balanceconf-03.webp)
+
+![Balance confirmation agent, figure 4](images/ch12-s1-balanceconf-04.webp)
+
+![Balance confirmation agent, figure 5](images/ch12-s1-balanceconf-05.webp)
+
+![Balance confirmation agent, figure 6](images/ch12-s1-balanceconf-06.webp)
+
+![Balance confirmation agent, figure 7](images/ch12-s1-balanceconf-07.webp)
+
+![Balance confirmation agent, figure 8](images/ch12-s1-balanceconf-08.webp)
+
+![Balance confirmation agent, figure 9](images/ch12-s1-balanceconf-09.webp)
+
+![Balance confirmation agent, figure 10](images/ch12-s1-balanceconf-10.webp)
+
+![Balance confirmation agent, figure 11](images/ch12-s1-balanceconf-11.webp)
+
+![Balance confirmation agent, figure 12](images/ch12-s1-balanceconf-12.webp)
+
+![Balance confirmation agent, figure 13](images/ch12-s1-balanceconf-13.webp)
+
+![Balance confirmation agent, figure 14](images/ch12-s1-balanceconf-14.webp)
+
+![Balance confirmation agent, figure 15](images/ch12-s1-balanceconf-15.webp)
+
+![Balance confirmation agent, figure 16](images/ch12-s1-balanceconf-16.webp)
+
+![Balance confirmation agent, figure 17](images/ch12-s1-balanceconf-17.webp)
+
+### Images: Tutorial: Budget variance agent
+
+*Source: [Tutorial: Budget variance agent](https://developers.sap.com/tutorials/budget-variance-agent)*
+
+![Budget variance agent, figure 1](images/ch12-s2-budgetvariance-01.webp)
+
+![Budget variance agent, figure 2](images/ch12-s2-budgetvariance-02.webp)
+
+![Budget variance agent, figure 3](images/ch12-s2-budgetvariance-03.webp)
+
+![Budget variance agent, figure 4](images/ch12-s2-budgetvariance-04.webp)
+
+![Budget variance agent, figure 5](images/ch12-s2-budgetvariance-05.webp)
+
+![Budget variance agent, figure 6](images/ch12-s2-budgetvariance-06.webp)
+
+![Budget variance agent, figure 7](images/ch12-s2-budgetvariance-07.webp)
+
+![Budget variance agent, figure 8](images/ch12-s2-budgetvariance-08.webp)
+
+![Budget variance agent, figure 9](images/ch12-s2-budgetvariance-09.webp)
+
+![Budget variance agent, figure 10](images/ch12-s2-budgetvariance-10.webp)
+
+![Budget variance agent, figure 11](images/ch12-s2-budgetvariance-11.webp)
+
+![Budget variance agent, figure 12](images/ch12-s2-budgetvariance-12.webp)
+
+![Budget variance agent, figure 13](images/ch12-s2-budgetvariance-13.webp)
+
+![Budget variance agent, figure 14](images/ch12-s2-budgetvariance-14.webp)
+
+![Budget variance agent, figure 15](images/ch12-s2-budgetvariance-15.webp)
+
+![Budget variance agent, figure 16](images/ch12-s2-budgetvariance-16.webp)
+
+![Budget variance agent, figure 17](images/ch12-s2-budgetvariance-17.webp)
+
+![Budget variance agent, figure 18](images/ch12-s2-budgetvariance-18.webp)
+
+![Budget variance agent, figure 19](images/ch12-s2-budgetvariance-19.webp)
+
+![Budget variance agent, figure 20](images/ch12-s2-budgetvariance-20.webp)
+
+![Budget variance agent, figure 21](images/ch12-s2-budgetvariance-21.webp)
+
+### Images: Tutorial: Demand spike agent
+
+*Source: [Tutorial: Demand spike agent](https://developers.sap.com/tutorials/build-a-demand-spike-agent)*
+
+![Demand spike agent, figure 1](images/ch12-s3-demandspike-01.webp)
+
+![Demand spike agent, figure 2](images/ch12-s3-demandspike-02.webp)
+
+![Demand spike agent, figure 3](images/ch12-s3-demandspike-03.webp)
+
+![Demand spike agent, figure 4](images/ch12-s3-demandspike-04.webp)
+
+![Demand spike agent, figure 5](images/ch12-s3-demandspike-05.webp)
+
+![Demand spike agent, figure 6](images/ch12-s3-demandspike-06.webp)
+
+![Demand spike agent, figure 7](images/ch12-s3-demandspike-07.webp)
+
+![Demand spike agent, figure 8](images/ch12-s3-demandspike-08.webp)
+
+![Demand spike agent, figure 9](images/ch12-s3-demandspike-09.webp)
+
+![Demand spike agent, figure 10](images/ch12-s3-demandspike-10.webp)
+
+![Demand spike agent, figure 11](images/ch12-s3-demandspike-11.webp)
+
+![Demand spike agent, figure 12](images/ch12-s3-demandspike-12.webp)
+
+![Demand spike agent, figure 13](images/ch12-s3-demandspike-13.webp)
+
+![Demand spike agent, figure 14](images/ch12-s3-demandspike-14.webp)
+
+![Demand spike agent, figure 15](images/ch12-s3-demandspike-15.webp)
+
+![Demand spike agent, figure 16](images/ch12-s3-demandspike-16.webp)
+
+![Demand spike agent, figure 17](images/ch12-s3-demandspike-17.webp)
+
+![Demand spike agent, figure 18](images/ch12-s3-demandspike-18.webp)
+
+![Demand spike agent, figure 19](images/ch12-s3-demandspike-19.webp)
+
+![Demand spike agent, figure 20](images/ch12-s3-demandspike-20.webp)
+
+### Images: Tutorial: Sales goal advisor agent
+
+*Source: [Tutorial: Sales goal advisor agent](https://developers.sap.com/tutorials/build-a-sales-goal-advisor-agent)*
+
+![Sales goal advisor agent, figure 1](images/ch12-s4-salesgoal-01.webp)
+
+![Sales goal advisor agent, figure 2](images/ch12-s4-salesgoal-02.webp)
+
+![Sales goal advisor agent, figure 3](images/ch12-s4-salesgoal-03.webp)
+
+![Sales goal advisor agent, figure 4](images/ch12-s4-salesgoal-04.webp)
+
+![Sales goal advisor agent, figure 5](images/ch12-s4-salesgoal-05.webp)
+
+![Sales goal advisor agent, figure 6](images/ch12-s4-salesgoal-06.webp)
+
+![Sales goal advisor agent, figure 7](images/ch12-s4-salesgoal-07.webp)
+
+![Sales goal advisor agent, figure 8](images/ch12-s4-salesgoal-08.webp)
+
+![Sales goal advisor agent, figure 9](images/ch12-s4-salesgoal-09.webp)
+
+![Sales goal advisor agent, figure 10](images/ch12-s4-salesgoal-10.webp)
+
+![Sales goal advisor agent, figure 11](images/ch12-s4-salesgoal-11.webp)
+
+![Sales goal advisor agent, figure 12](images/ch12-s4-salesgoal-12.webp)
+
+![Sales goal advisor agent, figure 13](images/ch12-s4-salesgoal-13.webp)
+
+![Sales goal advisor agent, figure 14](images/ch12-s4-salesgoal-14.webp)
+
+![Sales goal advisor agent, figure 15](images/ch12-s4-salesgoal-15.webp)
+
+![Sales goal advisor agent, figure 16](images/ch12-s4-salesgoal-16.webp)
+
+![Sales goal advisor agent, figure 17](images/ch12-s4-salesgoal-17.webp)
+
+![Sales goal advisor agent, figure 18](images/ch12-s4-salesgoal-18.webp)
+
+![Sales goal advisor agent, figure 19](images/ch12-s4-salesgoal-19.webp)
+
+![Sales goal advisor agent, figure 20](images/ch12-s4-salesgoal-20.webp)
+
+### Images: Tutorial: Supplier performance assistant agent
+
+*Source: [Tutorial: Supplier performance assistant agent](https://developers.sap.com/tutorials/build-a-supplier-performance-assistant-agent)*
+
+![Supplier performance agent, figure 1](images/ch12-s5-supplierperf-01.webp)
+
+![Supplier performance agent, figure 2](images/ch12-s5-supplierperf-02.webp)
+
+![Supplier performance agent, figure 3](images/ch12-s5-supplierperf-03.webp)
+
+![Supplier performance agent, figure 4](images/ch12-s5-supplierperf-04.webp)
+
+![Supplier performance agent, figure 5](images/ch12-s5-supplierperf-05.webp)
+
+![Supplier performance agent, figure 6](images/ch12-s5-supplierperf-06.webp)
+
+![Supplier performance agent, figure 7](images/ch12-s5-supplierperf-07.webp)
+
+![Supplier performance agent, figure 8](images/ch12-s5-supplierperf-08.webp)
+
+![Supplier performance agent, figure 9](images/ch12-s5-supplierperf-09.webp)
+
+![Supplier performance agent, figure 10](images/ch12-s5-supplierperf-10.webp)
+
+![Supplier performance agent, figure 11](images/ch12-s5-supplierperf-11.webp)
+
+![Supplier performance agent, figure 12](images/ch12-s5-supplierperf-12.webp)
+
+![Supplier performance agent, figure 13](images/ch12-s5-supplierperf-13.webp)
+
+![Supplier performance agent, figure 14](images/ch12-s5-supplierperf-14.webp)
+
+![Supplier performance agent, figure 15](images/ch12-s5-supplierperf-15.webp)
+
+### Images: Tutorial: Financial closing advisor agent
+
+*Source: [Tutorial: Financial closing advisor agent](https://developers.sap.com/tutorials/financial-closing-advisor-agent)*
+
+![Financial closing advisor, figure 1](images/ch12-s6-fincloseadvisor-01.webp)
+
+![Financial closing advisor, figure 2](images/ch12-s6-fincloseadvisor-02.webp)
+
+![Financial closing advisor, figure 3](images/ch12-s6-fincloseadvisor-03.webp)
+
+![Financial closing advisor, figure 4](images/ch12-s6-fincloseadvisor-04.webp)
+
+![Financial closing advisor, figure 5](images/ch12-s6-fincloseadvisor-05.webp)
+
+![Financial closing advisor, figure 6](images/ch12-s6-fincloseadvisor-06.webp)
+
+![Financial closing advisor, figure 7](images/ch12-s6-fincloseadvisor-07.webp)
+
+![Financial closing advisor, figure 8](images/ch12-s6-fincloseadvisor-08.webp)
+
+![Financial closing advisor, figure 9](images/ch12-s6-fincloseadvisor-09.webp)
+
+![Financial closing advisor, figure 10](images/ch12-s6-fincloseadvisor-10.webp)
+
+![Financial closing advisor, figure 11](images/ch12-s6-fincloseadvisor-11.webp)
+
+![Financial closing advisor, figure 12](images/ch12-s6-fincloseadvisor-12.webp)
+
+![Financial closing advisor, figure 13](images/ch12-s6-fincloseadvisor-13.webp)
+
+![Financial closing advisor, figure 14](images/ch12-s6-fincloseadvisor-14.webp)
+
+![Financial closing advisor, figure 15](images/ch12-s6-fincloseadvisor-15.webp)
+
+![Financial closing advisor, figure 16](images/ch12-s6-fincloseadvisor-16.webp)
+
+![Financial closing advisor, figure 17](images/ch12-s6-fincloseadvisor-17.webp)
+
+### Images: Tutorial: Joule Work for the financial closing advisor
+
+*Source: [Tutorial: Joule Work for the financial closing advisor](https://developers.sap.com/tutorials/get-productive-with-joule-work-for-financial-closing-advisor)*
+
+![Financial closing in Joule Work, figure 1](images/ch12-s7-fincloseproductive-01.webp)
+
+![Financial closing in Joule Work, figure 2](images/ch12-s7-fincloseproductive-02.webp)
+
+![Financial closing in Joule Work, figure 3](images/ch12-s7-fincloseproductive-03.webp)
+
+![Financial closing in Joule Work, figure 4](images/ch12-s7-fincloseproductive-04.webp)
+
+### Images: Tutorial: FI collection assistant
+
+*Source: [Tutorial: FI collection assistant](https://developers.sap.com/tutorials/joule-studio-fi-collection-assistant)*
+
+![FI collection assistant, figure 1](images/ch12-s8-ficollassistant-01.webp)
+
+![FI collection assistant, figure 2](images/ch12-s8-ficollassistant-02.webp)
+
+![FI collection assistant, figure 3](images/ch12-s8-ficollassistant-03.webp)
+
+![FI collection assistant, figure 4](images/ch12-s8-ficollassistant-04.webp)
+
+![FI collection assistant, figure 5](images/ch12-s8-ficollassistant-05.webp)
+
+![FI collection assistant, figure 6](images/ch12-s8-ficollassistant-06.webp)
+
+![FI collection assistant, figure 7](images/ch12-s8-ficollassistant-07.webp)
+
+![FI collection assistant, figure 8](images/ch12-s8-ficollassistant-08.webp)
+
+![FI collection assistant, figure 9](images/ch12-s8-ficollassistant-09.webp)
+
+![FI collection assistant, figure 10](images/ch12-s8-ficollassistant-10.webp)
+
+![FI collection assistant, figure 11](images/ch12-s8-ficollassistant-11.webp)
+
+![FI collection assistant, figure 12](images/ch12-s8-ficollassistant-12.webp)
+
+![FI collection assistant, figure 13](images/ch12-s8-ficollassistant-13.webp)
+
+![FI collection assistant, figure 14](images/ch12-s8-ficollassistant-14.webp)
+
+### Images: Tutorial: FI collection workbench
+
+*Source: [Tutorial: FI collection workbench](https://developers.sap.com/tutorials/joule-studio-fi-collection-workbench)*
+
+![FI collection workbench, figure 1](images/ch12-s9-ficollworkbench-01.webp)
+
+![FI collection workbench, figure 2](images/ch12-s9-ficollworkbench-02.webp)
+
+![FI collection workbench, figure 3](images/ch12-s9-ficollworkbench-03.webp)
+
+![FI collection workbench, figure 4](images/ch12-s9-ficollworkbench-04.webp)
+
+![FI collection workbench, figure 5](images/ch12-s9-ficollworkbench-05.webp)
+
+![FI collection workbench, figure 6](images/ch12-s9-ficollworkbench-06.webp)
+
+![FI collection workbench, figure 7](images/ch12-s9-ficollworkbench-07.webp)
+
+![FI collection workbench, figure 8](images/ch12-s9-ficollworkbench-08.webp)
+
+![FI collection workbench, figure 9](images/ch12-s9-ficollworkbench-09.webp)
+
+![FI collection workbench, figure 10](images/ch12-s9-ficollworkbench-10.webp)
+
+![FI collection workbench, figure 11](images/ch12-s9-ficollworkbench-11.webp)
+
+### Images: Tutorial: HR onboarding assistant
+
+*Source: [Tutorial: HR onboarding assistant](https://developers.sap.com/tutorials/joule-studio-hr-onboarding-assistant)*
+
+![HR onboarding assistant, figure 1](images/ch12-s10-hronboarding-01.webp)
+
+![HR onboarding assistant, figure 2](images/ch12-s10-hronboarding-02.webp)
+
+![HR onboarding assistant, figure 3](images/ch12-s10-hronboarding-03.webp)
+
+![HR onboarding assistant, figure 4](images/ch12-s10-hronboarding-04.webp)
+
+![HR onboarding assistant, figure 5](images/ch12-s10-hronboarding-05.webp)
+
+![HR onboarding assistant, figure 6](images/ch12-s10-hronboarding-06.webp)
+
+![HR onboarding assistant, figure 7](images/ch12-s10-hronboarding-07.webp)
+
+![HR onboarding assistant, figure 8](images/ch12-s10-hronboarding-08.webp)
+
+![HR onboarding assistant, figure 9](images/ch12-s10-hronboarding-09.webp)
+
+![HR onboarding assistant, figure 10](images/ch12-s10-hronboarding-10.webp)
+
+![HR onboarding assistant, figure 11](images/ch12-s10-hronboarding-11.webp)
+
+![HR onboarding assistant, figure 12](images/ch12-s10-hronboarding-12.webp)
+
+![HR onboarding assistant, figure 13](images/ch12-s10-hronboarding-13.webp)
+
+![HR onboarding assistant, figure 14](images/ch12-s10-hronboarding-14.webp)
+
+![HR onboarding assistant, figure 15](images/ch12-s10-hronboarding-15.webp)
+
+![HR onboarding assistant, figure 16](images/ch12-s10-hronboarding-16.webp)
+
+![HR onboarding assistant, figure 17](images/ch12-s10-hronboarding-17.webp)
+
+![HR onboarding assistant, figure 18](images/ch12-s10-hronboarding-18.webp)
+
+![HR onboarding assistant, figure 19](images/ch12-s10-hronboarding-19.webp)
+
+![HR onboarding assistant, figure 20](images/ch12-s10-hronboarding-20.webp)
+
+![HR onboarding assistant, figure 21](images/ch12-s10-hronboarding-21.webp)
+
+![HR onboarding assistant, figure 22](images/ch12-s10-hronboarding-22.webp)
+
+![HR onboarding assistant, figure 23](images/ch12-s10-hronboarding-23.webp)
+
+![HR onboarding assistant, figure 24](images/ch12-s10-hronboarding-24.webp)
+
+![HR onboarding assistant, figure 25](images/ch12-s10-hronboarding-25.webp)
+
+![HR onboarding assistant, figure 26](images/ch12-s10-hronboarding-26.webp)
+
+![HR onboarding assistant, figure 27](images/ch12-s10-hronboarding-27.webp)
+
+![HR onboarding assistant, figure 28](images/ch12-s10-hronboarding-28.webp)
+
+![HR onboarding assistant, figure 29](images/ch12-s10-hronboarding-29.webp)
+
 ## Recap
 
 - One pipeline, ten scenarios

@@ -139,6 +139,114 @@ flowchart LR
 | Guardrail | Rules file |
 | Deploy | Ask the agent; QR code onboards the app |
 
+## Screenshots and figures from the sources
+
+*Images saved from the source pages, in the order they appear there.*
+
+### Images: Tutorial: MDK app with MCP
+
+*Source: [Tutorial: MDK app with MCP](https://developers.sap.com/tutorials/cp-mobile-dev-kit-mcp-app)*
+
+![MDK MCP app, figure 1](images/ch09-s1-mdkapp-01.webp)
+
+![MDK MCP app, figure 2](images/ch09-s1-mdkapp-02.webp)
+
+![MDK MCP app, figure 3](images/ch09-s1-mdkapp-03.webp)
+
+![MDK MCP app, figure 4](images/ch09-s1-mdkapp-04.webp)
+
+![MDK MCP app, figure 5](images/ch09-s1-mdkapp-05.webp)
+
+![MDK MCP app, figure 6](images/ch09-s1-mdkapp-06.webp)
+
+![MDK MCP app, figure 7](images/ch09-s1-mdkapp-07.webp)
+
+![MDK MCP app, figure 8](images/ch09-s1-mdkapp-08.webp)
+
+![MDK MCP app, figure 9](images/ch09-s1-mdkapp-09.webp)
+
+![MDK MCP app, figure 10](images/ch09-s1-mdkapp-10.webp)
+
+![MDK MCP app, figure 11](images/ch09-s1-mdkapp-11.webp)
+
+![MDK MCP app, figure 12](images/ch09-s1-mdkapp-12.webp)
+
+![MDK MCP app, figure 13](images/ch09-s1-mdkapp-13.webp)
+
+![MDK MCP app, figure 14](images/ch09-s1-mdkapp-14.webp)
+
+![MDK MCP app, figure 15](images/ch09-s1-mdkapp-15.webp)
+
+![MDK MCP app, figure 16](images/ch09-s1-mdkapp-16.webp)
+
+![MDK MCP app, figure 17](images/ch09-s1-mdkapp-17.webp)
+
+### Images: Tutorial: Enhance the MDK MCP app
+
+*Source: [Tutorial: Enhance the MDK MCP app](https://developers.sap.com/tutorials/cp-mobile-dev-kit-mcp-enhance)*
+
+![MDK MCP enhance, figure 1](images/ch09-s2-mdkenhance-01.webp)
+
+![MDK MCP enhance, figure 2](images/ch09-s2-mdkenhance-02.webp)
+
+![MDK MCP enhance, figure 3](images/ch09-s2-mdkenhance-03.webp)
+
+![MDK MCP enhance, figure 4](images/ch09-s2-mdkenhance-04.webp)
+
+![MDK MCP enhance, figure 5](images/ch09-s2-mdkenhance-05.webp)
+
+![MDK MCP enhance, figure 6](images/ch09-s2-mdkenhance-06.webp)
+
+![MDK MCP enhance, figure 7](images/ch09-s2-mdkenhance-07.webp)
+
+![MDK MCP enhance, figure 8](images/ch09-s2-mdkenhance-08.webp)
+
+![MDK MCP enhance, figure 9](images/ch09-s2-mdkenhance-09.webp)
+
+![MDK MCP enhance, figure 10](images/ch09-s2-mdkenhance-10.webp)
+
+![MDK MCP enhance, figure 11](images/ch09-s2-mdkenhance-11.webp)
+
+![MDK MCP enhance, figure 12](images/ch09-s2-mdkenhance-12.webp)
+
+![MDK MCP enhance, figure 13](images/ch09-s2-mdkenhance-13.webp)
+
+![MDK MCP enhance, figure 14](images/ch09-s2-mdkenhance-14.webp)
+
+![MDK MCP enhance, figure 15](images/ch09-s2-mdkenhance-15.webp)
+
+![MDK MCP enhance, figure 16](images/ch09-s2-mdkenhance-16.webp)
+
+![MDK MCP enhance, figure 17](images/ch09-s2-mdkenhance-17.webp)
+
+### Images: Tutorial: MDK MCP setup
+
+*Source: [Tutorial: MDK MCP setup](https://developers.sap.com/tutorials/cp-mobile-dev-kit-mcp-setup)*
+
+![MDK MCP setup, figure 1](images/ch09-s3-mdksetup-01.webp)
+
+![MDK MCP setup, figure 2](images/ch09-s3-mdksetup-02.webp)
+
+![MDK MCP setup, figure 3](images/ch09-s3-mdksetup-03.webp)
+
+![MDK MCP setup, figure 4](images/ch09-s3-mdksetup-04.webp)
+
+![MDK MCP setup, figure 5](images/ch09-s3-mdksetup-05.webp)
+
+![MDK MCP setup, figure 6](images/ch09-s3-mdksetup-06.webp)
+
+![MDK MCP setup, figure 7](images/ch09-s3-mdksetup-07.webp)
+
+![MDK MCP setup, figure 8](images/ch09-s3-mdksetup-08.webp)
+
+![MDK MCP setup, figure 9](images/ch09-s3-mdksetup-09.webp)
+
+![MDK MCP setup, figure 10](images/ch09-s3-mdksetup-10.webp)
+
+![MDK MCP setup, figure 11](images/ch09-s3-mdksetup-11.webp)
+
+![MDK MCP setup, figure 12](images/ch09-s3-mdksetup-12.webp)
+
 ## Recap
 
 - MCP lets an AI agent use a server's tools in a standard way

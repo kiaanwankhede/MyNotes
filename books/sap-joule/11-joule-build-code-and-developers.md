@@ -204,6 +204,30 @@
 | ABAP | Chat, completion, Explain, tests, RAP prediction |
 | Joule Work | Conversation, Space, `@agent` |
 
+## Screenshots and figures from the sources
+
+*Images saved from the source pages, in the order they appear there.*
+
+### Images: Tutorial: Build Code setup
+
+*Source: [Tutorial: Build Code setup](https://developers.sap.com/tutorials/build-code-setup)*
+
+![Build Code setup tutorial, figure 1](images/ch11-s3-buildcodesetup-01.webp)
+
+![Build Code setup tutorial, figure 2](images/ch11-s3-buildcodesetup-02.webp)
+
+![Build Code setup tutorial, figure 3](images/ch11-s3-buildcodesetup-03.webp)
+
+![Build Code setup tutorial, figure 4](images/ch11-s3-buildcodesetup-04.webp)
+
+![Build Code setup tutorial, figure 5](images/ch11-s3-buildcodesetup-05.webp)
+
+![Build Code setup tutorial, figure 6](images/ch11-s3-buildcodesetup-06.webp)
+
+![Build Code setup tutorial, figure 7](images/ch11-s3-buildcodesetup-07.webp)
+
+![Build Code setup tutorial, figure 8](images/ch11-s3-buildcodesetup-08.webp)
+
 ## Recap
 
 - Set up Build Code with the booster, then verify the two subscriptions
