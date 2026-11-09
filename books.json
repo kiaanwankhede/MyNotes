@@ -43,12 +43,6 @@
       "blurb": "CineBot, Time Tracker, Meridian and AI Updater, ready to talk about."
     },
     {
-      "slug": "sap-joule",
-      "title": "SAP Joule",
-      "shelf": "SAP",
-      "blurb": "Joule Studio, skills, agents, MCP and A2A, BTP setup."
-    },
-    {
       "slug": "sap-ai",
       "title": "SAP AI",
       "shelf": "SAP",
