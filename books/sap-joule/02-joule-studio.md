@@ -446,6 +446,102 @@ sequenceDiagram
 | Where does it run? | SAP-managed runtime, governed through the AI Agent Hub |
 | Workflows? | n8n canvas, managed through the Idea Board |
 
+## Screenshots and figures from the sources
+
+*Images saved from the source pages, in the order they appear there.*
+
+### Images: Gamechanger Alert: Meet SAP Joule Studio
+
+*Source: [Gamechanger Alert: Meet SAP Joule Studio](https://community.sap.com/t5/human-capital-management-blog-posts-by-members/gamechanger-alert-meet-sap-joule-studio-for-real-world-impact/ba-p/14133749)*
+
+![Joule Studio blog, figure 1](images/ch02-s2-gamechanger-01.jpg)
+
+![Joule Studio blog, figure 2](images/ch02-s2-gamechanger-02.jpg)
+
+![Joule Studio blog, figure 3](images/ch02-s2-gamechanger-03.jpg)
+
+### Images: Joule Studio product page
+
+*Source: [Joule Studio product page](https://www.sap.com/products/artificial-intelligence/joule-studio.html)*
+
+![Joule Studio product page, figure 1](images/ch02-s3-productpage-01.webp)
+
+![Joule Studio product page, figure 2](images/ch02-s3-productpage-02.jpg)
+
+![Joule Studio product page, figure 3](images/ch02-s3-productpage-03.jpg)
+
+![Joule Studio product page, figure 4](images/ch02-s3-productpage-04.jpg)
+
+![Joule Studio product page, figure 5](images/ch02-s3-productpage-05.jpg)
+
+### Images: Course lesson 1: What is the SAP Business AI Platform?
+
+*Source: [Course lesson 1: What is the SAP Business AI Platform?](https://learning.sap.com/courses/introducing-joule-studio/what-is-the-sap-business-ai-platform_a4cb3085-5c53-48fc-8323-9cec86b4a95e)*
+
+![Course lesson 1, figure 1](images/ch02-s4-course-L1-01.png)
+
+### Images: Course lesson 2: Introducing Joule Studio
+
+*Source: [Course lesson 2: Introducing Joule Studio](https://learning.sap.com/courses/introducing-joule-studio/introducing-joule-studio_c8026bc0-f709-42e7-b415-cab94c23c813)*
+
+![Course lesson 2, figure 1](images/ch02-s4-course-L2-01.png)
+
+![Course lesson 2, figure 2](images/ch02-s4-course-L2-02.png)
+
+![Course lesson 2, figure 3](images/ch02-s4-course-L2-03.png)
+
+![Course lesson 2, figure 4](images/ch02-s4-course-L2-04.png)
+
+![Course lesson 2, figure 5](images/ch02-s4-course-L2-05.png)
+
+![Course lesson 2, figure 6](images/ch02-s4-course-L2-06.png)
+
+![Course lesson 2, figure 7](images/ch02-s4-course-L2-07.png)
+
+![Course lesson 2, figure 8](images/ch02-s4-course-L2-08.png)
+
+![Course lesson 2, figure 9](images/ch02-s4-course-L2-09.png)
+
+![Course lesson 2, figure 10](images/ch02-s4-course-L2-10.png)
+
+### Images: Course lesson 3: Creating an AI Agent with Joule Studio
+
+*Source: [Course lesson 3: Creating an AI Agent with Joule Studio](https://learning.sap.com/courses/introducing-joule-studio/creating-an-ai-agent-with-joule-studio_ddd497ad-d762-41a7-848d-59b84b79cc7e)*
+
+![Course lesson 3, figure 1](images/ch02-s4-course-L3-01.png)
+
+![Course lesson 3, figure 2](images/ch02-s4-course-L3-02.png)
+
+![Course lesson 3, figure 3](images/ch02-s4-course-L3-03.png)
+
+![Course lesson 3, figure 4](images/ch02-s4-course-L3-04.png)
+
+![Course lesson 3, figure 5](images/ch02-s4-course-L3-05.png)
+
+![Course lesson 3, figure 6](images/ch02-s4-course-L3-06.png)
+
+![Course lesson 3, figure 7](images/ch02-s4-course-L3-07.png)
+
+### Images: Course lesson 4: Creating n8n Workflows in Joule Studio
+
+*Source: [Course lesson 4: Creating n8n Workflows in Joule Studio](https://learning.sap.com/courses/introducing-joule-studio/creating-n8n-workflows-in-joule-studio_d5f93929-9d6d-451c-8808-6ffc1646f2d0)*
+
+![Course lesson 4, figure 1](images/ch02-s4-course-L4-01.png)
+
+![Course lesson 4, figure 2](images/ch02-s4-course-L4-02.png)
+
+![Course lesson 4, figure 3](images/ch02-s4-course-L4-03.png)
+
+![Course lesson 4, figure 4](images/ch02-s4-course-L4-04.png)
+
+![Course lesson 4, figure 5](images/ch02-s4-course-L4-05.png)
+
+![Course lesson 4, figure 6](images/ch02-s4-course-L4-06.png)
+
+![Course lesson 4, figure 7](images/ch02-s4-course-L4-07.png)
+
+![Course lesson 4, figure 8](images/ch02-s4-course-L4-08.png)
+
 ## Recap
 
 - Joule Studio is where Joule is built and extended; Joule Work is where it is used

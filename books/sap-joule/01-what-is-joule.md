@@ -483,6 +483,26 @@ flowchart LR
 - Not to avoid shutdowns, meet quarterly upgrades or get discounts.
 </details>
 
+## Screenshots and figures from the sources
+
+*Images saved from the source pages, in the order they appear there.*
+
+### Images: Introducing Joule course, lesson pages
+
+*Source: [Introducing Joule course, lesson pages](https://learning.sap.com/courses/introducing-joule)*
+
+![Introducing Joule course, figure 1](images/ch01-s1-course-L01-01.png)
+
+![Introducing Joule course, figure 2](images/ch01-s1-course-L02-01.png)
+
+![Introducing Joule course, figure 3](images/ch01-s1-course-L06-01.png)
+
+![Introducing Joule course, figure 4](images/ch01-s1-course-U1-01.png)
+
+![Introducing Joule course, figure 5](images/ch01-s1-course-U2-01.png)
+
+![Introducing Joule course, figure 6](images/ch01-s1-course-U3-01.png)
+
 ## Recap
 
 - Joule is the engagement layer of SAP's Autonomous Enterprise; Joule Work is where you use it
