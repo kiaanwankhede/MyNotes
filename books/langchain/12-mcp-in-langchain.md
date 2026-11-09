@@ -298,6 +298,32 @@ async with MCPAdapter(group) as adapter:
 - A **single server** target accepts one URL, path or in-memory server. You cannot pass several this way
 - **An in-memory server** defined in your own code can be passed straight in
 
+### The same with `langchain-mcp-adapters` (*added by Claude*)
+
+Most tutorials and production code you'll meet use the separate adapters package. The multi-server recipe:
+
+```python
+from langchain_mcp_adapters.client import MultiServerMCPClient
+
+client = MultiServerMCPClient(
+    {
+        "orders": {"command": "python", "args": ["orders_server.py"], "transport": "stdio"},
+        "docs":   {"url": "https://example.com/mcp", "transport": "streamable_http",
+                   "headers": {"Authorization": f"Bearer {user_token}"}},   # per-user token
+    },
+    tool_name_prefix=True,          # orders_get_order, docs_search: no name collisions
+)
+tools = await client.get_tools()
+agent = create_agent("openai:gpt-4o-mini", tools=tools)
+```
+
+- **`tool_name_prefix=True`** puts the server key in front of every tool name; turn it on as soon as you have two servers
+- **Tool errors** come back as text by default (`"Error calling tool 'get_order': …"`), so the model can retry with better arguments instead of the run crashing
+- Other constructor options: `tool_interceptors` (wrap every MCP call, e.g. inject auth or log) and `handle_tool_errors`
+- Build the client **per user** when headers carry a user token (see 12.9, the per-user trap)
+
+✅ *Verified on `langchain-mcp-adapters` 0.3.2 with a local FastMCP stdio server: the tool was listed as `orders_get_order`; a good call returned `A-1: shipped`; a bad id returned `Error calling tool 'get_order': order id must look like A-123` as text, not an exception. The HTTP server entry is illustrative and was not run.*
+
 ### A demo that survives a bad network
 
 The multi-server notebook connects to **each server in its own `try` and `except`** and merges whatever succeeds, instead of a group:
