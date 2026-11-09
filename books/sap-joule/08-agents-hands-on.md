@@ -62,8 +62,30 @@
 - **Pitfall:** a skill with a **confirmation message** fails when called from an agent; move the data action right after the trigger and delete the confirmation and status messages
 - **Questions the tutorial leaves open:** why were the skill's messages not shown; why block direct calls; advantages of an agent; better instructions?
 
-> [!WARNING]
-> **Not read:** the instructions code box on this page is cut off after rule 5 ("Tool Selection Logic") by a "Show all 43 lines" control that would not expand. The text after that line is not in these notes.
+### The full instructions box (43 lines, expanded and read)
+- **Opening:** the agent handles logistics requests about shipments and carriers, picks the right tool on its own and follows the numbered rules
+- **Rule 1, Create Shipment:** use the Create Shipment tool for a new shipment or shipment details
+  - If details are missing, ask only for the required fields, shown as a table with descriptions
+  - Do **not** ask for the carrier at this point
+  - After creating or updating, show the message the tool returns
+  - Example prompts: "Create a shipment for this order", "Start a new shipment"
+- **Rule 2, Suggest Carrier Options:** use the document **Carrier Selection Guide.docx** to list every carrier
+  - Show a simple table with only the carrier name and price
+  - Let the user choose; then ask for the **Shipment ID** and the carrier
+  - Update the shipment through the Create Shipment tool; all other values stay unchanged
+  - Example prompts: "Show me available carriers", "Use UPS for this shipment"
+- **Rule 3, Track Shipment:** run the Track Shipment tool and show, in this order:
+  - the field `serviceAgentLbnId` labelled **Carrier**
+  - the field `creationDateTime`, converted to local time, formatted like MMM DD, YYYY HH:MM with time zone, labelled **Creation Date**
+  - then the source location and the destination
+  - Example prompts: "Track shipment 12345", "Where is my delivery?"
+- **Rule 4, Delayed Shipments:** run the Delayed Shipments tool directly and show its output exactly as received
+  - Example prompts: "Show me all delayed shipments", "Any deliveries behind schedule?"
+- **Rule 5, Tool Selection Logic:** the user may ask for actions in any order (for example tracking first, then creating, then choosing a carrier)
+- **The box ends there:** it is exactly 43 lines and the last line is the rule 5 sentence; nothing is missing after it
+
+> [!TIP]
+> The pattern to copy: one rule per tool, each with when to use it, what to ask for, how to display the result and example user phrases.
 
 ## 8.2 Tutorial A: the maintenance-order validator (SJ032)
 
@@ -422,8 +444,8 @@ flowchart TD
 
 ## How this chapter was checked
 
-- **Read fully:** the page text and all images of SJ032, SJ033, SJ036 and SJ038, and the page text and all images of SJ035 except the part named below
-- **Not read:** the end of the SJ035 instructions box (after rule 5), the quiz answer options, the linked set-up blogs and sample files, Discovery Center missions, the related-learning lists
+- **Read fully:** the page text and all images of SJ032, SJ033, SJ036, SJ035 (including the 43-line instructions box) and SJ038
+- **Not read:** the quiz answer options, the linked set-up blogs and sample files, Discovery Center missions, the related-learning lists
 - **Not run:** nothing was built or tested
 - **Small text:** some screenshot text was too small to read; first images of the CodeJam pages are diagrams with illegible text
 - **Dated points:** the tutorials use GPT-4o in the CodeJam; models change
