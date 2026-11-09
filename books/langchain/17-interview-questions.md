@@ -427,6 +427,56 @@ flowchart LR
 
 </details>
 
+## 17.6b Debugging round: "the agent is broken, what do you check?" (*added by Claude*)
+
+Interviewers increasingly give a symptom and watch how you narrow it down. Answer in this order: **read the trace → isolate the layer (model, tool, memory, middleware) → fix → add an eval case.**
+
+<details class="qa"><summary>1. The agent never calls the search tool; it answers from memory.</summary>
+
+- Trace: no `tool_calls` in any `AIMessage`
+- Causes: vague tool description; system prompt doesn't say when to search; model too weak for tool use
+- Fix: description with when/when-not ([Ch 5](05-tools.md)), an explicit rule in the prompt, test the tool schema alone; add a case to the eval set ([Ch 15](15-testing-agents-and-tracing.md))
+
+</details>
+
+<details class="qa"><summary>2. Runs hit <code>GraphRecursionError</code> after many tool calls.</summary>
+
+- Trace: the same tool called repeatedly with similar args
+- Causes: tool returns an error or empty result the model can't use; no "stop if not found" rule
+- Fix: make the tool return a clear, actionable message; add tool/model call limits ([Ch 8](08-prebuilt-middleware-limits-fallback-and-pii.md)); don't just raise the limit
+
+</details>
+
+<details class="qa"><summary>3. Users say the bot "forgot" what they said two messages ago.</summary>
+
+- Check: is there a checkpointer, and is the **same `thread_id`** sent each turn? Did summarisation or trimming drop it ([Ch 7](07-middleware.md))?
+- Fix: stable thread id from the session; tune `keep`; move lasting facts to the store ([Ch 6](06-agents-and-memory.md))
+
+</details>
+
+<details class="qa"><summary>4. Cost per conversation doubled after a release.</summary>
+
+- Break down tokens per step (traces or a usage middleware, [Ch 10](10-shell-tools-and-custom-middleware.md))
+- Usual suspects: longer system prompt, more tools in every call, extra loop turns, retries, a pricier model, summarisation not triggering
+- Fix the cause, then add cost to the eval dashboard so the next regression is caught before release
+
+</details>
+
+<details class="qa"><summary>5. Structured output fails 10% of the time in production.</summary>
+
+- Log the raw reply and the validation error `type` per field
+- Causes: required fields the input often lacks (model invents or fails), deep nesting, provider strategy unsupported for the model
+- Fix: optional fields + "null if missing", `Literal` sets, flatter schema, `ToolStrategy` with retry ([Ch 4](04-structured-output.md))
+
+</details>
+
+<details class="qa"><summary>6. One user saw another user's data.</summary>
+
+- Severity one: check thread ids (shared or guessable?), store namespaces (keyed by authenticated user?), MCP or tool credentials (shared service account?) ([Ch 12](12-mcp-in-langchain.md))
+- Fix: user identity only from `context` set by your auth layer, never from the model; per-user namespaces and tokens; a regression test that two users can't cross
+
+</details>
+
 ## Revision map: one line per chapter
 
 | Ch | Remember this |
