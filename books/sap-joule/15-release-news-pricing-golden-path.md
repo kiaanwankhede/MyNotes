@@ -226,3 +226,7 @@
 ---
 
 *Previous: [Chapter 14: Troubleshooting Joule setup and Joule Studio](14-troubleshooting-joule-setup-and-studio.md)*
+
+---
+
+*Next: [Chapter 16: The fusion sample: Build Code with Joule, a RAP service and SAP Build Apps](16-fusion-sample-build-code-rap-build-apps.md)*

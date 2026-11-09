@@ -141,7 +141,7 @@
   - Scenario: a mobile app built in SAP Build Apps talks to a CAP backend (Build Code with Joule) and a RAP backend (ABAP environment)
   - Story: a technician reports a faulty device; an admin assigns a processor; RAP calculates the processor's location from latitude and longitude stored in CAP
   - Three modules: (1) Build Code with Joule, (2) RESTful ABAP service, (3) SAP Build Apps with a customer web app and an admin web app
-  - **The module folders were not read**
+  - **The module folders are now covered in [Chapter 16](16-fusion-sample-build-code-rap-build-apps.md)**
 
 ## 11.7 Added by Claude, not from the sources
 

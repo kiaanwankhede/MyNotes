@@ -16,3 +16,4 @@
 * [Chapter 13: More Joule Studio scenarios: sales, supply chain, data products, agent extensions and n8n workflows](13-more-agent-scenarios-extensions-n8n.md)
 * [Chapter 14: Troubleshooting Joule setup and Joule Studio](14-troubleshooting-joule-setup-and-studio.md)
 * [Chapter 15: Keeping current: Q2 2026 release news, pricing and the golden path](15-release-news-pricing-golden-path.md)
+* [Chapter 16: The fusion sample: Build Code with Joule, a RAP service and SAP Build Apps](16-fusion-sample-build-code-rap-build-apps.md)
