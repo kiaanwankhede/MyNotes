@@ -389,6 +389,37 @@ except ModelTimeoutError:
 > - Watch `usage_metadata` per request and alert on cost per conversation, not just total spend
 > - *Added by Claude.*
 
+### Fallback models, retries and response caching
+
+Three one-liners that make a model call survive real traffic. *Added by Claude.*
+
+```python
+from langchain.chat_models import init_chat_model
+from langchain_core.globals import set_llm_cache
+from langchain_core.caches import InMemoryCache
+
+primary = init_chat_model("openai:gpt-4o-mini", timeout=20, max_retries=2)
+backup  = init_chat_model("anthropic:claude-haiku-4-5", timeout=20)   # different provider
+
+model = primary.with_fallbacks([backup])          # primary fails → backup answers
+flaky = primary.with_retry(stop_after_attempt=3)  # retry the whole call (Runnable-level)
+
+set_llm_cache(InMemoryCache())                    # identical prompt → cached answer, no API call
+```
+
+| Tool | Use when | Watch out |
+|---|---|---|
+| `max_retries=` on the model | transient 429/5xx from one provider | each retry is billed and adds latency |
+| `.with_fallbacks([...])` | a provider outage must not stop the app | backup model may answer differently; test both; use a **different provider** |
+| `.with_retry(...)` | retry a whole chain or step | don't stack with `max_retries` blindly: attempts multiply |
+| `set_llm_cache(...)` | repeated identical prompts (FAQ, tests, evals) | exact-match only; never cache per-user or time-sensitive answers; use Redis/SQLite caches across processes |
+| Provider **prompt caching** | long fixed prefix (system prompt, documents) resent every call | done by the provider, not LangChain; keep the stable part **first** and unchanged |
+
+- In an agent, prefer the middleware versions ([Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md): model fallback and retry middleware) so the policy applies to every model call in the loop
+- Model names change often: keep them in config and check the provider's current list
+
+✅ *Verified on `langchain-core` (offline, fake models): a failing primary fell back to the backup's answer; `with_retry(stop_after_attempt=2)` re-raised after two attempts; with `InMemoryCache` the second identical call returned the first cached reply instead of a new one.*
+
 ## 3.10 The LangChain error pages
 
 - *Source: LangChain docs, `errors/*.mdx` (7 pages), `install.mdx`.*
