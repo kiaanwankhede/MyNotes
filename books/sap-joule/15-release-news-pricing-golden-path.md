@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **You will learn:** what is new in Joule and the Business AI Platform (Q2 2026), the three pricing tiers and AI Unit rates, and the golden-path rules for building Joule skills
 > - **Level:** beginner to intermediate · **Time:** about 25 minutes of reading
-> - **Sources:** SJ106 (SAP News, release highlights Q2 2026), SJ114 (SAP AI pricing page), SJ110 (Architecture Center golden path: Joule Skills); read 9 November 2026 (text and images)
+> - **Sources:** SJ106 (SAP News, release highlights Q2 2026), SJ114 (SAP AI pricing page), SJ110 (Architecture Center golden path: Joule Skills), SJ117, SJ118, SJ121 (reference and hub sites); read 9 November 2026 (text and images)
 > - **Builds on:** [Chapter 13](13-more-agent-scenarios-extensions-n8n.md) and [Chapter 6](06-first-joule-skill.md)
 
 **After this chapter you can:**
@@ -154,12 +154,38 @@
 > [!TIP]
 > This matches Chapter 6 (first skill) and Chapter 12 (agents): skills for fixed, simple flows; agents when the task needs reasoning.
 
-## 15.4 Not read in this batch
+## 15.4 Reference and hub sites (SJ117, SJ118, SJ121)
+
+*Sources: SJ117 (A2A site home page), SJ118 (OData documentation index), SJ121 (SAP Discovery Center home). All three are landing pages, so these notes are short.*
+
+### A2A protocol (SJ117), links to [Chapter 10](10-pro-code-agents-a2a.md)
+- An open standard for **agent-to-agent** communication between agents built on different frameworks (LangGraph, CrewAI, Semantic Kernel, custom)
+- Agents stay **opaque**: they do not share internal memory, tools or logic
+- **MCP vs A2A:** MCP connects an agent to its tools; A2A connects an agent to other agents; they are complementary, not competitors
+- What A2A is not: not an agent framework, not a sub-agent or tool-call protocol, not a replacement for MCP, not a chat app
+- Governance: started at Google, donated to the Linux Foundation; the steering committee includes SAP, AWS, Cisco, IBM Research, Microsoft, Salesforce, ServiceNow and Google
+- Official SDKs: Python, JavaScript, Java, C#/.NET, Go, Rust; an A2A command-line tool is listed too; Apache 2.0 licence
+
+### OData (SJ118), links to the OData APIs used by skills in Chapters 6 and 15.3
+- Standardised by OASIS and approved as an ISO/IEC standard; current documents are version 4.01
+- Reading order the site suggests: beginner tutorial, advanced tutorial, Part 1 Protocol, Part 2 URL Conventions, CSDL (XML), then the JSON format
+- Older versions listed: 3.0 and 2.0
+- The detailed specification PDFs were not opened
+
+### SAP Discovery Center (SJ121)
+- Sections: Business AI (Joule Assistants and Agents, AI Estimator for cost forecasting, AI maturity assessments), Platform Services, Business Data Cloud
+- **Missions:** step-by-step guided implementations; includes "Build custom Joule skills" and "Build custom AI agents" with Joule Studio, classic edition
+- **Adoption framework:** maturity journey, maturity assessments, best practices
+- Partner AI agents catalogue; links to Help Portal, Architecture Center, tutorials, communities, Road Map Explorer
+- Highlights pages named the classic edition of Joule Studio, which matches the "new Joule Studio" story in 15.1
+
+## 15.5 Not read in this batch
 - SJ115 (Inclusion Cloud article on controlling AI Unit spend): blocked, the browser has no access to that site
 - SJ116 (Redress Compliance pricing guide): the link returns "Page Not Found"
-- Other pages in the pricing FAQ are covered in 15.2; the "AI Features Guide" it points to was not opened
+- SJ120 (SAP Road Map Explorer): redirects to a sign-in page
+- The "AI Features Guide" named in the pricing FAQ was not opened
 
-## 15.5 Added by Claude, not from the sources
+## 15.6 Added by Claude, not from the sources
 - The 40-step cost example in 15.2 is my own calculation
 - The pointer to Chapters 6 and 12 in 15.3 is my link between chapters
 
@@ -180,12 +206,21 @@
 
 *The pricing page (SJ114) had no usable figures: its only image was a 375-byte placeholder, not saved.*
 
+### Images: A2A protocol home page (SJ117)
+![A2A page graphic, figure 1](images/ch15-s4-a2a-01.svg)
+![Agent Development Kit icon (framework logo on the page), figure 2](images/ch15-s4-a2a-02.png)
+![Model Context Protocol logo, figure 3](images/ch15-s4-a2a-03.png)
+![Video thumbnail "The A2A Protocol" with three presenters, figure 4](images/ch15-s4-a2a-04.jpg)
+
+*Discovery Center (SJ121) showed only marketing tiles and customer-story photos; not saved.*
+
 ---
 
 ## Recap
 - Q2 2026 brought Joule Work mobile, multi-system Joule, a new Joule Studio (early adopter), a custom-code migration agent and AI Agent Hub growth
 - Pricing has three tiers: free Base AI, AI-Unit Premium AI, and free-to-build, pay-at-runtime custom AI
 - Agent actions cost 0.02 (standard) or 0.05 (advanced) AI Units; Joule for Consultants is 35 units per user per month
+- A2A is agent-to-agent, MCP is agent-to-tool; OData is the API standard behind skills
 - Golden path: reuse, handle errors, test standalone, confirm writes, use agents for complex cases
 
 ---
