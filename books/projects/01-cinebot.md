@@ -110,6 +110,18 @@ Run offline with a scripted stand-in model, `langchain` 1.4.7:
 | Safety | Approval on cancel | Approval on cancel and refund; limits on seats per booking |
 | Visibility | Test prints | Tracing, error and cost dashboards |
 
+## Portfolio upgrade: make CineBot show-worthy (*added by Claude*)
+
+| Upgrade | Why it impresses | Where it's taught |
+|---|---|---|
+| Real model + a 20-case eval set (book, sold out, VIP denied, cancel approved/rejected) | shows you **measure** agents, not just demo them | [Langchain Ch 15](../langchain/15-testing-agents-and-tracing.md) |
+| Streaming UI (Streamlit or FastAPI + SSE) with tool steps visible | users and reviewers see the agent think | [Langchain Ch 1](../langchain/01-introduction-to-langchain.md) |
+| Approval across two HTTP requests, stored in SQLite/Postgres | the real HITL pattern, survives restarts | [Langchain Ch 11](../langchain/11-runtime-and-human-in-the-loop.md) |
+| Idempotent `book_seats` with a DB unique constraint | answers the "two users, last seat" question with code | [Langchain Ch 5](../langchain/05-tools.md) |
+| Cost-per-conversation log line | proves production thinking | [Langchain Ch 10](../langchain/10-shell-tools-and-custom-middleware.md) |
+
+**Resume bullet template:** *Built a LangChain booking agent with role-gated tools, human approval for cancellations and idempotent bookings; evaluated on N scripted scenarios (X% pass) and tracked cost per conversation.* Fill N and X from your own runs only.
+
 ## Talking about this project
 
 > [!TIP]

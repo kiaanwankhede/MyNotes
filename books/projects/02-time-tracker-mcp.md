@@ -200,6 +200,18 @@ flowchart LR
 | Protocol | Mixed `fastmcp` versions | Pinned versions; support the modern stateless spec |
 | Testing | Manual demos | Automated write-then-read tests through REST and MCP |
 
+## Portfolio upgrade: make TimeTrack show-worthy (*added by Claude*)
+
+| Upgrade | Why it impresses | Where it's taught |
+|---|---|---|
+| Replace the raw-SQL tool with narrow, parameterised tools | shows you understand tool safety and SQL injection | 2.7, [MCP Ch 5](../mcp/05-building-mcp-servers.md) |
+| In-memory pytest suite for every tool (+ `ToolError` cases) | servers you can change without fear | [MCP Ch 5](../mcp/05-building-mcp-servers.md), 5.10b |
+| `readOnlyHint` / `destructiveHint` on tools, approval on deletes | host-side safety signals | [MCP Ch 5](../mcp/05-building-mcp-servers.md) |
+| HTTP deploy with `/health`, per-user auth tokens | turns a laptop demo into a service | [MCP Ch 6](../mcp/06-deployment-and-building-a-client.md) |
+| A LangChain agent consuming it via `langchain-mcp-adapters` | proves the server works with any host | [Langchain Ch 12](../langchain/12-mcp-in-langchain.md) |
+
+**Resume bullet template:** *Built an MCP server (FastMCP) exposing a time-tracking database to AI hosts over STDIO and HTTP, with role-scoped tools, a pytest suite and a health-checked container deploy.*
+
 ## Talking about this project
 
 > [!TIP]

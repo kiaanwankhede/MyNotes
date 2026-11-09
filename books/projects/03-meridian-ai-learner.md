@@ -371,6 +371,20 @@ gcloud projects delete YOUR_PROJECT_ID     # removes everything
 | Security | `allow_origins=["*"]` with credentials | Exact origins, auth, least-privilege service account |
 | Cost | Index endpoint bills hourly | Undeploy when idle, budgets and alerts |
 
+## Portfolio upgrade: make Meridian show-worthy (*added by Claude*)
+
+Meridian is already the strongest portfolio piece (RAG + agents + cloud). What makes a reviewer stop scrolling:
+
+| Upgrade | Why it impresses | Where it's taught |
+|---|---|---|
+| A retrieval eval: 30 questions with known source files, hit rate@3 per retriever type | numbers that justify `similarity` vs `multiquery` | [Langchain Ch 16](../langchain/16-tutorials-knowledge-base-sql-and-voice.md) |
+| Citations in every answer (`[file p.N]`) and a "not in the documents" test set | measurable hallucination control | 3.4, [LLM Ch 3](../llm/03-inside-the-model.md) |
+| Cost and latency per question logged and charted | shows the trade-off of each retriever | [Langchain Ch 10](../langchain/10-shell-tools-and-custom-middleware.md) |
+| Prompt-injection test: a PDF that says "ignore your instructions" | security awareness most portfolios lack | [Langchain Ch 9](../langchain/09-guardrails-to-do-lists-and-tool-resilience.md) |
+| README with architecture diagram, eval table and a 60-second demo GIF | reviewers decide in under a minute | below |
+
+**Resume bullet template:** *Built a RAG and multi-agent app on Google Cloud (Vertex AI Vector Search, Gemini) with three retrieval strategies compared on an N-question eval (hit rate X% → Y%), cited answers and per-query cost tracking.* Use your own measured numbers.
+
 ## Talking about this project
 
 > [!TIP]

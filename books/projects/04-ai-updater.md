@@ -65,6 +65,12 @@ flowchart LR
 | Sending | Draft only | Draft → human review → send |
 | Trust | Whatever search returns | Allow-listed sources, citations checked |
 
+## Portfolio upgrade (*added by Claude*)
+
+- Add a small eval: 10 past days of sources, check that the digest includes the items a human marked important
+- Log tokens and cost per run; show the monthly estimate in the README
+- Make the sources configurable (a YAML list) so others can reuse it: reusable tools get GitHub stars
+
 ## Talking about this project
 
 > [!TIP]
