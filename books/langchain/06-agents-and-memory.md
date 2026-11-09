@@ -180,6 +180,50 @@ The whiteboard compares the two in-memory classes:
 > - Set retention: old threads cost storage and may hold personal data you must delete on request
 > - *Added by Claude.*
 
+### Long-term memory from a tool, scoped per user (*added by Claude*)
+
+```python
+from dataclasses import dataclass
+from langchain.agents import create_agent
+from langchain.tools import tool, ToolRuntime
+from langgraph.store.memory import InMemoryStore
+
+@dataclass
+class Ctx:
+    user_id: str                      # from your auth layer, never from the model
+
+@tool
+def save_preference(pref: str, runtime: ToolRuntime[Ctx]) -> str:
+    """Save a lasting user preference (language, tone, favourite tools)."""
+    runtime.store.put(("users", runtime.context.user_id), "prefs", {"text": pref})
+    return "saved"
+
+agent = create_agent(model="openai:gpt-4o-mini", tools=[save_preference],
+                     store=InMemoryStore(), context_schema=Ctx)
+agent.invoke({"messages": [{"role": "user", "content": "I like Python"}]},
+             context=Ctx(user_id="u42"))
+```
+
+- The **namespace** `("users", user_id)` is the isolation boundary; the `user_id` comes from `context`, so the model can't read or spoof it
+- Read it back in another conversation with `runtime.store.get(("users", user_id), "prefs")`, or `search(...)` when the store has an embedding index
+
+✅ *Verified offline with a scripted model: after the run, `store.get(("users", "u42"), "prefs").value` was `{'text': 'likes Python'}`.*
+
+### Swapping in durable backends (*added by Claude*)
+
+```python
+# uv add langgraph-checkpoint-postgres
+from langgraph.checkpoint.postgres import PostgresSaver
+from langgraph.store.postgres import PostgresStore
+
+with PostgresSaver.from_conn_string(DB_URI) as saver, PostgresStore.from_conn_string(DB_URI) as store:
+    saver.setup(); store.setup()               # create tables once
+    agent = create_agent(model=..., tools=..., checkpointer=saver, store=store)
+```
+
+- Same agent code; only the objects change. `langgraph-checkpoint-sqlite` (`SqliteSaver`) is the lighter option for a single machine
+- *Not run here: the Postgres and SQLite packages were not installed in my sandbox. Check the LangGraph persistence docs for the current API before using.*
+
 ## 6.6 Putting it together: the full TripMate agent
 
 ```python
