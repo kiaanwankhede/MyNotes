@@ -344,6 +344,42 @@ agent.invoke(
 
 ✅ *Verified: `recursion_limit` in config.*
 
+### Watch the agent work: streaming
+
+`invoke` waits for the whole loop. `stream` shows each step as it happens, which is what a chat UI and your debugging both need.
+
+```python
+for mode, chunk in agent.stream(
+    {"messages": [{"role": "user", "content": "Weather in Tokyo?"}]},
+    stream_mode=["updates"],          # one chunk per finished step
+):
+    for step, data in chunk.items():  # step is "model" or "tools"
+        data["messages"][-1].pretty_print()
+```
+
+- A one-tool run streams **three** steps: `model` (asks for the tool) → `tools` (runs it) → `model` (answers)
+- `stream_mode="messages"` streams the model's tokens instead, for a typing effect in the UI
+- `await agent.ainvoke(...)` / `agent.astream(...)` are the async versions for web servers (FastAPI)
+
+✅ *Verified on `langchain` 1.4.7 with a scripted fake model: the `updates` stream produced `model`, `tools`, `model`.*
+
+### First errors you will hit, and the fix
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `ValueError: Checkpointer requires ... thread_id` | Agent has a checkpointer, call has no config | Pass `config={"configurable": {"thread_id": "..."}}` on **every** call |
+| Agent "forgets" between calls | No checkpointer, or a new `thread_id` each call | Add a checkpointer; reuse the same `thread_id` |
+| Model answers from memory instead of calling the tool | Vague tool name or docstring | Say *when* to use it in the docstring and in the system prompt |
+| Wrong tool chosen | Two tools with overlapping descriptions | Make descriptions mutually exclusive |
+| `GraphRecursionError` | Hit `recursion_limit` (model keeps calling tools) | Read the trace: usually a tool returns something the model can't use; fix it, don't just raise the limit |
+| Authentication error on the first call | Key missing from `.env` or not loaded | `load_dotenv()` before creating the agent; check the variable name the provider expects |
+| Run crashes inside a tool | Tool raised an exception | Return an error string, or use tool-error middleware ([Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md)) |
+
+✅ *Verified: the missing-`thread_id` message above is the exact text raised on `langchain` 1.4.7.*
+
+> [!TIP]
+> **Debugging habit:** when an agent misbehaves, print `result["messages"]` with `pretty_print()` (or open the LangSmith trace) **before** changing the prompt. The messages show whether the model asked for the wrong tool, the tool returned junk, or the model ignored a good result. Each needs a different fix.
+
 ## 1.11 Interview corner
 
 **What interviewers listen for:** you separate the **model** from the **harness**, you know the loop's stop condition, and you raise **cost, limits and security** without being asked.
