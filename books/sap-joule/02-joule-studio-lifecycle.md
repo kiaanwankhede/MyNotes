@@ -1,4 +1,4 @@
-# Chapter 2: Joule Studio and the agent development lifecycle
+# Joule Studio and the agent development lifecycle
 
 *Intent in, agent out — but every stage in between is a reviewable artifact, not a black box.*
 
@@ -7,7 +7,7 @@
 > - **You will learn:** where Joule Studio sits in the SAP Business AI Platform, the three principles SAP designs "trusted" agents around, and the six-stage lifecycle every agent goes through — illustrated with a real worked example's actual generated files
 > - **You will build:** nothing yet — but you'll see a complete generated agent's file tree, its `asset.yaml`, and its real test coverage breakdown
 > - **Level:** beginner · **Time:** about 18 minutes
-> - **Builds on:** [Chapter 1](01-what-is-joule.md) (Skill/Agent/Assistant/Work, the three zones). **Leads to:** Chapter 3 (extending a standard agent, worked example)
+> - **Builds on:** [What Joule actually is](01-what-is-joule.md) (Skill/Agent/Assistant/Work, the three zones). **Leads to:** [How business users actually use Joule](05-how-business-users-use-joule.md)
 
 **After this chapter you can:**
 
@@ -370,4 +370,4 @@ A Joule Skill itself has its own visual canvas, distinct from both the agent con
 - SAP, *Joule Studio product page* — https://www.sap.com/products/artificial-intelligence/joule-studio.html (read in full, all FAQs expanded, 10 Nov 2026)
 - Chetannagpal, *Gamechanger Alert: Meet SAP Joule Studio for Real-World Impact* — https://community.sap.com/t5/human-capital-management-blog-posts-by-members/gamechanger-alert-meet-sap-joule-studio-for-real-world-impact/ba-p/14133749 (read in full, 10 Nov 2026; used for its 3 screenshots, not its text)
 
-Previous: [Chapter 1, What Joule actually is](01-what-is-joule.md) · Next: [Chapter 3, Extending an SAP-delivered agent](03-extending-a-standard-agent.md)
+Previous: [What Joule actually is](01-what-is-joule.md) · Next: [How business users actually use Joule](05-how-business-users-use-joule.md)

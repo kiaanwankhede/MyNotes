@@ -48,6 +48,8 @@ header{display:flex;align-items:center;gap:16px;padding:10px 20px;border-bottom:
 #chmenu a:hover{background:var(--accent-soft)}
 #chmenu a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
 #chmenu a.draft{color:var(--muted)}
+#chmenu .ch-group{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:14px 10px 4px;padding-top:10px;border-top:1px solid var(--line)}
+#chmenu .ch-group:first-child{margin-top:4px;padding-top:0;border-top:0}
 #chmenu .tag{font-size:11px;border:1px solid var(--line);border-radius:999px;padding:0 7px;margin-left:6px;color:var(--muted)}
 .shell{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 230px}
 aside.right{overflow-y:auto;padding:22px 16px}
@@ -219,10 +221,16 @@ function getText(url){return fetch(url,{cache:'no-cache'}).then(function(r){retu
 function loadBook(b){
   if(b.loading) return b.loading;
   b.loading=getText('books/'+b.slug+'/SUMMARY.md').then(function(summ){
-    var chs=[],re=/\* \[(.+?)\]\((.+?)\)/g,m;
-    while((m=re.exec(summ))){ if(m[2]==='README.md')continue; chs.push({id:m[2].replace(/\.md$/,''),title:m[1],file:m[2],md:'',written:false}); }
+    var chs=[];
+    summ.split('\n').forEach(function(line){
+      var mh=line.match(/^##\s+(.+)/);
+      if(mh){ chs.push({divider:true,title:mh[1].trim()}); return; }
+      var m=line.match(/^\*\s*\[(.+?)\]\((.+?)\)/);
+      if(m){ if(m[2]==='README.md')return; chs.push({id:m[2].replace(/\.md$/,''),title:m[1],file:m[2],md:'',written:false}); }
+    });
     b.chapters=chs;
-    return Promise.all(chs.map(function(c){return getText('books/'+b.slug+'/'+c.file).then(function(md){c.md=md;c.written=!!md&&md.indexOf('_Not written yet._')<0;});}));
+    var real=chs.filter(function(c){return !c.divider});
+    return Promise.all(real.map(function(c){return getText('books/'+b.slug+'/'+c.file).then(function(md){c.md=md;c.written=!!md&&md.indexOf('_Not written yet._')<0;});}));
   }).then(function(){return getText('books/'+b.slug+'/README.md')}).then(function(intro){b.intro=intro;return b});
   return b.loading;
 }
@@ -259,10 +267,12 @@ function libraryPage(){
   return h+'</div>';
 }
 function renderLeft(b){
-  var h='<a href="#highlights" class="hlnav">★ My highlights</a><p class="nav-title">'+esc(b.title)+'</p>', cur=null;
-  (b.chapters||[]).forEach(function(c,i){
-    if(c.id===state.ch) cur=(i+1)+'. '+c.title;
-    h+='<a href="#'+hashFor(b.slug,c.id)+'" class="'+(c.written?'':'draft')+'"'+(c.id===state.ch?' aria-current="page"':'')+'>'+(i+1)+'. '+esc(c.title)+(c.written?'':'<span class="tag">soon</span>')+'</a>';
+  var h='<a href="#highlights" class="hlnav">★ My highlights</a><p class="nav-title">'+esc(b.title)+'</p>', cur=null, n=0;
+  (b.chapters||[]).forEach(function(c){
+    if(c.divider){ h+='<p class="ch-group">'+esc(c.title)+'</p>'; return; }
+    n++;
+    if(c.id===state.ch) cur=n+'. '+c.title;
+    h+='<a href="#'+hashFor(b.slug,c.id)+'" class="'+(c.written?'':'draft')+'"'+(c.id===state.ch?' aria-current="page"':'')+'>'+n+'. '+esc(c.title)+(c.written?'':'<span class="tag">soon</span>')+'</a>';
   });
   document.getElementById('chmenu').innerHTML=h;
   document.getElementById('chlbl').textContent=cur||(b.title+' chapters');
@@ -303,7 +313,8 @@ function show(){
     else { html=marked.parse(c.md); }
     html=fixLinks(html).replace(/<table>/g,'<div class="tbl"><table>').replace(/<\/table>/g,'</table></div>');
     if(c){
-      var i=b.chapters.indexOf(c), prev=b.chapters[i-1], next=b.chapters[i+1];
+      var reals=b.chapters.filter(function(x){return !x.divider});
+      var i=reals.indexOf(c), prev=reals[i-1], next=reals[i+1];
       html+='<div class="pager"><span>'+(prev?'<a href="#'+hashFor(b.slug,prev.id)+'"><small>Previous</small>'+esc(prev.title)+'</a>':'')+'</span><span>'+(next?'<a href="#'+hashFor(b.slug,next.id)+'"><small>Next</small>'+esc(next.title)+'</a>':'')+'</span></div>';
     }
     doc.innerHTML=html;

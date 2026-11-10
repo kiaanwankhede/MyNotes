@@ -1,4 +1,4 @@
-# Chapter 3: Extending an SAP-delivered agent
+# Extending an SAP-delivered agent
 
 *Clean-core for agents: add your logic next to SAP's agent, never inside it.*
 
@@ -7,7 +7,7 @@
 > - **You will learn:** the three agent extension points, which ones actually ship today vs. which are roadmap, and the full worked example of extending a real SAP-delivered agent — from intent statement to a deployed `solution.yaml`
 > - **You will build:** nothing runnable (no Joule Studio access here) — but you'll see every artifact a real extension produces, including the generated YAML
 > - **Level:** beginner · **Time:** about 15 minutes
-> - **Builds on:** [Chapter 2](02-joule-studio-lifecycle.md) (the six-stage lifecycle). **Leads to:** Chapter 4 (n8n workflows, worked example)
+> - **Builds on:** [Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md) (the six-stage lifecycle). **Leads to:** [n8n workflows in Joule Studio](04-n8n-workflows.md)
 
 **After this chapter you can:**
 
@@ -218,4 +218,4 @@ The course's own material shows one more real example, an **"Accounts Receivable
 
 - SAP Learning, *Introducing Joule Studio* — https://learning.sap.com/courses/introducing-joule-studio, lessons "Understanding SAP-Delivered Agent Extensions" and "Extending a Standard Agent Using Joule Studio" (read in full 9 Nov 2026)
 
-Previous: [Chapter 2, Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md) · Next: [Chapter 4, n8n workflows in Joule Studio](04-n8n-workflows.md)
+Previous: [How business users actually use Joule](05-how-business-users-use-joule.md) · Next: [n8n workflows in Joule Studio](04-n8n-workflows.md)

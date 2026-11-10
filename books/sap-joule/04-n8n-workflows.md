@@ -1,4 +1,4 @@
-# Chapter 4: n8n workflows in Joule Studio
+# n8n workflows in Joule Studio
 
 *One intent statement, four deployed assets: an agent, a workflow, and two auto-generated MCP servers.*
 
@@ -7,7 +7,7 @@
 > - **You will learn:** how Joule Studio's n8n integration turns a plain-language intent into a scheduled, multi-step automation — and what actually gets deployed underneath a "workflow"
 > - **You will build:** nothing runnable here either, but you'll see the real generated architecture: an n8n canvas, an AI agent, and two MCP servers, one of them auto-wrapping an existing OData API
 > - **Level:** beginner · **Time:** about 12 minutes
-> - **Builds on:** [Chapter 3](03-extending-a-standard-agent.md) (the extension lifecycle). **Leads to:** your own first build (not covered by a source yet)
+> - **Builds on:** [Extending an SAP-delivered agent](03-extending-a-standard-agent.md) (the extension lifecycle). **Leads to:** the Real-World Use Cases and other-product-enablement chapters, not yet written
 
 **After this chapter you can:**
 
@@ -219,4 +219,4 @@ When the build finished, the assistant reported what had actually been deployed 
 
 - SAP Learning, *Introducing Joule Studio* — https://learning.sap.com/courses/introducing-joule-studio, lesson "Creating n8n Workflows in Joule Studio" (read in full 9 Nov 2026)
 
-Previous: [Chapter 3, Extending an SAP-delivered agent](03-extending-a-standard-agent.md) · Next: [Chapter 5, How business users actually use Joule](05-how-business-users-use-joule.md)
+Previous: [Extending an SAP-delivered agent](03-extending-a-standard-agent.md)
