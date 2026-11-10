@@ -77,11 +77,16 @@
    "folder": "books/sap-joule",
    "sections": ["BTP Concepts", "Joule Concepts", "Enabling for SuccessFactors", "Joule Tutorials", "Real-World Use Cases", "Enabling for Other Products"],
    "chapters": [
+    "Joule's identity and platform foundation",
+    "Extending Joule beyond a single application",
     "What Joule actually is",
     "Joule Studio and the agent development lifecycle",
+    "Document grounding, analytics, and developer tooling",
     "How business users actually use Joule",
+    "Enabling Joule for SAP SuccessFactors",
     "Extending an SAP-delivered agent",
-    "n8n workflows in Joule Studio"
+    "n8n workflows in Joule Studio",
+    "Enabling Joule for other SAP products"
    ]
   },
   "SAP AI": {

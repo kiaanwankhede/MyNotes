@@ -7,7 +7,7 @@
 > - **You will learn:** the basic Joule Work interaction loop, the five request types SAP calls "interaction patterns," and what makes a prompt effective — kept brief on purpose
 > - **You will build:** nothing — this is background, not a build chapter
 > - **Level:** beginner · **Time:** about 6 minutes
-> - **Builds on:** [What Joule actually is](01-what-is-joule.md) (Joule Work) and [Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md). **Leads to:** [Extending an SAP-delivered agent](03-extending-a-standard-agent.md), the first of the Joule Tutorials
+> - **Builds on:** [What Joule actually is](01-what-is-joule.md) (Joule Work) and [Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md). **Leads to:** [Enabling Joule for SAP SuccessFactors](enabling-successfactors.md)
 
 **After this chapter you can:**
 
@@ -86,4 +86,4 @@ Joule Work appears the same way everywhere a user meets it: embedded in SAP appl
 
 - SAP Learning, *Getting Started with Joule for Business Users* — https://learning.sap.com/courses/getting-started-with-joule-for-business-users (all 7 lessons + 2 quizzes, read in full 10 Nov 2026)
 
-Previous: [Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md) · Next: [Extending an SAP-delivered agent](03-extending-a-standard-agent.md)
+Previous: [Document grounding, analytics, and developer tooling](joule-advanced-capabilities.md) · Next: [Enabling Joule for SAP SuccessFactors](enabling-successfactors.md)

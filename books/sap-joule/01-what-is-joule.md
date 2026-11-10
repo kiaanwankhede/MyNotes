@@ -7,7 +7,7 @@
 > - **You will learn:** the Work → Assistants → Agents → Skills taxonomy, Joule's three architectural zones, how a request actually gets routed, the three ways an agent gets triggered, and where a developer touches any of this
 > - **You will build:** nothing yet — the mental model the rest of the book hangs code on
 > - **Level:** beginner · **Time:** about 20 minutes
-> - **Builds on:** nothing (first chapter). **Leads to:** Chapter 2 (Joule Studio and building your first agent)
+> - **Builds on:** [Extending Joule beyond a single application](btp-extending-joule.md) (the BTP platform layer). **Leads to:** [Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md)
 
 **After this chapter you can:**
 
@@ -268,4 +268,4 @@ This is the same retrieve-then-generate shape you'd build by hand with any vecto
 
 - SAP Learning, *Introducing Joule* — https://learning.sap.com/courses/introducing-joule (all 11 lessons + 5 quizzes, read in full 9 Nov 2026)
 
-Previous: [SAP Joule book introduction](README.md) · Next: [Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md)
+Previous: [Extending Joule beyond a single application](btp-extending-joule.md) · Next: [Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md)

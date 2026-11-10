@@ -218,4 +218,4 @@ The course's own material shows one more real example, an **"Accounts Receivable
 
 - SAP Learning, *Introducing Joule Studio* — https://learning.sap.com/courses/introducing-joule-studio, lessons "Understanding SAP-Delivered Agent Extensions" and "Extending a Standard Agent Using Joule Studio" (read in full 9 Nov 2026)
 
-Previous: [How business users actually use Joule](05-how-business-users-use-joule.md) · Next: [n8n workflows in Joule Studio](04-n8n-workflows.md)
+Previous: [Enabling Joule for SAP SuccessFactors](enabling-successfactors.md) · Next: [n8n workflows in Joule Studio](04-n8n-workflows.md)

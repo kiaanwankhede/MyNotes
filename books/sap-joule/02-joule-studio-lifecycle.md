@@ -7,7 +7,7 @@
 > - **You will learn:** where Joule Studio sits in the SAP Business AI Platform, the three principles SAP designs "trusted" agents around, and the six-stage lifecycle every agent goes through — illustrated with a real worked example's actual generated files
 > - **You will build:** nothing yet — but you'll see a complete generated agent's file tree, its `asset.yaml`, and its real test coverage breakdown
 > - **Level:** beginner · **Time:** about 18 minutes
-> - **Builds on:** [What Joule actually is](01-what-is-joule.md) (Skill/Agent/Assistant/Work, the three zones). **Leads to:** [How business users actually use Joule](05-how-business-users-use-joule.md)
+> - **Builds on:** [What Joule actually is](01-what-is-joule.md) (Skill/Agent/Assistant/Work, the three zones). **Leads to:** [Document grounding, analytics, and developer tooling](joule-advanced-capabilities.md)
 
 **After this chapter you can:**
 
@@ -370,4 +370,4 @@ A Joule Skill itself has its own visual canvas, distinct from both the agent con
 - SAP, *Joule Studio product page* — https://www.sap.com/products/artificial-intelligence/joule-studio.html (read in full, all FAQs expanded, 10 Nov 2026)
 - Chetannagpal, *Gamechanger Alert: Meet SAP Joule Studio for Real-World Impact* — https://community.sap.com/t5/human-capital-management-blog-posts-by-members/gamechanger-alert-meet-sap-joule-studio-for-real-world-impact/ba-p/14133749 (read in full, 10 Nov 2026; used for its 3 screenshots, not its text)
 
-Previous: [What Joule actually is](01-what-is-joule.md) · Next: [How business users actually use Joule](05-how-business-users-use-joule.md)
+Previous: [What Joule actually is](01-what-is-joule.md) · Next: [Document grounding, analytics, and developer tooling](joule-advanced-capabilities.md)
