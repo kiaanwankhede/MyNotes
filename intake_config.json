@@ -76,7 +76,10 @@
   "SAP Joule": {
    "folder": "books/sap-joule",
    "chapters": [
-    "What Joule actually is"
+    "What Joule actually is",
+    "Joule Studio and the agent development lifecycle",
+    "Extending an SAP-delivered agent",
+    "n8n workflows in Joule Studio"
    ]
   },
   "SAP AI": {

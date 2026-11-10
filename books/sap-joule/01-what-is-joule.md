@@ -253,4 +253,4 @@ This is the same retrieve-then-generate shape you'd build by hand with any vecto
 
 - SAP Learning, *Introducing Joule* — https://learning.sap.com/courses/introducing-joule (all 11 lessons + 5 quizzes, read in full 9 Nov 2026)
 
-Previous: [SAP Joule book introduction](README.md) · Next: Chapter 2 (TBD)
+Previous: [SAP Joule book introduction](README.md) · Next: [Chapter 2, Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md)
