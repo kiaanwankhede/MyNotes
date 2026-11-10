@@ -219,4 +219,4 @@ When the build finished, the assistant reported what had actually been deployed 
 
 - SAP Learning, *Introducing Joule Studio* — https://learning.sap.com/courses/introducing-joule-studio, lesson "Creating n8n Workflows in Joule Studio" (read in full 9 Nov 2026)
 
-Previous: [Chapter 3, Extending an SAP-delivered agent](03-extending-a-standard-agent.md)
+Previous: [Chapter 3, Extending an SAP-delivered agent](03-extending-a-standard-agent.md) · Next: [Chapter 5, How business users actually use Joule](05-how-business-users-use-joule.md)
