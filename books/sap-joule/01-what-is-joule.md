@@ -49,11 +49,26 @@ flowchart LR
 - A Skill is a function call with no judgment. An Agent is the thing that decides *which* Skills to call and *in what order*. An Assistant is the thing you address, which picks the Agent(s).
 - This maps almost directly onto an agentic framework's own vocabulary: Skill ≈ a tool/function; Agent ≈ an agent with a planning loop; Assistant ≈ a router/supervisor agent in front of several worker agents.
 
+A concrete, named example of the hierarchy, straight from the course's own material — one Assistant coordinating six distinct, named Agents:
+
+![The Financial Closing Assistant coordinating six named Agents: Accounting Accruals, Analytical Business Insights, Asset Accounting Anomaly Detection, Financial Consistency Analysis, Intercompany Matching and Reconciliation, Journal Entry](images/01-reimagine-finance.png)
+
+- This is the Assistant/Agent split from this section made concrete: you never address "Accounting Accruals Agent" directly — you talk to the **Financial Closing Assistant**, and it's the one deciding which of its six Agents to invoke for a given request.
+
 > [!WARNING]
 > **⚠️ Pitfall: the skill-count number does not agree with itself**
 > One lesson in this same course states "over 1,300 Joule Skills covering approximately 80% of the most-used SAP transactions." A different lesson in the same course states "over 1,800 skills." Both are from SAP, in the same course, published the same week. Treat any specific skill/agent count from SAP material as directional, not a number to quote in a design doc without checking the current AI Feature Catalog yourself.
 
 ## 1.2 The three zones: where you can actually write code
+
+Zoomed all the way out, Joule sits on a 5-layer stack — this is the picture to have in your head before the "three zones" detail below:
+
+![The five layers: Joule (engagement) on top of the SAP Autonomous Suite's Agents/Apps/Data, grounded by the SAP Knowledge Graph, running on the SAP Business AI Platform's Build/Contextualize & Reason/Govern](images/01-ae-layers.png)
+
+- **Joule** is the engagement layer you actually talk to.
+- The **SAP Autonomous Suite** is where named domains (Finance, Spend, SCM, HCM, CX) plus Industry AI run as stacked Agents / Apps / Data layers.
+- The **SAP Knowledge Graph** sits between the two, grounding everything above it.
+- The **SAP Business AI Platform** underneath does the actual Build / Contextualize & Reason / Govern work — this is the layer the rest of this chapter zooms into.
 
 Joule Work is not one application — it's three zones plus a shared foundation underneath.
 
@@ -245,7 +260,7 @@ This is the same retrieve-then-generate shape you'd build by hand with any vecto
 ## How this chapter was checked
 
 - All 11 lessons and all 5 unit quizzes of "Introducing Joule" (learning.sap.com/courses/introducing-joule) were read in full, 9 Nov 2026. Linked videos, the external architecture-center link, and "Related resources" live sessions were not opened.
-- All 7 images across the course's lessons were viewed. 3 are used in this chapter (saved to `images/`, never hotlinked): the Joule Work interfaces screenshot, the assistant-value illustration, and SAP's official architecture diagram. The other 4 (the Autonomous Enterprise vision graphic, the value-pillars graphic, the "Joule Delivers Value" graphic, and the Reimagine Finance stats slide) illustrate the marketing/ROI content this chapter deliberately left out, so they weren't saved.
+- All 7 images across the course's lessons were viewed. 5 are used in this chapter (saved to `images/`, never hotlinked): the Joule Work interfaces screenshot, the assistant-value illustration, SAP's official architecture diagram, the 5-layer Autonomous Enterprise diagram, and the Reimagine Finance example (used only for its concrete named-Agent list, not its ROI stats). 2 (the Autonomous Enterprise vision graphic and the "Joule Delivers Value" graphic) are pure marketing illustration with no diagram or product content and weren't saved.
 - Nothing in this chapter is code yet, so nothing was run.
 - Sections on activation (SAP for Me), licensing (Joule Base vs Premium AI, SKUs, AI Unit pricing tiers), the "staying current" resource list, and consultant-only features (Expert Workspaces, Landscape Awareness, SAP Joule for Consultants pricing) were deliberately left out of this chapter as licensing/change-management/end-user material, per the book's developer-only scope. One distilled line from each survives: the entitlement/activation gap note in the 1.4 TIP box, and the per-action cost note in the 1.4 🏭 box.
 

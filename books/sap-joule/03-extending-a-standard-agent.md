@@ -121,13 +121,22 @@ assets:
 - The **Manage** tab (separate from **Develop**) tracks: **Life Cycle Management** (Deployment, Versions), **Try Deployed Solution** (run each generated artifact directly), and **Monitoring & Analytics** (Completed Runs, Failures — scoped per artifact, with a time-range filter).
 - Ownership is tracked explicitly too: creator, line of business, and the SAP product the base agent belongs to (here, SAP Ariba Sourcing) — this is the "named owner" governance detail from Chapter 2, 2.2.
 
-## 3.4 Added by Claude, not from the sources
+## 3.4 A third data point: not every solution is 100% green
+
+The course's own material shows one more real example, an **"Accounts Receivable Collection Email"** solution — an agent that drafts personalized collection emails from SAP customer payment history and outstanding AR items, paired with a scheduler workflow:
+
+![Accounts Receivable Collection Email solution: 1 Agent, 1 Workflow, 2 MCP Servers, with a Testing Overview showing 171 total tests, 170 passed, 1 failed, 99.42% score](images/03-ar-collection-example.png)
+
+- **Solution Artifacts: 1 Agent, 1 Workflow, 2 MCP Servers** — a fourth confirmation (after the Sourcing extension, the n8n PO workflow in Chapter 4, and the Cable Roll Optimizer in Chapter 2) of the same pattern: one MCP server per SAP integration point, bundled with the agent/workflow that uses it.
+- **171 Total Tests, 170 Passed, 1 Failed, 99.42% Score** — unlike every other testing screenshot in this book, this one isn't a clean sweep. Worth keeping in mind: a generated solution with a failing test is a normal, visible state in Joule Studio, not a hidden failure — the Testing Overview surfaces it the same way it would surface 100%.
+
+## 3.5 Added by Claude, not from the sources
 
 - The pitfall in 3.2 — pointing out that the course's own diagram contradicts its own prose about which extension points are live — is this book's own cross-check, not something the course states explicitly.
 - Treating the `solution.yaml` schema as a stable interface to design against is a reasonable inference from one example, not something the course asserts as a documented, versioned schema. Verify against current Joule Studio docs before depending on exact field names in real work.
 - Not run: this walkthrough is reproduced from the course's own screenshots; nothing here was independently executed, since it requires a Joule Studio tenant this book doesn't have access to.
 
-## 3.5 Interview corner
+## 3.6 Interview corner
 
 **What interviewers listen for:** you know extensions don't touch the base agent's source, you can name which extension point is actually available today, and you'd check the Agent Catalog rather than assume.
 
@@ -191,6 +200,7 @@ assets:
 - Three extension points exist (Instructions, Tools/MCP, Hooks), but SAP's own material shows only Instructions as definitely available — verify the rest per agent in the Agent Catalog
 - The full lifecycle on a real example: pick Extension → pick agent from catalog → write an intent statement (including what must *not* change) → review the generated PRD (with real metrics and REQ- user stories) → inspect the generated `solution.yaml` and its referenced assets → deploy and monitor from Manage
 - Generated post-hook workflows speak MCP and A2A, the same protocols from Chapter 2 — not a proprietary extension format
+- A third example (across Ch2-4, four total) confirms "one MCP server per SAP integration point" as a consistent pattern, not a one-off — and shows a real, non-100% test result, which is a normal visible state, not a hidden failure
 
 ## Practice
 
@@ -201,7 +211,7 @@ assets:
 ## How this chapter was checked
 
 - This chapter is built from two lessons of "Introducing Joule Studio" (Unit 3): "Understanding SAP-Delivered Agent Extensions" and "Extending a Standard Agent Using Joule Studio," both read in full 9 Nov 2026 (see Chapter 2 for the full course reading note).
-- 9 of the course's screenshots are used here (saved to `images/`, never hotlinked), covering every step of the worked example, plus 1 extension-points diagram. All were viewed in full; none were cropped or altered beyond file naming.
+- 11 of the course's screenshots are used here (saved to `images/`, never hotlinked): 9 covering every step of the worked example, 1 extension-points diagram, and 1 third example (Accounts Receivable Collection Email) used for its realistic non-100% test result. All were viewed in full; none were cropped or altered beyond file naming.
 - Nothing here was independently run — this chapter reproduces the course's own worked example and screenshots rather than a live Joule Studio session, which this book doesn't have access to.
 
 ## Sources and further reading
