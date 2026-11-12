@@ -22,4 +22,5 @@
 ## Real-World Use Cases
 
 ## Enabling for Other Products
+* [Enabling Joule for SAP S/4HANA Cloud Public Edition](enabling-s4hana-public-edition.md)
 * [Enabling Joule for other SAP products](enabling-other-products.md)

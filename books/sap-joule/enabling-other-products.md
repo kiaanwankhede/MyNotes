@@ -110,4 +110,4 @@ Notice what's **not** in this table: UI screenshots, step-by-step configuration,
 
 - SAP Learning, *Setting Up Joule Across your Organizational System Landscapes* — https://learning.sap.com/courses/setting-up-joule-across-your-organizational-system-landscapes, Unit 3 (SAP Concur, SAP Ariba, SAP Signavio, SAP IBP, SAP IPD, SAP Digital Manufacturing lessons; read in full 10 Nov 2026)
 
-Previous: [n8n workflows in Joule Studio](04-n8n-workflows.md)
+Previous: [Enabling Joule for SAP S/4HANA Cloud Public Edition](enabling-s4hana-public-edition.md)

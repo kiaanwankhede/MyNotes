@@ -294,7 +294,8 @@ function fixLinks(html){
     var am=attrs.match(/alt="([^"]*)"/), alt=am?am[1]:'';
     return '<figure class="shot"><img '+attrs+' loading="lazy">'+(alt?'<figcaption>'+alt+'</figcaption>':'')+'</figure>';
   });
-  return html.replace(/href="(?:\.\.\/([a-z]+)\/)?([0-9]{2}-[^"#]+)\.md"/g,function(m,bk,id){
+  return html.replace(/href="(?:\.\.\/([a-z0-9-]+)\/)?((?!https?:)[^"#]+)\.md"/g,function(m,bk,id){
+    if(id==='README') return m;
     return 'href="#'+hashFor(bk||state.book,id)+'"';
   });
 }
