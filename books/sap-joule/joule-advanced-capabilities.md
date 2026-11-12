@@ -7,7 +7,7 @@
 > - **You will learn:** how Document Grounding actually retrieves (not trains on) your content, how Analytical Insights connects conversation to SAP Analytics Cloud, and what SAP Joule for Developers does inside ABAP Cloud and SAP Build
 > - **You will build:** nothing yet — this is the capability map before you configure any of the three
 > - **Level:** intermediate · **Time:** about 12 minutes
-> - **Builds on:** [What Joule actually is](01-what-is-joule.md) (grounding, Chapter 1 1.2). **Leads to:** [Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md)
+> - **Builds on:** [What Joule actually is](01-what-is-joule.md) (grounding, 1.2) and [Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md). **Leads to:** [How business users actually use Joule](05-how-business-users-use-joule.md)
 
 **After this chapter you can:**
 
@@ -43,7 +43,7 @@ Analytical Insights lets users ask analytical questions in natural language and 
 - Results come back as structured output — charts or key figures — alongside free-form text, not text-only
 - The integration point is **SAP Analytics Cloud**
 
-This is the same "Analytical" interaction pattern named back in [How business users actually use Joule](05-how-business-users-use-joule.md), 5.2 — here's what actually powers it on the backend.
+This is the same "Analytical" interaction pattern covered in [How business users actually use Joule](05-how-business-users-use-joule.md), 5.2 — here's what actually powers it on the backend, before you get there.
 
 ## 3. SAP Joule for Developers: design-time AI, not a runtime feature
 
@@ -70,7 +70,7 @@ What it actually does:
 
 ## 4. Added by Claude, not from the sources
 
-- Tying Analytical Insights explicitly back to Chapter 5's "Analytical" interaction pattern is this book's own cross-reference; the course describes the capability without naming that earlier pattern.
+- Tying Analytical Insights explicitly back to [How business users actually use Joule](05-how-business-users-use-joule.md)'s "Analytical" interaction pattern is this book's own cross-reference; the course describes the capability without naming that earlier pattern. (That chapter in turn follows this one in the book — the cross-reference points forward, not back.)
 - Not run: this chapter is capability and configuration guidance, not code; nothing was independently executed. Chapters 2–4 already carry this book's "not run" / "verified" markers for actual generated code.
 
 ## 5. Interview corner

@@ -28,7 +28,7 @@ No menus to learn, no commands to memorize — a user states what they want, in 
 
 ## 5.2 Five interaction patterns
 
-Every request a user types falls into one of five patterns. This matters to you as a developer mainly because it's the same vocabulary used for Skill types back in Chapter 1 — a request's pattern roughly predicts which kind of Skill ends up handling it.
+Every request a user types falls into one of five patterns. This matters to you as a developer mainly because it's the same vocabulary used for Skill types back in [What Joule actually is](01-what-is-joule.md) — a request's pattern roughly predicts which kind of Skill ends up handling it.
 
 | Pattern | What the user wants | Example |
 |---|---|---|
@@ -59,7 +59,7 @@ Joule Work appears the same way everywhere a user meets it: embedded in SAP appl
 
 <details class="qa"><summary>Why would a developer care about "interaction patterns" meant for business users?</summary>
 
-- They're the same vocabulary as Skill types (Chapter 1) — recognizing which pattern a request falls into helps you predict, and design for, which Skill or Agent should handle it
+- They're the same vocabulary as Skill types ([What Joule actually is](01-what-is-joule.md)) — recognizing which pattern a request falls into helps you predict, and design for, which Skill or Agent should handle it
 
 </details>
 

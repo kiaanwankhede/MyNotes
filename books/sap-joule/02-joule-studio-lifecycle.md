@@ -35,8 +35,8 @@ SAP's own ecosystem diagram names real, specific tools at every layer — this i
 ![SAP Business AI Platform ecosystem: Joule on top of SAP Autonomous Domains, Partner Agents (KPMG, Accenture, Deloitte, IBM, PwC, EY, Capgemini, NTT) and Third-party AI Agents (NVIDIA NemoClaw); below, Build (Joule Studio, n8n, Vercel, Claude Code, Cursor, SAP Integration Suite), Contextualize & Reason (SAP Knowledge Graph, SAP & Non-SAP Models including OpenAI, Mistral AI, Cohere, Perplexity, PRIOR), and Govern (SAP AI Agent Hub, Value Realization, Joule Studio Runtime, Identity/Access/Security), all on SAP Business Data Cloud (SAP, Databricks, Microsoft, Google Cloud, Snowflake)](images/02-platform-ecosystem.png)
 
 - **You are not locked into SAP's own models or tools.** The diagram names OpenAI, Mistral AI, Cohere, Perplexity and "PRIOR" as usable models alongside SAP's own, and Databricks, Microsoft, Google Cloud and Snowflake as Business Data Cloud partners.
-- **Partner and third-party agents are first-class, not an afterthought.** KPMG, Accenture, Deloitte, IBM, PwC, EY, Capgemini and NTT appear as named "Partner Agents"; NVIDIA NemoClaw appears as a named "Third-party AI Agent" — all governed through the same AI Agent Hub as your own agents (Chapter 1, 1.6).
-- The **Agent Gateway** (Chapter 1, 1.2) sits literally in the middle of this diagram, between the SAP Autonomous Suite above and the Business AI Platform below — it's the thing every one of these integrations actually routes through.
+- **Partner and third-party agents are first-class, not an afterthought.** KPMG, Accenture, Deloitte, IBM, PwC, EY, Capgemini and NTT appear as named "Partner Agents"; NVIDIA NemoClaw appears as a named "Third-party AI Agent" — all governed through the same AI Agent Hub as your own agents ([What Joule actually is](01-what-is-joule.md), 1.6).
+- The **Agent Gateway** ([What Joule actually is](01-what-is-joule.md), 1.2) sits literally in the middle of this diagram, between the SAP Autonomous Suite above and the Business AI Platform below — it's the thing every one of these integrations actually routes through.
 
 ## 2.2 Three principles, because "it compiles" isn't enough
 
@@ -71,14 +71,14 @@ SAP's own course material walks a second full worked example through all six sta
 
 > **Intent statement (in full):** "Create an agent that should optimize cable roll selection for manufacturing work orders to minimize offcut waste. It reads work order requirements from SAP S/4HANA — including cable material, required length, and specification — and checks available batch stock across all storage locations. Based on this data, the agent applies an optimization engine to recommend the single roll or combination of rolls that fulfills the work order with minimum waste. Where local stock is insufficient, the agent identifies available rolls at other locations and recommends raising a stock transfer order accordingly. All recommendations are presented to the planner for review and approval before any SAP data is modified. The agent supports configuration for acceptable waste thresholds, location priority rules, and batch selection criteria such as expiry date and certificate status."
 
-- Notice **"All recommendations are presented to the planner for review and approval before any SAP data is modified"** — same pattern as Chapter 3's "preserve the agent's standard functionality" clause: state your human-in-the-loop boundary in the intent itself, don't leave it implicit.
+- Notice **"All recommendations are presented to the planner for review and approval before any SAP data is modified"** — same pattern as [Extending an SAP-delivered agent](03-extending-a-standard-agent.md)'s "preserve the agent's standard functionality" clause: state your human-in-the-loop boundary in the intent itself, don't leave it implicit.
 - **Quick Create: Skip clarifying questions and start directly building the solution** is a checkbox right in this dialog — confirming it's a one-step opt-in, not a separate mode.
 
 **Stage 2 — PRD.**
 
 ![Generated PRD: title, owner, Solution Category "AI Agent (Python, A2A protocol)", elevator pitch, business need](images/02-cro-2-prd.png)
 
-- The PRD's own title line states the architecture before a single file is generated: **Solution Category: AI Agent (Python, A2A protocol)**. Every PRD in this course — this one and the n8n example in Chapter 4 — names the implementation language and protocol up front, not as an implementation detail discovered later.
+- The PRD's own title line states the architecture before a single file is generated: **Solution Category: AI Agent (Python, A2A protocol)**. Every PRD in this course — this one and the n8n example in [n8n workflows in Joule Studio](04-n8n-workflows.md) — names the implementation language and protocol up front, not as an implementation detail discovered later.
 
 **Stage 3 — Specification.**
 
@@ -155,8 +155,8 @@ provides:
 >
 > *Added by Claude; the course's screenshots show this but don't name the pattern explicitly.*
 
-- `kind: a2a` on the `provides.apis` entry confirms what the PRD already said: this agent's API is exposed as an **A2A** endpoint, the same protocol from Chapter 1, 1.7 and the post-hook in Chapter 3.
-- Skills are declared in the `agentCard` as a list with `name` + `description` — this is the Joule Skill concept from Chapter 1, 1.1, now visible as literal YAML.
+- `kind: a2a` on the `provides.apis` entry confirms what the PRD already said: this agent's API is exposed as an **A2A** endpoint, the same protocol from [What Joule actually is](01-what-is-joule.md), 1.7 and the post-hook in [Extending an SAP-delivered agent](03-extending-a-standard-agent.md).
+- Skills are declared in the `agentCard` as a list with `name` + `description` — this is the Joule Skill concept from [What Joule actually is](01-what-is-joule.md), 1.1, now visible as literal YAML.
 - The IDE handover options shown here are more complete than a short list: **Claude Code, Cursor, Cline, Open Code, Codex, "and more"** — see 2.4.
 
 **Stage 5 — Testing.**
@@ -164,7 +164,7 @@ provides:
 ![Testing Overview for the Cable Roll Optimizer: 150 total tests, 150 passed, 0 failed, 100% score, with per-module coverage breakdown](images/02-cro-5-testing.png)
 
 - Per-module coverage, read from the actual chat trace: **`agent.py` 69%, `config_loader.py` 96%, `optimisation_engine.py` 81%** — the genuine business logic. Against that: **`mcp_providers/agw.py` 23%** (flagged as "network infrastructure, cannot be unit tested offline") and **`prompt_injection_detector.py` 0%** (flagged as "security infrastructure... framework modules that don't need to be covered by agent-specific tests"). This is the live version of the pitfall above: don't read a low number on a framework module as a quality problem.
-- This example also deploys with **4 SAP-connected MCP servers** alongside the agent — `sap-s4-production-order-mcp-server`, `sap-s4-batch-master-record-mcp-...`, `sap-s4-material-stock-mcp-server`, `sap-s4-stock-transport-order-mcp-...` — the same "one MCP server per integration point" pattern from Chapter 4's n8n example, now confirmed on an agent too.
+- This example also deploys with **4 SAP-connected MCP servers** alongside the agent — `sap-s4-production-order-mcp-server`, `sap-s4-batch-master-record-mcp-...`, `sap-s4-material-stock-mcp-server`, `sap-s4-stock-transport-order-mcp-...` — the same "one MCP server per integration point" pattern from [n8n workflows in Joule Studio](04-n8n-workflows.md)'s n8n example, now confirmed on an agent too.
 
 **Stage 6 — Deployment.**
 
@@ -196,7 +196,7 @@ Who does what, at each stage, through which entry point — stated explicitly ra
 
 - Notice **Specification has no business-user row at all** — it's the one stage that's entirely a developer activity. Business users re-enter at Solution ("give feedback through solution preview") and Testing ("confirm the solution meets business needs"), but don't touch the technical spec itself.
 - **Git is the shared foundation.** Every generated artifact can be pushed to Git, through the Git provider of your choice — version control, code review, and team collaboration work the way they already do for the rest of your code, not some Joule-specific workflow.
-- **Enterprise integration runs through MCP and A2A.** This confirms the "open protocols" flagged as unresolved in Chapter 1, 1.7 — Joule Studio names both explicitly: **MCP** for connecting tools and services, **A2A** for agent interoperability, and the worked example above shows both as literal file content (`mcp-mock.json`, `kind: a2a`), not just slideware. If you know the [MCP book](../mcp/01-why-mcp-exists.md), this is not new ground, just a new place it's wired in.
+- **Enterprise integration runs through MCP and A2A.** This confirms the "open protocols" flagged as unresolved in [What Joule actually is](01-what-is-joule.md), 1.7 — Joule Studio names both explicitly: **MCP** for connecting tools and services, **A2A** for agent interoperability, and the worked example above shows both as literal file content (`mcp-mock.json`, `kind: a2a`), not just slideware. If you know the [MCP book](../mcp/01-why-mcp-exists.md), this is not new ground, just a new place it's wired in.
 - Business context during generation is pulled from **SAP LeanIX** (landscape/architecture), **SAP Signavio** (process intelligence), the **SAP Knowledge Graph / domain models** (application semantics) — and one more named here for the first time: **SAP RPT-1**, described as a predictive-AI source ("Anticipate... Predictions"). SAP Business Data Cloud fills out the picture as the facts source.
 - SAP's own product page groups that same context into four categories, which is a cleaner mental model than the tool-name list above: **landscape insights** (architecture, a central agent repository, compliance policies, identity controls), **application context** (data models, object relationships, functionality, KPIs), **process insights** (bottlenecks, gaps, improvement recommendations), and **best practices** (process templates, development guidelines, benchmarks). Note the **"central agent repository"** sitting inside landscape insights — a discoverable inventory of what's already been built, separate from (but feeding) the AI Agent Hub in 2.5.
 
@@ -212,7 +212,7 @@ A second full example, from the same page, confirming the "several MCP servers p
 
 ![The Create Agent dialog over a Solutions list showing "Discount Pricing Agent" tagged 1 Agent + 5 MCP Servers, and a "Tariff Disruption Response Agent" intent statement about tariff and supply-chain disruption](images/02-tariff-agent-example.jpg)
 
-- **Discount Pricing Agent: 1 Agent, 5 MCP Servers** — a fifth data point (after the Sourcing extension, the n8n PO workflow, the Cable Roll Optimizer, and the AR Collection Email solution in Chapter 3) for the same rule: a solution's MCP-server count tracks its number of external integration points, and that count is often more than one.
+- **Discount Pricing Agent: 1 Agent, 5 MCP Servers** — a fifth data point (after the Sourcing extension, the n8n PO workflow, the Cable Roll Optimizer, and the AR Collection Email solution in [Extending an SAP-delivered agent](03-extending-a-standard-agent.md)) for the same rule: a solution's MCP-server count tracks its number of external integration points, and that count is often more than one.
 
 ## 2.5 Testing and governance, beyond one agent
 
@@ -220,7 +220,7 @@ The per-agent testing in 2.3 is only half the picture — once deployed, agents 
 
 ![SAP AI Agent Hub's AI Agent Discovery Inbox: a real inventory of agents (Procurement Invoice Agent, Billing Creation Agent 2.3.5 Production, Classification Agent, Vendor Risk Evaluator) with status and a usage-analytics detail panel showing session counts and a sessions-over-time chart](images/02-ai-agent-hub.png)
 
-- This is the **AI Agent Hub** from Chapter 1, 1.6, shown as a real screen rather than a description: a searchable **Discovery Inbox** of every agent in the landscape (here: 52 total results), each tagged by classification (SAP AI Agent, etc.) and status (**Action Needed** / **Linked**), with an **Approval gate** ("Reject" / "Add to Inventory") before anything goes into inventory.
+- This is the **AI Agent Hub** from [What Joule actually is](01-what-is-joule.md), 1.6, shown as a real screen rather than a description: a searchable **Discovery Inbox** of every agent in the landscape (here: 52 total results), each tagged by classification (SAP AI Agent, etc.) and status (**Action Needed** / **Linked**), with an **Approval gate** ("Reject" / "Add to Inventory") before anything goes into inventory.
 - The detail panel for one agent shows real **usage analytics**: Total Sessions, First/Last Active dates, and a Sessions Over Time chart — this is the "visibility into cost and value delivered" principle from 2.2, made concrete.
 - Identity and access control specifically runs through **SAP Cloud Identity Services** — named explicitly on SAP's own product page as the mechanism behind the "identity and access controls" line in 2.2's governance principle.
 
@@ -228,7 +228,7 @@ The runtime underneath all of this:
 
 ![SAP-managed runtime capabilities: deploy, securely run with identity/security/compliance, scale across business, with NVIDIA OpenShell named for secure isolation — alongside a real agent's Testing Overview panel](images/02-runtime-openshell.png)
 
-- **NVIDIA OpenShell** is named explicitly as the isolation technology behind the SAP-managed runtime's "secure isolation and enterprise scale" claim — this is the specific product name behind what Chapter 1 described only generically as "the SAP-managed runtime."
+- **NVIDIA OpenShell** is named explicitly as the isolation technology behind the SAP-managed runtime's "secure isolation and enterprise scale" claim — this is the specific product name behind what [What Joule actually is](01-what-is-joule.md) described only generically as "the SAP-managed runtime."
 - The testing panel shown alongside it (a different example, "Cable Roll Optimizer" again, 150/150/0 at a **different point in development**) reflects a live tool trace: "Called 3 tools," "Called 6 tools," including a **deployment quota check** and **file validation** before the agent actually ships — the generation process itself uses tools, the same way the agent it's generating will.
 
 > [!WARNING]
@@ -252,20 +252,20 @@ Opening an agent built this way surfaces a configuration screen not shown anywhe
 - **Thinking Steps: Small / Medium / Large** — a reasoning-effort control, the same shape as the `temperature`/reasoning-effort knobs you'd set by hand in a framework like LangChain, exposed here as a simple three-way UI choice.
 - The **Tools table** (Name, Description, Resource, each editable) is the UI-level view of what the generated `agentCard.capabilities.skills` YAML in 2.3 represents in config form — a real example tool here is "Unified Risk and Weather Retrieval: real-time weather forecast APIs to gather climatic conditions along the transportation path."
 
-A Joule Skill itself has its own visual canvas, distinct from both the agent config above and the n8n canvas in Chapter 4:
+A Joule Skill itself has its own visual canvas, distinct from both the agent config above and the n8n canvas in [n8n workflows in Joule Studio](04-n8n-workflows.md):
 
 ![A Joule Skill's flow canvas: Trigger ("When skill is called") -> Transportation Process -> Fetch Tracking Status -> Confirmation Message -> End](images/02-sapbuild-skill-canvas.jpg)
 
-- Every skill flow starts with a fixed **Trigger: "When skill is called"** node and ends at an **End** node, with business logic steps in between (here: a process step, a data-fetch step, and a message-composition step) — a simpler, more constrained canvas than n8n's, appropriate for what a Skill is meant to be (Chapter 1, 1.1): atomic and deterministic, not an open-ended workflow.
+- Every skill flow starts with a fixed **Trigger: "When skill is called"** node and ends at an **End** node, with business logic steps in between (here: a process step, a data-fetch step, and a message-composition step) — a simpler, more constrained canvas than n8n's, appropriate for what a Skill is meant to be ([What Joule actually is](01-what-is-joule.md), 1.1): atomic and deterministic, not an open-ended workflow.
 
 > [!WARNING]
 > **⚠️ Pitfall: don't follow this blog's access instructions literally**
-> The blog post this came from tells readers to "go into SAP Build and access Joule Studio" as the way in. That may have been accurate when it was written (per its own screenshots), but it predates the dedicated Joule Studio launcher and the SAP-Managed Joule activation path from Chapter 1, 1.4. Treat the SAP Build entry point as *a* way in that still appears to exist, not necessarily *the* current recommended one — confirm against current docs before telling someone else how to get started.
+> The blog post this came from tells readers to "go into SAP Build and access Joule Studio" as the way in. That may have been accurate when it was written (per its own screenshots), but it predates the dedicated Joule Studio launcher and the SAP-Managed Joule activation path from [What Joule actually is](01-what-is-joule.md), 1.4. Treat the SAP Build entry point as *a* way in that still appears to exist, not necessarily *the* current recommended one — confirm against current docs before telling someone else how to get started.
 
 ## 2.7 Added by Claude, not from the sources
 
 - The explicit confirmation that "Solution" (not "Code") is the UI's own stage name was reached by cross-checking every screenshot in this chapter — the course's own prose is looser than its own UI, but the UI is consistent everywhere it appears.
-- The framing of MCP/A2A as "resolving" Chapter 1's open question is this book's own continuity, not something the course states.
+- The framing of MCP/A2A as "resolving" [What Joule actually is](01-what-is-joule.md)'s open question is this book's own continuity, not something the course states.
 - The 🏭 box on `circuit_breaker.py` / `prompt_injection_detector.py` as default scaffold modules is a pattern this book names; the course's screenshots show it but don't call it out as a design principle.
 - Reading `ChatLiteLLM` as confirmation that Joule Studio uses LiteLLM for model abstraction is a direct read of the generated code shown in SAP's own product-page screenshot — not an inference, but also not something SAP states in prose anywhere on that page.
 - SAP's product page also cites customer and analyst proof points not reproduced here in detail: Accenture (25% faster full-stack app development), Florida Crystals (a customer story), and a Constellation Research benchmark claiming Joule Studio is "5.5x faster" than traditional development across three scenarios. These are marketing claims from named sources, not independently verified — cite the source and the claimed number together if you ever repeat them, never the number alone.
@@ -347,7 +347,7 @@ A Joule Skill itself has its own visual canvas, distinct from both the agent con
 - Build in the **web UI, an IDE** (Claude Code, Cursor, Cline, Open Code, Codex), **or a CLI** — Git ties them together
 - Testing means **behavioral evaluation against the PRD**, not just successful execution — and low coverage on a framework module (like the prompt-injection detector) isn't the same signal as low coverage on your own business logic
 - AI Agent Hub's Discovery Inbox is a real approval gate with per-agent usage analytics, not just a concept
-- Joule Studio can also be reached through **SAP Build**'s own "Create Project" flow (an older entry point); agent config there shows an explicit LLM provider choice (Anthropic, Google, MistralAI, OpenAI), separate Base/Advanced model slots, and a Thinking Steps (Small/Medium/Large) reasoning control — and a Skill has its own Trigger→steps→End flow canvas, distinct from the n8n canvas in Chapter 4
+- Joule Studio can also be reached through **SAP Build**'s own "Create Project" flow (an older entry point); agent config there shows an explicit LLM provider choice (Anthropic, Google, MistralAI, OpenAI), separate Base/Advanced model slots, and a Thinking Steps (Small/Medium/Large) reasoning control — and a Skill has its own Trigger→steps→End flow canvas, distinct from the n8n canvas in [n8n workflows in Joule Studio](04-n8n-workflows.md)
 
 ## Practice
 

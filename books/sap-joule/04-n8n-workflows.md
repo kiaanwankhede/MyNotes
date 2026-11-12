@@ -18,7 +18,7 @@
 
 ## 4.1 n8n, inside Joule Studio
 
-n8n is a low-code workflow automation tool, integrated into Joule Studio as a visual canvas for orchestrating SAP and third-party systems. The point isn't n8n itself — it's that Joule Studio wraps it in the same intent → requirements → spec → build → test → deploy lifecycle from Chapter 2, so a workflow gets the same governance and review as an agent.
+n8n is a low-code workflow automation tool, integrated into Joule Studio as a visual canvas for orchestrating SAP and third-party systems. The point isn't n8n itself — it's that Joule Studio wraps it in the same intent → requirements → spec → build → test → deploy lifecycle from [Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md), so a workflow gets the same governance and review as an agent.
 
 The lifecycle here runs through the **Idea Board**:
 
@@ -41,8 +41,8 @@ flowchart LR
 
 ![Configuration dialog: solution, workflow name "First Workflow", intent statement field, Quick Create toggle](images/04-n8n-2-create-dialog.png)
 
-- The launcher has **four** creation types, not two: **Agent**, **n8n Workflow**, **Data Product** ("create custom data sets for analytics and reporting"), and **Extension** (Chapter 3). This book hasn't covered Data Product yet — flagging it here as a type that exists, not a gap we're silently ignoring.
-- Same pattern as Chapter 3: pick a solution to group related assets, name the workflow, describe the outcome in plain language. **Quick Create** is available here too, with the same trade-off — skip clarification at the cost of a thinner PRD.
+- The launcher has **four** creation types, not two: **Agent**, **n8n Workflow**, **Data Product** ("create custom data sets for analytics and reporting"), and **Extension** ([Extending an SAP-delivered agent](03-extending-a-standard-agent.md)). This book hasn't covered Data Product yet — flagging it here as a type that exists, not a gap we're silently ignoring.
+- Same pattern as [Extending an SAP-delivered agent](03-extending-a-standard-agent.md): pick a solution to group related assets, name the workflow, describe the outcome in plain language. **Quick Create** is available here too, with the same trade-off — skip clarification at the cost of a thinner PRD.
 
 **Step 2 — intent analysis, then PRD generation.**
 
@@ -64,7 +64,7 @@ The generated PRD restates the architecture, now as a formal line:
 > **Architecture confirmed:** n8n Workflow + AI Agent (Python/A2A) + Custom MCP Server wrapping the SAP S/4HANA PO OData API.
 
 - The agent is **Python**, communicates via **A2A**, and talks to SAP not through a hand-written integration but through the MCP server confirmed in the investigation step above.
-- The PRD also defines **4 instrumented milestones** for observability: New POs Retrieved → PO Query Answered → PO Routed for Approval → Approval Decision Handled. This is the same tracing/observability thread from Chapter 2, 2.5 and Chapter 1, 1.6 — defined at requirements time, not bolted on after.
+- The PRD also defines **4 instrumented milestones** for observability: New POs Retrieved → PO Query Answered → PO Routed for Approval → Approval Decision Handled. This is the same tracing/observability thread from [Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md), 2.5 and [What Joule actually is](01-what-is-joule.md), 1.6 — defined at requirements time, not bolted on after.
 
 **Step 3 — Specification, then the canvas.**
 
@@ -72,7 +72,7 @@ The generated PRD restates the architecture, now as a formal line:
 > **⚠️ Pitfall: the course's own Specification screenshot is a duplicate, not new content**
 > The image captioned "Specification" on this lesson's page is byte-for-byte identical (same file, confirmed by hash) to the "PRD" image above it — SAP's own authoring reused the wrong screenshot. There's no independently-viewable Specification screen for this example; treat the PRD content above as covering both, rather than expecting distinct per-component technical detail that the source never actually shows.
 
-- Conceptually, Specification still translates the PRD's 5 requirements into per-component technical detail (one spec per asset: the workflow, the agent, the MCP server) before anything is generated — same checkpoint discipline as Chapter 2, 2.3, and the same stage name shown doing real work in Chapter 2's Cable Roll Optimizer example (which *does* have a distinct Specification screenshot).
+- Conceptually, Specification still translates the PRD's 5 requirements into per-component technical detail (one spec per asset: the workflow, the agent, the MCP server) before anything is generated — same checkpoint discipline as [Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md), 2.3, and the same stage name shown doing real work in that chapter's Cable Roll Optimizer example (which *does* have a distinct Specification screenshot).
 
 **Step 4 — The generated n8n canvas.**
 
@@ -118,7 +118,7 @@ When the build finished, the assistant reported what had actually been deployed 
 
 ![Deployment stage: environment selection and packaging](images/04-n8n-8-deploying.png)
 
-- Same deploy pattern as Chapter 3: pick a target environment (e.g. Development), Joule Studio handles packaging. From here the workflow is managed the same way the agent extension was — Life Cycle Management, Monitoring & Analytics, per-asset run history.
+- Same deploy pattern as [Extending an SAP-delivered agent](03-extending-a-standard-agent.md): pick a target environment (e.g. Development), Joule Studio handles packaging. From here the workflow is managed the same way the agent extension was — Life Cycle Management, Monitoring & Analytics, per-asset run history.
 
 ## 4.3 Added by Claude, not from the sources
 
@@ -173,7 +173,7 @@ When the build finished, the assistant reported what had actually been deployed 
 <details class="qa"><summary>6. A procurement workflow built this way needs to add a new SAP system down the line. What changes?</summary>
 
 - A new MCP server gets generated/wired for the new integration point, following the same per-integration-point pattern seen here (one MCP server per external system, not one shared server for everything)
-- *Stronger answer:* flag this during the Specification stage, not after the canvas is built — the per-component spec is where a new integration point should be scoped and reviewed, same discipline as the REQ-mapped PRD from Chapter 3
+- *Stronger answer:* flag this during the Specification stage, not after the canvas is built — the per-component spec is where a new integration point should be scoped and reviewed, same discipline as the REQ-mapped PRD from [Extending an SAP-delivered agent](03-extending-a-standard-agent.md)
 
 </details>
 
@@ -209,7 +209,7 @@ When the build finished, the assistant reported what had actually been deployed 
 
 ## How this chapter was checked
 
-- This chapter is built from the "Creating n8n Workflows in Joule Studio" lesson and its quiz (Unit 4 of "Introducing Joule Studio"), read in full 9 Nov 2026 (see Chapter 2 for the full course reading note).
+- This chapter is built from the "Creating n8n Workflows in Joule Studio" lesson and its quiz (Unit 4 of "Introducing Joule Studio"), read in full 9 Nov 2026 (see [Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md) for the full course reading note).
 - The lesson has 8 images total; all 8 were viewed in full and 7 are used here (saved to `images/`, never hotlinked). The 8th ("Specification") was dropped after a hash check showed it's byte-for-byte identical to the PRD image — a duplicate in the source itself, not a skip on our part (see the pitfall box in 4.2, Step 3).
 - The coverage-number discrepancy (4.2, Testing) was found by comparing two screenshots from the same lesson against each other, not by running anything.
 - `CE_PURCHASEORDER_0001` and the "no pre-built MCP server exists, so one will be generated" line (4.2, Step 2) are transcribed directly from the intent-generation screenshot's own text, not inferred.

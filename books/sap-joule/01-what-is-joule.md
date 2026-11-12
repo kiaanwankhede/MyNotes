@@ -175,7 +175,7 @@ This is the same retrieve-then-generate shape you'd build by hand with any vecto
 
 - The Skill/Agent/Assistant/Work vocabulary is SAP's own, but the mapping onto generic agentic-framework terms (tool, agent, supervisor) in 1.1 is added here to connect it to concepts you already have from the LangChain and LLM books.
 - The cost-awareness framing in the 🏭 box (1.4) is a design implication drawn from the commercial-model lesson in this course, deliberately stripped of SKU numbers and pricing-tier detail, which this book is explicitly skipping.
-- Not run: nothing in this chapter is code yet, so there's nothing to verify. Chapter 2 (Joule Studio, first agent) will carry the first "not run" / "verified" markers.
+- Not run: nothing in this chapter is code yet, so there's nothing to verify. [Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md) will carry the first "not run" / "verified" markers.
 
 ## 1.9 Interview corner
 
