@@ -15,7 +15,7 @@
   var pending = null, barMode = null, removeIds = [], barTouch = false, barTimer = null, selTimer = null;
   try { only = localStorage.getItem(LS_ONLY) === '1'; } catch (e) {}
 
-  function loadStore() { try { var d = JSON.parse(localStorage.getItem(LS_DATA)); if (d && d.items) return d; } catch (e) {} return { items: {} }; }
+  function loadStore() { try { var d = JSON.parse(localStorage.getItem(LS_DATA)); if (d && d.items) { if (!d.notes) d.notes = {}; return d; } } catch (e) {} return { items: {}, notes: {} }; }
   function saveStore() { try { localStorage.setItem(LS_DATA, JSON.stringify(store)); } catch (e) {} }
   function token() { try { return localStorage.getItem(LS_TOK) || ''; } catch (e) { return ''; } }
 
@@ -55,13 +55,13 @@
     }
     return null;
   }
-  function wrap(a, b, id) {
+  function wrap(a, b, id, kind) {
     idx.nodes.forEach(function (e) {
       var s = e.s, t = s + e.n.data.length; if (t <= a || s >= b) return;
       var from = Math.max(a, s) - s, to = Math.min(b, t) - s;
       if (!e.n.data.slice(from, to).trim()) return;
       var r = document.createRange(); r.setStart(e.n, from); r.setEnd(e.n, to);
-      var m = document.createElement('mark'); m.className = 'hl'; m.setAttribute('data-id', id);
+      var m = document.createElement('mark'); m.className = kind === 'flag' ? 'hl flag' : 'hl'; m.setAttribute('data-id', id);
       r.surroundContents(m);
     });
   }
@@ -89,7 +89,7 @@
     buildIndex(); orphans = [];
     mine().forEach(function (h) {
       var r = locate(h); if (!r) { orphans.push(h); return; }
-      wrap(r[0], r[1], h.id); buildIndex();
+      wrap(r[0], r[1], h.id, h.kind); buildIndex();
     });
     banner(); applyMode(); updateUi();
   }
@@ -158,9 +158,9 @@
     return { text: t, pre: S.slice(Math.max(0, a - 40), a), post: S.slice(b, b + 40) };
   }
   function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
-  function add(o) {
+  function add(o, kind) {
     if (!cur) return; var id = newId();
-    store.items[id] = { id: id, book: cur.book, ch: cur.ch, text: o.text, pre: o.pre, post: o.post, u: Date.now() };
+    store.items[id] = { id: id, book: cur.book, ch: cur.ch, text: o.text, pre: o.pre, post: o.post, kind: kind === 'flag' ? 'flag' : 'hl', u: Date.now() };
     saveStore(); render(); schedule();
   }
   function removeId(id) {
@@ -207,7 +207,8 @@
           var t = chTitle(b, id), hd = el('h3'), a = el('a', '', t ? t : (id === '_intro' ? b.title + ' (intro)' : id + ' (chapter not found)'));
           if (t || id === '_intro') a.href = '#' + b.slug + (id === '_intro' ? '' : '-' + id); hd.appendChild(a); list.appendChild(hd);
           chs[id].sort(function (x, y) { return x.u - y.u; }).forEach(function (h) {
-            var row = el('div', 'hlitem'), q = el('blockquote', '', h.text), acts = el('div', 'hlacts');
+            var row = el('div', 'hlitem' + (h.kind === 'flag' ? ' flag' : '')), q = el('blockquote', '', h.text), acts = el('div', 'hlacts');
+            if (h.kind === 'flag') row.appendChild(el('span', 'hltag', '🔴 To revisit'));
             if (t || id === '_intro') { var o = el('a', 'hlopen', 'Open in chapter'); o.href = a.href; o.addEventListener('click', function () { focusId = h.id; }); acts.appendChild(o); }
             var rm = el('button', '', 'Remove'); rm.type = 'button'; rm.addEventListener('click', function () { removeId(h.id); }); acts.appendChild(rm);
             row.appendChild(q); row.appendChild(acts); list.appendChild(row);
@@ -233,48 +234,83 @@
     paint(); document.getElementById('main').scrollTop = 0; updateUi();
   }
 
-  /* ---------- bottom button ---------- */
-  var bar = document.createElement('button');
-  bar.type = 'button'; bar.className = 'hlbar'; bar.hidden = true; document.body.appendChild(bar);
-  function showBar(mode, label) { barMode = mode; bar.textContent = label; bar.hidden = false; }
+  /* ---------- bottom bar: Highlight / Revisit / Remove ---------- */
+  var bar = document.createElement('div');
+  bar.className = 'hlbar'; bar.hidden = true;
+  var btnHl = document.createElement('button'); btnHl.type = 'button'; btnHl.className = 'hlbtn'; btnHl.textContent = '✎ Highlight';
+  var btnFlag = document.createElement('button'); btnFlag.type = 'button'; btnFlag.className = 'hlbtn flagbtn'; btnFlag.textContent = '🔴 Revisit';
+  var btnRm = document.createElement('button'); btnRm.type = 'button'; btnRm.className = 'hlbtn rmbtn'; btnRm.textContent = '✕ Remove';
+  bar.appendChild(btnHl); bar.appendChild(btnFlag); bar.appendChild(btnRm); document.body.appendChild(bar);
+  function showBar(mode) {
+    barMode = mode;
+    btnHl.hidden = mode !== 'add'; btnFlag.hidden = mode !== 'add'; btnRm.hidden = mode !== 'rm';
+    if (mode === 'rm') { btnRm.textContent = '✕ Remove ' + (removeIds.length > 1 ? 'marks' : 'mark'); clearTimeout(barTimer); barTimer = setTimeout(hideBar, 7000); }
+    bar.hidden = false;
+  }
   function hideBar() { bar.hidden = true; barMode = null; pending = null; removeIds = []; clearTimeout(barTimer); }
   bar.addEventListener('pointerdown', function (e) { barTouch = true; e.preventDefault(); setTimeout(function () { barTouch = false; }, 600); });
   bar.addEventListener('mousedown', function (e) { e.preventDefault(); });
-  bar.addEventListener('click', function () {
-    if (barMode === 'hl' && pending) { add(pending); var s = window.getSelection(); if (s) s.removeAllRanges(); }
-    else if (barMode === 'rm') { removeIds.forEach(removeId); }
-    hideBar();
-  });
+  function doAdd(kind) { if (pending) { add(pending, kind); var s = window.getSelection(); if (s) s.removeAllRanges(); } hideBar(); }
+  btnHl.addEventListener('click', function () { doAdd('hl'); });
+  btnFlag.addEventListener('click', function () { doAdd('flag'); });
+  btnRm.addEventListener('click', function () { removeIds.forEach(removeId); hideBar(); });
   document.addEventListener('selectionchange', function () {
     clearTimeout(selTimer);
     selTimer = setTimeout(function () {
       if (barTouch) return;
+      var sel = window.getSelection();
+      if (sel && !sel.isCollapsed && sel.rangeCount && doc.contains(sel.anchorNode) && doc.contains(sel.focusNode)) {
+        var r = sel.getRangeAt(0), hit = [];
+        doc.querySelectorAll('mark.hl').forEach(function (m) {
+          if (r.intersectsNode(m)) { var id = m.getAttribute('data-id'); if (hit.indexOf(id) < 0) hit.push(id); }
+        });
+        if (hit.length) { removeIds = hit; showBar('rm'); return; }
+      }
       var o = readSelection();
-      if (o) { pending = o; showBar('hl', '✎ Highlight'); }
-      else if (barMode === 'hl') hideBar();
+      if (o) { pending = o; showBar('add'); }
+      else if (barMode === 'add') hideBar();
     }, 140);
   });
   doc.addEventListener('click', function (e) {
     var m = e.target.closest && e.target.closest('mark.hl'); var s = window.getSelection();
     if (!m || (s && !s.isCollapsed)) { if (barMode === 'rm') hideBar(); return; }
     removeIds = []; for (var x = m; x && x !== doc; x = x.parentElement) if (x.tagName === 'MARK' && x.getAttribute('data-id')) removeIds.push(x.getAttribute('data-id'));
-    showBar('rm', '✕ Remove highlight'); clearTimeout(barTimer); barTimer = setTimeout(hideBar, 7000);
+    showBar('rm');
   });
 
+  /* ---------- chapter notes (free-text, per book+chapter) ---------- */
+  function noteKey() { return cur ? cur.book + '-' + cur.ch : null; }
+  function getNote() { var k = noteKey(); var n = k && store.notes[k]; return (n && !n.del) ? n.text : ''; }
+  function setNote(text) {
+    var k = noteKey(); if (!k) return;
+    var prev = store.notes[k];
+    if (!text && (!prev || !prev.text)) return;
+    store.notes[k] = text ? { text: text, u: Date.now() } : { text: '', del: 1, u: Date.now() };
+    saveStore(); updateUi(); schedule();
+  }
+
   /* ---------- header buttons ---------- */
-  var tbtn = document.getElementById('hlt'), sbtn = document.getElementById('hlset');
+  var tbtn = document.getElementById('hlt'), sbtn = document.getElementById('hlset'), nbtn = document.getElementById('chnote');
   function updateUi() {
     tbtn.setAttribute('aria-pressed', only ? 'true' : 'false');
     tbtn.classList.toggle('on', only);
     sbtn.querySelector('.dot').className = 'dot ' + status;
     sbtn.title = statusText();
     var n = mine().length; tbtn.title = n ? n + ' highlight' + (n > 1 ? 's' : '') + ' on this page' : 'No highlights on this page';
+    var inChapter = !!cur && !pageMode;
+    nbtn.hidden = !inChapter;
+    if (inChapter) {
+      var has = !!getNote();
+      nbtn.classList.toggle('on', has);
+      nbtn.title = has ? 'This chapter has a note — click to view or edit' : 'Add a note for this chapter';
+    }
   }
   tbtn.addEventListener('click', function () {
     only = !only; try { localStorage.setItem(LS_ONLY, only ? '1' : '0'); } catch (e) {}
     applyMode(); updateUi(); var m = document.getElementById('main'); if (m) m.scrollTop = 0;
   });
   sbtn.addEventListener('click', openPanel);
+  nbtn.addEventListener('click', openNotePanel);
 
   /* ---------- sync with the private repo ---------- */
   function b64e(s) { var b = new TextEncoder().encode(s), r = ''; for (var i = 0; i < b.length; i += 8192) r += String.fromCharCode.apply(null, b.subarray(i, i + 8192)); return btoa(r); }
@@ -312,15 +348,19 @@
   }
   function attempt(n) {
     return gh('GET').then(function (r) {
-      if (r.status === 404) return { items: {}, sha: null };
+      if (r.status === 404) return { items: {}, notes: {}, sha: null };
       if (r.status === 401 || r.status === 403) throw new Error('GitHub rejected the token (' + r.status + '). It needs Contents read and write on ' + CFG.repo + '.');
       if (!r.ok) throw new Error('GitHub error ' + r.status);
-      return r.json().then(function (j) { var d = {}; try { d = JSON.parse(b64d(j.content)); } catch (e) {} return { items: d.items || {}, sha: j.sha }; });
+      return r.json().then(function (j) { var d = {}; try { d = JSON.parse(b64d(j.content)); } catch (e) {} return { items: d.items || {}, notes: d.notes || {}, sha: j.sha }; });
     }).then(function (rem) {
-      var m = merge(store.items, rem.items);
-      if (m.local) { store.items = m.items; saveStore(); if (pageMode) page(); else render(); }
-      if (!m.remote && rem.sha) return;
-      var body = { message: 'Update highlights', content: b64e(JSON.stringify({ v: 1, items: m.items })) };
+      var mi = merge(store.items, rem.items), mn = merge(store.notes, rem.notes);
+      if (mi.local || mn.local) {
+        store.items = mi.items; store.notes = mn.items; saveStore();
+        if (pageMode) page(); else render();
+        updateUi();
+      }
+      if (!mi.remote && !mn.remote && rem.sha) return;
+      var body = { message: 'Update highlights', content: b64e(JSON.stringify({ v: 1, items: mi.items, notes: mn.items })) };
       if (rem.sha) body.sha = rem.sha;
       return gh('PUT', body).then(function (r) {
         if (r.status === 409 || r.status === 422) { if (n < 2) return attempt(n + 1); throw new Error('Conflict, will retry'); }
@@ -384,14 +424,57 @@
     document.getElementById('hltoken').value = ''; setStatus('local');
   });
   document.getElementById('hlexp').addEventListener('click', function () {
-    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ v: 1, items: store.items }, null, 1)], { type: 'application/json' }));
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ v: 1, items: store.items, notes: store.notes }, null, 1)], { type: 'application/json' }));
     a.download = 'notes-highlights.json'; document.body.appendChild(a); a.click(); a.remove();
   });
   document.getElementById('hlimp').addEventListener('change', function (e) {
     var f = e.target.files[0]; if (!f) return; var rd = new FileReader();
     rd.onload = function () {
-      try { var d = JSON.parse(rd.result); var m = merge(store.items, d.items || {}); store.items = m.items; saveStore(); render(); schedule(); } catch (x) { alert('That file is not a highlights export.'); }
+      try {
+        var d = JSON.parse(rd.result);
+        var mi = merge(store.items, d.items || {}), mn = merge(store.notes, d.notes || {});
+        store.items = mi.items; store.notes = mn.items; saveStore(); render(); updateUi(); schedule();
+      } catch (x) { alert('That file is not a highlights export.'); }
     }; rd.readAsText(f); e.target.value = '';
+  });
+
+  /* ---------- chapter notes panel ---------- */
+  var npanel = document.createElement('div');
+  npanel.id = 'ntpanel'; npanel.hidden = true; npanel.setAttribute('role', 'dialog'); npanel.setAttribute('aria-label', 'Chapter notes');
+  npanel.innerHTML =
+    '<div class="hlcard"><div class="hlhead"><strong id="nttitle">Notes</strong><button type="button" id="ntclose" aria-label="Close">✕</button></div>' +
+    '<p class="hlstat">Private notes for yourself about this chapter — what to fix, check, or revisit. Saved and synced the same way as highlights.</p>' +
+    '<textarea id="nttext" placeholder="e.g. Section 2.3 needs a real code example; double-check the pricing claim in 1.4…"></textarea>' +
+    '<p id="ntstat" class="hlstat"></p>' +
+    '<div class="hlrow"><button type="button" id="ntclear">Clear note</button></div></div>';
+  document.body.appendChild(npanel);
+  var ntText = document.getElementById('nttext'), ntStat = document.getElementById('ntstat'), ntTimer = null;
+  function openNotePanel() {
+    if (!cur) return;
+    var title = (allItems0Title() || cur.ch);
+    document.getElementById('nttitle').textContent = 'Notes: ' + title;
+    ntText.value = getNote();
+    ntStat.textContent = ''; ntStat.className = 'hlstat';
+    npanel.hidden = false; setTimeout(function () { ntText.focus(); }, 30);
+  }
+  function allItems0Title() {
+    var b = cur && BOOKS.filter(function (x) { return x.slug === cur.book; })[0];
+    var c = b && (b.chapters || []).filter(function (x) { return x.id === cur.ch; })[0];
+    return c ? c.title : null;
+  }
+  function closeNotePanel() { npanel.hidden = true; }
+  document.getElementById('ntclose').addEventListener('click', closeNotePanel);
+  npanel.addEventListener('click', function (e) { if (e.target === npanel) closeNotePanel(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !npanel.hidden) closeNotePanel(); });
+  ntText.addEventListener('input', function () {
+    clearTimeout(ntTimer); ntStat.textContent = 'Saving…'; ntStat.className = 'hlstat';
+    ntTimer = setTimeout(function () {
+      setNote(ntText.value);
+      ntStat.textContent = 'Saved ✓'; ntStat.className = 'hlstat ntsaved';
+    }, 500);
+  });
+  document.getElementById('ntclear').addEventListener('click', function () {
+    ntText.value = ''; setNote(''); ntStat.textContent = 'Cleared'; ntStat.className = 'hlstat';
   });
 
   window.HL = { apply: apply, sync: sync, render: render, page: page };
