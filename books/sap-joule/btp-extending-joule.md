@@ -6,12 +6,13 @@
 > **📍 At a glance**
 > - **You will learn:** how Joule reaches users outside a single SAP app (Work Zone, Mobile Start, Microsoft 365 Copilot), and the two supported ways to connect Joule to non-SAP systems — plus what's explicitly not supported
 > - **You will build:** nothing — this is the architectural boundary every extension idea has to fit inside
-> - **Level:** intermediate · **Time:** about 12 minutes
+> - **Level:** intermediate · **Time:** about 16 minutes
 > - **Builds on:** [Joule's identity and platform foundation](btp-identity-foundation.md). **Leads to:** [What Joule actually is](01-what-is-joule.md)
 
 **After this chapter you can:**
 
 - Explain what SAP Build Work Zone and SAP Mobile Start add to Joule beyond a single app
+- Walk through the real 7-stage Joule Booster wizard for Work Zone, standard edition, and name the one missed checkbox that causes the most common activation failure
 - Describe the Joule ↔ Microsoft 365 Copilot integration and its one hard constraint
 - State, correctly, why you can't call Joule as a public API — and what to build instead
 - Choose between Joule Studio and the Joule Action Bar for a given non-SAP integration need
@@ -25,7 +26,39 @@ Up to the identity/platform setup in the previous chapter, Joule is enabled *wit
 
 With Joule integrated here, it can resolve user intents across connected systems, navigate users to authorized applications and tasks, and stay available consistently across desktop and mobile — rather than being locked to a single application's context.
 
+![Joule's chat panel opened inside a Work Zone purchasing launchpad: the panel surfaces answers (e.g. purchase order status) and navigation links without the user switching screens](images/sj019-02-work-zone-joule-purchasing-launchpad.png)
+
 Prerequisites specific to this step: a unified Joule instance already provisioned (previous chapter), SAP Build Work Zone standard edition in the same subaccount, SAP applications already exposing navigation content, and consistent Cloud Identity Services configuration across systems.
+
+### 1.1 Activating Joule in Work Zone, standard edition — the concrete steps
+
+![The generic Joule chat panel with example quick-prompts ("View Manager," "View Job Data," "View Pronouns," "View Email Address") — the same panel the screenshot above shows embedded in a live Work Zone launchpad](images/sj019-01-joule-panel-example-prompts.jpg)
+
+- **Identity prerequisite, stated as a hard gate:** Joule requires **SAP Cloud Identity Services – Identity Authentication** for user login. If your Work Zone site hasn't already switched over from an older identity setup, that switch has to happen *first* — it's not something Joule's own activation steps will do for you.
+- **Activation runs through the Joule Booster**, a guided wizard. The real wizard (not just the 3-step summary SAP's announcement gives) has **7 stages**: Check Prerequisites → Set Up Subaccount → Select Integrations → Select Capabilities → Set Up Integrations → Validation → Review.
+
+![Booster step "Set Up Subaccount": selecting the das-application entitlement, subaccount, org, and space the Joule integration will provision into, with a visible required-quota check](images/sj019-03-booster-step2-set-up-subaccount.jpg)
+
+- The **Set Up Subaccount** step checks the same **`das-application` entitlement** already covered in [the SuccessFactors chapter](enabling-successfactors.md) — this isn't a SuccessFactors-specific check, it's the general Joule entitlement gate, surfaced again here for Work Zone.
+
+![Booster step "Select Integrations": checkbox list of SAP products (Work Zone standard edition, S/4HANA Cloud Public Edition, SuccessFactors, Signavio, IBP, and others) to enable Joule for](images/sj019-04-booster-step3-select-integrations.jpg)
+
+- The **Select Integrations** step is where you pick which already-activated SAP products Joule should connect to from Work Zone — this is the step a real reported failure traced back to (see the pitfall below).
+
+![Booster step "Select Capabilities": choosing which products' capability packages to provision, with a visible checkbox to store conversation data submitted by users](images/sj019-05-booster-step4-select-capabilities.jpg)
+
+- The **Select Capabilities** step provisions the actual capability packages per product — and carries its own explicit, visible consent control: a **"Store conversation data submitted by users"** checkbox. This is a real governance decision made at activation time, not a hidden default — worth flagging to whoever owns data-retention policy before clicking through.
+- **After the Booster completes:** go to the site's **Site Settings → Services**, and enable **Joule** there — only then does the Joule icon appear in the runtime site's header for end users.
+
+> [!CAUTION]
+> **🔒 Joule is not available in SAP BTP trial accounts, full stop**
+> This isn't a quota limitation to work around — trial accounts lack the backend integration Joule's value actually depends on. If you're evaluating Joule on a trial landscape and the Booster won't cooperate, this is almost certainly why, not a configuration mistake.
+
+> [!WARNING]
+> **⚠️ Pitfall: "no Joule option in Site Settings" usually traces back to one missed checkbox**
+> A real reported case: after running the Booster, no Joule entry appeared under Site Settings → Services at all. The fix, confirmed by SAP: **SAP Build Work Zone, standard edition** has to be explicitly selected as one of the integration targets *during* the Booster's Select Integrations step — it's easy to assume Work Zone is included automatically since you're running the Booster from inside it, but it isn't.
+
+- **Known gaps, as of the source (Dec 2024) — worth re-verifying before assuming either is still true:** approving or rejecting **SAP Build Process Automation** instances directly through Joule inside Work Zone was not yet supported; integration into **Work Zone advanced edition** (standard edition only, at the time) was described as roadmap for 2025. Neither was confirmed shipped as of this chapter's own check — treat both as "ask current docs," not settled facts.
 
 ## 2. Microsoft 365 Copilot: bi-directional, opt-in, Teams first
 
@@ -102,16 +135,22 @@ SAP's acquisition of **WalkMe** gave Joule a second extension path: the **Joule 
 
 </details>
 
+<details class="qa"><summary>3. A Work Zone Booster run completes with no errors, but no Joule entry shows up under Site Settings → Services. What's the single most likely cause?</summary>
+
+- SAP Build Work Zone, standard edition wasn't explicitly selected as an integration target during the Booster's Select Integrations step — it has to be picked deliberately, not assumed as automatic
+
+</details>
+
 ### 🟡 Intermediate
 
-<details class="qa"><summary>3. A team wants Joule to read data from a non-SAP CRM and take actions in it. Which extension approach fits, and why?</summary>
+<details class="qa"><summary>4. A team wants Joule to read data from a non-SAP CRM and take actions in it. Which extension approach fits, and why?</summary>
 
 - Joule Studio — build a Skill or Agent that calls the CRM's API through a destination/action project; this is "integrating APIs of non-SAP systems," squarely Joule Studio's use case
 - *Stronger answer:* the CRM remains a backend data/action provider; Joule itself is never embedded into or exposed to the CRM application
 
 </details>
 
-<details class="qa"><summary>4. A team wants AI assistance available inside a third-party web app they don't control the codebase of. What fits?</summary>
+<details class="qa"><summary>5. A team wants AI assistance available inside a third-party web app they don't control the codebase of. What fits?</summary>
 
 - WalkMe + the Joule Action Bar — it overlays via screen-level context without needing code-level access to the target app
 
@@ -119,7 +158,7 @@ SAP's acquisition of **WalkMe** gave Joule a second extension path: the **Joule 
 
 ### 🔴 Senior
 
-<details class="qa"><summary>5. A vendor pitches a "Joule REST connector" for a non-SAP tool, claiming direct API access. How do you evaluate that claim?</summary>
+<details class="qa"><summary>6. A vendor pitches a "Joule REST connector" for a non-SAP tool, claiming direct API access. How do you evaluate that claim?</summary>
 
 - Treat it as incorrect by default — SAP explicitly does not expose Joule as a public API, and identity/authorization is never delegated to a non-SAP system
 - *Stronger answer:* ask what the connector actually does under the hood — it's almost certainly either a Joule Studio-built Skill/Agent (legitimate) or a WalkMe-style overlay (legitimate), repackaged with misleading marketing; verify which, because the security and governance model differs
@@ -135,6 +174,8 @@ SAP's acquisition of **WalkMe** gave Joule a second extension path: the **Joule 
 | Need | Mechanism |
 |---|---|
 | Cross-app launchpad experience | SAP Build Work Zone + SAP Mobile Start |
+| Activate Joule for Work Zone | Joule Booster, 7 stages — Check Prerequisites → Subaccount → Select Integrations → Select Capabilities → Set Up Integrations → Validation → Review |
+| "No Joule option appears after the Booster" | Work Zone standard edition wasn't picked in Select Integrations — go back and add it |
 | AI inside Microsoft Teams/365 | Joule ↔ M365 Copilot (opt-in, bi-directional) |
 | Call a non-SAP API from an agent | Joule Studio (Skills/Agents, via destinations) |
 | AI overlay on a non-SAP web app, no code access | WalkMe + Joule Action Bar |
@@ -143,6 +184,8 @@ SAP's acquisition of **WalkMe** gave Joule a second extension path: the **Joule 
 ## Recap
 
 - Work Zone + Mobile Start extend Joule into a cross-system, cross-device experience layer — not a new Joule instance, the same unified one
+- Activating it runs through a real 7-stage Joule Booster wizard; the most commonly reported activation failure (no Joule entry in Site Settings) traces back to not explicitly selecting Work Zone standard edition in the Select Integrations step
+- Joule is not available in BTP trial accounts — a hard constraint, not a quota issue to raise a ticket about
 - Joule ↔ Microsoft 365 Copilot is bi-directional, opt-in on both sides, transparent about which system answered, and enters through Teams first
 - **Joule has no public API** — this is a hard architectural boundary, not a current limitation waiting to be lifted
 - Non-SAP integration happens through exactly two supported mechanisms: **Joule Studio** (API integration, agent orchestration, grounding) and **WalkMe's Joule Action Bar** (screen-context overlay, no code embedding)
@@ -157,11 +200,13 @@ SAP's acquisition of **WalkMe** gave Joule a second extension path: the **Joule 
 ## How this chapter was checked
 
 - All 3 lessons of Unit 5 ("Setting Up Joule for SAP Build Work Zone and SAP Mobile Start," "Setting Up Joule with Microsoft 365 Copilot," "Integrating Joule with Non-SAP Applications") and the unit quiz, from "Setting Up Joule Across your Organizational System Landscapes," were read in full, 10 Nov 2026.
-- No images appeared in any of these 3 lessons — none were skipped.
+- Section 1.1 was added 13 Nov 2026 from a separate source: the SAP Community blog "Joule is now integrated into SAP Build Work Zone" (Yumnahabbasi, Dec 2024), including its 16-comment thread. All 5 real content screenshots in that article were downloaded and are used here; roughly 20 other `<img>` tags on the page were commenter avatars and site chrome, correctly excluded. One labeling correction made during review: the source screenshots were initially mislabeled against the article's own simplified "3-step" description — the actual Booster wizard shown in the screenshots has 7 stages, and the images are captioned to match what they actually show, not the article's rounded-off summary.
+- No images appeared in the original 3 lessons — none were skipped there either.
 - Nothing in this chapter is code; nothing was run.
 
 ## Sources and further reading
 
 - SAP Learning, *Setting Up Joule Across your Organizational System Landscapes* — https://learning.sap.com/courses/setting-up-joule-across-your-organizational-system-landscapes, Unit 5 (read in full 10 Nov 2026)
+- SAP Community, Yumnahabbasi, *Joule is now integrated into SAP Build Work Zone* — https://community.sap.com/t5/application-development-and-automation-blog-posts/joule-is-now-integrated-into-sap-build-work-zone/ba-p/13961162 (article and comment thread, read in full 13 Nov 2026)
 
 Previous: [Joule's identity and platform foundation](btp-identity-foundation.md) · Next: [What Joule actually is](01-what-is-joule.md)
