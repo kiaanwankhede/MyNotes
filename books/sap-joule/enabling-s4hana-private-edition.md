@@ -260,4 +260,4 @@ Both the comprehensive guide (90 comments) and its troubleshooting companion (34
 - SAP Community, Samir_Rai, *Common configuration issues: Joule for SAP S/4HANA Cloud Private Edition* — https://community.sap.com/t5/enterprise-resource-planning-blog-posts-by-sap/common-configuration-issues-joule-for-sap-s-4hana-cloud-private-edition/ba-p/14125996 (article and comment thread, read in full 13 Nov 2026)
 - SAP Support Portal, SAP Note 3523238 — https://me.sap.com/notes/3523238/E (referenced extensively by both sources above; inaccessible without an authenticated SAP S-user, not independently read)
 
-Previous: [Joule Studio tutorial 5: consuming an automated process](joule-studio-tutorial-5-automated-processes.md) · Next: [Enabling Joule for SAP S/4HANA Cloud Public Edition](enabling-s4hana-public-edition.md)
+Previous: [Joule Studio tutorial 27: getting productive with Joule Work](joule-studio-tutorial-27-joule-work-trial.md) · Next: [Enabling Joule for SAP S/4HANA Cloud Public Edition](enabling-s4hana-public-edition.md)
