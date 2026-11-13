@@ -18,9 +18,11 @@
 ## Joule Tutorials
 * [Extending an SAP-delivered agent](03-extending-a-standard-agent.md)
 * [n8n workflows in Joule Studio](04-n8n-workflows.md)
+* [Building your first Joule Skill in Joule Studio](joule-studio-first-skill.md)
 
 ## Real-World Use Cases
 
 ## Enabling for Other Products
+* [Enabling Joule for SAP S/4HANA Cloud Private Edition](enabling-s4hana-private-edition.md)
 * [Enabling Joule for SAP S/4HANA Cloud Public Edition](enabling-s4hana-public-edition.md)
 * [Enabling Joule for other SAP products](enabling-other-products.md)

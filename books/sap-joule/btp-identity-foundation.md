@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **You will learn:** the IAM architecture Joule depends on, why Joule onboarding requires OIDC specifically, what "a unified Joule instance" actually means, and how S/4HANA Private and Public Edition activation differ
 > - **You will build:** nothing — this is the platform layer every later activation chapter assumes you already understand
-> - **Level:** beginner · **Time:** about 15 minutes
+> - **Level:** beginner · **Time:** about 22 minutes
 > - **Builds on:** nothing — this is the first chapter in the book. **Leads to:** [Extending Joule beyond a single application](btp-extending-joule.md)
 
 **After this chapter you can:**
@@ -16,6 +16,7 @@
 - Say what makes a Joule instance "unified" rather than per-application
 - Walk through the four-step end-to-end setup flow
 - Explain why SAP S/4HANA Cloud Private and Public Edition activation differ
+- Diagnose the three most common real-world identity failures: a blank Joule screen, a broken corporate-IdP setup, and SSO-only users working while password users don't
 
 ## 1. IAM is the real dependency
 
@@ -62,7 +63,74 @@ Three prerequisite groups:
 > **🏭 In production: different IAS tenants means different Joule instances, full stop**
 > "Can I use different IAS tenants and still have unified Joule?" No. One IAS tenant per landscape tier (prod/non-prod) is the hard requirement — different tenants produce separate Joule instances, not a unified one. If your landscape isn't aligned yet, you *can* enable Joule per application anyway, but you've explicitly opted out of the unified model, not deferred it.
 
-## 3. The end-to-end setup flow
+## 2a. Multi-tenant scenarios, concretely
+
+SAP shorthand worth knowing: **J4B** (Joule for Business), **J4D** (Joule for Developers), **J4C** (Joule for Consultants) — the same unified-instance rule applies to each, with one hard exception: **J4C cannot share a subaccount with J4B**, full stop, not yet unifiable.
+
+![Case 1: a customer with SuccessFactors and S/4HANA Public Edition on one Cloud Identity Services tenant, reaching a single unified Joule subaccount](images/sj015-08-case1-unified-one-identity-service.png)
+
+Three concrete landscape patterns:
+
+| Case | Setup | Result |
+|---|---|---|
+| **1 (recommended)** | SuccessFactors, S/4HANA Public Edition, SAP DSC (IBP + PLM + Digital Manufacturing + APM), and others all trust one Cloud Identity Services tenant | One Joule subaccount, fully unified |
+| **2** | Multiple IAS tenants already exist | Separate Joule instances per tenant — one can't answer another's Line-of-Business questions |
+| **3** | S/4HANA **Private** Edition sits on a different IAS tenant than Public Edition + SuccessFactors | **Two separate BTP subaccounts required**, each with its own Joule instance |
+
+![Case 3: S/4HANA Private Edition on a different Cloud Identity Services tenant requires its own separate BTP subaccount and Joule instance, alongside the unified subaccount for SuccessFactors + S/4HANA Public Edition](images/sj015-10-case3-two-subaccounts-different-identity.png)
+
+> [!WARNING]
+> **⚠️ Pitfall: today, only one S/4HANA edition can be unified per subaccount**
+> Case 3 isn't a configuration gap waiting to be fixed — as of this writing, only **one of Private OR Public** S/4HANA edition can be part of a given subaccount's unified Joule instance, never both at once in the same subaccount.
+
+- **Document Grounding's supported integration targets, named explicitly**: Microsoft SharePoint, **SAP Build Work Zone Advanced Edition**, and ServiceNow — not an open-ended "upload any documents."
+- **Changing what's in a Joule formation doesn't require re-running the Booster**: including or excluding a system from an existing formation is a direct action on the formation itself.
+- **Joule Preview** is a separate service (introduced 2025) recommended for non-production tiers (Sandbox/Dev/Test) specifically, to validate new capabilities before they reach production — it has no place in a Prod subaccount.
+
+![A 3-tier landscape (Dev/QA/Prod), each tier with its own BTP subaccounts for Joule Studio and Joule itself; non-prod tiers additionally run Joule Preview](images/sj015-06-joule-account-structure-3tier-landscape.png)
+
+- Compliance note: EU/GDPR-constrained customers should look specifically at the **EU11** BTP subaccount region; running Joule across regions also means planning around **maintenance-window overlap** across time zones, a real operational cost of multi-region setups.
+
+## 2b. Common identity setup questions, answered
+
+A second, more hands-on source collects real recurring questions from unified-Joule setups. Framed as Q&A since that's the most useful shape for this material:
+
+**Q: Our landscape's IAS tenants aren't aligned yet — can we still get some value from Joule?**
+A: Yes, via separate per-app Joule instances — but you lose cross-app answering, and you now manage multiple subaccounts instead of one.
+
+**Q: Which domain should trust configuration actually point at — `cloud.sap` or `ondemand.com`?**
+A: Standardize new trust configuration to **`cloud.sap`** endpoints, since SuccessFactors already defaults there. The IAS admin console itself is reached at `https://<tenant>.accounts.cloud.sap/admin`, not the `.accounts.ondemand.com/admin` form.
+
+![IAS SAML 2.0 Configuration screen: the Issuer field is flagged "do not change" while the SAML SSO/ACS/SLO endpoint URLs underneath it are the ones that should be set to use](images/sj130-01-ias-saml-config-cloud-sap-endpoints.png)
+
+> [!WARNING]
+> **⚠️ Pitfall: don't confuse "which domain to standardize on" with "don't touch the Issuer"**
+> The **Issuer** value in an existing SAML 2.0 configuration should be left exactly as-is — SAP's own source material is explicit about this. It's the *other* SAML endpoint URLs (SSO, Assertion Consumer Service, Single Logout) you configure in a connecting app's trust settings that should use the `cloud.sap` form going forward. A **"Sync SSO Cookies Between Domains"** toggle in Cloud Identity Services exists specifically for landscapes that can't be fully aligned to one domain yet.
+
+**Q: Launching Joule shows a blank screen. What's wrong?**
+A: Almost always a domain mismatch between the BTP subaccount's trust configuration and the app's own trust domain with IAS. Fix: align both to `cloud.sap`, or enable the cookie-sync toggle above as a stopgap. A second, officially documented cause of the same symptom: a corporate IdP (Azure AD/OKTA) is being used for login, but hasn't been set as the **Default** Identity Provider for the Joule application specifically in Identity Authentication — set it explicitly rather than assuming "it's already the only one configured" is enough.
+
+**Q: We use a corporate IdP (Okta, Entra ID, etc.) — what does the Booster actually set up for us?**
+A: It auto-creates an app in IAS named `das-ias-<appname>`. Its **conditional authentication** settings then have to be manually aligned to match the source app's own conditional-auth rules — this doesn't happen automatically.
+
+> [!CAUTION]
+> **🔒 A corporate IdP running in pure proxy mode breaks Joule outright**
+> If IAS's **"Use Identity Authentication user store"** toggle (under Identity Federation) is disabled — i.e. IAS is a pure authentication proxy with no user store of its own — **Joule will not work**, because it depends on the **Global User ID (GUID)**, which only exists if IAS's own user store is actually populated. The fix is enabling that toggle (tenant-wide or per application) and maintaining real user profiles in IAS even though authentication itself is delegated to the corporate IdP.
+
+**Q: Can two different corporate IdPs feed into one unified Joule instance, even on the same IAS tenant?**
+A: No. IAS can't route one Joule instance's conditional authentication to two different corporate IdPs — this requires separate Joule instances, same as the different-IAS-tenant case.
+
+**Q: The "Identity Provisioning" tab is missing from our IAS admin console.**
+A: Either the admin user is missing the **"Manage Identity Provisioning"** permission, or the tenant is still on the older, separate **Neo-based IPS** console. Neo-based IPS still works with Joule, but SAP recommends migrating — the newer console unifies IAS/IPS administration, adds an out-of-the-box SAP Build Work Zone connector, and improves logging, the visual transformation editor, and job simulation.
+
+**Q: Why does Joule need users synced into Work Zone at all?**
+A: Specifically for **navigational** interaction patterns — without the sync, Joule has no way to route a user to a page or app they're authorized for.
+
+**Q: The sync job ran, but navigational answers are still broken.**
+A: Check the job's actual execution status, not just that it ran. Useful trace parameters for diagnosis: `ips.trace.skipped.entity[.content]`, `ips.trace.failed.entity.content`, `ips.trace.created.entity[.content]`, `ips.trace.deleted.entity`, `ips.trace.updated.entity`.
+
+**Q: In SuccessFactors specifically, SSO users work fine but password-based users don't.**
+A: Fix via conditional-authentication rules in IAS — group users by auth method (SSO vs. password) and route each group differently. Always point every user at the standard SuccessFactors tenant URL, never an IDP-initiated URL.
 
 The same four-step sequence applies across every Line of Business:
 
@@ -105,6 +173,7 @@ Both S/4HANA Cloud editions need Joule + Build Work Zone entitlements in the glo
 ## 5. Added by Claude, not from the sources
 
 - The "pick one of three Work Zone editions" framing is stated directly in the source; the observation that this is a hard one-to-one constraint (not "choose your favorite") is this book's emphasis.
+- Section 2b's Q&A framing reorganizes a second source's running prose into direct question/answer pairs — the facts and fixes are the source's, the structure is this book's.
 - Not run: this chapter is architecture and setup guidance, not code — nothing here was independently executed.
 
 ## 6. Interview corner
@@ -140,12 +209,26 @@ Both S/4HANA Cloud editions need Joule + Build Work Zone entitlements in the glo
 
 </details>
 
+<details class="qa"><summary>5. Launching Joule shows a blank screen. What's the single most likely cause?</summary>
+
+- A domain mismatch between the BTP subaccount's trust configuration and the app's own trust domain with IAS
+- *Stronger answer:* standardize both to `cloud.sap` endpoints, or enable the "Sync SSO Cookies Between Domains" toggle in Cloud Identity Services as a stopgap
+
+</details>
+
 ### 🔴 Senior
 
-<details class="qa"><summary>5. A Joule activation on S/4HANA Private Edition is failing intermittently. Where do you start investigating?</summary>
+<details class="qa"><summary>6. A Joule activation on S/4HANA Private Edition is failing intermittently. Where do you start investigating?</summary>
 
 - The four named common failure areas: trusted domain configuration, Joule formations, Cloud Connector connectivity, and Identity Provisioning Service errors
 - *Stronger answer:* verify the identity prerequisites first (same IAS tenant, correct Global User ID mapping) — a surprising number of "Joule bugs" are actually identity misconfiguration surfacing as functional issues, per the course's own emphasis on Global User ID correctness
+
+</details>
+
+<details class="qa"><summary>7. A customer has two SuccessFactors tenants, each behind a different corporate IdP (Okta on one, Entra ID on the other), but both sit on the same IAS tenant. Can this be one unified Joule instance?</summary>
+
+- No — IAS can't route one Joule instance's conditional authentication to two different corporate IdPs, even on a shared IAS tenant; this needs separate Joule instances, the same outcome as using different IAS tenants entirely
+- *Stronger answer:* this is a subtler failure mode than the usual "different IAS tenant" rule — same tenant, same Global User ID scheme, but still not unifiable, because the identity federation routing itself is the constraint
 
 </details>
 
@@ -163,6 +246,11 @@ Both S/4HANA Cloud editions need Joule + Build Work Zone entitlements in the glo
 | Joule Booster | SAP's provisioning automation for Joule onboarding |
 | Private Edition burden | Network (Cloud Connector), tenant config, custom Fiori roles |
 | Public Edition | SAP-managed tenant/infra, Joule Booster-driven |
+| Trust domain to standardize on | `cloud.sap`, not `ondemand.com` (don't touch an existing SAML Issuer though) |
+| Blank Joule screen | Domain mismatch between subaccount trust config and app's IAS trust domain |
+| Corporate IdP in pure proxy mode | Breaks Joule outright unless IAS's own user store (Global User ID) is populated |
+| Two corporate IdPs, one IAS tenant | Still not unifiable — separate Joule instances required |
+| J4C (Joule for Consultants) | Cannot share a subaccount with J4B |
 
 ## Recap
 
@@ -171,6 +259,8 @@ Both S/4HANA Cloud editions need Joule + Build Work Zone entitlements in the glo
 - A **unified** Joule instance requires one shared IAS tenant per tier and one consistent Global User ID — different tenants mean separate instances, not a design choice
 - The setup flow is always: prepare BTP structure → verify identity → run Joule onboarding once → enable per LoB
 - S/4HANA **Private** Edition pushes network, tenant, and role-design work onto the customer; **Public** Edition is SAP-managed and Joule-Booster-driven
+- Only one S/4HANA edition can be unified per subaccount today — Private on a different IAS tenant than Public/SuccessFactors means two separate subaccounts, each with its own Joule instance
+- Most real-world identity failures trace to one of a handful of causes: a trust-domain mismatch (blank screen), a corporate IdP in pure proxy mode (no Global User ID), two corporate IdPs on one IAS tenant, or SSO/password-user routing in SuccessFactors specifically
 
 ## Practice
 
@@ -182,10 +272,15 @@ Both S/4HANA Cloud editions need Joule + Build Work Zone entitlements in the glo
 
 - Units 1 and 2 (4 lessons: Exploring Joule's Technical Architecture, Setting Up A Unified Joule Instance, Setting Up Joule for SAP S/4HANA Cloud Private Edition, Setting Up Joule for SAP S/4HANA Cloud Public Edition) and both unit quizzes of "Setting Up Joule Across your Organizational System Landscapes" were read in full, 10 Nov 2026.
 - All 4 images across these lessons are used here (saved to `images/`, never hotlinked): the IAM foundation diagram, the unified-setup prerequisites diagram, the end-to-end process diagram, and the BTP provisioning architecture diagram. Nothing was left out.
+- Sections 2a and 2b were added 13 Nov 2026 from two further SAP Community sources (discovered via a partner resource hub and triaged for genuine new technical content). Section 2a's source had 14 images; 10 are genuine content diagrams (3 small decorative icons and 1 video-thumbnail were excluded after inspection — the video itself is linked, not downloaded), of which 3 are embedded here (the two multi-tenant case diagrams and the 3-tier landscape diagram) — the rest (BTP account hierarchy, roadmap slide, J4B/J4D/J4C panel example, provisioning/Joule-Preview split) are described in the body text without a dedicated figure, to keep this already-dense chapter readable, and are kept in `images/` (`sj015-*`) for reference. Section 2b's source had 1 image, used here. Every content image in both sources was opened and visually verified against its caption before being embedded, not captioned from alt text or DOM order alone.
+- The blank-screen Q&A in section 2b was cross-checked against the official SAP Help troubleshooting doc ("Joule Troubleshooting Steps"), which confirms a second, independent cause (corporate IdP not set as Default IdP) — that doc has no images.
 - Nothing in this chapter is code; nothing was run.
 
 ## Sources and further reading
 
 - SAP Learning, *Setting Up Joule Across your Organizational System Landscapes* — https://learning.sap.com/courses/setting-up-joule-across-your-organizational-system-landscapes, Units 1–2 (read in full 10 Nov 2026)
+- SAP Community, nageshcaparthy, *Joule - Unified Setup: Bridging Simplicity and Performance* — https://community.sap.com/t5/technology-blog-posts-by-sap/joule-unified-setup-bridging-simplicity-and-performance/ba-p/13924542 (read in full 13 Nov 2026)
+- SAP Community, harjeetjudge, *Setting Up a Unified Joule Instance: Key Considerations and Common Questions* — https://community.sap.com/t5/technology-blog-posts-by-sap/setting-up-a-unified-joule-instance-key-considerations-and-common-questions/ba-p/14126614 (read in full 13 Nov 2026)
+- SAP Help Portal, *Joule Troubleshooting Steps* — https://help.sap.com/docs/joule/integrating-joule-with-sap/troubleshooting (read in full 13 Nov 2026)
 
 Previous: [SAP Joule book introduction](README.md) · Next: [Extending Joule beyond a single application](btp-extending-joule.md)

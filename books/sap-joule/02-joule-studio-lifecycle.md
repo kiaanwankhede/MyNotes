@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **You will learn:** where Joule Studio sits in the SAP Business AI Platform, the three principles SAP designs "trusted" agents around, and the six-stage lifecycle every agent goes through — illustrated with a real worked example's actual generated files
 > - **You will build:** nothing yet — but you'll see a complete generated agent's file tree, its `asset.yaml`, and its real test coverage breakdown
-> - **Level:** beginner · **Time:** about 18 minutes
+> - **Level:** beginner · **Time:** about 21 minutes
 > - **Builds on:** [What Joule actually is](01-what-is-joule.md) (Skill/Agent/Assistant/Work, the three zones). **Leads to:** [Document grounding, analytics, and developer tooling](joule-advanced-capabilities.md)
 
 **After this chapter you can:**
@@ -214,6 +214,31 @@ A second full example, from the same page, confirming the "several MCP servers p
 
 - **Discount Pricing Agent: 1 Agent, 5 MCP Servers** — a fifth data point (after the Sourcing extension, the n8n PO workflow, the Cable Roll Optimizer, and the AR Collection Email solution in [Extending an SAP-delivered agent](03-extending-a-standard-agent.md)) for the same rule: a solution's MCP-server count tracks its number of external integration points, and that count is often more than one.
 
+### 2.4a Two builders, and connecting Joule Studio across subaccounts
+
+![Joule Studio's place in the wider SAP BTP architecture: inside SAP Build alongside Process Automation, Apps, Code, and Work Zone, trusting SAP Cloud Identity Services, reaching SAP AI Core/Document Grounding and SAP Cloud Solutions, and connecting outward to on-premise systems and 3rd-party APIs](images/sj144-01-joule-studio-sap-build-architecture-diagram.png)
+
+Joule Studio, Classic Edition actually has **two distinct builders**, both GA:
+
+| Builder | For | Cost |
+|---|---|---|
+| **Skill Builder** | A single predefined task (the Trigger → Action → Send Message → End shape) | No additional orchestration cost, no AI Units consumed |
+| **Agent Builder** | Autonomous, multi-step agents that plan their own path through a task | Billed in AI Units once its promotional free-execution window ends |
+
+Agent Builder is activated via **Control Tower → AI Agent Builder Activation**.
+
+> [!WARNING]
+> **⚠️ Pitfall: don't trust a specific promo end-date for Agent Builder — it has already moved twice**
+> Three SAP sources disagree with each other on when Agent Builder's free-execution promo ends: one blog says "through Dec 31, 2026," a later one corrects that to "May 31, 2026," and the activation screen's own UI banner said "at least January 31, 2026." All three dates have already passed as of this chapter's own check. The pattern, not the date, is the lesson: **verify current billing status directly in the Control Tower before assuming a custom Joule Agent is still free to run** — don't cite any blog's stated date as current.
+
+If **Joule and SAP Build Process Automation live in separate global accounts**, they can still be connected — the one hard requirement is both being federated under the **same SAP Cloud Identity Services tenant** (the "golden thread" that makes this work at all, consistent with the unified-instance rule in [the identity foundation chapter](btp-identity-foundation.md)). Concretely: BTP Cockpit → System Landscape → **Formations** → select the "Integration with Joule" formation → **Include Systems** → pick the SBPA subaccount → check **Enable Capability Deployment** → wait for Formation Status to reach **Ready**.
+
+> [!WARNING]
+> **⚠️ Pitfall: the documented role-collection name may not match what actually works**
+> The documented requirement is role collections `joule_extensibility` and `end_user` on the Joule subaccount. A real reported case needed `extensibility_developer` instead of `joule_extensibility` to actually get things working — an unresolved discrepancy between two SAP sources. If Joule Studio doesn't appear after an otherwise-correct split-account setup, try both role collection names rather than assuming the documented one is simply wrong to use.
+
+- **If Joule Studio doesn't appear after the Booster at all**, the usual suspects, in order: mismatched IAS tenants between the two subaccounts, SAP Build Process Automation still on the legacy "standard" plan instead of **build-default**, a missing or wrong Joule SKU, or missing role collections (see the pitfall above). If the Formation itself won't reach Ready, that points to an IdP trust error — log an SAP BTP Technical Advisory request rather than keep retrying the same formation action.
+
 ## 2.5 Testing and governance, beyond one agent
 
 The per-agent testing in 2.3 is only half the picture — once deployed, agents are governed centrally:
@@ -348,6 +373,7 @@ A Joule Skill itself has its own visual canvas, distinct from both the agent con
 - Testing means **behavioral evaluation against the PRD**, not just successful execution — and low coverage on a framework module (like the prompt-injection detector) isn't the same signal as low coverage on your own business logic
 - AI Agent Hub's Discovery Inbox is a real approval gate with per-agent usage analytics, not just a concept
 - Joule Studio can also be reached through **SAP Build**'s own "Create Project" flow (an older entry point); agent config there shows an explicit LLM provider choice (Anthropic, Google, MistralAI, OpenAI), separate Base/Advanced model slots, and a Thinking Steps (Small/Medium/Large) reasoning control — and a Skill has its own Trigger→steps→End flow canvas, distinct from the n8n canvas in [n8n workflows in Joule Studio](04-n8n-workflows.md)
+- **Skill Builder** (single predefined tasks, no AI-Unit cost) and **Agent Builder** (autonomous multi-step agents, billed once its promo ends) are two distinct, separately-activated builders — and Joule/SAP Build Process Automation can live in separate global accounts as long as both share one Cloud Identity Services tenant
 
 ## Practice
 
@@ -363,11 +389,14 @@ A Joule Skill itself has its own visual canvas, distinct from both the agent con
 - 2 further images are used from the product page (saved to `images/`, never hotlinked): the generated `main.py` / ChatLiteLLM screenshot, and the Tariff Disruption Response Agent / Discount Pricing Agent example. The page's other visible image (a hero background pattern) is decorative with no content.
 - A community blog post, "Gamechanger Alert: Meet SAP Joule Studio for Real-World Impact" (community.sap.com), was read in full 10 Nov 2026. Its own text is non-technical and written by a self-described SAP newcomer (generic HR/IT use cases, no code or architecture) — but all 3 of its embedded screenshots are used here (saved to `images/`, never hotlinked), since they show a SAP Build entry point and a configuration UI (explicit LLM provider choice, dual model slots, a Skill flow canvas) not documented anywhere else in this chapter.
 - Nothing in this chapter is code yet, so nothing was run — the file tree, `asset.yaml`, `main.py`, and coverage numbers are transcribed directly from source screenshots, not independently executed.
+- Section 2.4a was added 13 Nov 2026 from two further sources, discovered via a partner resource hub and judged ~90% commercial/licensing (SKUs, TDD pricing, Fair Use Limits — correctly out of scope per this book's standing rule) but each contributing one genuinely non-commercial technical fact: the Skill Builder/Agent Builder distinction, and the Formations/role-collections mechanics for a split-account Joule Studio setup. 4 images were found across both (3 byte-identical between the two sources, cross-referenced rather than re-downloaded); 1 unique architecture diagram is used here, opened and visually verified before captioning.
 
 ## Sources and further reading
 
 - SAP Learning, *Introducing Joule Studio* — https://learning.sap.com/courses/introducing-joule-studio (all 7 lessons + 4 quizzes, read in full 9 Nov 2026)
 - SAP, *Joule Studio product page* — https://www.sap.com/products/artificial-intelligence/joule-studio.html (read in full, all FAQs expanded, 10 Nov 2026)
 - Chetannagpal, *Gamechanger Alert: Meet SAP Joule Studio for Real-World Impact* — https://community.sap.com/t5/human-capital-management-blog-posts-by-members/gamechanger-alert-meet-sap-joule-studio-for-real-world-impact/ba-p/14133749 (read in full, 10 Nov 2026; used for its 3 screenshots, not its text)
+- SAP Community, *How to Get Started with Joule Studio, Classic Edition* — https://community.sap.com/t5/application-development-and-automation-blog-posts/how-to-get-started-with-joule-studio/ba-p/14152855 (read in full 13 Nov 2026)
+- SAP Community, *Setting Up Joule Studio, Classic Edition for All Partner Flows and Entitlement Levels* — https://community.sap.com/t5/technology-blog-posts-by-sap/setting-up-joule-studio-for-all-partner-flows-and-entitlement-levels/ba-p/14282498 (read in full 13 Nov 2026)
 
 Previous: [What Joule actually is](01-what-is-joule.md) · Next: [Document grounding, analytics, and developer tooling](joule-advanced-capabilities.md)

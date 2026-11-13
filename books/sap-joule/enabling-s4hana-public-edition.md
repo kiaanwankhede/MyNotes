@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **You will learn:** the concrete, hands-on configuration steps that follow a Joule Booster run for SAP S/4HANA Cloud Public Edition — destinations, communication arrangements, content exposure, and the Identity Provisioning source/target systems that actually replicate users and roles
 > - **You will build:** nothing runnable here — this is BTP/S4 administration, not code — but you will walk through the exact screens and field values a real activation requires
-> - **Level:** intermediate · **Time:** about 20 minutes
+> - **Level:** intermediate · **Time:** about 26 minutes
 > - **Builds on:** [Joule's identity and platform foundation](btp-identity-foundation.md) (the Joule Booster, Private vs. Public Edition) and [Extending Joule beyond a single application](btp-extending-joule.md) (SAP Build Work Zone). **Leads to:** [Enabling Joule for other SAP products](enabling-other-products.md)
 
 **After this chapter you can:**
@@ -267,6 +267,40 @@ These aren't from the official guide — they're patterns that showed up repeate
 | A second S/4HANA tenant won't connect to the same Joule setup | **One subaccount connects to only one production system per application type.** A second S/4 production tenant needs its own subaccount — this isn't a bug, it's the architecture |
 | Users authenticated, but Joule gives vague/generic answers instead of real data | Recheck the Communication System **Host** field (section 3.2.3) against both this guide and SAP's Discovery Center Mission — they disagree, and the wrong one fails silently |
 
+### 6.1 Booster-time activation errors
+
+A dedicated troubleshooting source gives the exact error text for four Booster-stage failures, each with its fix:
+
+| Error (as shown) | Cause | Fix |
+|---|---|---|
+| "Some of the entitlements are not available in the selected subaccount" | Joule or Work Zone standard edition isn't entitled in this subaccount | BTP Global Account → Entity Assignments → confirm both are entitled; if missing, the entitlement needs to be procured first |
+| `das-application-ias` sync with Cloud Identity Services fails (e.g. "application in IAS not found") | Sync between Joule and Cloud Identity Services broke | Resynchronize; if it persists, raise a ticket under component **BC-CP-MP-FOR** with the technical details shown |
+| "No registered systems of type SAP S/4HANA Cloud" | Formation prerequisites aren't met | Register at least one S/4HANA Cloud system in the global account first (the "Register SAP S/4HANA Cloud Public Edition" mission step) |
+| Formation sync errors citing component **CA-JOULE-PRV** and a formation ID, persisting even after Resynchronize | Two reported causes | **(1)** On the Select Capabilities step, **leave "Store conversation data submitted by users for the improvement of Joule" unticked** — a concrete reported bug ties this exact checkbox to formation sync failures; **(2)** manually add a dependency per SAP Note/KBA 3646589 |
+
+![The Select Capabilities step with the "Store conversation data submitted by users for the improvement of Joule" checkbox left unticked — ticking it is tied to a reported formation sync failure](images/sj147-07-44-fix-select-capabilities-data-checkbox.png)
+
+### 6.2 Why Joule doesn't respond as expected
+
+| Symptom | Fix |
+|---|---|
+| Joule icon missing from S/4HANA Cloud after completing the setup mission | Re-check the "Update Content Security Policy Settings" mission step; try an Incognito window to rule out caching; clear cache/cookies if it appears there (SAP Note/KBA 3657080) |
+| Joule asks for separate login credentials every time | Joule needs a session already established by the hosting app — confirm the Cloud Identity Services domain used at S/4 login matches the one set in BTP Cockpit → Joule subaccount → Trust Configuration → Domain, and that IdP/Conditional Authentication config matches exactly between the S/4 and Joule apps |
+| Joule returns the wrong document or object (e.g. a SAP Help doc instead of a sales order; a purchase requisition instead of a purchase order) | Check SAP Note 3545050's enabled-business-objects list; verify the CDM sync via Channel Manager → Report; verify the user's business-catalog/group assignment via the Explore Role Assignments screen |
+| Joule responds "I cannot [x] due to system limitations. However..." to a navigational/transactional request | SAP Note/KBA 3660276 and 3679305. Two concrete real-world causes beyond the official note: the IPS search box disabled with a `403 Forbidden ... subscribe to WORKZONE with paid plan` trace error (fix: use a paid Work Zone plan, not free); or more than 3,000 apps assigned to a single Role/Group/Catalog (SAP Note 3107801) |
+| Joule in S/4HANA Cloud says "Not authorized" | A **Common Name (CN) mismatch** between the `S4HANA_PUB_SSO` BTP destination's certificate and the S/4 Communication System's SAML Bearer Assertion Provider certificate — the two CNs have to match exactly |
+| Joule times out / can't connect to S/4HANA Cloud Public Edition | Confirmed root cause in one documented case: a broken `S4HANA_PUB_SSO` destination behind component **BC-EIM-ESH** (the enterprise search service); fixed per SAP Note 3804793, after which the same query returned a proper result instead of timing out |
+| Nothing above resolves it | Open a ticket under component **CA-JOULE**, and attach the Joule web client's own trace file — it meaningfully speeds up resolution |
+
+![A Common Name mismatch between the S4HANA_PUB_SSO BTP destination's certificate and the S/4 Communication System's SAML Bearer Assertion Provider certificate, annotated "CN names need to match"](images/sj147-18-55-cn-name-match-destination-commsystem.png)
+
+> [!NOTE]
+> One commenter asked about per-interaction cost while scoping a narrow pilot (one process, not a full rollout) — the author's confirmed answer: **Joule Base currently has unlimited usage**, no per-token metering to plan around for a pilot.
+
+> [!WARNING]
+> **⚠️ Pitfall: an identical prompt can behave inconsistently**
+> A reported, unresolved pattern: the first attempt or two at an identical prompt returns a generic "guidance mode" answer (pointing to SAP Help docs) before a later retry actually fetches real data. If this happens, the suggested path is downloading the Joule web client's trace file (as above) and reporting it against the specific AI feature's component via the AI feature catalog, rather than assuming the setup itself is wrong.
+
 > [!CAUTION]
 > **🔒 Open question worth verifying directly with SAP, not assuming**
 > A reader asked, in the original post's comments, for documentation confirming that Joule can never "infer" or surface data beyond what a user's replicated S/4HANA role already permits — and got no reply in the thread. The architecture described throughout this book (Joule inherits the acting user's existing authorizations, never more) strongly implies the answer is "it can't," but if this matters for a compliance sign-off, get it confirmed against current official documentation rather than citing this chapter.
@@ -274,6 +308,7 @@ These aren't from the official guide — they're patterns that showed up repeate
 ## 7. Added by Claude, not from the sources
 
 - Section 6's table is this book's own synthesis of recurring patterns across dozens of reader comments on the original SAP Community post (spanning 2025–2026) — each fix is attributed to what commenters actually reported, not invented.
+- Sections 6.1 and 6.2 draw on a second, dedicated troubleshooting source; splitting it into "Booster-time errors" vs. "wrong/no response" is this book's organization, the symptoms and fixes themselves are the source's.
 - The explicit cross-reference between this guide's Host-field instruction and the conflicting Discovery Center Mission guidance (section 3.2.3's pitfall) is a real discrepancy a reader flagged publicly — included here as a genuine pitfall, not smoothed over.
 - Not run: this chapter is BTP/S4 administration guidance, not code; nothing was independently executed. The field values and screenshots are the source author's own activation, not a setup performed for this book.
 
@@ -319,6 +354,13 @@ These aren't from the official guide — they're patterns that showed up repeate
 
 </details>
 
+<details class="qa"><summary>6. Joule tells a user "Not authorized" even though their S/4 roles look correct. What's a concrete, non-obvious thing to check?</summary>
+
+- A Common Name (CN) mismatch between the `S4HANA_PUB_SSO` BTP destination's certificate and the S/4 Communication System's SAML Bearer Assertion Provider certificate — the two have to match exactly
+- *Stronger answer:* this is a certificate-trust problem, not an authorization problem — don't start by re-checking the user's Fiori roles, check the two certificates' CN values side by side first
+
+</details>
+
 > [!TIP]
 > **🧩 Design question**
 > *"A customer's Joule pilot for S/4HANA Cloud Public Edition works for most users, but a subset report 'unauthorized' or oddly generic answers, and a few report being prompted to log in twice."* Talk about: the double-login symptom pointing specifically at a missing Conditional Authentication mirror for `das-ias` (section 2.5's pitfall), the generic-answer symptom pointing at the Host-field discrepancy in the Communication System (section 3.2.3), and why you'd check the IPS Provisioning Log statistics before assuming either fix, since a partially-successful Read Job can produce exactly this "some users work, some don't" pattern.
@@ -334,6 +376,9 @@ These aren't from the official guide — they're patterns that showed up repeate
 | Navigation-breaking trap | Missing `/oauth/token` suffix on the NavigationService Token Service URL |
 | Multi-tenant limit | One subaccount = one production system per application type |
 | First troubleshooting move | Delete the Joule app in Instances/Subscriptions, re-run the Booster |
+| Formation sync fails at Select Capabilities | Leave "Store conversation data..." unticked — ticking it is tied to a reported sync bug |
+| "Not authorized" despite correct roles | Check CN match: `S4HANA_PUB_SSO` destination cert vs. Communication System's SAML cert |
+| Joule base cost for a pilot | Unlimited usage, confirmed by SAP — no per-token metering to plan around |
 
 ## Recap
 
@@ -342,6 +387,8 @@ These aren't from the official guide — they're patterns that showed up repeate
 - The IPS **Read Job** is the step that actually moves data — run it, check its Provisioning Log statistics, and schedule it to recur
 - Two real-world traps cause silent (not loud) failures: the Communication System Host field (two SAP sources disagree) and a missing `/oauth/token` suffix on NavigationService
 - When nothing else works, deleting the Joule app and re-running the Booster is the most commonly reported fix — try that before deep debugging
+- Four Booster-time errors have documented fixes, and the "Store conversation data" checkbox is tied to a real reported formation-sync bug if ticked
+- A CN mismatch between two SSL certificates — not a role/authorization problem — is a real, concrete cause of "Not authorized" errors despite correct Fiori roles
 
 ## Practice
 
@@ -352,12 +399,14 @@ These aren't from the official guide — they're patterns that showed up repeate
 ## How this chapter was checked
 
 - The full SAP Community blog post "Joule in SAP S/4HANA Cloud Public Edition - Setup Guide" (nageshcaparthy, 19 Dec 2024) was read in full, including its 49-comment discussion thread, 12–13 Nov 2026.
-- All 43 images found in the article were downloaded; 40 are used here. 3 were exact byte-duplicates of two small decorative glyphs (a pointing-hand icon and a note-bullet icon) that repeat inline throughout the article as generic UI markers with no distinguishing content — one representative copy of each was kept rather than silently dropping them, and both are acknowledged here rather than embedded individually, since embedding repeated identical icons adds no teaching value. Every numbered screenshot ("Image 1" through "Image 36," including the two multi-part ones) is embedded above. Nothing substantive was skipped.
+- All 43 images found in the article were downloaded; 38 are used here. 3 were exact byte-duplicates of two small decorative glyphs (a pointing-hand icon and a note-bullet icon) that repeat inline throughout the article as generic UI markers with no distinguishing content — one representative copy of each was kept rather than silently dropping them, and both are acknowledged here rather than embedded individually, since embedding repeated identical icons adds no teaching value. Every numbered screenshot ("Image 1" through "Image 36," including the two multi-part ones) is embedded above. Nothing substantive was skipped.
 - Section 6's troubleshooting table and the two pitfalls in sections 2.3 and 3.2.3 are drawn directly from the comment thread, not the article body — attributed as field-reported patterns, not official guidance.
+- Sections 6.1 and 6.2 were added 13 Nov 2026 from a dedicated troubleshooting source, "How to solve Joule activation error? [Public Cloud ERP]" (LilingJia, Oct 2025), including 9 of its 10 comments (1 untranslatable/unreadable). 22 images were found, 1 confirmed byte-identical duplicate was removed (21 kept); 2 are embedded above, each opened and visually verified before captioning. The rest document the remaining symptoms' UI in sequence and are kept in `images/` (`sj147-*`) without being individually embedded, since the tables already convey each fix completely.
 - Nothing in this chapter is code; nothing was run. This is BTP/S4 administration guidance.
 
 ## Sources and further reading
 
 - SAP Community, nageshcaparthy, *Joule in SAP S/4HANA Cloud Public Edition - Setup Guide* — https://community.sap.com/t5/technology-blog-posts-by-sap/joule-in-sap-s-4hana-cloud-public-edition-setup-guide/ba-p/13965333 (article and comment thread, read in full 12–13 Nov 2026)
+- SAP Community, LilingJia, *How to solve Joule activation error? [Public Cloud ERP]* — https://community.sap.com/t5/enterprise-resource-planning-blog-posts-by-sap/how-to-solve-joule-activation-error-why-joule-doesn-t-response-as-expected/ba-p/14251657 (read in full 13 Nov 2026)
 
-Previous: [n8n workflows in Joule Studio](04-n8n-workflows.md) · Next: [Enabling Joule for other SAP products](enabling-other-products.md)
+Previous: [Enabling Joule for SAP S/4HANA Cloud Private Edition](enabling-s4hana-private-edition.md) · Next: [Enabling Joule for other SAP products](enabling-other-products.md)
