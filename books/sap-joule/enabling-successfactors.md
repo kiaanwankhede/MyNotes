@@ -7,7 +7,7 @@
 > - **You will learn:** how Joule actually relates to SuccessFactors architecturally, the specific prerequisites for activation, and 19 documented real-world activation issues with their fixes
 > - **You will build:** nothing — this is activation/architecture knowledge, not a code tutorial
 > - **Level:** beginner · **Time:** about 12 minutes
-> - **Builds on:** [Joule's identity and platform foundation](btp-identity-foundation.md). **Leads to:** [Extending an SAP-delivered agent](03-extending-a-standard-agent.md), the first of the Joule Tutorials
+> - **Builds on:** [Joule's identity and platform foundation](btp-identity-foundation.md). **Leads to:** [Joule Studio tutorial 1: environment and connectivity setup](joule-studio-tutorial-1-environment-setup.md), the first of the Joule Tutorials
 
 **After this chapter you can:**
 
@@ -168,4 +168,4 @@ A dedicated troubleshooting source collects the recurring real-world problems fr
 - SAP Community, nageshcaparthy, *Joule with SFSF – Common Setup Issues* — https://community.sap.com/t5/technology-blog-posts-by-sap/joule-with-sfsf-common-setup-issues/ba-p/13650311 (article and comment thread, read in full 13 Nov 2026)
 - SAP Help Portal, *Setting Up Joule in SAP SuccessFactors Mobile* — https://help.sap.com/docs/successfactors-platform/setting-up-and-using-joule-in-sap-successfactors/setting-up-joule-in-sap-successfactors (read in full 13 Nov 2026)
 
-Previous: [How business users actually use Joule](05-how-business-users-use-joule.md) · Next: [Extending an SAP-delivered agent](03-extending-a-standard-agent.md)
+Previous: [How business users actually use Joule](05-how-business-users-use-joule.md) · Next: [Joule Studio tutorial 1: environment and connectivity setup](joule-studio-tutorial-1-environment-setup.md)

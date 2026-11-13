@@ -146,4 +146,4 @@ Confirm both destinations now show up, each associated with 2 environments:
 
 - SAP Developers, *Build Your First Joule Skill in Joule Studio, Classic Edition* — https://developers.sap.com/group.joule-studio-first-skill.html, Tutorial 1 of 5 (read in full 13 Nov 2026)
 
-Previous: [n8n workflows in Joule Studio](04-n8n-workflows.md) · Next: [Joule Studio tutorial 2: Action Projects](joule-studio-tutorial-2-action-projects.md)
+Previous: [Enabling Joule for SAP SuccessFactors](enabling-successfactors.md) · Next: [Joule Studio tutorial 2: Action Projects](joule-studio-tutorial-2-action-projects.md)

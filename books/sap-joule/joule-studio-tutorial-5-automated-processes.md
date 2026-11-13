@@ -270,4 +270,4 @@ This closing check matters precisely because of this tutorial's central limitati
 
 - SAP Developers, *Build Your First Joule Skill in Joule Studio, Classic Edition* — https://developers.sap.com/group.joule-studio-first-skill.html, Tutorial 5 of 5 (read in full 13 Nov 2026)
 
-Previous: [Joule Studio tutorial 4: filters and the other response mode](joule-studio-tutorial-4-filters-and-responses.md) · Next: [Joule Studio tutorial 6: CLI supplier disruption agent](joule-studio-tutorial-6-cli-supplier-disruption-agent.md)
+Previous: [Joule Studio tutorial 4: filters and the other response mode](joule-studio-tutorial-4-filters-and-responses.md) · Next: [Extending an SAP-delivered agent](03-extending-a-standard-agent.md)

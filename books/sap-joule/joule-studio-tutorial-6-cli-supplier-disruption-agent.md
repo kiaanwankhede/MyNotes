@@ -7,7 +7,7 @@
 > - **You will learn:** the Joule Studio Local/CLI flow — `jl` CLI setup and login, initializing a project with a coding agent (OpenCode), and the same Intent → PRD → Specification → Solution lifecycle driven entirely through chat with a local coding agent instead of a web UI
 > - **You will build:** a Supplier Disruption Response Agent for SAP S/4HANA Public Cloud — given a real supplier production-halt scenario, it retrieves at-risk purchase orders and scheduling agreements, scores them HIGH/MEDIUM/LOW, and produces a risk-scored, fully labeled assessment report
 > - **Level:** intermediate · **Time:** about 25 minutes
-> - **Builds on:** [Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md) (the 6-stage lifecycle this tutorial walks through concretely) and [Joule Studio tutorial 5](joule-studio-tutorial-5-automated-processes.md). **Leads to:** [Joule Studio tutorial 7: building a supplier performance agent](joule-studio-tutorial-7-supplier-performance-agent.md)
+> - **Builds on:** [Joule Studio and the agent development lifecycle](02-joule-studio-lifecycle.md) (the 6-stage lifecycle this tutorial walks through concretely) and [n8n workflows in Joule Studio](04-n8n-workflows.md). **Leads to:** [Joule Studio tutorial 7: building a supplier performance agent](joule-studio-tutorial-7-supplier-performance-agent.md)
 
 **After this tutorial you can:**
 
@@ -216,4 +216,4 @@ execute specification/supplier-disruption-agent/specification.md
 
 - SAP Developers, *Build a Supplier Disruption Response Agent on SAP S/4HANA* — https://developers.sap.com/tutorials/build-a-supplier-disruption-response-agent-on-sap (read in full 13 Nov 2026)
 
-Previous: [Joule Studio tutorial 5: consuming an automated process](joule-studio-tutorial-5-automated-processes.md) · Next: [Joule Studio tutorial 7: building a supplier performance agent](joule-studio-tutorial-7-supplier-performance-agent.md)
+Previous: [n8n workflows in Joule Studio](04-n8n-workflows.md) · Next: [Joule Studio tutorial 7: building a supplier performance agent](joule-studio-tutorial-7-supplier-performance-agent.md)

@@ -18,13 +18,13 @@
 ## Real-World Use Cases
 
 ## Joule Tutorials
-* [Extending an SAP-delivered agent](03-extending-a-standard-agent.md)
-* [n8n workflows in Joule Studio](04-n8n-workflows.md)
 * [Joule Studio tutorial 1: environment and connectivity setup](joule-studio-tutorial-1-environment-setup.md)
 * [Joule Studio tutorial 2: Action Projects](joule-studio-tutorial-2-action-projects.md)
 * [Joule Studio tutorial 3: building and deploying a Joule Skill](joule-studio-tutorial-3-create-deploy-skill.md)
 * [Joule Studio tutorial 4: filters and the other response mode](joule-studio-tutorial-4-filters-and-responses.md)
 * [Joule Studio tutorial 5: consuming an automated process](joule-studio-tutorial-5-automated-processes.md)
+* [Extending an SAP-delivered agent](03-extending-a-standard-agent.md)
+* [n8n workflows in Joule Studio](04-n8n-workflows.md)
 * [Joule Studio tutorial 6: CLI supplier disruption agent](joule-studio-tutorial-6-cli-supplier-disruption-agent.md)
 * [Joule Studio tutorial 7: Supplier Performance Assistant agent](joule-studio-tutorial-7-supplier-performance-agent.md)
 * [Joule Studio tutorial 8: AI Sales Assistant agent](joule-studio-tutorial-8-ai-sales-assistant-agent.md)
