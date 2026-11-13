@@ -15,12 +15,16 @@
 ## Enabling for SuccessFactors
 * [Enabling Joule for SAP SuccessFactors](enabling-successfactors.md)
 
+## Real-World Use Cases
+
 ## Joule Tutorials
 * [Extending an SAP-delivered agent](03-extending-a-standard-agent.md)
 * [n8n workflows in Joule Studio](04-n8n-workflows.md)
-* [Building your first Joule Skill in Joule Studio](joule-studio-first-skill.md)
-
-## Real-World Use Cases
+* [Joule Studio tutorial 1: environment and connectivity setup](joule-studio-tutorial-1-environment-setup.md)
+* [Joule Studio tutorial 2: Action Projects](joule-studio-tutorial-2-action-projects.md)
+* [Joule Studio tutorial 3: building and deploying a Joule Skill](joule-studio-tutorial-3-create-deploy-skill.md)
+* [Joule Studio tutorial 4: filters and the other response mode](joule-studio-tutorial-4-filters-and-responses.md)
+* [Joule Studio tutorial 5: consuming an automated process](joule-studio-tutorial-5-automated-processes.md)
 
 ## Enabling for Other Products
 * [Enabling Joule for SAP S/4HANA Cloud Private Edition](enabling-s4hana-private-edition.md)
