@@ -1,9 +1,13 @@
 # Chapter 5: Tools
 
+*Give the model hands: define tools, describe them well, and control what they see and return.*
+
 > [!NOTE]
 > **📍 At a glance**
+> - **You will learn:** binding vs running, tool schemas, `ToolRuntime`, what a tool can return, `return_direct` and gating
 > - **You will build:** tools by hand and with decorators, schemas, ToolRuntime and gated tools
-> - **Level:** beginner to intermediate · **Time:** about 35 minutes
+> - **Level:** beginner to intermediate · **Time:** about 45 minutes
+> - **Builds on:** [Chapter 3](03-models-messages-and-parameters.md) (models, messages) and [Chapter 4](04-structured-output.md) (Pydantic schemas)
 
 **After this chapter you can:**
 
@@ -12,6 +16,8 @@
 - Write tools with `@tool`, custom names and `args_schema`
 - Avoid the reserved names `config` and `runtime`
 - Use `ToolRuntime` for state, context and memory
+- Pick what a tool returns: text, a dict, images, or a `Command` that updates state
+- Predict when `return_direct` ends the run, including parallel calls
 - Gate a tool so the model never sees it
 
 **This is the LangChain version of** the by-hand loop in [LLM, Chapter 2](../llm/02-the-agentic-loop-in-pure-python.md). Running example: CineBot (see [Chapter 4](04-structured-output.md)).
@@ -191,6 +197,11 @@ def check_showtimes(movie_title: str) -> str:
 
 - **Function name** becomes the tool name. **Docstring** becomes its description
 - The description is sent to the model. It is the model's **only clue** about what the tool does and when to use it
+- **Type hints are required.** They become the input schema
+  - *Checked on 1.5.0:* a tool without hints still defines, but its schema is `{'x': {'title': 'X'}}`, with no type, so the model must guess
+
+> [!WARNING]
+> **Prefer `snake_case` tool names** (`web_search`, not `Web Search`). Some providers reject names with spaces or special characters. Stick to letters, digits, `_` and `-`. *Source: LangChain docs, Tools.*
 
 Override both without touching the function (useful when wrapping someone else's code):
 
@@ -278,6 +289,35 @@ print(book_seats.args)    # shows descriptions, the "greater than 0" limit and t
 - A richer schema costs a few extra tokens (class figure: 20 to 30). That is cheaper than malformed input plus a retry
 - A function with no `@tool` is also accepted, but you lose this argument detail
 
+### A schema written as a JSON-schema dict
+
+- `args_schema` also takes a plain JSON-schema `dict`. Useful when the schema already exists as JSON (an OpenAPI spec, a registry)
+
+```python
+weather_schema = {
+    "type": "object",
+    "properties": {
+        "location": {"type": "string", "description": "City name"},
+        "units": {"type": "string", "enum": ["celsius", "fahrenheit"]},
+    },
+    "required": ["location"],
+}
+
+@tool(args_schema=weather_schema)
+def get_weather(location: str, units: str = "celsius") -> str:
+    """Get current weather for a city."""
+    return f"22 degrees {units} in {location}"
+
+print(get_weather.args)   # the dict's properties, exactly as written
+```
+
+> [!WARNING]
+> **A dict schema is not validated when the tool runs.**
+> - The docs present Pydantic and JSON schema as equal ways to define inputs
+> - *Checked on 1.5.0:* `get_weather.invoke({"location": 5})` ran and returned `22 degrees celsius in 5`. The Pydantic version raised `ValidationError`
+> - A missing required field failed only as the function's own `TypeError`
+> - Use Pydantic when you want the input checked
+
 ## 5.6 Two names you cannot use: `config` and `runtime`
 
 ```python
@@ -307,7 +347,7 @@ def get_weather(location: str, config: str) -> str:
 - **Custom function:** your own `@tool` function
 - **Built-in LangChain tool:** pre-built, such as Tavily web search
 - **Server-side (provider) tool:** runs on the provider's servers, for example web search or a code interpreter in a chat product. You neither write nor run it
-- **JSON-schema tool:** schema written directly as JSON, no Python function. Valid, but Pydantic is easier to read
+- **JSON-schema tool:** schema written directly as JSON, no Python function. Valid, but Pydantic is easier to read (5.5 shows a dict `args_schema`)
 
 The server-side kind is the odd one out: when a chat product searches the web, that is not on your machine and not a tool you control.
 
@@ -326,14 +366,58 @@ def get_weather(location: str, runtime: ToolRuntime) -> str:
 
 - Print `.args`: only `location` appears. LangChain hides `runtime` by recognising the `ToolRuntime` annotation on the parameter named `runtime` (checked: confirmed)
 
-What `runtime` holds:
+What `runtime` holds (checked: these 9 fields on `langchain` 1.5.0):
 
-- **`state`:** the conversation so far, mutable. This conversation only
-- **`context`:** immutable settings given when the agent is invoked (for example a paid plan). One invocation, pass it again on every call
-- **`store`:** long-term memory. Survives across conversations
-- **`stream_writer`:** live progress updates ("searching..."). While the tool runs
-- **execution info:** thread ID, run ID, attempt number
-- **server info:** metadata when running on a LangGraph server
+| Field | What it holds | Use it for |
+|---|---|---|
+| **`state`** | the conversation so far, mutable. This conversation only | read history, custom state fields |
+| **`context`** | immutable settings given when the agent is invoked (for example a paid plan). One invocation, pass it again on every call | user id, plan, permissions |
+| **`store`** | long-term memory. Survives across conversations | preferences, saved facts |
+| **`stream_writer`** | live progress updates ("searching..."). While the tool runs | progress for slow tools ([Ch11](11-runtime-and-human-in-the-loop.md), 11.10) |
+| **`execution_info`** | thread ID, run ID, attempt number | logs, behaving differently on a retry |
+| **`server_info`** | assistant ID, graph ID, authenticated user, when running on LangSmith Agent Server. `None` locally | data scoped to one assistant or user |
+| **`config`** | the `RunnableConfig` | callbacks, tags, metadata |
+| **`tool_call_id`** | the id of this tool call | the `ToolMessage` inside a `Command` (5.10), log correlation |
+| **`tools`** | **every** tool registered on the agent. In 1.5.0, not in the docs table | debugging only |
+
+- `execution_info` and `server_info` need `langgraph>=1.1.5` (or `deepagents>=0.5.0`)
+- `stream_writer` works only inside a LangGraph run, such as an agent. Not on a bare `tool.invoke()`
+
+**Reading state** (`runtime.state` is a dict, `messages` included):
+
+```python
+from langchain.messages import HumanMessage
+
+@tool
+def get_last_user_message(runtime: ToolRuntime) -> str:
+    """Get the most recent message from the user."""
+    for message in reversed(runtime.state["messages"]):
+        if isinstance(message, HumanMessage):
+            return message.content
+    return "No user messages found"
+
+print(get_last_user_message.args)   # {}  (the model sees no arguments at all)
+```
+
+✅ *Verified on 1.5.0: inside an agent the tool returned the user's text. `execution_info` gave the thread id and attempt 1, and `server_info` was `None` (details at the end).*
+
+> [!WARNING]
+> **`runtime.tools` is not "what the model can see".** *Checked:* with middleware hiding a tool from the model, `runtime.tools` still listed it. It holds every registered tool, so never use it to make permission decisions.
+
+**Migrating older code.** Older examples inject each piece on its own. The docs now recommend one `runtime: ToolRuntime` parameter.
+
+| Older pattern | Now |
+|---|---|
+| `state: Annotated[dict, InjectedState]` | `runtime.state` |
+| `store: Annotated[BaseStore, InjectedStore()]` | `runtime.store` |
+| `tool_call_id: Annotated[str, InjectedToolCallId]` | `runtime.tool_call_id` |
+| `get_runtime()` inside the tool | the `runtime` parameter |
+
+- *Checked on 1.5.0:* all four older forms **still work**, and are hidden from the model. [Chapter 13](13-multi-agent-systems-and-subagents.md) still uses `InjectedToolCallId`
+- **Docs vs package:** the docs' "previous pattern" writes `state: InjectedState` with no `Annotated[...]`
+  - On 1.5.0 that breaks: `.args` raised `PydanticInvalidForJsonSchema`
+  - The old form that worked was always `Annotated[dict, InjectedState]`
+- Runtime in depth (context schemas, store, middleware): [Chapter 11](11-runtime-and-human-in-the-loop.md), 11.3 to 11.10
 
 Every serious agent framework has some version of this. LangChain is the concrete example.
 
@@ -364,7 +448,7 @@ agent = create_agent(model=model, tools=[save_favorite_genre, recall_favorite_ge
 ```
 
 - Use a **tuple namespace**: `put((customer_id, "preferences"), key, value)`. The class write-up showed three loose arguments, but the reference notebook and assignment solution use the tuple form (store call checked)
-- `InMemoryStore` is a dictionary in RAM. Nothing survives a restart. Production uses a database-backed store such as Postgres
+- `InMemoryStore` is a dictionary in RAM. Nothing survives a restart. Production uses a database-backed store such as Postgres (the docs name `PostgresStore`, `MongoDBStore` and `RedisStore`)
 - Scaling is a database question, not LangChain's
 - General-purpose storage, not only chat history
 - Using LangGraph's store inside LangChain is not mixing frameworks. LangChain is built on LangGraph
@@ -383,6 +467,22 @@ def refund_policy(x: str) -> str:
 ```
 
 (The class did not show the syntax. The flag exists on the tool object, checked.)
+
+- **The run ends with the tool's message.** `result["messages"][-1]` is the `ToolMessage`, not an `AIMessage` (checked). Code that reads "the last AI reply" must allow for this
+- **Parallel calls are all or nothing.** All tools in the step run first. The agent stops only if **every** tool called in that step has `return_direct=True`
+- **Mixed batch:** one `return_direct` tool plus one normal tool → the agent goes **back to the model** with every `ToolMessage` from the step
+
+```mermaid
+flowchart TD
+    M[Model turn with tool calls] --> R[Run every tool in the step]
+    R --> Q{Every tool called has<br/>return_direct=True?}
+    Q -->|yes| E[END: the final messages are the ToolMessages]
+    Q -->|no, mixed or none| B[Back to the model with all ToolMessages]
+```
+
+✅ *Verified on 1.5.0: one direct tool and two direct tools both ended on a `ToolMessage`. A direct tool plus a normal tool went back to the model (details at the end).*
+
+- A `return_direct` tool can also update state by returning a `Command`. See "What a tool can return" below
 
 **Gating a tool**
 
@@ -425,18 +525,95 @@ class VipState(AgentState):
 # create_agent(..., state_schema=VipState)  then  invoke({"messages": [...], "is_vip_member": True})
 ```
 
+### What a tool can return
+
+| Return | What the model gets | Changes state? | Use when |
+|---|---|---|---|
+| `str` | a `ToolMessage` with that text | no | the result reads naturally as text |
+| `dict` | a `ToolMessage` with the dict as a **JSON string** | no | the model should reason over named fields |
+| `list` of content blocks | a `ToolMessage` with text **and** images (or other media) | no | screenshots, charts, files |
+| `Command` | whatever `ToolMessage` you put inside it | **yes** | the tool must write to agent state |
+
+```python
+@tool
+def get_weather_data(city: str) -> dict:
+    """Get structured weather data for a city."""
+    return {"city": city, "temperature_c": 22, "conditions": "sunny"}
+    # the ToolMessage content: '{"city": "Pune", "temperature_c": 22, "conditions": "sunny"}'
+
+@tool
+def capture_screenshot() -> list[dict]:
+    """Capture a screenshot of the current page."""
+    return [
+        {"type": "text", "text": "Screenshot of the current page:"},
+        {"type": "image", "url": "https://example.com/page.png"},
+    ]
+    # ToolMessage.content_blocks: ['text', 'image']
+```
+
+- **Multimodal returns:** the model must support the media you return (check its capabilities first). Block types: [Chapter 3](03-models-messages-and-parameters.md), 3.4 (multimodal input) and 3.5 (standard content blocks)
+- MCP tools that return images or mixed content are converted the same way ([Chapter 12](12-mcp-in-langchain.md), 12.5)
+
+**Returning a `Command` to update state**
+
+```python
+from langchain.agents import AgentState
+from langchain.messages import ToolMessage
+from langgraph.types import Command
+
+class LangState(AgentState):
+    preferred_language: str
+
+@tool
+def set_language(language: str, runtime: ToolRuntime) -> Command:
+    """Set the preferred response language."""
+    return Command(update={
+        "preferred_language": language,
+        "messages": [ToolMessage(f"Language set to {language}.",
+                                 tool_call_id=runtime.tool_call_id)],
+    })
+
+# create_agent(model, tools=[set_language], state_schema=LangState)
+```
+
+- The new value is visible to later steps in the **same run** (and later turns, with a checkpointer)
+- **The `ToolMessage` is required.** Every tool call in the history needs a matching `ToolMessage`, and a `Command` is not turned into one for you
+  - Use `runtime.tool_call_id` for its id
+- **Parallel calls writing one field need a reducer.** The model may call the same tool twice in one step
+
+```python
+from typing import Annotated
+import operator
+
+class TagState(AgentState):
+    tags: Annotated[list, operator.add]   # without the reducer: InvalidUpdateError
+```
+
+- **`return_direct` + `Command`:** the tool updates state and the run ends. Same `ToolMessage` rule
+- **`Command(graph=Command.PARENT)`** writes to the parent graph instead (multi-agent handoffs). No `ToolMessage` is needed there, because control leaves this graph ([Chapter 14](14-handoffs-skills-router-and-custom-workflows.md))
+
+> [!WARNING]
+> **A `Command` without its `ToolMessage` crashes the run.** *Checked on 1.5.0:*
+> - `ToolNode` raised `ValueError: Expected to have a matching ToolMessage in Command.update for tool 'bad_set_language', got: []`
+> - Two parallel `Command`s writing a plain `tags` field raised `InvalidUpdateError: Can receive only one value per step`
+> - With `Annotated[list, operator.add]` the result was `['a', 'b']`
+
+✅ *Verified on 1.5.0 with a scripted model: all four return types, the `Command` state update, the two failures above, and `return_direct` with a `Command` (details at the end).*
+
 ### Loading and calling tools
 
 - **Dynamic tool calling:** the default. The model picks which available tool to use
 - **Dynamic tool loading:** decide **before** the model is called which subset of a large set (class range 25 to 50 tools) to show it
 - MCP is not an alternative to loading. It is a packaged set of tools. Loading is about which tools, from any source, are exposed
+- Two ways to load: filter tools registered up front (gating above, [Chapter 7](07-middleware.md) 7.4), or **register a tool at run time** with two middleware hooks ([Chapter 7](07-middleware.md), 7.2)
 
 ### Assignment questions on this chapter (Q18 to Q24)
 
 - **Docstring as the tool's pitch to the model:** largely true. The model reads it to decide whether and when to call. Even a tool that is always the only option suffers from a poor docstring
-- **Plain string vs `Command`:** a string only answers. A `Command` can write to agent state (key example: raise a customer's loyalty tier and store it for later tools). `Command` is not yet taught in the material processed, so treat this as an answer-key pointer
+- **Plain string vs `Command`:** a string only answers. A `Command` can write to agent state (key example: raise a customer's loyalty tier and store it for later tools). How to write one: "What a tool can return", above
 - **`wrap_model_call` vs the system prompt:** the first removes the tool structurally. The second only asks
 - **Headless tool:** per the key, the schema is registered on the server but execution happens on the client (a browser, for example) via interrupt and resume. Its example is browser geolocation. Not covered in the class material read so far
+  - The Tools docs page describes a Python API for it, but that API is not in `langchain` 1.5.0 yet (the call raised `TypeError`, checked 2026-11-15)
 
 ### More questions from the class (class 10)
 
@@ -541,6 +718,24 @@ Rows not already covered above.
 
 </details>
 
+<details class="qa"><summary>9. A tool must save the user's language for later turns. What does it return, and what can go wrong?</summary>
+
+- A `Command(update={...})` with the new field **and** a `ToolMessage` carrying `runtime.tool_call_id`
+- The field must exist in the agent's state schema
+- Missing `ToolMessage` → `ValueError`. Two parallel writes to a plain field → `InvalidUpdateError`
+- *Stronger answer:* give fields that parallel calls may write a reducer (`Annotated[list, operator.add]`), and use `Command.PARENT` only for handoffs to a parent graph
+
+</details>
+
+<details class="qa"><summary>10. The model calls a <code>return_direct</code> tool and a normal tool in the same turn. What happens?</summary>
+
+- Both tools run
+- The agent does **not** stop: it goes back to the model with both `ToolMessage`s
+- It stops only when every tool called in that step has `return_direct=True`
+- *Stronger answer:* if the exact wording matters (a policy text), set `parallel_tool_calls=False` or give that tool its own turn, so the batch cannot be mixed. *Added by Claude*
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"Give an agent safe access to a company's ticketing system."* Cover which tools exist, their argument schemas, read vs write split, approval, and what the tool returns on error.
 
@@ -555,17 +750,32 @@ Not in the course material. Established practice, but check current docs.
 - **Return errors as text.** Let the model read "not found" and adapt, instead of crashing the run ([Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md))
 - **Fewer, sharper tools.** Accuracy of tool choice tends to drop as the list grows. That is the reason dynamic loading exists
 - **Make side-effect tools safe to repeat** (idempotent), because loops and retries can call them twice
+- **Structured returns cost tokens like text.** A returned `dict` is sent as a JSON string (checked), so return only the fields the model needs, not a whole API response
 
 ## Cheat sheet
 
 ```python
 from langchain.tools import tool, ToolRuntime
+from langchain.messages import ToolMessage
+from langgraph.types import Command
 @tool
 def get_order(order_id: str, runtime: ToolRuntime) -> str:
     """Look up one order by id. Do not use for refunds."""
     user = runtime.context.user_id          # app data the model never sees
     return f"order {order_id} for {user}"
 model.bind_tools([get_order])               # model can now request it
+
+# return: str | dict (sent as JSON) | list of content blocks | Command (writes state)
+@tool
+def set_tier(tier: str, runtime: ToolRuntime) -> Command:
+    """Set the customer's loyalty tier."""
+    return Command(update={"tier": tier,       # field must be in the state schema
+        "messages": [ToolMessage(f"Tier set to {tier}", tool_call_id=runtime.tool_call_id)]})
+
+@tool(return_direct=True)                   # ends the run only if EVERY tool in the step has it
+def refund_policy() -> str:
+    """Return the exact refund policy text."""
+    return "Refunds within 30 days."
 ```
 
 ## Recap
@@ -576,6 +786,8 @@ model.bind_tools([get_order])               # model can now request it
 - `args_schema` adds descriptions, limits, defaults. Field names must match the parameters
 - Never name a parameter `config` or `runtime` (except `runtime: ToolRuntime`)
 - `ToolRuntime` gives state, context, store, stream writer and more, hidden from the model
+- A tool returns text, a dict (sent as JSON), content blocks, or a `Command`. A `Command` must carry its `ToolMessage`
+- `return_direct` ends the run only when every tool called in that step has it
 - Gate by **removing** tools, using context or a state schema. A prompt only asks
 
 ## Practice
@@ -589,15 +801,28 @@ model.bind_tools([get_order])               # model can now request it
 7. Add `runtime: ToolRuntime` and print `.args` to confirm the model never sees it
 8. Rebuild save and recall genre tools with `InMemoryStore` and prove memory survives two `.invoke()` calls
 9. Assignment B1.1, B2.2, B3.1, B3.2: a table-availability tool, an order tool with `args_schema`, a dietary-preference memory pair, and a gated private-dining tool (GreenPlate). For B3.2 use context or a state schema, not a bare input key
+10. Write `set_language` returning a `Command`. Remove the `ToolMessage` and read the `ValueError`
+11. Give the model one `return_direct` tool and one normal tool in the same turn, and check which message ends the run
+12. Pass `{"location": 5}` to a dict-schema tool and to a Pydantic-schema tool, and compare
 
 ## How this chapter was checked
 
 - Run offline for the additions: the `Args:` block with and without `parse_docstring=True`, `config` and `runtime` as plain arguments, and the registered-tools listing of a built agent
 - Run offline with a stand-in model on `langchain` 1.4.7: the manual tool loop from 5.3, `ToolMessage` content and artifact, `@tool` name and description override, `args_schema` output, the `config` parameter failure, `runtime` hidden from `.args`, `InMemoryStore` with a tuple namespace, `return_direct`, and gating with both context and a state schema (plus the failing bare-input version)
-- **Not run against a live model:** what a real model returns for `tool_calls`, Tavily, headless tools, `Command`. Those are class or answer-key statements
+- **Not run against a live model:** what a real model returns for `tool_calls`, Tavily, a real model reading an image tool result. Those are class or answer-key statements
+- **Could not run:** headless tools. The Python API is not in `langchain` 1.5.0
 - **Details by section** (moved here from the ✅ markers):
   - *5.6 Two names you cannot use: `config` and `runtime`:* Checked, and a refinement: `config` as a plain `str` argument defines fine and fails when called. **`runtime` as a plain `str` argument worked** (the call returned normally). What LangChain treats specially is a parameter **annotated as `ToolRuntime`**, which it hides from the model. Do not rely on a plain `runtime: str` working in other versions. Avoid both names
   - *Two whiteboard sketches (`Langchain-2-Updated.pdf`):* Checked* in [LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md): one tool use took **2 model calls**
+  - *Tools docs page merge (2026-11-15), on `langchain` 1.5.0, `langchain-core` 1.8.0, `langgraph` 1.2.22, with a scripted `GenericFakeChatModel` (no keys, no network):*
+    - 5.4: a tool without type hints defined, with schema `{'x': {'title': 'X'}}`
+    - 5.5: the dict `args_schema` showed its properties in `.args`. `invoke({"location": 5})` ran (no validation); the Pydantic schema raised `ValidationError`
+    - 5.9: `ToolRuntime` dataclass fields listed (9, including `tools`). In an agent with a checkpointer: `get_last_user_message` returned `hello there`. `execution_info.thread_id` was `t-1`, `node_attempt` 1, `run_id` `None` (no tracing). `server_info` was `None`. `runtime.tools` listed a tool that middleware had hidden from the model
+    - 5.9 migration: `Annotated[dict, InjectedState]`, `Annotated[BaseStore, InjectedStore()]`, `Annotated[str, InjectedToolCallId]` and `get_runtime()` all worked and were hidden from `.args`. A bare `state: InjectedState` raised `PydanticInvalidForJsonSchema` on `.args`
+    - 5.10 returns: `str` → text; `dict` → JSON string; content-block list → `content_blocks` `['text', 'image']`. `Command` set `preferred_language`; the same without a `ToolMessage` raised `ValueError`. Parallel `Command`s on a plain list field raised `InvalidUpdateError`; with `operator.add` gave `['a', 'b']`
+    - 5.10 `return_direct`: one and two direct calls ended on the `ToolMessage` (3 and 4 messages); direct + normal went back to the model (5 messages, last an `AIMessage`). `return_direct` + `Command` set `last_order_status` and ended on the `ToolMessage`
+    - Headless: `tool(name=..., description=..., args_schema=...)` raised `TypeError: tool() got an unexpected keyword argument 'name'`; `langchain.tools` has no `HeadlessTool`
+    - Cheat sheet additions ran inside an agent: `set_tier` set `tier` to `gold` (alongside two parallel `add_tag` calls → `['a', 'b']`), and `refund_policy` ended the run on its text. All new 5.x blocks were extracted from this file and run as written (the model swapped for the fake)
   - *Steering which tool, and how many (2026-11-15):* Checked on `langchain-openai` 1.8.0 (dummy key, no call): `tool_choice="any"` was sent as `"required"`, a tool name became `{"type": "function", "function": {"name": "get_weather"}}`, and `parallel_tool_calls=False` was passed through. A scripted model streamed the arguments as `{"lo`, `cation": "B`, `oston"}`; summing the chunks gave `get_weather {'location': 'Boston'}`. `get_weather.invoke(tool_call)` returned a `ToolMessage` with the call's id. **Not run:** a real model's parallel calls
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran a `ToolRuntime` tool inside an agent and confirmed `runtime.context.user_id` reached the tool; `bind_tools` was constructed, not called. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
@@ -613,5 +838,6 @@ model.bind_tools([get_order])               # model can now request it
 - Section 5.12 is added by Claude and is not from these sources
 - Live-Class-2026, `Student_Reference_Structured_Output_and_Tools.ipynb` and `Langchain_Till_Agents.ipynb` (Weekend 5). The `parse_docstring` and `runtime` findings are from testing
 - LangChain docs: [Models](https://docs.langchain.com/oss/python/langchain/models), section "Tool calling" (read 2026-11-15), for "Steering which tool, and how many" in 5.1 and the `tool.invoke(tool_call)` shortcut in 5.3
+- LangChain docs: [Tools](https://docs.langchain.com/oss/python/langchain/tools), read 2026-11-15 in full from its source, `langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/tools.mdx` plus its Python snippets in `src/snippets/code-samples/` (docs.langchain.com was blocked from this environment). Used for 5.4 names and type hints, 5.5 dict schema, the 5.9 runtime table and migration, "What a tool can return", the `return_direct` rules, and 7.2 runtime registration
 
 Previous: [Chapter 4](04-structured-output.md) · Next: [Chapter 6, Agents and memory](06-agents-and-memory.md)

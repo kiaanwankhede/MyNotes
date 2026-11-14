@@ -11,6 +11,7 @@
 - Explain why not every tool belongs to every user, and how dynamic tool loading solves it
 - Name the six middleware hooks and where each sits in the agent loop
 - Filter tools by state or by context
+- Register a tool at run time with `wrap_model_call` plus `wrap_tool_call`
 - Compress long conversations with `SummarizationMiddleware`
 - Guard irreversible tools with `HumanInTheLoopMiddleware` and resume a paused run
 
@@ -39,6 +40,55 @@
   - That visibility exists only **inside** the agent run, which is exactly what middleware gives you
 - **Design warning:** if you have 1,000 tools "in public" and load all of them for an authenticated user, the design is wrong. Do not build 1,000 tools in the first place
 - Not the same as dynamic tool **calling** (the model picking among the tools it sees). See [Chapter 5](05-tools.md), 5.10
+
+### Registering a tool at run time
+
+- Use it when tools appear during the run: loaded from an MCP server, built from user data, fetched from a registry
+- It needs **two hooks** (7.3 shows where they sit):
+  1. `wrap_model_call` adds the tool to the request, so the **model sees it**
+  2. `wrap_tool_call` hands over the tool object when the model calls it, so the agent **can run it**
+
+```python
+from langchain.tools import tool
+from langchain.agents import create_agent
+from langchain.agents.middleware import AgentMiddleware, ModelRequest, ToolCallRequest
+
+@tool
+def calculate_tip(bill_amount: float, tip_percentage: float = 20.0) -> str:
+    """Calculate the tip amount for a bill."""
+    tip = bill_amount * (tip_percentage / 100)
+    return f"Tip: ${tip:.2f}, Total: ${bill_amount + tip:.2f}"
+
+class DynamicToolMiddleware(AgentMiddleware):
+    def wrap_model_call(self, request: ModelRequest, handler):
+        # in real code: load from an MCP server, a database, ...
+        return handler(request.override(tools=[*request.tools, calculate_tip]))
+
+    def wrap_tool_call(self, request: ToolCallRequest, handler):
+        if request.tool_call["name"] == "calculate_tip":
+            return handler(request.override(tool=calculate_tip))
+        return handler(request)
+
+agent = create_agent(
+    model="openai:gpt-5-mini",
+    tools=[get_weather],                  # only the static tools
+    middleware=[DynamicToolMiddleware()],
+)
+agent.invoke({"messages": [("user", "Calculate a 20% tip on $85")]})
+# tool result: "Tip: $17.00, Total: $102.00"
+```
+
+- **Without `wrap_tool_call`** the run fails at the first model call, before any tool runs: `ValueError: Middleware added tools that the agent doesn't know how to execute. Unknown tools: ['calculate_tip']`
+- The error names a simpler fix for tools **known up front**: register them in `create_agent(tools=[...])`, or on the middleware's `tools` attribute, and filter (7.4)
+
+> [!WARNING]
+> **A pass-through `wrap_tool_call` turns that check off.**
+> - The agent checks for unknown tools only when **no** middleware has a `wrap_tool_call` hook
+> - *Checked on 1.5.0:* with an unrelated logging hook (`return handler(request)`) in the stack, there was no `ValueError`
+> - The model called the tool and got back `Error: calculate_tip is not a valid tool, try one of [get_weather].`
+> - If you add tools at run time, make sure some hook really supplies them
+
+✅ *Verified on `langchain` 1.5.0 with a scripted model: both hooks → the tip result; model hook only → the `ValueError`; model hook plus a logging hook → the error `ToolMessage` (details at the end).*
 
 ## 7.3 Middleware: cutting into the loop
 
@@ -504,6 +554,7 @@ agent = create_agent(model, tools, checkpointer=InMemorySaver(), middleware=[
   - HITL: interrupt, `get_state`, approve, edit (both shapes), reject, respond, a disallowed decision, resume without a checkpointer
 - **Not run against a live model:** the quality of a real summary and real tool-call choices. Class output was read from the notebook (cells 0 to 56)
 - **Details by section** (moved here from the ✅ markers):
+  - *7.2 Registering a tool at run time (2026-11-15):* run on `langchain` 1.5.0, `langgraph` 1.2.22 with a scripted `GenericFakeChatModel` that called `calculate_tip(bill_amount=85)`. Both hooks: the model saw `['get_weather', 'calculate_tip']` on both calls, the agent's tool node still held only `get_weather`, and the `ToolMessage` was `Tip: $17.00, Total: $102.00` (status `success`). `wrap_model_call` only: `ValueError` with "Unknown tools: ['calculate_tip'] / Registered tools: ['get_weather']" and the two fixes. `wrap_model_call` plus a pass-through `@wrap_tool_call`: no `ValueError`; the `ToolMessage` had status `error` and said `calculate_tip is not a valid tool`. The check lives in `langchain/agents/factory.py` (`DYNAMIC_TOOL_ERROR_TEMPLATE`, skipped when any `wrap_tool_call` exists)
   - *More `SummarizationMiddleware` settings:* Checked: `trigger=("messages", 4)` summarised once over three long turns. A **list** `[("tokens", 100000), ("messages", 4)]` also did (the second condition was enough). A **dict** `{"tokens": 10, "messages": 100}` did **not** (the second condition failed)
   - *More `SummarizationMiddleware` settings:* Checked: the default prompt is a long template. It starts "Context Extraction Assistant" and asks for four sections: `SESSION INTENT`, `SUMMARY`, `ARTIFACTS` and `NEXT STEPS`
   - *More `SummarizationMiddleware` settings:* Checked: with `summary_prompt="Summarise briefly:\n{messages}"`, the summariser received that text with the messages inserted as `<message type="human">...` blocks
@@ -517,5 +568,6 @@ agent = create_agent(model, tools, checkpointer=InMemorySaver(), middleware=[
 - Live-Class-2026, `MIddleware.ipynb` (cells 0 to 56), `Middleware-Architecture-Sketch.ipynb`, the whiteboards `Agent-Middleware-Architecture.pdf` and `Langchain-2-Updated.pdf`, and the folder README, all in `Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/`
 - `Assignment_2_Agents_and_Prebuilt_Middleware.ipynb` (questions only; the answers belong to later classes)
 - Section 7.9 and the corrections in 7.4 to 7.6 are from testing, not from the class sources
+- LangChain docs: [Tools](https://docs.langchain.com/oss/python/langchain/tools), section "Dynamic tool selection" (read 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "Registering a tool at run time" in 7.2. The pass-through pitfall is from testing
 
 Previous: [Chapter 6, Agents and memory](06-agents-and-memory.md) · Next: [Chapter 8, Prebuilt middleware: limits, fallback and PII](08-prebuilt-middleware-limits-fallback-and-pii.md)
