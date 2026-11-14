@@ -184,6 +184,13 @@ agent.invoke({"messages": [("user", "Show my account")], "authenticated": False}
 
 Long conversations keep growing the context. Summarization condenses the old part.
 
+- **Why bother if the model's window is big enough?** (docs) Models still do worse over long contexts:
+  - they get "distracted" by stale or off-topic content
+  - responses get slower, and every call costs more
+- Three ways to forget: **trim** (drop messages for the model call), **delete** (remove them from state for good, [Chapter 6](06-agents-and-memory.md) 6.4), **summarise** (replace old messages with a summary)
+
+![Summarise vs filter (LangChain docs): the oldest human and AI messages go to an LLM and come back as one Summary message, while the recent messages are kept or filtered as they are](images/summary.png)
+
 ```python
 from langchain.agents import create_agent
 from langchain.agents.middleware import SummarizationMiddleware
@@ -270,6 +277,8 @@ def keep_recent(state: AgentState, runtime):
         return None
     kept = trim_messages(msgs, strategy="last", token_counter=len, max_tokens=20,
                          start_on="human", include_system=True)   # never start mid tool-call
+    if not kept:            # no human message in the window (a long tool loop): leave history alone
+        return None
     return {"messages": [RemoveMessage(id=REMOVE_ALL_MESSAGES), *kept]}
 ```
 
@@ -285,6 +294,45 @@ def keep_recent(state: AgentState, runtime):
 - Lasting facts belong in the **store** ([Chapter 6](06-agents-and-memory.md)), not in a long thread
 
 ✅ *Verified offline over five turns with a checkpointer: the model received 1, 3, 3, 3, 3 messages: the window stayed bounded instead of growing to 9.*
+
+> [!WARNING]
+> **Without the `if not kept` guard this hook can erase the thread.** *Checked on 1.5.0:*
+> - In a run of five tool calls with a window of 4, the last 4 messages held no human message, so `trim_messages(start_on="human")` returned `[]`
+> - `REMOVE_ALL_MESSAGES` then wiped everything, the user's question included. The saved thread ended as `['ai']`
+> - With the guard, the history stayed intact (the trade-off: no trimming until the next human turn)
+> - This guard was missing from an earlier version of this example
+
+**The docs' hand-written version** (Short-term memory page): keep the first message plus a short recent window.
+
+```python
+from typing import Any
+from langchain.agents.middleware import before_model, AgentState
+from langchain.messages import RemoveMessage
+from langgraph.graph.message import REMOVE_ALL_MESSAGES
+from langgraph.runtime import Runtime
+
+@before_model
+def trim_messages(state: AgentState, runtime: Runtime) -> dict[str, Any] | None:
+    """Keep only the last few messages to fit context window."""
+    messages = state["messages"]
+    if len(messages) <= 3:
+        return None                                   # no changes needed
+    first_msg = messages[0]
+    recent_messages = messages[-3:] if len(messages) % 2 == 0 else messages[-4:]
+    return {"messages": [RemoveMessage(id=REMOVE_ALL_MESSAGES), first_msg, *recent_messages]}
+```
+
+- Keeping `messages[0]` keeps the opening facts ("my name is bob") the model would otherwise lose
+- **The `% 2` trick** picks 3 or 4 recent messages so the window still alternates human, AI, human after the first message. It assumes **strict** alternation
+- *Checked:* plain chat stayed valid (`['human', 'ai', 'human', 'ai', 'human']`)
+- **Name clash:** the docs call this hook `trim_messages`, the same name as the `langchain_core.messages` utility used in `keep_recent`
+  - In one file the later one wins (checked: `TypeError: 'trim_messages' object is not callable`). Rename the hook
+
+> [!WARNING]
+> **The parity trick breaks with parallel tool calls.**
+> - *Checked on 1.5.0:* after one AI message with two tool calls, the next model call got `['human', 'tool', 'ai', 'human']`
+> - That is a `ToolMessage` without its AI tool call. Most providers reject it
+> - For tool-using agents, use `trim_messages(..., start_on="human")` with the guard above
 
 ## 7.6 `HumanInTheLoopMiddleware`
 
@@ -497,6 +545,15 @@ def run_interactive_hitl_demo(agent, config):
 
 </details>
 
+<details class="qa"><summary>9. You trim history in a <code>before_model</code> hook. What can go wrong?</summary>
+
+- The window can start on a `ToolMessage` whose AI tool call was cut off. Most providers reject it
+- With `REMOVE_ALL_MESSAGES` the trim is **saved**: a bad window becomes permanent memory loss
+- `trim_messages(start_on="human")` can return `[]` mid tool-loop and wipe the thread unless you guard it
+- *Stronger answer:* to trim without losing history, cut only the call's input (`wrap_model_call` with `request.override(messages=...)`), keep lasting facts in the store, and test the hook on a tool-heavy transcript. *Added by Claude*
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"An HR agent can read any employee record for HR staff but only your own for others."* Cover where the role comes from, which hook filters tools, the in-tool check, and logging.
 
@@ -545,6 +602,7 @@ agent = create_agent(model, tools, checkpointer=InMemorySaver(), middleware=[
 6. Assignment 2 (NovaBank), the parts this chapter prepares you for. The assignment has no answer key:
    - A2 Q7: a realistic NovaBank `transfer_funds` situation for each of the four HITL decisions
    - B2.1: guard `transfer_funds` with all four decisions, resume with an `edit` that changes the amount, and confirm the edited amount was used (remember the `edited_action` shape)
+7. Run the docs' `trim_messages` hook on a chat where the model makes two parallel tool calls, and find the orphan `ToolMessage`. Then switch to `keep_recent` with the guard
 
 ## How this chapter was checked
 
@@ -554,6 +612,13 @@ agent = create_agent(model, tools, checkpointer=InMemorySaver(), middleware=[
   - HITL: interrupt, `get_state`, approve, edit (both shapes), reject, respond, a disallowed decision, resume without a checkpointer
 - **Not run against a live model:** the quality of a real summary and real tool-call choices. Class output was read from the notebook (cells 0 to 56)
 - **Details by section** (moved here from the ✅ markers):
+  - *7.5 trimming, from the Short-term memory docs page (2026-11-15):* run on `langchain` 1.5.0, `langgraph` 1.2.22 with a scripted model and `InMemorySaver`
+    - The docs' `trim_messages` hook over four plain turns: the model saw `['human']`, `['human', 'ai', 'human']`, then `['human', 'ai', 'human', 'ai', 'human']` twice
+    - The same hook after one AI message with two parallel tool calls: the next model call got `['human', 'tool', 'ai', 'human']`
+    - `keep_recent` without the guard, window 4, five sequential tool calls: `trim_messages` returned `[]` twice and the saved thread ended as `['ai']`. With the guard: the thread kept all 12 messages
+    - `keep_recent` with the guard (extracted from this file, window set to 3 for the test; the snippet uses 20), re-run on five plain turns: the model still received 1, 3, 3, 3, 3 messages. On five sequential tool calls it kept all 12 messages, starting with the user's question
+    - Running the docs' hook and `keep_recent` from one file: `TypeError: 'trim_messages' object is not callable` (the hook's name hid the utility)
+    - Interview Q9: a `wrap_model_call` hook with `request.override(messages=request.messages[-1:])` gave the model 1 message per call, while the checkpointer kept all 6
   - *7.2 Registering a tool at run time (2026-11-15):* run on `langchain` 1.5.0, `langgraph` 1.2.22 with a scripted `GenericFakeChatModel` that called `calculate_tip(bill_amount=85)`. Both hooks: the model saw `['get_weather', 'calculate_tip']` on both calls, the agent's tool node still held only `get_weather`, and the `ToolMessage` was `Tip: $17.00, Total: $102.00` (status `success`). `wrap_model_call` only: `ValueError` with "Unknown tools: ['calculate_tip'] / Registered tools: ['get_weather']" and the two fixes. `wrap_model_call` plus a pass-through `@wrap_tool_call`: no `ValueError`; the `ToolMessage` had status `error` and said `calculate_tip is not a valid tool`. The check lives in `langchain/agents/factory.py` (`DYNAMIC_TOOL_ERROR_TEMPLATE`, skipped when any `wrap_tool_call` exists)
   - *More `SummarizationMiddleware` settings:* Checked: `trigger=("messages", 4)` summarised once over three long turns. A **list** `[("tokens", 100000), ("messages", 4)]` also did (the second condition was enough). A **dict** `{"tokens": 10, "messages": 100}` did **not** (the second condition failed)
   - *More `SummarizationMiddleware` settings:* Checked: the default prompt is a long template. It starts "Context Extraction Assistant" and asks for four sections: `SESSION INTENT`, `SUMMARY`, `ARTIFACTS` and `NEXT STEPS`
@@ -568,6 +633,7 @@ agent = create_agent(model, tools, checkpointer=InMemorySaver(), middleware=[
 - Live-Class-2026, `MIddleware.ipynb` (cells 0 to 56), `Middleware-Architecture-Sketch.ipynb`, the whiteboards `Agent-Middleware-Architecture.pdf` and `Langchain-2-Updated.pdf`, and the folder README, all in `Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/`
 - `Assignment_2_Agents_and_Prebuilt_Middleware.ipynb` (questions only; the answers belong to later classes)
 - Section 7.9 and the corrections in 7.4 to 7.6 are from testing, not from the class sources
+- LangChain docs: [Short-term memory](https://docs.langchain.com/oss/python/langchain/short-term-memory), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`), for the 7.5 intro, the summary image (`images/summary.png`, copied from the page) and the hand-written trim pattern. The two trimming warnings are from testing
 - LangChain docs: [Tools](https://docs.langchain.com/oss/python/langchain/tools), section "Dynamic tool selection" (read 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "Registering a tool at run time" in 7.2. The pass-through pitfall is from testing
 
 Previous: [Chapter 6, Agents and memory](06-agents-and-memory.md) · Next: [Chapter 8, Prebuilt middleware: limits, fallback and PII](08-prebuilt-middleware-limits-fallback-and-pii.md)

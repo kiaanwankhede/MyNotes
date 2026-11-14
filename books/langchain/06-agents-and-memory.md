@@ -183,6 +183,9 @@ config = {"configurable": {"thread_id": str(uuid7())}}   # one new id per conver
 - **`InMemorySaver` lives in RAM.** No time limit, but it ends when the Python process ends
 - A persistent saver (for example Postgres) follows the same pattern
 - **Deployed on LangSmith?** A checkpointer is provided for you. Locally you must pass one, or `thread_id` does nothing
+- **A thread is like an email thread:** many interactions, one conversation. Short-term memory is scoped to one thread
+- **When memory is written and read** (docs): the agent's state is saved when the agent is invoked and each time a step (a model call, a tool call) completes. It is read at the start of each step
+- Short-term memory **is** the agent's state, mainly `messages`. Custom fields are saved with it too (`state_schema`, 6.6)
 
 ### `thread_id` vs `context`: two different jobs
 
@@ -233,7 +236,35 @@ print(state.next)                  # () when the run finished, otherwise the ste
 - Remove some: return `{"messages": [RemoveMessage(id=m.id) for m in messages[:2]]}` from a hook.
 - Remove all: `RemoveMessage(id=REMOVE_ALL_MESSAGES)` from `langgraph.graph.message`.
 - ✅ *Verified (details in "How this chapter was checked").*
-- Postgres saver install note: `langgraph-checkpoint-postgres "psycopg[binary]"`.
+- Deleting is **permanent**: the checkpointer saves the shorter history. Trimming for one model call only is in [Chapter 7](07-middleware.md), 7.5
+
+```python
+from langchain.messages import RemoveMessage
+from langchain.agents import AgentState
+from langchain.agents.middleware import after_model
+from langgraph.runtime import Runtime
+
+@after_model
+def delete_old_messages(state: AgentState, runtime: Runtime) -> dict | None:
+    """Remove old messages to keep the conversation manageable."""
+    messages = state["messages"]
+    if len(messages) > 2:
+        return {"messages": [RemoveMessage(id=m.id) for m in messages[:2]]}   # the earliest two
+    return None
+
+agent = create_agent(model, tools=[], middleware=[delete_old_messages], checkpointer=InMemorySaver())
+```
+
+- What the thread holds after each turn (checked, scripted model):
+  - `hi! I'm bob` → `[human "hi! I'm bob", ai "Hi Bob!"]`
+  - `write a short poem about cats` → `[human "write a short poem…", ai "cat poem"]`. The first turn is gone
+  - `what's my name?` → the model never sees "bob" again. Deleting is forgetting
+
+> [!WARNING]
+> **The remaining history must still be valid for the provider.**
+> - Some providers expect the history to **start with a user message**
+> - Most require an AI message with tool calls to be **followed by its tool results**
+> - Deleting "the first N" messages can cut between a tool call and its result. Check what is left, not just how many. *Source: LangChain docs, Short-term memory.*
 
 
 ## 6.5 Saver, store, cache or database?
@@ -340,7 +371,12 @@ with PostgresSaver.from_conn_string(DB_URI) as saver, PostgresStore.from_conn_st
 ```
 
 - Same agent code; only the objects change. `langgraph-checkpoint-sqlite` (`SqliteSaver`) is the lighter option for a single machine
-- *Not run here: the Postgres and SQLite packages were not installed in my sandbox. Check the LangGraph persistence docs for the current API before using.*
+- The saver half is in the docs (Short-term memory, "In production"):
+  - Install: `pip install -U langgraph-checkpoint-postgres "psycopg[binary]"`. The package installs `psycopg` 3 **without** extras; `[binary]` is the recommended add-on
+  - `PostgresSaver.from_conn_string(DB_URI)` as a context manager, then `.setup()` once to create the tables
+  - Other checkpointer libraries: SQLite, Postgres, Azure Cosmos DB
+- *Checked:* `SqliteSaver` for real. A thread saved through one saver was read back by a **new** saver and a **new** agent on the same file (a stand-in for a restart): the second agent saw `Hi! My name is Bob.`
+- *Not run:* Postgres (no server in the sandbox; `PostgresSaver` and `PostgresStore` were only imported or taken from the docs)
 
 ## 6.6 Putting it together: the full TripMate agent
 
@@ -691,11 +727,13 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
    - A1 Q4 on `stream_mode` (6.8) and Q5 on `name=` (6.6)
    - B1.1: two tools plus a checkpointer, proving memory across two `.invoke()` calls
    - B1.2: a `context_schema` with `account_tier` that a tool reads through `runtime.context`
+10. Add the `delete_old_messages` hook, chat three turns, and print the thread after each. Then explain why the agent forgot your name
+11. Swap `InMemorySaver` for `SqliteSaver` on a file, restart Python, and continue the same `thread_id`
 
 ## How this chapter was checked
 
 - Run offline with a stand-in model on `langchain` 1.4.7: the full agent assembly (tools, middleware, checkpointer, store, context schema, name), per-run context reaching tools and middleware, `InMemoryStore` put, get and search with a tuple namespace, `get_state`, and the SQLite save and get tools
-- **Not run against a live model or real APIs:** Open-Meteo, Tavily, a persistent saver, headless tools. Those are class statements
+- **Not run against a live model or real APIs:** Open-Meteo, Tavily, a Postgres saver, headless tools. Those are class statements
 - The TripMate real-tool code is not in the sources read for this chapter, so section 6.3 shows only my own SQLite example
 - **Details by section** (moved here from the ✅ markers):
   - *Deleting messages with `RemoveMessage`:* Checked: an `after_model` hook with a checkpointer dropped the first two messages, so after two turns the thread held `['b', '2']`; the remove-all hook left `[]`.
@@ -708,6 +746,10 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
     - 6.8 the `stream.values` loop printed User → Calling tools `['search']` → Agent
     - `create_agent` parameter list in 6.6 taken from its signature in `langchain` 1.5.0
     - **Not run:** live models, a LangSmith deployment (the automatic checkpointer is a docs statement), `MemoryMiddleware` and `SkillsMiddleware` with real `AGENTS.md` and `skills/` files
+  - *Update from the Short-term memory docs page (2026-11-15), same versions and fake model:*
+    - 6.4 `delete_old_messages` (`after_model`) with `InMemorySaver`: after three turns the thread held only the last turn; turn 3's model input had no "bob"
+    - 6.5 `SqliteSaver.from_conn_string(file)`: turn 1 through one saver and agent, turn 2 through a new saver and a new agent; the result held all four messages. Packages: `langgraph-checkpoint-sqlite` 3.1.3, `langgraph-checkpoint-postgres` 3.2.1, `psycopg` 3.3.9
+    - `PostgresSaver` imported and has `from_conn_string` and `setup`; not connected (no server)
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures, and the updated cheat sheet against 1.5.0
 - **Cheat sheet:** ran the checkpointer, store, thread id and `stream_mode="updates"`; the thread state held the messages. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
@@ -719,6 +761,7 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
 - Live-Class-2026, `MIddleware.ipynb` (cells 0 to 56) in the same folder
 - LangChain docs: [Agents](https://docs.langchain.com/oss/python/langchain/agents) (read in full 2026-11-15): agent anatomy, `AgentState`, invocation with `thread_id` and `context`, streaming, the harness capability areas. The three diagrams in `images/` are copied from this page
 - LangChain docs: `short-term-memory.mdx`, `streaming.mdx`, `event-streaming.mdx` (earlier batches)
+- LangChain docs: [Short-term memory](https://docs.langchain.com/oss/python/langchain/short-term-memory), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/short-term-memory.mdx`; docs.langchain.com was blocked from this environment). Used for 6.4 (threads, when memory is saved, deleting and the valid-history warning) and 6.5 (the Postgres saver install and setup)
 - Section 6.11, the SQLite example in 6.3, the state / context / store table in 6.6 and senior questions 10–11 are added by Claude and are not from these sources
 
 Previous: [Chapter 5, Tools](05-tools.md) · Next: [Chapter 7, Middleware](07-middleware.md)

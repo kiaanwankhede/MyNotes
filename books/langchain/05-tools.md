@@ -401,6 +401,26 @@ print(get_last_user_message.args)   # {}  (the model sees no arguments at all)
 
 ✅ *Verified on 1.5.0: inside an agent the tool returned the user's text. `execution_info` gave the thread id and attempt 1, and `server_info` was `None` (details at the end).*
 
+- **Typing it:** `ToolRuntime[Context, State]`, context type first. `ToolRuntime[None, MyState]` when there is no context schema
+- **Steering with a `Command` that holds only a `ToolMessage`:** a tool that is called too early can answer "call `update_user_info` first" without changing any state (docs, Short-term memory)
+
+```python
+from langchain.messages import ToolMessage
+from langgraph.types import Command
+# CustomContext holds user_id; CustomState(AgentState) adds user_name: str
+
+@tool
+def greet(runtime: ToolRuntime[CustomContext, CustomState]) -> str | Command:
+    """Use this to greet the user once you found their info."""
+    user_name = runtime.state.get("user_name")
+    if user_name is None:
+        return Command(update={"messages": [ToolMessage(
+            "Please call the 'update_user_info' tool first.", tool_call_id=runtime.tool_call_id)]})
+    return f"Hello {user_name}!"
+```
+
+- *Checked:* the model called `greet` first and got the instruction, then `update_user_info` stored the name, and the second `greet` returned `Hello John Smith!`
+
 > [!WARNING]
 > **`runtime.tools` is not "what the model can see".** *Checked:* with middleware hiding a tool from the model, `runtime.tools` still listed it. It holds every registered tool, so never use it to make permission decisions.
 
@@ -821,6 +841,7 @@ def refund_policy() -> str:
     - 5.9 migration: `Annotated[dict, InjectedState]`, `Annotated[BaseStore, InjectedStore()]`, `Annotated[str, InjectedToolCallId]` and `get_runtime()` all worked and were hidden from `.args`. A bare `state: InjectedState` raised `PydanticInvalidForJsonSchema` on `.args`
     - 5.10 returns: `str` → text; `dict` → JSON string; content-block list → `content_blocks` `['text', 'image']`. `Command` set `preferred_language`; the same without a `ToolMessage` raised `ValueError`. Parallel `Command`s on a plain list field raised `InvalidUpdateError`; with `operator.add` gave `['a', 'b']`
     - 5.10 `return_direct`: one and two direct calls ended on the `ToolMessage` (3 and 4 messages); direct + normal went back to the model (5 messages, last an `AIMessage`). `return_direct` + `Command` set `last_order_status` and ended on the `ToolMessage`
+    - 5.9 `greet` steering (from the Short-term memory page): with a Pydantic `CustomContext(user_id="user_123")` and `CustomState.user_name`, a scripted model called `greet`, `update_user_info`, `greet`; the tool messages were the instruction, `Successfully looked up user information`, then `Hello John Smith!`
     - Headless: `tool(name=..., description=..., args_schema=...)` raised `TypeError: tool() got an unexpected keyword argument 'name'`; `langchain.tools` has no `HeadlessTool`
     - Cheat sheet additions ran inside an agent: `set_tier` set `tier` to `gold` (alongside two parallel `add_tag` calls → `['a', 'b']`), and `refund_policy` ended the run on its text. All new 5.x blocks were extracted from this file and run as written (the model swapped for the fake)
   - *Steering which tool, and how many (2026-11-15):* Checked on `langchain-openai` 1.8.0 (dummy key, no call): `tool_choice="any"` was sent as `"required"`, a tool name became `{"type": "function", "function": {"name": "get_weather"}}`, and `parallel_tool_calls=False` was passed through. A scripted model streamed the arguments as `{"lo`, `cation": "B`, `oston"}`; summing the chunks gave `get_weather {'location': 'Boston'}`. `get_weather.invoke(tool_call)` returned a `ToolMessage` with the call's id. **Not run:** a real model's parallel calls
@@ -839,5 +860,6 @@ def refund_policy() -> str:
 - Live-Class-2026, `Student_Reference_Structured_Output_and_Tools.ipynb` and `Langchain_Till_Agents.ipynb` (Weekend 5). The `parse_docstring` and `runtime` findings are from testing
 - LangChain docs: [Models](https://docs.langchain.com/oss/python/langchain/models), section "Tool calling" (read 2026-11-15), for "Steering which tool, and how many" in 5.1 and the `tool.invoke(tool_call)` shortcut in 5.3
 - LangChain docs: [Tools](https://docs.langchain.com/oss/python/langchain/tools), read 2026-11-15 in full from its source, `langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/tools.mdx` plus its Python snippets in `src/snippets/code-samples/` (docs.langchain.com was blocked from this environment). Used for 5.4 names and type hints, 5.5 dict schema, the 5.9 runtime table and migration, "What a tool can return", the `return_direct` rules, and 7.2 runtime registration
+- LangChain docs: [Short-term memory](https://docs.langchain.com/oss/python/langchain/short-term-memory), read 2026-11-15 from its source (commit `04d4d4a`), for the `ToolRuntime[Context, State]` typing and the `greet` steering example in 5.9
 
 Previous: [Chapter 4](04-structured-output.md) · Next: [Chapter 6, Agents and memory](06-agents-and-memory.md)
