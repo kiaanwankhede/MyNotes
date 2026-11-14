@@ -332,6 +332,43 @@ result = supervisor_agent.invoke(Command(resume=resume), config)
 - Sub-agents run **inside tool functions**, so LangGraph cannot see them statically. `get_state(..., subgraphs=True)` on the main graph will not show their state. To inspect nested state during an interrupt, call the sub-agent from a **node** in a custom graph ([Chapter 14](14-handoffs-skills-router-and-custom-workflows.md))
 - Not run here
 
+### Streaming what each subagent says
+
+- With v3 event streaming ([Chapter 6](06-agents-and-memory.md), 6.8), a subagent's events flow at a **nested namespace** of the supervisor's stream
+- **`stream.subagents`** gives one handle per **named** inner `create_agent` run. The `name=` you pass is the label
+  - Each handle has `.name`, `.cause` (the tool call that started it), and its own `.messages`, `.values`, `.tool_calls`, `.output`
+
+```python
+weather_agent = create_agent(model, tools=[get_weather], name="weather_agent")   # name= is what labels it
+
+def call_weather(query: str) -> str:
+    """Query the weather agent."""
+    return weather_agent.invoke({"messages": [{"role": "user", "content": query}]})["messages"][-1].text
+
+supervisor = create_agent(model, tools=[call_weather], name="supervisor")
+
+stream = supervisor.stream_events(
+    {"messages": [{"role": "user", "content": "What's the weather in Boston?"}]}, version="v3")
+for subagent in stream.subagents:
+    print(f"{subagent.name}: ", end="")
+    for message in subagent.messages:
+        for token in message.text:
+            print(token, end="", flush=True)
+    print()
+# weather_agent: Boston is sunny
+```
+
+- *Checked:* the handle had `name='weather_agent'` and `cause={'type': 'toolCall', 'tool_call_id': 'a'}`, so a UI can show which tool call started which agent
+- **`stream.subgraphs`** covers **every** nested graph run, named agents included. `stream.subagents` is the focused view
+
+> [!WARNING]
+> **Plain subgraphs: the docs and the package disagree.**
+> - **Docs:** only named `create_agent` runs appear in `stream.subagents`, and a plain `StateGraph` compiled with `.compile(name="doubler")` gets that label in `graph_name`
+> - **Tested on `langchain` 1.5.0 / `langgraph` 1.2.22:** a plain `StateGraph` called from a tool of a **named** supervisor also appeared in `stream.subagents`
+> - It was labelled `supervisor` (the parent's name), and its `graph_name` was `supervisor` too
+> - With an **unnamed** supervisor it appeared only in `stream.subgraphs`, as `graph_name='tools'` (the node name). `doubler` never appeared
+> - So filter out handles whose name equals the parent's name, and don't rely on `.compile(name=...)` for labels
+
 ### Passing context down and results up
 
 - *Source: LangChain docs, `multi-agent/subagents-personal-assistant.mdx` (sections 7-8).*
@@ -510,6 +547,7 @@ supervisor = create_agent(model, [research], checkpointer=InMemorySaver())
   - *What the subagent receives: isolated or forked:* Checked: the isolated sub-agent saw only `["Recommend something similar"]`. The forked one saw the parent's earlier message, an **empty message**, and the new ask
   - *What the supervisor gets back:* Checked, and not mentioned in the notebook: **the extra key is silently dropped unless it is declared in the agent's state schema.** With a plain `create_agent`, `last_research_confidence` was **absent** from the final state. With `state_schema` including `last_research_confidence`, it was `0.92`. Declare every key a tool writes
   - *Human approval inside nested subagents:* Checked: resuming with a **dictionary keyed by interrupt id** worked. Both tools then ran, and the edited email went out with the subject **"Mockups reminder"**
+  - *Streaming what each subagent says (2026-11-15):* `langchain` 1.5.0, `langgraph` 1.2.22, a scripted streaming chat model. A supervisor named `supervisor` called `call_weather` (wrapping `weather_agent`) and `double_it` (wrapping a plain `StateGraph` compiled with `name="doubler"`) in one turn. `stream.subagents` → `('weather_agent', cause tool_call_id 'a')` and `('supervisor', cause tool_call_id 'b', output {'x': 'abab'})`. `stream.subgraphs` → `graph_name` `weather_agent` and `supervisor`. Supervisor unnamed, plain subgraph only: `stream.subagents` empty, `stream.subgraphs` → `graph_name='tools'`
   - *Subagent design decisions:* Checked (scripted model): a tool returning a `Command` copied the subagent's state key into the parent (`found` became `x-found`) and the tool message carried the subagent's text; an `Enum` argument accepted `"writer"` and rejected `"bogus"` with a `ValidationError`. Async jobs and `get_state(subgraphs=True)` were not run.
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran a supervisor that called a subagent wrapped as a tool and read `.text` from the subagent's last message. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
@@ -519,5 +557,6 @@ supervisor = create_agent(model, [research], checkpointer=InMemorySaver())
 - Live-Class-2026, `classes_transcription_summary/23 - 27 Sep - MCP In LangChain.md` (second half: why multi-agent, context isolation, patterns, Q&A)
 - Live-Class-2026, `Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/`: `README.md`, `00_Multi_Agent_Overview.ipynb`, `01_Subagents_Personal_Assistant.ipynb`, `LangChain_MultiAgent_Patterns_VSCode.ipynb`, and `test.py` (a scratch router snippet that calls undefined tools)
 - Sections marked *checked* and 13.9 are from testing
+- LangChain docs: [Event streaming](https://docs.langchain.com/oss/python/langchain/event-streaming), section "Streaming sub-agents" (read 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "Streaming what each subagent says". The plain-subgraph warning is from testing
 
 Previous: [Chapter 12, MCP in LangChain](12-mcp-in-langchain.md) · Next: [Chapter 14, Handoffs, skills, router and custom workflows](14-handoffs-skills-router-and-custom-workflows.md)

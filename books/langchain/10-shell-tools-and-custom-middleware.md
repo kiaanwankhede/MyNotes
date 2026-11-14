@@ -445,11 +445,63 @@ def check_blocked(state: AgentState, runtime: Runtime):
 
 **Custom stream transformers**
 
-- Middleware can register stream transformers through a `transformers` class attribute (needs `langchain>=1.3.2`). They are part of the event-streaming page and are not covered here
+- Middleware can register stream transformers through a `transformers` class attribute (needs `langchain>=1.3.2`)
+- **What a transformer is:** an object that watches the raw events of a v3 stream ([Chapter 6](06-agents-and-memory.md), 6.8) and builds a **projection** that isn't built in: retrieval progress, artifacts, domain events
+- Its projection appears under `stream.extensions["<key>"]`
+
+**A minimal one** (*added by Claude*: the docs use `ToolActivityTransformer` but don't define it, so this one is built from the installed `langgraph.stream.StreamTransformer` base class):
+
+```python
+from langgraph.stream import StreamTransformer, StreamChannel
+
+class ToolActivityTransformer(StreamTransformer):
+    """One line per tool start and finish, on stream.extensions["tool_activity"]."""
+    required_stream_modes = ("tools",)          # ask the run to emit tool events
+
+    def __init__(self, scope=()):
+        super().__init__(scope)                  # scope: () at the root, non-empty in a subgraph
+        self._log = StreamChannel()
+
+    def init(self):
+        return {"tool_activity": self._log}      # key → stream.extensions["tool_activity"]
+
+    def process(self, event):
+        if event["method"] == "tools" and event["params"]["namespace"] == list(self.scope):
+            d = event["params"]["data"]
+            if d["event"] == "tool-started":
+                self._log.push(f"started {d['tool_name']} {d['input']}")
+            elif d["event"] == "tool-finished":
+                self._log.push(f"finished {d['tool_call_id']}")
+        return True                              # True = keep the event for other projections
+```
+
+**Three ways to register it** (all three checked: each gave `["started get_weather {'city': 'Boston'}", 'finished c1']`):
+
+```python
+# 1. for one run
+stream = agent.stream_events(input, version="v3", transformers=[ToolActivityTransformer])
+
+# 2. on a middleware, so every run of agents using it gets the projection
+class ToolActivityMiddleware(AgentMiddleware):
+    transformers = (ToolActivityTransformer,)
+
+# 3. on the agent
+agent = create_agent(model, tools=[get_weather], transformers=[ToolActivityTransformer])
+
+stream = agent.stream_events(input, version="v3")     # with 2 or 3, no transformers= needed here
+for activity in stream.extensions["tool_activity"]:
+    print(activity)
+```
+
+- **What you register is a factory**, called as `factory(scope)`. A class works, because `ToolActivityTransformer(scope)` builds a fresh one per call. Fresh per call keeps each subgraph's projection separate
+- **Order on the compiled agent** (docs): the built-in `ToolCallTransformer` first, then middleware factories in middleware order, then `create_agent(transformers=...)`
+  - Built-in tool-call tracking stays in front; your own entries get the final word
+- The built-in `PIIMiddleware` uses this hook to redact the live stream ([Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md), 8.4)
+- The full transformer contract (async lane, `before_builtins`, `finalize`) is on the LangGraph "Build your own projection" docs page, which these notes have not read yet. The basics above are from the installed base class's docstring
 
 **The docs' best practices:** keep each middleware focused; handle errors gracefully; use node-style hooks for sequential logic (logging, validation) and wrap-style hooks for control flow (retry, fallback, caching); document custom state; unit test each on its own; remember execution order; prefer built-in middleware
 
-*Source: `langchain-ai/docs`, `src/oss/langchain/middleware/custom.mdx` (Agent jumps, Configure tracing, State updates, Custom stream transformers, Best practices).*
+*Source: `langchain-ai/docs`, `src/oss/langchain/middleware/custom.mdx` (Agent jumps, Configure tracing, State updates, Custom stream transformers, Best practices), and `event-streaming.mdx` (Custom updates, Register transformers on middleware), read 2026-11-15.*
 
 ## 10.12 Questions from the class
 
@@ -615,6 +667,7 @@ agent = create_agent(model, tools, middleware=[log_calls, time_tools, Guard()])
   - *10.11 Agent jumps, tracing and state composition:* Checked: a reply containing `BLOCKED` ended the run with the replacement message after **1** model call. After a tool turn it ended after **2** calls
   - *10.11 Agent jumps, tracing and state composition:* Checked: the same hook **without** `can_jump_to` also ended the run for `'end'`. The docs still ask you to declare it, and the other targets need it, so declare it
   - *10.11 Agent jumps, tracing and state composition:* Checked: `TracePolicy`, `omit_payload` and `configure_trace_policy` import from `langchain.agents.middleware`, a class with `trace_policy` builds, and the global set and clear run. Whether the trace really omits the payload needs LangSmith and was **not** checked
+  - *10.11 Custom stream transformers (2026-11-15):* `langchain` 1.5.0, `langgraph` 1.2.22, a scripted streaming chat model that called `get_weather(city="Boston")`. `ToolActivityTransformer` (extracted from this file) passed to `stream_events(transformers=...)`, set on a middleware's `transformers`, and passed to `create_agent(transformers=...)`: each gave `["started get_weather {'city': 'Boston'}", 'finished c1']` on `stream.extensions["tool_activity"]`. The ordering rule is the docs' statement, not tested
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran `before_model`, `wrap_tool_call` and an `AgentMiddleware` subclass together in one agent with a tool call. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
@@ -625,5 +678,6 @@ agent = create_agent(model, tools, middleware=[log_calls, time_tools, Guard()])
 - Live-Class-2026, `Weekend 08 - 15-16 Aug/README.md`
 - `Assignment_2_Agents_and_Prebuilt_Middleware.ipynb` (questions only)
 - Section 10.14 and the corrections marked *checked* are from testing, not from the class sources
+- LangChain docs: [Event streaming](https://docs.langchain.com/oss/python/langchain/event-streaming), "Custom updates" and "Register transformers on middleware" (read 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "Custom stream transformers" in 10.11. The transformer class itself is Claude's, built on the installed `StreamTransformer`
 
 Previous: [Chapter 9, Guardrails, to-do lists and tool resilience](09-guardrails-to-do-lists-and-tool-resilience.md) · Next: [Chapter 11, Runtime and human-in-the-loop](11-runtime-and-human-in-the-loop.md)

@@ -210,6 +210,10 @@ Three more switches (from the library signature, not explained in class 12):
 
 - `apply_to_input` (default `True`): clean user messages before the model
 - `apply_to_output` (default `False`): clean what the model replies
+  - It also cleans the **live stream** (needs `langchain>=1.3.2`), via a stream transformer
+  - That covers text deltas, tool-call args, tool outputs and state snapshots, before readers of `stream_events(version="v3")` see them ([Chapter 6](06-agents-and-memory.md), 6.8)
+  - Why it matters: `after_model` redaction happens after the model finishes, but streamed tokens reach the reader **while** it is still writing
+  - *Checked on 1.5.0:* with `PIIMiddleware("email", strategy="redact", apply_to_output=True)`, the streamed deltas read `Contact me at [REDACTED_EMAIL] today`. Without the flag the raw address streamed out
 - `apply_to_tool_results` (default `False`): clean what tools return
 
 > [!IMPORTANT]
@@ -428,6 +432,7 @@ middleware = [
 - **Not run against a live model:** a real provider outage and real tool-call choices. Class output was read from the notebook (cells 57 to 101)
 - The middlewares for to-do lists, tool selection, tool errors, tool retry and tool emulation are in [Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md)
 - **Details by section** (moved here from the ✅ markers):
+  - *8.4 `apply_to_output` on the stream (2026-11-15):* `langchain` 1.5.0, a scripted streaming model replying `Contact me at bob@example.com today`. Deltas read through `stream.interleave("messages", "values")`: with the flag `Contact me at [REDACTED_EMAIL] today` (final state the same), without it the raw address. Tool-call args, tool outputs and snapshots were not checked separately
   - *`ToolCallLimitMiddleware`: the exit behaviours and the error:* Checked* with `tool_name="t1"`, `run_limit=1` and a model that asked twice: `continue` gave a final model answer; `end` ended with the message `'t1' tool call limit reached: run limit exceeded (2/1 calls).`; `error` raised `ToolCallLimitExceededError` with the same text
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran all four middleware in one agent; the email address was redacted from the stored input; the call limits and the model fallback were constructed but not triggered. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
@@ -439,5 +444,6 @@ middleware = [
 - Live-Class-2026, `MIddleware.ipynb` (cells 57 to 97), the whiteboard `Agent-Middleware-Architecture.pdf` and the folder README in `Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/`
 - Live-Class-2026, `Weekend 07 - 8-9 Aug/README.md` (the other files in that folder are copies of Weekend 06 files)
 - Section 8.9 and the corrections in 8.3 and 8.4 are from testing, not from the class sources
+- LangChain docs: [Event streaming](https://docs.langchain.com/oss/python/langchain/event-streaming), "Register transformers on middleware" (read 2026-11-15 from its source, commit `04d4d4a`), for `apply_to_output` on the live stream in 8.4
 
 Previous: [Chapter 7, Middleware basics](07-middleware.md) · Next: [Chapter 9, Guardrails, to-do lists and tool resilience](09-guardrails-to-do-lists-and-tool-resilience.md)

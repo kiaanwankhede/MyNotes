@@ -540,9 +540,7 @@ for c in agent.stream(inp, stream_mode="custom", version="v2"):
 ```
 - A tool that calls `get_stream_writer()` cannot be run outside a LangGraph run.
 - **Event streaming (v3, experimental)**: `stream = agent.stream_events(input, version="v3")`.
-  - `stream.messages`: one stream per model call; `.text` deltas, `.reasoning`, `.tool_calls.get()`, `.output` (final `AIMessage`), `.node`.
-  - `stream.tool_calls`: tool run lifecycle (`tool_name`, `input`, `output_deltas`, `output`, `error`).
-  - `stream.values`, `stream.output` (final state), `stream.subgraphs`, `stream.extensions`.
+  - Returns a run object with typed **projections**: read each one on its own instead of unpacking `(mode, data)` tuples. Full detail below
   - Async code can read several projections together with `asyncio.gather`.
 - **Why stream at all:** `invoke` returns only at the end. With several tool calls, users need progress before that. A simple progress feed from full-state snapshots:
 
@@ -565,6 +563,79 @@ for snapshot in stream.values:                 # full state after each step
 ```
 
 - ✅ *Verified (details in "How this chapter was checked").*
+
+### Event streaming (v3): projections and rules
+
+- **Docs vs package:**
+  - The docs recommend v3 "for most application and frontend use cases"
+  - The package marks it experimental: every call raised `LangChainBetaWarning: The v3 streaming protocol on Pregel is experimental.` (tested on `langgraph` 1.2.22)
+
+```mermaid
+flowchart LR
+    R["stream_events(input, version='v3')"] --> M["each model call → stream.messages<br/>.text · .reasoning · .tool_calls · .output"]
+    R --> T["each tool run → stream.tool_calls<br/>input · output_deltas · output · error"]
+    R --> V["each step → stream.values"]
+    R --> O["end of run → stream.output"]
+    R --> N["nested runs → stream.subagents · stream.subgraphs"]
+    R --> X["your transformers → stream.extensions"]
+```
+
+| Projection | What you get |
+|---|---|
+| `stream.messages` | one stream per model call; `.text` deltas, `.reasoning`, `.tool_calls.get()`, `.output` (final `AIMessage`), `.node` |
+| `message.reasoning` | reasoning deltas, only if the model emits reasoning blocks ([Ch 3](03-models-messages-and-parameters.md)) |
+| `message.tool_calls` | tool-call **argument chunks** while the model writes the call; `.get()` gives the parsed calls |
+| `stream.tool_calls` | tool run lifecycle (`tool_name`, `input`, `output_deltas`, `output`, `error`) |
+| `stream.values` / `stream.output` | a state snapshot after each step / the final state |
+| `stream.subagents` / `stream.subgraphs` | named inner agents / every nested graph ([Ch 13](13-multi-agent-systems-and-subagents.md), 13.6) |
+| `stream.extensions` | projections from your own transformers ([Ch 10](10-shell-tools-and-custom-middleware.md), 10.11) |
+| `for event in stream` | raw protocol events: every channel, full envelope |
+
+**Reading a projection (sync):** iterate it for live deltas; read it once more for the final value.
+
+```python
+stream = agent.stream_events(input, version="v3")
+for message in stream.messages:
+    print(f"[{message.node}] ", end="")
+    for delta in message.text:                 # live: 'It ', 'is ', 'sunny ' ...
+        print(delta, end="", flush=True)
+    final_text = str(message.text)             # the whole text
+    calls = message.tool_calls.get()           # parsed tool calls, [] if none
+    usage = message.output.usage_metadata      # tokens live on the final AIMessage
+```
+
+- **Tool calls have two views:** `message.tool_calls` streams the **arguments** as the model writes them; `stream.tool_calls` follows the **execution** after the tool starts
+- Each argument chunk holds the call's `id`, `name` and **only the new part** of `args` (needs `langchain-core>=1.6.13`; older versions repeat all args so far)
+  - *Checked on 1.8.0:* `'{"ci'`, `'ty":'`, `' "Bo'`, `'ston'`, `'"}'`, then `.get()` → `{'city': 'Boston'}`
+
+> [!WARNING]
+> **In sync code, read projections together, not one after another.**
+> - *Checked on 1.5.0:* a full loop over `stream.messages` left a later `stream.tool_calls` loop **empty**, and the reverse order did the same
+> - The docs' own "Tool calls" example uses two loops in a row, so its lifecycle loop printed nothing
+> - Use `stream.interleave("messages", "tool_calls", "values")` (sync) or `asyncio.gather` over `astream_events` (async). Both returned every item
+
+```python
+for name, item in stream.interleave("messages", "tool_calls", "values"):
+    if name == "messages":
+        print(str(item.text))
+    elif name == "tool_calls":
+        print(item.tool_name, item.input)
+    elif name == "values":
+        print(len(item["messages"]))
+```
+
+> [!WARNING]
+> **The final message's `.content` is a list in v3.** *Checked:* `stream.output["messages"][-1].content` was `[{'type': 'text', 'text': 'done', 'index': 0}]`, while `invoke()` gave `'done'`. Read `.text`, which works for both.
+
+**Raw events** for channels without a projection, or for debugging:
+
+```python
+for event in stream:
+    print(event["method"], event["params"]["namespace"], event["params"]["data"])
+# methods seen: messages, values, tools ("tool-started", "tool-finished")
+```
+
+✅ *Verified on `langchain` 1.5.0 with a scripted model that streams text word by word and tool arguments in 4-character pieces (details at the end).*
 
 
 ## 6.9 Questions from the class
@@ -669,6 +740,15 @@ for snapshot in stream.values:                 # full state after each step
 
 </details>
 
+<details class="qa"><summary>12. Your chat UI streams the model's tokens, but tool progress never shows. Why?</summary>
+
+- With v3 in sync code, the UI probably loops over `stream.messages` and then over `stream.tool_calls`
+- The first loop consumes the run; the second finds nothing (checked on 1.5.0)
+- Fix: `stream.interleave("messages", "tool_calls")`, or async `astream_events` with `asyncio.gather`
+- *Stronger answer:* also show argument chunks from `message.tool_calls` so the user sees the call forming, and read text with `.text`, because v3's final `.content` is a list of blocks
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"A travel assistant must remember a user's preferences across trips but not leak them to other users."* Cover thread vs store, namespaces, what gets saved, and deletion.
 
@@ -750,6 +830,13 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
     - 6.4 `delete_old_messages` (`after_model`) with `InMemorySaver`: after three turns the thread held only the last turn; turn 3's model input had no "bob"
     - 6.5 `SqliteSaver.from_conn_string(file)`: turn 1 through one saver and agent, turn 2 through a new saver and a new agent; the result held all four messages. Packages: `langgraph-checkpoint-sqlite` 3.1.3, `langgraph-checkpoint-postgres` 3.2.1, `psycopg` 3.3.9
     - `PostgresSaver` imported and has `from_conn_string` and `setup`; not connected (no server)
+  - *Update from the Event streaming docs page (2026-11-15), `langchain` 1.5.0, `langchain-core` 1.8.0, `langgraph` 1.2.22, with a scripted chat model whose `_stream` yields text word by word and tool-call args in 4-character `tool_call_chunks`:*
+    - `stream.messages`: deltas `['It ', 'is ', 'sunny ', 'in ', 'SF']`, `str(message.text)` `'It is sunny in SF'`, `.tool_calls.get()` on the tool-call message, `message.output.usage_metadata` `{'input_tokens': 12, 'output_tokens': 5, 'total_tokens': 17}`, `.node` `model`
+    - `message.tool_calls` chunks: `'{"ci'`, `'ty":'`, `' "Bo'`, `'ston'`, `'"}'`; `.get()` → `{'city': 'Boston'}`
+    - `stream.tool_calls` read alone: `get_weather {'city': 'Boston'}`, `output_deltas` empty (the tool returns at once), `output` the result, `error` `None`. After a full `stream.messages` loop it was empty; `stream.messages` after a full `stream.tool_calls` loop was empty too
+    - `interleave("messages", "tool_calls", "values")` gave values, messages, values, tool_calls, values, messages, values. `astream_events` + `asyncio.gather` gave both messages and the tool call
+    - v3 final `.content` was a list of blocks; `invoke()` gave a string. `LangChainBetaWarning` on every v3 call
+    - Raw events: methods `messages`, `values`, `tools` (`tool-started`, `tool-finished`), namespace `[]` at the root
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures, and the updated cheat sheet against 1.5.0
 - **Cheat sheet:** ran the checkpointer, store, thread id and `stream_mode="updates"`; the thread state held the messages. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
@@ -761,6 +848,7 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
 - Live-Class-2026, `MIddleware.ipynb` (cells 0 to 56) in the same folder
 - LangChain docs: [Agents](https://docs.langchain.com/oss/python/langchain/agents) (read in full 2026-11-15): agent anatomy, `AgentState`, invocation with `thread_id` and `context`, streaming, the harness capability areas. The three diagrams in `images/` are copied from this page
 - LangChain docs: `short-term-memory.mdx`, `streaming.mdx`, `event-streaming.mdx` (earlier batches)
+- LangChain docs: [Event streaming](https://docs.langchain.com/oss/python/langchain/event-streaming), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/event-streaming.mdx`; docs.langchain.com was blocked from this environment). Used for "Event streaming (v3): projections and rules" in 6.8. The two ⚠️ boxes are from testing
 - LangChain docs: [Short-term memory](https://docs.langchain.com/oss/python/langchain/short-term-memory), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/short-term-memory.mdx`; docs.langchain.com was blocked from this environment). Used for 6.4 (threads, when memory is saved, deleting and the valid-history warning) and 6.5 (the Postgres saver install and setup)
 - Section 6.11, the SQLite example in 6.3, the state / context / store table in 6.6 and senior questions 10–11 are added by Claude and are not from these sources
 
