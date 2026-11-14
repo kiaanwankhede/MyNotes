@@ -1,9 +1,12 @@
 # Chapter 3: Models, messages and parameters
 
+*The model is the agent's reasoning engine: how to create it, tune it, call it and read what it returns.*
+
 > [!NOTE]
 > **📍 At a glance**
+> - **You will learn:** `init_chat_model` and model classes, the parameters that change cost and reliability, messages, `invoke` / `stream` / `batch`, reasoning effort, token tracking, prompt templates
 > - **You will build:** model calls with parameters, messages, streaming, batching and prompt templates
-> - **Level:** beginner · **Time:** about 40 minutes
+> - **Level:** beginner · **Time:** about 55 minutes
 
 **After this chapter you can:**
 
@@ -31,6 +34,33 @@ print(response.content)
 - Without LangChain you write different code for OpenAI, Claude, Groq, OpenRouter. LangChain puts them behind one interface
 - The "give me any LLM" pattern appears in other frameworks too (CrewAI's docs use it), so it transfers
 - **Models differ in capabilities:** tool calling, structured output, multimodality (text + images), reasoning. Look up the model's capability sheet before you plan around a feature ([Chapter 4](04-structured-output.md), section 4.7, shows `model.profile`)
+- **New model names work at once.** Provider packages pass the name straight to the provider's API, so a model released today needs no LangChain upgrade
+
+**Two ways to use a model**
+
+- **Inside an agent:** pass it to `create_agent(model=...)`; the agent loop calls it ([Chapter 6](06-agents-and-memory.md))
+- **Standalone:** call it yourself for one-off jobs (generate, classify, extract) with no agent at all
+- Same object, same interface in both. Start standalone, move into an agent when you need tools and a loop
+
+**Two ways to create one**
+
+| | `init_chat_model("provider:model")` | Model class, e.g. `ChatOpenAI(model=...)` |
+|---|---|---|
+| Install | `langchain` + the provider package | The provider package |
+| Switch provider | Change one string | Change the import and class |
+| Provider-only options | Passed through as keyword arguments | Every option, with autocomplete |
+| Pick it when | Provider-neutral code, config-driven names | You need provider-specific features (2.6 has Azure) |
+
+```python
+from langchain.chat_models import init_chat_model
+from langchain_openai import ChatOpenAI
+
+model_a = init_chat_model("openai:gpt-6.1-sol")
+model_b = ChatOpenAI(model="gpt-6.1-sol")        # same model, class form
+```
+
+> [!WARNING]
+> **Got a plain string back instead of an `AIMessage`?** You are using an old text-completion **LLM** class, not a chat model. LangChain chat model classes start with `Chat` (`ChatOpenAI`, `ChatAnthropic`). Use those.
 
 **Messages steer behaviour.** A system message and a human message go in as a list:
 
@@ -84,8 +114,8 @@ assert os.environ.get("OPENAI_API_KEY"), "Missing OPENAI_API_KEY -- check your .
 - **`api_key`:** optional. LangChain reads the standard variable (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, ...)
 - **`temperature`:** randomness and creativity. Low = steady, high = varied
 - **`max_tokens`:** caps the length of the reply
-- **`timeout`:** how long to wait for the model before giving up
-- **`max_retries`:** how many times to retry (default 6)
+- **`timeout`:** how long to wait for the model before giving up, in seconds
+- **`max_retries`:** how many times to retry a failed request (see "Retries in detail" below)
 
 ```python
 deterministic = init_chat_model("openai:gpt-5-mini", temperature=0.0, max_tokens=200, timeout=30)
@@ -95,6 +125,9 @@ prompt = "Describe a sunset in one creative sentence."
 print(deterministic.invoke(prompt).content)   # nearly identical on every run
 print(creative.invoke(prompt).content)        # varies run to run
 ```
+
+> [!WARNING]
+> **Check that your temperature was kept.** In `langchain-openai` 1.8.0, `ChatOpenAI` **silently sets `temperature` to `None`** for gpt-5 family models (`gpt-5-mini`, `gpt-5.4-mini`), with no warning, because those reasoning models do not take it. So the demo above, run on `gpt-5-mini`, sends no temperature at all; `gpt-4o-mini` keeps it. Print `model.temperature` after creating a model, and use `reasoning_effort` (below) to steer reasoning models instead. *Added by Claude; checked on the installed package.*
 
 - Car-dashboard picture: temperature = creative liberty, `max_tokens` = fuel ceiling on the reply, `timeout` = how long you wait at a red light, `max_retries` = how many times you retry starting the car
 - Common OpenRouter error: reply longer than the allowed limit. Raise `max_tokens`
@@ -112,6 +145,85 @@ print(creative.invoke(prompt).content)        # varies run to run
 paid_model = init_chat_model("openai:gpt-5-mini")
 # local_model = init_chat_model("ollama:llama3.2")   # runs on your machine, no API key
 ```
+
+- Pick local when data must not leave your machine, you run a custom model, or you want no per-call cost. Ollama is the easiest start
+
+### Retries in detail
+
+- Failed requests are retried with **exponential backoff and jitter** (each wait longer, slightly randomised)
+- **Retried:** network errors, rate limits (429), server errors (5xx)
+- **Not retried:** client errors such as 401 (bad key) and 404 (wrong model). Retrying cannot fix them
+- For long agent runs on shaky networks, the docs suggest `max_retries` of **10 to 15**, plus a checkpointer so progress survives a failure ([Chapter 6](06-agents-and-memory.md))
+
+```python
+model = init_chat_model(
+    "openai:gpt-6.1-sol",
+    temperature=0.7,
+    timeout=30,        # seconds
+    max_tokens=1000,
+    max_retries=6,     # say it explicitly; see the warning
+)
+```
+
+> [!WARNING]
+> **The default is not what the docs say for every provider.** The docs (and the class) give a default of **6**. In `langchain-openai` 1.8.0, `ChatOpenAI` leaves `max_retries` unset and the OpenAI SDK's own default of **2** applies. Always set `max_retries` yourself so behaviour does not change with a package version.
+
+### Provider-specific parameters
+
+- Each integration adds its own options beyond the standard set, for example `ChatOpenAI(use_responses_api=True)` picks OpenAI's Responses API over Chat Completions
+- Find them on the provider's chat model integration page; `init_chat_model` passes unknown keyword arguments on to the class
+
+### Reasoning effort
+
+- Reasoning models can be told **how hard to think**: categorical tiers (`"low"`, `"high"`) or a token budget; some can switch reasoning off
+- **`reasoning_effort`** is now a standard parameter (needs `langchain-core>=1.5.2` plus a recent provider package) on `ChatOpenAI`, `ChatAnthropic`, `ChatGoogleGenerativeAI`, `ChatBedrockConverse`, `ChatFireworks`, `ChatXAI`
+- Set it when you create the model **or** per call, like `temperature`; each provider translates it to its own API
+
+```python
+model = init_chat_model("openai:gpt-6.1-sol", reasoning_effort="low")   # default for this model
+reply = model.invoke("Why do parrots have colorful feathers?", reasoning_effort="high")  # this call only
+
+model.profile.get("reasoning_effort_levels")    # e.g. ['low', 'medium', 'high']
+model.profile.get("reasoning_effort_default")
+```
+
+- Native names still work: `ChatAnthropic(effort=...)`, `ChatGoogleGenerativeAI(thinking_level=...)`
+- Higher effort = more hidden reasoning tokens = higher cost and latency (3.5 shows how to see them)
+
+### OpenAI-compatible servers, routers and proxies
+
+- Many servers speak the OpenAI Chat Completions API (vLLM, Together AI, a company gateway). Point the OpenAI integration at them with `base_url`:
+
+```python
+model = init_chat_model(
+    model="MODEL_NAME",
+    model_provider="openai",
+    base_url="http://localhost:8000/v1",   # your server
+    api_key="YOUR_API_KEY",
+)
+```
+
+- Behind a corporate HTTP proxy: `ChatOpenAI(model=..., openai_proxy="http://proxy.example.com:8080")`. Proxy support varies by integration
+
+> [!WARNING]
+> `model_provider="openai"` follows the **official OpenAI spec**. Extra fields that routers and proxies add may be dropped. For OpenRouter use `ChatOpenRouter` (`langchain-openrouter`); for LiteLLM use `ChatLiteLLM` (`langchain-litellm`).
+
+### Choosing the model at run time
+
+- **Configurable model:** create it without a fixed model, then choose per call through `config`:
+
+```python
+configurable = init_chat_model(temperature=0)
+configurable.invoke("what's your name", config={"configurable": {"model": "gpt-5-nano"}})
+configurable.invoke("what's your name", config={"configurable": {"model": "claude-sonnet-4-6"}})
+```
+
+- `configurable_fields=("model", "model_provider", "temperature", "max_tokens")` and `config_prefix="first"` let several configurable models live in one chain (`"first_model"`, `"first_temperature"`)
+- You can still call `bind_tools` and `with_structured_output` on a configurable model
+- **Inside an agent**, choose the model per step with `@wrap_model_call` middleware and `request.override(model=...)`, for example a cheap model for short chats and a strong one for long ones ([Chapter 10](10-shell-tools-and-custom-middleware.md))
+
+> [!WARNING]
+> Dynamic model selection with structured output needs models that are **not** pre-bound (no `bind_tools` already called). Pass plain models to the middleware.
 
 > [!IMPORTANT]
 > **🏭 In production**
@@ -219,6 +331,59 @@ print(response.usage_metadata)
 - **Cost per user or session:** add up `usage_metadata` across the conversation. It is the exact billed number, not an estimate
 - Streaming, structured output and tool calling all build on reading these fields correctly
 
+### Adding up tokens across calls and models
+
+Collect usage for a whole job, even across providers, with a callback handler or a context manager:
+
+```python
+from langchain_core.callbacks import UsageMetadataCallbackHandler, get_usage_metadata_callback
+
+callback = UsageMetadataCallbackHandler()
+model_1.invoke("Hello", config={"callbacks": [callback]})
+model_2.invoke("Hello", config={"callbacks": [callback]})
+print(callback.usage_metadata)       # {'gpt-5.4-mini': {'input_tokens': 8, ...}, 'claude-haiku-4-5-...': {...}}
+
+with get_usage_metadata_callback() as cb:   # same result, scoped to a block
+    model_1.invoke("Hello")
+    model_2.invoke("Hello")
+    print(cb.usage_metadata)
+```
+
+- The result is keyed **by model name**, so a mixed-model pipeline shows each model's share
+- **Streaming:** OpenAI and Azure OpenAI chat completions only send token usage while streaming if you opt in (`stream_usage=True` on `ChatOpenAI`)
+- Prompt-cache hits show up here too, as `cache_read` in `input_token_details` (3.9)
+
+### Log probabilities
+
+- Some models return how likely each generated token was. Useful for confidence scores and classification thresholds
+
+```python
+model = init_chat_model("openai:gpt-6.1-sol").bind(logprobs=True)
+reply = model.invoke("Why do parrots talk?")
+reply.response_metadata["logprobs"]
+```
+
+### Server-side tools in the reply
+
+- Some providers run tools **on their own servers** (web search, code interpreter) inside one model call. You turn them on by binding a tool dict:
+
+```python
+model_with_search = init_chat_model("openai:gpt-5.4-mini").bind_tools([{"type": "web_search"}])
+reply = model_with_search.invoke("What was a positive news story from today?")
+reply.content_blocks
+# [{'type': 'server_tool_call', 'name': 'web_search', 'args': {...}, 'id': 'ws_abc123'},
+#  {'type': 'server_tool_result', 'tool_call_id': 'ws_abc123', 'status': 'success'},
+#  {'type': 'text', 'text': '...', 'annotations': [{'type': 'citation', 'url': '...'}]}]
+```
+
+- It is **one turn**: there are no `ToolMessage`s to send back, unlike your own tools ([Chapter 5](05-tools.md))
+- The blocks are provider-neutral (`server_tool_call`, `server_tool_result`), and text can carry **citations**
+
+### Multimodal output
+
+- Models that can produce images or audio return them as content blocks, for example `{"type": "image", "base64": "...", "mime_type": "image/jpeg"}`
+- Input works the same way: any multimodal chat model accepts the standard block format, the OpenAI chat format, and its own native format (3.5, Standard content blocks)
+
 ### Standard content blocks
 
 - *Source: LangChain docs, `messages.mdx` (Message content, Standard content blocks).*
@@ -259,6 +424,37 @@ print("Reconstructed:", full.content)
 ```
 
 - `.invoke()` was never called, yet the summed message has the same shape as one from `.invoke()`
+- The summed message can go straight into the history as context for the next call
+
+**Streaming more than text.** Each chunk has `content_blocks`, so reasoning and tool calls stream too:
+
+```python
+for chunk in model.stream("What color is the sky?"):
+    for block in chunk.content_blocks:
+        if block["type"] == "reasoning" and (r := block.get("reasoning")):
+            print(f"Reasoning: {r}")
+        elif block["type"] == "tool_call_chunk":
+            print(f"Tool call chunk: {block}")
+        elif block["type"] == "text":
+            print(block["text"])
+```
+
+> [!WARNING]
+> Streaming only helps if **every step** after the model can handle chunks. If any step needs the whole output in memory first (a parser, a database write), the user waits for that step anyway.
+
+**Events instead of chunks.** `astream_events()` reports what is happening, with the full message assembled for you at the end:
+
+```python
+async for event in model.astream_events("Hello"):
+    if event["event"] == "on_chat_model_start":
+        print("Input:", event["data"]["input"])
+    elif event["event"] == "on_chat_model_stream":
+        print("Token:", event["data"]["chunk"].text)
+    elif event["event"] == "on_chat_model_end":
+        print("Full message:", event["data"]["output"].text)
+```
+
+**Auto-streaming.** Inside an agent, code that calls `model.invoke()` still streams tokens when the agent itself is being streamed. LangChain switches to streaming internally, so `agent.stream(...)` shows the model's output live without you changing the call ([Chapter 6](06-agents-and-memory.md), 6.8).
 
 ## 3.7 Batching
 
@@ -280,13 +476,26 @@ for idx, response in model.batch_as_completed(questions):   # each result as it 
 - Requests must be **independent**, which is what lets them run in parallel
 - Batching and streaming combine through `batch_as_completed`
 - Example use: a Q&A portal collects questions over a short window (every 15 seconds) and batches them
+- Cap how many run at once, so you stay under the provider's rate limit:
+
+```python
+model.batch(list_of_inputs, config={"max_concurrency": 5})   # at most 5 calls in flight
+```
 
 **Does batching save tokens? No.**
 
 - Every request still carries its own system message and context
-- What it saves is **cost and time**, from two places:
-  - Provider batch APIs (OpenAI's batch endpoint runs jobs asynchronously at roughly 50% lower cost, class figure, a pricing decision by the provider)
-  - Fewer round trips and connections when a million calls are grouped
+- **`model.batch()` is not the provider's batch API.** Two different things share the word "batch":
+
+| | `model.batch()` / `batch_as_completed()` | Provider batch API (OpenAI, Anthropic) |
+|---|---|---|
+| What it is | Your code sends the calls **in parallel** | You upload a job; the provider runs it later |
+| Price | Normal price per call | Discounted (OpenAI quoted roughly 50% in class; check current pricing) |
+| Speed | Results in seconds | Results within hours (asynchronous) |
+| Saves | **Wall-clock time** | **Money** |
+| Use for | Many independent calls you need now | Large offline jobs: evals, bulk labelling |
+
+- So `model.batch()` saves time (calls overlap, fewer waits in a row), not money. For the discount, use the provider's batch endpoint directly
 
 **Three ways to call a model**
 
@@ -375,7 +584,10 @@ except ModelTimeoutError:
   - Limits requests per time, **not** request size or tokens.
 - **Model profile** (`langchain>=1.1`): `model.profile` is a dict of capabilities (`max_input_tokens`, `image_inputs`, `tool_calling`, ...).
   - Used by summarization middleware (context window) and by structured-output strategy choice.
-  - Data comes from the open-source models.dev project.
+  - Also lets your app gate inputs by modality and maximum input tokens, and lists `reasoning_effort_levels` (3.3).
+  - Data comes from the open-source models.dev project, plus LangChain's own additions shipped in each provider package.
+  - **Wrong or missing data?** Pass your own: `init_chat_model("...", profile={"max_input_tokens": 100_000, "tool_calling": True})`. To change a shared model safely, copy it: `model.model_copy(update={"profile": model.profile | {"key": "value"}})`.
+  - Profiles are **beta**: the format may change.
 - **Invocation config**: `model.invoke(x, config={"run_name": ..., "tags": [...], "metadata": {...}, "callbacks": [...]})`.
   - `tags` and `metadata` are inherited by sub-calls; `run_name` is not.
   - `max_concurrency` limits parallel calls in `batch()`.
@@ -414,6 +626,17 @@ set_llm_cache(InMemoryCache())                    # identical prompt → cached 
 | `.with_retry(...)` | retry a whole chain or step | don't stack with `max_retries` blindly: attempts multiply |
 | `set_llm_cache(...)` | repeated identical prompts (FAQ, tests, evals) | exact-match only; never cache per-user or time-sensitive answers; use Redis/SQLite caches across processes |
 | Provider **prompt caching** | long fixed prefix (system prompt, documents) resent every call | done by the provider, not LangChain; keep the stable part **first** and unchanged |
+
+**Prompt caching, three levels** (*source: LangChain docs, `models.mdx`*)
+
+| Level | How you turn it on | Examples |
+|---|---|---|
+| **Automatic** | Nothing: the provider discounts repeated prefixes | OpenAI, Gemini |
+| **Explicit provider controls** | You mark cache points | `ChatOpenAI` `prompt_cache_key`, Anthropic `cache_control` blocks, Bedrock `cachePoint` blocks |
+| **Middleware** (agents) | Add the middleware; it caches the stable system prompt and tool definitions | `AnthropicPromptCachingMiddleware`, `BedrockPromptCachingMiddleware` |
+
+- Caching usually starts only **above a minimum prompt length**, set by the provider
+- Hits appear in `usage_metadata` (`cache_read` in `input_token_details`), so you can check it is working
 
 - In an agent, prefer the middleware versions ([Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md): model fallback and retry middleware) so the policy applies to every model call in the loop
 - Model names change often: keep them in config and check the provider's current list
@@ -496,7 +719,9 @@ set_llm_cache(InMemoryCache())                    # identical prompt → cached 
 
 <details class="qa"><summary>5. Does batching save tokens?</summary>
 
-- No. Each request carries its own context. It saves cost (provider batch pricing) and time (fewer round trips)
+- No. Each request carries its own context
+- `model.batch()` runs calls in parallel from your side: it saves **time**, at normal price
+- *Stronger answer:* the discount comes from the provider's **asynchronous batch API**, a separate endpoint that returns results hours later; use it for offline evals and bulk jobs
 
 </details>
 
@@ -529,6 +754,22 @@ set_llm_cache(InMemoryCache())                    # identical prompt → cached 
 
 </details>
 
+<details class="qa"><summary>10. Which model errors are retried automatically, and which are not?</summary>
+
+- Retried with exponential backoff and jitter: network errors, 429 rate limits, 5xx server errors
+- Not retried: 401 bad key, 404 wrong model, other client errors
+- *Stronger answer:* set `max_retries` explicitly because defaults differ by package, and do not stack it with retry middleware without counting the total attempts
+
+</details>
+
+<details class="qa"><summary>11. Your reasoning model is accurate but slow and expensive. What do you change?</summary>
+
+- Lower `reasoning_effort` for easy calls; keep `"high"` only where it pays off
+- Read `output_token_details.reasoning` to see the hidden spend
+- *Stronger answer:* route by difficulty: a cheap model or low effort by default, escalate with `@wrap_model_call` middleware for hard cases, and measure on an eval set before and after
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"Build the model layer for an app that must switch between two providers without code changes."* Cover `init_chat_model`, config-driven model names, timeouts, retryable errors and a fallback (Ch8).
 
@@ -549,9 +790,12 @@ from langchain.chat_models import init_chat_model
 model = init_chat_model("openai:gpt-4o-mini", temperature=0, max_tokens=500, timeout=30)
 model.invoke("Hi")                                   # one call
 for chunk in model.stream("Hi"): print(chunk.content, end="")
-model.batch(["a", "b"], config={"max_concurrency": 4})
+model.batch(["a", "b"], config={"max_concurrency": 4})   # parallel, not discounted
 msgs = [("system", "Be brief"), ("human", "Explain RAG")]
 reply = model.invoke(msgs); reply.usage_metadata     # tokens
+init_chat_model("openai:gpt-6.1-sol", max_retries=6, reasoning_effort="low")   # explicit retries, effort
+init_chat_model("m", model_provider="openai", base_url="http://localhost:8000/v1")  # OpenAI-compatible server
+with get_usage_metadata_callback() as cb: model.invoke("Hi"); cb.usage_metadata  # tokens per model
 ```
 
 ## Recap
@@ -561,7 +805,9 @@ reply = model.invoke(msgs); reply.usage_metadata     # tokens
 - Messages: system, human, AI, tool. Objects or dicts, same result
 - Few-shot = example exchanges before the real question
 - A reply has text, tool calls, token usage and metadata
-- `.stream()` = feels fast. `.batch()` = parallel and cheaper, **not** fewer tokens
+- `.stream()` = feels fast. `.batch()` = parallel, so faster, **not** cheaper and **not** fewer tokens. The discount is the provider's separate batch API
+- Set `max_retries` and `timeout` explicitly: the default retry count differs by package
+- `reasoning_effort` trades cost for depth; `UsageMetadataCallbackHandler` adds up tokens across calls and models
 - Templates separate structure from variables. Double literal braces
 
 ## Practice
@@ -571,6 +817,9 @@ reply = model.invoke(msgs); reply.usage_metadata     # tokens
 3. Run `.stream()` on a long prompt, then `.batch()` on three questions, then `batch_as_completed()`
 4. Print `.usage_metadata` on a real call and compare with your provider's dashboard
 5. If you have the RAM, run the same prompt through a local Ollama model and compare quality
+6. Call two different models inside `get_usage_metadata_callback()` and read the per-model token totals
+7. Ask a reasoning model the same question at `reasoning_effort="low"` and `"high"`; compare answers and `output_token_details.reasoning`
+8. Print `model.max_retries` for the provider you use. Is it what you expected?
 
 ## How this chapter was checked
 
@@ -581,6 +830,14 @@ reply = model.invoke(msgs); reply.usage_metadata     # tokens
   - *Standard content blocks:* Checked (langchain 1.4.7): both parses above and the `content_blocks=` constructor gave exactly these shapes. `output_version` was **not** run: it is not an argument of the installed `init_chat_model` signature, so treat it as docs-only.
   - *3.9 Model errors, rate limits and profiles:* Checked (langchain 1.4.7, scripted model): the exception names and `is_retryable` values above; a limiter at 5 requests/s with a bucket of 1 made 4 calls take about 0.8 s; `disable_streaming=True` gave one chunk. `model.profile` was not run (needs the provider package).
   - *3.10 The LangChain error pages:* Checked (langchain-core): the coercion dict raised `ValueError: Message dict must contain 'role' and 'content' keys`; a template missing `name` raised `KeyError ... missing variables {'name'}`; a `(role, text)` tuple worked. The JavaScript-only pages were not run.
+  - *Update from the Models docs page (2026-11-15), run on `langchain` 1.5.0, `langchain-core` 1.8.0, `langchain-openai` 1.8.0 with fake models and a dummy key (no network):*
+    - 3.1 `init_chat_model("openai:...")` and `ChatOpenAI(...)` built the same class and model
+    - 3.3 `max_retries=6` reached the OpenAI client; **left unset, `ChatOpenAI.max_retries` was `None` and the SDK client used 2**. `temperature=0.7` was kept for `gpt-4o-mini`, `o3-mini`, `gpt-6.1-sol` and **dropped to `None` for `gpt-5-mini` and `gpt-5.4-mini`**. `reasoning_effort="low"`, `use_responses_api`, `openai_proxy` and `base_url` were all stored. A configurable model resolved to `gpt-5-nano` from `config`; the prefixed one resolved `first_model`, `first_temperature`, `first_max_tokens` (temperature checked on `gpt-4o`, for the reason above)
+    - 3.5 `UsageMetadataCallbackHandler` and `get_usage_metadata_callback` both gave per-model totals (18 and 29 tokens for two fake models); `.bind(logprobs=True)`, a `{"type": "web_search"}` tool dict and `stream_usage=True` were passed through
+    - 3.6 streamed `content_blocks` gave text blocks; `astream_events` gave start, 3 stream events, end
+    - 3.7 `batch` with `max_concurrency=2` kept input order
+    - 3.9 a custom `profile=` was used, and `model_copy` changed only the copy
+    - **Not run:** live calls, so the retry backoff, `reasoning_effort` per call, server-side tool content blocks, logprob values, prompt caching and the provider batch API discount are docs statements
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran `invoke`, `stream`, `batch` with `max_concurrency` and read `usage_metadata` on a fake model; `init_chat_model("openai:gpt-4o-mini", temperature=0, max_tokens=500, timeout=30)` was constructed, not called. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
@@ -590,7 +847,8 @@ reply = model.invoke(msgs); reply.usage_metadata     # tokens
 - Live-Class-2026, `classes_summary/08 - 19 Jul - Inside the Model.md`
 - Live-Class-2026, `classes_transcription_summary/08 - 19 Jul - LangChain - Inside the Model.md`
 - Live-Class-2026, notebooks `02_03_environment_models_messages_student_notes.ipynb`, `04_05_prompt_templates_structured_output_student_notes.ipynb` and `Revision_Parts_1-4.ipynb` in `Weekend 04 - 18-19 Jul/07-08 - .../Notebook For Reference/`
-- Section 3.13 is added by Claude and is not from these sources
+- LangChain docs: [Models](https://docs.langchain.com/oss/python/langchain/models) (read in full 2026-11-15): two ways to use and create models, retries, provider parameters, reasoning effort, streaming events, batch vs provider batch APIs, token usage, logprobs, server-side tools, profiles, prompt caching, base URL and proxies, configurable models
+- Section 3.13 and the two temperature / `max_retries` findings in 3.3 are added by Claude (checked on the installed packages) and are not from these sources
 - Live-Class-2026, `Weekend 04 - 18-19 Jul/.../Learning/Part 2 - Models/Langchain (1).ipynb` and `Langchain - Colab.ipynb` (reasoning-token output, three-SDK comparison). Both notebooks hold **API keys in their source**. They were not copied. Revoke any that are yours
 - Live-Class-2026, `Weekend 04 - 18-19 Jul/07-08 .../Langchain.pdf` and the Weekend 4 README (whiteboard summary of classes 7 and 8: family, harness, messages, structured output)
 

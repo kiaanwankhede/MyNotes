@@ -296,6 +296,36 @@ What the message trace shows, in order:
 - **Limit of this safety net:** `10` was the model's choice of a valid value, not what the user wanted. Hard business rules belong in the schema. Add a human check for anything consequential
 - Assignment Q17 asks for this exact walk-through for `party_size: int = Field(ge=1, le=20)` and "table for 50 please". Answer: propose 50, fail validation, feed the error back, retry until valid or `handle_errors` gives up
 
+### When the model refuses
+
+- *Source: LangChain docs, `models.mdx` (Handle a model refusal).*
+- A refusal (for example a safety-policy refusal) is not a broken constraint. Providers report it as a **successful** response, not an HTTP error
+- What you get back:
+  - **Plain model call:** the message, with a `refusal` content block
+  - **`with_structured_output`:** raises **`ModelRefusalError`** (from `langchain_core.exceptions`) instead of a confusing parsing error. `error.raw_message` holds the refused reply
+  - **`with_structured_output(..., include_raw=True)`:** no exception; the error comes back in `parsing_error`
+
+```python
+from langchain_core.exceptions import ModelRefusalError
+
+try:
+    movie = model.with_structured_output(Movie).invoke("Provide details about the movie Inception")
+except ModelRefusalError as error:
+    print(error)                   # Model refused to produce the requested output (category=...)
+    refused = error.raw_message
+
+out = model.with_structured_output(Movie, include_raw=True).invoke("...")
+if isinstance(out["parsing_error"], ModelRefusalError):
+    refused = out["raw"]
+```
+
+- Detected for OpenAI, Anthropic and Gemini models
+- **In an agent:** `response_format` raises `ModelRefusalError` only when you add `ModelRefusalMiddleware`
+- **Versions:** needs `langchain-core>=1.7.5` (and `langchain-google-genai>=4.4.3` for Gemini). After upgrading `langchain-core` to 1.7.5+, also upgrade `langchain-openai` to 1.7.4+, or Responses-API refusals raise a generic `ValueError`
+- Retrying a refusal with the same prompt rarely helps. Log it, and answer the user with a clear "cannot help with that" (*added by Claude*)
+
+✅ *Verified: `ModelRefusalError` and `ModelRefusalMiddleware` exist with these names in `langchain-core` 1.8.0 / `langchain` 1.5.0 (details at the end).*
+
 ### Assignment questions on this chapter (Q12 to Q17)
 
 - **Why is "please reply in JSON" weaker than `with_structured_output`?** A prompt only asks. A schema is validated before the result reaches your code
@@ -474,6 +504,7 @@ agent.invoke(inp)["structured_response"]                       # on an agent
   - *4.7 `model.profile`: check before you rely on it:* Checked from the installed `langchain-openai` data (no network call): `gpt-5-mini` reported `structured_output` and `tool_calling` as `True` with `max_input_tokens` 272000. `gpt-3.5-turbo` reported both as `False`. The profile is **static library data**, so it can lag a model's real abilities
   - *4.7 `model.profile`: check before you rely on it:* Checked: building an agent with `response_format=ToolStrategy(...)`, `ProviderStrategy(...)` or a bare schema on `gpt-3.5-turbo` **did not fail at construction**. Any failure shows up at call time, which was not run here
   - *Tool-strategy extras: tool message text and wrong multi-output:* Checked (scripted model): the final message was `Captured!`; a two-schema turn produced the error text twice, then the retry gave `task='y'`.
+  - *When the model refuses (2026-11-15):* Checked on `langchain-core` 1.8.0 / `langchain` 1.5.0: `ModelRefusalError` imports from `langchain_core.exceptions`, its default text is "Model refused to produce the requested output", and it carries `raw_message`; `ModelRefusalMiddleware` imports from `langchain.agents.middleware`. **Not run:** a real provider refusal, so the raise-vs-`parsing_error` behaviour and the version notes are from the docs
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran `create_agent(..., response_format=ToolStrategy(Movie))` and read `structured_response`; `with_structured_output(Movie)` was constructed on a real model object, not called. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
@@ -488,5 +519,6 @@ agent.invoke(inp)["structured_response"]                       # on an agent
 - Section 4.11 is added by Claude and is not from these sources
 - Live-Class-2026, `Weekend 05 - 25-26 Jul/09-10 .../Assignment & Questions/Student_Reference_Structured_Output_and_Tools.ipynb`, `Langchain_Structured_OUTPUT_COLAB.ipynb`, `Langchain_Till_Agents.ipynb`, and the whiteboard PDFs `Langchain-2.pdf` and `Langchain-Session-2.pdf` (text extracted)
 - The `method=` options, `profile` values and `handle_errors` behaviour in 4.2, 4.7 and 4.9 are from testing
+- LangChain docs: [Models](https://docs.langchain.com/oss/python/langchain/models), section "Handle a model refusal" (read 2026-11-15), for "When the model refuses" in 4.9
 
 Previous: [Chapter 3](03-models-messages-and-parameters.md) · Next: [Chapter 5, Tools](05-tools.md)

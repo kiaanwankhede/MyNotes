@@ -50,6 +50,55 @@ More points:
 - A plain Python function binds directly, with no hand-written JSON schema (unlike the raw approach in the LLM book). This works through LangChain's wrapper, not a bare OpenAI SDK object
 - A **docstring still matters**. Without one the model may guess the purpose wrongly
 - `bind_tools` takes a **list**. Add a second tool and the model picks from each tool's name and docstring
+- "Function calling" and "tool calling" mean the same thing
+
+### Steering which tool, and how many
+
+- *Source: LangChain docs, `models.mdx` (Tool calling).*
+- By default the model chooses freely: one tool, several, or none. Two settings change that:
+
+| Setting | Effect | Use when |
+|---|---|---|
+| `tool_choice="any"` | Must call **some** bound tool (sent to OpenAI as `"required"`) | The answer must come from a tool, never from memory |
+| `tool_choice="get_weather"` | Must call **that** tool | A fixed step, e.g. always look up the order first |
+| `parallel_tool_calls=False` | At most one tool call per turn (OpenAI, Anthropic) | Calls depend on each other, or side effects must happen in order |
+
+```python
+model.bind_tools([get_weather], tool_choice="any")
+model.bind_tools([get_weather], tool_choice="get_weather")
+model.bind_tools([get_weather], parallel_tool_calls=False)
+```
+
+- Most tool-calling models make **parallel calls by default** when the requests are independent:
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant M as Model
+    participant T as Tools
+    U->>M: "What's the weather in SF and NYC?"
+    par Parallel tool calls
+        M->>T: get_weather("San Francisco")
+        M->>T: get_weather("New York")
+    end
+    T-->>M: SF result
+    T-->>M: NYC result
+    M->>U: "SF: sunny, NYC: cloudy"
+```
+
+- Each call has its own `id`, and each `ToolMessage` must carry the matching `tool_call_id` (5.2)
+
+> [!WARNING]
+> Forcing a tool inside an agent loop can stop it from ever ending: if every turn **must** call a tool, the model never gets a turn to answer in plain text. Force tools on single model calls, not on the agent's main model. *Added by Claude.*
+
+**Streaming tool calls.** While streaming, a tool call arrives in pieces (`tool_call_chunks`): the name and id first, then the arguments a few characters at a time. Add the chunks together to get the finished calls:
+
+```python
+gathered = None
+for chunk in model_with_tools.stream("What's the weather in Boston?"):
+    gathered = chunk if gathered is None else gathered + chunk
+print(gathered.tool_calls)     # [{'name': 'get_weather', 'args': {'location': 'Boston'}, 'id': ...}]
+```
 
 ## 5.2 Returning the result: `ToolMessage`
 
@@ -123,6 +172,7 @@ print(model.invoke(conversation).content)
 ```
 
 - Request, run, wrap, send back = the loop from the LLM book
+- **Shortcut:** a `@tool` invoked with the whole tool call returns the `ToolMessage` for you, id included: `tools_by_name[call["name"]].invoke(call)`
 - **Look the tool up by the name the model gave** (`TOOLS[...]`). The class notebook called `get_weather(**args)` even when the model asked for `set_password`, which raises `TypeError: get_weather() got an unexpected keyword argument 'new_pass'`
 
 ## 5.4 A tool is a function with a job description
@@ -548,6 +598,7 @@ model.bind_tools([get_order])               # model can now request it
 - **Details by section** (moved here from the ✅ markers):
   - *5.6 Two names you cannot use: `config` and `runtime`:* Checked, and a refinement: `config` as a plain `str` argument defines fine and fails when called. **`runtime` as a plain `str` argument worked** (the call returned normally). What LangChain treats specially is a parameter **annotated as `ToolRuntime`**, which it hides from the model. Do not rely on a plain `runtime: str` working in other versions. Avoid both names
   - *Two whiteboard sketches (`Langchain-2-Updated.pdf`):* Checked* in [LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md): one tool use took **2 model calls**
+  - *Steering which tool, and how many (2026-11-15):* Checked on `langchain-openai` 1.8.0 (dummy key, no call): `tool_choice="any"` was sent as `"required"`, a tool name became `{"type": "function", "function": {"name": "get_weather"}}`, and `parallel_tool_calls=False` was passed through. A scripted model streamed the arguments as `{"lo`, `cation": "B`, `oston"}`; summing the chunks gave `get_weather {'location': 'Boston'}`. `get_weather.invoke(tool_call)` returned a `ToolMessage` with the call's id. **Not run:** a real model's parallel calls
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran a `ToolRuntime` tool inside an agent and confirmed `runtime.context.user_id` reached the tool; `bind_tools` was constructed, not called. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
@@ -561,5 +612,6 @@ model.bind_tools([get_order])               # model can now request it
 - Live-Class-2026, notebooks `02_03_environment_models_messages_student_notes.ipynb` and `Revision_Parts_1-4.ipynb` in `Weekend 04 - 18-19 Jul/07-08 - .../Notebook For Reference/`
 - Section 5.12 is added by Claude and is not from these sources
 - Live-Class-2026, `Student_Reference_Structured_Output_and_Tools.ipynb` and `Langchain_Till_Agents.ipynb` (Weekend 5). The `parse_docstring` and `runtime` findings are from testing
+- LangChain docs: [Models](https://docs.langchain.com/oss/python/langchain/models), section "Tool calling" (read 2026-11-15), for "Steering which tool, and how many" in 5.1 and the `tool.invoke(tool_call)` shortcut in 5.3
 
 Previous: [Chapter 4](04-structured-output.md) · Next: [Chapter 6, Agents and memory](06-agents-and-memory.md)
