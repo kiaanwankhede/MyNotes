@@ -1,28 +1,108 @@
 # Chapter 6: Agents and memory
 
+*Every `create_agent` argument in one place, the loop it runs, and how it remembers.*
+
 > [!NOTE]
 > **📍 At a glance**
+> - **You will learn:** the full anatomy of `create_agent`, agent state, `thread_id` vs `context`, the six harness capability areas, and saver vs store vs cache vs database
 > - **You will build:** the TripMate travel agent with tools, memory, a store and streaming
-> - **Level:** intermediate · **Time:** about 30 minutes
+> - **Level:** intermediate · **Time:** about 45 minutes
 > - **Builds on:** [Chapter 1](01-introduction-to-langchain.md) (first agent, checkpointer basics) and [Chapter 5](05-tools.md) (tools, `ToolRuntime`, `InMemoryStore`). Middleware is in [Chapter 7](07-middleware.md).
 
 **After this chapter you can:**
 
 - Explain why models, messages, structured output and tools were already "agents"
 - Describe the agentic loop and where tokens are spent
+- Name the six areas a harness covers, and which chapter teaches each
 - Tell memory saver, memory store, cache and database apart, and pick one
-- Give an agent short-term memory (`thread_id`) and long-term memory (`store`)
-- Assemble a full agent with tools, middleware, memory, context and a name
+- Give an agent short-term memory (`thread_id`) and long-term memory (`store`), and say how `thread_id` differs from `context`
+- Assemble a full agent with tools, middleware, memory, context, custom state and a name
 - Explain headless tools
 
 ## 6.1 Everything so far was already an agent
 
+> An agent is a model calling tools in a loop until a given task is complete. A harness is everything around that loop.
+
 - **Agent = model + harness.** Around the model you add tools, context, sub-agents, memory, skills, middleware: anything that helps you get the most from the model
+- **The harness has one job:** get the model **the right context at the right time** for the task. Every harness feature serves that job
 - Models, messages, structured output and tools were never separate topics. They are the **components** an agent is built from
 - What changed in the last few years? Essentially one thing: we got an artificial brain (the LLM). The rest of software engineering is the same
 - So the real question is always: **how do I best harness this model?**
 
+![Agent = model + harness (LangChain docs): the model sits inside a harness of system prompt, tools, context, memory, skills and subagents](images/agent_model_harness.svg)
+
+### The harness, by capability
+
+`create_agent` starts small. **Middleware** is how it grows: each piece handles one concern, hooks into the loop at the right moment, and combines freely with the others. Take what the use case needs and skip the rest.
+
+![Harness capabilities (LangChain docs): execution environment, context management, delegation and steering, with the middleware in each](images/agent_harness_capabilities.svg)
+
+| Area | What it solves | Typical middleware | Where in this book |
+|---|---|---|---|
+| **Execution environment** | Agent acts, not just talks: tools, a filesystem across turns, code execution, sandboxes | `FilesystemMiddleware`, shell tools | [Ch 10](10-shell-tools-and-custom-middleware.md) |
+| **Context management** | The context window fills up: compress history, load lasting memory, surface skills on demand, cache prompts | `SummarizationMiddleware`, memory, skills | [Ch 7](07-middleware.md), [Ch 14](14-handoffs-skills-router-and-custom-workflows.md) |
+| **Planning and delegation** | One context window is not enough: plan with a to-do list, hand pieces to subagents with clean contexts | `TodoListMiddleware`, subagents | [Ch 9](09-guardrails-to-do-lists-and-tool-resilience.md), [Ch 13](13-multi-agent-systems-and-subagents.md) |
+| **Fault tolerance** | Rate limits, timeouts, flaky APIs, without try/except in every tool | `ModelRetryMiddleware`, `ToolRetryMiddleware`, fallbacks, call limits | [Ch 8](08-prebuilt-middleware-limits-fallback-and-pii.md), [Ch 9](09-guardrails-to-do-lists-and-tool-resilience.md) |
+| **Guardrails** | Rules that must hold whatever the model does (applied in code, not in the prompt) | `PIIMiddleware`, content filters | [Ch 8](08-prebuilt-middleware-limits-fallback-and-pii.md), [Ch 9](09-guardrails-to-do-lists-and-tool-resilience.md) |
+| **Steering** | A human decides at risky points: destructive writes, expensive calls, judgment calls | `HumanInTheLoopMiddleware` | [Ch 7](07-middleware.md), [Ch 11](11-runtime-and-human-in-the-loop.md) |
+
+```python
+from langchain.agents import create_agent
+from langchain.agents.middleware import (
+    ModelRetryMiddleware, ToolRetryMiddleware, PIIMiddleware, HumanInTheLoopMiddleware,
+)
+
+agent = create_agent(
+    model="openai:gpt-6.1-sol",
+    tools=[search, write_file],
+    middleware=[
+        ModelRetryMiddleware(max_retries=3),                         # fault tolerance
+        ToolRetryMiddleware(max_retries=2),
+        PIIMiddleware("email"),                                      # guardrail
+        HumanInTheLoopMiddleware(interrupt_on={"write_file": True}), # steering
+    ],
+)
+```
+
+✅ *Verified: this stack builds on `langchain` 1.5.0 (details at the end).*
+
+**Borrowing Deep Agents pieces.** The `deepagents` package (`uv add deepagents`) ships middleware you can drop into a plain `create_agent`: a virtual filesystem, memory loaded from an `AGENTS.md` file, skills from a folder, and subagents.
+
+```python
+from langchain.agents import create_agent
+from langchain.agents.middleware import TodoListMiddleware
+from deepagents.backends import StateBackend
+from deepagents.middleware import FilesystemMiddleware, MemoryMiddleware, SkillsMiddleware
+from deepagents.middleware.subagents import SubAgentMiddleware
+
+backend = StateBackend()                       # files live in the agent's state
+agent = create_agent(
+    model="openai:gpt-6.1-sol",
+    tools=[search],
+    middleware=[
+        FilesystemMiddleware(backend=backend),                    # ls, read_file, write_file, edit_file, glob, grep...
+        MemoryMiddleware(backend=backend, sources=["./AGENTS.md"]),  # lasting instructions at startup
+        SkillsMiddleware(backend=backend, sources=["./skills/"]),    # domain know-how, loaded on demand
+        TodoListMiddleware(),                                     # planning
+        SubAgentMiddleware(backend=backend, subagents=[{
+            "name": "researcher",
+            "description": "Searches and returns a structured summary.",
+            "system_prompt": "Use the search tool to research the question and summarize key points.",
+            "tools": [search],
+        }]),
+    ],
+)
+```
+
+- Each subagent runs in its **own context**, so the main agent's window stays clean and work can run in parallel
+- `create_deep_agent(...)` pre-assembles this whole stack (plus summarization and prompt caching). Build it by hand with `create_agent` only when you want a **smaller** harness ([Ch 2](02-langchain-family-and-harness-engineering.md), 2.1)
+
+> [!WARNING]
+> **Two classes called `SummarizationMiddleware`.** `deepagents.middleware.SummarizationMiddleware` needs a `backend` and offloads old history into it. `langchain.agents.middleware.SummarizationMiddleware` ([Ch 7](07-middleware.md), 7.5) does not. Check the import line before copying an example.
+
 ## 6.2 The agentic loop, restated
+
+![The core agent loop (LangChain docs): request → model → action → tools → observation → model → result](images/core_agent_loop.svg)
 
 1. A message arrives
 2. The model decides: does it need a tool?
@@ -92,8 +172,46 @@ agent_with_memory.invoke({"messages": [("user", "Who am I?")]}, config=config)
 - **`thread_id`** is just a unique id so the checkpointer can find the right chat
   - Not a reserved keyword. It is the key the checkpointer looks for in the config
   - **Your application** creates and controls it, not the user. New session, new `thread_id`
+  - The docs generate it with `uuid7()`: unique, hard to guess, and time-ordered, so threads sort by creation
+
+```python
+from langchain_core.utils.uuid import uuid7
+
+config = {"configurable": {"thread_id": str(uuid7())}}   # one new id per conversation
+```
+
 - **`InMemorySaver` lives in RAM.** No time limit, but it ends when the Python process ends
 - A persistent saver (for example Postgres) follows the same pattern
+- **Deployed on LangSmith?** A checkpointer is provided for you. Locally you must pass one, or `thread_id` does nothing
+
+### `thread_id` vs `context`: two different jobs
+
+| | `thread_id` (in `config`) | `context` (with `context_schema`) |
+|---|---|---|
+| Scopes | The **conversation**: message history, checkpoints | One **run**: data tools and middleware read at call time |
+| Typical contents | A conversation id | User id, plan or tier, API keys, feature flags |
+| Lives | As long as the checkpointer keeps it | Only for that `invoke` |
+| Read by | The checkpointer | `runtime.context` in tools and middleware ([Ch 11](11-runtime-and-human-in-the-loop.md)) |
+| Who sets it | Your app | Your app, from auth, never from the model |
+
+```python
+from dataclasses import dataclass
+
+@dataclass
+class Context:
+    user_id: str
+
+agent = create_agent(model=model, tools=[...], context_schema=Context, checkpointer=InMemorySaver())
+agent.invoke(
+    {"messages": [{"role": "user", "content": "What's the weather in San Francisco?"}]},
+    config={"configurable": {"thread_id": str(uuid7())}},   # which conversation
+    context=Context(user_id="user-123"),                    # who is asking, this run
+)
+```
+
+- They are usually passed **together**: the thread says which chat, the context says who and with what rights
+
+✅ *Verified: `uuid7`, and `thread_id` with `context` in one call (details at the end).*
 - Before and after, as drawn on the whiteboard:
   - **Without a saver:** `invoke`, result, `invoke2`: "Empty and nothing remembered"
   - **With a saver:** `invoke2` has all the previous messages
@@ -226,6 +344,68 @@ with PostgresSaver.from_conn_string(DB_URI) as saver, PostgresStore.from_conn_st
 
 ## 6.6 Putting it together: the full TripMate agent
 
+### Every `create_agent` argument, in one place
+
+| Argument | Accepts | Use it for | Taught in |
+|---|---|---|---|
+| `model` | `"provider:model"` string **or** a model object (`init_chat_model(...)`, `ChatOpenAI(...)`) | The brain. Use an object when you need parameters (temperature, timeout, Azure deployment) | [Ch 2](02-langchain-family-and-harness-engineering.md) 2.6, [Ch 3](03-models-messages-and-parameters.md) |
+| `tools` | Plain Python functions, `@tool` tools, or **tool dicts** (JSON-schema style) | Actions the model may request | [Ch 5](05-tools.md) |
+| `system_prompt` | A string **or** a `SystemMessage` | Role and rules. For a prompt that changes per run, use middleware | [Ch 3](03-models-messages-and-parameters.md), [Ch 10](10-shell-tools-and-custom-middleware.md) |
+| `response_format` | A Pydantic model, dataclass, JSON schema or strategy | A validated answer in `result["structured_response"]` | [Ch 4](04-structured-output.md) |
+| `middleware` | A list of middleware | Growing the harness (6.1) | [Ch 7](07-middleware.md)–[10](10-shell-tools-and-custom-middleware.md) |
+| `state_schema` | A subclass of `AgentState` | Extra fields carried through the run | below |
+| `context_schema` | A dataclass or TypedDict | Per-run data for tools and middleware | 6.4, [Ch 11](11-runtime-and-human-in-the-loop.md) |
+| `checkpointer` | `InMemorySaver()`, a Postgres saver... | Short-term memory per `thread_id` | 6.4 |
+| `store` | `InMemoryStore()`, a Postgres store... | Long-term memory across threads | 6.5 |
+| `name` | A string | The agent's id when it is a subgraph inside a multi-agent system | below, [Ch 13](13-multi-agent-systems-and-subagents.md) |
+
+- `create_agent` also takes `interrupt_before`, `interrupt_after`, `debug` and `cache`. You will rarely need them: human approval is done with middleware ([Ch 11](11-runtime-and-human-in-the-loop.md))
+- `create_agent` returns a compiled LangGraph graph. That is why `invoke`, `stream`, `get_state` and checkpointers all work on it
+
+```python
+from pydantic import BaseModel
+
+class Answer(BaseModel):
+    summary: str
+    confidence: float
+
+agent = create_agent(model="openai:gpt-6.1-sol", tools=tools, response_format=Answer)
+result = agent.invoke({"messages": [{"role": "user", "content": "Summarize AI trends"}]})
+result["structured_response"]      # Answer(summary=..., confidence=...)
+```
+
+### Agent state: what the run carries
+
+- Every agent keeps its working data in **`AgentState`**, a typed dictionary
+- Built-in field: **`messages`**, the full conversation for the current thread. It is **append-only**: new messages are added, old ones are not replaced (deleting needs `RemoveMessage`, 6.4)
+- `structured_response` appears in the result when you set `response_format`
+- `AgentState` is also what every node-style hook receives (`before_model`, `after_model`...). A hook returns a dict of updates that is merged back in ([Ch 7](07-middleware.md))
+- To carry your own fields, subclass it and pass `state_schema=`:
+
+```python
+from langchain.agents import AgentState, create_agent
+
+class MyState(AgentState):
+    user_id: str
+    call_count: int
+
+agent = create_agent(model="openai:gpt-6.1-sol", tools=[], state_schema=MyState)
+```
+
+| Put it in… | When the value… | Example |
+|---|---|---|
+| **State** (`state_schema`) | Changes during the run, and should be saved with the thread | A call counter, a flag set by a tool |
+| **Context** (`context_schema`) | Is fixed for the run, and comes from your app | User id, account tier |
+| **Store** | Must last across conversations | Preferences |
+
+### Name your agent
+
+- `name="research_assistant"` gives the agent an id
+- It matters most when this agent becomes a **subgraph** inside a multi-agent system: traces, streamed chunks and handoffs show which agent did what ([Ch 13](13-multi-agent-systems-and-subagents.md))
+- The name is copied onto the agent's replies (`AIMessage.name`). Use short `snake_case` names, because some providers restrict the characters allowed in that field
+
+### The full TripMate agent
+
 ```python
 full_tripmate = create_agent(
     model="openai:gpt-5-mini",
@@ -328,6 +508,26 @@ for c in agent.stream(inp, stream_mode="custom", version="v2"):
   - `stream.tool_calls`: tool run lifecycle (`tool_name`, `input`, `output_deltas`, `output`, `error`).
   - `stream.values`, `stream.output` (final state), `stream.subgraphs`, `stream.extensions`.
   - Async code can read several projections together with `asyncio.gather`.
+- **Why stream at all:** `invoke` returns only at the end. With several tool calls, users need progress before that. A simple progress feed from full-state snapshots:
+
+```python
+from langchain.messages import AIMessage, HumanMessage
+
+stream = agent.stream_events(
+    {"messages": [{"role": "user", "content": "Search for AI news and summarize the findings"}]},
+    version="v3",
+)
+for snapshot in stream.values:                 # full state after each step
+    latest = snapshot["messages"][-1]
+    if latest.content:
+        if isinstance(latest, HumanMessage):
+            print(f"User: {latest.content}")
+        elif isinstance(latest, AIMessage):
+            print(f"Agent: {latest.content}")
+    elif latest.tool_calls:
+        print(f"Calling tools: {[tc['name'] for tc in latest.tool_calls]}")
+```
+
 - ✅ *Verified (details in "How this chapter was checked").*
 
 
@@ -378,25 +578,58 @@ for c in agent.stream(inp, stream_mode="custom", version="v2"):
 
 </details>
 
+<details class="qa"><summary>5. <code>thread_id</code> vs <code>context</code>?</summary>
+
+- `thread_id` (in `config`) picks the conversation the checkpointer loads and saves
+- `context` is per-run data (user id, tier, flags) that tools and middleware read via `runtime.context`
+- *Stronger answer:* both come from your app, never the model; you usually pass both, and `thread_id` does nothing without a checkpointer
+
+</details>
+
+<details class="qa"><summary>6. What does a harness actually do, and what areas does it cover?</summary>
+
+- Gets the model the right context at the right time
+- Six areas: execution environment, context management, planning and delegation, fault tolerance, guardrails, steering
+- *Stronger answer:* name one middleware per area and say which ones you would add first for a given risk (retries and a call limit before anything clever)
+
+</details>
+
 ### 🔴 Senior
 
-<details class="qa"><summary>5. What is <code>context_schema</code> for?</summary>
+<details class="qa"><summary>7. What is <code>context_schema</code> for?</summary>
 
 - Declares the per-run data you pass to tools and middleware (`runtime.context`)
 - *Stronger answer:* context is per invocation and immutable. It is the right place for user id and plan, not message history
 
 </details>
 
-<details class="qa"><summary>6. When would you add a cache?</summary>
+<details class="qa"><summary>8. When would you add a cache?</summary>
 
 - When the same expensive call repeats and the answer stays valid for a while (weather, currency rates)
 
 </details>
 
-<details class="qa"><summary>7. Design memory for an assistant used by 10,000 users.</summary>
+<details class="qa"><summary>9. Design memory for an assistant used by 10,000 users.</summary>
 
 - A database checkpointer keyed by `thread_id`, one thread per conversation; a store namespaced per user for durable facts
 - *Stronger answer:* trim or summarise long threads, encrypt and expire personal data, and add a "forget me" path
+
+</details>
+
+<details class="qa"><summary>10. A value must reach a tool. Do you put it in state, context or the store?</summary>
+
+- **Context:** fixed for the run and set by your app (user id, tier)
+- **State:** changes during the run and should be saved with the thread (a counter, a flag a tool sets)
+- **Store:** must outlive the conversation (preferences)
+- *Stronger answer:* anything security-relevant goes in context, because the model can influence state through tool calls but cannot touch context
+
+</details>
+
+<details class="qa"><summary>11. <code>create_deep_agent</code> or <code>create_agent</code> plus Deep Agents middleware?</summary>
+
+- `create_deep_agent`: the full stack pre-assembled (filesystem, summarization, subagents, prompt caching)
+- Hand-built: pick only the pieces you need, for a smaller prompt and fewer tools
+- *Stronger answer:* start hand-built for focused agents, since every extra tool and prompt section costs tokens and confuses tool choice; reach for the full stack for long, open-ended research or coding work
 
 </details>
 
@@ -419,20 +652,28 @@ Not in the course material. Established practice, but check current docs.
 ```python
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.store.memory import InMemoryStore
-agent = create_agent(model, tools, checkpointer=InMemorySaver(), store=InMemoryStore())
-cfg = {"configurable": {"thread_id": "trip-42"}}
-agent.invoke({"messages": [("user", "I prefer aisle seats")]}, cfg)
+from langchain_core.utils.uuid import uuid7
+agent = create_agent(model, tools, system_prompt="...",          # str or SystemMessage
+                     middleware=[...], response_format=Answer,     # harness, typed answer
+                     state_schema=MyState, context_schema=Ctx,     # run data / per-run data
+                     checkpointer=InMemorySaver(), store=InMemoryStore(), name="trip_agent")
+cfg = {"configurable": {"thread_id": str(uuid7())}}               # which conversation
+agent.invoke({"messages": [("user", "I prefer aisle seats")]}, cfg, context=Ctx(user_id="u1"))
 for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
+# state = changes in the run · context = fixed per run · store = across conversations
 ```
 
 ## Recap
 
 - Agent = model + harness. Models, messages, structured output and tools are its parts
+- The harness's job: the right context at the right time. It grows through middleware across six areas: execution environment, context management, planning and delegation, fault tolerance, guardrails, steering
 - The loop: message, model decides, tool runs, result goes **back to the model**, repeat, then final answer
 - Tool use costs at least two model calls. Tools themselves cost no tokens
 - Default = no memory. Add `checkpointer` + `thread_id`
 - Saver = one chat. Store = about a user, across chats. Cache = repeat calls. Database = everything else
 - `store`, `context_schema`, `middleware`, `name` go into `create_agent` alongside tools and the checkpointer
+- `thread_id` = which conversation. `context` = who is asking, this run. State = what changes during the run (`state_schema`)
+- `name` matters when the agent becomes a subgraph in a multi-agent system
 - Headless tools: defined on the server, run on the user's device
 
 ## Practice
@@ -443,11 +684,13 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
 4. Walk through the TripMate build: real weather, real search, real SQLite persistence
 5. Revise saver vs store vs cache vs database until the differences are automatic
 6. Print `get_state(config).values["messages"]` for a thread and read it
-7. Assignment 2 (NovaBank banking assistant), the parts this chapter prepares you for. The assignment has no answer key:
-   - A1 Q1 to Q3: describe the loop; what else `thread_id` needs; `thread_id` vs `context`
+7. Add a `state_schema` with a `call_count` field and a `before_model` hook that increments it; print it from `get_state`
+8. Give an agent `ModelRetryMiddleware`, `PIIMiddleware("email")` and `HumanInTheLoopMiddleware`, then say which harness area each covers
+9. Assignment 2 (NovaBank banking assistant), the parts this chapter prepares you for. The assignment has no answer key:
+   - A1 Q1 to Q3: describe the loop; what else `thread_id` needs; `thread_id` vs `context` (6.4)
+   - A1 Q4 on `stream_mode` (6.8) and Q5 on `name=` (6.6)
    - B1.1: two tools plus a checkpointer, proving memory across two `.invoke()` calls
    - B1.2: a `context_schema` with `account_tier` that a tool reads through `runtime.context`
-   - (A1 Q4 on `stream_mode` and Q5 on `name=` are not taught in the sources read so far)
 
 ## How this chapter was checked
 
@@ -457,7 +700,15 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
 - **Details by section** (moved here from the ✅ markers):
   - *Deleting messages with `RemoveMessage`:* Checked: an `after_model` hook with a checkpointer dropped the first two messages, so after two turns the thread held `['b', '2']`; the remove-all hook left `[]`.
   - *6.8 Streaming an agent:* Checked (scripted model, langchain 1.4.7): the v2 chunk keys; `updates` gave `model, tools, model`; `values` gave 4 snapshots; `messages` gave tuples; `GraphOutput.interrupts` was `()`; `custom` printed both writer lines; v3 `stream.messages` gave text `It is sunny` and tool call `get_weather {'city': 'SF'}`. **Observed:** in sync code, reading `stream.messages` first left `stream.tool_calls` empty. Use `stream.interleave("messages", "tool_calls")` to get both in order (tested in Ch16), plus `stream.interrupted` and `stream.interrupts` for a paused run.
-- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
+  - *Update from the Agents docs page (2026-11-15), run on `langchain` 1.5.0 and `deepagents` 0.7.38 with a scripted fake chat model (no keys, no network):*
+    - 6.1 middleware stack (`ModelRetryMiddleware`, `ToolRetryMiddleware`, `PIIMiddleware`, `HumanInTheLoopMiddleware`) compiled
+    - 6.1 Deep Agents pieces inside `create_agent` built and ran; `FilesystemMiddleware` added `ls`, `read_file`, `write_file`, `edit_file`, `delete`, `glob`, `grep`, `execute`; `SubAgentMiddleware` added `task`
+    - 6.4 `uuid7()` gave a time-ordered id; one call with `thread_id` and `context` let a tool read `user-123` and saved 4 messages to the thread
+    - 6.6 `response_format=Answer` returned `Answer(summary='AI grows', confidence=0.8)`; `state_schema` + a `before_model` hook counted 2 model calls; `name="research_assistant"` appeared on the graph and on `AIMessage.name`
+    - 6.8 the `stream.values` loop printed User → Calling tools `['search']` → Agent
+    - `create_agent` parameter list in 6.6 taken from its signature in `langchain` 1.5.0
+    - **Not run:** live models, a LangSmith deployment (the automatic checkpointer is a docs statement), `MemoryMiddleware` and `SkillsMiddleware` with real `AGENTS.md` and `skills/` files
+- The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures, and the updated cheat sheet against 1.5.0
 - **Cheat sheet:** ran the checkpointer, store, thread id and `stream_mode="updates"`; the thread state held the messages. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
 ## Sources and further reading
@@ -466,6 +717,8 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
 - Live-Class-2026, `classes_transcription_summary/11 - 01 Aug - LangChain - Agents, Memory, Middleware.md`
 - Live-Class-2026, whiteboards `Langchain-2-Updated.pdf` and `Agent-Middleware-Architecture.pdf` in `Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/`
 - Live-Class-2026, `MIddleware.ipynb` (cells 0 to 56) in the same folder
-- Section 6.11 and the SQLite example in 6.3 are added by Claude and are not from these sources
+- LangChain docs: [Agents](https://docs.langchain.com/oss/python/langchain/agents) (read in full 2026-11-15): agent anatomy, `AgentState`, invocation with `thread_id` and `context`, streaming, the harness capability areas. The three diagrams in `images/` are copied from this page
+- LangChain docs: `short-term-memory.mdx`, `streaming.mdx`, `event-streaming.mdx` (earlier batches)
+- Section 6.11, the SQLite example in 6.3, the state / context / store table in 6.6 and senior questions 10–11 are added by Claude and are not from these sources
 
 Previous: [Chapter 5, Tools](05-tools.md) · Next: [Chapter 7, Middleware](07-middleware.md)
