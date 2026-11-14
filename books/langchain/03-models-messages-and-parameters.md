@@ -251,6 +251,8 @@ Four message types:
 - **Human:** the user's input
 - **AI:** the model's earlier reply
 - **Tool:** a tool's result, sent back to the model ([Chapter 5](05-tools.md))
+  - `ToolMessage(content=..., tool_call_id=...)`: the id **must** match the tool call it answers
+  - The docs list `name` as required, but the class accepts it missing (`name=None`). Set it anyway; it makes traces easier to read
 
 Good to know:
 
@@ -276,6 +278,7 @@ from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 - Plain text: one standalone request, no history
 - Message objects: multi-turn, multimodal, system instructions
 - A dict with no `content`, or an unknown `role`, raises an error (`MESSAGE_COERCION_FAILURE`)
+- **Import path:** v1 docs use `from langchain.messages import ...`. It is the same classes as `langchain_core.messages`, so either works
 
 `HumanMessage` has two optional fields:
 
@@ -283,6 +286,8 @@ from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 HumanMessage(content="Hi, how are you?", name="mayank", id="user_1234")
 # name: label who is speaking in a multi-user chat. id: stable message identifier
 ```
+
+- `name` is honoured by some providers and **ignored by others**. Do not rely on it to separate users; check the provider's reference
 
 ### Few-shot prompting
 
@@ -304,6 +309,58 @@ response = model.invoke(messages)
 
 - Fine for restoring **real** conversation history
 - Not a trick to make the model "believe" it agreed to something. A made-up `AIMessage` is treated as real context either way
+
+### Sending images, PDFs, audio and video
+
+- *Source: LangChain docs, `messages.mdx` (Multimodal).*
+- A multimodal message is a list of content blocks: a `text` block plus one block per file
+- Each file can come from three places:
+
+| Type | `url` | `base64` (+ `mime_type`, required) | `file_id` (uploaded to the provider) |
+|---|---|---|---|
+| `image` | ✅ | ✅ `image/jpeg`, `image/png` | ✅ |
+| `file` (PDF and other documents) | ✅ | ✅ `application/pdf` | ✅ |
+| `audio` | — | ✅ `audio/wav`, `audio/mpeg` | ✅ |
+| `video` | — | ✅ `video/mp4`, `video/webm` | ✅ |
+
+*(The docs' examples show URL input for images and files only. The block definitions accept a URL for audio and video too, but provider support varies.)*
+
+```python
+message = {
+    "role": "user",
+    "content": [
+        {"type": "text", "text": "Describe the content of this document."},
+        {"type": "file", "base64": pdf_b64, "mime_type": "application/pdf"},
+    ],
+}
+image = {"type": "image", "url": "https://example.com/path/to/image.jpg"}
+by_id = {"type": "image", "file_id": "file-abc123"}
+```
+
+- Extra provider keys go at the top level of the block or under `"extras": {...}`. Example: OpenAI needs a **filename** for PDFs
+- `text-plain` blocks carry document text (`.txt`, `.md`) with a `mime_type` such as `text/markdown`
+
+> [!WARNING]
+> Not every model takes every file type, and each provider has size limits. Check the provider's reference (and `model.profile`, e.g. `image_inputs`, 3.9) before you build a feature on it.
+
+### Saving and restoring messages
+
+- To store a conversation and resume it later, turn messages into plain dicts and back:
+
+```python
+from langchain.messages import HumanMessage
+from langchain_core.load import dumpd, load
+
+serialized = dumpd(HumanMessage("What is the capital of France?"))  # plain dict: lc, type, id, kwargs
+restored = load(serialized)                                         # a HumanMessage again
+```
+
+- In an agent you rarely need this: a checkpointer saves the thread for you ([Chapter 6](06-agents-and-memory.md))
+
+> [!CAUTION]
+> **`load()` creates Python objects and can trigger side effects while doing it.** Never call it on data from an untrusted or unauthenticated source: a user upload, a public API, a shared bucket. For data you do not control, store and validate plain `{"role", "content"}` dicts instead.
+
+✅ *Verified: `dumpd` / `load` round trip (details at the end).*
 
 ## 3.5 What comes back: the full `AIMessage`
 
@@ -382,25 +439,52 @@ reply.content_blocks
 ### Multimodal output
 
 - Models that can produce images or audio return them as content blocks, for example `{"type": "image", "base64": "...", "mime_type": "image/jpeg"}`
-- Input works the same way: any multimodal chat model accepts the standard block format, the OpenAI chat format, and its own native format (3.5, Standard content blocks)
+- Input works the same way: any multimodal chat model accepts the standard block format, the OpenAI chat format, and its own native format (3.4, Sending images, PDFs, audio and video)
 
 ### Standard content blocks
 
-- *Source: LangChain docs, `messages.mdx` (Message content, Standard content blocks).*
+- *Source: LangChain docs, `messages.mdx` (Message content, Standard content blocks, Content block reference).*
+- **`content` can hold three things:**
+  1. a plain string
+  2. a list of blocks in the **provider's own** format (e.g. OpenAI's `image_url`)
+  3. a list of LangChain's **standard** blocks
 - `message.content` is whatever the provider returned (string or provider-shaped list).
 - `message.content_blocks` parses it **lazily** into one standard shape, whatever the provider.
   - Anthropic `thinking` + `signature` becomes `{"type": "reasoning", "reasoning": ..., "extras": {"signature": ...}}`.
   - OpenAI `reasoning` with a `summary` list becomes one `reasoning` block per summary item, keeping the `id`.
   - The parser uses `response_metadata["model_provider"]` to pick the rules.
-- You can also **build** a message from standard blocks:
+- `content_blocks` (new in v1) is an **extra view**, not a replacement: `content` still works as before
+- You can also **build** a message from standard blocks. It still fills `content`, but with a type-checked shape:
+
 ```python
 HumanMessage(content_blocks=[
     {"type": "text", "text": "Describe this"},
     {"type": "image", "url": "https://example.com/i.jpg"},
 ])
 ```
+
 - To store standard blocks in `content` itself (for apps outside LangChain), set env `LC_OUTPUT_VERSION=v1` or pass `output_version="v1"` to the model.
 - ✅ *Verified (details in "How this chapter was checked").*
+
+**Every block type, at a glance**
+
+| Group | `type` | Holds |
+|---|---|---|
+| Core | `text` | `text`, plus `annotations` (e.g. citations) |
+| Core | `reasoning` | The model's reasoning steps, provider data in `extras` |
+| Core | `refusal` | A refusal the **provider** reported (OpenAI refusal part, Anthropic `stop_reason="refusal"`, Gemini safety block). A refusal written as ordinary text is not detected. Needs `langchain-core>=1.7.5` ([Chapter 4](04-structured-output.md), 4.9) |
+| Multimodal | `image`, `audio`, `video`, `file` | `url`, `base64` + `mime_type`, or `id` |
+| Multimodal | `text-plain` | Document text with a `mime_type` |
+| Tool calling | `tool_call` | `name`, `args`, `id` |
+| Tool calling | `tool_call_chunk` | Streaming fragments: `args` may be half-written JSON, plus `index` ([Chapter 5](05-tools.md), 5.1) |
+| Tool calling | `invalid_tool_call` | A call whose arguments failed to parse, with `error` |
+| Server-side tools | `server_tool_call`, `server_tool_call_chunk`, `server_tool_result` | Provider-run tools; the result has `status` `"success"` or `"error"` (3.5) |
+| Provider-specific | `non_standard` | Anything without a standard type yet, in `value` |
+
+- **Malformed tool calls** are kept on `message.invalid_tool_calls` (name, raw `args`, `error`), separate from `message.tool_calls`. Check it when a model "called a tool" but nothing ran
+
+> [!WARNING]
+> **Do not build logic on `non_standard`.** When `langchain-core` adds a standard type for a payload, it moves out of `non_standard` into the new type. Branch on `block["type"]`, and upgrade provider packages **together** with `langchain-core`.
 
 ## 3.6 Streaming: it feels fast
 
@@ -770,6 +854,22 @@ set_llm_cache(InMemoryCache())                    # identical prompt → cached 
 
 </details>
 
+<details class="qa"><summary>12. <code>content</code> vs <code>content_blocks</code>?</summary>
+
+- `content` is whatever the provider returned: a string or provider-shaped blocks
+- `content_blocks` parses it into LangChain's standard types (text, reasoning, refusal, image, tool call...)
+- *Stronger answer:* write provider-neutral code against `content_blocks` and branch on `type`; never depend on `non_standard`, because payloads move out of it as standard types are added
+
+</details>
+
+<details class="qa"><summary>13. How do you store chat history safely, and what is the risk with <code>load()</code>?</summary>
+
+- `dumpd()` / `load()` round-trip message objects; in an agent a checkpointer does it for you
+- `load()` builds Python objects and can trigger side effects
+- *Stronger answer:* only `load()` data you wrote and control; for anything from users or other systems, store plain role/content dicts and validate them
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"Build the model layer for an app that must switch between two providers without code changes."* Cover `init_chat_model`, config-driven model names, timeouts, retryable errors and a fallback (Ch8).
 
@@ -796,6 +896,10 @@ reply = model.invoke(msgs); reply.usage_metadata     # tokens
 init_chat_model("openai:gpt-6.1-sol", max_retries=6, reasoning_effort="low")   # explicit retries, effort
 init_chat_model("m", model_provider="openai", base_url="http://localhost:8000/v1")  # OpenAI-compatible server
 with get_usage_metadata_callback() as cb: model.invoke("Hi"); cb.usage_metadata  # tokens per model
+img = {"type": "image", "base64": b64, "mime_type": "image/png"}                 # url= / file_id= also work
+model.invoke([{"role": "user", "content": [{"type": "text", "text": "Describe"}, img]}])
+[b["type"] for b in reply.content_blocks]          # text, reasoning, refusal, tool_call, non_standard...
+restored = load(dumpd(msg))                         # only on data you control
 ```
 
 ## Recap
@@ -803,6 +907,8 @@ with get_usage_metadata_callback() as cb: model.invoke("Hi"); cb.usage_metadata 
 - `init_chat_model("provider:model")` = one entry point for all providers
 - Parameters: `temperature`, `max_tokens`, `timeout`, `max_retries`
 - Messages: system, human, AI, tool. Objects or dicts, same result
+- Files go in as `image` / `file` / `audio` / `video` blocks, by URL, base64 (+ `mime_type`) or provider file id
+- `content_blocks` = the standard view of `content`; branch on `type`. `dumpd` / `load` save history, but never `load()` untrusted data
 - Few-shot = example exchanges before the real question
 - A reply has text, tool calls, token usage and metadata
 - `.stream()` = feels fast. `.batch()` = parallel, so faster, **not** cheaper and **not** fewer tokens. The discount is the provider's separate batch API
@@ -827,7 +933,8 @@ with get_usage_metadata_callback() as cb: model.invoke("Hi"); cb.usage_metadata 
 - Run offline with a stand-in model on `langchain` 1.4.7: message dicts, tuples, bad `role` and missing `content` errors, `name` and `id`, `.batch()`, `.batch_as_completed()`, prompt template filling, the unescaped-brace `KeyError`, the doubled-brace fix, `MessagesPlaceholder`
 - **Not run against a live model:** temperature behaviour, token counts, OpenRouter limits, provider batch pricing. Those are class figures
 - **Details by section** (moved here from the ✅ markers):
-  - *Standard content blocks:* Checked (langchain 1.4.7): both parses above and the `content_blocks=` constructor gave exactly these shapes. `output_version` was **not** run: it is not an argument of the installed `init_chat_model` signature, so treat it as docs-only.
+  - *Standard content blocks:* Checked (langchain 1.4.7): both parses above and the `content_blocks=` constructor gave exactly these shapes. Re-checked 2026-11-15 on `langchain-core` 1.8.0 / `langchain-openai` 1.8.0: **`output_version="v1"` is now accepted** (`init_chat_model("openai:gpt-5-nano", output_version="v1").output_version == "v1"`); on 1.4.7 it was not in the signature.
+  - *Messages docs page update (2026-11-15), `langchain-core` 1.8.0:* `dumpd` gave a dict with `lc`, `type`, `id`, `kwargs` and `load` restored an equal `HumanMessage`; `ToolMessage(content=..., tool_call_id=...)` worked with `name=None`; a message built with `content_blocks=` had them in `content`; an unknown block type parsed as `non_standard`; a malformed call sat in `invalid_tool_calls` with its `error`; `langchain.messages.HumanMessage` is the `langchain_core` class; the PDF dict message (with `extras.filename`) was accepted by a fake model and parsed as `text` + `file`, and `image` (URL and file id), `audio`, `video` and `text-plain` blocks kept their types. **Not run:** real multimodal calls (provider format support and size limits are docs statements)
   - *3.9 Model errors, rate limits and profiles:* Checked (langchain 1.4.7, scripted model): the exception names and `is_retryable` values above; a limiter at 5 requests/s with a bucket of 1 made 4 calls take about 0.8 s; `disable_streaming=True` gave one chunk. `model.profile` was not run (needs the provider package).
   - *3.10 The LangChain error pages:* Checked (langchain-core): the coercion dict raised `ValueError: Message dict must contain 'role' and 'content' keys`; a template missing `name` raised `KeyError ... missing variables {'name'}`; a `(role, text)` tuple worked. The JavaScript-only pages were not run.
   - *Update from the Models docs page (2026-11-15), run on `langchain` 1.5.0, `langchain-core` 1.8.0, `langchain-openai` 1.8.0 with fake models and a dummy key (no network):*
@@ -848,6 +955,7 @@ with get_usage_metadata_callback() as cb: model.invoke("Hi"); cb.usage_metadata 
 - Live-Class-2026, `classes_transcription_summary/08 - 19 Jul - LangChain - Inside the Model.md`
 - Live-Class-2026, notebooks `02_03_environment_models_messages_student_notes.ipynb`, `04_05_prompt_templates_structured_output_student_notes.ipynb` and `Revision_Parts_1-4.ipynb` in `Weekend 04 - 18-19 Jul/07-08 - .../Notebook For Reference/`
 - LangChain docs: [Models](https://docs.langchain.com/oss/python/langchain/models) (read in full 2026-11-15): two ways to use and create models, retries, provider parameters, reasoning effort, streaming events, batch vs provider batch APIs, token usage, logprobs, server-side tools, profiles, prompt caching, base URL and proxies, configurable models
+- LangChain docs: [Messages](https://docs.langchain.com/oss/python/langchain/messages) (read in full 2026-11-15): message types and fields, multimodal input, standard content blocks and the block reference, serialization
 - Section 3.13 and the two temperature / `max_retries` findings in 3.3 are added by Claude (checked on the installed packages) and are not from these sources
 - Live-Class-2026, `Weekend 04 - 18-19 Jul/.../Learning/Part 2 - Models/Langchain (1).ipynb` and `Langchain - Colab.ipynb` (reasoning-token output, three-SDK comparison). Both notebooks hold **API keys in their source**. They were not copied. Revoke any that are yours
 - Live-Class-2026, `Weekend 04 - 18-19 Jul/07-08 .../Langchain.pdf` and the Weekend 4 README (whiteboard summary of classes 7 and 8: family, harness, messages, structured output)
