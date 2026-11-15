@@ -208,6 +208,13 @@ async with MCPAdapter(transport) as adapter:
 - `EmbeddedResource` text becomes a text block. A blob becomes an image or file block by mime type
 - `AudioContent` is **not yet supported** and raises `NotImplementedError`
 - Only text was run here. The rest is from the notebook's table
+  - **Update (2026-11-15), images checked:** a FastMCP tool returning `["Here is the page:", Image(data=png, format="png")]` reached LangChain as two blocks: `text`, then `image` with `mime_type="image/png"` and the data in `base64`
+
+```python
+for block in tool_message.content_blocks:
+    if block["type"] == "image":
+        print(block["mime_type"], block["base64"][:20])
+```
 
 **Structured data** *(checked)*. For `get_seat_map`:
 
@@ -256,6 +263,26 @@ async with MCPAdapter(transport) as adapter:
 - A **checkpointer** and a `thread_id` are needed to pause and resume ([Chapter 11](11-runtime-and-human-in-the-loop.md), 11.11)
 - **Caveat:** an annotation is a hint from the server's author. A server can leave it off. Treat it as one input, not a guarantee
 
+**Gate on the arguments too** (docs). `InterruptOnConfig(when=...)` gets each pending call, so a tool can run freely for safe inputs and pause only for risky ones:
+
+```python
+from langchain.agents.middleware import HumanInTheLoopMiddleware
+from langchain.agents.middleware.human_in_the_loop import InterruptOnConfig
+
+PROTECTED = ("/etc/", "/prod/")
+
+def needs_approval(request) -> bool:              # request.tool_call has name, args, id
+    return request.tool_call["args"].get("path", "").startswith(PROTECTED)
+
+gate = InterruptOnConfig(allowed_decisions=["approve", "reject"], when=needs_approval)
+agent = create_agent(model, tools,
+                     middleware=[HumanInTheLoopMiddleware(interrupt_on={"delete_file": gate})],
+                     checkpointer=InMemorySaver())
+```
+
+- *Checked:* `delete_file("/tmp/scratch.txt")` ran without a pause; `delete_file("/prod/db.sqlite")` paused
+- Combine both checks: `is_destructive(tool)` picks **which** tools get a gate, `when` decides **which calls** of them pause
+
 ## 12.7 Elicitation as a LangGraph interrupt
 
 - **Elicitation:** a server pauses a tool call to ask the user something ([MCP, Chapter 3](../mcp/03-lifecycle-json-rpc-and-capability-negotiation.md), 3.9)
@@ -274,7 +301,7 @@ adapter → server: tools/call again, with the answer
 server → adapter: final result
 ```
 
-*Not run end to end here. The shape is from the class notebook.*
+*The shape is from the class notebook. Now run end to end below ("A modern elicitation, built and run").*
 
 ### Why the class demo showed an error
 
@@ -286,7 +313,7 @@ The notebook's own output for the elicitation cell was `status: error`, with the
 
 **Two ways that work** *(checked)*:
 
-1. **Make the server return its request as an `InputRequiredResult`.** The installed library's documentation names this route. *Not built or run here*
+1. **Make the server return its request as an `InputRequiredResult`.** The installed library's documentation names this route. *Built and run below*
 2. **Give the client its own `elicitation_handler`** and use legacy mode. The adapter respects a handler you supply:
 
 ```python
@@ -304,6 +331,60 @@ async with MCPAdapter(client) as adapter:
 - ✅ *Verified (details in "How this chapter was checked").*
 - ✅ *Verified (details in "How this chapter was checked").*
 - **Only elicitation is answered.** The adapter refuses sampling and roots requests
+
+### A modern elicitation, built and run
+
+The server **returns** its question instead of sending a request, and reads the answer when it is called again (FastMCP 4's "guard" pattern):
+
+```python
+import mcp.types as t
+from fastmcp import FastMCP, Context
+
+server = FastMCP("Booking")
+
+@server.tool()
+async def book_table(party_size: int, ctx: Context):
+    """Book a table. Asks the user for a date."""
+    answers = ctx.input_responses or {}
+    if "date" not in answers:                                  # first call: ask
+        return t.InputRequiredResult(input_requests={"date": t.ElicitRequest(params=t.ElicitRequestFormParams(
+            message="Which date?",
+            requested_schema={"type": "object", "properties": {"date": {"type": "string"}}, "required": ["date"]},
+        ))})
+    answer = answers["date"]                                   # called again with the answer
+    if answer.action != "accept":
+        return f"No booking ({answer.action})"
+    return f"Booked a table for {party_size} on {answer.content['date']}"
+```
+
+The agent side (the docs' pattern): a checkpointer, one `thread_id`, pause, then resume with the answer keyed by the request's `key`:
+
+```python
+from langgraph.types import Command
+
+async with MCPAdapter(server) as adapter:
+    tools = await adapter.list_tools()
+agent = create_agent(model, tools, checkpointer=InMemorySaver())
+config = {"configurable": {"thread_id": "booking-1"}}
+
+paused = await agent.ainvoke({"messages": [{"role": "user", "content": "Book a table for 4."}]}, config)
+[interrupt] = paused["__interrupt__"]
+[question] = interrupt.value["requests"]        # {'key': 'date', 'message': 'Which date?', 'mode': 'form', 'requested_schema': {...}}
+
+answer = {"action": "accept", "content": {"date": "2026-09-14"}}     # or {"action": "decline"} / {"action": "cancel"}
+done = await agent.ainvoke(Command(resume={"responses": {question["key"]: answer}}), config)
+```
+
+- `interrupt.value` holds `type`, `tool_name` and `requests`. The answer types live in `langchain.mcp.elicitation`
+- *Checked:* accept gave `Booked a table for 4 on 2026-09-14`; decline gave `No booking (decline)`
+- Elicitation is on by default. A prebuilt client with its own `elicitation_handler` is used instead (above)
+- Agent Server uses the same mechanism to ask for input when an agent exposed through its MCP endpoint pauses (docs)
+
+> [!WARNING]
+> **Resuming reruns the tool, more than once.**
+> - The docs warn that resuming reruns the tool from the beginning, so work done before the question can repeat
+> - *Checked on 1.5.0:* one pause made the tool run **3 times**: it asked, then on resume it ran again **without** the answer and asked again, then ran with it
+> - So code before the answer check runs **twice** per pause. Keep side effects after it, or make them idempotent (a booking id, an "already done?" check)
 
 ## 12.8 Several servers: config or client group
 
@@ -332,6 +413,28 @@ async with MCPAdapter(group) as adapter:
 - **Version handling stays out of the agent's way.** FastMCP negotiates per connection. As the class put it, the agent should only worry about getting tools
 - A **single server** target accepts one URL, path or in-memory server. You cannot pass several this way
 - **An in-memory server** defined in your own code can be passed straight in
+
+**How long to keep a connection** (docs; pick one row here and one row from the table above, they are independent):
+
+| Situation | Pattern |
+|---|---|
+| Script, notebook, most agents | Discover inside `async with`, build the agent, leave the block. Each tool call opens and releases the client |
+| One session held across several tool calls in a run | Keep the adapter's `async with` open **around** the agent call; the tools reuse that connection |
+| Many concurrent runs in a deployment | Discover per run in a graph factory; share an HTTP pool and cache the tool list |
+
+```python
+SERVERS = {"weather": "http://localhost:8001/mcp", "calc": "http://localhost:8002/mcp"}
+
+async def make_graph():
+    """Called once per run by `langgraph dev` (or Agent Server, via langgraph.json)."""
+    config = {"mcpServers": {name: {"url": url} for name, url in SERVERS.items()}}
+    async with MCPAdapter(config) as adapter:
+        tools = await adapter.list_tools(cache_mode="use")     # cached within the server's TTL
+        return create_agent(model, tools)
+```
+
+- Register the factory instead of a static compiled graph, so each run sees the current tool list
+- Returning the agent after discovery is enough. Use a context-manager factory when you need teardown around the run (docs; not run here, it needs a server)
 
 ### The same with `langchain-mcp-adapters` (*added by Claude*)
 
@@ -463,7 +566,39 @@ mcp = FastMCP("CineBot", auth=StaticTokenVerifier())
   1. **Authenticate the caller at the LangGraph server** with a custom auth handler, so the user identity is in the runtime
   2. **Mint or exchange a credential for that user.** Inside the graph factory, build the MCP client with a **per-user token**
 - **Rule:** authorise at the user level. Never store one person's authorisation where everyone can use it
-- Not built here
+- The docs' factory for step 2 (not built here; `token_for` stands for your OAuth gateway or token exchange):
+
+```python
+from fastmcp.client import Client
+from fastmcp.client.auth import BearerAuth
+
+async def make_graph(runtime):
+    user = runtime.user.identity if runtime.user is not None else "anonymous"
+    auth = BearerAuth(token_for(user))                      # a token for THIS caller
+    async with MCPAdapter(Client({"mcpServers": {"docs": {"url": "https://example.com/mcp"}}}, auth=auth)) as adapter:
+        tools = await adapter.list_tools()
+        return create_agent(model, tools)
+```
+
+- Also keep any **cached tool lists per user**, keyed by the verified identity, so one user never sees another's cached list
+
+**What `auth=` accepts, checked** against a local HTTP server that wants the token `s3cret`:
+
+| `auth=` | Result |
+|---|---|
+| `"s3cret"` (a token string) | worked |
+| `BearerAuth("s3cret")` | worked |
+| a subclass of `httpx2.Auth` | worked |
+| a subclass of **`httpx.Auth`** | **refused**: `Invalid "auth" argument` |
+| a wrong token | `MCPError` raised while connecting, not a tool error |
+
+> [!WARNING]
+> **Docs vs package: `httpx.Auth` vs `httpx2.Auth`.**
+> - The docs say `auth=` takes "any `httpx.Auth`"
+> - FastMCP 4 is built on **`httpx2`**, and on `fastmcp` 4.2.0 only an `httpx2.Auth` was accepted
+> - Custom auth classes must subclass `httpx2.Auth`
+
+- Beyond bearer and `"oauth"`: FastMCP has providers for common identity providers (Auth0, WorkOS, Okta) and machine-to-machine (client credentials) auth. See the FastMCP auth docs; not run here
 
 > [!IMPORTANT]
 > **🏭 In production**
@@ -574,6 +709,15 @@ From the class notebook's last section, with each point from the older package c
 
 </details>
 
+<details class="qa"><summary>10. An MCP tool asks the user for a date mid-call. How does your LangChain agent handle it, and what can go wrong?</summary>
+
+- The server returns its question (`InputRequiredResult`); the adapter turns it into a LangGraph interrupt
+- The app shows `interrupt.value["requests"]`, then resumes with `Command(resume={"responses": {key: {"action": "accept", "content": {...}}}})` on the same `thread_id`
+- It needs a checkpointer, and the server must use the modern "return the question" style, not a legacy `ctx.elicit` push
+- *Stronger answer:* the tool reruns on resume (three runs per pause, checked), so anything before the answer check must be idempotent
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"Connect your support agent to an internal CRM through MCP, used by 200 agents with different permissions."* Cover transport, auth per user, tool gating, caching of tool lists, and failure handling.
 
@@ -625,11 +769,17 @@ agent = create_agent(model, tools)          # tools still work after the context
 
 - Run with `langchain` 1.4.7 (installed as `langchain[mcp]`): the adapter's public members and documentation; listing tools over STDIO; direct `ainvoke`; structured content as an artifact; an error and a success from the same tool; destructive annotations; an agent with human-in-the-loop (scripted stand-in model, pause and approve); elicitation under a default client, a legacy client, and a legacy client with a handler; an MCP config and a client group, including a legacy member; a bare path string; and bearer authentication over HTTP with right, wrong and no token
 - Run in a separate environment: the older package's public methods and constructor
-- **Not run:** a real model, any remote server (Context7, the hosted TimeTrack server, the LangChain docs server), OAuth, an input-required server, the interrupt resume with `{"responses": {key: answer}}`, per-user credentials, audio or image content, interceptors, transport-failure exceptions
+- **Not run:** a real model, any remote server (Context7, the hosted TimeTrack server, the LangChain docs server), OAuth, per-user credentials in a deployment, the `langgraph dev` graph factory, the shared HTTP pool, audio content, interceptors, transport-failure exceptions. (An input-required server, the resume with `{"responses": {key: answer}}` and image content were run on 2026-11-15, below)
 - The class transcript and the two notebooks are the source for everything not marked *checked*
 - Run later: the one-file example `langchain.py` (12.4) with a scripted model; the file-name shadowing; the string model id with no key
 - **Open:** the first class notebook (`Langchain MCP.ipynb`) is a failed demo on the old LangChain version. Its README is an empty file (0 bytes)
 - **Details by section** (moved here from the ✅ markers):
+  - *MCP Tools, Connections and Authentication pages (2026-11-15), `langchain` 1.5.0, `fastmcp` 4.2.0, scripted models:*
+    - 12.5: an in-process tool returning text plus `Image(data=png, format="png")` → blocks `text` and `image` (`image/png`, base64)
+    - 12.6: `InterruptOnConfig(when=needs_approval)` on `delete_file`: `/tmp/scratch.txt` ran, `/prod/db.sqlite` paused
+    - 12.7: the guard-pattern `book_table` server in process; interrupt value keys `type`, `tool_name`, `requests`; accept → `Booked a table for 4 on 2026-09-14`, decline → `No booking (decline)`; a run log in the tool showed `no answer`, `no answer`, `with answer` for one pause
+    - 12.9: a local HTTP FastMCP server with a static token verifier on `127.0.0.1:8931`: token string, `BearerAuth` and an `httpx2.Auth` subclass worked; an `httpx.Auth` subclass gave `RuntimeError: Client failed to connect: Invalid "auth" argument`; a wrong token gave `MCPError: Server returned an error response`
+    - Docs slips: the destructive-gate snippet uses `MCPAdapter`, `create_agent` and `InMemorySaver` without importing them; the use-in-agent snippet's comment says the agent is usable "for the life of the adapter context", which the overview and Connections pages contradict
   - *MCP overview page re-read (2026-11-15), `langchain` 1.5.0 with `fastmcp` 4.2.0, `mcp` 2.3.0, `langchain-mcp-adapters` 0.3.1 in one environment:*
     - Import of `langchain.mcp` raised one `LangChainBetaWarning`; `import fastmcp` worked with both packages installed
     - After `async with` exited, a tool call still worked: in-process server (`Sunny in Pune`) and a stdio script
@@ -665,6 +815,7 @@ agent = create_agent(model, tools)          # tools still work after the context
 - Live-Class-2026, `Weekend 13 - 27th Sep/Langchain MCP.ipynb` and `langchain.py`
 - The installed `langchain.mcp` module's own documentation (adapter targets, elicitation behaviour)
 - Sections marked *checked* and 12.14 are from testing
+- LangChain docs: [MCP Tools](https://docs.langchain.com/oss/python/langchain/mcp/tools), [Connections](https://docs.langchain.com/oss/python/langchain/mcp/connections) and [Authentication](https://docs.langchain.com/oss/python/langchain/mcp/auth), re-read in full 2026-11-15 from their sources (commit `04d4d4a`, plus their 14 Python snippet files), for the image result (12.5), the argument gate (12.6), the modern elicitation example and rerun warning (12.7), the connection-lifetime table and graph factory (12.8), and the per-user factory and `auth=` table (12.9)
 - LangChain docs: [MCP overview](https://docs.langchain.com/oss/python/langchain/mcp), re-read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `mcp/index.mdx` and its three snippets; docs.langchain.com was blocked from this environment), for the lifetime correction, "How long a STDIO server lives", the docs MCP server, the target list and the beta-warning note
 
 Previous: [Chapter 11, Runtime and human-in-the-loop](11-runtime-and-human-in-the-loop.md) · Next: [Chapter 13, Multi-agent systems and subagents](13-multi-agent-systems-and-subagents.md)
