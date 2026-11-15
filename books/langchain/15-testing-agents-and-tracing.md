@@ -15,6 +15,7 @@
 - Record and replay model calls with cassettes, and make a stale cassette fail
 - Grade a trajectory with an LLM judge and log evals to LangSmith
 - Turn on LangSmith tracing with environment variables
+- Route, tag and redact traces, and spot the settings that silently drop them
 
 ## 15.1 Three layers of testing
 
@@ -790,7 +791,27 @@ print(f"pass rate: {sum(results)}/{len(results)}")
 
 ## 15.5 Tracing with LangSmith
 
+- Agents built with `create_agent` support tracing through **LangSmith** out of the box: a platform to capture, debug, evaluate and monitor agent behaviour
 - A trace records every step: model calls, tool calls, inputs and outputs
+  - From the user's input to the final response, including every decision point
+  - Use it to debug issues, evaluate across different inputs, and monitor usage in production
+- You need a LangSmith account and an API key
+
+```mermaid
+flowchart TD
+    R["LangGraph, or the agent's name=<br/>root run: the whole invoke"] --> M1["model · step 1<br/>LLM call"]
+    R --> T1["tools · step 2<br/>search_web"]
+    R --> M2["model · step 3<br/>LLM call"]
+    R --> T2["tools · step 4<br/>send_email"]
+    R --> M3["model · step 5<br/>final answer"]
+```
+
+- *Tested:* this is the tree the quickstart below sent to a local stand-in for the LangSmith server
+  - One root run per `invoke`, named `LangGraph`, or the `name=` given to `create_agent`
+  - A `model` or `tools` child per step, and under each the LLM call or the tool run
+
+### Turn it on
+
 - **No code change.** Set environment variables and run the agent as usual:
 ```bash
 export LANGSMITH_TRACING=true
@@ -798,13 +819,128 @@ export LANGSMITH_API_KEY=<your-api-key>
 export LANGSMITH_AGENT_ID="<your-agent-id>"
 export LANGSMITH_AGENT_ENVIRONMENT="local"
 ```
-- You need a LangSmith account and an API key
-- **Trace only some calls:** `with ls.tracing_context(enabled=True): agent.invoke(...)`; calls outside are not traced if `LANGSMITH_TRACING` is unset
-- **Choose where traces go:** `LANGSMITH_AGENT_ID` and `LANGSMITH_AGENT_ENVIRONMENT`; older project-based workspaces use `LANGSMITH_PROJECT` instead
-- **Add tags and metadata:** `agent.invoke(input, config={"tags": ["production"], "metadata": {"user_id": "u1"}})`, or pass `tags=` and `metadata=` to `tracing_context`
 - In an agent-based workspace, create the agent in LangSmith once before sending traces
+- The docs' quickstart: plain functions as tools, nothing tracing-specific in the code
+
+```python
+from langchain.agents import create_agent
+
+
+def send_email(to: str, subject: str, body: str):
+    """Send an email to a recipient."""
+    # ... email sending logic
+    return f"Email sent to {to}"
+
+def search_web(query: str):
+    """Search the web for information."""
+    # ... web search logic
+    return f"Search results for: {query}"
+
+agent = create_agent(
+    model="gpt-6.1-sol",
+    tools=[send_email, search_web],
+    system_prompt="You are a helpful assistant that can send emails and search the web."
+)
+
+# Run the agent - all steps will be traced automatically
+response = agent.invoke({
+    "messages": [{"role": "user", "content": "Search for the latest AI news and email a summary to john@example.com"}]
+})
+```
+
+- Traces appear in the destination you configured (next sections)
+
+> [!WARNING]
+> **A settings mistake drops traces silently.** *(Found in testing with `langsmith` 0.14.17; the docs do not say this.)*
+> - `LANGSMITH_AGENT_ENVIRONMENT` must be `local`, `development`, `staging` or `production`. With `prod`, nothing was sent
+> - `LANGSMITH_AGENT_ID` without `LANGSMITH_AGENT_ENVIRONMENT`: nothing was sent
+> - `LANGSMITH_PROJECT` **and** the two agent variables together: nothing was sent
+> - An unreachable LangSmith server: nothing was sent
+> - Each time the agent still ran and answered. The only sign was `Error in LangChainTracer...` lines in the log
+> - After any settings change, check that one trace actually arrives
+
+### Trace only some calls
+
+- **Trace only some calls:** wrap them in LangSmith's `tracing_context`. Calls outside it are not traced if `LANGSMITH_TRACING` is unset
+
+```python
+import langsmith as ls
+
+# This WILL be traced
+with ls.tracing_context(enabled=True):
+    agent.invoke({"messages": [{"role": "user", "content": "Send a test email to alice@example.com"}]})
+
+# This will NOT be traced (if LANGSMITH_TRACING is not set)
+agent.invoke({"messages": [{"role": "user", "content": "Send another email"}]})
+```
+
+- *Tested:* one trace arrived, for the first call only
+- The reverse also works: `tracing_context(enabled=False)` sent nothing even with `LANGSMITH_TRACING=true` (tested)
+
+### Choose where traces go
+
+- **Choose where traces go:** `LANGSMITH_AGENT_ID` and `LANGSMITH_AGENT_ENVIRONMENT`; older project-based workspaces use `LANGSMITH_PROJECT` instead
+  - The same holds for self-hosted LangSmith
+  - An integration that needs a `project_name` in an agent-based workspace: pass the environment's `tracer_session_name` as a compatibility value
+- **Per request, in code:** pass an agent address. The docs page only links to this; the call below is from the `langsmith` 0.14.17 SDK
+
+```python
+import langsmith as ls
+
+with ls.tracing_context(address=ls.agent_address("billing-bot", "production")):
+    agent.invoke({"messages": [{"role": "user", "content": "Refund order 42"}]})
+```
+
+- *Tested:*
+  - The run arrived addressed to `lrn:agents/billing-bot/environments/production`, overriding the `email-bot` / `local` env vars
+  - `LANGSMITH_PROJECT=my-project` alone sent the run to project `my-project`
+  - `project_name=` and `address=` in the same `tracing_context` raised `LangSmithUserError` before the agent ran
+- Which setting wins, per the SDK's own notes (highest first): `tracing_context`, then `langsmith_extra`, then `@traceable` / `trace` arguments, then `configure`, then the env vars
+
+### Add tags and metadata
+
+- **Add tags and metadata** through `config`:
+
+```python
+response = agent.invoke(
+    {"messages": [{"role": "user", "content": "Send a welcome email"}]},
+    config={
+        "tags": ["production", "email-assistant", "v1.0"],
+        "metadata": {
+            "user_id": "user_123",
+            "session_id": "session_456",
+            "environment": "production"
+        }
+    }
+)
+```
+
+- Or pass `tags=` and `metadata=` to `tracing_context`:
+
+```python
+with ls.tracing_context(
+    enabled=True,
+    tags=["production", "email-assistant", "v1.0"],
+    metadata={"user_id": "user_123", "session_id": "session_456", "environment": "production"}):
+    response = agent.invoke(
+        {"messages": [{"role": "user", "content": "Send a welcome email"}]}
+    )
+```
+
+- *Tested:* with both forms, the three tags and the metadata arrived on the root run **and** on every child run, so you can filter on any step
+
+> [!CAUTION]
+> **🔒 Security: a trace stores everything the agent saw**
+> - *Tested:* the quickstart's `john@example.com` appeared in the inputs or outputs of **9 runs** of one trace
+> - Put ids in metadata (`user_id`), never names, emails or account numbers
+> - `LANGSMITH_HIDE_INPUTS=true` and `LANGSMITH_HIDE_OUTPUTS=true` keep inputs and outputs out of every run. *Tested:* 0 copies of the email were sent; runs still arrived, with `{}` as inputs and outputs
+> - For partial redaction, `langsmith.Client(hide_inputs=...)` also takes a function (in the 0.14.17 signature; not tested)
+> - Set a retention period in LangSmith that matches your privacy policy
+> - *Added by Claude.*
+
+- More on debugging, evaluating and monitoring with traces: the LangSmith observability docs (not read for these notes)
 - ✅ *Verified (details in "How this chapter was checked").*
-- *Source: LangChain docs, `observability.mdx`.*
+- *Source: LangChain docs, `observability.mdx` and its two snippets.*
 
 ## 15.6 Questions from the class
 
@@ -878,6 +1014,15 @@ export LANGSMITH_AGENT_ENVIRONMENT="local"
 
 </details>
 
+<details class="qa"><summary>9. Tracing is "on", but no traces show up. What do you check?</summary>
+
+- `LANGSMITH_TRACING=true` and a valid `LANGSMITH_API_KEY`, and the server reachable
+- Both `LANGSMITH_AGENT_ID` and `LANGSMITH_AGENT_ENVIRONMENT` set, with the environment one of `local`, `development`, `staging`, `production`
+- Not `LANGSMITH_PROJECT` and the agent variables together
+- *Stronger answer:* every one of these failed silently in testing (the agent still answered; only `LangChainTracer` errors in the log), so add a startup check that sends one trace, and watch the log in CI
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"Set up quality checks for a support agent that 5 engineers change every week."* Cover unit, integration and eval layers, where each runs, the dataset, and the release gate.
 
@@ -887,6 +1032,7 @@ export LANGSMITH_AGENT_ENVIRONMENT="local"
 - **Pick the mode to match the risk.** Use `subset` when an extra call is dangerous (a payment tool), `superset` when a missing step is the risk
 - **A trajectory score of `True` does not mean a good answer.** Add an assertion on the final message or a judge
 - **Never record cassettes with real secrets.** Check the filter list before committing cassette files
+- **Treat traces as personal data.** Ids in metadata, `LANGSMITH_HIDE_INPUTS` / `HIDE_OUTPUTS` or a redaction function where needed, and a retention period
 - **Give every eval case a second check.** `subset` passes an empty run and `superset` passes extra calls; a final-answer check or a judge catches what each lets through
 
 ## Cheat sheet
@@ -901,6 +1047,8 @@ ev(outputs=result["messages"], reference_outputs=reference)["score"]
 model = init_chat_model("openai:gpt-4o-mini", max_tokens=256)        # cheap integration tests
 # vcr_config: filter_headers=[("authorization", "XXXX")], match_on=[..., "body"]
 judge = create_trajectory_llm_as_judge(model="openai:gpt-5.4-mini", prompt=TRAJECTORY_ACCURACY_PROMPT)
+with ls.tracing_context(enabled=True, tags=["v1.0"], metadata={"user_id": "u1"}):   # trace one block
+    agent.invoke(inp)          # route per call: tracing_context(address=ls.agent_address(id, "production"))
 ```
 
 ## Recap
@@ -910,6 +1058,8 @@ judge = create_trajectory_llm_as_judge(model="openai:gpt-5.4-mini", prompt=TRAJE
 - Assert structure, not words; cap tokens; use small models
 - `agentevals` modes: strict, unordered, subset, superset; or an LLM judge
 - Tracing is on with environment variables, no code change
+- One trace per `invoke`: a root run, then a `model` or `tools` child per step. Tags and metadata reach every run
+- A bad agent environment, a missing variable or project-plus-agent settings drop traces silently
 - Keys: skip only integration tests when a key is missing, never the whole suite
 - Cassettes replay model calls for free; match on the body so a prompt change fails
 - `subset` passes an agent that called nothing. Pair modes, or add an answer check
@@ -924,17 +1074,26 @@ judge = create_trajectory_llm_as_judge(model="openai:gpt-5.4-mini", prompt=TRAJE
 5. Run the whole suite with no key set. Does your unit test still run? Fix the fixture until it does
 6. Record a cassette, change the prompt and re-run. Then add `"body"` to `match_on` and re-run again
 7. Score a run with no tool calls in all four modes and explain the `subset` result
+8. Trace one call with `tracing_context(enabled=True, tags=..., metadata=...)`, find it in LangSmith, and filter by the tag. Then set `LANGSMITH_HIDE_INPUTS=true` and compare
 
 ## How this chapter was checked
 
 - Run offline: the fake models, the pytest marker setup, and the four trajectory modes (with `agentevals` installed from the package registry)
-- **Not run:** LangSmith tracing and logging, a real LLM judge, any real model
+- **Not run:** a real LangSmith account (tracing was checked against a local stand-in server), LangSmith eval logging, a real LLM judge, any real model
 - Everything else comes from the LangChain docs pages named in each section
 - **Details by section** (moved here from the ✅ markers):
   - *15.2 Unit tests with a fake model:* Checked: the list model cycled; the subclass ran the tool once and answered; the plain class raised `NotImplementedError`; reusing a finished fake raised `RuntimeError`
   - *15.3 Integration tests:* Checked: with the `pytest.ini` above, the default run deselected the integration test and `-m integration` ran it. Not run: `vcrpy` (not installed), real model calls
   - *15.4 Evals: scoring the trajectory:* Checked (scripted agent, `agentevals` installed): a one-tool run against a one-tool reference scored `True` in all four modes; a run with one **extra** tool scored `False` in `strict`, `unordered` and `subset`, and `True` in `superset`. Not run: the LLM judge and LangSmith logging (need keys)
   - *15.5 Tracing with LangSmith:* Checked: `langsmith.tracing_context(enabled=False, tags=..., metadata=...)` runs as a context manager. *Not run:* actual tracing (no LangSmith account here)
+  - *Update from the Observability docs page (2026-11-15), `langchain` 1.5.0, `langsmith` 0.14.17, scripted model:* `LANGSMITH_ENDPOINT` pointed at a local stand-in server that recorded every `/runs/multipart` upload; the uploads were parsed into run trees
+    - Quickstart, as written: one root `LangGraph` run with 5 step children (`model`, `tools`, `model`, `tools`, `model`), the LLM and tool runs under them, all addressed `lrn:agents/email-bot/environments/local` from the env vars. With `name="email_assistant"` the root took that name
+    - `tracing_context(enabled=True)` with `LANGSMITH_TRACING` unset: 1 trace, the second call nothing. `enabled=False` with tracing on: nothing
+    - Tags and metadata, via `config` and via `tracing_context`: on the root and on every child run
+    - `tracing_context(address=ls.agent_address("billing-bot", "production"))` overrode the env vars. `LANGSMITH_PROJECT` alone set the project. Project plus address in one `tracing_context` raised `LangSmithUserError`
+    - Silent loss: environment `prod`, agent id without environment, project plus agent env vars, and an unreachable server each sent nothing while the agent still answered
+    - The email address appeared in 9 runs; with `LANGSMITH_HIDE_INPUTS=true` and `LANGSMITH_HIDE_OUTPUTS=true`, 0 copies were sent
+    - Not checked: `tracer_session_name`, the LangSmith UI, `Client(hide_inputs=<function>)`
   - *Update from the four Test docs pages (2026-11-15), `langchain` 1.5.0, `langchain-openai` 1.8.0, `agentevals` 0.0.9, `pytest` 9.2.0, `vcrpy` 9.4.2, `pytest-recording` 0.14.1 (no keys):*
     - 15.2: the docs' six unit tests ran as a pytest file and passed. `GenericFakeChatModel` turned the string `"bar"` into an `AIMessage`; a third call raised `StopIteration`. A `module`-scoped fake failed the third of three tests. The `InMemorySaver` turn 2 carried turn 1
     - 15.3 markers: both the `pytest.ini` and the `pyproject.toml` form deselected the integration test by default; `-m integration` ran it
@@ -952,6 +1111,8 @@ judge = create_trajectory_llm_as_judge(model="openai:gpt-5.4-mini", prompt=TRAJE
 
 - LangChain docs, `src/oss/langchain/test/` (`index`, `unit-testing`, `integration-testing`, `evals`) and `observability.mdx` (github.com/langchain-ai/docs, MIT, commit 433a92c)
 - LangChain docs: [Test](https://docs.langchain.com/oss/python/langchain/test/index), [Unit testing](https://docs.langchain.com/oss/python/langchain/test/unit-testing), [Integration testing](https://docs.langchain.com/oss/python/langchain/test/integration-testing) and [Evals](https://docs.langchain.com/oss/python/langchain/test/evals), re-read in full 2026-11-15 from their source (`langchain-ai/docs` commit `04d4d4a`, plus the `integration-testing-max-tokens-py` snippet; docs.langchain.com was blocked from this environment). Used for 15.1 to 15.4
+- LangChain docs: [LangSmith Observability](https://docs.langchain.com/oss/python/langchain/observability), re-read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/observability.mdx` with `snippets/oss/observability-py.mdx` and `snippets/langsmith/agent-tracing-prerequisite.mdx`). Used for 15.5. `agent_address` and the precedence order come from the `langsmith` 0.14.17 SDK
+- Added by Claude in 15.5: the 🔒 trace box, interview question 9; the ⚠️ silent-loss box comes from testing
 - Added by Claude in 15.2 to 15.4: the marker-aware key fixture, the `match_on` body fix, the 🔒 cassette box, `same_tools`, the `same_city` override, and interview questions 7 and 8. The ⚠️ findings come from testing
 - `agentevals`: github.com/langchain-ai/agentevals
 
