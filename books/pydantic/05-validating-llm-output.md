@@ -5,8 +5,16 @@
 > [!NOTE]
 > **📍 At a glance**
 > - **You will learn:** validating raw model JSON, checking tool arguments before side effects, retry-with-errors, and native strict structured output
-> - **Level:** intermediate · **Time:** about 20 minutes
+> - **You will build:** the class's currency validator for raw LLM JSON, a validated tool that never calls the API with bad arguments, a retry loop, and a strict structured-output call
+> - **Level:** intermediate · **Time:** about 30 minutes
 > - **Builds on:** [Chapters 1 to 4](01-why-pydantic-and-basemodel.md) · **Leads to:** [Langchain Ch 4](../langchain/04-structured-output.md), [LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md)
+
+**After this chapter you can:**
+
+- Validate a model's raw JSON reply, and clean the common broken forms first
+- Check tool arguments before any network call or side effect
+- Send `{field, problem}` errors back to the model and retry, with a cap
+- Use native strict structured output, and say what it does and doesn't guarantee
 
 ---
 
@@ -30,6 +38,18 @@ WeatherQuestion.model_validate_json('{"city": 3, "x": }')         # ValidationEr
 ```
 
 - `model_validate_json` parses **and** validates; JSON errors arrive as validation errors
+- The class's version (`_8_pydantic_with_ai.py`, Part 6). Its `StrictAmount` has `amount: float = Field(gt=0)` and a currency validator like the one in 5.2:
+
+```python
+llm_clean_output = '{"amount": 300, "currency": "usd"}'
+StrictAmount.model_validate_json(llm_clean_output)        # amount=300.0 currency='USD'
+
+llm_messy_output = '{"amount": "a few hundred", "currency": "dollars"}'
+StrictAmount.model_validate_json(llm_messy_output)
+# 2 validation errors: amount  float_parsing · currency  'DOLLARS' isn't a recognized currency
+```
+
+- *Tested:* both errors came back in one exception, before any code used the values
 - Common real-world replies to handle:
 
 | Reply | What happens |
@@ -69,6 +89,8 @@ def convert_safely(raw: dict) -> float | str:
 ```
 
 - Bad arguments fail fast: **no network call, no cost, no side effect**
+- This is the class's `_9_api_call_with_structure.py` (`convert_currency_validated`), and `_10` wraps the same tool in the `@tool` registry
+- *Tested with a counting stand-in for `requests.get`:* `{"amount": -50, "from_currency": "dollars", "to_currency": "inr"}` was rejected with 2 errors and made **0** network calls; good arguments made 1
 - One `field_validator` can cover several fields; the tool itself stays a plain function
 
 ## 5.3 Retry with structured errors
@@ -101,6 +123,7 @@ completion.choices[0].message.parsed     # WeatherQuestion, or None on refusal
 ```
 
 - The SDK sends `Model.model_json_schema()`, the provider **constrains decoding**, the SDK validates into your class
+- *Tested (`openai` 3.51.0) against a local server speaking the OpenAI API:* `parse()` returned `WeatherQuestion(city='Tokyo', wants_fahrenheit=True)`. The strict schema the SDK built listed **both** fields as `required`, though `wants_fahrenheit` has a default
 - **Strict mode changes meaning:** every field becomes `required` and `additionalProperties: false`; a default only applies when *you* build the object, so use `X | None` for optional fields
 - LangChain equivalent: `with_structured_output(Model)` / `response_format=` ([Langchain Ch 4](../langchain/04-structured-output.md))
 
@@ -120,29 +143,48 @@ completion.choices[0].message.parsed     # WeatherQuestion, or None on refusal
 > [!CAUTION]
 > **🔒 Security:** prompt injection can make a model return *valid* but harmful arguments (`to="attacker@example.com"`). Validation is necessary, not sufficient: add allow-lists, least privilege and human approval for irreversible tools. **Valid ≠ true.**
 
+## 5.5 Added by Claude, not from the sources
+
+- **Log the raw reply next to the error**, so a failure can be reproduced without calling the model again
+- **Keep the error message short when you retry**: field and problem, never the whole traceback
+- **Treat a refusal as an answer**, not a parsing failure; don't retry it blindly
+- **Never let validated arguments skip authorisation.** A valid `account_id` may still belong to someone else
+
 ## Interview corner
+
+**What interviewers listen for:** you treat model output as untrusted input, you validate before side effects, and you know what strict structured output does not guarantee.
+
+### 🟢 Basic
 
 <details class="qa"><summary>1. Why validate LLM output, and where?</summary>
 
 - It is untrusted external input; validate at the boundary, before any side effect
+- *Stronger answer:* validate tool arguments too, not just final answers, because they cause the side effects
 
 </details>
+
+### 🟡 Intermediate
 
 <details class="qa"><summary>2. Validation failed. Now what?</summary>
 
 - Retry with `{field, problem}` errors, capped at 2–3; log the raw reply; recurring failures mean the schema needs work
+- *Stronger answer:* count failures per field; one field failing often means its `description` or type is unclear
 
 </details>
 
 <details class="qa"><summary>3. With strict structured output, do you still need Pydantic?</summary>
 
 - Yes: strict guarantees shape, not value limits, cross-field rules or truth; it also makes all fields required, so model optionals as `X | None`
+- *Stronger answer:* strict mode supports only a subset of JSON Schema, which differs by provider, so check its list; Pydantic still enforces every limit afterwards
 
 </details>
+
+### 🔴 Senior
 
 <details class="qa"><summary>4. How can an attacker abuse validated tool arguments?</summary>
 
 - Prompt injection yields valid-but-malicious values; add allow-lists, least-privilege tools, human approval
+- *Stronger answer:* scope each tool to the current user (the user id comes from your app, never from the model) and require approval for anything irreversible
 
 </details>
 
@@ -160,14 +202,35 @@ except ValidationError as e:
     # resend fix, max 2–3 tries
 ```
 
+## Recap
+
+- Model output is untrusted input: clean, then `model_validate_json`
+- Validate tool arguments before the call: no network, no cost, no side effect on bad input
+- Retry with `{field, problem}` pairs, at most 2–3 times
+- Strict structured output guarantees shape, not values; every field becomes required
+- Valid is not true and not allowed: add allow-lists, scoping and approval
+
 ## Practice
 
 1. Validate a fenced, a prefixed ("Sure! …") and a list reply; make all three behave
 2. Write `ask_validated` against a scripted model that fails once
 3. Print the strict schema for a model with a default and explain `required`
+4. Run the class's `_9` with bad arguments and prove no network call happened
 
----
+## How this chapter was checked
 
-*Source: Live-Class-2026 classes 03–04 and files `_8`–`_10`, `Project 0/_03`; retry, strict-schema, production and security sections added by Claude (tested with Pydantic 2.13 and openai SDK offline). Docs: [OpenAI structured outputs](https://platform.openai.com/docs/guides/structured-outputs).*
+- **Run offline** with `pydantic` 2.14.3 and `openai` 3.51.0
+- **5.1:** the reply table and `TypeAdapter` in the 2026 review (Pydantic 2.13); `_8` Part 6 as written on 2.14.3: the clean reply parsed, the messy one gave 2 errors
+- **5.2:** `_9` and `_10` as written, with `requests.get` replaced by a counting stand-in: 0 calls for bad arguments, 1 for good
+- **5.3:** `ask_validated` against a scripted model that failed once, in the 2026 review
+- **5.4:** `client.chat.completions.parse(...)` against a local fake OpenAI server returned the parsed object; `openai.lib._pydantic.to_strict_json_schema` listed every field as required with `additionalProperties: false`
+- **Not run:** a real provider call
+
+## Sources and further reading
+
+- Live-Class-2026, `Weekend 01 .../_8_pydantic_with_ai.py` (Part 6), `_9_api_call_with_structure.py`, `_10_tool_with_ai_call.py` (re-read in full 2026-11-15)
+- Live-Class-2026, Weekend 02 `Project 0/_03_structuring_with_pydantic.py` and the Class 03–04 summaries (earlier batches)
+- [OpenAI structured outputs](https://platform.openai.com/docs/guides/structured-outputs)
+- Added by Claude: retry (5.3), the strict-schema section, the 🏭 and 🔒 boxes, 5.5
 
 Previous: [Chapter 4](04-nested-models-and-inheritance.md)
