@@ -478,6 +478,15 @@ print(resumed.value["messages"][-1].content)
 - **`approve`:** execute with the original arguments
 - **`edit`:** modify the arguments before executing. Shape: `{"type": "edit", "edited_action": {"name": "cancel_booking", "args": {...}}}`
 - **`reject`:** skip entirely. The **feedback is sent to the agent**: `{"type": "reject", "message": "Cancellations require manager sign-off first. Ask the customer to call support."}`
+  - **No `message`?** The model gets a default (status `error`): ``User rejected the tool call for `execute_sql` with id q. The tool was not executed. Do not retry this tool call unless the user asks…`` (checked)
+  - For side-effecting tools write your own (docs): say whether to give up, ask a follow-up, or try a safer alternative
+- **Edit conservatively** (docs): big changes to the arguments can make the model rethink its plan and call tools again or do something unexpected
+
+> [!WARNING]
+> **In batched mode, an `edit` can swap the tool.**
+> - The docs' batched example even shows `"name": "new_tool_name"`
+> - *Checked:* editing a `write_file` call to `{"name": "read_data", ...}` ran **`read_data`** instead
+> - Per-call mode refuses this (its schema pins the name; a swap raised `ValidationError`). In a review UI, lock the tool name and let the reviewer change only the arguments
 - **`respond`:** the human's message is returned **as the tool result** and the tool never runs
 
 **`respond` is different in kind.** It is for tools that really just **ask the user something**:
@@ -534,11 +543,38 @@ HumanInTheLoopMiddleware(
 - **Invalid answers:** the answer is checked against the schema before it is saved. *Checked:* an edit missing `content` raised a `ValidationError`, nothing was saved, and a corrected answer to the **same ID** was accepted. The docs warn that if several answers are sent together and one is invalid, the others' tools can run while their interrupts still show as pending, and answering again runs them twice. Check answers first or send them one at a time
 - **Order of middleware:** list `HumanInTheLoopMiddleware` **before** `ToolRetryMiddleware` and `ToolErrorMiddleware`, so a retried call does not ask the reviewer again. Middleware listed before it runs again up to the pause on resume, so it must have no side effects before it calls its handler
 
-*Source: `langchain-ai/docs`, `src/oss/langchain/human-in-the-loop.mdx` (Set the interrupt mode, Pause once per tool call).*
+**What a per-call interrupt holds** (checked):
+
+```python
+for interrupt in result.interrupts:
+    interrupt.value            # {'type': 'tool_approval', 'tool_call_id': 'call_sql', 'name': 'execute_sql',
+                               #  'args': {'query': 'DELETE FROM orders'}, 'description': '...'}
+    interrupt.response_schema  # the JSON schema of answers it accepts, on the Interrupt itself
+    interrupt.id               # the key for Command(resume={interrupt.id: decision})
+```
+
+- `type: "tool_approval"` lets a client tell these apart from other interrupts
+- The schema is **not** inside `.value`; read `interrupt.response_schema`
+  - A tool allowing several decisions: a `oneOf` with one branch per decision (`ApproveDecision`, `EditDecision`, ...) and a `discriminator` on `type`
+  - A tool allowing one decision: that decision's schema alone, no `oneOf`
+- Use it to build the review form and to check answers before sending them
+- **Edits are checked against the tool's arguments** only for normal (Pydantic) tools
+  - *Checked:* an edit missing `content` was refused for a Pydantic tool, but **accepted** for a tool with a raw JSON-schema `args_schema`, which then ran without it
+  - Arguments the tool does not declare are ignored, as when the model sends them
+
+**How the middleware works inside the loop** (docs):
+
+- **Batched:** an `after_model` hook runs after the model replies and before any tool runs
+  - If calls need review it builds one request (`action_requests` + `review_configs`) and calls `interrupt()`
+  - On resume it runs approved or edited calls and writes tool messages for rejected and responded ones
+- **Per-call:** the `after_model` hook does nothing. Each gated call pauses as it starts, and its tool runs once its own decision arrives
+- For something else entirely, build it yourself with `interrupt()` in your own middleware ([Chapter 10](10-shell-tools-and-custom-middleware.md))
+
+*Source: `langchain-ai/docs`, `src/oss/langchain/human-in-the-loop.mdx`, read in full 2026-11-15 (commit `04d4d4a`), with its per-call snippets.*
 
 > [!IMPORTANT]
 > **🏭 In production**
-> - Approvals can wait hours: the checkpointer must be a real database, and the UI must show the exact action and arguments
+> - Approvals can wait hours: the checkpointer must be a real database (the docs suggest `AsyncPostgresSaver` or `MongoDBSaver`), and the UI must show the exact action and arguments
 > - Decide what happens to unanswered approvals (expire, remind, cancel) before launch
 > - Use runtime **context** for who the user is; never let the model choose the user id
 > - *Added by Claude.*
@@ -581,6 +617,15 @@ conditional_agent = create_agent(
 - Confirmed live and again by my test: a **$25** refund ran with **no interrupt**, a **$500** refund on the **same tool and same middleware** paused for approval
 - **Real-world framing from the whiteboard:** a user asks to cancel booking `BK1011`, worth $101, with a refund. The request goes through the agentic loop, hits the cancel tool behind the HITL middleware and **pauses for an executive, not the customer**. That is how a refund-approval workflow routes an above-threshold request to a human reviewer instead of the requester
 - The saved notebook cell has the real check **commented out** and `return True`. The saved outputs match the real check, so treat the commented lines as the intent
+- More `when` examples from the docs: pause `write_file` only for paths outside `/workspace/`; pause `execute_sql` unless the query starts with `SELECT`
+- Needs `langchain>=1.3.3`
+
+> [!WARNING]
+> **`when` runs again on resume, and must give the same answer.**
+> - If it returns `False` on resume, the tool runs and the reviewer's answer is **ignored, even a reject** (docs)
+> - *Checked, both modes:* a predicate that was `True` only the first time paused the call; the reviewer answered **reject**; the SQL ran anyway (`Deleted 42 rows`)
+> - In batched mode, if the answer changes for only some calls, the middleware raises `ValueError` (checked: "Number of human decisions (2) does not match number of hanging tool calls (1)")
+> - So base `when` only on the call's arguments and fixed settings, never on time, counters or anything that can change while the run waits
 
 ## 11.13 The interactive HITL loop
 
@@ -677,6 +722,25 @@ for chunk in agent.stream(Command(resume=decisions), config=config,      # same 
 ```
 
 - *Checked:* two parallel `get_weather` calls came as **one** interrupt with two action requests. After the resume, both tools ran, Boston with the edited city
+**The same with v3 event streaming** (docs; [Chapter 6](06-agents-and-memory.md), 6.8):
+
+```python
+stream = agent.stream_events({"messages": [{"role": "user", "content": "Delete old records"}]},
+                             config=config, version="v3")
+for message in stream.messages:
+    for token in message.text:
+        print(token, end="", flush=True)
+
+if stream.interrupted:                                   # the run paused for a human
+    print(stream.interrupts)
+
+stream = agent.stream_events(Command(resume={"decisions": [{"type": "approve"}]}),
+                             config=config, version="v3")
+# per-call mode: Command(resume={i.id: {"type": "approve"} for i in stream.interrupts})
+```
+
+- *Checked:* the first stream ended with `stream.interrupted == True` and one interrupt holding `action_requests` and `review_configs`; the resumed stream printed `All done`, with `stream.interrupted == False`
+
 - **Docs vs package:**
   - The docs show the edited call's result as plain `It's always sunny in Boston, U.K.!`
   - On 1.5.0 the `ToolMessage` started with the reviewer note (`Note: a human reviewer replaced this tool call before it ran ... Executed instead: get_weather with arguments {"city": "Boston, U.K."}`), then the result
@@ -780,6 +844,15 @@ for chunk in agent.stream(Command(resume=decisions), config=config,      # same 
 
 </details>
 
+<details class="qa"><summary>11. A reviewer rejected a dangerous call, yet it ran. How can that happen?</summary>
+
+- The tool's `when` predicate is evaluated again on resume; if it returned `False` the second time, the call ran and the reject was ignored (checked)
+- Typical causes: a predicate based on time, a counter, or state that changed while the run waited
+- In batched mode an `edit` can also swap the tool name, so a careless review UI can run a different tool
+- *Stronger answer:* keep `when` a pure function of the arguments, lock the tool name in the review form, prefer per-call mode (it validates answers against `interrupt.response_schema`), and test the reject path
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"An agent books meetings for executives but a human assistant must approve anything over 1 hour."* Cover the conditional interrupt, what the reviewer sees, edit vs reject, and persistence.
 
@@ -857,6 +930,7 @@ agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg, context=
   - HITL: the unguarded agent, a dict result vs `version="v2"`, `.interrupts` and `.value`, `True` and `False` in `interrupt_on`, `description_prefix`, `respond` with a question-only tool, `when=` with $25 and $500, and the interactive loop with approve, edit and reject
   - retry and error middleware in both orders with the default `on_failure`
 - **Not run:** a real LangGraph server (so `server_info` and `run_id` were `None`), real model behaviour, a persistent checkpointer or store
+- *Human-in-the-loop docs page merge (2026-11-15):* `langchain` 1.5.0, scripted models (one that streams). Default reject message (no `message`) quoted in 11.11. Batched edit: an undeclared argument was ignored; a different tool name ran that tool (`read_data`). Per-call: interrupt `.value` keys `type`, `tool_call_id`, `name`, `args`, `description`; `interrupt.response_schema` had `oneOf` with four `$ref`s and a `discriminator` for `write_file`, and a plain schema for a one-decision tool; a name swap and a missing argument raised `ValidationError`; a raw-JSON-schema tool accepted an edit missing `content`. `when` returning `True` once then `False`: reject ignored and the tool ran, batched and per-call; batched with two calls and one changing: the quoted `ValueError`. v3: `stream.interrupted` `True`, then `False` after the resume with text `All done`
 - *Context engineering docs page merge (2026-11-15):* `langchain` 1.5.0, scripted models. `request.messages` equalled `request.state["messages"]` (a copy, no system message). The file-context injection (extracted from this file, with `uploaded_files` declared in `FilesState`) reached the model and was not saved; without the declaration the input key was dropped and nothing was injected. `store_aware_prompt` produced `... User prefers brief responses.` The response-format override raised the quoted `ValueError` without a declared format; with `ToolStrategy(Union[ConciseResponse, VerboseResponse])` it returned `VerboseResponse(answer='Paris', sources=['atlas'])`, also when the override passed the bare class; `ProviderStrategy(VerboseResponse)` with nothing declared also worked. The docs' `authenticate_user` raised the quoted `ValueError`. Docs slip: the file-context example's comment says "before recent messages" while the code appends at the end
 - *Runtime docs page merge (2026-11-15):* `langchain` 1.5.0, `langgraph` 1.2.22, scripted models. The docs' middleware example (`dynamic_prompt`, `before_model` and `after_model` typed `Runtime[Context]`) plus the new `auth_gate`, with `thread_id="t-9"`: hooks logged `John Smith`, the gate passed and logged `t-9`, the model's system message was `You are a helpful assistant. Address the user as John Smith.` Dependency injection: a frozen `AppContext(user_id, db)` with a stand-in `FakeDB` gave `brief and polite`; the tool's `.args` were `{}`. Not run: Agent Server (`server_info`)
 - *HITL while streaming (2026-11-15):* `langchain` 1.5.0, `langgraph` 1.2.22, a scripted streaming model calling `get_weather` for Boston and San Francisco in one turn, `HumanInTheLoopMiddleware(interrupt_on={"get_weather": True})`, `InMemorySaver`. One `__interrupt__` update with two action requests; resume with decisions keyed by the interrupt id (edit Boston, approve San Francisco); the tools update held `It's always sunny in San Francisco!` and the Boston result behind the reviewer note
@@ -880,6 +954,7 @@ agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg, context=
 - Live-Class-2026, `Weekend 09 - 22-23 Aug/README.md` and `22nd Aug - Runtime & HITL/README.md`
 - `Assignment_2_Agents_and_Prebuilt_Middleware.ipynb` (questions only)
 - Section 11.16 and the corrections marked *checked* are from testing, not from the class sources
+- LangChain docs: [Human-in-the-loop](https://docs.langchain.com/oss/python/langchain/human-in-the-loop), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `human-in-the-loop.mdx`, the decision-types table and five per-call snippets), for the decision details and batched-edit warning, the per-call interrupt shape, the execution lifecycle (11.11), the `when` warning (11.12) and v3 streaming (11.13)
 - LangChain docs: [Context engineering](https://docs.langchain.com/oss/python/langchain/context-engineering), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `context-engineering.mdx`; docs.langchain.com was blocked from this environment), for "Context engineering: the framework" in 11.8: the lever table, transient vs persistent, the store-based prompt, the response-format warning, the tool-write warning and the best practices
 - LangChain docs: [Runtime](https://docs.langchain.com/oss/python/langchain/runtime), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/runtime.mdx`; docs.langchain.com was blocked from this environment), for the 11.3 version note and dependency injection, `Runtime[Context]` in 11.6, and the docs' `auth_gate` in 11.9
 - LangChain docs: [Streaming](https://docs.langchain.com/oss/python/langchain/streaming), section "Streaming with human-in-the-loop" (read 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "HITL while streaming" in 11.13
