@@ -41,6 +41,30 @@
 Good to know:
 
 - `create_agent` runs on **LangGraph's runtime**. LangChain exposes what LangGraph already maintains
+- `execution_info` and `server_info` need `langgraph>=1.1.5` (or `deepagents>=0.5.0`). `server_info` is `None` outside Agent Server
+- **Context is dependency injection** (docs): instead of hard-coding values or reaching for globals, hand each run what it needs (user id, a DB connection, a client)
+  - Tools become easier to test and reuse: pass a stand-in DB in a test, the real one in production
+
+```python
+from dataclasses import dataclass
+from typing import Any
+from langchain.tools import tool, ToolRuntime
+
+@dataclass(frozen=True)
+class AppContext:
+    user_id: str
+    db: Any                                   # a connection or client, injected per run
+
+@tool
+def fetch_user_email_preferences(runtime: ToolRuntime[AppContext]) -> str:
+    """Fetch the user's email preferences."""
+    return runtime.context.db.email_prefs(runtime.context.user_id)
+
+agent = create_agent(model, tools=[fetch_user_email_preferences], context_schema=AppContext)
+agent.invoke({"messages": [...]}, context=AppContext(user_id="u1", db=FakeDB({"u1": "brief and polite"})))
+```
+
+- *Checked:* the tool returned `brief and polite` from the stand-in DB, and its arguments as the model sees them were `{}`, so the model never sees the user id or the client
 - Every framework has some equivalent under another name. The idea transfers
 - ✅ *Verified (details in "How this chapter was checked").*
 - ✅ *Verified (details in "How this chapter was checked").*
@@ -129,6 +153,7 @@ The most repeated idea of the class.
 - **Tools:** get **both**, bundled as `ToolRuntime`, plus the tool call id and config
 - **Node-style hooks** (`before_model`, `after_model`): receive **`state` and `runtime` as two separate parameters**
 - **Wrap-style hooks** (`wrap_model_call`): receive **one `request`** (a `ModelRequest`) that holds state and runtime inside it. In code: `request.state`, `request.runtime`
+- **Type the runtime** in node hooks (docs): `def log_before_model(state: AgentState, runtime: Runtime[Context])`. Then `runtime.context.user_name` is checked by your editor and type checker
 
 None of this is optional. It is how LangChain calls your function:
 
@@ -224,6 +249,22 @@ def auth_gate(state: AgentState, runtime: Runtime) -> dict | None:
 - **Corrections:**
   - The class notebook cell failed with `NameError: name 'Runtime' is not defined`. The import above fixes it
   - As written, the check raises **whenever `server_info` is present**, and `server_info` is exactly what a LangGraph server provides (it carries the authenticated user). On a server this would block everyone. Treat it as a demonstration of reading the components, not as a real gate. A real gate checks the **identity** inside `server_info`, or uses your own auth layer
+
+**The docs' current version** checks the identity, as the correction above asks:
+
+```python
+@before_model
+def auth_gate(state: AgentState, runtime: Runtime) -> dict | None:
+    """Block unauthenticated users when running on Agent Server."""
+    server = runtime.server_info
+    if server is not None and server.user is None:        # on a server, but nobody signed in
+        raise ValueError("Authentication required")
+    print(f"Thread: {runtime.execution_info.thread_id}")
+    return None
+```
+
+- Locally `server_info` is `None`, so the gate lets everything through: test the blocking branch on a real Agent Server, or keep your own auth check as well
+- *Checked locally:* the run passed the gate and printed the thread id (`t-9`). Not run on Agent Server
 
 ## 11.10 `stream_writer`: progress updates from a tool
 
@@ -711,6 +752,7 @@ agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg, context=
   - HITL: the unguarded agent, a dict result vs `version="v2"`, `.interrupts` and `.value`, `True` and `False` in `interrupt_on`, `description_prefix`, `respond` with a question-only tool, `when=` with $25 and $500, and the interactive loop with approve, edit and reject
   - retry and error middleware in both orders with the default `on_failure`
 - **Not run:** a real LangGraph server (so `server_info` and `run_id` were `None`), real model behaviour, a persistent checkpointer or store
+- *Runtime docs page merge (2026-11-15):* `langchain` 1.5.0, `langgraph` 1.2.22, scripted models. The docs' middleware example (`dynamic_prompt`, `before_model` and `after_model` typed `Runtime[Context]`) plus the new `auth_gate`, with `thread_id="t-9"`: hooks logged `John Smith`, the gate passed and logged `t-9`, the model's system message was `You are a helpful assistant. Address the user as John Smith.` Dependency injection: a frozen `AppContext(user_id, db)` with a stand-in `FakeDB` gave `brief and polite`; the tool's `.args` were `{}`. Not run: Agent Server (`server_info`)
 - *HITL while streaming (2026-11-15):* `langchain` 1.5.0, `langgraph` 1.2.22, a scripted streaming model calling `get_weather` for Boston and San Francisco in one turn, `HumanInTheLoopMiddleware(interrupt_on={"get_weather": True})`, `InMemorySaver`. One `__interrupt__` update with two action requests; resume with decisions keyed by the interrupt id (edit Boston, approve San Francisco); the tools update held `It's always sunny in San Francisco!` and the Boston result behind the reviewer note
 - Class 15 has no code folder beyond the notebook and diagram. The Colab link in the README is not in the repo
 - **Details by section** (moved here from the ✅ markers):
@@ -732,6 +774,7 @@ agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg, context=
 - Live-Class-2026, `Weekend 09 - 22-23 Aug/README.md` and `22nd Aug - Runtime & HITL/README.md`
 - `Assignment_2_Agents_and_Prebuilt_Middleware.ipynb` (questions only)
 - Section 11.16 and the corrections marked *checked* are from testing, not from the class sources
+- LangChain docs: [Runtime](https://docs.langchain.com/oss/python/langchain/runtime), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/runtime.mdx`; docs.langchain.com was blocked from this environment), for the 11.3 version note and dependency injection, `Runtime[Context]` in 11.6, and the docs' `auth_gate` in 11.9
 - LangChain docs: [Streaming](https://docs.langchain.com/oss/python/langchain/streaming), section "Streaming with human-in-the-loop" (read 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "HITL while streaming" in 11.13
 
 Previous: [Chapter 10, Shell tools and custom middleware](10-shell-tools-and-custom-middleware.md) · Next: [Chapter 12, MCP in LangChain](12-mcp-in-langchain.md)
