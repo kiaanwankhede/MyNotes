@@ -16,6 +16,7 @@
 - Name the six areas a harness covers, and which chapter teaches each
 - Tell memory saver, memory store, cache and database apart, and pick one
 - Give an agent short-term memory (`thread_id`) and long-term memory (`store`), and say how `thread_id` differs from `context`
+- Store, get and search long-term memories by namespace and key, and keep one user's memories away from another's
 - Assemble a full agent with tools, middleware, memory, context, custom state and a name
 - Explain headless tools
 
@@ -329,6 +330,144 @@ The whiteboard compares the two in-memory classes:
 > - Set retention: old threads cost storage and may hold personal data you must delete on request
 > - *Added by Claude.*
 
+### Long-term memory with a store
+
+- Long-term memory = what the agent stores and recalls **across conversations and sessions**
+  - Short-term memory is scoped to one thread (6.4). Long-term memory persists across threads and can be recalled at any time
+- It is built on **LangGraph stores**: each memory is a **JSON document** filed under a `namespace` and a `key`
+  - `namespace` ≈ a folder: a tuple such as `("my-user", "chitchat")`. It often holds user or org ids
+  - `key` ≈ a file name inside that folder
+- Create a store and pass it to `create_agent`. Tools then reach it as `runtime.store`
+
+```python
+from langchain.agents import create_agent
+from langgraph.store.memory import InMemoryStore
+
+store = InMemoryStore()   # an in-memory dictionary: development only, use a DB-backed store in production
+agent = create_agent("claude-sonnet-4-6", tools=[], store=store)
+```
+
+```mermaid
+flowchart TD
+    S[(Store)] --> N1["namespace<br/>('my-user', 'chitchat')"]
+    S --> N2["namespace<br/>('my-user', 'travel')"]
+    S --> N3["namespace<br/>('other-user', 'chitchat')"]
+    N1 --> K1["key 'a-memory'<br/>rules, my-key"]
+    N2 --> K2["key 'prefs'<br/>seat: aisle"]
+    N3 --> K3["key 'a-memory'<br/>another user's rules"]
+```
+
+- The tuple makes a hierarchy: `search(("my-user",))` sees both `my-user` namespaces, never `other-user`'s
+- For memory types (semantic, episodic, procedural) and strategies for writing them, the docs point to the [Memory conceptual guide](https://docs.langchain.com/oss/python/concepts/memory#long-term-memory) (not read for these notes)
+
+### Storing, getting and searching memories
+
+```python
+from collections.abc import Sequence
+
+from langgraph.store.base import IndexConfig
+from langgraph.store.memory import InMemoryStore
+
+
+def embed(texts: Sequence[str]) -> list[list[float]]:
+    # Replace with an actual embedding function or LangChain embeddings object
+    return [[1.0, 2.0] for _ in texts]
+
+
+store = InMemoryStore(index=IndexConfig(embed=embed, dims=2))
+user_id = "my-user"
+application_context = "chitchat"
+namespace = (user_id, application_context)
+store.put(
+    namespace,
+    "a-memory",
+    {
+        "rules": [
+            "User likes short, direct language",
+            "User only speaks English & python",
+        ],
+        "my-key": "my-value",
+    },
+)
+# get the "memory" by ID
+item = store.get(namespace, "a-memory")
+# search for "memories" within this namespace, filtering on content equivalence, sorted by vector similarity
+items = store.search(
+    namespace, filter={"my-key": "my-value"}, query="language preferences"
+)
+```
+
+- `put(namespace, key, value)`: `value` is a dict, stored as one JSON document
+- `get(namespace, key)`: one item, or `None` if the key is missing
+- `search(namespace_prefix, filter=..., query=..., limit=10)`:
+  - `filter`: exact match on fields of the value
+  - `query`: natural-language text, ranked by **vector similarity**. That needs an `index`: an embedding function (or a LangChain embeddings object) and its `dims`
+  - The namespace is a **prefix**, so one search can cover many namespaces ("cross-namespace searching", in the docs' words)
+- Also on every store: `delete(namespace, key)` and `list_namespaces()`
+- **Docs vs package** (tested on `langgraph` 1.2.22):
+  - The docs' comments call the result of `get` a "StoreValue object". The package returns `langgraph.store.base.Item`, with `.value`, `.key`, `.namespace`, `.created_at` and `.updated_at`
+  - `search` returns `SearchItem`s, which add a `.score`
+- **Watch out** (tested):
+  - The docs' `embed` gives every text the same vector, so every score ties. It only shows the shape of the call
+  - A `query` on a store with **no** index does not fail. It returns the items unranked, with `score=None`
+  - `search` returns at most 10 items unless you pass `limit`
+
+### Read and write memory from tools
+
+The docs' two examples, a read tool and a write tool, combined here into one agent:
+
+```python
+from dataclasses import dataclass
+
+from langchain.agents import create_agent
+from langchain.tools import ToolRuntime, tool
+from langgraph.store.memory import InMemoryStore
+from typing_extensions import TypedDict
+
+
+@dataclass
+class Context:
+    user_id: str
+
+
+class UserInfo(TypedDict):           # the structure of user information, for the LLM
+    name: str
+
+
+store = InMemoryStore()
+store.put(("users",), "user_123", {"name": "John Smith", "language": "English"})
+
+
+@tool
+def get_user_info(runtime: ToolRuntime[Context]) -> str:
+    """Look up user info."""
+    assert runtime.store is not None             # the store given to create_agent
+    user_info = runtime.store.get(("users",), runtime.context.user_id)
+    return str(user_info.value) if user_info else "Unknown user"
+
+
+@tool
+def save_user_info(user_info: UserInfo, runtime: ToolRuntime[Context]) -> str:
+    """Save user info."""
+    assert runtime.store is not None
+    runtime.store.put(("users",), runtime.context.user_id, dict(user_info))
+    return "Successfully saved user info."
+
+
+agent = create_agent("claude-sonnet-4-6", tools=[get_user_info, save_user_info],
+                     store=store, context_schema=Context)
+agent.invoke({"messages": [{"role": "user", "content": "My name is John Smith"}]},
+             context=Context(user_id="user_123"))   # whose information is updated
+item = store.get(("users",), "user_123")            # read the store directly, outside the agent
+```
+
+- `user_id` comes from `context`, which your app sets. The model never chooses whose memory it touches
+- `runtime.store` is `None` when the agent was built without a store; the `assert` makes that a loud error
+- The `UserInfo` TypedDict becomes the tool's argument schema, so the model must send `{"name": ...}`
+
+> [!WARNING]
+> **`put` replaces the whole document.** In the run above, `save_user_info` overwrote `{"name": "John Smith", "language": "English"}` with `{"name": "John Smith"}`, and `language` was gone. To update one field, `get` the old value, merge, then `put`. *(Found in testing; the docs do not mention it.)*
+
 ### Long-term memory from a tool, scoped per user (*added by Claude*)
 
 ```python
@@ -356,12 +495,20 @@ agent.invoke({"messages": [{"role": "user", "content": "I like Python"}]},
 - The **namespace** `("users", user_id)` is the isolation boundary; the `user_id` comes from `context`, so the model can't read or spoof it
 - Read it back in another conversation with `runtime.store.get(("users", user_id), "prefs")`, or `search(...)` when the store has an embedding index
 
+> [!CAUTION]
+> **🔒 Security: put the user in the namespace, not only in the key**
+> - The docs' tools file every user under one namespace, `("users",)`, with the user id as the key
+> - That is safe for `get`, but `search(("users",))` returns **every user's** record (tested: `u1` and `u2` both came back)
+> - A memory-search tool built on that layout can leak one user's facts into another user's prompt
+> - With `("users", user_id)` as the namespace, every search is limited to that user's prefix
+> - *Added by Claude.*
+
 ✅ *Verified offline with a scripted model: after the run, `store.get(("users", "u42"), "prefs").value` was `{'text': 'likes Python'}`.*
 
-### Swapping in durable backends (*added by Claude*)
+### Swapping in durable backends
 
 ```python
-# uv add langgraph-checkpoint-postgres
+# uv add langgraph-checkpoint-postgres "psycopg[binary]"
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.store.postgres import PostgresStore
 
@@ -371,10 +518,12 @@ with PostgresSaver.from_conn_string(DB_URI) as saver, PostgresStore.from_conn_st
 ```
 
 - Same agent code; only the objects change. `langgraph-checkpoint-sqlite` (`SqliteSaver`) is the lighter option for a single machine
-- The saver half is in the docs (Short-term memory, "In production"):
-  - Install: `pip install -U langgraph-checkpoint-postgres "psycopg[binary]"`. The package installs `psycopg` 3 **without** extras; `[binary]` is the recommended add-on
-  - `PostgresSaver.from_conn_string(DB_URI)` as a context manager, then `.setup()` once to create the tables
-  - Other checkpointer libraries: SQLite, Postgres, Azure Cosmos DB
+- The combined block is Added by Claude. Each half is in the docs:
+  - **Saver** (Short-term memory page) and **store** (Long-term memory page) share one install: `pip install -U langgraph-checkpoint-postgres "psycopg[binary]"`. The package installs `psycopg` 3 **without** extras; `[binary]` is the recommended add-on
+  - `PostgresSaver.from_conn_string(DB_URI)` / `PostgresStore.from_conn_string(DB_URI)` as a context manager, then `.setup()` once to create the tables
+  - Semantic search on Postgres: `PostgresStore.from_conn_string(DB_URI, index=IndexConfig(embed=embed, dims=2))`
+  - The docs' URI: `"postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable"`. *Added by Claude:* never put real credentials in code
+  - Other checkpointer libraries: SQLite, Postgres, Azure Cosmos DB. Other stores, including Redis and MongoDB: the docs' [store integrations](https://docs.langchain.com/oss/python/integrations/long-term-memory) list
 - *Checked:* `SqliteSaver` for real. A thread saved through one saver was read back by a **new** saver and a **new** agent on the same file (a stand-in for a restart): the second agent saw `Hi! My name is Bob.`
 - *Not run:* Postgres (no server in the sandbox; `PostgresSaver` and `PostgresStore` were only imported or taken from the docs)
 
@@ -849,6 +998,15 @@ for chunk in agent.stream({"messages": [input_message]}, stream_mode="messages",
 
 </details>
 
+<details class="qa"><summary>14. Store each user's memory under <code>("users",)</code> with the user id as key, or under <code>("users", user_id)</code>?</summary>
+
+- Both work for `get`: one record per user either way
+- `search` takes a namespace **prefix**, so under `("users",)` one search returns every user's records
+- Choose `("users", user_id)` (add the app context, such as `"chitchat"`, as a third part when needed)
+- *Stronger answer:* take `user_id` from `context`, never from a tool argument, and remember `put` replaces the whole document, so merge before writing one field
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"A travel assistant must remember a user's preferences across trips but not leak them to other users."* Cover thread vs store, namespaces, what gets saved, and deletion.
 
@@ -857,7 +1015,7 @@ for chunk in agent.stream({"messages": [input_message]}, stream_mode="messages",
 Not in the course material. Established practice, but check current docs.
 
 - **Do not use guessable `thread_id`s.** If ids are sequential, one user can read another's chat. Derive the id from the authenticated user and session, and check ownership on the server
-- **Scope the store per user.** Use a namespace like `(user_id, "preferences")`, as in the examples, so users never read each other's data
+- **Scope the store per user.** Use a namespace like `(user_id, "preferences")`, as in the per-user tool in 6.5, so users never read each other's data. The docs' examples key by user id inside one shared namespace instead; see the 🔒 box in 6.5
 - **Long-term memory is personal data.** Decide what you keep, tell users, and make deletion possible (privacy laws such as GDPR and India's DPDP Act apply)
 - **Use parameterised SQL** (`?` placeholders, as in 6.3) in tools. The model controls the arguments, so never build SQL with string formatting
 - **Threads grow every turn.** The checkpointer keeps the whole message list, and you pay for those tokens on every call. [Chapter 7](07-middleware.md) covers summarization
@@ -874,6 +1032,9 @@ agent = create_agent(model, tools, system_prompt="...",          # str or System
                      state_schema=MyState, context_schema=Ctx,     # run data / per-run data
                      checkpointer=InMemorySaver(), store=InMemoryStore(), name="trip_agent")
 cfg = {"configurable": {"thread_id": str(uuid7())}}               # which conversation
+store = InMemoryStore(index={"embed": embeddings, "dims": 1536})   # index = semantic search
+store.put(("u1", "prefs"), "seat", {"value": "aisle"})          # namespace (folder), key (file), JSON doc
+store.search(("u1",), filter={"value": "aisle"}, query="seat")   # prefix + exact filter + similarity
 agent.invoke({"messages": [("user", "I prefer aisle seats")]}, cfg, context=Ctx(user_id="u1"))
 for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
 # state = changes in the run · context = fixed per run · store = across conversations
@@ -887,6 +1048,8 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
 - Tool use costs at least two model calls. Tools themselves cost no tokens
 - Default = no memory. Add `checkpointer` + `thread_id`
 - Saver = one chat. Store = about a user, across chats. Cache = repeat calls. Database = everything else
+- Store = JSON documents by namespace (folder) and key (file). `search` scans a namespace prefix, filters exactly and, with an index, ranks by similarity. Put the user id in the namespace
+- `put` replaces the whole document. Merge before updating one field
 - `store`, `context_schema`, `middleware`, `name` go into `create_agent` alongside tools and the checkpointer
 - `thread_id` = which conversation. `context` = who is asking, this run. State = what changes during the run (`state_schema`)
 - `name` matters when the agent becomes a subgraph in a multi-agent system
@@ -909,6 +1072,7 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
    - B1.2: a `context_schema` with `account_tier` that a tool reads through `runtime.context`
 10. Add the `delete_old_messages` hook, chat three turns, and print the thread after each. Then explain why the agent forgot your name
 11. Swap `InMemorySaver` for `SqliteSaver` on a file, restart Python, and continue the same `thread_id`
+12. Give an `InMemoryStore` an index with real embeddings, save three preferences, and search them with a query. Then store two users under `("users",)` keyed by id, search `("users",)`, and see what leaks
 
 ## How this chapter was checked
 
@@ -945,6 +1109,14 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
     - `interleave("messages", "tool_calls", "values")` gave values, messages, values, tool_calls, values, messages, values. `astream_events` + `asyncio.gather` gave both messages and the tool call
     - v3 final `.content` was a list of blocks; `invoke()` gave a string. `LangChainBetaWarning` on every v3 call
     - Raw events: methods `messages`, `values`, `tools` (`tool-started`, `tool-finished`), namespace `[]` at the root
+  - *Update from the Long-term memory docs page (2026-11-15), `langchain` 1.5.0, `langgraph` 1.2.22, with a scripted fake chat model (no keys, no network):*
+    - Every new 6.5 block was extracted from this file and run as written (model swapped for the scripted one)
+    - Store basics: `create_agent(..., store=store)` built. The docs' storage snippet ran; `get` returned an `Item` (not a "StoreValue"), `search` a list of `SearchItem` with `.score`
+    - Docs `embed` gave every item the same score. With `DeterministicFakeEmbedding` and `fields=["t"]`, the matching text scored 1.0 and the other lower. A `query` on a store with no index returned items with `score=None`
+    - Read and write tools in one agent: `get_user_info` returned `{'name': 'John Smith', 'language': 'English'}`; `save_user_info` then left `{'name': 'John Smith'}` (the `put` overwrite in the ⚠️ box). With no store, the `assert` raised
+    - Isolation: under `("users",)` keyed by id, `search(("users",))` returned both users; under `("users", user_id)`, a search on one user's prefix returned only theirs
+    - Cheat sheet store lines ran with a fake embedding (1536 dims)
+    - `PostgresStore` imported; `from_conn_string` takes `index`, and it has `setup`. Not connected (no server)
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures, and the updated cheat sheet against 1.5.0
 - **Cheat sheet:** ran the checkpointer, store, thread id and `stream_mode="updates"`; the thread state held the messages. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
@@ -959,6 +1131,7 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
 - LangChain docs: [Streaming](https://docs.langchain.com/oss/python/langchain/streaming), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/streaming.mdx` and two snippet files; docs.langchain.com was blocked from this environment). Used for the stream-mode bullets and "`stream()` patterns" in 6.8
 - LangChain docs: [Event streaming](https://docs.langchain.com/oss/python/langchain/event-streaming), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/event-streaming.mdx`; docs.langchain.com was blocked from this environment). Used for "Event streaming (v3): projections and rules" in 6.8. The two ⚠️ boxes are from testing
 - LangChain docs: [Short-term memory](https://docs.langchain.com/oss/python/langchain/short-term-memory), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/short-term-memory.mdx`; docs.langchain.com was blocked from this environment). Used for 6.4 (threads, when memory is saved, deleting and the valid-history warning) and 6.5 (the Postgres saver install and setup)
-- Section 6.11, the SQLite example in 6.3, the state / context / store table in 6.6 and senior questions 10–11 are added by Claude and are not from these sources
+- LangChain docs: [Long-term memory](https://docs.langchain.com/oss/python/langchain/long-term-memory), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/long-term-memory.mdx` and eight Python snippet files; docs.langchain.com was blocked from this environment). Used for the store sections of 6.5: namespace and key, put / get / search, the index, the read and write tools, and the Postgres store
+- Section 6.11, the SQLite example in 6.3, the state / context / store table in 6.6, the per-user tool and 🔒 box in 6.5, and senior questions 10–11 and 14 are added by Claude and are not from these sources
 
 Previous: [Chapter 5, Tools](05-tools.md) · Next: [Chapter 7, Middleware](07-middleware.md)
