@@ -37,6 +37,12 @@
       "blurb": "Model Context Protocol: servers, clients, security."
     },
     {
+      "slug": "deep-agents",
+      "title": "Deep Agents",
+      "shelf": "GenAI & Agents",
+      "blurb": "The batteries-included agent harness: planning, file systems, subagents, skills and memory."
+    },
+    {
       "slug": "projects",
       "title": "Projects",
       "shelf": "Projects",

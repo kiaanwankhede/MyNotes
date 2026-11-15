@@ -64,6 +64,12 @@
     "Interview questions"
    ]
   },
+  "Deep Agents": {
+   "folder": "books/deep-agents",
+   "chapters": [
+    "Retrieval and RAG"
+   ]
+  },
   "Projects": {
    "folder": "books/projects",
    "chapters": [
