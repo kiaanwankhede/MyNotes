@@ -15,6 +15,8 @@
 - Switch models at run time with `wrap_model_call`
 - Extend a prebuilt middleware by subclassing
 - Predict the order in which several middlewares run
+- Stop dangerous shell commands, and explain why a blocklist is not enough
+- Turn business rules into one class-based middleware with its own state
 
 ## 10.1 `ShellToolMiddleware`: build your own "Claude Code"
 
@@ -71,11 +73,40 @@ cinebot_shell_agent = create_agent(
 
 - "Create a reports folder if it does not already exist" → a real folder appeared in the file browser
 - "Do research on the NBA and save it in `nba_research.txt`" → the file landed **in the workspace**. Asking a chat product the same thing gives a file that exists only in *its* sandbox and can never reach your machine
+  - The "research" came from the model's own memory: the agent had no search tool. Treat such a file as the model's recollection, not research
 - "Create `Hello_world.py` with one print line" → the message history showed: the human message, an AI message with the tool call (`cat > Hello_world.py << ...`), a tool message confirming the write, and a final AI message. The same command in a real terminal gave an identical file
 - "Write a script that creates two folders, run it, then delete it" → a full write, execute, clean-up cycle in one flow
 - "Create and run a simple calculator app" → the same pattern scales to small working programs
+  - Running it **timed out**: the calculator waited for keyboard input that never comes, so the tool gave up and restarted the shell ("Programs that wait for input", below)
+- "Delete all files and folders inside your workspace" → it did, at once. That demo was the class's case for the Docker policy, and for the guards at the end of 10.1
 
 My offline check of the same cycle (a stand-in model sent the commands): the tool ran `mkdir`, wrote `Hello_world.py` and ran it, and a second run deleted it. The files appeared and disappeared on disk.
+
+**Why the shell tool has `before_agent` and `after_agent` hooks** (asked in class 14 and left for later; answered from the installed code)
+
+- `before_agent` starts a new `/bin/bash` process and runs `startup_commands`. `after_agent` runs `shutdown_commands` and ends that process
+- So the "persistent" session lasts **one `invoke`**, not one chat. *Tested on 1.5.0*, one thread with a checkpointer:
+  - message 1 ran `export GREETING=from_run1; mkdir -p sub; cd sub; echo hi > note.txt` (shell process 376)
+  - message 2 found `$GREETING` empty and the working folder back at `workspace_root`, but `sub/note.txt` still there (shell process 384)
+- Files survive between messages. Variables, `cd` and running processes do not. Write anything the next message needs to a file
+- Without `workspace_root`, each run works in a new temporary folder (`/tmp/langchain-shell-…`) that is deleted when the run ends (tested). Set it whenever files must outlive the run
+
+**Programs that wait for input**
+
+```text
+python3 -c "n = input('Enter a number: ')"        →  Error: Command timed out after 1.0 seconds.   (shell restarted)
+echo 21 | python3 -c "print(int(input()) * 2)"     →  42
+```
+
+- The agent cannot type into a running program. A program that asks for input just waits until `command_timeout` (30 seconds by default), then the shell is restarted and its variables are lost
+- So run programs non-interactively: arguments, piped input, `--yes` flags
+- ✅ *Verified on 1.5.0 with `command_timeout=1.0`: both lines above, as shown.*
+
+**Windows**
+
+- The class: "Windows does not have shell access, so we will have to control that"
+- From the installed code: after each command the tool sends `printf '<marker> %s\n' $?` to read the exit code. That is POSIX shell syntax, and the default shell is `/bin/bash`
+- So on Windows, point `shell_command` at a POSIX shell (WSL or Git Bash). PowerShell and `cmd` would not understand the marker. *Read from the source; not tested on Windows*
 
 **Remote machines.** Can an agent run commands on a secured remote machine (a Kubernetes cluster you reach by SSH)? Yes. Put the SSH connection in the shell tool's **startup commands**. Once your own machine is connected, the agent inherits that access.
 
@@ -88,6 +119,80 @@ My offline check of the same cycle (a stand-in model sent the commands): the too
 > - Log every command the agent runs, and require approval for anything that writes outside the workspace
 > - *Added by Claude.*
 
+### Stopping dangerous commands (class 14)
+
+The last question of the class: how do you stop the agent deleting folders without permission? The class answer: check the command in `after_model`, when the model proposes it. `wrap_tool_call` works too; the two stop at different points:
+
+| Gate | What it sees | When it blocks |
+|---|---|---|
+| `after_model` | every command the model proposes in that turn, before any of them runs | the turn ends with your message |
+| `wrap_tool_call` | one command, just before it runs | the model gets an error tool message and can try something else |
+
+```python
+import re
+from langchain.agents.middleware import after_model, wrap_tool_call
+from langchain.messages import AIMessage, ToolMessage
+
+DANGEROUS = re.compile(r"\brm\s+-\w*[rf]|\bmkfs\b|\bdd\s+if=|\bshutdown\b|\breboot\b")
+
+@wrap_tool_call
+def block_dangerous_shell(request, handler):
+    """Last gate: checked right before each shell command runs."""
+    command = request.tool_call["args"].get("command") or ""
+    if request.tool_call["name"] == "shell" and DANGEROUS.search(command):
+        return ToolMessage(content=f"Blocked by policy: {command!r}. Ask a human to do this.",
+                           tool_call_id=request.tool_call["id"], name="shell", status="error")
+    return handler(request)
+
+@after_model(can_jump_to=["end"])
+def refuse_dangerous_plan(state, runtime):
+    """Earlier gate: checked when the model proposes the commands, before any of them runs."""
+    last = state["messages"][-1]
+    bad = [c["args"].get("command") for c in last.tool_calls
+           if c["name"] == "shell" and DANGEROUS.search(c["args"].get("command") or "")]
+    if bad:
+        return {"messages": [AIMessage(content=f"I won't run {bad[0]!r} without a human's approval.", id=last.id)],
+                "jump_to": "end"}
+    return None
+```
+
+✅ *Verified on 1.5.0 (scripted model, host policy, a scratch workspace): without a guard, `rm -rf ./*` emptied the workspace, as in class. With `block_dangerous_shell` the files stayed and the model got the "Blocked by policy" message. With `refuse_dangerous_plan` nothing ran and the run ended with "I won't run 'rm -rf ./*' without a human's approval."*
+
+> [!CAUTION]
+> **A blocklist is not a safety boundary.**
+> - *Tested:* `find . -mindepth 1 -delete` and a one-line `python3 -c "…shutil.rmtree…"` both passed `block_dangerous_shell` and emptied the workspace
+> - There are endless ways to delete a file, and a refused model may simply try another one: the error message invites it
+> - Treat a blocklist as a speed bump, never as the protection
+
+An allowlist is stricter: only named commands, and no shell tricks (*added by Claude*):
+
+```python
+import re
+from langchain.agents.middleware import wrap_tool_call
+from langchain.messages import ToolMessage
+
+ALLOWED = {"ls", "cat", "pwd", "head", "wc", "grep", "pytest"}   # read-only plus the test runner
+SHELL_TRICKS = re.compile(r"[;&|`$<>()\\\n]")                    # chaining, pipes, redirects, substitution
+
+def is_allowed(command: str) -> bool:
+    words = command.split()
+    return bool(words) and words[0] in ALLOWED and not SHELL_TRICKS.search(command)
+
+@wrap_tool_call
+def allow_listed_shell(request, handler):
+    command = request.tool_call["args"].get("command") or ""
+    if request.tool_call["name"] == "shell" and not is_allowed(command):
+        return ToolMessage(content=f"Not allowed: {command!r}. Allowed commands: {', '.join(sorted(ALLOWED))}.",
+                           tool_call_id=request.tool_call["id"], name="shell", status="error")
+    return handler(request)
+```
+
+✅ *Verified: `ls -la` and `cat a.txt` were allowed. `rm -rf ./*`, `find . -mindepth 1 -delete`, `ls; rm -rf .`, `cat a.txt > /dev/null`, `echo $(rm -rf .)` and `python3 -c 'print(1)'` were refused. In an agent run, `find … -delete` was refused and the workspace kept its files.*
+
+- An allowlist narrows what the agent can **ask for**. It cannot limit what an allowed program **does**: `pytest` runs whatever code the tests contain, and `cat` reads any path, because `workspace_root` is not a jail
+- The layers, weakest first: blocklist → allowlist → human approval for anything that writes (10.14) → a sandbox that limits what any command can touch (`DockerExecutionPolicy`, network off)
+- For edits, give the agent narrow file tools (read, write and edit inside one folder, as Deep Agents' filesystem middleware does) and keep the shell for commands
+
 ## 10.2 Why custom middleware
 
 - Every prebuilt middleware is **generic**. It has to be, because LangChain cannot know your business rules
@@ -97,6 +202,7 @@ My offline check of the same cycle (a stand-in model sent the commands): the too
   - log every cancellation in a very specific internal audit format
 - Custom middleware closes that gap
 - Same relationship as Pydantic to plain Python: Python has no field validation built in, so a dedicated layer was added on top
+- All three rules are built in 10.10 ("CineBot's three rules, built"). The first one also has a prebuilt answer, if "two movies" means two bookings
 
 ## 10.3 Hooks: six points to intercept execution
 
@@ -119,6 +225,10 @@ Request
 - Everything in between (`before_model`, `wrap_model_call`, `after_model`, `wrap_tool_call`) can run **many times**, once per loop pass
 - Checked: with one tool call, `before_model` fired twice and the two agent hooks once each
 - LangChain builds the execution graph and calls each hook at its declared point. Your code does not decide when
+- **Same idea, other names:** Google ADK calls them callbacks, Claude Code calls them hooks. The table is in [Chapter 7](07-middleware.md), 7.3
+- **A hook is not a webhook** (class 14). A hook runs inside your agent's own loop, at a point you choose. A webhook is an HTTP request that another service sends to you when something happens
+- **Middleware is not a gateway either** (class question). An API gateway sits in front of services at the network edge: auth, rate limits and routing for every request. Middleware runs inside one agent's loop and can read its state
+  - An **LLM gateway**, a proxy in front of the model providers ([Chapter 3](03-models-messages-and-parameters.md), 3.3), can centralise keys, fallbacks and cost logs for every app at once. Keep in middleware what needs the agent's state *(added by Claude)*
 
 **Why no `before_tool` and `after_tool`?**
 
@@ -169,6 +279,39 @@ logged_agent.invoke({"messages": [("user", "How are you?")]})
 - **Return `None`:** "I observed this, I change nothing"
 - **Return a dict:** it **updates the state**. *Checked:* returning `{"messages": [SystemMessage(...)]}` from `before_model` added that message to the conversation
 - **`before_agent` is the natural place to set up** (open a database connection, load what the run needs), because it fires once at the start. **`after_agent` is the natural place to tear down**
+- **"Once" means once per `invoke`, and a chat calls `invoke` once per user message.** *Tested:* `before_agent` ran 3 times for 3 messages in one thread. A connect in `before_agent` and a disconnect in `after_agent` cost a new connection on every message
+- So open shared resources **once, when the app starts** (a connection pool), and pass them in `context`. Keep `before_agent` for per-run setup, such as loading this user's profile *(added by Claude)*:
+
+```python
+import sqlite3
+from dataclasses import dataclass
+from langchain.agents import create_agent
+from langchain.tools import tool, ToolRuntime
+from langgraph.checkpoint.memory import InMemorySaver
+
+@dataclass
+class AppContext:
+    user_id: str
+    db: sqlite3.Connection          # opened once at app start; in production, a connection pool
+
+@tool
+def get_booking(booking_id: str, runtime: ToolRuntime[AppContext]) -> str:
+    """Look up one of the current user's bookings."""
+    row = runtime.context.db.execute(
+        "SELECT movie, seats FROM bookings WHERE id = ? AND user_id = ?",
+        (booking_id, runtime.context.user_id)).fetchone()
+    return f"{row[0]}, {row[1]} seats" if row else "No such booking for this user."
+
+db = sqlite3.connect("cinebot.db", check_same_thread=False)     # once, when the app starts
+agent = create_agent(model, tools=[get_booking], context_schema=AppContext, checkpointer=InMemorySaver())
+for text in ["Show booking BK1044", "And BK2000?"]:                # every message reuses the same connection
+    agent.invoke({"messages": [("user", text)]}, {"configurable": {"thread_id": "chat-1"}},
+                 context=AppContext(user_id="u1", db=db))
+```
+
+✅ *Verified on 1.5.0 (scripted model): one connection served both messages, and `BK2000`, which belongs to another user, came back as "No such booking for this user."*
+
+- Typing the argument as `ToolRuntime[AppContext]`, not a bare `ToolRuntime`, also removes the Pydantic serializer warning seen in class 11 ([Chapter 6](06-agents-and-memory.md), 6.6). *Tested:* bare, 2 warnings; typed, none
 - **You do not pass `state` and `runtime` yourself.** LangChain calls your function with them. A hook must accept the parameters its type provides. A hook defined with **no parameters** fails with `TypeError: bad() takes 0 positional arguments but 2 were given` (shown live, checked)
 - **Decorators take arguments** (docs): `state_schema=` adds the middleware's own state fields; `can_jump_to=` declares jump targets (same as stacking `@hook_config`, 10.11)
 
@@ -230,6 +373,9 @@ cost_aware_agent = create_agent(
 
 - A short, simple exchange does not need the most expensive model. Past a length threshold (here, more than 10 messages) it is upgraded automatically
 - It is the same idea as the automatic model routing in chat products
+  - **How the products do it** (reported): ChatGPT's GPT-5 used a trained "real-time router" that picks a fast or a reasoning model from the conversation type, its complexity, the tools it needs and explicit intent ("think hard"). Manual Auto, Fast and Thinking modes were added later
+  - A message count is a crude stand-in for that. For a model that makes the choice, see `ModelRouterMiddleware` ([Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md), 8.3)
+  - *Web-checked 2026-11-15 (Fortune, TechCrunch; secondary reporting, see Sources)*
 - `wrap_model_call` is the right hook because it hands you **the exact request object**, so you can override the model before the call goes out. `before_model` cannot do that
 - ✅ *Verified (details in "How this chapter was checked").*
 - **What you can change on the request:** `model`, `messages`, `system_message`, `tool_choice`, `tools`, `response_format`, `state`, `runtime` and `model_settings`
@@ -314,6 +460,25 @@ class CallLimitMiddleware(AgentMiddleware[CustomState]):
 ```
 
 - *Checked:* a middleware with `tools = [write_note]` put `write_note` on the agent's tool node, and the model's call to it ran
+
+**Async hooks** (class 14)
+
+```python
+import asyncio
+from langchain.agents.middleware import AgentMiddleware
+
+class LoadProfile(AgentMiddleware):
+    async def abefore_agent(self, state, runtime):
+        await asyncio.sleep(0.3)            # stands in for an async database or HTTP call
+        return None
+
+agent = create_agent(model, tools=[], middleware=[LoadProfile()])
+asyncio.run(agent.ainvoke({"messages": [("user", "Hi")]}))     # agent.invoke(...) raises TypeError
+```
+
+- In class, an async hook was said to run without waiting for the one before it to finish. *Tested on 1.5.0:* two middlewares with async `abefore_agent` (0.3 s and 0.1 s) ran strictly in order under `ainvoke`: A from 0.00 to 0.30 s, then B from 0.30 to 0.40 s
+- Each hook is a step of the graph, and a step finishes before the next one starts. What async buys you is that the server can serve **other** requests while a hook waits on I/O, not overlap inside one run
+- A middleware with only async hooks fails under plain `invoke`: `TypeError: No synchronous function provided to "abefore_agent". Either initialize with a synchronous function or invoke via the async API (ainvoke, astream, etc.)` (tested; the same for an `async def` with `@before_agent`). Define both versions, or call the agent with `ainvoke`
 
 ## 10.7 Extending a prebuilt middleware
 
@@ -456,6 +621,121 @@ def monitor_tool(request, handler):
         print("failed:", e); raise
 ```
 - ✅ *Verified (details in "How this chapter was checked").*
+
+### CineBot's three rules, built (class 14)
+
+Class 14 opened custom middleware with three rules no prebuilt middleware can know (10.2). One class covers all three, with two hooks and its own state (*added by Claude*: the class named the rules but did not code them):
+
+```python
+import json, logging, operator, time
+from typing import Annotated
+from typing_extensions import NotRequired
+from langchain.agents import AgentState
+from langchain.agents.middleware import AgentMiddleware
+from langchain.messages import ToolMessage
+from langgraph.types import Command
+
+audit = logging.getLogger("cinebot.audit")
+RIVALS = ("StarScreen", "MegaPlex")              # stand-in names for rival chains
+
+class CineBotState(AgentState):
+    booked_movies: NotRequired[Annotated[list[str], operator.add]]   # reducer: updates add up
+
+class CineBotRules(AgentMiddleware[CineBotState]):
+    """CineBot's own business rules: one middleware, two hooks, its own state."""
+    state_schema = CineBotState
+
+    def __init__(self, max_movies: int = 2):
+        super().__init__()
+        self.max_movies = max_movies
+
+    def wrap_tool_call(self, request, handler):
+        call = request.tool_call
+        if call["name"] == "book_seats":                 # rule 1: at most two different movies per session
+            booked = request.state.get("booked_movies", [])
+            movie = call["args"]["movie_title"]
+            if movie not in booked and len(booked) >= self.max_movies:
+                return ToolMessage(content=f"Limit reached: at most {self.max_movies} different movies per session.",
+                                   tool_call_id=call["id"], name=call["name"], status="error")
+            result = handler(request)
+            if movie in booked or getattr(result, "status", "success") == "error":
+                return result
+            return Command(update={"messages": [result], "booked_movies": [movie]})   # remember it
+        if call["name"] == "cancel_booking":             # rule 3: our own audit line for every cancellation
+            start, status = time.monotonic(), "error"
+            try:
+                result = handler(request)
+                status = getattr(result, "status", "success")
+                return result
+            finally:
+                audit.info(json.dumps({"event": "cancel", "user": request.runtime.context.user_id,
+                                       "args": call["args"], "status": status,
+                                       "ms": round((time.monotonic() - start) * 1000)}))
+        return handler(request)
+
+    def after_model(self, state, runtime):               # rule 2: flag any rival chain the bot names
+        named = [r for r in RIVALS if r.lower() in state["messages"][-1].text.lower()]
+        if named:
+            audit.warning(json.dumps({"event": "rival_mention", "names": named}))
+        return None
+```
+
+```python
+from dataclasses import dataclass
+from langgraph.checkpoint.memory import InMemorySaver
+
+@dataclass
+class Ctx:
+    user_id: str                                   # set by your app from login, never by the model
+
+agent = create_agent(model, tools=[book_seats, cancel_booking], middleware=[CineBotRules()],
+                     context_schema=Ctx, checkpointer=InMemorySaver())    # a session = one thread
+agent.invoke({"messages": [("user", "Book 2 seats for Oppenheimer")]},
+             {"configurable": {"thread_id": "session-1"}}, context=Ctx(user_id="u1"))
+```
+
+✅ *Verified on 1.5.0 (scripted model, one thread): Oppenheimer and Dune were booked; Oppenheimer again was fine (same movie); Interstellar got "Limit reached: at most 2 different movies per session." The cancellation logged `{"event": "cancel", "user": "u1", "args": {"booking_id": "BK1044"}, "status": "success", "ms": 1}`. A failing cancellation was still logged, with `"status": "error"`, and its exception still reached the caller. A reply naming StarScreen logged a `rival_mention` warning.*
+
+- **Why one class:** two hooks, its own `state_schema` and a setting (`max_movies`). Those are the cases where 10.6 says to prefer a class
+- **The booked list lives in state, not on `self`,** so it is per session and saved with the thread (the 10.6 pitfall). The `operator.add` reducer lets updates add up
+- **Rule 1 has a prebuilt answer if it means bookings:** `ToolCallLimitMiddleware(tool_name="book_seats", thread_limit=2)` ([Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md), 8.2). *Tested:* it also blocked a second booking for a movie already booked. "Two **different** movies" needs the custom version
+  - The class: no prebuilt middleware can know these rules. The docs: prefer a built-in middleware when one fits (10.9). Check before you write one
+- **Rule 2 flags, it does not block.** To block, return the reply replaced (same `id`), as `refuse_dangerous_plan` does in 10.1
+- **Rule 3 logs in `finally`,** so a failed cancellation is logged too. The user comes from `runtime.context`, never from the model
+
+> [!WARNING]
+> **Parallel tool calls slip past a state-based limit.**
+> - *Tested:* one model turn that asked to book A, B and C at once booked all three. Every call in a turn sees the same state, so none of them saw the others
+> - Enforce the hard limit where the booking is written: the booking service or a database constraint. The middleware is the early, friendly check
+> - Or allow one tool call per turn with `request.override(model_settings={**request.model_settings, "parallel_tool_calls": False})` in a `wrap_model_call` hook. *Checked:* the request sent `"parallel_tool_calls": false`. That is OpenAI's setting; other providers name it differently
+
+**The "10 million tokens" guard** (class 14's other example: should you process a giant request at all?)
+
+```python
+from langchain.agents.middleware import before_agent
+from langchain.messages import AIMessage, HumanMessage
+from langchain_core.messages.utils import count_tokens_approximately
+
+MAX_INPUT_TOKENS = 8_000
+
+@before_agent(can_jump_to=["end"])
+def reject_huge_input(state, runtime):
+    """Refuse an oversized message before any model call, and keep it out of the saved thread."""
+    last = state["messages"][-1]
+    n = count_tokens_approximately([last])
+    if n > MAX_INPUT_TOKENS:
+        return {"messages": [
+                    HumanMessage(content=f"[message of about {n:,} tokens removed: too long]", id=last.id),  # same id: replaces it
+                    AIMessage(content="That message is too long. Please shorten it or upload it as a file.")],
+                "jump_to": "end"}
+    return None
+```
+
+✅ *Verified on 1.5.0 (scripted model, with a checkpointer): a 50,000-word message (about 62,504 tokens) got the refusal with 0 model calls. The saved thread held the placeholder and the refusal, and the next message worked normally. A guard that only replied, without replacing the message, sent all 250,010 characters to the model on the next turn.*
+
+- **Replace the message, don't just answer it.** The input is already in the thread when `before_agent` runs; left there, every later turn re-sends it
+- Replace it with a short placeholder rather than deleting it: some providers reject a history that starts with an AI message ([Chapter 6](06-agents-and-memory.md), 6.4)
+- `count_tokens_approximately` is a fast estimate. Use the provider's own counter when the number must be exact
 
 ### Cost tracking per run (*added by Claude*)
 
@@ -603,6 +883,16 @@ for activity in stream.extensions["tool_activity"]:
 - **After I edited a transfer amount and approved it, why did the agent ask for approval again?** That second request came from the **model**. It saw a partial transfer completed and reasoned that a balance remained. It is the model's judgement, not scripted by `HumanInTheLoopMiddleware`
 - **Does memory depend on which LLM I use?** No. The checkpointer and thread memory are LangChain mechanisms, independent of the model. Inconsistent remembering is more likely a setup issue, so re-test
 - **Why does my Groq/Llama agent call a `BraveSearch` tool I never defined?** Likely a model-specific quirk: some open models expect a particular search tool. Switching model or providing that tool fixed it. Not a bug in your code
+- **Why does the shell tool have `before_agent` and `after_agent` hooks?** It starts its shell in one and ends it in the other, so the session lasts one `invoke` (10.1)
+- **Does a terminal window need to be open?** No. The middleware starts its own `/bin/bash` process for each run (10.1)
+- **Can it run on Windows?** The class: Windows has no shell access, so it needs handling. The tool needs a POSIX shell: use WSL or Git Bash through `shell_command` (10.1)
+- **How do I stop the agent deleting folders without permission?** A check in `after_model` or `wrap_tool_call`, but a blocklist is easy to get around. Use an allowlist, approval and a sandbox (10.1)
+- **Is there such a thing as "middleware state"?** The class: no, the agent owns the state and middleware changes it. The docs (tested in 10.4): a middleware can declare a `state_schema`, and its fields are merged into the agent's state. Both hold: there is one state, and a middleware can add fields to it
+- **Can a middleware stop the model call?** (left open in class) Yes. Return `{"jump_to": "end"}` from `before_model` with `can_jump_to` declared (10.11), or return your own response from `wrap_model_call` without calling `handler` (10.5)
+- **Is middleware the same as a gateway?** No (10.3)
+- **Is Docker the same as a virtual machine?** No. A container shares the host's kernel; a VM runs its own. That makes containers lighter, and it is why untrusted code often runs in stronger sandboxes, such as gVisor or microVMs like Firecracker *(added by Claude)*
+- **Do async hooks run at the same time?** No. Each hook finishes before the next starts (10.6)
+- **Can I put everything in `before_agent`, PII masking included?** No. A tool may need the real value; mask before the **model** (10.4)
 
 ## 10.13 Interview corner
 
@@ -678,6 +968,32 @@ for activity in stream.extensions["tool_activity"]:
 
 </details>
 
+<details class="qa"><summary>10. Your coding agent must never delete anything outside its project folder. How do you make sure?</summary>
+
+- Not with the prompt, and not with `workspace_root`: it is a starting folder, not a jail
+- A blocklist is easy to get around (`find -delete` and a Python one-liner passed one in testing). An allowlist is stricter but still trusts every allowed program
+- Run commands in a sandbox that can only see the project folder (Docker, network off), and require human approval for anything that writes
+- *Stronger answer:* layer them: allowlist plus approval plus sandbox, with an audit log of every command and a timeout on each. Remember that text the agent reads (a web page, an issue) can try to inject commands
+
+</details>
+
+<details class="qa"><summary>11. A business rule says "at most two different movies per session". Where does it go, and what can go wrong?</summary>
+
+- A class-based middleware: `wrap_tool_call` on the booking tool, with the booked movies in the middleware's own `state_schema`, saved per thread
+- If the rule were "two bookings", `ToolCallLimitMiddleware(thread_limit=2)` already does it. Check for a built-in first
+- What goes wrong: parallel tool calls in one turn all see the same state and can pass together; and state on `self` would be shared by every user
+- *Stronger answer:* enforce the hard limit in the booking service or database too, switch off parallel tool calls for this agent if needed, and unit test the middleware with a scripted model, including a parallel-call turn
+
+</details>
+
+<details class="qa"><summary>12. The agent ran <code>cd build</code> and set a variable, but in the next message both were gone. Why?</summary>
+
+- `ShellToolMiddleware` starts a new shell in `before_agent` and ends it in `after_agent`, so each `invoke`, each user message, gets a fresh shell
+- Files on disk survive; variables, `cd` and running processes do not. A human-approval pause resets the shell too (10.14)
+- *Stronger answer:* make each command self-contained (`cd build && make`), keep what must last in files or in the agent's state, and set `workspace_root` so the files are not in a temporary folder that is deleted after the run
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"Build a coding agent that can run tests in a repo."* Cover the shell middleware, the sandbox, which commands need approval, output size limits and how you stop runaway loops.
 
@@ -715,6 +1031,16 @@ def time_tools(request, handler):
 class Guard(AgentMiddleware):
     def wrap_model_call(self, request, handler): return handler(request)
 agent = create_agent(model, tools, middleware=[log_calls, time_tools, Guard()])
+
+from langchain.agents.middleware import before_agent, wrap_model_call
+class Rules(AgentMiddleware[MyState]):         # a business rule: several hooks, its own state (10.10)
+    state_schema = MyState
+@before_agent(can_jump_to=["end"])             # input guard: replace the giant message, reply, jump to end
+def guard(state, runtime): return None
+@wrap_model_call                               # one tool call per turn (OpenAI setting)
+def one_call(request, handler):
+    return handler(request.override(model_settings={**request.model_settings, "parallel_tool_calls": False}))
+# shell: one bash per invoke (files persist; variables and cd do not). Blocklists leak: allowlist + sandbox
 ```
 
 ## Recap
@@ -727,6 +1053,11 @@ agent = create_agent(model, tools, middleware=[log_calls, time_tools, Guard()])
 - Decorators for one hook, classes for several hooks, state, async and reuse. Class state lives on the instance
 - Subclassing: an overridden hook **replaces** the parent's
 - Order: `before_*` declared order, `after_*` reversed, `wrap_*` nested. A stack, last in, first out
+- The shell tool starts a fresh shell for every `invoke`. Programs that wait for input time out. It needs a POSIX shell
+- Blocklists are easy to get around. Use an allowlist, approval and a sandbox
+- `before_agent` runs once per `invoke`, so once per user message. Share connections through `context`
+- Async hooks still run one after another. Async-only hooks need `ainvoke`
+- Business rules belong in a class-based middleware with its own state, and hard limits also in the system of record
 
 ## Practice
 
@@ -740,6 +1071,9 @@ agent = create_agent(model, tools, middleware=[log_calls, time_tools, Guard()])
 8. Assignment 2 (NovaBank), the part this chapter now lets you answer. The assignment has no answer key:
    - A2 Q6: the exact rule for how `before_*`, `after_*` and `wrap_*` hooks order themselves when combined, and why `before_*` and `after_*` differ (10.8)
    - (A1 Q4 and Q5, Q8, Q9, Q12 to Q15 and the capstone still need later material)
+9. Give the shell agent `block_dangerous_shell`, then get around it with `find . -delete`. Replace it with the allowlist and try again
+10. Build `CineBotRules`, book three different movies in one session, then book two in a single turn with parallel tool calls. Explain the result
+11. Send a 50,000-word message to an agent with `reject_huge_input` and a checkpointer. Print the saved thread
 
 ## How this chapter was checked
 
@@ -754,6 +1088,7 @@ agent = create_agent(model, tools, middleware=[log_calls, time_tools, Guard()])
   - the `ModelRequest` fields and the list of hook methods on `AgentMiddleware`
 - **Not run:** a real model choosing shell commands, a Docker or Codex sandbox, an SSH session, or a Colab environment. Those are class statements
 - Class 14 has no code folder in the repo. The `custom_middleware.py` file the transcript mentions is not there
+- The class's Colab notebook (linked from the Weekend 08 README) is on Google Drive, which this environment's network blocks, so the class code was taken from the recording transcript
 - **Details by section** (moved here from the ✅ markers):
   - *Custom middleware page re-read (2026-11-15), `langchain` 1.5.0, `langgraph` 1.2.22, scripted models:*
     - 10.4: `@before_model(state_schema=..., can_jump_to=["end"])` + `@after_model(state_schema=...)` with the limit set to 1: `model_call_count` 2, the run ended, `user_id` returned; no `state_schema` on `create_agent`
@@ -772,6 +1107,16 @@ agent = create_agent(model, tools, middleware=[log_calls, time_tools, Guard()])
   - *10.11 Agent jumps, tracing and state composition:* Checked: the same hook **without** `can_jump_to` also ended the run for `'end'`. The docs still ask you to declare it, and the other targets need it, so declare it
   - *10.11 Agent jumps, tracing and state composition:* Checked: `TracePolicy`, `omit_payload` and `configure_trace_policy` import from `langchain.agents.middleware`, a class with `trace_policy` builds, and the global set and clear run. Whether the trace really omits the payload needs LangSmith and was **not** checked
   - *10.11 Custom stream transformers (2026-11-15):* `langchain` 1.5.0, `langgraph` 1.2.22, a scripted streaming chat model that called `get_weather(city="Boston")`. `ToolActivityTransformer` (extracted from this file) passed to `stream_events(transformers=...)`, set on a middleware's `transformers`, and passed to `create_agent(transformers=...)`: each gave `["started get_weather {'city': 'Boston'}", 'finished c1']` on `stream.extensions["tool_activity"]`. The ordering rule is the docs' statement, not tested
+  - *Class 14 recording (16 Aug), added 2026-11-15, `langchain` 1.5.0, `langgraph` 1.2.22, scripted fake chat models (no keys, no network), host policy in scratch folders:*
+    - 10.1 session: two messages on one thread; message 2 saw `GREETING=[]`, the workspace root as `pwd`, `sub/note.txt` present, and a new shell process (376, then 384). Source: `shell_tool.py`, `before_agent` creates the session resources, `after_agent` runs the shutdown commands and releases them. No `workspace_root`: the run used `/tmp/langchain-shell-…`, gone after the run
+    - 10.1 input: with `command_timeout=1.0`, the `input()` command returned `Error: Command timed out after 1.0 seconds.` and the shell restarted; the piped version printed `42`
+    - 10.1 Windows: from the source only (the `printf` marker in `execute`, default shell `/bin/bash`); not run on Windows
+    - 10.1 guards (blocks run as written): no guard, `rm -rf ./*` left the workspace empty; `block_dangerous_shell` kept `a.txt`, `b.txt` and `reports`; `find . -mindepth 1 -delete` and the `python3 -c` one-liner each emptied it; `refuse_dangerous_plan` ran nothing. Allowlist: the eight commands in the ✅ line, then an agent run refusing `find … -delete`
+    - 10.4: `before_agent` ran 3 times for 3 messages on one thread. The `pool_block` code run as written: 1 connection opened for 2 messages; tool results `Interstellar, 2 seats` and `No such booking for this user.`. `ToolRuntime` bare gave 2 Pydantic serializer warnings, `ToolRuntime[Ctx]` none
+    - 10.6 async: `ainvoke` order `A start 0.00, A end 0.30, B start 0.30, B end 0.40`; plain `invoke` with an async-only hook, and with an `async def` under `@before_agent`, raised the `TypeError` quoted in 10.6
+    - 10.10 `CineBotRules` run as written: the ✅ results; three parallel bookings in one turn all succeeded (`booked_movies` `['A', 'B', 'C']`); `ToolCallLimitMiddleware(tool_name="book_seats", thread_limit=2)` blocked the third and fourth bookings, including Oppenheimer again. `parallel_tool_calls` override: checked in the request body sent to a local stand-in OpenAI server
+    - 10.10 input guard run as written: the ✅ results; an earlier version that deleted the message left the saved thread starting with an AI message, so it was changed to a placeholder
+    - **Not run:** a real model choosing commands, Docker or Codex sandboxes, Windows, the ChatGPT router (web reports only)
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran `before_model`, `wrap_tool_call` and an `AgentMiddleware` subclass together in one agent with a tool call. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
@@ -785,5 +1130,8 @@ agent = create_agent(model, tools, middleware=[log_calls, time_tools, Guard()])
 - LangChain docs: [Custom middleware](https://docs.langchain.com/oss/python/langchain/middleware/custom), re-read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `custom.mdx` and its six Python snippet files), for the decorator arguments (10.4), handler call counts (10.5), class attributes (10.6), the jump warning and the state-update resolution (10.11)
 - LangChain docs: [Built-in middleware](https://docs.langchain.com/oss/python/langchain/middleware/built-in), section "Shell tool" (read 2026-11-15 from its source, commit `04d4d4a`), for the interrupt limitation and the redaction warning
 - LangChain docs: [Event streaming](https://docs.langchain.com/oss/python/langchain/event-streaming), "Custom updates" and "Register transformers on middleware" (read 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "Custom stream transformers" in 10.11. The transformer class itself is Claude's, built on the installed `StreamTransformer`
+- Class 14 recording transcript (16 Aug 2026), uploaded by you; teaching part only (00:04–03:14; the doubt session after it was left out): the shell demos, the Windows remark, the business rules, hooks vs webhooks, async hooks, "middleware state", and the closing question on stopping deletes
+- ChatGPT's model router (10.5), secondary reporting: [Fortune](https://fortune.com/2025/08/12/openai-gpt-5-model-router-backlash-ai-future/) and [TechCrunch](https://techcrunch.com/2025/08/12/chatgpts-model-picker-is-back-and-its-complicated), web-checked 2026-11-15
+- Added by Claude: the guards and the allowlist in 10.1, the connection-in-context code in 10.4, `CineBotRules` and the input guard in 10.10, the gateway and Docker notes, and interview questions 10–12
 
 Previous: [Chapter 9, Guardrails, to-do lists and tool resilience](09-guardrails-to-do-lists-and-tool-resilience.md) · Next: [Chapter 11, Runtime and human-in-the-loop](11-runtime-and-human-in-the-loop.md)
