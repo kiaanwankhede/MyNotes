@@ -170,6 +170,31 @@ logged_agent.invoke({"messages": [("user", "How are you?")]})
 - **Return a dict:** it **updates the state**. *Checked:* returning `{"messages": [SystemMessage(...)]}` from `before_model` added that message to the conversation
 - **`before_agent` is the natural place to set up** (open a database connection, load what the run needs), because it fires once at the start. **`after_agent` is the natural place to tear down**
 - **You do not pass `state` and `runtime` yourself.** LangChain calls your function with them. A hook must accept the parameters its type provides. A hook defined with **no parameters** fails with `TypeError: bad() takes 0 positional arguments but 2 were given` (shown live, checked)
+- **Decorators take arguments** (docs): `state_schema=` adds the middleware's own state fields; `can_jump_to=` declares jump targets (same as stacking `@hook_config`, 10.11)
+
+```python
+from typing_extensions import NotRequired
+
+class CustomState(AgentState):
+    model_call_count: NotRequired[int]
+    user_id: NotRequired[str]
+
+@before_model(state_schema=CustomState, can_jump_to=["end"])
+def check_call_limit(state: CustomState, runtime: Runtime) -> dict[str, Any] | None:
+    if state.get("model_call_count", 0) > 10:
+        return {"jump_to": "end"}
+    return None
+
+@after_model(state_schema=CustomState)
+def increment_counter(state: CustomState, runtime: Runtime) -> dict[str, Any] | None:
+    return {"model_call_count": state.get("model_call_count", 0) + 1}
+
+agent = create_agent(model, tools=[], middleware=[check_call_limit, increment_counter])   # no state_schema here
+agent.invoke({"messages": [("user", "Hello")], "model_call_count": 0, "user_id": "user-123"})
+```
+
+- The agent's state becomes the agent schema **plus** every middleware's `state_schema`. So a middleware can bring its own fields
+  - *Checked (limit lowered to 1):* the count stopped at 2, the run ended, and `user_id` came back in the result
 
 **Why "before model" is its own hook and not just "before agent"**
 
@@ -210,6 +235,32 @@ cost_aware_agent = create_agent(
 - **What you can change on the request:** `model`, `messages`, `system_message`, `tool_choice`, `tools`, `response_format`, `state`, `runtime` and `model_settings`
 - **In real client work,** two patterns are what actually gets used: automatic model selection by conversation complexity, and dynamic tool loading. The class examples are the real thing, not edge cases
 
+**You decide how often the handler runs** (docs): **zero** times to short-circuit, **once** for the normal flow, **several** times to retry.
+
+```python
+@wrap_model_call
+def cached(request, handler):                       # 0 times on a cache hit
+    key = request.messages[-1].content
+    if key in cache:
+        return ModelResponse(result=[AIMessage(cache[key])])
+    response = handler(request)                     # 1 time otherwise
+    cache[key] = response.result[-1].content
+    return response
+
+@wrap_model_call
+def retry_model(request, handler):                  # up to 3 times
+    for attempt in range(3):
+        try:
+            return handler(request)
+        except Exception as e:
+            if attempt == 2:
+                raise
+            print(f"Retry {attempt + 1}/3 after error: {e}")
+```
+
+- *Checked:* the second identical question was answered from the cache; the scripted model had only one reply, so a second model call would have failed
+- For real retries, prefer the built-in `ModelRetryMiddleware` (backoff, jitter, `retry_on`; [Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md), 9.9)
+
 ## 10.6 Decorator or class?
 
 - **Decorator-based**
@@ -242,6 +293,27 @@ class CallCounterMiddleware(AgentMiddleware):
 - A method with the exact hook name is picked up automatically. You do not need decorator syntax inside a class
 - **Each middleware needs a unique name.** By default the name is the **class name**. *Checked:* attaching two instances of one class raises `AssertionError: Please remove duplicate middleware instances`. The built-in limit and PII middlewares give each instance its own name (`PIIMiddleware[email]`, `ToolCallLimitMiddleware[cancel_booking]`), which is why you can attach several. For your own class, override `name` or give each class a different name
 - **Pitfall (checked):** the state lives on the **instance**. The counter was 4 after four separate `invoke`s, and one instance attached to two agents counted calls from both. For per-run data, use agent state, not `self`
+
+**What a class can declare** (docs; picked up when the agent is built):
+
+- **`state_schema`:** the middleware's own state fields (the per-run alternative to `self`). Also type the class: `AgentMiddleware[CustomState]`
+- **`tools`:** tools that ship with the middleware, as `TodoListMiddleware` ships `write_todos`
+- **`transformers`:** stream projections (10.11)
+
+```python
+class CallLimitMiddleware(AgentMiddleware[CustomState]):
+    state_schema = CustomState                     # per-run counter, saved with the thread
+    tools = [write_note]                           # registered on the agent automatically
+
+    @hook_config(can_jump_to=["end"])               # needed for a jump from before_model (10.11)
+    def before_model(self, state: CustomState, runtime) -> dict[str, Any] | None:
+        return {"jump_to": "end"} if state.get("model_call_count", 0) > 10 else None
+
+    def after_model(self, state: CustomState, runtime) -> dict[str, Any] | None:
+        return {"model_call_count": state.get("model_call_count", 0) + 1}
+```
+
+- *Checked:* a middleware with `tools = [write_note]` put `write_note` on the agent's tool node, and the model's call to it ran
 
 ## 10.7 Extending a prebuilt middleware
 
@@ -341,6 +413,7 @@ agent.invoke({"messages": [("user", "Hi")]})
 ## 10.9 Best practices
 
 - Keep each middleware focused on **one thing**
+- **Put critical middleware first** in the list (docs): it is the outermost wrapper and sees `before_*` first (10.8)
 - **Handle errors inside** the middleware. Its own bug should not be what crashes the agent
 - Choose the hook deliberately: node-style (`before_model`, ...) to **observe**, wrap-style (`wrap_model_call`, `wrap_tool_call`) when the **request must change**
 - **Document** any custom state a middleware relies on or adds
@@ -432,6 +505,12 @@ def check_blocked(state: AgentState, runtime: Runtime):
 - ✅ *Verified (details in "How this chapter was checked").*
 - A class version puts `@hook_config(...)` on the method of an `AgentMiddleware` subclass
 
+> [!WARNING]
+> **Declare `can_jump_to`, or a `before_model` jump is ignored.**
+> - *Checked on 1.5.0:* `{"jump_to": "end"}` from `before_model` **without** the declaration was dropped: the agent made all 4 model calls. With `@hook_config(can_jump_to=["end"])` it stopped after 1
+> - From `after_model` the jump to `"end"` worked either way (as found on 1.4.7, below)
+> - The docs' class example (`CallCounterMiddleware`, custom state schema) leaves the declaration out, so its limit never triggers. Always declare
+
 **Configure tracing**
 
 - Needs `langchain>=1.3.15`. Hook spans record their inputs and outputs by default. Set `trace_policy = TracePolicy(process_inputs=omit_payload)` on a middleware to leave the input out of its trace
@@ -442,7 +521,11 @@ def check_blocked(state: AgentState, runtime: Runtime):
 
 - Node-style hooks return a dict. A wrap hook returns an `ExtendedModelResponse` with a `Command`, and the update goes through the graph's reducers (messages add up)
 - The docs say that with several layers, commands apply inner first then outer, **the outer one wins** on a plain (non-reducer) field, and commands from an earlier retry are discarded
-- *Not reproduced:* two middleware each returning `Command(update={"tag": ...})` for the same plain field raised `InvalidUpdateError` ("Can receive only one value per step"). Use a field with a reducer (an `Annotated` key) when more than one layer writes it
+- *Not reproduced with a plain field:* two middleware each returning `Command(update={"tag": ...})` for the same plain field raised `InvalidUpdateError` ("Can receive only one value per step"). Use a field with a reducer (an `Annotated` key) when more than one layer writes it
+  - **Resolved:** the docs' own example gives the field a **last-wins reducer** (`trace_layer: NotRequired[Annotated[str, _last_wins]]`, where `_last_wins(a, b)` returns `b`)
+  - *Checked with that reducer:* `trace_layer` ended as `"outer"`, and the messages arrived inner first, then outer (`[Inner ran]`, `[Outer ran]`)
+  - So "outer wins" needs that reducer; a plain field still raises
+- **Retry-safe** (docs, checked): an outer middleware that called the handler twice kept only the second inner command (`['inner call 2']`)
 
 **Custom stream transformers**
 
@@ -586,6 +669,15 @@ for activity in stream.extensions["tool_activity"]:
 
 </details>
 
+<details class="qa"><summary>9. Your middleware returns <code>{"jump_to": "end"}</code> from <code>before_model</code>, but the agent keeps going. Why?</summary>
+
+- The hook did not declare its targets: add `@hook_config(can_jump_to=["end"])`, or `@before_model(can_jump_to=["end"])`
+- Without it the jump is dropped from `before_model` (checked on 1.5.0), though `after_model` happens to honour `"end"`
+- Also check the counter field is declared in the middleware's `state_schema`, or it is never saved
+- *Stronger answer:* write a unit test that runs the agent with a scripted model and asserts the number of model calls, because this failure is silent
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"Build a coding agent that can run tests in a repo."* Cover the shell middleware, the sandbox, which commands need approval, output size limits and how you stop runaway loops.
 
@@ -663,6 +755,13 @@ agent = create_agent(model, tools, middleware=[log_calls, time_tools, Guard()])
 - **Not run:** a real model choosing shell commands, a Docker or Codex sandbox, an SSH session, or a Colab environment. Those are class statements
 - Class 14 has no code folder in the repo. The `custom_middleware.py` file the transcript mentions is not there
 - **Details by section** (moved here from the ✅ markers):
+  - *Custom middleware page re-read (2026-11-15), `langchain` 1.5.0, `langgraph` 1.2.22, scripted models:*
+    - 10.4: `@before_model(state_schema=..., can_jump_to=["end"])` + `@after_model(state_schema=...)` with the limit set to 1: `model_call_count` 2, the run ended, `user_id` returned; no `state_schema` on `create_agent`
+    - 10.5: the cache hook answered the second identical question without a model call (the scripted model had one reply); the retry hook is the docs' code
+    - 10.6: a class with `tools = [write_note]`: the tool node listed `write_note` and the call returned `saved: hi`
+    - 10.11 jumps: a class `before_model` returning `jump_to` at count 2: 4 model calls without `@hook_config`, 1 with it; the same in `after_model`: 2 calls either way
+    - 10.11 state updates: the docs' `OuterMiddleware` / `InnerMiddleware` with the `_last_wins` reducer gave `trace_layer='outer'` and `[Inner ran]` before `[Outer ran]`; with a plain field, `InvalidUpdateError`. An outer middleware calling the handler twice kept only `['inner call 2']`
+    - Docs slip, not reproduced as a test: the class version of the dynamic-prompt snippet uses `SystemMessage` without importing it
   - *Shell tool with HITL (2026-11-15):* `langchain` 1.5.0, `HostExecutionPolicy`, scripted model. With `HumanInTheLoopMiddleware(interrupt_on={"shell": True})` and `InMemorySaver`: command 1 `export GREETING=hi; echo step1 > a.txt; echo $GREETING` → `hi`; command 2 `echo $GREETING; cat a.txt` → an empty line then `step1`. The same two commands without HITL → `hi` then `hi\nstep1`
   - *10.5 `wrap_model_call`: gating and dynamic model selection:* Checked: with two stand-in models, the basic one answered up to 10 messages of history and the advanced one answered from 12
   - *10.7 Extending a prebuilt middleware:* Checked: a subclass whose `before_model` just returns `None` **left the email unredacted**
@@ -683,6 +782,7 @@ agent = create_agent(model, tools, middleware=[log_calls, time_tools, Guard()])
 - Live-Class-2026, `Weekend 08 - 15-16 Aug/README.md`
 - `Assignment_2_Agents_and_Prebuilt_Middleware.ipynb` (questions only)
 - Section 10.14 and the corrections marked *checked* are from testing, not from the class sources
+- LangChain docs: [Custom middleware](https://docs.langchain.com/oss/python/langchain/middleware/custom), re-read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `custom.mdx` and its six Python snippet files), for the decorator arguments (10.4), handler call counts (10.5), class attributes (10.6), the jump warning and the state-update resolution (10.11)
 - LangChain docs: [Built-in middleware](https://docs.langchain.com/oss/python/langchain/middleware/built-in), section "Shell tool" (read 2026-11-15 from its source, commit `04d4d4a`), for the interrupt limitation and the redaction warning
 - LangChain docs: [Event streaming](https://docs.langchain.com/oss/python/langchain/event-streaming), "Custom updates" and "Register transformers on middleware" (read 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "Custom stream transformers" in 10.11. The transformer class itself is Claude's, built on the installed `StreamTransformer`
 
