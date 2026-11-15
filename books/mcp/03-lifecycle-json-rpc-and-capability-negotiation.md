@@ -43,8 +43,83 @@
 
 - A client calls the `list` calls **first**. That is how a host learns what a server offers before using any of it
 - **Resources have more:** **templates** (one resource pattern answers for a whole family, such as every customer record) and **subscriptions** (the client is told when a resource changes, instead of re-reading on a timer)
-  - The class only named these. This chapter does not build them
+  - Templates are built and tested just below. Subscriptions are only named here
 - The handout whiteboard also lists the prompts functions as `list` and `get`, tools as `list` and `call`, and resources as `list`, `get`, template/list and listen
+
+### Resource templates: one pattern, many resources
+
+Class 17's example: a travel company keeps a visa checklist per destination. That is one pattern with a blank, not one resource per country.
+
+```python
+from fastmcp import FastMCP
+
+mcp = FastMCP("Travel Docs")
+
+@mcp.resource("visa://{country}/checklist")          # {country} makes this a template
+def visa_checklist(country: str) -> str:
+    """Visa checklist for one destination country."""
+    return f"Visa checklist for {country}: passport valid 6 months, photo, bank statement."
+```
+
+```python
+import asyncio
+from fastmcp import Client
+
+async def main():
+    async with Client(mcp) as client:                  # in-memory: no process, no network
+        print(await client.list_resources())                                   # []
+        print([t.uri_template for t in await client.list_resource_templates()])
+        print((await client.read_resource("visa://uae/checklist"))[0].text)
+
+asyncio.run(main())
+```
+
+✅ *Verified (`fastmcp` 4.2.0): `list_resources()` returned `[]`, the template listed as `visa://{country}/checklist`, and reading `visa://uae/checklist` returned the UAE text.*
+
+- A template is listed by **`resources/templates/list`**, not by `resources/list`. A client that only calls `resources/list` never sees it
+- The client fills the blank and reads a concrete URI with `resources/read`. The `{country}` part arrives as the function's argument
+- Use a template when the set of documents is open-ended (every country, every customer); use a plain resource for one fixed document
+- In Python the field is `uri_template` (MCP SDK v2). Older code that reads `uriTemplate` still works in `fastmcp` 4.2.0, with a deprecation warning
+
+### How a client learns that the tools changed
+
+- The class: "a subscription kind of thing; it regularly checks"
+- The protocol: a server that declared `tools: {listChanged: true}` sends **`notifications/tools/list_changed`** when its tools change. The client then calls `tools/list` again. No polling
+- Added to the same server, a tool that switches on another tool and announces it:
+
+```python
+from fastmcp import Context
+from mcp.types import ToolListChangedNotification
+
+@mcp.tool
+async def enable_hotels(ctx: Context) -> str:
+    """Turn on hotel booking for this server."""
+    @mcp.tool
+    def book_hotel(city: str) -> str:
+        """Book a hotel in a city."""
+        return f"Booked a hotel in {city}"
+    await ctx.send_notification(ToolListChangedNotification(method="notifications/tools/list_changed"))
+    return "Hotel booking is on."
+```
+
+```python
+async def on_message(message):
+    print("server says:", getattr(message, "method", message))
+
+async def main():
+    async with Client(mcp, message_handler=on_message) as client:
+        print([t.name for t in await client.list_tools()])
+        await client.call_tool("enable_hotels", {})
+        await asyncio.sleep(0.1)                         # let the notification arrive
+        print([t.name for t in await client.list_tools()])
+
+asyncio.run(main())
+```
+
+✅ *Verified (`fastmcp` 4.2.0): the client printed `['enable_hotels']`, then `server says: notifications/tools/list_changed`, then `['enable_hotels', 'book_hotel']`.*
+
+- **Don't count on it by default.** Tested: `fastmcp` 4.2.0 declared `listChanged: false`, and adding a tool without the explicit `send_notification` line sent nothing. The new tool only appeared on the client's next `tools/list`
+- So a client should also re-list after reconnecting, and a server that changes its tools should declare `listChanged` and send the notice
 
 ## 3.3 Tools, resources and prompts in one server
 
@@ -184,6 +259,17 @@ sequenceDiagram
 - An unknown **tool** does **not**. It returns a normal `result` with `"isError": true` and the text "Unknown tool". Tool failures travel in the result so the model can read them
 - Two requests sent back to back came back with their own ids (99 then 98 here). Match by id, not by position
 
+**Two rules MCP adds to the `id`** (from the specification, web-checked):
+
+- It is **never `null`**, which plain JSON-RPC allows
+- It is **never reused** while it could be confused: in the 2025-03-26 spec, not within the same session; in the 2026-07-28 spec, not while a response to an earlier request with that id is still awaited
+
+**Batches: gone**
+
+- The class: a client can batch several requests into one message. JSON-RPC allows that, and MCP's 2025-03-26 spec added it. The next spec, 2025-06-18, **removed** it
+- *Tested (`fastmcp` 4.2.0, STDIO):* a batch of two requests got **no reply at all** within 3 seconds, and the next normal request was answered. A client that batches can hang waiting
+- Send separate requests instead. They can all be in flight at once; the ids keep them apart
+
 ## 3.6 Why JSON-RPC and not plain REST?
 
 Flagged in class as an interview-depth question.
@@ -199,6 +285,11 @@ Flagged in class as an interview-depth question.
 
 - **Not the same as asynchronous.** Async means the client sends a request, carries on and gets the answer later. The server still never starts anything
 - **Not the same as a WebSocket.** A WebSocket is a permanent open connection. Two-way is a property of the protocol, not of keeping a socket open
+
+**"Why JSON-RPC and not HTTP?"** (named in class 18 as an interview question)
+
+- The question mixes two layers. **HTTP is a transport**, and MCP does run over it (Streamable HTTP, [Chapter 4](04-operation-transports-and-shutdown.md), 4.9). **JSON-RPC is the message format**, carried over STDIO or HTTP
+- A strong answer names both: JSON-RPC for the messages (the five points above), STDIO or HTTP to carry them. The real comparison is with REST-style endpoints, one URL per operation
 
 ## 3.7 The initialization handshake
 
@@ -216,6 +307,7 @@ Client → Server : 3. initialized (notification: no id, no reply)
 - The client sends `initialized` as a **notification**. This is the "notifications built in" idea in practice
 - **Two ordering rules:** before the server answers `initialize`, the client sends nothing except pings. Before the server receives `initialized`, it sends nothing except pings
 - In class this was shown live in Claude Desktop's MCP log on macOS (`~/Library/Logs/Claude/mcp.log`), against a real local server (Apple Notes over STDIO)
+- On Windows the same logs are in `%APPDATA%\Claude\logs`. `mcp.log` holds connection events; `mcp-server-<name>.log` holds each server's standard error *(from the MCP debugging docs, web-checked)*
 
 ✅ *Verified:* a real server answered `initialize` with its version, the capabilities `logging`, `prompts`, `resources` and `tools`, and its name. The client then sent `{"jsonrpc":"2.0","method":"notifications/initialized"}` with no id.
 
@@ -226,6 +318,9 @@ Client → Server : 3. initialized (notification: no id, no reply)
 - **Server does not:** it answers with the latest version **it** supports. The client checks that against its own supported list
   - In the handout flowchart, `SUPPORTED_PROTOCOL_VERSIONS` is checked **exactly once**
   - Match: send `initialized` and go on. No match: **disconnect**, send nothing further
+- **Class 17's recording put it differently:** if they don't agree, "they send the list of versions which they support" and check again
+  - The handout has **one** answer and **one** check, and the real server below answered with **one** version, not a list
+  - A list does appear in the modern `server/discover` answer: `supportedVersions` (below)
 - Analogy from class: Windows and a game agreeing on DirectX. They settle on the highest version both share
 - Real consequence: a serious client, such as one built for a company, must decide **which historical versions it supports** and handle each difference in behaviour. "Connect to whatever URL I am given" is not enough. Class flagged this as interview depth
 
@@ -265,7 +360,7 @@ Client → Server : 3. initialized (notification: no id, no reply)
 
 - **Elicitation:** the server asks for **more information from the user, through the client, in the middle of a task**
   - It is the two-way nature of JSON-RPC made concrete: the server reaches out, instead of only replying
-- In LangChain it surfaces as a **LangGraph interrupt**: a person answers, then the run resumes. The class cited LangChain's documentation for this. Not re-checked here
+- How a framework surfaces it is up to the framework. For LangChain, see [Langchain, Chapter 12](../langchain/12-mcp-in-langchain.md), 12.7
 - **Not the same as human-in-the-loop (HITL):**
   - HITL is a safety layer in the AI application: approve, edit or reject a tool call ([Langchain, Chapter 11](../langchain/11-runtime-and-human-in-the-loop.md))
   - Elicitation is a native MCP request from a **server** for information it is missing
@@ -316,6 +411,14 @@ Client → Server : 3. initialized (notification: no id, no reply)
 - **Limits:** it reads **line by line**, so it fits STDIO servers that send one JSON message per line. It does not tap HTTP servers
 - The class folder holds two copies of each script, byte-identical
 
+**Another way to watch: an inspector app** (class 18)
+
+- The class used **MCPJam Inspector**, an open-source (Apache 2.0) tool for testing MCP servers
+  - It connects over STDIO or HTTP, shows the **raw JSON-RPC** of every message, and has an LLM playground for trying a server with a model
+- Start it with `npx @mcpjam/inspector@latest`
+- In class its client sent the newer `server/discover` call first, got an error from the older server, then fell back to `initialize` (3.8)
+- *Web-checked 2026-11-15; not run here (it needs `npx` and a download)*
+
 ## 3.11 Project: AI updates, with no code
 
 A whiteboard project from the handout. Aim: **MCP concepts without writing a line of code**, using Claude Desktop **connectors**, which are MCP servers.
@@ -336,6 +439,20 @@ A whiteboard project from the handout. Aim: **MCP concepts without writing a lin
   - Fix: say exactly how much detail you want per category, then test
 - The boxes on the whiteboard are unlabelled and the brain icons mark the steps where the model works. The detail of the steps was not written on the page
 
+**More from the live run** (class 18 recording):
+
+- **Turning the diagram into a prompt:** Claude asked clarifying questions first, each with multiple-choice answers
+  - Which news categories, what voice for the LinkedIn post and the article, and whether to set up one recurring calendar event instead of one per run
+  - Read the generated prompt before running it: it had left out the Apple Notes folder
+- 🔒 **Keep personal details out:** the class added a line to the prompt telling Claude to keep all personal information out of the outputs. The same Claude account holds context from other work
+- **Permission prompts are human-in-the-loop:** "Allow once" and "Always allow" on each tool are the host asking a human before an action
+- **The homework, live:** stock ideas from the news through **Alpha Vantage**, added as a custom connector (its sign-in step asked for a free API key)
+  - Third-party servers can be free or paid, with usage limits. When you connect a server, look at the tools it offers
+- **Buying is a different risk class:** a broker connector (the class named Zerodha) can place real orders. The class advice: don't, or only with tiny amounts. *Added by Claude:* put any tool that places orders behind a human approval step
+- **Scheduling:** asked to run daily at 7 am, Claude pointed to Claude Cowork for scheduled tasks
+- **Check the output format:** the LinkedIn post and the article came back as Markdown, which Apple Notes does not render
+  - In an online Markdown viewer they read fine. The class left the fix as a prompt change: ask for a format the target app shows
+
 ## 3.12 Class questions
 
 - **Can one MCP server call another?** Yes. A server can act as a client to another server inside it
@@ -349,6 +466,19 @@ A whiteboard project from the handout. Aim: **MCP concepts without writing a lin
 - **Logs used to show full JSON-RPC and now do not. Did the protocol version change?** No. The class's answer: Anthropic's own client changed how much it writes to disk. It is unrelated to the MCP specification and to version negotiation
 - **Who builds what for Gmail?** The service provider builds the **server**. The host builds the **client**. Claude's Gmail client is Anthropic's work
 - **Reference server from the class:** `Link.txt` points to a Gmail MCP server on GitHub (`theposch/gmail-mcp`). It was shared as a reference and not read for these notes
+- **Does the server run the tool, or the agent?** The **server** runs it
+  - The model picks the tool and its arguments, the host's client sends `tools/call`, and the server runs the function and returns the result
+  - The class: "host tells the client, client calls the tool"
+- **How does the server send a request to the client? Is there a callback URL?** No callback URL. It uses the connection that is already open
+  - STDIO: it writes the request to its output. Streamable HTTP: it sends it on an event stream the client holds open (spec; [Chapter 4](04-operation-transports-and-shutdown.md), 4.9)
+  - The class answered "JSON-RPC and MCP protocol": the message format, not the route
+- **How does a client learn that the tools changed?** Through `notifications/tools/list_changed`, if the server sends it (3.2)
+- **Does the client cache the tool list?** The class gave two answers
+  - Class 17: "in the latest version, it does". Class 18: "I'm not sure that by default, MCP caches anything"
+  - The protocol's answer is the change notice: a client can keep its list until the server says it changed. Tested: `fastmcp` 4.2.0 does not send that notice by itself (3.2)
+- **Can I batch several requests in one message?** Not any more. Batching was removed in the 2025-06-18 spec (3.5)
+- **Prompts or skills?** The class: "skills are just some predefined instructions", for work you repeat, so "skills are just prompts"
+  - In MCP terms: a prompt is a template a **server** offers, and the user picks it. For skills inside agents, see [Langchain, Chapter 14](../langchain/14-handoffs-skills-router-and-custom-workflows.md)
 
 ## 3.13 Added by Claude, not from the sources
 
@@ -472,6 +602,22 @@ p.terminate()
 
 </details>
 
+<details class="qa"><summary>13. Your client sends several requests in one JSON-RPC batch and then hangs. Why?</summary>
+
+- Batching was added in the 2025-03-26 spec and removed in 2025-06-18. A current server may simply not answer a batch (tested: no reply within 3 seconds)
+- Send the requests separately. They can all be in flight at once, matched by id
+- *Stronger answer:* pin the protocol versions your client implements, give every request a timeout, and test against servers of each version you support
+
+</details>
+
+<details class="qa"><summary>14. "Why does MCP use JSON-RPC and not HTTP?"</summary>
+
+- The question mixes layers. HTTP is one of MCP's transports (Streamable HTTP); JSON-RPC is the message format carried over STDIO or HTTP
+- Against REST-style endpoints, JSON-RPC gives two-way requests, notifications, one message shape for every operation, and transport independence
+- *Stronger answer:* show both layers in one example: an `initialize` request as a JSON-RPC message, sent as one line on STDIO or as a POST body over HTTP
+
+</details>
+
 > [!TIP]
 > **🧩 Design question**
 > - *"You must expose a reporting system to AI hosts that may be older or newer than your server. How do you handle compatibility?"*
@@ -507,7 +653,9 @@ p.terminate()
 - Handshake: `initialize`, response, `initialized` notification. Version: client proposes its latest, server answers, client accepts or disconnects
 - Capability negotiation is a two-way menu: it names categories, `tools/list` names the tools. Elicitation lets a server ask the user for missing information
 - A modern client tries `server/discover` first and falls back to `initialize`
-- The wiretap sits between host and server and prints the real messages
+- The wiretap sits between host and server and prints the real messages. MCPJam Inspector shows them in an app
+- Resource templates (`resources/templates/list`) cover open-ended families of documents. `notifications/tools/list_changed` tells a client to re-list tools, if the server sends it
+- Ids are never `null` and never reused while pending. JSON-RPC batches were removed in the 2025-06-18 spec
 
 ## Practice
 
@@ -522,12 +670,21 @@ p.terminate()
 9. Open a real server's published capabilities (GitHub's or Gmail's) and check whether it ships tools only
 10. Add a free, no-auth server such as Context7 in VS Code and watch the tools appear before you ask anything
 11. Build the no-code AI-news project with three or more connectors. State how many items per category you want
+12. Add the `visa://{country}/checklist` template to your server, then list templates and read two countries
+13. Add `enable_hotels` and watch the client receive `notifications/tools/list_changed`. Then remove the `send_notification` line and see what changes
+14. Send a two-request batch with the raw client in 3.13 and see what comes back
 
 ## How this chapter was checked
 
 - **2026 review:** the lifecycle diagram, the production box, the graded interview and the cheat sheet were added (Added by Claude). The cheat-sheet messages follow the shapes already checked in 3.5 and 3.10
 - Run with `fastmcp` 4.1.4: the full three-primitive server from the class notebook; `resources/list`, `resources/read`, `prompts/list` and `prompts/get` over raw JSON-RPC on STDIO; the `initialize` answer and capabilities; the `initialized` notification; an unknown method and an unknown tool; two back-to-back requests; a future protocol version; the first message a current client sends (`server/discover`) and its fallback to `initialize`; the trailing-slash URI behaviour; and the working-directory failure with a read from a different folder
-- **Not run:** elicitation, the Inspector in a browser, Claude Desktop and its log files, the wiretap scripts, the Tavily and Gmail project, templates and subscriptions
+- **Not run:** elicitation, the Inspector in a browser, Claude Desktop and its log files, the wiretap scripts, the Tavily and Gmail project, resource subscriptions, MCPJam
+- *Class 17 and 18 recordings (5–6 Sep), added 2026-11-15, `fastmcp` 4.2.0 (the code blocks run as printed, in memory through `fastmcp.Client`):*
+  - 3.2 template: `list_resources()` `[]`; `list_resource_templates()` gave `visa://{country}/checklist`; reading `visa://uae/checklist` returned the UAE text
+  - 3.2 change notice: tools `['enable_hotels']`, then the notification `notifications/tools/list_changed`, then `['enable_hotels', 'book_hotel']`. Without the explicit notification, nothing arrived and the second list still showed `book_hotel`; the server's `tools` capability printed `list_changed=False` (`listChanged: false` on the wire)
+  - The template client first read `t.uriTemplate`, which `fastmcp` 4.2.0 flags as deprecated (renamed `uri_template` in MCP SDK v2). The block now reads `uri_template` and was run again
+  - 3.5 batch: over STDIO, after a normal handshake, a JSON array of a `tools/call` and a `tools/list` got no reply within 3 seconds; a following single `tools/call` returned `5`
+  - Web-checked: the 2025-06-18 changelog (batching removed), the id rules in the 2025-03-26 and 2026-07-28 base protocol pages, the log paths in the MCP debugging docs, and MCPJam Inspector's README
 - The class write-ups, notebook and handouts are the source for everything not marked *checked*. The three handout PDFs are whiteboard images, read as text and as images
 
 ## Sources and further reading
@@ -537,5 +694,9 @@ p.terminate()
 - Live-Class-2026, `classes_transcription_summary/17 - 5 Sep - MCP Deep Dive — Primitives, Lifecycle & JSON-RPC.md`
 - Live-Class-2026, `Weekend 10 - 5-6 Sep/README.md`, and under `06 Sep - MCP Primitives & Architecture/`: `README.md`, `v4a_primitives_notebook.ipynb`, `MCP-Lifecycle.pdf`, `MCP-Primitives.pdf`, `AI-Updater-Project.pdf`, `claude_desktop_config.example.json`, `Link.txt`
 - Sections 3.3 (Checked), 3.5 and 3.7 to 3.8 (the *checked* lines) and 3.13 are from testing, not from the class sources
+- Class recording transcripts, uploaded by you: 5 Sep 2026 (class 17, teaching part 00:00–02:57) and 6 Sep 2026 (class 18, teaching part 00:00–03:10). The doubt sessions after them were left out
+  - Used for: the visa-document example, the change-notice, batching, caching and callback questions, the JSON-RPC interview question, MCPJam, and the live AI-updates run
+- MCP specification: [2025-06-18 changelog](https://modelcontextprotocol.io/specification/2025-06-18/changelog), base protocol [2025-03-26](https://modelcontextprotocol.io/specification/2025-03-26/basic) and [2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28/basic); [MCP debugging docs](https://modelcontextprotocol.io/docs/tools/debugging) (log paths); [MCPJam Inspector](https://mcpservers.org/servers/MCPJam/inspector). Web-checked 2026-11-15
+- Added by Claude: the template and change-notice code in 3.2, the batch test in 3.5, and interview questions 13–14
 
 Previous: [Chapter 2, Primitives and architecture](02-primitives-and-architecture.md) · Next: [Chapter 4, Operation, transports and shutdown](04-operation-transports-and-shutdown.md)

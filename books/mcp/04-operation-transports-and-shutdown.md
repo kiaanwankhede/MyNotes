@@ -102,7 +102,7 @@ Three live demonstrations from class:
   - Context7 is free, needs no authentication and returns the **latest documentation** for a library. Class named it among the most-used servers
   - It fixes the lag between a model's training data and a library's current API
 - **Claude Desktop with Apple Notes:** the tool list `list_notes`, `get_note_content`, `add_note`, `update_note_content` was visible before any note question
-- **A third-party inspector tool** on a two-tool time server (`getCurrentTime`, `convertTime`). The request "convert current Indian time to Chicago time" produced:
+- **MCPJam Inspector**, an open-source inspector app ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.10), on a two-tool time server (`getCurrentTime`, `convertTime`). The request "convert current Indian time to Chicago time" produced:
   1. an LLM call to understand the request
   2. `tools/call getCurrentTime`
   3. an LLM call to read that result
@@ -387,13 +387,15 @@ async with Client(Path("server.py")) as c:      # STDIO: launches the server as 
 
 - **2026 review:** the diagrams, 4.13, the security box, the graded interview and the cheat sheet were added (Added by Claude). The cheat-sheet client ran against the Chapter 2 cheat-sheet server with `fastmcp` 4.1.4 (`r.data == 5`); the `stdout` and `http_app` checks are described in 4.13
 - Run: the `input()` demo; a RecipeBox server through a FastMCP client; an unknown method, an unknown tool and a raising tool; the STDIO shutdown ladder (close input, SIGTERM, SIGKILL); a FastMCP server over Streamable HTTP with raw POST, GET and DELETE calls; the `mcp-session-id` header; and the `print()` inside a tool on STDIO
-- **Not run:** Context7, Apple Notes, Claude Desktop, any third-party inspector, the Excalidraw server, reconnect after an unexpected close, MIME types, the old HTTP + SSE transport
+- **Not run:** Context7, Apple Notes, Claude Desktop, MCPJam Inspector, the Excalidraw server, reconnect after an unexpected close, MIME types, the old HTTP + SSE transport
 - The class material is the source for everything not marked *checked*. Where the class and the test disagree (4.3), both are shown
+- *Class 18 recording (6 Sep), added 2026-11-15:* the inspector in 4.5 is named from the recording. The time-server steps there match it. Nothing new was run for this chapter
 
 ## Sources and further reading
 
 - Live-Class-2026, `classes_transcription_summary/18 - 6 Sep - MCP Capability Negotiation.md` (operation phase, privacy, live demos)
 - Live-Class-2026, `classes_transcription_summary/19 - 12 Sep - MCP - Shutdown, Transport Layer.md` (shutdown, STDIO, Streamable HTTP, questions)
 - Sections marked *checked* and 4.14 are from testing, not from the class sources
+- Class recording transcript, 6 Sep 2026 (class 18, teaching part 00:00–03:10), uploaded by you: the inspector's name in 4.5
 
 Previous: [Chapter 3, Lifecycle, JSON-RPC and capability negotiation](03-lifecycle-json-rpc-and-capability-negotiation.md) · Next: [Chapter 5, Building MCP servers](05-building-mcp-servers.md)
