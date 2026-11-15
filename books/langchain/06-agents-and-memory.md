@@ -520,14 +520,19 @@ How it works:
 ## 6.8 Streaming an agent
 
 - *Source: LangChain docs, `streaming.mdx` and `event-streaming.mdx`.*
+- **Two APIs.** `agent.stream()` with stream modes is the lower layer. For new apps the docs now recommend event streaming (`stream_events(..., version="v3")`, below), which the package still marks experimental
 - `agent.stream(input, stream_mode=...)` modes:
   - `updates`: one chunk per step, keyed by node (`model`, `tools`).
+    - If several nodes run in the same step, each one's update arrives as its own chunk
   - `values`: the full state after each step.
   - `messages`: `(token_chunk, metadata)` tuples for LLM tokens.
+    - `metadata["langgraph_node"]` says which node produced it; `metadata["lc_agent_name"]` is the agent's `name=`
+    - Read the chunk through `token.content_blocks`: text, `tool_call_chunk` pieces, reasoning
   - `custom`: anything a tool writes with `get_stream_writer()`.
   - Pass a list to get several modes at once.
 - **`version="v2"`** (LangGraph 1.1+): every chunk is a dict with `type`, `ns`, `data`; no `(mode, data)` tuple unpacking.
   - `invoke(..., version="v2")` returns `GraphOutput` with `.value` (state) and `.interrupts` (empty tuple if none).
+  - **Without `version`** (v1, still the default): a list of modes yields `(mode, data)` tuples; a single mode yields the data alone (checked)
 ```python
 from langgraph.config import get_stream_writer
 @tool
@@ -636,6 +641,92 @@ for event in stream:
 ```
 
 ✅ *Verified on `langchain` 1.5.0 with a scripted model that streams text word by word and tool arguments in 4-character pieces (details at the end).*
+
+### `stream()` patterns: tool calls, reasoning, completed messages
+
+| You want | Stream mode(s) |
+|---|---|
+| progress after each step (model, then tools) | `"updates"` |
+| tokens as they are written, including tool-call pieces | `"messages"` |
+| your own progress lines from tools or middleware | `"custom"` |
+| live pieces **and** the finished, parsed messages | `["messages", "updates"]` |
+| the whole state after every step | `"values"` |
+
+**Tool calls: live pieces plus completed calls.** `messages` gives the partial JSON; `updates` gives the parsed call and the tool's result once they exist.
+
+```python
+from langchain.messages import AIMessage, AIMessageChunk, ToolMessage
+
+for chunk in agent.stream({"messages": [input_message]},
+                          stream_mode=["messages", "updates"], version="v2"):
+    if chunk["type"] == "messages":                         # live pieces
+        token, metadata = chunk["data"]
+        if isinstance(token, AIMessageChunk):
+            if token.text:
+                print(token.text, end="|")
+            if token.tool_call_chunks:
+                print(token.tool_call_chunks)               # name and id first, then args bit by bit
+    elif chunk["type"] == "updates":                        # completed messages
+        for source, update in chunk["data"].items():
+            if source in ("model", "tools"):
+                message = update["messages"][-1]
+                if isinstance(message, AIMessage) and message.tool_calls:
+                    print(f"Tool calls: {message.tool_calls}")
+                if isinstance(message, ToolMessage):
+                    print(f"Tool response: {message.content_blocks}")
+```
+
+- **Messages not in state** (a model called inside middleware, say) never reach `updates`. Two ways out:
+- **Way 1, add the chunks up yourself:** every model call ends with an empty chunk whose `chunk_position` is `"last"`
+
+```python
+full_message = None
+for chunk in agent.stream({"messages": [input_message]}, stream_mode="messages", version="v2"):
+    token, metadata = chunk["data"]
+    if isinstance(token, AIMessageChunk):
+        full_message = token if full_message is None else full_message + token
+        if token.chunk_position == "last":                  # this model call is complete
+            if full_message.tool_calls:
+                print(f"Tool calls: {full_message.tool_calls}")
+            full_message = None
+```
+
+- **Way 2, send it on the `custom` channel** from where it is made, for example a guardrail middleware:
+
+```python
+from langchain.agents.middleware import after_agent, AgentState
+from langgraph.config import get_stream_writer
+
+@after_agent(can_jump_to=["end"])
+def safety_guardrail(state: AgentState, runtime) -> dict | None:
+    result = safety_model.invoke(...)          # a model call that is not saved in state
+    get_stream_writer()(result)                # arrives as chunk["type"] == "custom"
+    return None
+```
+
+**Reasoning tokens** (the model must have reasoning switched on, [Chapter 3](03-models-messages-and-parameters.md)):
+
+```python
+for chunk in agent.stream({"messages": [input_message]}, stream_mode="messages", version="v2"):
+    token, metadata = chunk["data"]
+    for block in token.content_blocks:
+        if block["type"] == "reasoning":
+            print(f"[thinking] {block['reasoning']}", end="")
+        elif block["type"] == "text":
+            print(block["text"], end="")
+```
+
+- Providers' formats (Anthropic `thinking` blocks, OpenAI reasoning summaries) are normalised to `"reasoning"` blocks (docs)
+  - *Checked:* an Anthropic-style `{'type': 'thinking', ...}` block became `{'type': 'reasoning', 'reasoning': ...}` when the message carried `model_provider="anthropic"` metadata (real providers set it). Without that metadata it stayed `non_standard`
+- With v3 the same thing is `message.reasoning` (table above)
+
+**Elsewhere:**
+
+- Pausing for approval mid-stream: [Chapter 11](11-runtime-and-human-in-the-loop.md), 11.13
+- Tokens from subagents (`subgraphs=True`): [Chapter 13](13-multi-agent-systems-and-subagents.md), 13.6
+- Turning streaming off for one model: [Chapter 3](03-models-messages-and-parameters.md), 3.9
+
+✅ *Verified on `langchain` 1.5.0 with the scripted streaming model (details at the end). A real model's reasoning stream was not run.*
 
 
 ## 6.9 Questions from the class
@@ -749,6 +840,15 @@ for event in stream:
 
 </details>
 
+<details class="qa"><summary>13. With <code>stream()</code>, how do you show a tool call forming and then the parsed call and its result?</summary>
+
+- `stream_mode=["messages", "updates"]` with `version="v2"`
+- `messages` chunks carry `tool_call_chunks` (name and id first, then the args in pieces)
+- `updates` carries the finished `AIMessage` with parsed `tool_calls`, then the `ToolMessage`
+- *Stronger answer:* for model calls that never reach state (inside middleware), add chunks until `chunk_position == "last"` or push the finished message through `get_stream_writer()`. With several agents, filter by `metadata["lc_agent_name"]`
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"A travel assistant must remember a user's preferences across trips but not leak them to other users."* Cover thread vs store, namespaces, what gets saved, and deletion.
 
@@ -830,6 +930,14 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
     - 6.4 `delete_old_messages` (`after_model`) with `InMemorySaver`: after three turns the thread held only the last turn; turn 3's model input had no "bob"
     - 6.5 `SqliteSaver.from_conn_string(file)`: turn 1 through one saver and agent, turn 2 through a new saver and a new agent; the result held all four messages. Packages: `langgraph-checkpoint-sqlite` 3.1.3, `langgraph-checkpoint-postgres` 3.2.1, `psycopg` 3.3.9
     - `PostgresSaver` imported and has `from_conn_string` and `setup`; not connected (no server)
+  - *Update from the Streaming docs page (2026-11-15), same versions and scripted streaming model:*
+    - `messages` mode with `name="weather_bot"`: every chunk had `langgraph_node` (`model` or `tools`) and `lc_agent_name='weather_bot'`; `content_blocks` showed `tool_call_chunk` pieces; each model call ended with an empty chunk with `chunk_position='last'`
+    - The `["messages", "updates"]` loop printed the chunks, `Tool calls: [... 'Boston' ...]` and `Tool response: [...]`. The `chunk_position` aggregation rebuilt `[{'name': 'get_weather', 'args': {'city': 'Boston'}, ...}]`
+    - v1: `stream_mode=["updates", "custom"]` yielded tuples; `stream_mode="updates"` yielded dicts
+    - `@after_agent(can_jump_to=["end"])` with `get_stream_writer()` sent `{'evaluation': 'safe'}` on `custom`
+    - Reasoning: `content_blocks` of chunks holding `{'type': 'reasoning', ...}`, and of `{'type': 'thinking', ...}` with and without `model_provider="anthropic"`. The reasoning snippet, run as written on an agent whose model streamed two Anthropic-style `thinking` chunks then text, printed `[thinking] User wants weather. [thinking] No tool needed.It is sunny`. Not run: a real provider's reasoning stream
+    - Every new 6.8 block was extracted from this file and run as written (model swapped for the scripted one)
+    - Docs slips: "Agent progress" describes `stream_mode="updates"` but its code uses v3 `interleave`; the guardrail streaming example uses `ToolMessage` without importing it
   - *Update from the Event streaming docs page (2026-11-15), `langchain` 1.5.0, `langchain-core` 1.8.0, `langgraph` 1.2.22, with a scripted chat model whose `_stream` yields text word by word and tool-call args in 4-character `tool_call_chunks`:*
     - `stream.messages`: deltas `['It ', 'is ', 'sunny ', 'in ', 'SF']`, `str(message.text)` `'It is sunny in SF'`, `.tool_calls.get()` on the tool-call message, `message.output.usage_metadata` `{'input_tokens': 12, 'output_tokens': 5, 'total_tokens': 17}`, `.node` `model`
     - `message.tool_calls` chunks: `'{"ci'`, `'ty":'`, `' "Bo'`, `'ston'`, `'"}'`; `.get()` → `{'city': 'Boston'}`
@@ -848,6 +956,7 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
 - Live-Class-2026, `MIddleware.ipynb` (cells 0 to 56) in the same folder
 - LangChain docs: [Agents](https://docs.langchain.com/oss/python/langchain/agents) (read in full 2026-11-15): agent anatomy, `AgentState`, invocation with `thread_id` and `context`, streaming, the harness capability areas. The three diagrams in `images/` are copied from this page
 - LangChain docs: `short-term-memory.mdx`, `streaming.mdx`, `event-streaming.mdx` (earlier batches)
+- LangChain docs: [Streaming](https://docs.langchain.com/oss/python/langchain/streaming), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/streaming.mdx` and two snippet files; docs.langchain.com was blocked from this environment). Used for the stream-mode bullets and "`stream()` patterns" in 6.8
 - LangChain docs: [Event streaming](https://docs.langchain.com/oss/python/langchain/event-streaming), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/event-streaming.mdx`; docs.langchain.com was blocked from this environment). Used for "Event streaming (v3): projections and rules" in 6.8. The two ⚠️ boxes are from testing
 - LangChain docs: [Short-term memory](https://docs.langchain.com/oss/python/langchain/short-term-memory), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/short-term-memory.mdx`; docs.langchain.com was blocked from this environment). Used for 6.4 (threads, when memory is saved, deleting and the valid-history warning) and 6.5 (the Postgres saver install and setup)
 - Section 6.11, the SQLite example in 6.3, the state / context / store table in 6.6 and senior questions 10–11 are added by Claude and are not from these sources

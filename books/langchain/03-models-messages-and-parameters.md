@@ -677,6 +677,10 @@ except ModelTimeoutError:
   - `max_concurrency` limits parallel calls in `batch()`.
 - **Turn token streaming off**: `disable_streaming=True` (any chat model); some providers also accept `streaming=False`.
   - Then `.stream()` returns one chunk with the whole text.
+  - Use it on purpose in agents (Streaming docs):
+    - in a multi-agent system, to choose which agents' tokens reach the user
+    - when mixing models with and without streaming
+    - on LangSmith deployments, for models whose output the client should not see. Set it in the graph code before you deploy
 - ✅ *Verified (details in "How this chapter was checked").*
 
 > [!IMPORTANT]
@@ -956,6 +960,7 @@ restored = load(dumpd(msg))                         # only on data you control
 - Live-Class-2026, notebooks `02_03_environment_models_messages_student_notes.ipynb`, `04_05_prompt_templates_structured_output_student_notes.ipynb` and `Revision_Parts_1-4.ipynb` in `Weekend 04 - 18-19 Jul/07-08 - .../Notebook For Reference/`
 - LangChain docs: [Models](https://docs.langchain.com/oss/python/langchain/models) (read in full 2026-11-15): two ways to use and create models, retries, provider parameters, reasoning effort, streaming events, batch vs provider batch APIs, token usage, logprobs, server-side tools, profiles, prompt caching, base URL and proxies, configurable models
 - LangChain docs: [Messages](https://docs.langchain.com/oss/python/langchain/messages) (read in full 2026-11-15): message types and fields, multimodal input, standard content blocks and the block reference, serialization
+- LangChain docs: [Streaming](https://docs.langchain.com/oss/python/langchain/streaming), section "Disable streaming" (read 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for when to turn streaming off in agents (3.9; a docs statement, not run)
 - Section 3.13 and the two temperature / `max_retries` findings in 3.3 are added by Claude (checked on the installed packages) and are not from these sources
 - Live-Class-2026, `Weekend 04 - 18-19 Jul/.../Learning/Part 2 - Models/Langchain (1).ipynb` and `Langchain - Colab.ipynb` (reasoning-token output, three-SDK comparison). Both notebooks hold **API keys in their source**. They were not copied. Revoke any that are yours
 - Live-Class-2026, `Weekend 04 - 18-19 Jul/07-08 .../Langchain.pdf` and the Weekend 4 README (whiteboard summary of classes 7 and 8: family, harness, messages, structured output)

@@ -504,6 +504,47 @@ r = agent.invoke(Command(resume={"decisions": [{"type": decision}]}),
 - Approve, reject, edit and respond appear under other names in other frameworks. The practice differs a little, the concept does not
 - This class used the **correct `edited_action` shape**. The class 11 demo used `args` directly, which raises an error (checked in [Chapter 7](07-middleware.md), 7.6)
 
+### HITL while streaming
+
+- The same pause works inside a `stream()` loop ([Chapter 6](06-agents-and-memory.md), 6.8). It needs the HITL middleware **and** a checkpointer
+- With `stream_mode=["messages", "updates"]`, the interrupt arrives as an `updates` chunk keyed **`__interrupt__`**
+
+```python
+config = {"configurable": {"thread_id": "some_id"}}
+interrupts = []
+for chunk in agent.stream({"messages": [input_message]}, config=config,
+                          stream_mode=["messages", "updates"], version="v2"):
+    if chunk["type"] == "updates":
+        for source, update in chunk["data"].items():
+            if source == "__interrupt__":
+                interrupts.extend(update)          # Interrupt objects
+                for request in update[0].value["action_requests"]:
+                    print(request["description"])  # "Tool execution requires approval ..."
+```
+
+- **Decide per interrupt, keyed by its id.** Inside one interrupt, the decisions must be in the **same order** as its `action_requests`
+
+```python
+def decide(interrupt):
+    return [
+        {"type": "edit", "edited_action": {"name": "get_weather", "args": {"city": "Boston, U.K."}}}
+        if "boston" in request["description"].lower() else {"type": "approve"}
+        for request in interrupt.value["action_requests"]
+    ]
+
+decisions = {i.id: {"decisions": decide(i)} for i in interrupts}
+
+for chunk in agent.stream(Command(resume=decisions), config=config,      # same loop as before
+                          stream_mode=["messages", "updates"], version="v2"):
+    ...
+```
+
+- *Checked:* two parallel `get_weather` calls came as **one** interrupt with two action requests. After the resume, both tools ran, Boston with the edited city
+- **Docs vs package:**
+  - The docs show the edited call's result as plain `It's always sunny in Boston, U.K.!`
+  - On 1.5.0 the `ToolMessage` started with the reviewer note (`Note: a human reviewer replaced this tool call before it ran ... Executed instead: get_weather with arguments {"city": "Boston, U.K."}`), then the result
+  - `edit_notice=None` removes the note (11.11)
+
 ## 11.14 Questions from the class
 
 - **State vs runtime context?** Mutability and persistence (11.7). State is mutable and persists across invocations in a conversation. Context is for static per-run values. The mentor first answered this the wrong way round and corrected it after the break
@@ -670,6 +711,7 @@ agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg, context=
   - HITL: the unguarded agent, a dict result vs `version="v2"`, `.interrupts` and `.value`, `True` and `False` in `interrupt_on`, `description_prefix`, `respond` with a question-only tool, `when=` with $25 and $500, and the interactive loop with approve, edit and reject
   - retry and error middleware in both orders with the default `on_failure`
 - **Not run:** a real LangGraph server (so `server_info` and `run_id` were `None`), real model behaviour, a persistent checkpointer or store
+- *HITL while streaming (2026-11-15):* `langchain` 1.5.0, `langgraph` 1.2.22, a scripted streaming model calling `get_weather` for Boston and San Francisco in one turn, `HumanInTheLoopMiddleware(interrupt_on={"get_weather": True})`, `InMemorySaver`. One `__interrupt__` update with two action requests; resume with decisions keyed by the interrupt id (edit Boston, approve San Francisco); the tools update held `It's always sunny in San Francisco!` and the Boston result behind the reviewer note
 - Class 15 has no code folder beyond the notebook and diagram. The Colab link in the README is not in the repo
 - **Details by section** (moved here from the ✅ markers):
   - *11.3 The five components of runtime:* Checked: the runtime object also has other members (for example `override`, `merge`, `heartbeat`). The five above are the ones to learn
@@ -690,5 +732,6 @@ agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg, context=
 - Live-Class-2026, `Weekend 09 - 22-23 Aug/README.md` and `22nd Aug - Runtime & HITL/README.md`
 - `Assignment_2_Agents_and_Prebuilt_Middleware.ipynb` (questions only)
 - Section 11.16 and the corrections marked *checked* are from testing, not from the class sources
+- LangChain docs: [Streaming](https://docs.langchain.com/oss/python/langchain/streaming), section "Streaming with human-in-the-loop" (read 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "HITL while streaming" in 11.13
 
 Previous: [Chapter 10, Shell tools and custom middleware](10-shell-tools-and-custom-middleware.md) · Next: [Chapter 12, MCP in LangChain](12-mcp-in-langchain.md)

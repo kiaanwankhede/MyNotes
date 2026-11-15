@@ -369,6 +369,26 @@ for subagent in stream.subagents:
 > - With an **unnamed** supervisor it appeared only in `stream.subgraphs`, as `graph_name='tools'` (the node name). `doubler` never appeared
 > - So filter out handles whose name equals the parent's name, and don't rely on `.compile(name=...)` for labels
 
+**The same with `stream()`:** pass `subgraphs=True` and read `metadata["lc_agent_name"]` on each `messages` chunk.
+
+```python
+current_agent = None
+for chunk in supervisor.stream({"messages": [input_message]},
+                               stream_mode=["messages", "updates"],
+                               subgraphs=True, version="v2"):
+    if chunk["type"] == "messages":
+        token, metadata = chunk["data"]
+        if (agent_name := metadata.get("lc_agent_name")) and agent_name != current_agent:
+            print(f"🤖 {agent_name}: ")
+            current_agent = agent_name
+        if token.text:
+            print(token.text, end="|")
+```
+
+- **Without `subgraphs=True` the subagent is silent.** *Checked:* only `supervisor` chunks arrived; with it, `weather_agent` chunks came too, with a nested `chunk["ns"]`
+- Same rule when an agent is a **node** in a parent `StateGraph`: without `subgraphs=True` the parent's `messages` stream got one finished `AIMessage`, with it the token chunks (checked)
+- Setting `name=` also stamps that name on every `AIMessage` the agent produces (docs)
+
 ### Passing context down and results up
 
 - *Source: LangChain docs, `multi-agent/subagents-personal-assistant.mdx` (sections 7-8).*
@@ -548,6 +568,7 @@ supervisor = create_agent(model, [research], checkpointer=InMemorySaver())
   - *What the supervisor gets back:* Checked, and not mentioned in the notebook: **the extra key is silently dropped unless it is declared in the agent's state schema.** With a plain `create_agent`, `last_research_confidence` was **absent** from the final state. With `state_schema` including `last_research_confidence`, it was `0.92`. Declare every key a tool writes
   - *Human approval inside nested subagents:* Checked: resuming with a **dictionary keyed by interrupt id** worked. Both tools then ran, and the edited email went out with the subject **"Mockups reminder"**
   - *Streaming what each subagent says (2026-11-15):* `langchain` 1.5.0, `langgraph` 1.2.22, a scripted streaming chat model. A supervisor named `supervisor` called `call_weather` (wrapping `weather_agent`) and `double_it` (wrapping a plain `StateGraph` compiled with `name="doubler"`) in one turn. `stream.subagents` → `('weather_agent', cause tool_call_id 'a')` and `('supervisor', cause tool_call_id 'b', output {'x': 'abab'})`. `stream.subgraphs` → `graph_name` `weather_agent` and `supervisor`. Supervisor unnamed, plain subgraph only: `stream.subagents` empty, `stream.subgraphs` → `graph_name='tools'`
+  - *The same with `stream()` (2026-11-15):* supervisor plus `weather_agent` wrapped in a tool: with `subgraphs=True` the `lc_agent_name` values were `supervisor` (root) then `weather_agent` (nested `ns`); without it only `supervisor`. A `create_agent` used as a node in a parent `StateGraph(MessagesState)`: `stream_mode="messages"` gave 1 item (a whole `AIMessage`, node `agent`) without `subgraphs=True`, 4 chunks with it
   - *Subagent design decisions:* Checked (scripted model): a tool returning a `Command` copied the subagent's state key into the parent (`found` became `x-found`) and the tool message carried the subagent's text; an `Enum` argument accepted `"writer"` and rejected `"bogus"` with a `ValidationError`. Async jobs and `get_state(subgraphs=True)` were not run.
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran a supervisor that called a subagent wrapped as a tool and read `.text` from the subagent's last message. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
@@ -557,6 +578,7 @@ supervisor = create_agent(model, [research], checkpointer=InMemorySaver())
 - Live-Class-2026, `classes_transcription_summary/23 - 27 Sep - MCP In LangChain.md` (second half: why multi-agent, context isolation, patterns, Q&A)
 - Live-Class-2026, `Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/`: `README.md`, `00_Multi_Agent_Overview.ipynb`, `01_Subagents_Personal_Assistant.ipynb`, `LangChain_MultiAgent_Patterns_VSCode.ipynb`, and `test.py` (a scratch router snippet that calls undefined tools)
 - Sections marked *checked* and 13.9 are from testing
+- LangChain docs: [Streaming](https://docs.langchain.com/oss/python/langchain/streaming), section "Streaming from sub-agents" (read 2026-11-15 from its source, commit `04d4d4a`), for "The same with `stream()`" in 13.6
 - LangChain docs: [Event streaming](https://docs.langchain.com/oss/python/langchain/event-streaming), section "Streaming sub-agents" (read 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "Streaming what each subagent says". The plain-subgraph warning is from testing
 
 Previous: [Chapter 12, MCP in LangChain](12-mcp-in-langchain.md) · Next: [Chapter 14, Handoffs, skills, router and custom workflows](14-handoffs-skills-router-and-custom-workflows.md)
