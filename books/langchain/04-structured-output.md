@@ -244,6 +244,8 @@ print(isinstance(result["structured_response"], CancelBooking))     # True
 - In class: the cancel message produced `CancelBooking`, "Book one ticket for Oppenhiemer for Mayank" produced `NewBooking` with `ticket_count=1`. No `if/else` routing written
 - **Docstrings matter:** they tell the model which intent each schema stands for
 - A truly ambiguous message is the model's call. Write schemas so the intents cannot be confused
+- **Only `ToolStrategy` takes a `Union`.** In class 09 the mentor read this from the docs; *tested on 1.5.0:* `ProviderStrategy(Union[NewBooking, CancelBooking])` raised `ValueError: Unsupported schema type ... Supported types: Pydantic models, dataclasses, TypedDicts, and JSON schema dicts`
+- **Why a `Union` and not one schema with an `intent` field** (the class's question): with 10 intents (book, cancel, modify, shift, check...) one schema fills up with optional fields that only some intents use. Separate schemas keep each intent's required fields required
 
 ## 4.9 When the model breaks a constraint
 
@@ -294,6 +296,40 @@ What the message trace shows, in order:
 - **`handle_errors=ValueError` did not catch it** and raised the same error. LangChain wraps Pydantic's error in its own `StructuredOutputValidationError`, which is **not** a `ValueError`. *Checked:* `handle_errors=StructuredOutputValidationError` (from `langchain.agents.structured_output`) retried and succeeded. Name that type
 - Pydantic's own `ValidationError` is a `ValueError`, which is why the mistake is easy to make
 - **Limit of this safety net:** `10` was the model's choice of a valid value, not what the user wanted. Hard business rules belong in the schema. Add a human check for anything consequential
+
+**Where the limit comes from, and where it must live** (class 09)
+
+- The class's real-world reasons for a hard limit: BookMyShow caps seats per booking, Amazon caps quantities on some products, an ATM caps one withdrawal
+- **A limit shown in the front end is not a limit.** The mentor opened the browser's developer tools on a seat-selection page and showed the request carrying the quantity, which anyone can resend with a different number. The API, and here the schema, must enforce it
+- **Don't silently clamp** 15 down to 10 in your own code. The user may have asked for 8 and the model misread it as 80. Reject and retry, or ask the user
+
+**Retries need a ceiling**
+
+- In class, a vague custom message (`handle_errors="Please make sure you follow the exact structure"`) made the agent "go round and round", and every lap was a paid model call. A specific one ("Ticket count should not be greater than 10") fixed it in two calls
+- *Tested on 1.5.0 with a model that always answers 15:*
+  - with `recursion_limit=25` it made **25 model calls**, then raised `GraphRecursionError`. Each retry uses one step, so under `create_agent`'s default limit of 9,999 steps that is up to ~9,999 paid calls
+  - `ModelCallLimitMiddleware(run_limit=3, exit_behavior="end")` stopped it after **3** calls. The last message read "Model call limits exceeded: run limit (3/3)" and `structured_response` was `None`, so your code must handle a missing result
+
+```python
+from langchain.agents.middleware import ModelCallLimitMiddleware
+
+seat_agent = create_agent(
+    model="openai:gpt-5-mini", tools=[],
+    response_format=ToolStrategy(SeatBooking, handle_errors="ticket_count must be 1 to 10. Ask the user if unsure."),
+    middleware=[ModelCallLimitMiddleware(run_limit=3, exit_behavior="end")],   # 1 try + 2 retries
+)
+result = seat_agent.invoke({"messages": [{"role": "user", "content": "Book 15 tickets"}]})
+booking = result.get("structured_response")
+if booking is None:
+    ...   # tell the user what is allowed; don't guess a value
+```
+
+**`ProviderStrategy` does not retry**
+
+- The mentor: the provider strategy "doesn't handle that"
+- *Tested on 1.5.0 against a stand-in OpenAI server that always returned `ticket_count: 15`:* **one** request, then `StructuredOutputValidationError`. There was no retry, and `ProviderStrategy` has no `handle_errors` parameter (only `schema` and `strict`)
+- The limits did travel to the provider: the request's JSON schema carried `"minimum": 1, "maximum": 10`. Whether the provider enforces them while generating is provider-specific, so validate anyway
+- So: use `ToolStrategy` when you need automatic retries on validation errors, or catch `StructuredOutputValidationError` yourself around a `ProviderStrategy` agent
 - Assignment Q17 asks for this exact walk-through for `party_size: int = Field(ge=1, le=20)` and "table for 50 please". Answer: propose 50, fail validation, feed the error back, retry until valid or `handle_errors` gives up
 
 ### When the model refuses
@@ -337,6 +373,22 @@ if isinstance(out["parsing_error"], ModelRefusalError):
   - Answer-key claim, not tested here
 - **Model level vs agent level?** See 4.8
 - **`Union` with an ambiguous message?** The model decides. It may even try more than one schema before settling
+
+### Questions from the class (classes 09–10)
+
+Asked during the teaching part on 25–26 Jul; the doubt sessions are not included.
+
+| Question | Answer |
+|---|---|
+| What if the customer doesn't give a name? | The field falls back to its default (`None` in the class schema). Make a field required only if the booking can't proceed without it |
+| Can the structure change midway through a request? | No. One run, one `response_format`. For several shapes, use a `Union` (4.8) |
+| Does structured output cost more tokens? | The mentor: it depends, and often saves tokens overall. *Added by Claude:* the schema is sent with each call, but you avoid re-asking and re-parsing free text |
+| How do I know whether a model supports native structured output? | `model.profile` (4.7). For an in-house model nobody has profiled, test it, or force `ToolStrategy` |
+| Is `ToolStrategy` about choosing which tool to call? | No. It is only a way to get structured output, by dressing the schema up as a tool |
+| If `ToolStrategy` does more, why isn't it the default? | The mentor: so that the easy path stays easy. *Added by Claude:* `ProviderStrategy` needs no extra tool round trip, and the provider enforces the schema while generating |
+| With ten validation errors, does the agent run ten times? | No. Pydantic reports every failed field in one error, and it goes back to the model in one `ToolMessage`. The retries continue until the output is valid or a limit stops them (4.9) |
+| Must `handle_errors` be `True` or `False`? | No: also a message string, an exception type or tuple of types, or a function (4.9 table) |
+| The limit is 10. How does someone book 50? | Not through this agent. That is the business rule; offer separate bookings or hand over to a person |
 
 ### Tool-strategy extras: tool message text and wrong multi-output
 
@@ -416,6 +468,14 @@ ToolStrategy(MeetingAction, tool_message_content="Action item captured!")
 
 </details>
 
+<details class="qa"><summary>8. A structured-output agent is burning tokens on retries. Why, and what do you change?</summary>
+
+- `ToolStrategy` retries until the output validates, and nothing caps that by default except the step limit (9,999 in `create_agent`)
+- A vague error message gives the model nothing to fix, so it tries again and again
+- *Stronger answer:* write the constraint into the error message and the field description, cap calls with `ModelCallLimitMiddleware`, handle a missing `structured_response`, and track the retry rate per field in traces. If one field keeps failing, the schema or the prompt is wrong, not the model
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"Extract invoice fields (vendor, date, line items, total) from emails into your database."* Cover the schema, validators, retries, how you handle a total that does not match the line items, and what you store when extraction fails.
 
@@ -484,6 +544,8 @@ agent.invoke(inp)["structured_response"]                       # on an agent
 - Model-level has **no tool loop**. For tools plus schema use `response_format` on an agent
 - `Union` lets one agent return different shapes. Docstrings guide the choice
 - Constraints are enforced outside the model. Errors go back to it for a retry
+- Retries need a ceiling: specific error text plus `ModelCallLimitMiddleware`. `ProviderStrategy` never retries, and only `ToolStrategy` takes a `Union`
+- A limit in the front end is not a limit; enforce it in the schema or API, and don't silently clamp
 
 ## Practice
 
@@ -506,6 +568,13 @@ agent.invoke(inp)["structured_response"]                       # on an agent
   - *4.7 `model.profile`: check before you rely on it:* Checked: building an agent with `response_format=ToolStrategy(...)`, `ProviderStrategy(...)` or a bare schema on `gpt-3.5-turbo` **did not fail at construction**. Any failure shows up at call time, which was not run here
   - *Tool-strategy extras: tool message text and wrong multi-output:* Checked (scripted model): the final message was `Captured!`; a two-schema turn produced the error text twice, then the retry gave `task='y'`.
   - *When the model refuses (2026-11-15):* Checked on `langchain-core` 1.8.0 / `langchain` 1.5.0: `ModelRefusalError` imports from `langchain_core.exceptions`, its default text is "Model refused to produce the requested output", and it carries `raw_message`; `ModelRefusalMiddleware` imports from `langchain.agents.middleware`. **Not run:** a real provider refusal, so the raise-vs-`parsing_error` behaviour and the version notes are from the docs
+  - *Class transcripts (25–26 Jul), added 2026-11-15, run on `langchain` 1.5.0 with scripted fake models and a local stand-in OpenAI server:*
+    - a model that always answered 15 made 25 model calls under `recursion_limit=25`, then `GraphRecursionError`
+    - `ModelCallLimitMiddleware(run_limit=3, exit_behavior="end")` stopped it at 3 calls with `structured_response` missing; the 4.9 code block ran as written (fake model swapped in) and its custom message reached the `ToolMessage`
+    - two bad fields came back in one `ToolMessage` listing both
+    - `ProviderStrategy` with a reply of 15: one request, then `StructuredOutputValidationError`; the request schema carried `minimum`/`maximum`; `ProviderStrategy` takes only `schema` and `strict`
+    - `ProviderStrategy(Union[...])` raised `ValueError: Unsupported schema type`; `ToolStrategy(Union[...])` was accepted
+    - **Not checked:** a real provider's behaviour on the 1–10 limits in its native mode, and the class's front-end request demo (it was shown, not reproduced)
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran `create_agent(..., response_format=ToolStrategy(Movie))` and read `structured_response`; `with_structured_output(Movie)` was constructed on a real model object, not called. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
@@ -521,5 +590,7 @@ agent.invoke(inp)["structured_response"]                       # on an agent
 - Live-Class-2026, `Weekend 05 - 25-26 Jul/09-10 .../Assignment & Questions/Student_Reference_Structured_Output_and_Tools.ipynb`, `Langchain_Structured_OUTPUT_COLAB.ipynb`, `Langchain_Till_Agents.ipynb`, and the whiteboard PDFs `Langchain-2.pdf` and `Langchain-Session-2.pdf` (text extracted)
 - The `method=` options, `profile` values and `handle_errors` behaviour in 4.2, 4.7 and 4.9 are from testing
 - LangChain docs: [Models](https://docs.langchain.com/oss/python/langchain/models), section "Handle a model refusal" (read 2026-11-15), for "When the model refuses" in 4.9
+- Class recording transcripts, 25 Jul 2026 (Class 09) and 26 Jul 2026 (Class 10), uploaded by you; teaching part only: the business-limit examples, the vague-retry experience, the `ProviderStrategy` and `Union` remarks, and the class questions
+- Added by Claude: the retry-ceiling rule and code, the "don't clamp" note, interview question 8, and the answers marked as such in the class-questions table
 
 Previous: [Chapter 3](03-models-messages-and-parameters.md) · Next: [Chapter 5, Tools](05-tools.md)

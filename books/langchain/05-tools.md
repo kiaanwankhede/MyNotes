@@ -479,11 +479,24 @@ agent = create_agent(model=model, tools=[save_favorite_genre, recall_favorite_ge
 - General-purpose storage, not only chat history
 - Using LangGraph's store inside LangChain is not mixing frameworks. LangChain is built on LangGraph
 
+> [!WARNING]
+> **`InMemorySaver` is not `InMemoryStore`.** In class 10 the demo first failed because the two were mixed up.
+> - **`InMemorySaver`** (`langgraph.checkpoint.memory`) is a **checkpointer**: `create_agent(checkpointer=...)`. It keeps one conversation's state per `thread_id` ([Chapter 6](06-agents-and-memory.md)).
+> - **`InMemoryStore`** (`langgraph.store.memory`) is a **store**: `create_agent(store=...)`. It keeps long-term data across conversations, read by tools through `runtime.store`.
+> - Both are RAM only and vanish on restart.
+
+- **The mentor's rule, "least moving parts":** use the store the agent already has before adding Redis or a separate database for a small feature. Every extra system is another thing to deploy, secure and debug
+
 **`return_direct`**
 
 - Sends a tool's raw output straight to the user, skipping the model's final pass
 - Use it when the model rewording an output (a refund policy, say) could change its meaning
 - Cannot be combined with a model double-check, because that puts the model back in the loop
+- **The class's demo:** asked to "explain the refund policy in points", the model added advice that wasn't in the policy (contact customer support, check your booking details). With `return_direct=True` the policy came back word for word, and the second model call was skipped (fewer tokens)
+- **Why it matters, the case the class cited:** *Moffatt v. Air Canada* (British Columbia Civil Resolution Tribunal, 2024 BCCRT 149, 14 Feb 2024)
+  - Air Canada's website chatbot told a customer he could apply for a bereavement fare **after** travelling. The airline's own policy page said the opposite
+  - Air Canada argued the chatbot was responsible for its own words. The tribunal rejected that and found the airline liable for negligent misrepresentation: CA$812.02, including CA$650.88 in damages
+  - *Added by Claude:* the decision doesn't say whether the bot was generative AI; "AI chatbot" is the media's label. The lesson holds either way: **the company owns what its bot says**. Serve policy, legal and pricing text verbatim from a tool, and keep the model away from rewording it
 
 ```python
 @tool(return_direct=True)
@@ -630,6 +643,12 @@ class TagState(AgentState):
 
 - **Dynamic tool calling:** the default. The model picks which available tool to use
 - **Dynamic tool loading:** decide **before** the model is called which subset of a large set (class range 25 to 50 tools) to show it
+- **Why it matters (class 10):**
+  - **Tokens:** every bound tool's name, description and schema is sent on **every** model call. *Measured with a stand-in server:* one compact booking tool added 559 characters to the request; 50 of them added about 28,000 characters, roughly 7,000 tokens, before the user's question. The mentor's rough figure was about 500 tokens per real-world tool
+  - **Accuracy:** many similar tools confuse the model
+  - **Access:** a tool that is on the menu can be called. A free user's agent shouldn't even see the VIP lounge tool (gating, above)
+  - **Tools that appear mid-run,** such as a newly connected MCP server, must be loaded at run time
+- **The mentor's Claude observation:** a plain "hi" counted about 4,169 tokens; with many connectors switched on it rose to about 27,000–35,000. In his account the larger models load connector tools only when needed, while Haiku loaded them all. *Class observation, not checked here*
 - MCP is not an alternative to loading. It is a packaged set of tools. Loading is about which tools, from any source, are exposed
 - Two ways to load: filter tools registered up front (gating above, [Chapter 7](07-middleware.md) 7.4), or **register a tool at run time** with two middleware hooks ([Chapter 7](07-middleware.md), 7.2)
 
@@ -653,6 +672,21 @@ Rows not already covered above.
 | How do I manage a growing conversation context? | No single technique. Summarise older messages, drop old ones, or mix, chosen by results. Aim: best performance from the least context, since cost scales with tokens ([Ch 7](07-middleware.md), `SummarizationMiddleware`) |
 | How do I build a tool for an internal service behind a VPN? | A tool is just an API call. If your code can call it, you can wrap it |
 | Is model choice a one-time decision? | No. Compare candidate models before any production choice, and again later |
+
+**Asked in the teaching part of classes 09–10 (25–26 Jul)**, rows not already covered above:
+
+| Question | Answer |
+|---|---|
+| What does an `args_schema` add? | Field checks (limits, allowed values) run before your function does, and the model sees each field's description (5.5) |
+| Doesn't a richer schema cost more tokens? | The mentor: a little, and it is worth it, because one wrong call costs a whole extra model call. *Added by Claude:* the cost that adds up is the number of tools: every bound tool is sent on every call (50 small tools ≈ 7,000 tokens, measured above) |
+| Can a parameter be called `config` or `runtime`? | No. Both are reserved. Defining the tool works; calling it fails at run time (5.6) |
+| Why a run-time error and not an error when the tool is defined? | The mentor: LangChain checks when the tool runs, because the same function may be used with other frameworks or decorators |
+| Do LangChain's ready-made tools (Tavily) have limits? | Yes, your key's limits. The mentor: about 1,000 free calls, then paid. Check the provider's current pricing |
+| Does a provider's web search run on my machine? | No. Server-side tools run on the provider's servers (Ch3, 3.5) |
+| How long does `InMemoryStore` keep data? | Until the process stops. It lives in RAM |
+| Besides the store, what is `runtime` for? | State, context, progress updates and execution info (5.9) |
+| Does `return_direct` save tokens? | Yes. The second model call, which would reword the result, is skipped |
+| Is `runtime` what picks the right 5 of 50 tools? | No. Choosing which tools the model sees is middleware's job (`wrap_model_call`, gating above, [Chapter 7](07-middleware.md)) |
 
 **Learning advice from the same Q&A** (the mentor's view):
 
@@ -758,6 +792,14 @@ Rows not already covered above.
 - Both tools run
 - The agent does **not** stop: it goes back to the model with both `ToolMessage`s
 - It stops only when every tool called in that step has `return_direct=True`
+
+</details>
+
+<details class="qa"><summary>11. Why serve a refund policy through a <code>return_direct</code> tool instead of letting the model answer?</summary>
+
+- The model rewords, summarises and adds "helpful" extras; with policy text that changes meaning
+- `return_direct=True` returns the tool's text as is and skips the second model call
+- *Stronger answer:* the company is liable for what its bot says (*Moffatt v. Air Canada*, 2024). Keep policy, legal and pricing text in one source of truth, serve it verbatim, and test that the agent routes those questions to the tool
 - *Stronger answer:* if the exact wording matters (a policy text), set `parallel_tool_calls=False` or give that tool its own turn, so the batch cannot be mixed. *Added by Claude*
 
 </details>
@@ -815,6 +857,9 @@ def refund_policy() -> str:
 - A tool returns text, a dict (sent as JSON), content blocks, or a `Command`. A `Command` must carry its `ToolMessage`
 - `return_direct` ends the run only when every tool called in that step has it
 - Gate by **removing** tools, using context or a state schema. A prompt only asks
+- Every bound tool is sent on every call (50 small tools ≈ 7,000 tokens): load only what the request needs
+- Policy text goes out verbatim through `return_direct`. The company owns what its bot says (*Moffatt v. Air Canada*)
+- `InMemorySaver` is a checkpointer, `InMemoryStore` is a store. Prefer the store you have to a new system
 
 ## Practice
 
@@ -851,6 +896,7 @@ def refund_policy() -> str:
     - Headless: `tool(name=..., description=..., args_schema=...)` raised `TypeError: tool() got an unexpected keyword argument 'name'`; `langchain.tools` has no `HeadlessTool`
     - Cheat sheet additions ran inside an agent: `set_tier` set `tier` to `gold` (alongside two parallel `add_tag` calls → `['a', 'b']`), and `refund_policy` ended the run on its text. All new 5.x blocks were extracted from this file and run as written (the model swapped for the fake)
   - *Steering which tool, and how many (2026-11-15):* Checked on `langchain-openai` 1.8.0 (dummy key, no call): `tool_choice="any"` was sent as `"required"`, a tool name became `{"type": "function", "function": {"name": "get_weather"}}`, and `parallel_tool_calls=False` was passed through. A scripted model streamed the arguments as `{"lo`, `cation": "B`, `oston"}`; summing the chunks gave `get_weather {'location': 'Boston'}`. `get_weather.invoke(tool_call)` returned a `ToolMessage` with the call's id. **Not run:** a real model's parallel calls
+  - *Class transcripts (25–26 Jul), added 2026-11-15, `langchain` 1.5.0, `langchain-openai` 1.8.0:* 50 booking tools with a Pydantic `args_schema` were bound and sent to a local stand-in server; the request's `tools` part was 559 characters for one tool and 27,990 for fifty (token figure is a ~4 characters per token estimate). The *Moffatt v. Air Canada* facts were web-checked; the mentor's Claude token counts were not
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran a `ToolRuntime` tool inside an agent and confirmed `runtime.context.user_id` reached the tool; `bind_tools` was constructed, not called. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
@@ -867,5 +913,8 @@ def refund_policy() -> str:
 - LangChain docs: [Models](https://docs.langchain.com/oss/python/langchain/models), section "Tool calling" (read 2026-11-15), for "Steering which tool, and how many" in 5.1 and the `tool.invoke(tool_call)` shortcut in 5.3
 - LangChain docs: [Tools](https://docs.langchain.com/oss/python/langchain/tools), read 2026-11-15 in full from its source, `langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/tools.mdx` plus its Python snippets in `src/snippets/code-samples/` (docs.langchain.com was blocked from this environment). Used for 5.4 names and type hints, 5.5 dict schema, the 5.9 runtime table and migration, "What a tool can return", the `return_direct` rules, and 7.2 runtime registration
 - LangChain docs: [Short-term memory](https://docs.langchain.com/oss/python/langchain/short-term-memory), read 2026-11-15 from its source (commit `04d4d4a`), for the `ToolRuntime[Context, State]` typing and the `greet` steering example in 5.9
+- Class recording transcripts, 25 Jul 2026 (Class 09) and 26 Jul 2026 (Class 10), uploaded by you; teaching part only: the refund-policy demo, the Air Canada case, the tool-count and Claude observations, the store mix-up and the class questions
+- *Moffatt v. Air Canada*, 2024 BCCRT 149, web-checked 2026-11-15: [American Bar Association summary](https://www.americanbar.org/groups/business_law/resources/business-law-today/2024-february/bc-tribunal-confirms-companies-remain-liable-information-provided-ai-chatbot/), [CBS News](https://www.cbsnews.com/news/aircanada-chatbot-discount-customer)
+- Added by Claude: the tool-size measurement, the `InMemorySaver`/`InMemoryStore` warning, interview question 11, and the answers marked as such in the class-questions table
 
 Previous: [Chapter 4](04-structured-output.md) · Next: [Chapter 6, Agents and memory](06-agents-and-memory.md)
