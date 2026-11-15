@@ -55,7 +55,7 @@ flowchart LR
 | Install | `pip install "langchain[mcp]>=1.4.0"` | `pip install langchain-mcp-adapters` |
 | Entry point | `MCPAdapter(target)` then `await adapter.list_tools()` | `MultiServerMCPClient({...})` then `await client.get_tools()` |
 | Built on | FastMCP | the official `mcp` SDK |
-| Status | **Beta**. It warns that the API may change | Mature |
+| Status | **Beta**. It warns that the API may change (a `LangChainBetaWarning`, once per process, on import) | Mature |
 
 - **Why the first class demo failed:** the notebook was written for `langchain` **0.3.25**. That version has no `mcp` extra, and the pip output printed "does not provide the extra 'mcp'". The `langchain.mcp` module needs a newer `langchain`. The class transcript also said this: the package was in beta and needed a newer release than the notebook environment had
 - ✅ *Verified (details in "How this chapter was checked").*
@@ -63,6 +63,9 @@ flowchart LR
 - **The class's own illustration** (`MCPAdapter(server)`, `list_tools()`, `create_agent(...)`) matches this API. The class notes say the import path was not legible in the recording
 
 > **Do not install both packages in one environment with FastMCP 4.** *Checked:* installing `langchain-mcp-adapters` replaced `mcp` 2.3.0 with 1.30.0, and `import fastmcp` then failed with "FastMCP server support is not installed". Use a separate virtual environment for each
+>
+> - **Update (2026-11-15):** with `langchain-mcp-adapters` **0.3.1**, the install kept `mcp` 2.3.0 and `fastmcp` 4.2.0, and both packages imported. The break above came from an older adapters release. Separate environments are still the safer habit
+> - Moving off the older package: the docs' "Migrate from `langchain-mcp-adapters`" page (not read for these notes)
 
 ## 12.4 Connecting: the quick start
 
@@ -116,6 +119,9 @@ if __name__ == "__main__":
   - an `http` or `https` **URL**
   - a **`Path`** to a local script, launched over STDIO
   - a **FastMCP transport**, an **in-process FastMCP server**, an already built **client**, or an **MCP config** dictionary
+    - transport object: for example a preconfigured `StreamableTransport` (headers, timeouts)
+    - prebuilt `fastmcp.Client`: when you need full control of transport, response caching and protocol negotiation (12.8)
+    - MCP config `{"mcpServers": {...}}`: several servers behind one adapter (12.8)
   - a **bare string that is not a URL is refused.** *Checked:* `MCPAdapter("/path/to/server.py")` raised `ValueError`. The reason in its documentation: a string often comes from configuration or from a model, and a path string would launch a local program
 
 ### Call a tool without any agent
@@ -149,6 +155,35 @@ async def run_agent(server) -> dict:
 ```
 
 - The comments in the file say it: the **tools hold the client**, so the agent stays usable for the life of the `async with` block. Use the agent **inside** the block
+  - **Correction:** the docs now say the agent stays usable **after** the block exits, and that is what the adapter's own docstring says too
+  - *Checked:* a tool call after the block worked with an in-process server and with a stdio script. Building the agent inside the block is still the clearest pattern
+
+### How long a STDIO server lives
+
+- FastMCP's stdio transport defaults to **`keep_alive=True`**: the server subprocess **outlives** the `async with` block, later calls reuse it, and it ends when your Python process ends
+- With **`keep_alive=False`** the subprocess stops when the block closes. A tool call made after that starts a fresh subprocess just for that call
+
+```python
+from pathlib import Path
+from fastmcp.client.transports import PythonStdioTransport
+from langchain.mcp import MCPAdapter
+
+transport = PythonStdioTransport(script_path=Path("weather_server.py"), keep_alive=False)
+async with MCPAdapter(transport) as adapter:
+    tools = await adapter.list_tools()
+# the subprocess has stopped here
+```
+
+- *Checked (server printing its own pid):* default: same pid inside the block and for two calls after it, still alive after the block. `keep_alive=False`: dead after the block; a later call ran in a new pid, which was also gone afterwards
+- Pick by workload: keep-alive saves start-up time for many calls; `False` frees the process for one-off scripts and tests
+
+### The public LangChain docs MCP server
+
+- `https://docs.langchain.com/mcp` is a public MCP server over HTTP. **No API key**
+- An agent connected to it can search and read the LangChain docs without custom tools: `MCPAdapter("https://docs.langchain.com/mcp")`
+- Its tools (docs): `search_docs_by_lang_chain` (search guides and examples), `query_docs_filesystem_docs_by_lang_chain` (read or search the docs as a virtual file system: `rg`, `head`, `cat`), `submit_feedback` (report a problem with a page)
+- The docs' page "Use docs programmatically" covers IDE and coding-agent setup (Claude Code, Cursor and others)
+- **Not run here:** that host was blocked from the environment these notes were tested in
 - `server` can be a FastMCP object, a URL or a transport (12.4)
 - ✅ *Verified (details in "How this chapter was checked").*
 - **Trap 1: the file name.** It is called `langchain.py`. Run from its own folder, Python finds the file before the real package, and `from langchain.agents import create_agent` fails with "'langchain' is not a package". *Checked* by putting the folder first on the path. Rename it (for example `mcp_agent.py`)
@@ -551,7 +586,7 @@ Items marked *checked* were run with `langchain` 1.4.7, `langgraph` 1.2.19, `fas
 - **Read the tool's annotations before you trust it.** *Checked:* the adapter exposes them. Combine them with an allow-list of tools you have reviewed, as in [MCP, Chapter 8](../mcp/08-interview-questions.md), 8.1
 - **Treat tool output as untrusted text** that goes into the model. A remote server's result can contain instructions. Add guardrails ([Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md))
 - **Pin versions.** The beta module, FastMCP 3 and 4, and the spec era all changed behaviour in this course. Record the versions you tested
-- **Close adapters properly.** Use `async with`, as in every example here, so STDIO sub-processes are shut down
+- **Close adapters properly, and know what closing does.** Use `async with`, as in every example here. A STDIO subprocess stops at the end of the block only with `keep_alive=False`; by default it lives until your process exits (checked, 12.4)
 
 ## Cheat sheet
 
@@ -566,7 +601,7 @@ agent = create_agent(model, tools)          # tools still work after the context
 ## Recap
 
 - To an agent, MCP is a **source of tools**. The loop is unchanged
-- **`langchain.mcp`** (beta, `langchain[mcp]>=1.4.0`) is the built-in adapter on FastMCP. **`langchain-mcp-adapters`** is the older, separate package. Do not mix them in one environment
+- **`langchain.mcp`** (beta, `langchain[mcp]>=1.4.0`) is the built-in adapter on FastMCP. **`langchain-mcp-adapters`** is the older, separate package. Prefer separate environments (an older adapters release broke `fastmcp` 4; 0.3.1 did not)
 - `MCPAdapter(target)`, then `await adapter.list_tools()`, then `create_agent(...)`. A bare string must be an http(s) URL
 - Results become content blocks, **structured content becomes an artifact**, a tool failure becomes `status="error"`, a transport failure raises
 - Read `destructive_hint` to build human-in-the-loop for dangerous tools
@@ -595,6 +630,12 @@ agent = create_agent(model, tools)          # tools still work after the context
 - Run later: the one-file example `langchain.py` (12.4) with a scripted model; the file-name shadowing; the string model id with no key
 - **Open:** the first class notebook (`Langchain MCP.ipynb`) is a failed demo on the old LangChain version. Its README is an empty file (0 bytes)
 - **Details by section** (moved here from the ✅ markers):
+  - *MCP overview page re-read (2026-11-15), `langchain` 1.5.0 with `fastmcp` 4.2.0, `mcp` 2.3.0, `langchain-mcp-adapters` 0.3.1 in one environment:*
+    - Import of `langchain.mcp` raised one `LangChainBetaWarning`; `import fastmcp` worked with both packages installed
+    - After `async with` exited, a tool call still worked: in-process server (`Sunny in Pune`) and a stdio script
+    - Stdio server printing its pid: default transport → same pid inside and after the block, alive after it; `PythonStdioTransport(..., keep_alive=False)` → stopped after the block, a later call ran in a new pid that was also gone afterwards
+    - `MCPAdapter("weather_server.py")` and `MCPAdapter("not a url")` → `ValueError: MCP target ... is not a valid URL. To run a local MCP server over stdio, ask for it explicitly ...`
+    - Not run: the public docs server (host blocked here)
   - *12.3 Two packages, and why the class demo failed:* Checked: with `langchain` **1.4.7** installed through `langchain[mcp]`, `from langchain.mcp import MCPAdapter` worked. It printed a beta warning. The module exposes `MCPAdapter`, `MCPToolArtifact`, `as_langchain_tool` and an `elicitation` module
   - *12.3 Two packages, and why the class demo failed:* Checked: `MCPAdapter` has only **two public members: `list_tools` and `client`.** There is no `get_resources` or `get_prompt` (see 12.10)
   - *12.4 Connecting: the quick start:* Checked: `list_tools()` returned the three tools as `StructuredTool` objects, ready for `create_agent`
@@ -624,5 +665,6 @@ agent = create_agent(model, tools)          # tools still work after the context
 - Live-Class-2026, `Weekend 13 - 27th Sep/Langchain MCP.ipynb` and `langchain.py`
 - The installed `langchain.mcp` module's own documentation (adapter targets, elicitation behaviour)
 - Sections marked *checked* and 12.14 are from testing
+- LangChain docs: [MCP overview](https://docs.langchain.com/oss/python/langchain/mcp), re-read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `mcp/index.mdx` and its three snippets; docs.langchain.com was blocked from this environment), for the lifetime correction, "How long a STDIO server lives", the docs MCP server, the target list and the beta-warning note
 
 Previous: [Chapter 11, Runtime and human-in-the-loop](11-runtime-and-human-in-the-loop.md) · Next: [Chapter 13, Multi-agent systems and subagents](13-multi-agent-systems-and-subagents.md)
