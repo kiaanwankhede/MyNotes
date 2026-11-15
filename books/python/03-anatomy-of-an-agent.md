@@ -38,6 +38,25 @@ flowchart LR
 - The class's picture: a model on its own is **only a brain**. An agent is like an intern, a "digital human": **brain + memory + tools**
 - **LLM calls are stateless.** "Memory" is the whole history resent each time, so long chats get slow, costly and eventually forget the start
 - The orchestration code is not intelligent; it routes between the three parts
+- Class 04 draws the three levels in plain Python, with no API calls (Weekend 02, `Project 0/_01`):
+
+```python
+def ai_model(question: str) -> str:
+    """A single one-shot prediction. Remembers NOTHING between calls."""
+    return f"[Mock prediction for]: {question}"
+
+class Chatbot:
+    def __init__(self) -> None:
+        self.history: list[dict] = []
+
+    def ask(self, question: str) -> str:
+        self.history.append({"role": "user", "content": question})
+        answer = ai_model(question)
+        self.history.append({"role": "assistant", "content": answer})
+        return answer
+```
+
+- Its `Agent` adds a `tools` dict and picks a tool by **keyword match**, a placeholder the class replaces with the model choosing ([LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md), 2.5)
 
 ## 3.2 One interface, many providers
 
@@ -131,6 +150,37 @@ def ask(messages, provider="groq", model="llama-3.3-70b-versatile") -> str:
 - *Tested* against a local server that speaks the OpenAI API: `ask(...)` returned the reply and logged `tokens in=1 out=1` from `usage`
 - Groq, OpenRouter, many local servers: **OpenAI-compatible** (same SDK, different `base_url`)
 - **Anthropic differs:** `client.messages.create(...)`, system prompt as a separate `system=` argument, text at `response.content[0].text`, usage as `input_tokens`/`output_tokens` (*not tested here*)
+- Class 04's version (`Project 0/_02`) shows four providers side by side, Anthropic included:
+
+```python
+def ask_anthropic(question: str) -> str:
+    from anthropic import Anthropic
+    client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    response = client.messages.create(model="claude-3-5-haiku-20241022", max_tokens=200,
+                                      messages=[{"role": "user", "content": question}])
+    return response.content[0].text          # not .choices[0].message.content
+```
+
+> [!WARNING]
+> **That model ID no longer works.** *Web-checked:* Anthropic retired `claude-3-5-haiku-20241022` on the Claude API on 19 February 2026, and its migration guide points to `claude-haiku-5-5`. Model IDs belong in config, so a retirement is a one-line change.
+
+- `_02` also picks a provider **and fails loudly** when no key is set, unlike the Weekend 01 files, which fall back silently to the fake client:
+
+```python
+def ask_ai(question: str) -> str:
+    if os.environ.get("GROQ_API_KEY"):
+        return ask_groq(question)
+    if os.environ.get("OPENROUTER_API_KEY"):
+        return ask_openrouter(question)
+    if os.environ.get("OPENAI_API_KEY"):
+        return ask_openai(question)
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        return ask_anthropic(question)
+    raise RuntimeError("No API key found. Set one of GROQ_API_KEY, OPENROUTER_API_KEY, "
+                       "OPENAI_API_KEY, or ANTHROPIC_API_KEY in your .env file.")
+```
+
+- *Tested:* with no keys, `_02` raised that `RuntimeError`; with only `OPENAI_API_KEY` set, it answered through the OpenAI path
 - Wrap providers behind one function so switching model is config, not a rewrite (LangChain's `init_chat_model` does this for you)
 - For tests, a **fake client with the same shape** keeps code runnable without keys
 
@@ -183,6 +233,7 @@ def call_tool_safely(name: str, raw_arguments: dict):
 ```
 
 - **`_13`:** three tools: currency (real API), weather (sample data), calculator (Chapter 1's filtered `eval`)
+- The same build continues in Weekend 02's **Project Zero**, up to a real loop and a Streamlit app ([LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md), 2.5–2.7)
 - **`_14`:** names the memory out loud: *"Memory, in every agent you'll ever build, is a Python list"* of `{"role", "content"}` dicts
 - The agent still doesn't **decide** which tool to use; `use_tool(...)` is called by your code. The model choosing is the agentic loop ([LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md))
 - *Tested:* `use_tool("convert_currency", amount=100, from_currency="usd", to_currency="inr")` normalised the codes to `USD`/`INR` and converted; `amount=-5` with `"xyz"` was rejected with 2 validation errors before the tool ran; an unknown tool name returned `No tool named 'send_email'`
@@ -331,12 +382,15 @@ request = [{"role": "system", "content": sp}, *messages[-20:], {"role": "user", 
 - **3.2:** the `FakeAIClient` block printed the currency reply. `_7` with no key printed the stand-in for Groq and OpenRouter. The `ask()` wrapper ran against a local fake OpenAI server (`base_url` pointed at it) and logged token usage
 - **3.3:** `_11` to `_14` as written. Observed: no system message in `messages`; tool calls absent from the transcript; `use_tool("calculator", expression="__import__('os')")` raised `ValueError`; the fallback received only the last question; bad currency arguments rejected with 2 validation errors; an unknown tool returned a message
 - **3.3, the improved `Agent`:** run with a recording fake client over 25 turns: every request started with the system prompt, held at most 20 history messages plus the new question, and included the previous tool result
+- **Weekend 02 `Project 0/_01` and `_02`** (re-read 2026-11-15): `_01` as written; `_02` with no key (`RuntimeError`) and with an OpenAI key against a local fake server. The Anthropic model's retirement was web-checked on Anthropic's deprecations page
 - **Not run:** real Groq, OpenRouter, OpenAI or Anthropic calls
 
 ## Sources and further reading
 
 - Live-Class-2026, `Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/`: `_6_fake_ai_call.py`, `_7_ai_call_free_and_paid.py`, `_11_agent_class_ai_only.py` to `_14_agent_with_memory.py`, `.env.example`, `README.md` (re-read in full 2026-11-15)
 - Live-Class-2026, the Class 3–4 whiteboard `Class-3-4.pdf` (the brain, memory and tool figure in `images/`)
+- Live-Class-2026, `Weekend 02 - 4-5 Jul/04-05 .../Project 0/_01_ai_model_vs_chatbot_vs_agent.py` and `_02_calling_the_ai_paid_and_free.py`
+- Anthropic: [model deprecations](https://platform.claude.com/docs/en/about-claude/model-deprecations), [Haiku 5.5 migration guide](https://platform.claude.com/docs/en/models/haiku-5-5/migration-guide)
 - [Groq OpenAI compatibility](https://console.groq.com/docs/openai) and [OpenRouter quickstart](https://openrouter.ai/docs/quickstart) for the `base_url` values
 - Added by Claude: the `ask()` wrapper, the improved `Agent`, the production column, 3.4, interview questions 3–4
 

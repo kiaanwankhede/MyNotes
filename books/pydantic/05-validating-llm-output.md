@@ -61,6 +61,36 @@ StrictAmount.model_validate_json(llm_messy_output)
 | a JSON **list** instead of an object | `Model(**data)` raises `TypeError`, so catch it or use `model_validate_json` |
 
 - Non-model shapes: `TypeAdapter(list[int]).validate_python(["1", "2"])` → `[1, 2]`
+- Class 04's extraction (Weekend 02, `Project 0/_03`): ask for JSON in the prompt, strip a fence, validate
+
+```python
+def extract_weather_question(user_message: str) -> WeatherQuestion | str:
+    instruction = (
+        "Read the user's message and reply with ONLY a JSON object -- no other "
+        'text -- in this exact shape: {"city": "<city name>", '
+        '"wants_fahrenheit": <true or false>}. '
+        f"User's message: {user_message!r}"
+    )
+    raw_reply = ask_ai(instruction)
+    try:
+        cleaned = raw_reply.strip().removeprefix("```json").removesuffix("```").strip()
+        return WeatherQuestion(**json.loads(cleaned))
+    except (json.JSONDecodeError, ValidationError) as exc:
+        return f"Rejected: {exc}"          # a bad reply never silently continues
+```
+
+- *Tested* against a local fake model: a ```` ```json ```` fenced reply parsed; a plain ```` ``` ```` fence and a `Sure! {...}` reply were both **rejected** (`Expecting value: line 1 column 1`)
+- Slicing from the first `{` to the last `}` handles all three (*added by Claude*; tested on the same three replies):
+
+```python
+def extract_json_object(text: str) -> str:
+    start, end = text.find("{"), text.rfind("}")
+    if start == -1 or end < start:
+        raise ValueError("no JSON object in the reply")
+    return text[start:end + 1]
+
+WeatherQuestion.model_validate_json(extract_json_object(raw_reply))
+```
 
 ## 5.2 Validate tool arguments before the call
 
@@ -223,13 +253,14 @@ except ValidationError as e:
 - **5.1:** the reply table and `TypeAdapter` in the 2026 review (Pydantic 2.13); `_8` Part 6 as written on 2.14.3: the clean reply parsed, the messy one gave 2 errors
 - **5.2:** `_9` and `_10` as written, with `requests.get` replaced by a counting stand-in: 0 calls for bad arguments, 1 for good
 - **5.3:** `ask_validated` against a scripted model that failed once, in the 2026 review
+- **5.1, Weekend 02 `_03`:** run as written against a local fake OpenAI server returning a ```` ```json ```` fence, a plain fence and a chatty reply; `extract_json_object` parsed all three
 - **5.4:** `client.chat.completions.parse(...)` against a local fake OpenAI server returned the parsed object; `openai.lib._pydantic.to_strict_json_schema` listed every field as required with `additionalProperties: false`
 - **Not run:** a real provider call
 
 ## Sources and further reading
 
 - Live-Class-2026, `Weekend 01 .../_8_pydantic_with_ai.py` (Part 6), `_9_api_call_with_structure.py`, `_10_tool_with_ai_call.py` (re-read in full 2026-11-15)
-- Live-Class-2026, Weekend 02 `Project 0/_03_structuring_with_pydantic.py` and the Class 03–04 summaries (earlier batches)
+- Live-Class-2026, Weekend 02 `Project 0/_03_structuring_with_pydantic.py` (re-read and run 2026-11-15) and the Class 03–04 summaries (earlier batches)
 - [OpenAI structured outputs](https://platform.openai.com/docs/guides/structured-outputs)
 - Added by Claude: retry (5.3), the strict-schema section, the 🏭 and 🔒 boxes, 5.5
 
