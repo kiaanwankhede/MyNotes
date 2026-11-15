@@ -368,6 +368,23 @@ if __name__ == "__main__":            # demo: runs on `uv run file.py` only
 
 - The class also explains its file names: Python can't `import` a module whose name starts with a digit, so the files are `_0_...`, `_1_...` (a leading underscore sorts the same way and stays importable)
 
+## Questions from the class (class 02)
+
+| Question | Answer |
+|---|---|
+| Why learn raw-Python agents before LangChain? | Frameworks are mature and convenient (like WhatsApp versus SMS), but learn the fundamentals first |
+| Do frameworks cost more in tokens? | Yes. The mentor says he avoids agent frameworks in his own production work where he can, preferring simple API orchestration to control token cost and execution (his view) |
+| Can Pydantic structure messy LLM output? | Yes: define the shape as a model and extract exactly that ([Pydantic Ch 5](../pydantic/05-validating-llm-output.md)) |
+| Is GraphQL versus REST covered? | Not as a core topic; it may appear in a project (for example observability) |
+| Node.js or TypeScript instead of Python? | LangChain and LangGraph support TypeScript. The language is an implementation detail |
+| DevOps use cases for agents? | Think "mini interns": code review, infrastructure provisioning, repetitive ops tasks |
+| Is "vibe coding" enough to ship an app to the Play Store? | It gets you about 80 to 90 percent of the way. Have a developer review security and data handling before publishing |
+| Guardrails for sensitive data? | Covered later with dedicated guardrail tools ([Langchain Ch 8](../langchain/08-prebuilt-middleware-limits-fallback-and-pii.md)) |
+| When do deployment and AgentOps come? | After fundamentals and frameworks, about 1.5 to 2 months in, on a VPS or cloud |
+| How is 3.0 different from 2.0? | More project and AgentOps focus, with newer tools (Claude Code, latest LangChain) |
+
+*Source: `classes_transcription_summary/02`, Q&A. This answers the glossary term "vibe coding" ([LLM Ch 4](../llm/04-glossary.md)).*
+
 ## 2.10 Added by Claude, not from the sources
 
 - **Type-hint every public function.** Agent frameworks read the hints to build tool schemas

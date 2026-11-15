@@ -169,6 +169,20 @@ flowchart LR
 
 - For a developer, the same plan is the golden rules in miniature: one use case, measured, then shared
 
+## Questions from the class (class 00)
+
+| Question | Answer |
+|---|---|
+| Is the course useful across experience levels? | Yes: fundamentals for beginners, system-design depth for architects and seniors |
+| Do I need paid tools? | No. Free and open-source tools come first; paid ones are optional and only demoed |
+| How do projects work for busy professionals? | Concepts and mini-projects live, then full code and explanations, so you can run first and deepen later |
+| Will Azure and Microsoft tools be covered? | Yes: dedicated sessions on Azure, Bedrock, Vertex AI and Foundry |
+| I have zero Python. What now? | A Python playlist is shared as preparation |
+
+- Action items from the session: install the academy's mobile app, use its in-app **Messages** tab as the only communication channel, block the weekend slots, watch the Python playlist if new, post a first learning update after class 1
+
+*Source: `classes_transcription_summary/00`, Q&A and action items. Platform rules are left out as admin, not teaching.*
+
 ## 1.5 Added by Claude, not from the sources
 
 - **Pick the simplest AI that fits.** If the task is "predict a number", an LLM agent is usually the wrong tool

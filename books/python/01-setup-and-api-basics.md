@@ -326,6 +326,23 @@ for day_temp in forecast:                          # the class file uses if/else
 - *Tested:* the class file printed the four types, `72.5°F`, "No umbrella needed." and warm only for `23.1`
 - The class closes the file with: *"Every one of these types and decisions reappears, unchanged, inside the agent you build later."*
 
+## Questions from the class (class 01)
+
+| Question | Answer |
+|---|---|
+| Is the course right for non-tech or semi-tech people? | Doable, but expect roughly **double the class time** in self-effort. It assumes basic developer comfort |
+| GitHub Copilot or Claude Code? | The mentor personally finds Claude Code better for development (his view). GitHub Copilot is covered in the course |
+| Is there a tool to understand an unfamiliar codebase? | No magic tool. Feed the repo and docs to Claude or ChatGPT (for example through a GitHub MCP) and ask for a summary |
+| Help finding AI use cases at work? | A handbook mapping AI opportunities across industries is to be shared (see [LLM Ch 1](../llm/01-course-roadmap-and-prerequisites.md), 1.4) |
+| Should I code along in class? | No. Watch and understand live, then practise with the recording |
+| Do I need Python experience? | Helpful, not mandatory. Beginners should reinforce basics fast |
+| Will Microsoft Copilot Studio be covered? | Only if the mentor can get access |
+
+- After class: install Python 3.10+, UV and VS Code; Windows users install Git Bash or Windows Terminal; redo the commands from the recording
+- Left out: ground rules and two job referrals (not teaching content)
+
+*Source: `classes_transcription_summary/01`, Q&A and action items.*
+
 ## 1.6 Added by Claude, not from the sources
 
 - **Pin the Python version per project** (`.python-version`), not per machine; CI and teammates then match
