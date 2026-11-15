@@ -135,6 +135,83 @@ resilient_agent = create_agent(
 
 > **Correction.** The class transcript wrote `ModelFallbackMiddleware(model="...")`. That raises `TypeError: unexpected keyword argument 'model'`. The notebook's positional form is the one that works
 
+### Refusals: `ModelRefusalMiddleware`
+
+- **The problem:** providers report a refusal (a safety-policy "I can't help with that") as a **successful** response
+  - *Checked:* without this middleware the run ended normally, and the final answer was the `refusal` block itself
+- `ModelRefusalMiddleware` (needs `langchain>=1.4.9`) raises **`ModelRefusalError`** instead, so your app can react
+- It looks for a `refusal` content block (OpenAI, Anthropic and Gemini produce one), and for refusals that fail to parse under `response_format`
+  - It does **not** catch refusals the model writes as ordinary text
+
+```python
+from langchain.agents import create_agent
+from langchain.agents.middleware import (
+    ModelFallbackMiddleware, ModelRefusalMiddleware, ModelResponse, wrap_model_call,
+)
+from langchain.messages import AIMessage
+from langchain_core.exceptions import ModelRefusalError
+
+@wrap_model_call
+def reply_on_refusal(request, handler):
+    try:
+        return handler(request)
+    except ModelRefusalError:                          # every model refused
+        return ModelResponse(result=[AIMessage("I cannot help with that request.")])
+
+agent = create_agent(
+    model="claude-sonnet-5-5",
+    tools=[],
+    middleware=[
+        reply_on_refusal,                              # outermost: the last resort
+        ModelFallbackMiddleware("gpt-6.1-sol"),        # a refusal moves on to the next model
+        ModelRefusalMiddleware(),                      # innermost: turns a refusal into an error
+    ],
+)
+```
+
+- **Order matters:** list the refusal middleware **after** the fallback, so the fallback sees the error
+  - *Checked:* in that order a refusing primary fell back to the backup's answer. Reversed, `ModelRefusalError` reached the caller
+- **No fallback?** Catch `ModelRefusalError` around `invoke`. The thread stays usable
+  - *Checked:* the refused AI reply was **not** saved, but the user's message was. The next turn held two human messages in a row, then the answer
+- `ModelRetryMiddleware` does **not** retry refusals (checked: one model call). A retry on the same prompt rarely changes the answer anyway
+- **Streaming:** text the model sends before it refuses can reach the client before the error is raised
+- **Other handling** (save the refusal in state, or `interrupt()` to ask a person): skip this middleware and check for `refusal` blocks in your own middleware ([Chapter 10](10-shell-tools-and-custom-middleware.md))
+- Refusals outside agents (`with_structured_output`): [Chapter 4](04-structured-output.md), 4.9
+
+### Choosing the model per run: `ModelRouterMiddleware` (beta)
+
+- Fallback only acts when a model **fails**. A router **picks** a model up front, by the task
+- Before the run, a **decision model** reads the latest human message and picks one of your named `ModelChoice` entries
+  - That model then serves **every** model call in the run. The pick is saved in state as `model_route`
+- Beta: needs `langchain>=1.5.0`, raises a `LangChainBetaWarning`, and the API may change
+
+```python
+from langchain.agents import create_agent
+from langchain.agents.middleware import ModelChoice, ModelRouterMiddleware
+from langchain_typesafe import TypeSafeClassifier      # the docs' decision model
+
+router = ModelRouterMiddleware(
+    classifier=TypeSafeClassifier(),
+    choices={
+        "fast": ModelChoice(
+            model="openai:gpt-6-luna",
+            criteria="Direct lookups, extraction, and localized changes with explicit targets.",
+        ),
+        "powerful": ModelChoice(
+            model="openai:gpt-6.1-sol",
+            criteria="Architecture, novel root-cause reasoning, and high-stakes decisions.",
+        ),
+    },
+    instructions="Choose the least costly model that can complete the task safely.",
+)
+agent = create_agent("openai:gpt-6-luna", middleware=[router])
+```
+
+- **What a decision model is:** a `BaseDecisionModel` (`langchain_core.decisions`) that answers typed questions with probabilities: a yes/no question, a choice between labels, a score
+  - The docs use `TypeSafeClassifier` from `langchain_typesafe` (not installed here). `langchain-openai` ships an `OpenAIClassifier`. Any subclass works
+- *Checked with a scripted decision model:* it picked `powerful`, only the `powerful` model was called, and `result["model_route"].choice` was `"powerful"`
+- Auto mode uses the same kind of decision model to block risky tool calls ([Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md), 9.1)
+
 ## 8.4 `PIIMiddleware`
 
 **PII** (personally identifiable information): date of birth, phone number, email, government ID numbers, passwords. It generally should **not reach the model** at all.
@@ -201,8 +278,15 @@ custom_pii_agent = create_agent(
 ```
 
 > **Correction.** The class transcript passed a compiled pattern, `detector=re.compile(r"\b\d{12}\b")`. That raises `TypeError: 're.Pattern' object is not callable`. Pass the pattern as a **string**, or write a function that returns a list of matches
+>
+> **Docs vs package.**
+> - The docs' PII section also shows a compiled pattern ("Method 2: Compiled regex pattern")
+> - On `langchain` 1.5.0 the middleware is **created** without complaint, but the **first run** raises that same `TypeError` (checked). The correction above still holds
 
 The function detector returns a list of dicts with `text`, `start` and `end`.
+
+- The docs type this as **`PIIMatch`** (`from langchain.agents.middleware import PIIMatch`) with the keys `type`, `value`, `start` and `end`
+- *Checked on 1.5.0:* a detector returning `value` and one returning `text` both redacted `123-45-6789`. Follow `PIIMatch`
 
 Class 13 used `strategy="hash"` for the booking codes. Checked: `BK1044` becomes `<booking_code_hash:94be15f9>`.
 
@@ -214,6 +298,8 @@ Three more switches (from the library signature, not explained in class 12):
   - That covers text deltas, tool-call args, tool outputs and state snapshots, before readers of `stream_events(version="v3")` see them ([Chapter 6](06-agents-and-memory.md), 6.8)
   - Why it matters: `after_model` redaction happens after the model finishes, but streamed tokens reach the reader **while** it is still writing
   - *Checked on 1.5.0:* with `PIIMiddleware("email", strategy="redact", apply_to_output=True)`, the streamed deltas read `Contact me at [REDACTED_EMAIL] today`. Without the flag the raw address streamed out
+  - **How it catches a match split across deltas** (docs): it holds back the last **128 characters** of each text block, tool-call argument and tool output, then checks the held text plus the new delta
+  - So keep custom detector matches **at most 128 characters**: the start of a longer match can go out before the rest arrives
 - `apply_to_tool_results` (default `False`): clean what tools return
 
 > [!IMPORTANT]
@@ -364,6 +450,24 @@ agent = create_agent(
 
 </details>
 
+<details class="qa"><summary>7. The model refuses a request. What does your agent do by default, and how do you change that?</summary>
+
+- By default nothing special: the refusal comes back as a normal, "successful" final answer
+- `ModelRefusalMiddleware` turns it into `ModelRefusalError`; list it **after** `ModelFallbackMiddleware` so the next model gets a try
+- An outer `wrap_model_call` can catch the error when every model refuses and reply politely
+- *Stronger answer:* retries don't help (`ModelRetryMiddleware` skips refusals); log refusals as a metric; and remember text-only refusals and tokens already streamed slip past it
+
+</details>
+
+<details class="qa"><summary>8. Fallback, refusal handling and a model router: how do they differ?</summary>
+
+- Fallback reacts to **errors**: the next model gets the same request
+- Refusal handling reacts to a **refusal** block, and can feed into the fallback
+- A router **chooses before** the run, from the request, using a decision model (beta)
+- *Stronger answer:* stack them deliberately: router to pick the cheapest capable model, fallback for outages, refusal last, and log `model_route` to see the cost split
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"A health-insurance chatbot must never send member identifiers to the model provider."* Cover PII detection and strategy, inputs vs outputs vs tool results, logging, and a fallback that respects the same rule.
 
@@ -433,6 +537,10 @@ middleware = [
 - The middlewares for to-do lists, tool selection, tool errors, tool retry and tool emulation are in [Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md)
 - **Details by section** (moved here from the ✅ markers):
   - *8.4 `apply_to_output` on the stream (2026-11-15):* `langchain` 1.5.0, a scripted streaming model replying `Contact me at bob@example.com today`. Deltas read through `stream.interleave("messages", "values")`: with the flag `Contact me at [REDACTED_EMAIL] today` (final state the same), without it the raw address. Tool-call args, tool outputs and snapshots were not checked separately
+  - *Built-in middleware page merge (2026-11-15), `langchain` 1.5.0, `langchain-core` 1.8.0, scripted models (no keys, no network):*
+    - Refusals: a fake model replied with `[{'type': 'refusal', 'refusal': "I can't help with that."}]`. Without the middleware that was the final answer. With it: `ModelRefusalError` ("Model refused to produce the requested output: ..."); the thread then held only the user message, and the next turn worked. `[fallback, refusal]` gave the backup's answer; `[refusal, fallback]` raised. `reply_on_refusal` + fallback + refusal, both models refusing: `I cannot help with that request.`. `ModelRetryMiddleware(max_retries=2)` + refusal: 1 model call
+    - Router: a scripted `BaseDecisionModel` subclass answering the `model_route` choice with `powerful`; a spy middleware saw only the `powerful` model; `result["model_route"].choice` was `powerful`; `LangChainBetaWarning` on construction. The docs' `TypeSafeClassifier` was not installed, so the docs' snippet itself was not run
+    - PII: `re.compile(...)` detector built fine and raised `TypeError: 're.Pattern' object is not callable` on the first `invoke`; function detectors returning `value` or `text` both redacted `123-45-6789`. The 128-character hold-back is a docs statement, not tested
   - *`ToolCallLimitMiddleware`: the exit behaviours and the error:* Checked* with `tool_name="t1"`, `run_limit=1` and a model that asked twice: `continue` gave a final model answer; `end` ended with the message `'t1' tool call limit reached: run limit exceeded (2/1 calls).`; `error` raised `ToolCallLimitExceededError` with the same text
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran all four middleware in one agent; the email address was redacted from the stored input; the call limits and the model fallback were constructed but not triggered. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
@@ -444,6 +552,7 @@ middleware = [
 - Live-Class-2026, `MIddleware.ipynb` (cells 57 to 97), the whiteboard `Agent-Middleware-Architecture.pdf` and the folder README in `Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/`
 - Live-Class-2026, `Weekend 07 - 8-9 Aug/README.md` (the other files in that folder are copies of Weekend 06 files)
 - Section 8.9 and the corrections in 8.3 and 8.4 are from testing, not from the class sources
+- LangChain docs: [Built-in middleware](https://docs.langchain.com/oss/python/langchain/middleware/built-in), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/middleware/built-in.mdx`; docs.langchain.com was blocked from this environment). Used for "Refusals" and "Choosing the model per run" in 8.3 and the PII additions in 8.4
 - LangChain docs: [Event streaming](https://docs.langchain.com/oss/python/langchain/event-streaming), "Register transformers on middleware" (read 2026-11-15 from its source, commit `04d4d4a`), for `apply_to_output` on the live stream in 8.4
 
 Previous: [Chapter 7, Middleware basics](07-middleware.md) · Next: [Chapter 9, Guardrails, to-do lists and tool resilience](09-guardrails-to-do-lists-and-tool-resilience.md)

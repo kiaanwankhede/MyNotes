@@ -25,6 +25,8 @@
 - **What happens when it breaks:** `ModelFallbackMiddleware`, `ToolErrorMiddleware`, `ToolRetryMiddleware`
 - **How it plans:** `TodoListMiddleware`
 - **How you test it safely:** `LLMToolEmulator`
+- **Which risky calls may run at all:** `AutoModeMiddleware` (beta, below)
+- **When the model refuses:** `ModelRefusalMiddleware` ([Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md), 8.3)
 
 The class opened with real industry mapping: fraud-detection hooks in fintech, PII redaction as a legal requirement in healthcare, refund approval gates in customer support, audit logging in internal tools.
 
@@ -53,6 +55,39 @@ class ContentFilterMiddleware(AgentMiddleware):
 - Deterministic guardrails are fast and predictable but catch only what you list. Model-based ones are broader but cost a model call and can be wrong ([8.5](08-prebuilt-middleware-limits-fallback-and-pii.md))
 
 *Source: `langchain-ai/docs`, `src/oss/langchain/guardrails.mdx` (Custom guardrails).*
+
+### Auto mode: a model that blocks risky tool calls (beta)
+
+- Before each call to a tool **you list**, a decision model estimates the probability that the call is risky or not authorized by the user
+  - At **0.5 or higher** the call does not run; the model gets an error `ToolMessage` instead
+  - Tools you do not list run without a check
+- It **blocks**; it does not ask anyone. For a person to approve, use `HumanInTheLoopMiddleware`
+- Beta: needs `langchain>=1.5.0`; the API may change
+
+```python
+from langchain.agents import create_agent
+from langchain.agents.middleware import AutoModeMiddleware
+from langchain.tools import tool
+from langchain_typesafe import TypeSafeClassifier      # the docs' decision model
+
+@tool
+def delete_all_backups() -> str:
+    """Delete every backup. This action cannot be undone."""
+    return "Backups deleted."
+
+agent = create_agent(
+    "openai:gpt-6.1-sol",
+    tools=[delete_all_backups],
+    middleware=[AutoModeMiddleware(tools=[delete_all_backups], classifier=TypeSafeClassifier())],
+)
+```
+
+- The default question tells the classifier to treat tool descriptions and arguments as **data**, and that only explicit user messages authorize an action
+  - So text injected through a tool result should not count as permission (`instructions=` can replace this question)
+- *Checked with a scripted decision model:*
+  - At risk `0.7` the listed tool returned ``The tool call `delete_all_backups` was blocked because it was classified as risky (probability: 0.70). The tool was not executed.`` (status `error`)
+  - An unlisted tool in the same step ran. At `0.2` both ran
+- Decision models: [Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md), 8.3 (model router)
 
 ### A guardrail for indirect prompt injection (*added by Claude*)
 
@@ -192,6 +227,36 @@ selector_agent = create_agent(
 - Models are fuzzy and can be wrong. Properly written code is not
 - Use the selector only for genuinely **query-dependent** relevance
 
+### Provider tool search: let the provider find the tool
+
+- A different way to cut the tool list: the tool schemas stay **with the provider**, and the model searches them on demand (server-side tool search)
+- `ProviderToolSearchMiddleware` marks which tools are **deferred**. They are hidden from the model until its search surfaces them
+- Only models with server-side tool search: Anthropic (Claude Sonnet 4+, Opus 4+, Haiku 4.5+) and OpenAI (gpt-5.5+). Others raise `ValueError`
+
+```python
+from langchain.agents import create_agent
+from langchain.agents.middleware import ProviderToolSearchMiddleware
+from langchain.tools import tool
+
+@tool(extras={"defer_loading": True})        # deferred by itself, no need to list it
+def send_email(to: str) -> str:
+    """Send an email."""
+    return "sent"
+
+agent = create_agent(
+    model="anthropic:claude-opus-4-8",
+    tools=[get_weather, lookup_order, send_email],
+    middleware=[ProviderToolSearchMiddleware(searchable_tools=["lookup_order"])],
+)
+# get_weather: sent up front. lookup_order and send_email: found by the model's search
+```
+
+- Without `searchable_tools`, only tools marked `defer_loading` are deferred
+- **Selector vs provider search:** the selector spends **your** extra model call to choose; provider search lets the provider do it inside the main call, but ties you to a provider
+- *Checked:* the `extras` flag is stored on the tool
+  - On a non-supporting (fake) model the run raised `ValueError: ProviderToolSearchMiddleware requires a provider with server-side tool search, but got 'fake'; supported providers: anthropic, openai`
+  - A real provider search was not run
+
 ## 9.4 `ToolErrorMiddleware`
 
 Tools fail: a malformed argument, a missing record, a permission problem.
@@ -225,6 +290,22 @@ Details:
 - **It does not retry.** Retrying is the next middleware
 - **Why handle it here instead of fixing the tool?** Tools are often third-party or shared, so you cannot always change them. Handling failure at the middleware level is the more general solution
 
+**More options** (docs; needs `langchain>=1.3.14`):
+
+- **`tools=["search_tool"]`:** handle errors for these tools only. *Checked:* an unlisted tool's `ValueError` still stopped the run
+- **Return content blocks** instead of a string: `on_error` may return a list such as `[{"type": "text", "text": "..."}]`, which becomes the tool message's content (checked)
+- **`aon_error`:** an async handler for `ainvoke` / `astream`. If you pass only `aon_error`, a sync `invoke` fails
+  - *Checked:* `RuntimeError: ToolErrorMiddleware has no sync on_error; run async (ainvoke/astream) or provide on_error`. Pass both for code that runs both ways
+
+```python
+async def aon_error(exc: Exception, request) -> str | None:
+    if isinstance(exc, ConnectionError):
+        return f"Tool `{request.tool_call['name']}` encountered a connection error."
+    return None
+
+middleware = [ToolErrorMiddleware(on_error=on_error, aon_error=aon_error, tools=["search_tool"])]
+```
+
 ## 9.5 `ToolRetryMiddleware`
 
 ```python
@@ -255,6 +336,22 @@ resilient_tool_agent = create_agent(
 - **`max_delay`** caps how long any single wait can grow
 - **`jitter`** adds small randomness so many clients do not retry in lockstep
 - **`on_failure="continue"`:** after the last failure the error comes back as a **tool message**. **`"error"`** re-raises the exception instead
+  - A **function** works too: it gets the exception and returns the tool message text. *Checked:* `on_failure=lambda e: f"gave up: {e}"` gave `gave up: db down` after 3 runs
+  - The old values `"return_message"` and `"raise"` still work but raise a `DeprecationWarning` (checked). Use `"continue"` and `"error"`
+- **`tools=["api_tool"]`:** retry only these tools (checked: only the listed tool was retried)
+- **`retry_on`:** which errors to retry. A tuple of exception types, or a function that returns `True` to retry
+
+```python
+ToolRetryMiddleware(max_retries=3, tools=["api_tool"], retry_on=(ConnectionError, TimeoutError))
+ToolRetryMiddleware(retry_on=lambda e: getattr(e, "status_code", None) in (429, 503))
+```
+
+  - The default (since `langchain` 1.3.16) retries model errors marked retryable and any error it cannot classify, but not model errors marked non-retryable ([Chapter 3](03-models-messages-and-parameters.md), 3.9)
+
+> [!WARNING]
+> **An error `retry_on` rejects is not caught.** `on_failure` only applies once retries are used up.
+> - *Checked:* with `retry_on` returning `False`, the tool ran **once** and its `ValueError` stopped the run. No "continue" message
+> - To turn those errors into messages too, put `ToolErrorMiddleware` outside it (9.6)
 
 **The backoff formula**
 
@@ -361,6 +458,10 @@ mw = ModelRetryMiddleware(max_retries=2, initial_delay=1.0, backoff_factor=2.0, 
 - Defaults: `max_retries=2`, `initial_delay=1.0`, `backoff_factor=2.0`, `max_delay=60.0`, `jitter=True`
 - ✅ *Verified (details in "How this chapter was checked").*
 - Put model retry and model fallback ([Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md)) in a deliberate order, as with the tool pair in 9.6
+- Same options as the tool version (9.5): `retry_on` (tuple or function), `on_failure` (`"continue"`, `"error"` or a function), `backoff_factor=0.0` for a constant delay
+- **`on_failure="continue"` here returns an `AIMessage`**, not a tool message, so the run ends with that text as the answer
+  - *Checked:* a model that always raised a 503-style error, with `retry_on=lambda e: getattr(e, "status_code", None) in (429, 503)`, was called 3 times. The final message was `Model call failed after 3 attempts with Boom: service unavailable`
+- It does not retry refusals ([Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md), 8.3)
 
 **`ContextEditingMiddleware` with `ClearToolUsesEdit`:** clears **old tool results** when the context grows, to save tokens.
 
@@ -372,13 +473,110 @@ mw = ContextEditingMiddleware(edits=[ClearToolUsesEdit(trigger=100000, keep=3, p
 - Defaults: `trigger=100000` tokens, `keep=3` most recent tool results, placeholder `[cleared]`. Options include `clear_at_least`, `clear_tool_inputs` and `exclude_tools`
 - ✅ *Verified (details in "How this chapter was checked").*
 - **Against summarisation:** this edits tool output **in place** without writing a summary. It is cheaper, and loses the old results
+- `token_count_method`: `"approximate"` (default) or `"model"` (ask the model's own counter)
 
 **`FilesystemFileSearchMiddleware(root_path=...)`:** gives the agent search tools over a folder.
 
 - ✅ *Verified (details in "How this chapter was checked").*
 - Defaults: uses `ripgrep` if available, skips files over 10 MB. **Limit `root_path` to the folder you intend to expose**
+- It adds two tools:
+  - **`glob_search(pattern, path)`:** file names by pattern (`**/*.py`), newest first
+  - **`grep_search(pattern, path, include, output_mode)`:** regex over contents; `output_mode` is `files_with_matches`, `content` or `count`
+  - *Checked:* both found `/src/a.py` in a test folder. Paths come back relative to `root_path`, starting with `/`
 
-**Also on the diagram, not found in the installed version:** a **subagent** middleware and **rubric grading (beta)**, which applies model-as-judge scoring so an agent iterates until a rubric is met. They were only a line each in the class table. `ProviderToolSearchMiddleware` (9.3) and `ShellToolMiddleware` (Chapter 10) are covered elsewhere.
+**Also on the diagram:** a **subagent** middleware and **rubric grading (beta)**, which applies model-as-judge scoring so an agent iterates until a rubric is met. They were only a line each in the class table. `ProviderToolSearchMiddleware` (9.3) and `ShellToolMiddleware` (Chapter 10) are covered elsewhere.
+
+- *Correction:* both exist, in the `deepagents` package (below). An earlier version of this note said they were not installed
+
+### Deep Agents middleware inside a plain `create_agent`
+
+- Three of the docs' "built-in" middlewares live in `deepagents` (`uv add deepagents`). `create_deep_agent` already includes them; with `create_deep_agent` you add your own middleware through its customization API instead
+- [Chapter 6](06-agents-and-memory.md), 6.1 shows them in a full stack. The options below are from the Built-in middleware page
+
+**`FilesystemMiddleware`: a file system for context and memory**
+
+- Tools for the agent's own scratch files: `ls`, `read_file`, `write_file`, `edit_file` (plus `glob`, `grep` and others in this version)
+- Why: long tool results (web search, RAG) fill the context. The agent can park them in a file and read back only what it needs
+- `tools=[...]` is an **allowlist**. *Checked:* `tools=["read_file", "ls", "glob", "grep"]` exposed exactly those four
+- **Short-term vs long-term:** files live in the graph state by default (this thread only). Route a path prefix to the store to keep it across threads
+
+```python
+from langchain.agents import create_agent
+from deepagents.middleware import FilesystemMiddleware
+from deepagents.backends import CompositeBackend, StateBackend, StoreBackend
+from langgraph.store.memory import InMemoryStore
+
+agent = create_agent(
+    model="claude-sonnet-4-6",
+    store=InMemoryStore(),
+    middleware=[FilesystemMiddleware(
+        backend=CompositeBackend(
+            default=StateBackend(),                                          # thread-only files
+            routes={"/memories/": StoreBackend(namespace=lambda rt: ("filesystem",))},   # kept across threads
+        ),
+    )],
+)
+```
+
+> [!WARNING]
+> **Docs vs package: `StoreBackend()` needs a `namespace`.**
+> - The docs write `StoreBackend()` with no arguments. On `deepagents` 0.7.38 that raises `TypeError: StoreBackend.__init__() missing 1 required keyword-only argument: 'namespace'`
+> - `namespace` is a function of the runtime that returns a tuple. Use the user's id in it (for example from `rt.server_info.user.identity`, or your context) so users don't share files
+> - *Checked with the namespace added:* `/memories/prefs.md` written in one thread was read back in a new thread; `/scratch.md` was not found there
+
+**`SubAgentMiddleware`: a `task` tool that hands work to subagents**
+
+- Keeps the main agent's context clean while a subagent goes deep ([Chapter 13](13-multi-agent-systems-and-subagents.md))
+- Two ways to define one:
+
+```python
+from deepagents import CompiledSubAgent
+from deepagents.backends import StateBackend
+from deepagents.middleware.subagents import SubAgentMiddleware
+
+weather_spec = {                                   # declarative: name, description, model, tools
+    "name": "weather",
+    "description": "This subagent can get weather in cities.",
+    "system_prompt": "Use the get_weather tool to get the weather in a city.",
+    "tools": [get_weather],
+    "model": "gpt-6.1-sol",
+    "middleware": [],                              # optional, e.g. to add a shared state key
+}
+weather_graph_spec = CompiledSubAgent(             # or any compiled LangGraph graph
+    name="weather", description="This subagent can get weather in cities.", runnable=weather_graph,
+)
+agent = create_agent(model, middleware=[SubAgentMiddleware(backend=StateBackend(), subagents=[weather_spec])])
+```
+
+- It exposes **only** the subagents you list. `create_deep_agent` also adds a default `general-purpose` one
+  - *Checked:* both forms answered through `task`. Asking for `general-purpose` returned "We cannot invoke subagent general-purpose because it does not exist..."
+
+**`RubricMiddleware` (needs `deepagents>=0.6.5`): grade, revise, repeat**
+
+- You state what "done" looks like as a **rubric**. A grader model checks the answer; if a criterion fails, the agent revises, up to `max_iterations`
+- It does nothing unless the input has a `rubric` key, so it is safe to leave in the stack
+
+```python
+from deepagents import RubricMiddleware
+
+agent = create_agent(model, tools=[], checkpointer=InMemorySaver(),
+                     middleware=[RubricMiddleware(model="anthropic:claude-haiku-4-5", max_iterations=3)])
+agent.invoke({"messages": [{"role": "user", "content": "Summarise sales"}],
+              "rubric": "Cite a source for every statistic."}, config)
+agent.get_state(config).values["_rubric_status"]   # satisfied, needs_revision, failed, max_iterations_reached, grader_error
+```
+
+- **If it gives up, the answer is not changed.** The last reply is whatever the model wrote; check `_rubric_status`, the `on_evaluation` callback, or the `rubric_evaluation_*` stream events
+- *Checked with scripted models:* first draft "Sales grew 40%." → grader `needs_revision` ("Add a source for the 40% figure") → second draft with a source → `satisfied`
+  - The grader's feedback reached the agent as a **human** message in the thread ("A grader reviewed your work against the rubric and asked for revisions...")
+- Full options: the Deep Agents "Grading rubrics" docs page, not read for these notes
+
+### Provider-specific middleware
+
+- Listed on the same docs page, documented on each provider's page (not read for these notes):
+  - **Anthropic:** prompt caching, bash tool, text editor, memory, file search
+  - **AWS:** prompt caching for Bedrock models
+  - **OpenAI:** content moderation
 
 ## 9.10 Questions from the class
 
@@ -456,6 +654,24 @@ mw = ContextEditingMiddleware(edits=[ClearToolUsesEdit(trigger=100000, keep=3, p
 
 </details>
 
+<details class="qa"><summary>9. Human-in-the-loop or auto mode for a destructive tool?</summary>
+
+- HITL pauses and a **person** decides; it needs a checkpointer and someone available
+- Auto mode lets a **decision model** block the call when the risk is 0.5 or more; nobody is asked (beta)
+- Auto mode only checks the tools you list, and treats tool text as data, so injected text should not authorize an action
+- *Stronger answer:* use auto mode to block the obvious cases cheaply, HITL for the irreversible ones, and log every block, since a classifier can be wrong both ways
+
+</details>
+
+<details class="qa"><summary>10. Your retry middleware is set to "continue", yet one tool error still crashed the run. Why?</summary>
+
+- `retry_on` rejected that error type, and a rejected error is re-raised at once
+- `on_failure` only applies after retries run out
+- Or the tool was not in the middleware's `tools=` list
+- *Stronger answer:* put `ToolErrorMiddleware` outside the retry middleware to turn every remaining exception into a safe message (9.6)
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"Your agent calls a flaky third-party weather API that times out 5% of the time."* Cover retries, backoff, a cache (Ch1), what the model sees when it finally fails, and a limit on total attempts.
 
@@ -520,7 +736,7 @@ middleware = [
 
 ## How this chapter was checked
 
-- Run offline for 9.9 on `langchain` 1.4.7: `ModelRetryMiddleware` (success after two failures, and both `on_failure` settings after three), `ContextEditingMiddleware` with `ClearToolUsesEdit` (older tool results replaced by the placeholder), and the two tools of `FilesystemFileSearchMiddleware`. The subagent and rubric-grading entries from the class diagram were **not** found in the installed version and were not run
+- Run offline for 9.9 on `langchain` 1.4.7: `ModelRetryMiddleware` (success after two failures, and both `on_failure` settings after three), `ContextEditingMiddleware` with `ClearToolUsesEdit` (older tool results replaced by the placeholder), and the two tools of `FilesystemFileSearchMiddleware`. The subagent and rubric-grading entries from the class diagram were **not** found in the installed version and were not run (they live in `deepagents`; run on 2026-11-15, below)
 - Run offline with a stand-in model on `langchain` 1.4.7:
   - to-do list: the `write_todos` tool, the `todos` state key, persistence on a second turn with a checkpointer
   - tool selector: a selector returning three names with `max_tools=2` (capped to two, plus the always-included tool), the refund query, an invalid name, a missing `always_include` name, and the order with `show_tools`
@@ -529,8 +745,15 @@ middleware = [
   - error and retry in both orders
   - tool emulator: the real function never ran, and default emulation of all tools
 - **Not run against a live model:** real selector quality, real emulated answers, real service timing. Class output was read from the notebook (cells 98 to 145)
-- Not covered here: custom middleware (class 14), the three retry mechanisms and `ProviderToolSearchMiddleware` (assignment questions only)
+- Not covered here: custom middleware (class 14) and the three retry mechanisms (assignment questions only). `ProviderToolSearchMiddleware` is now in 9.3, from the docs
 - **Details by section** (moved here from the ✅ markers):
+  - *Built-in middleware page merge (2026-11-15), `langchain` 1.5.0, `langchain-core` 1.8.0, `deepagents` 0.7.38, scripted models and a scripted `BaseDecisionModel` subclass (no keys, no network):*
+    - 9.1 auto mode: risk 0.7 blocked the listed `delete_all_backups` (status `error`, the message quoted) and ran the unlisted `list_backups`; risk 0.2 ran both. The docs' `TypeSafeClassifier` was not installed, so that snippet was not run as written
+    - 9.3 provider tool search: `@tool(extras={"defer_loading": True})` stored the flag; a fake model raised the quoted `ValueError`. No real provider search
+    - 9.4: `tools=["search_tool"]` handled `search_tool` and let `database_tool`'s `ValueError` through; a list of blocks became the content; `aon_error` worked under `ainvoke` and raised the quoted `RuntimeError` under `invoke`
+    - 9.5: `tools=["database_tool"]` + `on_failure=lambda e: f"gave up: {e}"` → 3 runs, `gave up: db down`; a `retry_on` function returning `False` → 1 run, `ValueError` raised; `"return_message"` and `"raise"` gave `DeprecationWarning`s
+    - 9.9: `ModelRetryMiddleware` with a 429/503 `retry_on` and a model always raising a 503 error → 3 calls, final `AIMessage` quoted; `token_count_method="model"` accepted; `glob_search` and `grep_search` found `/src/a.py`
+    - Deep Agents: the `FilesystemMiddleware` allowlist; `CompositeBackend` with `StoreBackend(namespace=...)` across two threads (and the `TypeError` without `namespace`); `SubAgentMiddleware` with a dict spec and with `CompiledSubAgent`; `RubricMiddleware` with a scripted agent and grader (`needs_revision` then `satisfied`, `_rubric_status` `satisfied`); with no `rubric` the middleware did nothing
   - *Custom guardrails: before and after the agent:* Checked: a banned word ended the run with **0 model calls** and the history `human, ai`. A clean request made 1 model call. The decorator form `@before_agent(can_jump_to=["end"])` behaved the same
   - *Custom guardrails: before and after the agent:* Checked: editing the last message in place and returning `None` did change the final answer. That works by side effect. A clearer way, also *checked*: return `{"messages": [AIMessage(content="I cannot provide that response.", id=last.id)]}`. The same `id` **replaces** the message, leaving one AI message
   - *9.9 More prebuilt middleware from the class diagram:* Checked with a model that raised `ConnectionError`: it failed twice and then answered, so **3 attempts** in total. With three failures, `on_failure="continue"` (the default) ended the run with an AI message "Model call failed after 3 attempts with ConnectionError..." and `on_failure="error"` **raised** the error
@@ -549,5 +772,6 @@ middleware = [
 - The guardrail map (9.1), the order rule (9.6) and section 9.11 are from testing, not from the class sources
 - Live-Class-2026, `Weekend 07 - 8-9 Aug/Agent-Middleware-Architecture.png` (the table of prebuilt middleware used in 9.9) and the `.excalidraw` versions of the diagram
 - Section 9.9 is checked by testing against `langchain` 1.4.7
+- LangChain docs: [Built-in middleware](https://docs.langchain.com/oss/python/langchain/middleware/built-in), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `built-in.mdx` plus the subagent and rubric snippet files; docs.langchain.com was blocked from this environment). Used for auto mode (9.1), provider tool search (9.3), the 9.4 and 9.5 options, and the 9.9 additions
 
 Previous: [Chapter 8, Prebuilt middleware](08-prebuilt-middleware-limits-fallback-and-pii.md) · Next: [Chapter 10, Shell tools and custom middleware](10-shell-tools-and-custom-middleware.md)

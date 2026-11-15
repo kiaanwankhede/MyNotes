@@ -63,6 +63,7 @@ cinebot_shell_agent = create_agent(
 
 - `startup_commands` and `shutdown_commands`: run when the shell opens and closes. *Checked:* `startup_commands=["export GREETING=from_startup"]` made `$GREETING` available to the agent's commands
 - `tool_name` (default `"shell"`), `env`, `shell_command`, `redaction_rules`
+  - **Redaction runs after the command** (docs). It cleans what the model sees, but on the host policy it does **not** stop a command from sending a secret somewhere else
 - Policy limits: `command_timeout` (default **30 seconds**), `max_output_lines` (default **100**). *Checked:* a `sleep 3` with `command_timeout=1.0` came back as `Error: Command timed out after 1.0 seconds.` and the shell restarted
 - `DockerExecutionPolicy`: image `python:3.12-alpine3.19` by default, and **network off** by default
 
@@ -598,6 +599,9 @@ Not in the course material. Established practice, but check current docs. Items 
 - **Prompt injection becomes command injection.** If an agent reads untrusted text (a web page, an email) and has a shell, that text can try to make it run commands. Do not combine the two without isolation
 - **Use isolation for anything untrusted.** `DockerExecutionPolicy` runs in a container with the network off by default. Mount only what the agent needs
 - **Put a human in the loop on the shell tool.** *Checked:* `HumanInTheLoopMiddleware(interrupt_on={"shell": ...})` paused the run before the command ran. The file did not exist before approval or after a reject ([Chapter 7](07-middleware.md), 7.6)
+  - **But the session does not survive the pause** (docs: persistent shell sessions do not yet work with interrupts)
+  - *Checked on 1.5.0:* after an approved `export GREETING=hi`, the next approved command printed an empty `$GREETING`. Files on disk survived; shell state (variables, `cd`) did not. Without HITL the variable carried over
+  - So with HITL, make each command self-contained (`cd /app && VAR=x ./run.sh`) and keep state in files
 - **Mind the limits.** Output is capped (100 lines by default) and commands time out (30 seconds by default). Long jobs need a different approach
 
 **Custom middleware**
@@ -659,6 +663,7 @@ agent = create_agent(model, tools, middleware=[log_calls, time_tools, Guard()])
 - **Not run:** a real model choosing shell commands, a Docker or Codex sandbox, an SSH session, or a Colab environment. Those are class statements
 - Class 14 has no code folder in the repo. The `custom_middleware.py` file the transcript mentions is not there
 - **Details by section** (moved here from the ✅ markers):
+  - *Shell tool with HITL (2026-11-15):* `langchain` 1.5.0, `HostExecutionPolicy`, scripted model. With `HumanInTheLoopMiddleware(interrupt_on={"shell": True})` and `InMemorySaver`: command 1 `export GREETING=hi; echo step1 > a.txt; echo $GREETING` → `hi`; command 2 `echo $GREETING; cat a.txt` → an empty line then `step1`. The same two commands without HITL → `hi` then `hi\nstep1`
   - *10.5 `wrap_model_call`: gating and dynamic model selection:* Checked: with two stand-in models, the basic one answered up to 10 messages of history and the advanced one answered from 12
   - *10.7 Extending a prebuilt middleware:* Checked: a subclass whose `before_model` just returns `None` **left the email unredacted**
   - *10.7 Extending a prebuilt middleware:* Checked: the `messages` update was applied. The `"trace_layer"` key was **silently dropped**, because no state field with that name was declared. Declare custom state fields with `state_schema` ([Chapter 7](07-middleware.md), 7.4)
@@ -678,6 +683,7 @@ agent = create_agent(model, tools, middleware=[log_calls, time_tools, Guard()])
 - Live-Class-2026, `Weekend 08 - 15-16 Aug/README.md`
 - `Assignment_2_Agents_and_Prebuilt_Middleware.ipynb` (questions only)
 - Section 10.14 and the corrections marked *checked* are from testing, not from the class sources
+- LangChain docs: [Built-in middleware](https://docs.langchain.com/oss/python/langchain/middleware/built-in), section "Shell tool" (read 2026-11-15 from its source, commit `04d4d4a`), for the interrupt limitation and the redaction warning
 - LangChain docs: [Event streaming](https://docs.langchain.com/oss/python/langchain/event-streaming), "Custom updates" and "Register transformers on middleware" (read 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "Custom stream transformers" in 10.11. The transformer class itself is Claude's, built on the installed `StreamTransformer`
 
 Previous: [Chapter 9, Guardrails, to-do lists and tool resilience](09-guardrails-to-do-lists-and-tool-resilience.md) · Next: [Chapter 11, Runtime and human-in-the-loop](11-runtime-and-human-in-the-loop.md)

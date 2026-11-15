@@ -321,6 +321,7 @@ if isinstance(out["parsing_error"], ModelRefusalError):
 
 - Detected for OpenAI, Anthropic and Gemini models
 - **In an agent:** `response_format` raises `ModelRefusalError` only when you add `ModelRefusalMiddleware`
+  - How to order it with a fallback model, and reply politely when every model refuses: [Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md), 8.3
 - **Versions:** needs `langchain-core>=1.7.5` (and `langchain-google-genai>=4.4.3` for Gemini). After upgrading `langchain-core` to 1.7.5+, also upgrade `langchain-openai` to 1.7.4+, or Responses-API refusals raise a generic `ValueError`
 - Retrying a refusal with the same prompt rarely helps. Log it, and answer the user with a clear "cannot help with that" (*added by Claude*)
 
