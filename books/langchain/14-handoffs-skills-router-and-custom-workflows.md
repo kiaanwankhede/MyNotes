@@ -418,6 +418,42 @@ def agent_node(state: SimpleState) -> dict:
     return {"answer": result["messages"][-1].content}
 ```
 
+**The agent itself as a node.** `create_agent` returns a compiled graph, so it can be added directly. It then runs as a **subgraph**, and its middleware goes with it:
+
+```python
+from langchain.agents import AgentState, create_agent
+from langchain.agents.middleware import HumanInTheLoopMiddleware
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.graph import START, StateGraph
+
+email_agent = create_agent(
+    model,
+    tools=[read_email, send_email],
+    middleware=[HumanInTheLoopMiddleware(interrupt_on={"send_email": True})],
+)
+
+graph = (
+    StateGraph(AgentState)                  # shares the agent's `messages` key
+    .add_node("classify", classify_node)
+    .add_node("email_agent", email_agent)   # the compiled agent, no wrapper function
+    .add_edge(START, "classify")
+    .add_conditional_edges("classify", route)
+    .compile(checkpointer=InMemorySaver())  # needed to resume the HITL pause
+)
+
+result = graph.invoke({"messages": [{"role": "user", "content": "email bob"}]}, config, version="v2")
+result.interrupts                           # the agent's HITL pause, seen by the parent
+graph.invoke(Command(resume={"decisions": [{"type": "approve"}]}), config, version="v2")
+```
+
+- HITL interrupts, summarization, PII redaction, retries and custom hooks all run inside the node (docs)
+  - *Checked:* the `send_email` interrupt came out at the parent, the agent's `before_model` hook ran, and resuming at the parent sent the email
+- **Which to choose:**
+  - **Agent as the node:** the parent's state matches the agent's (`messages`), and you want its interrupts and streaming to reach the caller (streaming needs `subgraphs=True`, [Chapter 13](13-multi-agent-systems-and-subagents.md) 13.6)
+  - **Agent called inside a node function** (above): the parent has its own state shape, so you map `query` in and `answer` out yourself
+- Use this when the flow is more than "loop until done": classify then route to one of several agents, fan out in parallel, or mix agents with fixed steps
+- Checkpointer scoping for subgraphs (per call or per thread) is on the LangGraph "Use subgraphs" docs page, not read for these notes
+
 **A retrieval pipeline** with three kinds of node:
 
 - **Model node (rewrite):** rewrite the query for better retrieval, ideally with structured output
@@ -682,6 +718,7 @@ Items marked *checked* were run with `langchain` 1.4.7 and `langgraph` 1.2.19, u
 - **No real model was used.** Whether a real model classifies or chooses well was not tested
 - The class notebooks and README are the source for everything not marked *checked*
 - **Details by section** (moved here from the ✅ markers):
+  - *The agent itself as a node (2026-11-15):* `langchain` 1.5.0, `langgraph` 1.2.22, scripted model. `StateGraph(AgentState)` with `classify` → `email_agent` (a `create_agent` with `HumanInTheLoopMiddleware(interrupt_on={"send_email": True})` and a counting `before_model` hook), compiled with `InMemorySaver`. `invoke(..., version="v2")` returned one interrupt for `send_email`; the hook had run once; `Command(resume={"decisions": [{"type": "approve"}]})` at the parent gave the tool result `sent to bob@x.com` and the final `Email sent.`
   - *14.2 Handoffs with one agent: customer support:* Checked over four turns on one thread: `current_step` was unset after turn 1 (it stays at the default until a tool runs), then `issue_classifier`, then `resolution_specialist`, then `resolution_specialist` again
   - *14.2 Handoffs with one agent: customer support:* Checked: the tools offered to the model changed per step: `record_warranty_status` only, then `record_issue_type` only, then `provide_solution` and `escalate_to_human`. **The model literally cannot call a tool from another step**
   - *14.3 Handoffs between separate agents:* Checked: the booking agent called `transfer_to_refunds`, the outer graph moved to `refunds_agent`, which answered. The message list had exactly four entries: the user, the triggering `AIMessage`, the artificial `ToolMessage`, and the refunds agent's reply. `active_agent` ended as `refunds_agent`
@@ -698,5 +735,6 @@ Items marked *checked* were run with `langchain` 1.4.7 and `langgraph` 1.2.19, u
 - Live-Class-2026, `Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/`: `README.md`, `00_Multi_Agent_Overview.ipynb`, `02_Handoffs_Customer_Support.ipynb`, `03_Router_Knowledge_Base.ipynb`, `04_Skills_SQL_Assistant.ipynb`, `LangChain_MultiAgent_Patterns_VSCode.ipynb`
 - Live-Class-2026, `classes_transcription_summary/23 - 27 Sep - MCP In LangChain.md` (pattern table and class questions, in [Chapter 13](13-multi-agent-systems-and-subagents.md))
 - Sections marked *checked* and 14.9 are from testing
+- LangChain docs: [Middleware overview](https://docs.langchain.com/oss/python/langchain/middleware/overview), section "Use middleware inside a LangGraph workflow" (read in full 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "The agent itself as a node" in 14.6
 
 Previous: [Chapter 13, Multi-agent systems and subagents](13-multi-agent-systems-and-subagents.md) · Next: [Chapter 15, Testing agents and tracing](15-testing-agents-and-tracing.md)

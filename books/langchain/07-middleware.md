@@ -102,7 +102,12 @@ flowchart TD
     AM -->|no tool calls| AA[after_agent]
 ```
 
+![Middleware hooks (LangChain docs): before_agent, before_model, wrap_model_call around the model, after_model, wrap_tool_call around the tools (back to before_model), after_agent](images/middleware_final.png)
+
 > Middleware provides a way to more tightly control what happens inside the agent.
+
+- **Not a separate runtime** (docs): the hooks run inside the compiled LangGraph graph that `create_agent` returns
+  - So they keep running when that agent becomes a node in a bigger graph ([Chapter 14](14-handoffs-skills-router-and-custom-workflows.md), 14.6)
 
 - The loop is: request, model call, tool call, result. Middleware lets you **cut into the middle**: before the model, after the model, around a tool call
 - It is a universal idea across frameworks, not a LangChain quirk
@@ -386,6 +391,12 @@ config = {"configurable": {"thread_id": "hitl-demo-live"}}
 - **A checkpointer is required.** Without one you can still start the run, but `Command(resume=...)` raises `RuntimeError: Cannot use Command(resume=...) without checkpointer`
 - `interrupt_on` maps a **tool name** to its allowed decisions. `False` means "never interrupt"
 
+> [!WARNING]
+> **The key is the tool's `.name`, not the Python function's name.**
+> - `@tool` takes the name from the function, unless you give one: `@tool("notify_team") def notify(...)` is called `notify_team`
+> - *Checked on 1.5.0:* with `interrupt_on={"notify": True}` there was **no** interrupt and the tool simply ran. With `{"notify_team": True}` it paused
+> - A wrong key fails silently, so test that each guarded tool really pauses. `[t.name for t in tools]` shows the right keys
+
 **Trigger the pause and look at it**
 
 ```python
@@ -612,6 +623,7 @@ agent = create_agent(model, tools, checkpointer=InMemorySaver(), middleware=[
   - HITL: interrupt, `get_state`, approve, edit (both shapes), reject, respond, a disallowed decision, resume without a checkpointer
 - **Not run against a live model:** the quality of a real summary and real tool-call choices. Class output was read from the notebook (cells 0 to 56)
 - **Details by section** (moved here from the ✅ markers):
+  - *7.6 `interrupt_on` key (2026-11-15):* `langchain` 1.5.0, scripted model calling `notify_team` (defined as `@tool("notify_team") def notify`). `interrupt_on={"notify": True}`: 0 interrupts, the `ToolMessage` was `notified`. `{"notify_team": True}`: 1 interrupt, the tool had not run
   - *7.5 trimming, from the Short-term memory docs page (2026-11-15):* run on `langchain` 1.5.0, `langgraph` 1.2.22 with a scripted model and `InMemorySaver`
     - The docs' `trim_messages` hook over four plain turns: the model saw `['human']`, `['human', 'ai', 'human']`, then `['human', 'ai', 'human', 'ai', 'human']` twice
     - The same hook after one AI message with two parallel tool calls: the next model call got `['human', 'tool', 'ai', 'human']`
@@ -633,6 +645,7 @@ agent = create_agent(model, tools, checkpointer=InMemorySaver(), middleware=[
 - Live-Class-2026, `MIddleware.ipynb` (cells 0 to 56), `Middleware-Architecture-Sketch.ipynb`, the whiteboards `Agent-Middleware-Architecture.pdf` and `Langchain-2-Updated.pdf`, and the folder README, all in `Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/`
 - `Assignment_2_Agents_and_Prebuilt_Middleware.ipynb` (questions only; the answers belong to later classes)
 - Section 7.9 and the corrections in 7.4 to 7.6 are from testing, not from the class sources
+- LangChain docs: [Middleware overview](https://docs.langchain.com/oss/python/langchain/middleware/overview), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`), for the hook diagram in 7.3 (`images/middleware_final.png`, copied from the page) and "not a separate runtime". The `interrupt_on` warning in 7.6 is from testing
 - LangChain docs: [Short-term memory](https://docs.langchain.com/oss/python/langchain/short-term-memory), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`), for the 7.5 intro, the summary image (`images/summary.png`, copied from the page) and the hand-written trim pattern. The two trimming warnings are from testing
 - LangChain docs: [Tools](https://docs.langchain.com/oss/python/langchain/tools), section "Dynamic tool selection" (read 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "Registering a tool at run time" in 7.2. The pass-through pitfall is from testing
 
