@@ -79,6 +79,7 @@ CountryCode = Annotated[str, Field(pattern=r"^[A-Z]{2}$")]
 ```
 
 - *Tested:* `JobApplicationV1` and `JobApplicationV2` gave the same `string_too_short` error and the same JSON schema limits (`minLength: 2`, `maximum: 50`)
+- The mentor prefers the `Field()` form ("less bulky") and notes that AI-written code uses `Annotated` more. *Added by Claude:* the real benefit of `Annotated` is reuse: one `PositiveAmount` type in many models
 
 ## 2.3 Fixed choices
 
@@ -119,6 +120,7 @@ class JobApplicationV3(BaseModel):
     email: EmailStr
 ```
 
+- Without the extra, the class hit `No module named email_validator`. *Tested:* defining an `EmailStr` field without it raised `ImportError: email-validator is not installed, run pip install 'pydantic[email]'`
 - *Tested (`email-validator` 2.4.0):* `"Rohan@Example.COM"` became `"Rohan@example.com"` (domain lower-cased, the part before `@` kept); `"abc@mayank-gs-india@yopmail.com"` was rejected; `"rohan@yopmail.com"` passed, because a disposable domain is still a valid email. Blocking it needs a validator ([Chapter 3](03-validators.md))
 - The class's secret:
 
@@ -258,10 +260,12 @@ class Job(BaseModel):
 - **2.2:** `string_too_short` for `"a"`; `greater_than` for `-50`; `JobApplicationV1` and `V2` produced the same schema limits
 - **2.4:** the email results listed above; `print(account)` showed stars; the JSON dump and reload kept the stars
 - **2.6:** `Settings()` with no key raised `ValidationError` (the intended start-up failure)
+- **Class transcript** (4 Jul, teaching part): the `Annotated` preference and the missing `email_validator` error; that error was reproduced in a fresh environment with only `pydantic`
 
 ## Sources and further reading
 
 - Live-Class-2026, `8_Pydantic/Pydantic_From_Scratch.ipynb` (`JobApplicationV1` to `V3`, `UserAccount`, `account.json`) and `_8_pydantic_with_ai.py` Part 3 (re-read in full 2026-11-15)
+- Class recording's transcript, 4 Jul 2026 (uploaded by you; teaching part only)
 - [Pydantic docs: Fields](https://docs.pydantic.dev/latest/concepts/fields/), [Types](https://docs.pydantic.dev/latest/concepts/types/), [Settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
 - Added by Claude: 2.3, 2.5, 2.6, 2.7, interview question 4
 

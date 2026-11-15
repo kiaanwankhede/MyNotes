@@ -42,7 +42,9 @@ class SignupForm(BaseModel):
 ```
 
 - `field_validator` sees one value (`@classmethod`: no object yet); `model_validator(mode="after")` sees `self`
+- `Field()` is configuration written on the field itself; `@field_validator` is a decorated method for rules `Field` can't express (class 03). `cls` is the class itself, as `self` is the object
 - One validator can cover several fields: `@field_validator("from_currency", "to_currency")`
+  - It still runs **once per field**, and each call sees only that field's value. *Tested:* with `@field_validator("password", "confirm_password")`, the method was called twice, once per field, so it cannot check that the two match. That needs a model validator
 - The class's version blocks disposable domains on a job application (`Pydantic_From_Scratch.ipynb`):
 
 ```python
@@ -75,6 +77,25 @@ def passwords_must_match(self):
         raise ValueError("password and confirm_password do not match")
     return self
 ```
+
+- The class's business rule needs two fields as well: an applicant with an `@infosys.com` email needs at least 5 years of experience. A field validator sees either the email or the years, "like Schrödinger's cat", never both:
+
+```python
+class JobApplication(BaseModel):
+    email: EmailStr
+    years_experience: int = Field(ge=0, le=50)
+
+    @model_validator(mode="after")
+    def infosys_needs_five_years(self):
+        if self.email.lower().endswith("@infosys.com") and self.years_experience < 5:
+            raise ValueError("Infosys applicants need at least 5 years of experience")
+        return self
+```
+
+- *Tested:* `a@gmail.com` with 2 years passed; `a@infosys.com` with 2 years failed with one error whose `loc` is `()`; with 6 years it passed
+- More cross-field rules from class: height and weight together for a health check; password and confirm password
+- Why not check these in a constructor? Pydantic calls validators for you on every object; you never call them yourself
+- Use a model validator **only** when a rule needs several fields; for one field, a field validator is shorter and clearer
 
 > [!WARNING]
 > **Two classic bugs:** (1) two validator methods with the **same name**: the first silently disappears; (2) `raise ValidationError` inside a validator: raise **`ValueError`**, Pydantic wraps it with the field path.
@@ -144,6 +165,23 @@ def experience_tier(self) -> str:
 ```
 
 - Output only; appears in dumps and the serialization schema
+- The class's reasoning: never ask users for a value you can calculate. BMI comes from height and weight; an experience tier is the company's rule, not the candidate's claim
+- The method's name **is** the field's name, so call it `bmi`, not `get_bmi`
+
+```python
+class Person(BaseModel):
+    height_m: float = Field(gt=0)
+    weight_kg: float = Field(gt=0)
+
+    @computed_field
+    @property
+    def bmi(self) -> float:
+        return round(self.weight_kg / self.height_m ** 2, 1)
+
+Person(height_m=1.75, weight_kg=70).model_dump()   # {'height_m': 1.75, 'weight_kg': 70.0, 'bmi': 22.9}
+```
+
+- *Tested:* the dump shown in the comment
 - *Tested (the class's `JobApplication`):* `years_experience=6` printed `experience_tier='mid'` in the `repr` and in `model_dump()`; passing `experience_tier="senior"` as input was ignored; the tier appeared in `model_json_schema(mode="serialization")` but not in the validation schema
 
 ## 3.4 Errors you can act on
@@ -161,6 +199,23 @@ def experience_tier(self) -> str:
 
 > [!IMPORTANT]
 > **🏭 In production:** validators stay **pure and fast** (no DB or HTTP calls); one rule per validator with a clear message; count failures by `type`; never log `input` blindly. *Added by Claude.*
+
+## Questions from the class (class 03)
+
+Asked during the teaching part of the class; the after-class doubt session is not included.
+
+| Question | Answer |
+|---|---|
+| What is the difference between `Field` and `field_validator`? | `Field` puts limits on the field itself; `field_validator` is your own rule, written as a decorated method |
+| What is `cls`? | The class itself, just as `self` is the object |
+| Can a validator be a static method instead? | It can, but keep all validation inside the Pydantic model |
+| Why pass two fields to one `field_validator`? | To reuse the same rule on both; each call still gets only one value |
+| Why not always use a model validator? | Use it only when a rule needs several fields; otherwise it is longer and less clear |
+| Can we block particular companies' email domains? | Yes, but that is your business logic: you list the domains |
+| Does `Annotated` have a benefit over `Field`? | Not in behaviour; the mentor prefers `Field`. *Added by Claude:* `Annotated` lets you reuse one type in many models |
+| What does `ge` mean? | Greater than or equal to |
+| Where does `model_dump` save the data? | Nowhere: it returns a dict in memory. Write a file yourself |
+| Should I practise in Colab or VS Code? | Beginners: Colab, to see each result at once. Experienced: VS Code, which the course uses from here on |
 
 ## 3.5 Added by Claude, not from the sources
 
@@ -249,11 +304,13 @@ class Booking(BaseModel):
 - **3.1:** `yopmail.com` rejected with `value_error`; the duplicate-name warning, the missing password check, the "do not match" failure for identical passwords, and the `TypeError` from `raise ValidationError`, all reproduced; the fixed form accepted matching 8-character passwords
 - **3.2:** `strip_years_suffix` without a mode: `int_parsing`; with `mode="before"`: `5`
 - **3.3, 3.4:** the results stated in each section
+- **Class transcript** (4 Jul, teaching part, read in full 2026-11-15): the `Field` vs `field_validator` and `cls` points, the Infosys rule, the two-field validator caveat, the BMI example and the questions table. The Infosys model, the two-field validator and the BMI model were run on Pydantic 2.14.3
 
 ## Sources and further reading
 
 - Live-Class-2026, `8_Pydantic/Pydantic_From_Scratch.ipynb` (validator cells) and `_8_pydantic_with_ai.py` Part 4 (re-read in full 2026-11-15)
 - Live-Class-2026 whiteboard `Class-3-4.pdf` ("email → field validator", "YOE → field validator")
+- Class recording's transcript, 4 Jul 2026 (uploaded by you; teaching part only)
 - [Pydantic docs: Validators](https://docs.pydantic.dev/latest/concepts/validators/)
 - Added by Claude: the fixed `SignupForm`, 3.5, the sorted-set tip, interview question 4. v1's `@validator` / `@root_validator` are the deprecated equivalents
 

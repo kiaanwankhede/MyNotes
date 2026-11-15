@@ -24,6 +24,9 @@
 ![Class whiteboard: an LLM turns input into output by predicting the next token; "ChatGPT is to AI what Google is to the internet"](images/whiteboard-llm-next-token-predictor.png)
 
 - The class's one-line model: an LLM is a **next-token predictor**. It writes one token, then the next, until it stops
+- Ask it "The capital of France is…": it doesn't look anything up in a table; "Paris" is simply the most likely next token (classes 03–04)
+  - That is why LLMs are weak at arithmetic and need a calculator tool, and why they repeat the patterns and biases in their training data
+  - The class's everyday versions: "Thank you for…" → "your business"; "Best of…" → "luck"; "Virat…" → "Kohli"
 
 | Term | Developer meaning |
 |---|---|
@@ -43,6 +46,8 @@
 
 - The whiteboard's price card is GPT-5.5: **$5 per million input tokens, $30 per million output**, 6× more for output. *Web-checked:* that is the standard API rate OpenAI announced on 23 April 2026 (cached input $0.50; batch half price). Prices change; check the provider's page before quoting
 - The tokenizer screenshot counts "unbelievable things happen" as **5 tokens** for 26 characters. *Not checked here:* the tokenizer files could not be downloaded in this environment
+- In class, the same sentence counted **5** tokens with the GPT-5.x tokenizer and **6** with the GPT-3 one: always count with the model's own tokenizer
+- Common short words are one token; long or rare words split into several (the class calls tokens "Lego bricks"), so unusual words quietly cost more
 
 ```python
 def call_cost(in_tokens: int, out_tokens: int, in_per_m: float, out_per_m: float) -> float:
@@ -53,6 +58,9 @@ call_cost(2_000, 500, in_per_m=5, out_per_m=30)    # 0.025: the 500 output token
 ```
 - **Embedding model ≠ chat model.** Index and query must use the **same** embedding model
 - The class's definition: embeddings are **numerical representations of language**, words or documents mapped to points in a high-dimensional space, so models can compare meaning with maths
+  - "Apple" the company and "apple" the fruit need different positions; "puppy" sits near "dog" and far from "happy"
+  - The class demo: the TensorFlow Embedding Projector, 10,000 words you can click to see their nearest neighbours
+  - **Judging an embedding model** (class): test pairs you know should be close (apple, banana) and far apart. A bad model gives everything similar numbers
 - "Close" is usually measured with cosine similarity (*code added by Claude*):
 
 ```python
@@ -66,6 +74,11 @@ cosine([1, 2, 3], [2, 4, 6])     # 1.0: same direction, same "meaning"
 cosine([1, 0], [0, 1])           # 0.0: unrelated
 ```
 - Use the provider's `usage` field for cost, never a word count
+- **Parameters**, the class's picture: a mixing console with billions of sliders, each nudged a little during training. No single slider means anything on its own
+  - A "70B" model is a slider count: a rough proxy for how much it can learn, never a guarantee that an answer is good
+  - Fixed after training; they change only when a new model version comes out. Smaller (cheaper) models usually have fewer
+  - *Added by Claude:* mixture-of-experts models use only part of their parameters per token (Sarvam-105B uses about 9B, [Chapter 1](01-course-roadmap-and-prerequisites.md), 1.4), and frontier labs don't publish counts for models like GPT-4 or Claude, so treat quoted figures as guesses
+- **Context window sizes**, web-checked: GPT-5.5's API window is 1,050,000 tokens (the class's "1M"); GPT-5.4 mini's is 400K in total, of which at most 272K can be input. Windows aren't unlimited because longer windows cost more to run
 
 ## 3.2 Stateless calls: why chats get expensive
 
@@ -80,6 +93,10 @@ sequenceDiagram
 ```
 
 - The app resends the whole history each call; the model remembers nothing. The class's line: **LLM calls are stateless**
+- The class quiz: you ask a question, get a reply, then ask a second question. How many messages are sent? **Three**: your first message, the reply, and the new one
+  - Like a fresh Google search, the model knows nothing about the last one
+  - The OpenAI Playground's code view shows it: every call carries the whole `messages` array. "If there were 100 messages, all 100 are sent for the 101st"
+- **Chat apps add a hidden system prompt to every call.** In class, a single "hi" to Claude counted **4,169 tokens**, because the app also sent its system message and the details of connected MCP servers. The raw API sends only what you send
 - 10 turns × 100 tokens/message ≈ **10,000** input tokens billed, not 1,000 (roughly quadratic)
 
 ```python
@@ -91,6 +108,9 @@ per_turn = input_tokens_per_turn(10)   # [100, 300, 500, ..., 1900]
 sum(per_turn)                          # 10000
 ```
 - When the window fills, old turns drop and the model never knew them
+  - The class's demo: a toy app with a 40-token window greys out the oldest message, then can't answer a question about it
+  - Real symptoms: long chats get slow, forget early instructions ("always call me Mayank"), and a big PDF pushes old turns out
+  - Why apps say "start a new chat": a new chat is a new context. The window belongs to the **chat**, not to your session or plan
 - **Fixes:** trim or summarise old turns, cache the stable prefix (prompt caching), new thread per task
 - **Bigger window ≠ free:** costs more per call and loses detail in the middle (below)
 
@@ -174,23 +194,44 @@ softmax([2, 1, 0.1], 1.0)   # [0.66, 0.24, 0.1]  more variety
 ![Class whiteboard: Claude on the web is a "controlled buffet"; the Claude API is "à la carte", where you can use lots and lots of models](images/whiteboard-claude-web-vs-api.png)
 
 - The class's picture: the chat app is a **controlled buffet** (a fixed plan, chosen dishes); the API is **à la carte** (pick any model, pay per token)
+  - You can't call chatgpt.com from your own app, not even by scripting a browser. A product's chatbot calls the **API**
+  - The OpenAI Platform is not ChatGPT: ChatGPT is one product. The API offers more models, including older ones (the Playground still lists GPT-3.5, GPT-4, o1, o3 and GPT-4.1): "the buffet might not have drinks"
+- **Model tiers are different brains, priced by capability.** Web-checked: GPT-5.5 costs $5 / $30 per million tokens, GPT-5.4 mini $0.75 / $4.50. In Claude's line-up, Opus is the strongest and Haiku the fastest and cheapest. A cheap brain on a hard task fails
 - Keep the model id in config; re-run evals before switching (names and prices change every few months)
 
 ## 3.7 Questions from the class
 
 <details class="qa"><summary>"If I flip between Sonnet and Opus in the same chat, will my context window keep shifting?"</summary>
 
-- The whiteboard records the question but not the answer. An answer (*added by Claude*):
-- Each call is stateless, so on every turn the app sends the **whole** conversation to whichever model you picked
-- The limit that applies is the **current** model's window. If the two windows are the same size, nothing shifts; if you switch to a smaller one, the history must fit it or be trimmed
+- The mentor's answer in class: no model holds your chat. Each message sends the **whole** conversation to whichever model you picked, so the context was about 46K tokens whether he chose Opus, Sonnet or Haiku
+- *Added by Claude:* the limit that applies is the **current** model's window. If the two windows are the same size, nothing shifts; if you switch to a smaller one, the history must fit it or be trimmed
 - *Web-checked:* Anthropic's model pages list a 1M-token window for both Claude Opus 5.5 and Claude Sonnet 5.5, while older models such as Sonnet 4.5 have 200K
 
 </details>
 
 <details class="qa"><summary>A student: "AI agents figure out the steps for a task and do them, not just answer questions." Right?</summary>
 
-- Yes. That is the brain + memory + tools picture ([Python Ch 3](../python/03-anatomy-of-an-agent.md)), run in a loop ([Chapter 2](02-the-agentic-loop-in-pure-python.md))
-- The model plans the next step, a tool does it, and the result comes back for the next decision
+- Not quite. The mentor called it "a very, very wide understanding… if you want to create agents, this understanding is wrong": **we** control how it figures things out
+- An agent isn't magic. An email agent with no access to email is useless, like an intern without a laptop; and the brain matters: a small model such as Haiku fails a complex task
+- What is true: it is the brain + memory + tools picture ([Python Ch 3](../python/03-anatomy-of-an-agent.md)), run in a loop ([Chapter 2](02-the-agentic-loop-in-pure-python.md)) whose tools, prompt and limits you define
+
+</details>
+
+<details class="qa"><summary>"Didn't you say input tokens cost more?"</summary>
+
+- No: for the same number of tokens, **output always costs more**, because the model has to work out the answer
+
+</details>
+
+<details class="qa"><summary>"What is the difference between a vector and an embedding?"</summary>
+
+- In this sense, none: an embedding is the vector a model gives a piece of text. "Embeddings" in RAG are the same idea, applied to documents (later in the course)
+
+</details>
+
+<details class="qa"><summary>"Why don't chat apps show token charges?"</summary>
+
+- They show **usage** against your plan's limit, not a price per token. Tokens are still counted behind the scenes; only the API bills you per token
 
 </details>
 
@@ -287,7 +328,8 @@ chat_input = sum((2 * k - 1) * msg_tokens for k in range(1, turns + 1))   # hist
 ## How this chapter was checked
 
 - **Code:** every Python block in this chapter run offline with Python 3.13: `call_cost` → 0.025; cosine 1.0 and 0.0; turn-by-turn input summing to 10,000; the softmax values shown
-- **Web-checked (2026-11-15):** GPT-5.5 standard API pricing ($5 / $30 per million, released 23 April 2026); Claude Opus 5.5 and Sonnet 5.5 context windows (1M) and older Sonnet 4.5 (200K)
+- **Class transcripts:** the teaching part of the 4 Jul (class 03) and 5 Jul (class 04) recordings, read in full on 2026-11-15; the after-class doubt sessions were left out by your choice
+- **Web-checked (2026-11-15):** GPT-5.5's 1,050,000-token window and GPT-5.4 mini's 400K window (272K input) and $0.75 / $4.50 pricing on OpenAI's model pages; GPT-5.5 standard API pricing ($5 / $30 per million, released 23 April 2026); Claude Opus 5.5 and Sonnet 5.5 context windows (1M) and older Sonnet 4.5 (200K)
 - **Not checked:** the tokenizer count on the whiteboard (tokenizer files blocked here)
 - 3.3 to 3.6 come from the 2026 review; their claims are standard practice, not re-tested in this pass
 
@@ -295,6 +337,8 @@ chat_input = sum((2 * k - 1) * msg_tokens for k in range(1, turns + 1))   # hist
 
 ## Sources and further reading
 
+- Class recordings' transcripts, 4 Jul and 5 Jul 2026 (uploaded by you; teaching part only)
+- OpenAI model pages: [GPT-5.5](https://developers.openai.com/api/docs/models/gpt-5.5.md), [GPT-5.4 mini](https://developers.openai.com/api/docs/models/gpt-5.4-mini.md)
 - Live-Class-2026, classes 03–04 (summaries, transcripts) and the `Class-3-4.pdf` whiteboard in `Weekend 01 - 27-28 Jun/` (four figures in `images/`, re-read 2026-11-15)
 - GPT-5.5 pricing: OpenAI's announcement, as reported in [this pricing breakdown](https://dev.to/hassann/gpt-55-pricing-full-breakdown-of-api-codex-and-chatgpt-costs-april-2026-14id) and [implicator.ai](https://www.implicator.ai/openai-gpt-5-5-by-the-numbers-higher-prices-disputed-benchmarks/); check [OpenAI pricing](https://openai.com/api/pricing/) for current rates
 - Claude context windows: [Claude Opus 5.5](https://platform.claude.com/docs/en/models/opus-5-5/overview), [Claude Sonnet 5.5](https://platform.claude.com/docs/en/models/sonnet-5-5/overview), [release notes](https://platform.claude.com/docs/en/release-notes/overview)

@@ -57,6 +57,13 @@ class Chatbot:
 ```
 
 - Its `Agent` adds a `tools` dict and picks a tool by **keyword match**, a placeholder the class replaces with the model choosing ([LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md), 2.5)
+- The class's picture of the model on its own: a **"Ghajini brain"**, after the film hero who has no short-term memory. It forgets everything between calls
+- A **chatbot** is a wrapper around the model: system instructions plus the previous messages. Whether it keeps memory is up to you
+  - In that sense ChatGPT and Claude are **agents**, not just models: they run memory and tools around one
+- Why people ask for "an agent for X": they want a digital worker that takes over a person's task (the intern picture)
+- **Agents aren't magic** (class 04): *you* define their tools, prompt and limits
+  - An email agent with no access to email is useless, like an intern without a laptop
+  - The brain matters too: a small, cheap model (Haiku, say) fails a complex task
 
 ## 3.2 One interface, many providers
 
@@ -183,6 +190,10 @@ def ask_ai(question: str) -> str:
 - *Tested:* with no keys, `_02` raised that `RuntimeError`; with only `OPENAI_API_KEY` set, it answered through the OpenAI path
 - Wrap providers behind one function so switching model is config, not a rewrite (LangChain's `init_chat_model` does this for you)
 - For tests, a **fake client with the same shape** keeps code runnable without keys
+- What class 04 showed live (the `Project 0` code itself was left as homework):
+  - **OpenRouter:** one key for many providers' models; create the key with an expiry (the class used 1 hour). A paid model with no credit failed ("no endpoint found", then a credits error) while a free model answered. The Activity page lists each request's tokens and cost ("token volume 342, total spent 0")
+  - **OpenAI Playground:** a system prompt "always reply in poetry" was obeyed. A "developer" message and a "system" message are the same thing for now. The code view shows the whole `messages` array that each call sends
+  - **A plain API call from Colab:** "Hi, I am Mayank", then "Who am I?" in a second call: the model didn't know. The usage page showed 45 input and 82 output tokens for the two calls, and it updates slowly
 
 > [!CAUTION]
 > **🔒 Keys:** `.env.example` lists the three keys with placeholder values; copy it to `.env`, paste real keys there, and keep `.env` out of git. The OpenAI call is paid: the class shows it but never runs it. *Added by Claude: also set a spending limit on any paid key.*
@@ -245,7 +256,7 @@ The class `Agent` teaches the parts but has gaps that real agents must close. Th
 | Part | Toy agent | Production |
 |---|---|---|
 | System prompt | stored, never sent (tested: no `system` message in `messages`) | always first message; versioned, tested |
-| Memory | grows forever | per user/thread; trimmed or summarised; persisted |
+| Memory | grows forever | per user/thread; trimmed or summarised; persisted in a database table or a memory service such as mem0 (class 04) |
 | Tool choice | your code decides | the **model** decides via schemas ([LLM Ch 2](../llm/02-the-agentic-loop-in-pure-python.md)) |
 | Tool results | not in memory (tested: the `_14` transcript held only the user and assistant turns) | saved as `tool` messages |
 | Tool errors | raise, stop the run (tested: a bad calculator expression raised `ValueError` out of `use_tool`) | caught, returned as text |
@@ -299,6 +310,27 @@ class Agent:
 
 > [!IMPORTANT]
 > **🏭 In production:** cost grows with history (trim, summarise, prompt caching); one provider wrapper; trace every turn (prompt, tools, tokens, latency). *Added by Claude.*
+
+## Questions from the class (classes 03–04)
+
+Asked during the teaching part of the classes; the after-class doubt sessions are not included.
+
+| Question | Answer |
+|---|---|
+| Does Copilot or Claude send a company's private code to a shared database? | No. Providers do not pool your code across companies. *Added by Claude:* retention and training use depend on your plan and settings, so check the provider's data policy |
+| Why are input tokens charged? | Every token has to be processed, including an uploaded PDF |
+| Are the LLM and the embedding model the same? | No, they are separate specialised models |
+| Do parameters change as users chat? | No. They are fixed after training and change only with a new model version |
+| How do you remember all the decorators and syntax? | You don't. "You never remember code": understand the concept, then look the syntax up in the docs or ask AI |
+| Can you Google syntax in an interview? | More or less, yes, today |
+| Which embedding model is best? | None in general; it depends on the use case. Test it on your own pairs of words |
+| Is OpenRouter like Hugging Face? | The mentor agreed. *Added by Claude:* only loosely: OpenRouter is one API and one bill across hosted models; Hugging Face is mainly a hub for model weights and datasets |
+| Did you pay for the OpenRouter key? | No. OpenRouter gives free access up to a limit, and some models are free |
+| Is a system prompt required? | No, it is optional |
+| Can memory have a limit? Won't it pile up? | Yes, it can have a limit. Real apps store it in a database |
+| In ChatGPT we don't save memory ourselves, right? | Right: ChatGPT does it for you. With the API you build it yourself |
+| How does the model know which tools exist? | The agent sends each tool's description with the call; the model picks from them |
+| Would it still search without "use web search" in the prompt? | Yes, in the class demo it would have used the tool anyway |
 
 ## 3.4 Added by Claude, not from the sources
 
@@ -383,6 +415,7 @@ request = [{"role": "system", "content": sp}, *messages[-20:], {"role": "user", 
 - **3.3:** `_11` to `_14` as written. Observed: no system message in `messages`; tool calls absent from the transcript; `use_tool("calculator", expression="__import__('os')")` raised `ValueError`; the fallback received only the last question; bad currency arguments rejected with 2 validation errors; an unknown tool returned a message
 - **3.3, the improved `Agent`:** run with a recording fake client over 25 turns: every request started with the system prompt, held at most 20 history messages plus the new question, and included the previous tool result
 - **Weekend 02 `Project 0/_01` and `_02`** (re-read 2026-11-15): `_01` as written; `_02` with no key (`RuntimeError`) and with an OpenAI key against a local fake server. The Anthropic model's retirement was web-checked on Anthropic's deprecations page
+- **Class transcripts** of 4 and 5 Jul (teaching part only), read in full on 2026-11-15: the 3.1 and 3.2 additions and the questions table; the first four questions are restored from the 2026-11-09 version of this chapter
 - **Not run:** real Groq, OpenRouter, OpenAI or Anthropic calls
 
 ## Sources and further reading
@@ -390,6 +423,7 @@ request = [{"role": "system", "content": sp}, *messages[-20:], {"role": "user", 
 - Live-Class-2026, `Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/`: `_6_fake_ai_call.py`, `_7_ai_call_free_and_paid.py`, `_11_agent_class_ai_only.py` to `_14_agent_with_memory.py`, `.env.example`, `README.md` (re-read in full 2026-11-15)
 - Live-Class-2026, the Class 3–4 whiteboard `Class-3-4.pdf` (the brain, memory and tool figure in `images/`)
 - Live-Class-2026, `Weekend 02 - 4-5 Jul/04-05 .../Project 0/_01_ai_model_vs_chatbot_vs_agent.py` and `_02_calling_the_ai_paid_and_free.py`
+- Class recordings' transcripts, 4 and 5 Jul 2026 (uploaded by you; teaching part only)
 - Anthropic: [model deprecations](https://platform.claude.com/docs/en/about-claude/model-deprecations), [Haiku 5.5 migration guide](https://platform.claude.com/docs/en/models/haiku-5-5/migration-guide)
 - [Groq OpenAI compatibility](https://console.groq.com/docs/openai) and [OpenRouter quickstart](https://openrouter.ai/docs/quickstart) for the `base_url` values
 - Added by Claude: the `ask()` wrapper, the improved `Agent`, the production column, 3.4, interview questions 3–4

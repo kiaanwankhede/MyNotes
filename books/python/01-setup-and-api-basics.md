@@ -105,6 +105,9 @@ deactivate
   - After a hand edit to `pyproject.toml`, `uv sync --locked` refused with "To update the lockfile, run `uv lock`"
 - Don't mix conda and `uv` in one project
 
+> [!WARNING]
+> **`uv init` needs a valid project name.** In class 03, `uv init` in the class folder stopped with "Current directory is not a valid package name". *Tested (`uv` 0.11.32):* folders named like `Class 1 (Python)`, `(1)`, `#class` or `-x` fail with "is not a valid package name. Please provide a package name with `--name`", while `Class 1 Python AI` became `class-1-python-ai`. Fix: `uv init --name my-project`, or `uv init my-project` to create a subfolder.
+
 ## 1.2 A safe API call
 
 - An API is how your code asks another program for data. The class's picture: with an old keypad phone and no internet, you call a travel agent for a flight price; they look it up and call you back
@@ -441,6 +444,7 @@ TOOL_REGISTRY[func.__name__] = wrapper             # name → function, for the 
 ## How this chapter was checked
 
 - **Run offline** on Python 3.13 with `requests` 2.34.2. The currency API was blocked from this environment, so `requests.get` was replaced by a stand-in returning Frankfurter-shaped JSON
+- **1.1, `uv init` names:** reproduced the class 03 error in folders with brackets, `#`, a leading `-` or non-Latin letters; `uv init --name class-1-python` fixed it
 - **1.1:** `uv` 0.11.32 for real: `uv init`, `uv add requests`, `uv add -r requirements.txt`, `uv run main.py` ("Hello from demo!"), and `uv sync --locked` refusing a stale lock, then passing after `uv lock`
 - **1.2:** `currency.py` printed `100 USD = 8550.00 INR` (stand-in rate). `_5`'s `convert_currency` returned the converted amount, and a text message on an HTTP error
 - **1.3:** the retry session against a local server that returned `503` twice then `200` (3 requests), and one that always returned `503` (`RetryError` after 4)

@@ -24,6 +24,8 @@
 ![Class whiteboard: "Python is a dynamically typed language which can change the type of my variable or value during runtime. Python is not type safe." Pydantic helps create rigid data models for inputs and outputs, makes code more error safe, and enforces type and data validation](images/whiteboard-python-not-type-safe.png)
 
 - Python never enforces hints: `age: int = "twenty-eight"` runs fine
+- Why (class 03): in Java or C++ you declare a variable's type, and memory is set aside for it (an `int` is a fixed-size box). A Python name only **points at** an object, so the same name can point at a string, then a list
+- JavaScript is just as loose; TypeScript, a typed superset of JavaScript, exists because of it. Loose typing is fine for learning and "a very big issue" in production
 - Bad data flows on silently and breaks far from where it entered
 - The class notebook shows both halves of the problem:
 
@@ -46,6 +48,8 @@ register_user(name="Rohan", email="rohan@example.com", age=10000)
 
 - Pydantic validates **at the boundary**: user input, APIs, files, config, **LLM replies and tool arguments**
 - FastAPI, the OpenAI/Anthropic SDKs and LangChain all build on it
+- **Why learn it when AI writes the code?** The class's answer: restaurants exist, but you still need to know cooking to judge the dish. Claude Code or Codex will write `field_validator`s; you must be able to read and fix them
+- **Prompt tip from class:** name the tool. Asking ChatGPT for "a student model" gave a plain class; asking it to "use Pydantic" gave `Field` limits and validators. "AI will write the way you tell it"
 
 ```mermaid
 flowchart LR
@@ -158,6 +162,9 @@ except ValidationError as e:
 ```
 
 - The class mini-project `8_Pydantic/` is a `uv` project (`uv sync`, `uv run main.py`) built up from an empty file
+- If you don't know a field's value yet, its default is `None`: Python has no `null`
+- `SignupForm(**incoming_data)` unpacks a dict into keyword arguments; it is the same as `SignupForm(username=..., email=..., ...)`
+- `model_dump()` returns a dict **in memory**; nothing is saved until you write it yourself, e.g. `json.dump(user.model_dump(mode="json"), f)`
 
 ## 1.3 `model_config`
 
@@ -274,12 +281,14 @@ u.model_dump(); u.model_dump_json(); User.model_json_schema()
 - **1.1:** the hint did not stop `"twenty-eight"`; `register_user` printed born approx. `-7974`; the plain class and the dataclass accepted bad data; `UserModel` raised `int_parsing`
 - **1.2:** two `missing` errors for `SignupForm(username="Mayank")`; the coercion results listed above; `_8_pydantic_with_ai.py` as written (`float_parsing` for `"five hundred"`, `"100"` → `100.0`)
 - **1.3:** the 2026 review checked these switches on Pydantic 2.13; the code ran again on 2.14.3
+- **Class transcript:** the teaching part of the 4 Jul recording, read in full on 2026-11-15, for the typing, cooking-analogy, prompt-tip and `None` points
 
 ## Sources and further reading
 
 - Live-Class-2026, `Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul .../8_Pydantic/`: `Pydantic_From_Scratch.ipynb`, `1. Why Pydantic.py`, `README.md`, `main.py` (re-read in full 2026-11-15)
 - Live-Class-2026, `_8_pydantic_with_ai.py` (Parts 1 and 2)
 - Live-Class-2026 whiteboards: Day 2 `Agentic-3-0.pdf` ("Python is not type safe") and `Class-3-4.pdf` (dynamic typing, form to model); three figures in `images/`
+- Class recording's transcript, 4 Jul 2026 (uploaded by you; teaching part only)
 - Earlier sources for this chapter: `classes_summary/03 - 4 Jul - Pydantic Deep Dive.md` and its transcription summary
 - [Pydantic docs: Models](https://docs.pydantic.dev/latest/concepts/models/), [Conversion table](https://docs.pydantic.dev/latest/concepts/conversion_table/)
 - Added by Claude: 1.3, 1.4, 1.5, interview question 4

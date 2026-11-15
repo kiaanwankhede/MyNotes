@@ -29,6 +29,7 @@
 | Role | Holds |
 |---|---|
 | `system` | Rules and behaviour (optional, recommended) |
+| `developer` | OpenAI's newer name for the same slot; "the same as system for now" (class 04) |
 | `user` | The person's input |
 | `assistant` | The model's reply, **or** its `tool_calls` |
 | `tool` | A tool result, tagged with the `tool_call_id` it answers |
@@ -101,6 +102,8 @@ def run_agent(messages: list, max_turns: int = 5) -> str:
 - **Why call the model again?** It does not know the tool ran; it sees the result only when you append it and resend
 - **Why append the assistant `tool_calls` message?** The `tool` messages answer it; without it, most APIs reject the next request
 - **Memory in a UI:** a terminal chat keeps one list; Streamlit keeps it in `st.session_state.messages` because the script re-runs on every click
+- The class's whiteboard version: the system prompt tells the model it has three tools (web search, calculator, weather). The question goes to the brain, the brain asks for a tool, the tool runs, its result goes back to the brain, the exchange is saved to memory, then the answer comes out
+  - "A to and fro between APIs: the API of the brain, the API of the tools, the API of the memory"
 
 What the history looks like after one tool turn:
 
@@ -114,6 +117,30 @@ What the history looks like after one tool turn:
   {"role": "assistant", "content": "It is 22°C and partly cloudy in Tokyo."}
 ]
 ```
+
+### The same loop in a no-code tool (class 04 demo)
+
+- Before any code, the mentor rebuilt the loop in **n8n** (a no-code workflow tool), "just for the visualisation": an AI Agent node with a model, a memory and tools
+
+```mermaid
+flowchart LR
+    C["Chat input"] --> A["AI Agent<br/>orchestrator"]
+    A <--> B["Brain<br/>Claude model"]
+    A <--> M["Simple Memory<br/>load, then save"]
+    A <--> T["Tools<br/>Calculator · Tavily web search"]
+```
+
+| Setup | What happened in class |
+|---|---|
+| Brain only, no memory | "Hi, I am Mayank", then "Who am I?" got "I don't know who you are" |
+| + Simple Memory | each turn: memory read, model called once, memory written. The third question sent 4 old messages + the new one |
+| New chat session | memory empty again |
+| + Calculator and Tavily (described as "Search in Tavily for information on the web") | "Hi, I am Mayank" used no tool. "Why is Virat Kohli famous?" called the model **twice**: once to decide to search, once to summarise the results instead of pasting them. Two questions in one message used the calculator **and** the web search in the same turn |
+
+- "Your agent is just an orchestrator… a piece of code which takes things from here to there. Only the brain can take the decision"
+- The model picks a tool from the **descriptions** the agent sends with each call
+- That n8n memory kept only the last 5 messages: a window, like `MAX_MESSAGES` in [Python Ch 3](../python/03-anatomy-of-an-agent.md)
+- Frameworks package exactly this. LangChain's docs list models and tools (Tavily among them); CrewAI's "role, goal and backstory" just generates the system prompt. "Every framework is just helping you create this thing"
 
 ## 2.4 Hardening: never let bad model output crash the loop
 
@@ -347,6 +374,7 @@ for _ in range(max_turns):
 - A safe runner turns unknown tools, bad JSON, wrong arguments and crashes into messages
 - The class build: keyword match → your code calls → the model chooses → the loop → a UI
 - Terminal memory is one list; Streamlit memory is `st.session_state`, per session
+- The agent only orchestrates; the brain decides. Frameworks and no-code tools (n8n) run the same loop
 
 ## Practice
 
@@ -365,12 +393,14 @@ for _ in range(max_turns):
   - `_06`: two plain turns, with the name remembered; `NameError` on the first tool call; `get_currency` returned `None`
   - `_07`: driven with `streamlit.testing.v1.AppTest` for five inputs, results as stated in 2.7
 - **2.3, 2.4:** the loop and `run_tool` from the 2026 review (unknown tool, bad JSON, wrong argument and a raising tool each came back as `Error: ...`); re-run in this pass inside the fixed `_06`
+- **The n8n demo in 2.3** is described from the 5 Jul class transcript (teaching part, read in full 2026-11-15); n8n was not run here
 - **Not run:** a real model, the live currency API (blocked here)
 
 ## Sources and further reading
 
 - Live-Class-2026, `Weekend 02 - 4-5 Jul/04-05 - 5 Jul & 11 Jul - Anatomy of an Agent & The Agentic Loop/`: `README.md`, `Project 0/README.md`, `_01` to `_07`, `output` (re-read in full 2026-11-15)
 - Live-Class-2026, class 05 summary and transcription summary (the Questions from the class table; earlier batch)
+- Class recording's transcript, 5 Jul 2026 (uploaded by you; teaching part only)
 - [Streamlit: session state](https://docs.streamlit.io/develop/concepts/architecture/session-state), [app testing](https://docs.streamlit.io/develop/concepts/app-testing)
 - Added by Claude: 2.4 hardening, 2.9, the fixes in 2.5 and 2.6, interview question 5
 
