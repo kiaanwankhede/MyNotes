@@ -114,6 +114,32 @@ The class free-tier note (class 20, not verified): **one developer, up to 200 MC
 >
 > *Added by Claude.*
 
+**What the live run showed** (class 21, 19 Sep):
+
+- Horizon built the repository from `pyproject.toml` and `uv.lock` and showed the build logs. Each push to GitHub started a new deployment
+- The `.gitignore` kept out the virtual environment, `.db` files, scratch `.txt` files and the editor's `.claude` folder. The server created a fresh database when it started
+  - So **every deployment reset the data**. The class watched new entries vanish after a push
+- **ChatMCP**, Horizon's own chat, tests a server before you connect a host. The FastMCP docs: it "is designed for testing, not as a daily work environment"
+- A second server, the calculator in 6.6, deployed from the same repository with its own entry point (`dummy.py:mcp`)
+- **The sign-in gate:** added to Claude as a custom connector, the Horizon URL asked the user to sign in to Horizon and to be a member of the owner's organisation
+  - The FastMCP docs: "When enabled, only authenticated users in your organization can connect." In class, turning it off needed a paid plan (class observation, not checked)
+  - That is why the class moved the whole app to Vercel
+
+### The whole app on Vercel (class 21)
+
+Horizon runs only the MCP server. A general host runs the whole FastAPI app: the website, the REST API and `/mcp`.
+
+1. Import the GitHub repository into a new Vercel project. Vercel recognised it as a FastAPI app
+2. Deploy. The website, the API and the MCP endpoint went live together on one URL
+3. **Settings → Deployment Protection: turn off Vercel Authentication** for the project. While it is on, a connector cannot reach `/mcp` without a Vercel login
+4. Add `https://<your-project>.vercel.app/mcp` as a custom connector. Students then logged hours from their own assistants, and the entries showed on the website
+
+- **Make the database path writable** (class 22): with a fixed path the deployed app could read entries but not log time. Read the path from an environment variable (6.3)
+- **The data still reset on every redeploy**, because the file lives on the deployment. The class homework: a hosted database and asynchronous database calls (6.8)
+- **Horizon or a general host?** Horizon for an MCP server on its own; a general host when the website and API ship with it (class)
+- 🔒 With protection off and no login in the server, anyone with the URL can read and write the data. Add authentication before real use ([Chapter 5](05-building-mcp-servers.md), 5.10)
+- *Not run here, and not web-checked: Vercel's documentation was blocked from this machine. The steps are the class's*
+
 ## 6.5 Connect a host to the deployed server
 
 ```json
@@ -128,6 +154,28 @@ The class free-tier note (class 20, not verified): **one developer, up to 200 MC
 - **Anyone with the URL can connect** and log their own hours through their own AI assistant. All of it writes to the **same shared, hosted database**
 - A public time-tracking server for a real company needs **access control**. The class planned authentication as a next step ([Chapter 5](05-building-mcp-servers.md), 5.10)
 - If a client does not follow redirects, use the URL with a trailing slash ([Chapter 4](04-operation-transports-and-shutdown.md), 4.14)
+
+### Check a deployed server with `curl`
+
+A browser cannot talk to `/mcp`. The class checked the server by hand with `curl` (class 21):
+
+```bash
+URL=http://127.0.0.1:8000/mcp        # or your deployed https://.../mcp
+H1="Content-Type: application/json"; H2="Accept: application/json, text/event-stream"
+
+curl -si -X POST "$URL" -H "$H1" -H "$H2" -d '{"jsonrpc":"2.0","id":1,"method":"initialize",
+  "params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"curl","version":"1"}}}'
+# copy the mcp-session-id header from the reply into SID
+curl -s -X POST "$URL" -H "$H1" -H "$H2" -H "mcp-session-id: $SID" \
+  -d '{"jsonrpc":"2.0","method":"notifications/initialized"}'
+curl -s -X POST "$URL" -H "$H1" -H "$H2" -H "mcp-session-id: $SID" \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
+```
+
+✅ *Verified (`fastmcp` 4.2.0, a local HTTP server): `initialize` gave 200 with `text/event-stream` and an `mcp-session-id`; `initialized` gave 202; `tools/list` listed the tools.*
+
+- The class skipped the `initialized` notice and `tools/list` still worked. ✅ This server is lenient; send it anyway, as the specification asks ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.7)
+- **A browser visit shows an error, and that is expected.** ✅ A GET with no `Accept` header got 400 "Bad Request: Missing session ID", the error the class saw. With `Accept: text/html`, 406
 
 ## 6.6 MCP does not need an API underneath
 
@@ -150,6 +198,7 @@ if __name__ == "__main__":
 - No API, no database. "What is 5 plus 3?" becomes a `tools/call` to `add`
 - **An MCP server is just a server.** What it does inside is up to you
 - ✅ *Verified:* a client called `add` on this server and got the result back. A bad argument (`"x"`) came back as a tool error flagged `is_error`
+- **Call shared functions, not your own API over HTTP.** On Horizon only the MCP server runs, so a tool that called the app's REST API would fail there. TimeTrack's tools call the database functions directly (class 21)
 
 ## 6.7 Why build your own client?
 
@@ -190,7 +239,7 @@ model  → client : the final answer (stop reason is not tool_use)  → loop end
 
 - **The model never calls the tool. The client does.** The model only says which tool it wants
 - This is the same agentic loop built earlier in the course. MCP only standardises how the **tool list and the tool call** travel between client and server
-- Framework "MCP adapters" (LangChain's, for example) wrap exactly this pattern in a few lines, as `create_agent()` wraps the raw loop. That is in the next Langchain chapter ([Chapter 12](../langchain/12-mcp-in-langchain.md), not written yet)
+- Framework "MCP adapters" (LangChain's, for example) wrap exactly this pattern in a few lines, as `create_agent()` wraps the raw loop. That is in [Langchain, Chapter 12](../langchain/12-mcp-in-langchain.md)
 
 ### The class code
 
@@ -257,6 +306,12 @@ async def run_agent(anthropic_client, mcp_client, user_message: str, model: str)
 - With `raise_on_error=False`, a bad argument came back as a result with `is_error` true and a readable message. The loop can pass that to the model instead of crashing
 - The class passed `Client("main.py")`. ✅ *Verified:* a string path prints a deprecation warning in `fastmcp` 4.1.4. Use `StdioTransport` or a `Path`
 - The model name in the class code is the class's choice. Use a current model name from the provider's documentation. Keep the API key in an environment variable, never in code
+
+**Seen live** (class 22, the class loop with a real model and the TimeTrack server):
+
+- "List every project, then give me the summary of the first one": two tool calls in a row, `list_projects` then `get_project_summary`, then the answer
+- "hi": **no tool call**. The reply still listed what it could do, because **the tool list goes with every request**. That is also why every connected tool costs tokens
+- The loop does not care which provider it uses. Swap the model client and keep the tool-use check (class)
 
 ## 6.8 Where this leaves you
 
@@ -404,6 +459,23 @@ Items marked *checked* were run with `fastmcp` 4.1.4. Check current documentatio
 
 </details>
 
+<details class="qa"><summary>11. Your server works in the hosting platform's own test chat, but a Claude connector cannot reach it. What do you check?</summary>
+
+- The platform's own sign-in gate: Horizon's free tier asked connector users to sign in and join the owner's organisation, and Vercel's Deployment Protection asks for a Vercel login (class 21)
+- Public reachability: a custom connector is reached from Anthropic's cloud, so the URL must be on the public internet ([Chapter 5](05-building-mcp-servers.md), 5.6)
+- The path: the URL ends in `/mcp`, with a trailing slash if the client does not follow redirects
+- *Stronger answer:* test from outside with `curl` (6.5), then replace the platform's gate with your own authentication, so access is a deliberate choice, not a hosting default
+
+</details>
+
+<details class="qa"><summary>12. Your deployed server loses its data on every deploy. Why, and what is the fix?</summary>
+
+- The database is a SQLite file on the deployment's own disk, created and seeded when the server starts. A new deployment starts with a new disk
+- Fix: a hosted database, reached through a connection string in an environment variable (the class homework)
+- *Stronger answer:* keep seeding out of production, run schema migrations at deploy time, use an async driver so a slow query does not block other calls, and back the database up
+
+</details>
+
 > [!TIP]
 > **🧩 Design question**
 > - *"Ship an internal MCP server that 50 teams will use from different hosts."*
@@ -437,6 +509,9 @@ async with Client("http://127.0.0.1:8000/mcp") as c:     # remote: a URL
 - Your own client is a **harness**: discover tools, send to the model, the **client** runs the tool, feed the result back, loop
 - Fix the class loop: one assistant message per turn, all results in one user message, send text not a repr
 - Read-only mode: do not register write tools. Gateways put several servers behind one entry point
+- Hosting platforms add their own gates: Horizon's organisation sign-in, Vercel's Deployment Protection. A connector must reach the URL without them, or with your own auth
+- A file database on the deployment resets on every deploy. Use a hosted database for real data
+- Check any deployed server with three `curl` calls: `initialize`, `initialized`, `tools/list`
 
 ## Practice
 
@@ -448,6 +523,9 @@ async with Client("http://127.0.0.1:8000/mcp") as c:     # remote: a URL
 6. Make the stand-in ask for two tools in one turn and check the message order
 7. Add a `READ_ONLY` switch to a server with a write tool and check both modes
 8. Draw the host, client and server picture, and mark where the harness sits
+9. Check a running server with the three `curl` calls in 6.5. Then send a GET with no `Accept` header and read the error
+10. Deploy the whole app to Vercel, or any host that runs FastAPI. Turn protection off and connect a host to `/mcp`
+11. Push a change and check whether your data survived. Then move the database to a hosted one
 
 ## How this chapter was checked
 
@@ -456,6 +534,11 @@ async with Client("http://127.0.0.1:8000/mcp") as c:     # remote: a URL
 - **Not run:** Prefect Horizon, any deployed URL, Claude Desktop, the real Anthropic API, Vercel, Railway, a gateway, `uvx`, authentication
 - The class transcripts are the source for everything not marked *checked*. Where the class and the test disagree (the concurrency claim in 6.8), both are shown
 - *Added 2026-11-15:* the 6.4 note on the new name, FastMCP Gateway, was web-checked against FastMCP's documentation, read from its GitHub source. Nothing new was run
+- *Class 21 and 22 recordings (19–20 Sep), added 2026-11-15, `fastmcp` 4.2.0:*
+  - 6.5: the `curl` calls against a local FastMCP HTTP server. `initialize` gave 200, `text/event-stream` and an `mcp-session-id`; `initialized` gave 202; `tools/list` listed the tools, and also worked without `initialized`
+  - 6.5: a GET with no `Accept` header gave 400 "Missing session ID"; with `Accept: text/html`, 406
+  - Web-checked 2026-11-15 from FastMCP's docs source: the Gateway's organisation-only authentication and ChatMCP
+  - Not run, and not web-checked: Horizon, Vercel (its documentation was blocked from this machine), any deployed URL, a real model in the loop. The 6.4 and 6.7 additions are class observations
 
 ## Sources and further reading
 
@@ -463,5 +546,9 @@ async with Client("http://127.0.0.1:8000/mcp") as c:     # remote: a URL
 - Live-Class-2026, `classes_transcription_summary/20 - 13 Sep - MCP - The Time Tracker Project.md` (the Horizon free-tier note, auto-conversion)
 - Sections marked *checked* and 6.10 are from testing
 - FastMCP docs: [FastMCP Gateway](https://gofastmcp.com/deployment/fastmcp-gateway) (formerly Horizon), web-checked 2026-11-15. The class 20 recording (13 Sep) repeated the free-tier note
+- Class recording transcripts, uploaded by you: 19 Sep 2026 (class 21, teaching part 00:00–03:04) and 20 Sep 2026 (class 22, teaching part 00:00–03:05). The doubt sessions after them were left out
+  - Class 21: the Horizon run and its sign-in gate, the Vercel deployment, the `curl` check, the shared-functions point
+  - Class 22: the read-only database path on Vercel, and the loop run with a real model
+- Added by Claude: interview questions 11–12
 
-Previous: [Chapter 5, Building MCP servers](05-building-mcp-servers.md) · Next: [Chapter 7, Legacy vs modern MCP](07-legacy-vs-modern-mcp.md) (not written yet)
+Previous: [Chapter 5, Building MCP servers](05-building-mcp-servers.md) · Next: [Chapter 7, Legacy vs modern MCP](07-legacy-vs-modern-mcp.md)

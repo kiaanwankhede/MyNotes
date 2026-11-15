@@ -686,6 +686,7 @@ def query_db(a: int, b: int, c: int) -> int: ...
 | `MultiAuth` | You accept more than one: for example people through `OAuthProxy` and services with JWTs |
 
 - Per-tool checks work the same whatever the login: `require_scopes` (above). `require_roles` also exists in 4.2.0
+- The 2026-07-28 specification deprecates Dynamic Client Registration in favour of Client ID Metadata Documents ([Chapter 7](07-legacy-vs-modern-mcp.md), 7.4). Check what your identity provider supports before choosing `RemoteAuthProvider`
 
 > [!IMPORTANT]
 > **🏭 In production: designing a server**

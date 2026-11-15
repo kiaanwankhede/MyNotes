@@ -328,7 +328,7 @@ Client → Server : 3. initialized (notification: no id, no reply)
 - **Modern clients try a newer call first.** ✅ *Verified with `mcp` 2.3.0:* the client's first message to a server was **`server/discover`** (version `2026-07-28`), not `initialize`
   - A server that answered "Method not found" made the client **fall back** to the old handshake: `initialize` with version `2025-11-25`
   - A current `fastmcp` 4.1.4 server answered `server/discover` directly, with `supportedVersions` and its capabilities
-  - This is the "newer discovery call, then fall back" that class 18 saw in a debugging tool. The legacy and modern handshakes get their own chapter ([Chapter 7](07-legacy-vs-modern-mcp.md), not written yet)
+  - This is the "newer discovery call, then fall back" that class 18 saw in a debugging tool. The legacy and modern handshakes get their own chapter ([Chapter 7](07-legacy-vs-modern-mcp.md))
   - The 3.7 handshake is the **legacy** pattern, still what most servers use. Class estimate for the ecosystem to move: **8 months to a year**, with only the most actively maintained servers moving in the first couple of months
 
 ## 3.9 Capability negotiation
