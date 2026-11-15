@@ -583,7 +583,7 @@ agent.get_state(config).values["_rubric_status"]   # satisfied, needs_revision, 
 - **Tool Error vs Tool Retry?** Error handles a failure gracefully **once**, as a readable tool message, with no retry. Retry actively retries the call, with backoff
 - **Why does a tool call limit give a tool message, not an interrupt?** An interrupt asks a human for a decision. A limit needs none ([Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md), 8.2)
 - **Do `always_include` tools count against `max_tools`?** No. They are always sent and are not counted
-- **If PII is hashed, can the agent still complete a real booking?** Not from the hash. A separate lookup, outside the model's view, resolves it only when a tool truly needs the real value (8.4)
+- **If PII is hashed, can the agent still complete a real booking?** Not from the hash. A hash cannot be turned back, and the middleware keeps no record of the original. When a tool needs the real value, use a token vault that swaps it back inside the tool, out of the model's view ([Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md), 8.4)
 - **Can `on_error` take more than one handler?** No. One function, with full access to the exception, tool name and request
 - **Is tool selection the same as dynamic tool loading?** No. Loading filters by **known state** (user type). Selection filters by **what the query says**
 - **Why 8 calls, not 4, with `max_retries=3`?** The middleware's cycle is 4. The model then asked for the tool again, which started another cycle (9.5)
@@ -760,6 +760,7 @@ middleware = [
   - *9.9 More prebuilt middleware from the class diagram:* Checked with `trigger=500, keep=2` and five long tool results: on the model's last call the three oldest tool messages read `[cleared]` and the two newest were intact
   - *9.9 More prebuilt middleware from the class diagram:* Checked: it adds two tools, **`glob_search`** and **`grep_search`**. In a test folder, a glob for `*.txt` and a grep for a word both found the file
   - *9.12 Added by Claude, not from the sources:* Checked: with `retry_on=(ConnectionError, TimeoutError)` a `ValueError` tool ran **once**, and the `ValueError` was raised as it was. A `ConnectionError` tool was retried
+- *9.10 hashed-PII row (2026-11-15):* reworded after the [Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md) 8.4 tests on `langchain` 1.5.0: `PIIMiddleware` keeps no record of hashed values, and the token vault there passed the real code to the tool while the provider never saw it
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran `TodoListMiddleware` and `ToolRetryMiddleware` in an agent; `LLMToolSelectorMiddleware` was constructed only, because running it makes a real selector-model call (needs an API key). Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 

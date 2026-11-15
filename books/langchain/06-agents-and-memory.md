@@ -19,6 +19,8 @@
 - Store, get and search long-term memories by namespace and key, and keep one user's memories away from another's
 - Assemble a full agent with tools, middleware, memory, context, custom state and a name
 - Explain headless tools
+- Harden a tool that calls a real API: timeouts, outage vs not found, strict parsing
+- Explain why an agent with `ToolStrategy` can loop, and stop it in code
 
 ## 6.1 Everything so far was already an agent
 
@@ -152,6 +154,87 @@ def get_saved_trips(user_id: str) -> str:
     return "; ".join(f"{d} ({dt})" for d, dt in rows) or "No saved trips."
 ```
 
+- The class version (Weekend 05 notebook, cells 95–97) adds a `trip_id INTEGER PRIMARY KEY AUTOINCREMENT` and a `status` column, and returns `Trip #<id> saved`. Keep the id: the modify and cancel schemas in 6.6 need a `trip_id`, so the model must be able to see it
+
+### The real weather tool, and what it needs before production
+
+The class tool (Weekend 05 notebook, cell 87, walked through again in class 11) makes two calls: find the city's coordinates, then read the current weather there. Open-Meteo needs no key.
+
+```python
+import requests
+from langchain.tools import tool
+
+@tool
+def get_real_weather(city: str) -> str:
+    """Get the REAL current weather for a city, using a live weather API."""
+    geo_data = requests.get("https://geocoding-api.open-meteo.com/v1/search",
+                            params={"name": city, "count": 1}).json()
+    if not geo_data.get("results"):
+        return f"Could not find a location matching '{city}'."
+    location = geo_data["results"][0]
+    weather_data = requests.get("https://api.open-meteo.com/v1/forecast", params={
+        "latitude": location["latitude"], "longitude": location["longitude"], "current_weather": "true"}).json()
+    current = weather_data.get("current_weather", {})
+    return (f"Real current weather in {location['name']}, {location.get('country', '')}: "
+            f"{current.get('temperature')}°C, wind {current.get('windspeed')} km/h.")
+```
+
+- In class, `get_real_weather.invoke({"city": "Bengaluru"})` printed `Real current weather in Bengaluru, India: 24.9°C, wind 21.0 km/h.`
+- It works on a good day. What it does on a bad day (tested against a local stand-in for the two Open-Meteo endpoints):
+
+| The weather service… | The class tool returns | Why that hurts |
+|---|---|---|
+| answers with HTTP 500 (an outage) | `Could not find a location matching '…'.` | An outage is reported as a spelling mistake |
+| drops `current_weather` from its reply | `… None°C, wind None km/h.` | Wrong data, which the model repeats as fact |
+| never answers | nothing: still waiting after 5 s | `requests` has **no default timeout**, so the whole agent run hangs |
+
+Hardened version (*added by Claude*):
+
+```python
+import requests
+from langchain.tools import tool
+
+GEO_URL = "https://geocoding-api.open-meteo.com/v1/search"
+FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
+TIMEOUT = (3, 10)          # seconds: (connect, read). requests has NO default timeout
+
+@tool
+def get_real_weather(city: str) -> str:
+    """Get the current temperature and wind for a city from Open-Meteo (live data)."""
+    try:
+        geo = requests.get(GEO_URL, params={"name": city, "count": 1}, timeout=TIMEOUT)
+        geo.raise_for_status()                         # a 500 is an outage, not "city not found"
+        results = geo.json().get("results")
+        if not results:
+            return f"No place called '{city}' was found. Ask the user to check the spelling."
+        place = results[0]
+        wx = requests.get(FORECAST_URL, timeout=TIMEOUT, params={
+            "latitude": place["latitude"], "longitude": place["longitude"], "current_weather": "true"})
+        wx.raise_for_status()
+        current = wx.json()["current_weather"]         # KeyError if the reply shape changed
+        return (f"{place['name']}, {place.get('country', '')}: "
+                f"{current['temperature']}°C, wind {current['windspeed']} km/h")
+    except requests.RequestException as e:             # timeouts, connection errors, HTTP errors
+        return f"Weather service unavailable ({type(e).__name__}). Do not guess the weather; tell the user."
+    except (KeyError, ValueError) as e:                # missing fields, invalid JSON
+        return f"Weather service sent an unexpected reply ({type(e).__name__}). Do not guess the weather."
+```
+
+✅ *Verified against the same stand-in: Bengaluru gave `Bengaluru, India: 24.9°C, wind 21.0 km/h`; the 500 gave `Weather service unavailable (HTTPError)…`; the missing field gave `…unexpected reply (KeyError)…`; the silent server gave `…(ReadTimeout)…` after 1.0 s (read timeout set to 1 s for the test).*
+
+- **Every outside call gets a timeout.** One slow API otherwise blocks the whole run, and the user waits for nothing
+- **Tell an outage apart from a real "not found".** The model acts on the text you return: "check the spelling" and "the service is down, don't guess" lead to different replies
+- **Fail on a changed reply instead of reading `None`** (`["current_weather"]`, not `.get(...)`): a wrong number stated as fact is worse than an error
+- **Return text or raise?** Returning text, as here, keeps the tool self-contained. To retry instead, let the exception escape and add `ToolRetryMiddleware` and `ToolErrorMiddleware` ([Chapter 9](09-guardrails-to-do-lists-and-tool-resilience.md), 9.4–9.6)
+- Weather stays valid for minutes: cache it per city with the helper in [Chapter 1](01-introduction-to-langchain.md), 1.8
+
+> [!NOTE]
+> **Two ways to ask Open-Meteo for the current weather.**
+> - The class code sends `current_weather=true` and reads `current_weather.temperature`. It worked in class
+> - Open-Meteo's current docs show `current=temperature_2m,wind_speed_10m`, which returns a `current` object instead
+> - I found no deprecation notice. Check [open-meteo.com/en/docs](https://open-meteo.com/en/docs) before building on either
+> - *Web-checked 2026-11-15. open-meteo.com was blocked from this environment, so neither form was called live*
+
 ## 6.4 The forgetting problem and the fix
 
 - Tell the agent "my name is Mayank". In the next call ask "who am I?". It does not know
@@ -181,6 +264,7 @@ from langchain_core.utils.uuid import uuid7
 config = {"configurable": {"thread_id": str(uuid7())}}   # one new id per conversation
 ```
 
+- **Forget the `thread_id` and the call fails.** Once an agent has a checkpointer, every call needs one (class 11 made the same point). Tested on 1.5.0: `ValueError: Checkpointer requires one or more of the following 'configurable' keys: thread_id, checkpoint_ns, checkpoint_id`
 - **`InMemorySaver` lives in RAM.** No time limit, but it ends when the Python process ends
 - A persistent saver (for example Postgres) follows the same pattern
 - **Deployed on LangSmith?** A checkpointer is provided for you. Locally you must pass one, or `thread_id` does nothing
@@ -592,9 +676,19 @@ agent = create_agent(model="openai:gpt-6.1-sol", tools=[], state_schema=MyState)
 ### The full TripMate agent
 
 ```python
+from dataclasses import dataclass
+
+@dataclass
+class TravelerContext:          # the class's fields (notebook cell 138), as a plain dataclass
+    user_id: str
+    home_currency: str
+    membership_tier: str
+    is_premium_member: bool
+
 full_tripmate = create_agent(
     model="openai:gpt-5-mini",
     tools=[
+        tavily_search,              # TavilySearch(max_results=5, topic="general"): needs a Tavily key
         get_real_weather,
         save_trip,
         get_saved_trips,
@@ -617,7 +711,7 @@ full_tripmate = create_agent(
 What each argument is for:
 
 - **`tools`:** weather and search are real APIs, trips go to SQLite, travel style goes to the store, the concierge tool is gated
-- **`middleware=[gate_premium_tools]`:** removes the premium tool unless the user is allowed it. "Only passed when required"
+- **`middleware=[gate_premium_tools]`:** removes the premium tool unless the user is allowed it. "Only passed when required". Read the flag from context: the class version read state, where the flag never arrived (see "Why the full TripMate never finished" below)
 - **`checkpointer=InMemorySaver()`:** saves the chat, the previous messages
 - **`store=travel_store`:** an `InMemoryStore` for preferences, key-value pairs
 - **`context_schema=TravelerContext`:** declares the data you pass in per run, to reach **middleware and tools** (`runtime.context`)
@@ -632,19 +726,124 @@ Three kinds of memory in one agent:
 Run it, passing the per-run context:
 
 ```python
-from dataclasses import dataclass
-
-@dataclass
-class TravelerContext:          # illustrative fields, the slide does not show them
-    user_id: str
-    is_premium: bool = False
-
-full_tripmate.invoke(
-    {"messages": [("user", "Plan a trip for me")]},
-    {"configurable": {"thread_id": "trip-1"}},
-    context=TravelerContext(user_id="u1", is_premium=False),
+result = full_tripmate.invoke(
+    {"messages": [("user", "I'm rohan_01. What's the weather like in Bali? I prefer budget travel, please remember that.")]},
+    {"configurable": {"thread_id": "rohan-planning-session"}},
+    context=TravelerContext(user_id="rohan_01", home_currency="INR", membership_tier="standard", is_premium_member=False),
 )
 ```
+
+### Why the full TripMate never finished (the class 11 homework)
+
+The trip schemas from the class (notebook cell 122), and the two things the class version added to the agent above:
+
+```python
+from typing import Union
+from pydantic import BaseModel, Field
+from langchain.agents.structured_output import ToolStrategy
+
+class NewTripRequest(BaseModel):
+    """A request to plan a new trip."""
+    user_id: str
+    destination: str
+    start_date: str = Field(description="Format: YYYY-MM-DD")
+    end_date: str = Field(description="Format: YYYY-MM-DD")
+
+class ModifyTripRequest(BaseModel):
+    """A request to change an existing trip."""
+    user_id: str
+    trip_id: int
+    change_description: str
+
+class CancelTripRequest(BaseModel):
+    """A request to cancel an existing trip."""
+    user_id: str
+    trip_id: int
+
+# added in the class version (notebook cell 139)
+response_format = ToolStrategy(Union[NewTripRequest, ModifyTripRequest, CancelTripRequest])
+system_prompt = ("... Remember travel style preferences"
+                 "Please make sure that you give the answer after running for 10  times and don't keep on running, be quick")
+```
+
+What happened in class:
+
+- An earlier, smaller agent with the same `Union` worked: "I am rohan_01, plan a trip to Bali from 2026-09-01 to 2026-09-10" gave `NewTripRequest(...)` after one model call (cells 123–127)
+- The full agent, asked the weather-and-preference question above, ran on and on. Every call re-sent a longer history, and it had cost about $0.50 when the mentor stopped it
+- A student asked: "How does the model know that the loop is completed?"
+- The mentor suspected the Pydantic warnings printed at the start, and set the fix as homework
+
+What I found (tested on `langchain` 1.5.0 with stand-in models, no live model):
+
+```mermaid
+flowchart TD
+    M["Model call<br/>tool_choice = required"] --> W{Which tool?}
+    W -->|weather, search, save| T[Run the tool] --> M
+    W -->|NewTrip, ModifyTrip or CancelTrip| E([structured_response: the run ends])
+    W -.->|plain-text answer| N[Not allowed]
+```
+
+1. **`ToolStrategy` forces a tool call on every model call.** Every request carried `tool_choice: "required"`. The model can never just answer, so the run ends only when it calls one of the schema tools ([Chapter 4](04-structured-output.md), 4.4)
+2. **The question fits none of the schemas.** "What's the weather like in Bali? I prefer budget travel" is not a new trip (no dates), a change or a cancellation. So there is no honest way to finish: the model keeps calling tools, or invents dates to fill `NewTripRequest` ([Chapter 4](04-structured-output.md), 4.11)
+3. **Nothing in code stops it.** `create_agent` sets a step limit of 9,999, about 5,000 model calls. The prompt's "stop after 10 times" is a request, not a limit. With a model that never picks a schema tool and the step limit lowered to 25, the run raised `GraphRecursionError` after 13 model calls
+4. **The warning is not the cause.** It comes from LangChain serialising the `runtime` argument of tools such as `save_travel_style` (`PydanticSerializationUnexpectedValue … field_name='context'`). Tested: 2 warnings with a plain dataclass, 2 with a `BaseModel`, none for a tool without `runtime`. Each run finished and the store was written. A warning never retries anything
+5. **The premium gate never let anyone in.** `gate_premium_tools` reads `request.state`, and `is_premium_member` in the invoke input is dropped because the state schema has no such field. Tested: a premium user's model call never got `book_premium_concierge` ([Chapter 5](05-tools.md), 5.10)
+
+> [!WARNING]
+> **`@dataclass` on a `BaseModel` does not build.**
+> - The saved notebook declares `@dataclass class TravelerContext(BaseModel)`
+> - Creating one raises `AttributeError: 'TravelerContext' object has no attribute '__pydantic_fields_set__'` (tested on Pydantic 2.10 to 2.14, Python 3.12 and 3.13)
+> - The class run printed warnings, not this error, so it must have used a plain `@dataclass`. The `(BaseModel)` looks like a later edit ("ideally, we could make it base model"), saved without re-running. *My reading of the notebook*
+> - Use a dataclass or a `BaseModel`, never both
+
+The homework, solved:
+
+```python
+from langchain.agents.middleware import ModelCallLimitMiddleware, wrap_model_call
+
+class GeneralReply(BaseModel):
+    """Any other answer: weather, advice, questions, small talk."""
+    message: str
+
+@wrap_model_call
+def gate_premium_from_context(request, handler):
+    """Only premium members see the concierge. The flag comes from your app (auth), via context."""
+    if not request.runtime.context.is_premium_member:
+        request = request.override(tools=[t for t in request.tools if t.name != "book_premium_concierge"])
+    return handler(request)
+
+full_tripmate = create_agent(
+    model="openai:gpt-5-mini",
+    tools=[tavily_search, get_real_weather, save_trip, get_saved_trips,
+           save_travel_style, recall_travel_style, book_premium_concierge],
+    system_prompt=(
+        "You are TripMate, a real travel planning assistant. Check real weather before "
+        "recommending destinations. Save trips when confirmed. Remember travel style preferences."
+    ),
+    response_format=ToolStrategy(
+        Union[NewTripRequest, ModifyTripRequest, CancelTripRequest, GeneralReply]),   # 1. a way out
+    middleware=[
+        gate_premium_from_context,                                    # 2. premium flag from context
+        ModelCallLimitMiddleware(run_limit=10, exit_behavior="end"),  # 3. "10 times", enforced in code
+    ],
+    checkpointer=InMemorySaver(),
+    store=travel_store,
+    context_schema=TravelerContext,                                   # 4. the plain dataclass above
+    name="tripmate_agent",
+)
+result = full_tripmate.invoke(
+    {"messages": [("user", "I'm rohan_01. What's the weather like in Bali?")]},
+    {"configurable": {"thread_id": "rohan-planning-session"}},
+    context=TravelerContext(user_id="rohan_01", home_currency="INR", membership_tier="standard", is_premium_member=False),
+)
+reply = result.get("structured_response")    # GeneralReply(...), or None when the call limit ended the run
+```
+
+✅ *Verified with stand-in models: with `GeneralReply` in the `Union`, a model that took the exit finished in 2 calls with `GeneralReply(message='Bali: 24.9°C, …')`. A model that never picks a schema tool stopped at 10 calls, with the last message `Model call limits exceeded: run limit (10/10)` and `structured_response` `None`. The context gate sent `book_premium_concierge` to a premium user.*
+
+- **Better still, ask whether a chat agent needs `response_format` at all.** It suits agents whose every turn ends in that shape: an extractor, a classifier, a router. TripMate's turns don't. Keep it conversational, and extract a `NewTripRequest` with `with_structured_output` ([Chapter 4](04-structured-output.md), 4.2) once the user confirms a trip *(added by Claude)*
+- **Find the loop in the trace, not by guessing.** A LangSmith trace ([Chapter 15](15-testing-agents-and-tracing.md)) lists every model call and the tool it picked. Ten identical tool calls in a row tell the story at a glance
+- **Cap the whole conversation too:** `thread_limit` on the same middleware ([Chapter 8](08-prebuilt-middleware-limits-fallback-and-pii.md), 8.1)
 
 ## 6.7 Headless tools
 
@@ -887,6 +1086,12 @@ for chunk in agent.stream({"messages": [input_message]}, stream_mode="messages",
 - **Will the course cover training a model?** No. It is about using and harnessing existing models
 - **Is the older (Classic) course content still relevant?** The concepts carry over. The code reflects LangChain Classic, and this course stays on the latest version
 - **How do I choose between store, saver, cache and database?** See 6.5
+- **Does the store save configuration?** The class's first answer was "the store saves configuration, the saver saves chats". The class then corrected it with the 6.5 table: the store keeps long-term data (preferences, profiles). Per-run configuration (user id, keys, feature flags) goes in `context` (6.4)
+- **Is there a size limit per thread?** Not by default. `InMemorySaver` is limited by your RAM. But every turn re-sends the whole thread, so each turn costs more than the last (6.11; summarization in [Chapter 7](07-middleware.md), 7.5)
+- **Thread id or session id?** The same idea here: one id per conversation. One user can have many threads
+- **Is Redis used for this?** The class: "Redis is a different thing" (a cache, as in [Chapter 1](01-introduction-to-langchain.md), 1.8). Also true: the `langgraph-checkpoint-redis` package provides a Redis checkpointer (`RedisSaver`) and store (`RedisStore`), so Redis can hold both kinds of memory. *Web-checked; the import paths were read from the 0.6.0 package, not run against a Redis server*
+- **How does the model know the loop is complete?** It does not "know". The loop ends when a reply has no tool calls. With `ToolStrategy` it ends when the model calls a schema tool. If neither happens, only a limit stops it (6.6)
+- **Why did the full TripMate never finish?** See "Why the full TripMate never finished" in 6.6
 
 ## 6.10 Interview corner
 
@@ -1007,6 +1212,24 @@ for chunk in agent.stream({"messages": [input_message]}, stream_mode="messages",
 
 </details>
 
+<details class="qa"><summary>15. Your agent has a <code>response_format</code>, keeps calling tools, and the bill climbs. Why, and what do you change?</summary>
+
+- With `ToolStrategy`, every model call is sent with `tool_choice` "required", so the model can never just answer
+- The run ends only when it calls a schema tool. A question that fits no schema has no exit, and `create_agent`'s step limit is 9,999
+- Fixes: add a general reply schema to the `Union`, or drop `response_format` from a chat agent and extract only when needed; cap calls with `ModelCallLimitMiddleware`
+- *Stronger answer:* find it in the trace first (the same tool again and again), put `run_limit` and `thread_limit` on every agent, and alert on cost per thread. A prompt line like "stop after 10 times" is not a limit
+
+</details>
+
+<details class="qa"><summary>16. What does a tool that calls a public API need before you give it to an agent?</summary>
+
+- A timeout on every request (`requests` has none by default), so one slow service cannot hang the run
+- A clear difference between "not found" and "service down", because the model acts on the text you return
+- Strict parsing: fail on a changed reply instead of reading `None`, which the model would state as fact
+- *Stronger answer:* decide per tool whether to return an error message or raise and let `ToolRetryMiddleware` and `ToolErrorMiddleware` handle it; cache results that stay valid (weather for minutes); keep keys server-side; log latency and error rate per tool
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"A travel assistant must remember a user's preferences across trips but not leak them to other users."* Cover thread vs store, namespaces, what gets saved, and deletion.
 
@@ -1038,6 +1261,9 @@ store.search(("u1",), filter={"value": "aisle"}, query="seat")   # prefix + exac
 agent.invoke({"messages": [("user", "I prefer aisle seats")]}, cfg, context=Ctx(user_id="u1"))
 for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
 # state = changes in the run · context = fixed per run · store = across conversations
+response_format=ToolStrategy(Union[NewTrip, CancelTrip, GeneralReply])   # ToolStrategy forces a tool call: give it an exit
+ModelCallLimitMiddleware(run_limit=10, exit_behavior="end")              # limits live in code, not in the prompt
+requests.get(url, params=params, timeout=(3, 10)); r.raise_for_status()  # every outside call: timeout + status check
 ```
 
 ## Recap
@@ -1054,6 +1280,9 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
 - `thread_id` = which conversation. `context` = who is asking, this run. State = what changes during the run (`state_schema`)
 - `name` matters when the agent becomes a subgraph in a multi-agent system
 - Headless tools: defined on the server, run on the user's device
+- A checkpointer without a `thread_id` in the config raises a `ValueError`
+- A real-API tool needs a timeout, a clear "service down" vs "not found", and strict parsing (6.3)
+- `ToolStrategy` forces a tool call on every model call. A message that fits no schema has no exit: add a general reply schema or keep `response_format` off chat agents, and cap calls in code (6.6)
 
 ## Practice
 
@@ -1073,12 +1302,14 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
 10. Add the `delete_old_messages` hook, chat three turns, and print the thread after each. Then explain why the agent forgot your name
 11. Swap `InMemorySaver` for `SqliteSaver` on a file, restart Python, and continue the same `thread_id`
 12. Give an `InMemoryStore` an index with real embeddings, save three preferences, and search them with a query. Then store two users under `("users",)` keyed by id, search `("users",)`, and see what leaks
+13. Point the class `get_real_weather` at a small local server that answers 500, drops `current_weather`, or never answers. Then run the hardened version against the same three cases
+14. The class 11 homework: give a fake model that never picks a schema tool to an agent with the three trip schemas. Watch it run to the step limit, stop it with `ModelCallLimitMiddleware`, then add `GeneralReply` and let a model take the exit
 
 ## How this chapter was checked
 
 - Run offline with a stand-in model on `langchain` 1.4.7: the full agent assembly (tools, middleware, checkpointer, store, context schema, name), per-run context reaching tools and middleware, `InMemoryStore` put, get and search with a tuple namespace, `get_state`, and the SQLite save and get tools
 - **Not run against a live model or real APIs:** Open-Meteo, Tavily, a Postgres saver, headless tools. Those are class statements
-- The TripMate real-tool code is not in the sources read for this chapter, so section 6.3 shows only my own SQLite example
+- The TripMate real-tool code is in the Weekend 05 notebook (`Langchain_Till_Agents.ipynb`, cells 84–144), which class 11 ran. Sections 6.3 and 6.6 now use it. *(This line used to say the code was not in the sources; it was, in that notebook.)* The SQLite example in 6.3 is still my own, shorter version of the class's `save_trip` and `get_saved_trips`
 - **Details by section** (moved here from the ✅ markers):
   - *Deleting messages with `RemoveMessage`:* Checked: an `after_model` hook with a checkpointer dropped the first two messages, so after two turns the thread held `['b', '2']`; the remove-all hook left `[]`.
   - *6.8 Streaming an agent:* Checked (scripted model, langchain 1.4.7): the v2 chunk keys; `updates` gave `model, tools, model`; `values` gave 4 snapshots; `messages` gave tuples; `GraphOutput.interrupts` was `()`; `custom` printed both writer lines; v3 `stream.messages` gave text `It is sunny` and tool call `get_weather {'city': 'SF'}`. **Observed:** in sync code, reading `stream.messages` first left `stream.tool_calls` empty. Use `stream.interleave("messages", "tool_calls")` to get both in order (tested in Ch16), plus `stream.interrupted` and `stream.interrupts` for a paused run.
@@ -1117,6 +1348,17 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
     - Isolation: under `("users",)` keyed by id, `search(("users",))` returned both users; under `("users", user_id)`, a search on one user's prefix returned only theirs
     - Cheat sheet store lines ran with a fake embedding (1536 dims)
     - `PostgresStore` imported; `from_conn_string` takes `index`, and it has `setup`. Not connected (no server)
+  - *Update from the class 11 recording (1 Aug) and the Weekend 05 notebook (2026-11-15), `langchain` 1.5.0, `langchain-openai` 1.8.0, `langgraph` 1.2.22, `pydantic` 2.12.5, `requests` 2.34.2, Python 3.13. No live model or API: a local stand-in for the two Open-Meteo endpoints (reply shapes copied from the notebook) and a local stand-in for the OpenAI API that logged every request body:*
+    - 6.3 class `get_real_weather` (code as in cell 87): Bengaluru as in class; a 500 gave "Could not find a location…"; a reply without `current_weather` gave `None°C, wind None km/h`; a server that never answered left the call waiting after 5 s (no timeout)
+    - 6.3 hardened version, run as written: the four results in the ✅ line (read timeout lowered to 1 s for the test)
+    - 6.4 an agent with `InMemorySaver` invoked without a config raised `ValueError: Checkpointer requires one or more of the following 'configurable' keys: thread_id, checkpoint_ns, checkpoint_id`
+    - 6.6 forced tool choice: every request from a `ToolStrategy(Union[...])` agent carried `"tool_choice": "required"`, and the tools sent were `get_real_weather` plus the three schema tools. `ProviderStrategy(NewTripRequest)` and an agent without `response_format` sent no `tool_choice`
+    - 6.6 loop: `create_agent` set `recursion_limit` 9999. A stand-in model that always called `get_real_weather` hit `GraphRecursionError` after 13 model calls with the limit set to 25, and stopped at 10 calls with `ModelCallLimitMiddleware(run_limit=10, exit_behavior="end")` (`structured_response` `None`). With `GeneralReply` added, a stand-in that took the exit finished in 2 calls
+    - 6.6 warning: a tool with `runtime: ToolRuntime` produced 2 `PydanticSerializationUnexpectedValue` warnings (`field_name='context'`) with a dataclass context and 2 with a `BaseModel` context; a tool without `runtime` produced none. The warning is raised in `langchain_core/tools/base.py` (`_parse_input`, `model_dump()`). Each run finished and wrote the store
+    - 6.6 `@dataclass` on a `BaseModel`: construction raised `AttributeError … '__pydantic_fields_set__'` on Pydantic 2.10.6, 2.11.10, 2.12.5, 2.13.4 and 2.14.3 (Python 3.13) and on 2.11.10 and 2.12.5 (Python 3.12.3). Notebook execution counts: cell 138 ran as number 108, the invoke as number 117
+    - 6.6 premium gate: with `is_premium_member: True` in the input and in context, the class gate (reads `request.state`) sent only `save_travel_style`; the context gate also sent `book_premium_concierge`
+    - 6.9 Redis: `langgraph-checkpoint-redis` 0.6.0 downloaded and its files read: `langgraph.checkpoint.redis` exports `RedisSaver` (and `ShallowRedisSaver`, async versions), `langgraph.store.redis` exports `RedisStore`. Not run (no Redis server)
+    - **Not run:** gpt-5-mini itself, so what the real model did in the class loop is inferred from the forced tool choice and the class output, not reproduced; live Open-Meteo and Tavily
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures, and the updated cheat sheet against 1.5.0
 - **Cheat sheet:** ran the checkpointer, store, thread id and `stream_mode="updates"`; the thread state held the messages. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
@@ -1126,12 +1368,16 @@ for c in agent.stream(inp, cfg, stream_mode="updates"): print(c)
 - Live-Class-2026, `classes_transcription_summary/11 - 01 Aug - LangChain - Agents, Memory, Middleware.md`
 - Live-Class-2026, whiteboards `Langchain-2-Updated.pdf` and `Agent-Middleware-Architecture.pdf` in `Weekend 06 - 1 Aug/11-12 - 1-8 Aug - Agents, Memory & Middleware/`
 - Live-Class-2026, `MIddleware.ipynb` (cells 0 to 56) in the same folder
+- Live-Class-2026, `Weekend 05 - 25-26 Jul/09-10 - 25-26 Jul - Structured Output & Tools (CineBot)/Langchain_Till_Agents.ipynb`, cells 84–144 (real weather, Tavily, SQLite trips, the trip schemas, the store tools, the premium gate and the full TripMate run), run in class 11
+- Class 11 recording transcript (1 Aug 2026), teaching part only (00:00–03:11; the doubt session after it was left out): the TripMate run and its cost, the store vs saver answer, the questions in 6.9
+- Open-Meteo docs: [open-meteo.com/en/docs](https://open-meteo.com/en/docs) (the `current=` parameter; web-checked 2026-11-15, the site itself was blocked here)
+- PyPI: [langgraph-checkpoint-redis](https://pypi.org/project/langgraph-checkpoint-redis/) (Redis checkpointer and store, 0.6.0)
 - LangChain docs: [Agents](https://docs.langchain.com/oss/python/langchain/agents) (read in full 2026-11-15): agent anatomy, `AgentState`, invocation with `thread_id` and `context`, streaming, the harness capability areas. The three diagrams in `images/` are copied from this page
 - LangChain docs: `short-term-memory.mdx`, `streaming.mdx`, `event-streaming.mdx` (earlier batches)
 - LangChain docs: [Streaming](https://docs.langchain.com/oss/python/langchain/streaming), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/streaming.mdx` and two snippet files; docs.langchain.com was blocked from this environment). Used for the stream-mode bullets and "`stream()` patterns" in 6.8
 - LangChain docs: [Event streaming](https://docs.langchain.com/oss/python/langchain/event-streaming), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/event-streaming.mdx`; docs.langchain.com was blocked from this environment). Used for "Event streaming (v3): projections and rules" in 6.8. The two ⚠️ boxes are from testing
 - LangChain docs: [Short-term memory](https://docs.langchain.com/oss/python/langchain/short-term-memory), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/short-term-memory.mdx`; docs.langchain.com was blocked from this environment). Used for 6.4 (threads, when memory is saved, deleting and the valid-history warning) and 6.5 (the Postgres saver install and setup)
 - LangChain docs: [Long-term memory](https://docs.langchain.com/oss/python/langchain/long-term-memory), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/long-term-memory.mdx` and eight Python snippet files; docs.langchain.com was blocked from this environment). Used for the store sections of 6.5: namespace and key, put / get / search, the index, the read and write tools, and the Postgres store
-- Section 6.11, the SQLite example in 6.3, the state / context / store table in 6.6, the per-user tool and 🔒 box in 6.5, and senior questions 10–11 and 14 are added by Claude and are not from these sources
+- Section 6.11, the SQLite example and the hardened weather tool in 6.3, the state / context / store table in 6.6, the "homework, solved" code and the bullets after it in 6.6, the per-user tool and 🔒 box in 6.5, and senior questions 10–11 and 14–16 are added by Claude and are not from these sources
 
 Previous: [Chapter 5, Tools](05-tools.md) · Next: [Chapter 7, Middleware](07-middleware.md)

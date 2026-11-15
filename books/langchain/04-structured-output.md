@@ -120,6 +120,8 @@ provider_strategy_model = model.with_structured_output(ProviderStrategy(SupportT
 
 **Caveat from the notes:** community reports from late 2025 say `ToolStrategy` plus real tool calls in one agent behaved unreliably on certain models (recursion limits, failed runs). Test your own model and use case before trusting that combination.
 
+- **Why it can loop** (tested on 1.5.0): on an agent, `ToolStrategy` sends **every** model call with `tool_choice` set to "required". The model must call some tool every turn and can never just answer. The run ends only when it calls one of the schema tools, so a message that fits no schema has no exit. `ProviderStrategy`, and an agent without `response_format`, send no `tool_choice`. Class 11's full TripMate agent hit exactly this ([Chapter 6](06-agents-and-memory.md), 6.6)
+
 ## 4.5 The whole pipeline: template in, structured output out
 
 - A template shapes the **question**. A schema shapes the **answer**. Chain them with `|`
@@ -570,11 +572,12 @@ agent.invoke(inp)["structured_response"]                       # on an agent
   - *When the model refuses (2026-11-15):* Checked on `langchain-core` 1.8.0 / `langchain` 1.5.0: `ModelRefusalError` imports from `langchain_core.exceptions`, its default text is "Model refused to produce the requested output", and it carries `raw_message`; `ModelRefusalMiddleware` imports from `langchain.agents.middleware`. **Not run:** a real provider refusal, so the raise-vs-`parsing_error` behaviour and the version notes are from the docs
   - *Class transcripts (25–26 Jul), added 2026-11-15, run on `langchain` 1.5.0 with scripted fake models and a local stand-in OpenAI server:*
     - a model that always answered 15 made 25 model calls under `recursion_limit=25`, then `GraphRecursionError`
-    - `ModelCallLimitMiddleware(run_limit=3, exit_behavior="end")` stopped it at 3 calls with `structured_response` missing; the 4.9 code block ran as written (fake model swapped in) and its custom message reached the `ToolMessage`
+    - `ModelCallLimitMiddleware(run_limit=3, exit_behavior="end")` stopped it at 3 calls with `structured_response` `None` (the key is present, its value is `None`); the 4.9 code block ran as written (fake model swapped in) and its custom message reached the `ToolMessage`
     - two bad fields came back in one `ToolMessage` listing both
     - `ProviderStrategy` with a reply of 15: one request, then `StructuredOutputValidationError`; the request schema carried `minimum`/`maximum`; `ProviderStrategy` takes only `schema` and `strict`
     - `ProviderStrategy(Union[...])` raised `ValueError: Unsupported schema type`; `ToolStrategy(Union[...])` was accepted
     - **Not checked:** a real provider's behaviour on the 1–10 limits in its native mode, and the class's front-end request demo (it was shown, not reproduced)
+  - *Class 11 recording (1 Aug), added 2026-11-15, `langchain` 1.5.0 and `langchain-openai` 1.8.0 with a local stand-in OpenAI server that logged every request body:* 4.4 "Why it can loop": every request from an agent with `ToolStrategy(Union[...])` carried `"tool_choice": "required"`; `ProviderStrategy(NewTripRequest)` sent `response_format` of type `json_schema` and no `tool_choice`; an agent without `response_format` sent no `tool_choice`. The full test is in [Chapter 6](06-agents-and-memory.md), "How this chapter was checked"
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran `create_agent(..., response_format=ToolStrategy(Movie))` and read `structured_response`; `with_structured_output(Movie)` was constructed on a real model object, not called. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
@@ -591,6 +594,7 @@ agent.invoke(inp)["structured_response"]                       # on an agent
 - The `method=` options, `profile` values and `handle_errors` behaviour in 4.2, 4.7 and 4.9 are from testing
 - LangChain docs: [Models](https://docs.langchain.com/oss/python/langchain/models), section "Handle a model refusal" (read 2026-11-15), for "When the model refuses" in 4.9
 - Class recording transcripts, 25 Jul 2026 (Class 09) and 26 Jul 2026 (Class 10), uploaded by you; teaching part only: the business-limit examples, the vague-retry experience, the `ProviderStrategy` and `Union` remarks, and the class questions
+- Class recording transcript, 1 Aug 2026 (Class 11), uploaded by you; teaching part only: the full TripMate run that never finished, explained by the forced tool choice in 4.4
 - Added by Claude: the retry-ceiling rule and code, the "don't clamp" note, interview question 8, and the answers marked as such in the class-questions table
 
 Previous: [Chapter 3](03-models-messages-and-parameters.md) · Next: [Chapter 5, Tools](05-tools.md)

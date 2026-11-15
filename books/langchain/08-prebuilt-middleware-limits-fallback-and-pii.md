@@ -9,8 +9,9 @@
 **After this chapter you can:**
 
 - Cap cost with model call and tool call limits (run vs thread)
-- Survive a provider outage with model fallback
+- Survive a provider outage with model fallback, without letting it hide a typo or a bad key
 - Keep personal data away from the model with `PIIMiddleware`, including custom detectors
+- Explain why a hash is one-way, and give a tool the real value through a token vault
 - Explain the difference between a guardrail and middleware
 - Combine several middlewares and decide between LangChain and LangGraph
 
@@ -135,6 +136,57 @@ resilient_agent = create_agent(
 
 > **Correction.** The class transcript wrote `ModelFallbackMiddleware(model="...")`. That raises `TypeError: unexpected keyword argument 'model'`. The notebook's positional form is the one that works
 
+### A fallback can hide a typo (class 12)
+
+- The class 12 demo's primary model was `openai:gpt-5.5-haiku`, a name that does not exist. With the middleware the answer simply came from `gpt-5-mini`. The mentor: "it didn't give me an error"
+- That is the hazard. The middleware cannot tell an outage from a mistake in your own config
+- *Tested on 1.5.0* (stand-in OpenAI server): the 404 `model_not_found` and a 401 bad key both fell back **silently**. No warning, no log line at any level. The installed `ModelFallbackMiddleware` catches every `Exception` and logs nothing when it switches
+- So a typo, an expired key or a retired model can run on the backup for weeks, at a different quality and cost, and nobody notices
+
+How to catch it:
+
+- **Check who answered.** `reply.response_metadata["model_name"]` read `gpt-5-mini-2025-08-07` on the typo run. Compare it with the model you configured, and alert on a mismatch
+- **Fall back only on outages** (*added by Claude*):
+
+```python
+import logging
+from langchain.agents import create_agent
+from langchain.agents.middleware import wrap_model_call
+from langchain.chat_models import init_chat_model
+from langchain_core.exceptions import ModelAPIError, ModelConnectionError, ModelRateLimitError, ModelTimeoutError
+
+log = logging.getLogger("llm.fallback")
+OUTAGE = (ModelRateLimitError, ModelAPIError, ModelConnectionError, ModelTimeoutError)   # 429, 5xx, network, timeout
+
+def fallback_on_outage(backup):
+    @wrap_model_call
+    def fallback(request, handler):
+        try:
+            return handler(request)
+        except OUTAGE as e:                      # a real outage: switch, and say so
+            log.warning("primary model failed (%s); using the backup", type(e).__name__)
+            return handler(request.override(model=backup))
+        # ModelNotFoundError (typo) and ModelAuthenticationError (bad key) are not caught: the run fails loudly
+    return fallback
+
+def check_models(*models):
+    """Run at startup or deploy: a typo or a bad key fails here, not behind a fallback."""
+    for m in models:
+        m.invoke("Reply with OK")
+
+primary = init_chat_model("openai:gpt-5-mini")
+backup = init_chat_model("anthropic:claude-sonnet-4-6")    # another provider, so it survives an OpenAI outage
+check_models(primary, backup)
+agent = create_agent(model=primary, tools=cinebot_tools, middleware=[fallback_on_outage(backup)])
+```
+
+✅ *Verified on 1.5.0 with `ChatOpenAI` objects pointed at a stand-in server: a 429 and a 503 fell back, each with a `WARNING llm.fallback` line; the typo raised `OpenAIModelNotFoundError` (404) and the bad key `OpenAIAuthenticationError` (401). `check_models` raised the same 404 for the typo at once (and the 429 and 503 for the outages).*
+
+- These error classes are **provider-neutral** (`langchain_core.exceptions`). In the installed versions `langchain-openai`, `langchain-anthropic` and `langchain-google-genai` raise subclasses of them. Other provider packages may raise only their own SDK's errors, so check yours
+- `check_models` also fails while a provider is down (tested: 429 and 503 raised too). Run it at deploy, and retry the deploy, not on every request
+- Keep the SDK's own retries on the primary (`max_retries`): a short burst of 429s often clears within seconds, and retrying is cheaper than switching models
+- The class's rule of thumb: **more than five fallbacks is a smell.** One backup from another provider is usually enough, plus a local model if you need to work offline
+
 ### Refusals: `ModelRefusalMiddleware`
 
 - **The problem:** providers report a refusal (a safety-policy "I can't help with that") as a **successful** response
@@ -235,9 +287,9 @@ Strategies (checked on `langchain` 1.4.7):
 - **`redact`:** removes the value. `priya@example.com` becomes `[REDACTED_EMAIL]`
 - **`mask`:** keeps a hint so the model can tell something was there. `priya@example.com` becomes `priya@****.com`
 - **`hash`:** replaces it with a **deterministic** hash, for example `<email_hash:6bdb7e96>`. The same input always gives the same hash
-  - Identity stays usable for analytics and debugging without exposing the value
-  - Class analogy: telling an outsider a card is "AMZ1234ABC" reveals nothing, but the system that made the reference can still look it up
-  - When a tool really needs the real value, the lookup that turns the hash back into it happens **separately, outside the model's view**. The model never sees it
+  - Identity stays usable for analytics and debugging without exposing the value: the same customer gets the same hash in every log
+  - Class analogy: telling an outsider a card is "AMZ1234ABC" reveals nothing, but the system that made the reference can still look it up. That only works if the system **kept a record** of which value made which reference
+  - A hash cannot be turned back into the value, so a tool that needs the real value gets nothing from it. The pattern for that case is a token vault ("Hashing is one-way", end of 8.4)
 - **`block`:** stops the run with a `PIIDetectionError`
 
 Built-in types in this version: `email`, `credit_card`, `ip`, `mac_address`, `url`. Anything else is a **custom** type.
@@ -288,7 +340,7 @@ The function detector returns a list of dicts with `text`, `start` and `end`.
 - The docs type this as **`PIIMatch`** (`from langchain.agents.middleware import PIIMatch`) with the keys `type`, `value`, `start` and `end`
 - *Checked on 1.5.0:* a detector returning `value` and one returning `text` both redacted `123-45-6789`. Follow `PIIMatch`
 
-Class 13 used `strategy="hash"` for the booking codes. Checked: `BK1044` becomes `<booking_code_hash:94be15f9>`.
+Class 13 used `strategy="hash"` for the booking codes. Checked: `BK1044` becomes `<booking_code_hash:94be15f9>`. What that hash can and cannot do is at the end of 8.4.
 
 Three more switches (from the library signature, not explained in class 12):
 
@@ -307,6 +359,93 @@ Three more switches (from the library signature, not explained in class 12):
 > - Regex PII detection misses things (names, free-text addresses); for regulated data add a dedicated detector and keep raw data out of logs too
 > - Decide where PII may go: masking before the model protects you only if traces and logs are masked as well
 > - *Added by Claude.*
+
+### Hashing is one-way: when a tool needs the real value (class 13)
+
+- In class 13 the mentor said he could "unhash" a value to get it back. A hash does not work that way: there is no key, and nothing to decrypt
+- *Checked on 1.5.0:* `PIIMiddleware` keeps no record of what it replaced; its only attributes are its settings. With `strategy="hash"`, the model passed `<booking_code_hash:94be15f9>` to a `lookup_booking` tool, which answered "No booking found"
+- The opposite risk: a short, unsalted hash of a **small set of values** is easy to reverse by trying them all
+  - The middleware keeps the first 8 hex characters of a plain SHA-256
+  - Trying every code from `BK0000` to `BK9999` found `BK1044` from `94be15f9` in 9 ms
+  - Plain Python on this machine hashed about 2.2 million values a second, so every 10-digit phone number would take about 1.3 hours on one core
+- So `hash` is for **telling records apart** (analytics, logs), not for hiding a value someone can guess
+
+**When a tool needs the real value: a token vault** (*added by Claude*)
+
+```mermaid
+flowchart TD
+    U["User: check BK1044"] --> H[Vault: BK1044 → random token]
+    H --> M[Model sees only the token]
+    M -->|tool call with the token| R[Vault: token → BK1044]
+    R --> T[Tool runs with BK1044]
+    T -->|result, BK1044 hidden again| M
+```
+
+```python
+import re, secrets
+from langchain.agents.middleware import AgentMiddleware
+from langchain.messages import HumanMessage, ToolMessage
+
+BOOKING = re.compile(r"\bBK\d{4}\b")
+TOKEN = re.compile(r"<booking:[0-9a-f]{8}>")
+
+class BookingVault(AgentMiddleware):
+    """Real booking codes never reach the model. Random tokens go in; tools get the real value back."""
+
+    def __init__(self):
+        super().__init__()
+        self.real, self.token_of = {}, {}   # token -> value, value -> token. Production: encrypted, per user, with a TTL
+
+    def hide(self, text: str) -> str:
+        def swap(m):
+            if m.group() not in self.token_of:                   # same code, same token
+                token = f"<booking:{secrets.token_hex(4)}>"      # random: nothing to reverse
+                self.token_of[m.group()], self.real[token] = token, m.group()
+            return self.token_of[m.group()]
+        return BOOKING.sub(swap, text)
+
+    def reveal(self, text: str) -> str:
+        return TOKEN.sub(lambda m: self.real.get(m.group(), m.group()), text)
+
+    def before_model(self, state, runtime):
+        last = state["messages"][-1]
+        if isinstance(last, HumanMessage) and BOOKING.search(last.text):
+            return {"messages": [HumanMessage(content=self.hide(last.text), id=last.id)]}  # same id: replaces it
+        return None
+
+    def wrap_tool_call(self, request, handler):
+        args = {k: self.reveal(v) if isinstance(v, str) else v for k, v in request.tool_call["args"].items()}
+        result = handler(request.override(tool_call={**request.tool_call, "args": args}))   # the tool sees BK1044
+        if isinstance(result, ToolMessage) and isinstance(result.content, str):
+            result.content = self.hide(result.content)                                    # the model does not
+        return result
+```
+
+```python
+from langchain.agents import create_agent
+from langchain.tools import tool
+from langgraph.checkpoint.memory import InMemorySaver
+
+@tool
+def lookup_booking(code: str) -> str:
+    """Look up a booking by its code."""
+    bookings = {"BK1044": "Interstellar, 2 seats, 7 pm"}          # stands in for your database
+    return f"Booking {code}: {bookings[code]}" if code in bookings else f"No booking found for {code}."
+
+vault = BookingVault()
+agent = create_agent(model="openai:gpt-5-mini", tools=[lookup_booking], middleware=[vault],
+                     checkpointer=InMemorySaver())
+config = {"configurable": {"thread_id": "t1"}}
+result = agent.invoke({"messages": [("user", "Please check booking BK1044")]}, config)
+print(vault.reveal(result["messages"][-1].content))     # reveal only when you show the reply
+```
+
+✅ *Verified on 1.5.0 with a stand-in OpenAI server that logged every request: the model saw `Please check booking <booking:95afe136>` and called `lookup_booking` with that token; the tool received `BK1044`; its result went back to the model as `Booking <booking:95afe136>: Interstellar, 2 seats, 7 pm`; `vault.reveal` turned the reply into `… Booking BK1044: …`. "BK1044" appeared in neither request the provider received, nor in the saved thread.*
+
+- **The tokens are random,** so there is nothing to reverse. Only the vault can map them back
+- **Reveal at display time, not in the agent's state.** If the real value goes back into the messages, the next turn sends it to the model
+- **Production:** keep the vault in your own database, encrypted, with a time limit, and **one vault per user or thread**. A shared vault lets one user's token open another user's booking, so the tool must still check that the booking belongs to the user
+- Card numbers are the extreme case: payment processors issue their own tokens, and card data should not reach the model at all (the payment page above)
 
 ## 8.5 Guardrail vs middleware
 
@@ -397,6 +536,9 @@ agent = create_agent(
 - **Can I attach several middlewares?** Yes, as a list (8.6)
 - **Do they run in a random order?** No. A defined priority applies, or declaration order (8.6)
 - **LangChain + middleware or LangGraph?** See 8.6
+- **Does the fallback tell you the primary model name is wrong?** No. In class 12 the misspelled model fell back without an error. Tested: no warning and no log line (8.3)
+- **Should every agent have a fallback?** The mentor: yes, providers do have outages. Also true: fall back only on outages, alert when it happens, and re-test your prompts on the backup. For safety-critical work, a silent switch to a weaker model is itself a risk (8.3, 8.9)
+- **Can a hashed value be "unhashed"?** No. A hash is one-way. To get values back you keep your own token-to-value record, a vault (8.4)
 
 ## 8.8 Interview corner
 
@@ -468,6 +610,22 @@ agent = create_agent(
 
 </details>
 
+<details class="qa"><summary>9. Your backup model has been answering for a week and nobody noticed. How did that happen, and how do you prevent it?</summary>
+
+- `ModelFallbackMiddleware` catches every exception and switches without a warning, so a typo in the model name, an expired key or a retired model looks like success
+- Prevent it: fall back only on outages (rate limit, 5xx, network, timeout) and let 404 and 401 fail; log every switch; smoke-test each configured model at deploy
+- *Stronger answer:* alert when `response_metadata["model_name"]` differs from the configured model, track the fallback rate on a dashboard, and re-run your evals on the backup so you know what quality you get when it fires
+
+</details>
+
+<details class="qa"><summary>10. A tool needs the customer's real booking code, but the code must never reach the model provider. Design it.</summary>
+
+- `strategy="hash"` is not enough: a hash cannot be turned back, so the tool gets nothing, and a short hash of a small code space is guessable by trying every code
+- Use a vault: replace codes with random tokens before the model, keep token to value on your side, swap the real value in inside `wrap_tool_call`, and hide it again in the tool's result
+- *Stronger answer:* one vault per user or thread, encrypted, with an expiry; the tool still checks ownership; reveal only when displaying the reply; and make sure logs and traces see tokens, not values
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"A health-insurance chatbot must never send member identifiers to the model provider."* Cover PII detection and strategy, inputs vs outputs vs tool results, logging, and a fallback that respects the same rule.
 
@@ -479,7 +637,7 @@ Not in the course material. Established practice, but check current docs.
 
 - **Limits stop runaway cost, not bad behaviour.** Keep the run limit comfortably above what a normal task needs, and add a time limit too
 - **A thread limit needs a persistent checkpointer** to survive restarts
-- **Log when a fallback fires.** It can hide an outage, and the fallback model may follow your prompt and tools differently. Re-test your prompts on it, and do not fall back to a weaker model silently for safety-critical work
+- **Log when a fallback fires.** The installed middleware does not (8.3). It can hide an outage, and the fallback model may follow your prompt and tools differently. Re-test your prompts on it, and do not fall back to a weaker model silently for safety-critical work
 
 **PII**
 
@@ -503,6 +661,9 @@ middleware = [
     ModelFallbackMiddleware("openai:gpt-4o-mini", "anthropic:claude-sonnet-4-6"),
     PIIMiddleware("email", strategy="redact", apply_to_input=True),
 ]
+fallback_on_outage(backup)               # 8.3: switch on 429 / 5xx / network / timeout only, and log it
+reply.response_metadata["model_name"]    # who really answered: alert if it is not the model you configured
+BookingVault()                           # 8.4: random tokens to the model, real values only inside tools
 ```
 
 ## Recap
@@ -510,6 +671,8 @@ middleware = [
 - **Model call limit:** `run_limit` (one invoke) and `thread_limit` (whole conversation, needs a checkpointer). **Tool call limit:** global or per tool
 - **Model fallback:** models passed positionally, only on hard failure, full history passed on
 - **PII:** redact, mask, hash or block. Custom detector = function or regex **string**. The card checksum can skip fake numbers
+- `ModelFallbackMiddleware` switches silently on **any** error, a typo included. Fall back only on outages, log it, and smoke-test model names at deploy
+- A hash is one-way, and a short hash of a small code space is guessable. When a tool needs the real value, use a token vault
 - **Guardrail = goal, middleware = mechanism**
 - Several middlewares go in one list and run in declaration order
 
@@ -517,7 +680,7 @@ middleware = [
 
 1. Set both a `run_limit` and a `thread_limit` on one agent and trigger each one independently
 2. Add a model call limit and a tool call limit to an existing agent and deliberately trigger both
-3. Configure `ModelFallbackMiddleware` and force the primary model to fail (an intentionally wrong model name or key) to confirm the fallback fires
+3. Configure `ModelFallbackMiddleware` and force the primary model to fail (an intentionally wrong model name or key) to confirm the fallback fires. Notice that nothing told you. Then swap in `fallback_on_outage` and watch the same typo fail loudly
 4. Write your own custom `PIIMiddleware` detector (with `re`) for an ID format from your own country or use case
 5. Explain the difference between a guardrail and middleware in your own words, out loud
 6. Assignment 2 (NovaBank), the parts this chapter prepares you for. The assignment has no answer key:
@@ -525,6 +688,7 @@ middleware = [
    - B2.2: a custom detector for `NB-` plus 8 digits, attached with `strategy="mask"`
    - B3.1 (partly): `SummarizationMiddleware`, `ToolCallLimitMiddleware` and `ModelCallLimitMiddleware` together on one agent
    - (Q6, Q9, Q11 to Q15, B2.3, B3.2, B3.3 and the capstone use the middlewares in Chapter 9)
+7. Hash `BK1044` with `strategy="hash"`, then recover it from the hash by trying every code from `BK0000` to `BK9999`. Then build the `BookingVault` and check the provider never sees the code
 
 ## How this chapter was checked
 
@@ -542,6 +706,12 @@ middleware = [
     - Router: a scripted `BaseDecisionModel` subclass answering the `model_route` choice with `powerful`; a spy middleware saw only the `powerful` model; `result["model_route"].choice` was `powerful`; `LangChainBetaWarning` on construction. The docs' `TypeSafeClassifier` was not installed, so the docs' snippet itself was not run
     - PII: `re.compile(...)` detector built fine and raised `TypeError: 're.Pattern' object is not callable` on the first `invoke`; function detectors returning `value` or `text` both redacted `123-45-6789`. The 128-character hold-back is a docs statement, not tested
   - *`ToolCallLimitMiddleware`: the exit behaviours and the error:* Checked* with `tool_name="t1"`, `run_limit=1` and a model that asked twice: `continue` gave a final model answer; `end` ended with the message `'t1' tool call limit reached: run limit exceeded (2/1 calls).`; `error` raised `ToolCallLimitExceededError` with the same text
+  - *Class 12 and 13 recordings (8–9 Aug), added 2026-11-15, `langchain` 1.5.0, `langchain-core` 1.8.0, `langchain-openai` 1.8.0, with a local stand-in for the OpenAI API (404 for `gpt-5.5-haiku`, 401 for a bad key, 429 and 503 for outages, every request body logged):*
+    - 8.3 typo: no fallback raised `OpenAIModelNotFoundError` (404, `model_not_found`). With `ModelFallbackMiddleware(gpt-5-mini)` the run answered `answer from gpt-5-mini`, `response_metadata["model_name"]` `gpt-5-mini-2025-08-07`, 0 warnings, 0 log lines at WARNING or above and none mentioning a fallback at any level. A 401 primary also fell back silently. The source: `model_fallback.py` catches `Exception` (re-raising only `GraphBubbleUp`) and has no log call on the switch
+    - 8.3 `fallback_on_outage` (the 8.3 block, `ChatOpenAI` objects swapped in for `init_chat_model`): 429 and 503 fell back with one `WARNING llm.fallback` line each; 404 raised `OpenAIModelNotFoundError`, 401 `OpenAIAuthenticationError`; `check_models` raised the 404 at once, and also the 429 and 503. The `langchain-openai` error classes subclass both the `openai` ones and `langchain_core.exceptions` ones (`OpenAIRateLimitError` → `ModelRateLimitError`, `OpenAIAPIError` → `ModelAPIError` for 5xx). `langchain-anthropic` 1.7.10 references all six classes used here; `langchain-google-genai` 4.5.0 references four (not connection or timeout). Only OpenAI was run
+    - 8.4 hash: the middleware's attributes were `_resolved_rule, apply_to_input, apply_to_output, apply_to_tool_results, detector, pii_type, strategy`; the user message became `Please check booking <booking_code_hash:94be15f9>`; the tool received the hash and answered `No booking found for <booking_code_hash:94be15f9>.`. The source keeps `sha256(value).hexdigest()[:8]`. Brute force over `BK0000`–`BK9999`: `['BK1044']` in 9 ms. Speed: 2.2 million SHA-256 per second in one Python process
+    - 8.4 vault: the 8.4 blocks run as written with the stand-in model; results in the ✅ line, 2 model calls, vault size 1 (one token reused for the same code)
+    - **Not run:** a real provider's 404, 401, 429 or 503 (the error classes come from the installed packages); Anthropic or Google models
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran all four middleware in one agent; the email address was redacted from the stored input; the call limits and the model fallback were constructed but not triggered. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
@@ -554,5 +724,7 @@ middleware = [
 - Section 8.9 and the corrections in 8.3 and 8.4 are from testing, not from the class sources
 - LangChain docs: [Built-in middleware](https://docs.langchain.com/oss/python/langchain/middleware/built-in), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/middleware/built-in.mdx`; docs.langchain.com was blocked from this environment). Used for "Refusals" and "Choosing the model per run" in 8.3 and the PII additions in 8.4
 - LangChain docs: [Event streaming](https://docs.langchain.com/oss/python/langchain/event-streaming), "Register transformers on middleware" (read 2026-11-15 from its source, commit `04d4d4a`), for `apply_to_output` on the live stream in 8.4
+- Class recording transcripts, 8 Aug 2026 (class 12, teaching part 00:10–03:18) and 9 Aug 2026 (class 13, teaching part 00:00–03:11), uploaded by you; the doubt sessions after them were left out: the misspelled fallback demo, "more than five fallbacks", "every agent should have a fallback", the hash strategy and "I can unhash it"
+- Added by Claude: `fallback_on_outage`, `check_models` and the bullets around them in 8.3 (except the class's five-fallbacks rule), the token vault in 8.4, and interview questions 9–10
 
 Previous: [Chapter 7, Middleware basics](07-middleware.md) · Next: [Chapter 9, Guardrails, to-do lists and tool resilience](09-guardrails-to-do-lists-and-tool-resilience.md)

@@ -13,7 +13,8 @@
 - Filter tools by state or by context
 - Register a tool at run time with `wrap_model_call` plus `wrap_tool_call`
 - Compress long conversations with `SummarizationMiddleware`
-- Guard irreversible tools with `HumanInTheLoopMiddleware` and resume a paused run
+- Guard irreversible tools with `HumanInTheLoopMiddleware` and resume a paused run, even from another process
+- Tell middleware apart from LangChain callbacks, and recognise the same hooks under other names (ADK callbacks, Claude Code hooks)
 
 ## 7.1 The problem: not every tool belongs to every user
 
@@ -123,6 +124,25 @@ Request
   → after_agent
   → Response
 ```
+
+**Same idea, other names** (class 12 called them middleware, hooks or callbacks):
+
+| Framework | Its name | Around the model call | Around a tool call | Around the whole run |
+|---|---|---|---|---|
+| LangChain | middleware hooks | `before_model`, `wrap_model_call`, `after_model` | `wrap_tool_call` | `before_agent`, `after_agent` |
+| Google ADK | callbacks | `before_model_callback`, `after_model_callback` | `before_tool_callback`, `after_tool_callback` | `before_agent_callback`, `after_agent_callback` |
+| Claude Code | hooks | (none) | `PreToolUse`, `PostToolUse` | `UserPromptSubmit`, `Stop`, `SessionStart`, `SessionEnd` |
+
+- In ADK, returning a response from `before_model_callback` skips the model call, much like a LangChain hook that jumps to the end. A `PreToolUse` hook in Claude Code can block a tool call
+- The mentor's point: this is what software engineers always did, repackaged. A `wrap_*` hook is Spring's "around advice": it receives the call (`handler`) and decides whether, how and how often to run it
+- *Web-checked 2026-11-15: ADK's [Types of callbacks](https://adk.dev/callbacks/types-of-callbacks/) and Claude Code's [Hooks reference](https://code.claude.com/docs/en/hooks). Names only; not run*
+
+> [!WARNING]
+> **LangChain also has callbacks, and they are not middleware.**
+> - Callbacks (`BaseCallbackHandler`, like the usage logger in [Chapter 3](03-models-messages-and-parameters.md), 3.3) **watch**: logs, traces, token counts
+> - *Tested on 1.5.0:* a callback that raised in `on_chat_model_start` was only logged (`Error in Blocker.on_chat_model_start callback`), and the model was called anyway. With `raise_error = True` the exception stopped the run, but a callback still cannot change the request or answer in the model's place
+> - Middleware **controls**: a `before_model` hook replied "Blocked before the model." and the model was never called
+> - So rules, guardrails and limits go in middleware. Observation goes in callbacks
 
 What middleware is used for (four groups):
 
@@ -476,6 +496,39 @@ def run_interactive_hitl_demo(agent, config):
 - **No UI comes with it.** You resolve the interrupt in code with `Command(resume=...)`, or wire it to your own interface (a pop-up, an approve and reject button)
 - **Two levels of sign-off** (for example manager then director) are not available out of the box. That needs custom middleware
 
+**The run does not wait in memory** (class 12)
+
+- The mentor said the agent "will wait" for the decision. In code, nothing waits: `invoke` **returns** as soon as the pause is hit, with `__interrupt__` in the result. The paused run is just a saved checkpoint
+- So the decision can come **hours later, from another process**: a web request from the approval screen, handled by any worker. That worker builds the agent with the same checkpointer database and passes the same `thread_id`
+
+```python
+import sqlite3
+from langgraph.checkpoint.sqlite import SqliteSaver   # one machine; across machines use PostgresSaver
+from langgraph.types import Command
+
+def build_agent():
+    """Every worker builds the agent the same way, on the same checkpointer database."""
+    saver = SqliteSaver(sqlite3.connect("approvals.db", check_same_thread=False))
+    return create_agent(model="openai:gpt-5-mini", tools=[cancel_booking], checkpointer=saver,
+                        middleware=[HumanInTheLoopMiddleware(interrupt_on={"cancel_booking": True})])
+
+config = {"configurable": {"thread_id": "support-ticket-4711"}}
+
+# worker 1: the chat request. It returns at once; nothing is left running
+result = build_agent().invoke({"messages": [("user", "Cancel booking B100")]}, config)
+pending = result["__interrupt__"][0].value["action_requests"]   # show these on the approval screen
+
+# worker 2, hours later: the approver clicks "Approve"
+agent = build_agent()                      # a new agent object, in another process
+print(agent.get_state(config).next)        # ('HumanInTheLoopMiddleware.after_model',): still paused
+agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), config)
+```
+
+✅ *Verified on 1.5.0 with two separate Python processes sharing one SQLite file (scripted model): process 1's `invoke` returned after 0.02 s with the pending `cancel_booking {'booking_id': 'B100'}`, and the tool had not run. Process 2, with a new agent object and a different process id, found the pause, resumed it, and the tool ran once. `state.next` was then `()`.*
+
+- **`InMemorySaver` cannot do this.** Its pauses vanish when the process ends, and other workers never see them. Use a database saver once approvals cross requests ([Chapter 6](06-agents-and-memory.md), 6.5)
+- Build the agent the same way in every worker (same tools, middleware and `interrupt_on`), so the resumed run continues in the same graph
+
 > [!IMPORTANT]
 > **🏭 In production**
 > - Approval needs a UI and an owner: who approves, how fast, and what happens if nobody answers
@@ -491,6 +544,9 @@ def run_interactive_hitl_demo(agent, config):
 - **Two levels of human approval?** Needs custom middleware (7.6)
 - **Does summarization share the agent's main context?** No. It works on its own separate text
 - **Does a support bot handing a chat to a human count as HITL?** No, that is a transfer (7.6)
+- **Can it remember my decision ("always allow this tool")?** Not built in. That is custom middleware too, for example one that skips the interrupt for a tool the user already approved in this thread (class 12)
+- **Is RLHF human in the loop?** No. RLHF is human feedback used to **train** a model. HITL is a person approving an action **while the agent runs** (class 12)
+- **Does the agent wait for the approval?** Not in memory. `invoke` returns at the pause, and you resume later, even from another process (7.6)
 
 ## 7.8 Interview corner
 
@@ -565,6 +621,22 @@ def run_interactive_hitl_demo(agent, config):
 
 </details>
 
+<details class="qa"><summary>10. The approval for a refund arrives three hours later, through a web request. How does the agent continue?</summary>
+
+- Nothing was waiting: the first `invoke` returned at the interrupt, and the pause is a checkpoint
+- The approval handler builds the agent (same tools and middleware) on the same database checkpointer, then calls `invoke(Command(resume={"decisions": [...]}), config)` with the same `thread_id`
+- *Stronger answer:* use a shared database saver, not `InMemorySaver`; check the approver is allowed to decide for that thread; expire stale approvals; log the decision with the arguments that ran
+
+</details>
+
+<details class="qa"><summary>11. LangChain has callbacks and middleware. Where do you enforce a policy, and why?</summary>
+
+- In middleware. It can change the request, filter tools, skip the model or end the run with its own reply
+- Callbacks only observe. An exception inside one is logged and ignored unless the handler sets `raise_error = True`, and even then it can only stop the run, not answer
+- *Stronger answer:* use both: middleware for rules (limits, guardrails, approvals), callbacks or tracing for audit and cost. Other frameworks name the same hooks differently: ADK callbacks, Claude Code hooks
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"An HR agent can read any employee record for HR staff but only your own for others."* Cover where the role comes from, which hook filters tools, the in-tool check, and logging.
 
@@ -592,6 +664,8 @@ agent = create_agent(model, tools, checkpointer=InMemorySaver(), middleware=[
     SummarizationMiddleware(model="openai:gpt-4o-mini", trigger=("tokens", 4000), keep=("messages", 20)),
     HumanInTheLoopMiddleware(interrupt_on={"send_email": True}),
 ])
+result = agent.invoke(inp, cfg)                    # returns at the pause: result["__interrupt__"]
+agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg)   # later, any worker, same DB saver + thread_id
 ```
 
 ## Recap
@@ -602,6 +676,8 @@ agent = create_agent(model, tools, checkpointer=InMemorySaver(), middleware=[
 - Filter with `request.override(tools=...)`. Per-user flags need a **state schema** or **context**
 - `SummarizationMiddleware`: `model`, `trigger=("tokens", n)`, `keep=("messages", n)`. Text only, and lossy
 - `HumanInTheLoopMiddleware`: needs a **checkpointer**. Resume with `Command(resume={"decisions": [...]})`. Four decisions: approve, edit, reject, respond. It is **not** a transfer
+- A paused run does not wait in memory: `invoke` returns, and any process with the same database checkpointer and `thread_id` can resume it
+- Other frameworks call hooks callbacks (Google ADK) or hooks (Claude Code). LangChain's own callbacks only watch; middleware controls
 
 ## Practice
 
@@ -614,6 +690,8 @@ agent = create_agent(model, tools, checkpointer=InMemorySaver(), middleware=[
    - A2 Q7: a realistic NovaBank `transfer_funds` situation for each of the four HITL decisions
    - B2.1: guard `transfer_funds` with all four decisions, resume with an `edit` that changes the amount, and confirm the edited amount was used (remember the `edited_action` shape)
 7. Run the docs' `trim_messages` hook on a chat where the model makes two parallel tool calls, and find the orphan `ToolMessage`. Then switch to `keep_recent` with the guard
+8. Pause a HITL run with `SqliteSaver` in one Python script, then approve it from a second script. Print `get_state(config).next` in both
+9. Write a callback that raises in `on_chat_model_start` and see the run continue. Then block the same call with a `before_model` hook
 
 ## How this chapter was checked
 
@@ -635,6 +713,10 @@ agent = create_agent(model, tools, checkpointer=InMemorySaver(), middleware=[
   - *More `SummarizationMiddleware` settings:* Checked: `trigger=("messages", 4)` summarised once over three long turns. A **list** `[("tokens", 100000), ("messages", 4)]` also did (the second condition was enough). A **dict** `{"tokens": 10, "messages": 100}` did **not** (the second condition failed)
   - *More `SummarizationMiddleware` settings:* Checked: the default prompt is a long template. It starts "Context Extraction Assistant" and asks for four sections: `SESSION INTENT`, `SUMMARY`, `ARTIFACTS` and `NEXT STEPS`
   - *More `SummarizationMiddleware` settings:* Checked: with `summary_prompt="Summarise briefly:\n{messages}"`, the summariser received that text with the messages inserted as `<message type="human">...` blocks
+  - *Class 12 recording (8 Aug), added 2026-11-15, `langchain` 1.5.0, `langgraph` 1.2.22, `langgraph-checkpoint-sqlite` 3.1.3, scripted fake chat models (no keys, no network):*
+    - 7.6 resume from another process: `hitl_p1.py` built the agent on a `SqliteSaver` file and invoked it; it returned after 0.02 s with one pending `cancel_booking {'booking_id': 'B100'}`, `state.next` `('HumanInTheLoopMiddleware.after_model',)`, and no tool run. `hitl_p2.py`, a separate process, built a new agent on the same file, found 1 interrupt, resumed with approve, and the tool wrote `B100` once; `state.next` was then `()`. The 7.6 block is that code with the scripted model swapped for the model string
+    - 7.3 callbacks: a `BaseCallbackHandler` raising `ValueError` in `on_chat_model_start` was logged as a warning and the run finished with the model's reply; with `raise_error = True` the run raised `ValueError: blocked by callback`; a `before_model(can_jump_to=["end"])` hook ended the run with its own message and the scripted model was never called
+    - 7.3 names table: from the ADK and Claude Code docs (web search), not run
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran both middleware in one agent; a `send_email` call paused with `__interrupt__`; the summarization trigger (4000 tokens) was constructed but not reached. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
@@ -648,5 +730,8 @@ agent = create_agent(model, tools, checkpointer=InMemorySaver(), middleware=[
 - LangChain docs: [Middleware overview](https://docs.langchain.com/oss/python/langchain/middleware/overview), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`), for the hook diagram in 7.3 (`images/middleware_final.png`, copied from the page) and "not a separate runtime". The `interrupt_on` warning in 7.6 is from testing
 - LangChain docs: [Short-term memory](https://docs.langchain.com/oss/python/langchain/short-term-memory), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`), for the 7.5 intro, the summary image (`images/summary.png`, copied from the page) and the hand-written trim pattern. The two trimming warnings are from testing
 - LangChain docs: [Tools](https://docs.langchain.com/oss/python/langchain/tools), section "Dynamic tool selection" (read 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "Registering a tool at run time" in 7.2. The pass-through pitfall is from testing
+- Class 12 recording transcript (8 Aug 2026), uploaded by you; teaching part only (00:10–03:18; the doubt session after it was left out): other names for hooks, "middleware is what engineers always did", "the agent will wait", "remember my decision", RLHF vs HITL
+- Google ADK docs: [Types of callbacks](https://adk.dev/callbacks/types-of-callbacks/); Claude Code docs: [Hooks reference](https://code.claude.com/docs/en/hooks) (web-checked 2026-11-15, for the names table in 7.3)
+- Added by Claude: the callbacks warning in 7.3, the resume code and bullets in 7.6, and interview questions 10–11
 
 Previous: [Chapter 6, Agents and memory](06-agents-and-memory.md) · Next: [Chapter 8, Prebuilt middleware: limits, fallback and PII](08-prebuilt-middleware-limits-fallback-and-pii.md)
