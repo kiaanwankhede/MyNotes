@@ -227,7 +227,103 @@ From `context-engineering.mdx`. The idea: agents usually fail not because the mo
 - ✅ *Verified (details in "How this chapter was checked").*
 - Where each kind lives in these notes: system prompt and dynamic prompt ([11.8](11-runtime-and-human-in-the-loop.md)), messages and summarisation ([Ch 7](07-middleware.md)), tools and gating ([Ch 5](05-tools.md), [Ch 7](07-middleware.md)), response format ([Ch 4](04-structured-output.md)), runtime, state and store (11.3 to 11.7)
 
-*Source: `langchain-ai/docs`, `src/oss/langchain/context-engineering.mdx` (Overview). The page's many examples were compared by identifier only; every identifier is already in these notes.*
+**Which lever, which hook.** Every lever can read **state**, the **store** or **runtime context**:
+
+| Lever | How you change it | Taught in |
+|---|---|---|
+| System prompt | `@dynamic_prompt`, or `request.override(system_message=...)` | 11.8, [Ch 10](10-shell-tools-and-custom-middleware.md) 10.10 |
+| Messages sent to the model | `request.override(messages=...)` in `wrap_model_call` | below |
+| Tools the model sees | `request.override(tools=...)` | [Ch 7](07-middleware.md) 7.4, [Ch 5](05-tools.md) 5.10 |
+| Which model | `request.override(model=...)` | [Ch 10](10-shell-tools-and-custom-middleware.md) 10.5 |
+| Response format | `request.override(response_format=...)` | below, [Ch 4](04-structured-output.md) 4.4 |
+| What tools read | `ToolRuntime`: `runtime.state`, `.store`, `.context` | [Ch 5](05-tools.md) 5.9, 11.5 |
+| What tools write | `Command(update=...)`, `runtime.store.put(...)` | [Ch 5](05-tools.md) 5.10 |
+| Between steps | node hooks, `SummarizationMiddleware`, guardrails | [Ch 7](07-middleware.md), [Ch 9](09-guardrails-to-do-lists-and-tool-resilience.md) |
+
+**Transient vs persistent, in code.** A `wrap_model_call` change affects **one model call** and is not saved:
+
+```python
+from typing_extensions import NotRequired
+
+class FilesState(AgentState):
+    uploaded_files: NotRequired[list[dict]]        # without this, the input key is dropped
+
+@wrap_model_call(state_schema=FilesState)
+def inject_file_context(request, handler):
+    files = request.state.get("uploaded_files", [])
+    if files:
+        note = "Files you have access to:\n" + "\n".join(f"- {f['name']}: {f['summary']}" for f in files)
+        request = request.override(messages=[*request.messages, {"role": "user", "content": note}])
+    return handler(request)
+```
+
+- `request.messages` is the state's message list (a copy), **without** the system prompt, which is `request.system_message`
+- Appending at the end is deliberate (docs): models pay more attention to the last messages
+- *Checked:* the model received the extra `Files you have access to: ...` message; the saved thread did not contain it
+  - Without `FilesState` the `uploaded_files` input was silently dropped and nothing was injected (checked)
+- To change state **for good**, use a node hook, a tool's `Command`, or `ExtendedModelResponse` from a wrap hook ([Chapter 10](10-shell-tools-and-custom-middleware.md), 10.11)
+
+**A prompt shaped by long-term memory** (store + context):
+
+```python
+@dynamic_prompt
+def store_aware_prompt(request: ModelRequest) -> str:
+    user_id = request.runtime.context.user_id
+    prefs = request.runtime.store.get(("preferences",), user_id)
+    base = "You are a helpful assistant."
+    if prefs:
+        base += f"\nUser prefers {prefs.value.get('communication_style', 'balanced')} responses."
+    return base
+
+agent = create_agent(model, tools=[...], middleware=[store_aware_prompt],
+                     context_schema=Context, store=store)
+```
+
+- *Checked:* with `{"communication_style": "brief"}` stored for `u1`, the system prompt ended `User prefers brief responses.`
+
+**Choosing the response format per run** (for example verbose for one user, concise for another):
+
+```python
+from typing import Union
+from langchain.agents.structured_output import ToolStrategy
+
+@wrap_model_call
+def store_based_output(request, handler):
+    prefs = request.runtime.store.get(("preferences",), request.runtime.context.user_id)
+    if prefs:
+        verbose = prefs.value.get("response_style") == "verbose"
+        request = request.override(response_format=VerboseResponse if verbose else ConciseResponse)
+    return handler(request)
+
+agent = create_agent(
+    model, tools=[], middleware=[store_based_output], context_schema=Context, store=store,
+    response_format=ToolStrategy(Union[ConciseResponse, VerboseResponse]),   # declare every option up front
+)
+```
+
+> [!WARNING]
+> **Docs vs package: declare the formats up front.**
+> - The docs' examples create the agent **without** `response_format` and add the schema in middleware
+> - On a model that uses `ToolStrategy`, that raised `ValueError: ToolStrategy specifies tool 'VerboseResponse' which wasn't declared in the original response format when creating the agent.` (checked on 1.5.0)
+> - With `ToolStrategy`, middleware may only **narrow** to schemas declared at creation. Declaring the `Union` fixed it. With `ProviderStrategy` (native structured output) it worked without declaring
+> - Strategies: [Chapter 4](04-structured-output.md), 4.4
+
+> [!WARNING]
+> **The docs' "write to state" tool example fails as written.**
+> - `authenticate_user` returns `Command(update={"authenticated": True})` with no `ToolMessage`. *Checked:* `ValueError: Expected to have a matching ToolMessage in Command.update ...`
+> - `authenticated` is also not in any state schema, so even with a `ToolMessage` the value would be dropped ([Chapter 13](13-multi-agent-systems-and-subagents.md))
+> - The working pattern: [Chapter 5](05-tools.md), "What a tool can return"
+
+**Best practices** (docs):
+
+- Start simple: static prompt and tools first; add dynamic context only when needed
+- Add one context-engineering feature at a time, and test each
+- Monitor model calls, token use and latency
+- Prefer built-in middleware (`SummarizationMiddleware`, `LLMToolSelectorMiddleware`, ...)
+- Document what context each part receives and why
+- Remember the split: model-context changes are per call; life-cycle and tool writes persist
+
+*Source: `langchain-ai/docs`, `src/oss/langchain/context-engineering.mdx`, read in full 2026-11-15 (commit `04d4d4a`). The examples above were run; the earlier version of this section compared them by identifier only.*
 
 ## 11.9 Using runtime in middleware: an authorisation gate
 
@@ -675,6 +771,15 @@ for chunk in agent.stream(Command(resume=decisions), config=config,      # same 
 
 </details>
 
+<details class="qa"><summary>10. A user prefers short answers. Where do you put that, and how does it reach the model?</summary>
+
+- Store it in **long-term memory** (the store), keyed by the user id from runtime context
+- Read it in a `@dynamic_prompt` (or `wrap_model_call`) and add it to the system prompt for that call
+- That change is **transient**: nothing extra is saved in the thread
+- *Stronger answer:* if the preference changes the output schema, declare every schema up front (`ToolStrategy(Union[...])`) and pick one in middleware; let a tool update the preference with `runtime.store.put`
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"An agent books meetings for executives but a human assistant must approve anything over 1 hour."* Cover the conditional interrupt, what the reviewer sees, edit vs reject, and persistence.
 
@@ -752,6 +857,7 @@ agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg, context=
   - HITL: the unguarded agent, a dict result vs `version="v2"`, `.interrupts` and `.value`, `True` and `False` in `interrupt_on`, `description_prefix`, `respond` with a question-only tool, `when=` with $25 and $500, and the interactive loop with approve, edit and reject
   - retry and error middleware in both orders with the default `on_failure`
 - **Not run:** a real LangGraph server (so `server_info` and `run_id` were `None`), real model behaviour, a persistent checkpointer or store
+- *Context engineering docs page merge (2026-11-15):* `langchain` 1.5.0, scripted models. `request.messages` equalled `request.state["messages"]` (a copy, no system message). The file-context injection (extracted from this file, with `uploaded_files` declared in `FilesState`) reached the model and was not saved; without the declaration the input key was dropped and nothing was injected. `store_aware_prompt` produced `... User prefers brief responses.` The response-format override raised the quoted `ValueError` without a declared format; with `ToolStrategy(Union[ConciseResponse, VerboseResponse])` it returned `VerboseResponse(answer='Paris', sources=['atlas'])`, also when the override passed the bare class; `ProviderStrategy(VerboseResponse)` with nothing declared also worked. The docs' `authenticate_user` raised the quoted `ValueError`. Docs slip: the file-context example's comment says "before recent messages" while the code appends at the end
 - *Runtime docs page merge (2026-11-15):* `langchain` 1.5.0, `langgraph` 1.2.22, scripted models. The docs' middleware example (`dynamic_prompt`, `before_model` and `after_model` typed `Runtime[Context]`) plus the new `auth_gate`, with `thread_id="t-9"`: hooks logged `John Smith`, the gate passed and logged `t-9`, the model's system message was `You are a helpful assistant. Address the user as John Smith.` Dependency injection: a frozen `AppContext(user_id, db)` with a stand-in `FakeDB` gave `brief and polite`; the tool's `.args` were `{}`. Not run: Agent Server (`server_info`)
 - *HITL while streaming (2026-11-15):* `langchain` 1.5.0, `langgraph` 1.2.22, a scripted streaming model calling `get_weather` for Boston and San Francisco in one turn, `HumanInTheLoopMiddleware(interrupt_on={"get_weather": True})`, `InMemorySaver`. One `__interrupt__` update with two action requests; resume with decisions keyed by the interrupt id (edit Boston, approve San Francisco); the tools update held `It's always sunny in San Francisco!` and the Boston result behind the reviewer note
 - Class 15 has no code folder beyond the notebook and diagram. The Colab link in the README is not in the repo
@@ -774,6 +880,7 @@ agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg, context=
 - Live-Class-2026, `Weekend 09 - 22-23 Aug/README.md` and `22nd Aug - Runtime & HITL/README.md`
 - `Assignment_2_Agents_and_Prebuilt_Middleware.ipynb` (questions only)
 - Section 11.16 and the corrections marked *checked* are from testing, not from the class sources
+- LangChain docs: [Context engineering](https://docs.langchain.com/oss/python/langchain/context-engineering), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `context-engineering.mdx`; docs.langchain.com was blocked from this environment), for "Context engineering: the framework" in 11.8: the lever table, transient vs persistent, the store-based prompt, the response-format warning, the tool-write warning and the best practices
 - LangChain docs: [Runtime](https://docs.langchain.com/oss/python/langchain/runtime), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/runtime.mdx`; docs.langchain.com was blocked from this environment), for the 11.3 version note and dependency injection, `Runtime[Context]` in 11.6, and the docs' `auth_gate` in 11.9
 - LangChain docs: [Streaming](https://docs.langchain.com/oss/python/langchain/streaming), section "Streaming with human-in-the-loop" (read 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "HITL while streaming" in 11.13
 
