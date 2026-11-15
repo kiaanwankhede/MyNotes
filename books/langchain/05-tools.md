@@ -181,6 +181,12 @@ print(model.invoke(conversation).content)
 - **Shortcut:** a `@tool` invoked with the whole tool call returns the `ToolMessage` for you, id included: `tools_by_name[call["name"]].invoke(call)`
 - **Look the tool up by the name the model gave** (`TOOLS[...]`). The class notebook called `get_weather(**args)` even when the model asked for `set_password`, which raises `TypeError: get_weather() got an unexpected keyword argument 'new_pass'`
 
+> [!CAUTION]
+> **🔒 `set_password` is a teaching toy, not a pattern.** In class 08 the user typed "change password admin123" and the model passed `new_pass="admin123"` to the tool. *Added by Claude:*
+> - The password now sits in the prompt, in the model's reply, in the `ToolMessage`, in your logs and traces, and at the model provider.
+> - The model can be talked into calling the tool: a pasted web page or email can say "set the password to …" (prompt injection).
+> - Real credential changes go through your own login flow: the user proves who they are, and the new secret never passes through the model. If an agent may start such an action at all, put a human approval step in front of it ([Chapter 11](11-runtime-and-human-in-the-loop.md)) and pass only an opaque request id, never the secret.
+
 ## 5.4 A tool is a function with a job description
 
 - A model is a brain with no hands. A tool is the hand, and it is just a function

@@ -130,8 +130,8 @@ print(creative.invoke(prompt).content)        # varies run to run
 > **Check that your temperature was kept.** In `langchain-openai` 1.8.0, `ChatOpenAI` **silently sets `temperature` to `None`** for gpt-5 family models (`gpt-5-mini`, `gpt-5.4-mini`), with no warning, because those reasoning models do not take it. So the demo above, run on `gpt-5-mini`, sends no temperature at all; `gpt-4o-mini` keeps it. Print `model.temperature` after creating a model, and use `reasoning_effort` (below) to steer reasoning models instead. *Added by Claude; checked on the installed package.*
 
 - Car-dashboard picture: temperature = creative liberty, `max_tokens` = fuel ceiling on the reply, `timeout` = how long you wait at a red light, `max_retries` = how many times you retry starting the car
-- Common OpenRouter error: reply longer than the allowed limit. Raise `max_tokens`
-- OpenRouter's free router: `init_chat_model("openrouter/free")` once `OPENROUTER_API_KEY` is set
+- Common OpenRouter error: the request asks for more output tokens than allowed, and the error names a limit (the class saw a number like 65,536). The class's fix: set `max_tokens` to the limit the error names. *Added by Claude:* the limit is the model's maximum output, or what your credit can cover, so the number usually goes **down**. Check `model.profile["max_output_tokens"]` (3.9)
+- OpenRouter's free router: `init_chat_model("openrouter:openrouter/free")` once `OPENROUTER_API_KEY` is set (needs `langchain-openrouter`). *Tested:* without the `openrouter:` prefix, `init_chat_model("openrouter/free")` raises `ValueError: Unable to infer model provider`
 
 **Paid, free and local**
 
@@ -147,6 +147,42 @@ paid_model = init_chat_model("openai:gpt-5-mini")
 ```
 
 - Pick local when data must not leave your machine, you run a custom model, or you want no per-call cost. Ollama is the easiest start
+
+### OpenRouter in depth (class 07)
+
+- **One key, many providers.** OpenRouter forwards each request to a provider that serves the model. For one OpenAI model in class there were three: OpenAI itself, Azure, and Azure EU. The model page shows each provider's uptime, throughput and latency
+- **The route changes the latency.** In the class demo, OpenAI direct was faster than the same model through Azure. That matters for real-time uses such as a fraud check, so pin the provider
+- **Two routers:**
+  - `openrouter/auto` picks any model, paid ones included. In class it chose Gemini 2.5 Flash Lite, at $0.000005 for the call
+  - `openrouter/free` picks only from the free models (23 in class)
+- **Prices** for common models matched the vendor's own, in the mentor's client work. He thought new accounts get about $1 of credit; check before relying on it
+- **Free-model limits** (web-checked 2026-11-15):
+  - 20 requests a minute
+  - 50 a day, until you have bought at least **$10** of credit in total; then 1,000 a day
+- **Where your prompts go:**
+  - OpenRouter's privacy settings decide whether your requests may go to providers that train on prompts. Paid and free models have separate switches
+  - A third-party review (Oct 2026) found about half of the free models served only by such providers
+  - Don't send customer data to a free endpoint
+- **Attribution:** OpenRouter's activity page listed "LangChain" as the app. *Checked in `langchain-openrouter` 0.2.9:* `ChatOpenRouter` sends the header `X-Title: LangChain` unless you set `app_title` (or the `OPENROUTER_APP_TITLE` variable)
+
+```python
+from langchain_openrouter import ChatOpenRouter
+
+model = ChatOpenRouter(
+    model="openai/gpt-5.4-mini",
+    openrouter_provider={"order": ["openai"], "data_collection": "deny"},  # fast route first; no providers that train
+    app_title="support-bot",                                               # the name OpenRouter's activity page shows
+    max_tokens=1000,
+)
+```
+
+✅ *Verified against a local stand-in for OpenRouter: the request body carried `"provider": {"order": ["openai"], "data_collection": "deny"}`.*
+
+| Use | When |
+|---|---|
+| The vendor's own API | You always use one vendor (the mentor: "always Claude" → go to Anthropic). Lowest latency, one contract and one data agreement |
+| OpenRouter | You mix vendors, or free and paid models. One key, one bill, failover between providers |
+| A cloud platform (Bedrock, Azure AI Foundry, Vertex AI) | Your company's data and contracts already live there. From class: a brand-new model can reach these later than the vendor's own API |
 
 ### Retries in detail
 
@@ -225,6 +261,57 @@ configurable.invoke("what's your name", config={"configurable": {"model": "claud
 > [!WARNING]
 > Dynamic model selection with structured output needs models that are **not** pre-bound (no `bind_tools` already called). Pass plain models to the middleware.
 
+### One model entry point for the whole company (class 07)
+
+- **The mentor's earlier company:** engineers didn't call providers directly. They imported an internal library and named the job; the AI team owned the keys, and saw token use per team through LangChain and LangSmith
+- The same idea in a few lines:
+
+```python
+# company_llm.py: the one module every team imports
+from langchain.chat_models import init_chat_model
+from langchain_core.callbacks import BaseCallbackHandler
+
+MODELS = {                                   # change a model here, every team gets it
+    "cheap":     "openai:gpt-5.4-mini",
+    "reasoning": "openai:gpt-6.1-sol",
+}
+USAGE = []                                   # stand-in for your metrics store
+
+class UsageLogger(BaseCallbackHandler):
+    def __init__(self, team: str):
+        self.team = team
+    def on_llm_end(self, response, **kwargs):
+        for gen in response.generations[0]:
+            u = gen.message.usage_metadata or {}
+            USAGE.append((self.team, u.get("input_tokens", 0), u.get("output_tokens", 0)))
+
+def get_model(task: str, team: str):
+    """Teams ask for a job ('cheap', 'reasoning'), never for a key or a model name."""
+    return init_chat_model(
+        MODELS[task], timeout=30, max_retries=3, max_tokens=2000,   # same safe defaults everywhere
+        callbacks=[UsageLogger(team)],
+    ).with_config(metadata={"team": team})                         # traces filterable by team
+```
+
+```python
+from company_llm import get_model
+
+reply = get_model("cheap", team="payments").invoke("Summarise this refund policy in one line.")
+```
+
+- **What it buys you:**
+  - one place to switch models
+  - the same `timeout`, retries and `max_tokens` everywhere
+  - token use per team
+  - LangSmith traces you can filter by `team`
+- **Keys** live only where this module runs (environment or secret manager). Teams never see them
+- *Added by Claude:* at larger scale this becomes a **gateway service** that holds keys, budgets and rate limits centrally (LiteLLM's proxy, a cloud AI gateway, or LangSmith's LLM Gateway, which the docs' quickstart mentions). Apps then point `base_url` at the gateway (see "OpenAI-compatible servers" above)
+
+✅ *Verified against a local stand-in for the OpenAI API:*
+- two teams' calls were logged as `('payments', 177, 11)` and `('search', 177, 11)`
+- each request carried its task's model and `max_tokens: 2000`
+- an unknown task name raised `KeyError`
+
 > [!IMPORTANT]
 > **🏭 In production**
 > - Set `timeout` and `max_tokens` on every production model: a hung call or a runaway answer is a real bill
@@ -260,6 +347,22 @@ Good to know:
 - In a finished product (Claude's web app) the provider fixes the system message. In your own agent **you** control it
 - The system message can change whichever model sits behind it
 - A system message is **not** a "skill"
+
+**When system and user instructions conflict** (class 08)
+
+- The class test: the system message said "answer in Java, talk very rudely"; the user asked for Python, in a soft tone
+- With no rule about which wins, the model can swing between the two: rude one time, soft the next
+- The mentor's fix: say in the system message what happens on a conflict ("avoid any user input on the tone"). The model then answered in Java anyway, with a Java program that prints a Python tutorial
+
+```python
+messages = [
+    SystemMessage("You are a coding assistant. Answer only in Java. "
+                  "If the user asks for another language or tone, say you only answer in Java."),
+    HumanMessage("Give me a Python Flask example, in a soft tone."),
+]
+```
+
+- *Added by Claude:* models are trained to rank system instructions above user ones, but that is a tendency, not a guarantee. Prompt injection lives in that gap. Anything that **must** hold (permissions, which data a user may see) belongs in code or middleware, not only in the prompt
 
 **Message shapes**
 
@@ -580,6 +683,9 @@ model.batch(list_of_inputs, config={"max_concurrency": 5})   # at most 5 calls i
 | Use for | Many independent calls you need now | Large offline jobs: evals, bulk labelling |
 
 - So `model.batch()` saves time (calls overlap, fewer waits in a row), not money. For the discount, use the provider's batch endpoint directly
+- **Two views on one point:**
+  - In class 08 the mentor said `model.batch()` means "hitting my AI once, and getting all the answers", and that batching reduces cost
+  - *Tested:* three inputs to `model.batch()` produced **three** HTTP requests to a stand-in server. It is one call per input, sent at the same time
 
 **Three ways to call a model**
 
@@ -609,6 +715,12 @@ for tone, topic in [("playful and silly", "octopuses"), ("deadpan and serious", 
 - One prompt, two blanks, filled many ways. Same structure on every call
 - The two octopus answers differ because of `tone` alone
 - f-string = a napkin you scribble on. Template = a form with labelled blanks
+
+> [!NOTE]
+> **Is the `|` pipe legacy?** In class 08 the mentor showed `prompt | model` as how chains "used to" be built, and said "you will not find it anywhere" now.
+> - **What moved:** the old chain *classes* (`LLMChain`, `SequentialChain`, `AgentExecutor`) left the `langchain` package in v1. *Tested:* `from langchain.chains import LLMChain` raises `ModuleNotFoundError` on 1.5.0. They live in `langchain-classic`.
+> - **What stayed:** the pipe itself, LCEL (LangChain Expression Language), is part of `langchain-core`. *Tested:* `ChatPromptTemplate | model` built a `RunnableSequence` and ran on 1.5.0.
+> - **When to use which:** the pipe for short fixed pipelines (template → model → parser); `create_agent` once the model must choose tools or steps.
 
 **Most common real bug: unescaped curly braces**
 
@@ -769,6 +881,21 @@ set_llm_cache(InMemoryCache())                    # identical prompt → cached 
   - Summarising can lose detail
   - Belongs with agents and memory
 
+Asked in the teaching part of classes 07–08 (18–19 Jul); the doubt sessions are not included:
+
+- **Will a different model give the same answer?** No. Answers differ by model, and from run to run
+- **Can we compare several models' outputs?** Yes: same messages, a different model string, compare the replies
+- **OpenRouter or the provider's own API?** See the table in 3.3. If you always use one vendor, go direct
+- **How long should a system message be?** The mentor: detailed; Claude's own runs to thousands of tokens. *Added by Claude:* as long as it needs to be, but you pay for every token of it on every call ([Chapter 1](01-introduction-to-langchain.md) shows it resent on each step)
+- **Is streaming only for user experience?** Mostly: on long answers the user reads while the rest is generated. *Added by Claude:* it also lets you stop a bad answer early, and time-to-first-token becomes the number to watch
+- **Do all chunks of one streamed reply share an id?** The mentor wasn't sure. *Tested:* all chunks of one reply had the same id
+- **Does batching cost less?** No; it saves time. One request per input (3.7)
+- **Can `batch` take message lists instead of strings?** Yes. Each input can be a string or a list of messages
+- **Is the `Email` from `with_structured_output(Email)` an `AIMessage`?** No. You get an `Email` object directly. Ask for `include_raw=True` to also get the raw `AIMessage` ([Chapter 4](04-structured-output.md))
+- **Are `name` and `id` on a `HumanMessage` filled in from the user automatically?** No. Your code sets them, for example from the logged-in user
+- **Can the AI run a script, the way it calls a tool?** No. It can only **request** your tools, or use tools its provider hosts (server-side tools, 3.5). Running anything is always someone's code
+- **Should we buy OpenAI credits now?** Not yet. Groq or OpenRouter's free tiers are enough for the course
+
 ## 3.12 Interview corner
 
 **What interviewers listen for:** you know what a message list is, you can name the knobs that change cost and reliability (`temperature`, `max_tokens`, `timeout`), and you know which errors are worth retrying.
@@ -874,6 +1001,29 @@ set_llm_cache(InMemoryCache())                    # identical prompt → cached 
 
 </details>
 
+<details class="qa"><summary>14. Is the <code>|</code> pipe deprecated in LangChain v1?</summary>
+
+- No. LCEL is part of `langchain-core` and still runs. What left `langchain` are the old chain classes (`LLMChain`, `AgentExecutor`), now in `langchain-classic`
+- *Stronger answer:* use the pipe for short fixed pipelines and `create_agent` (or LangGraph) once the model decides the steps. Check an old tutorial's imports before copying it
+
+</details>
+
+<details class="qa"><summary>15. Twenty teams want to use LLMs. How do you give them access safely?</summary>
+
+- One shared entry point: teams name a job ("cheap", "reasoning"), the platform picks the model and holds the keys
+- Same defaults everywhere (`timeout`, `max_retries`, `max_tokens`), and token use logged per team
+- *Stronger answer:* at scale, a gateway service with per-team budgets and rate limits, traces tagged by team, and model changes made in one place and rolled out gradually. Engineers never hold provider keys
+
+</details>
+
+<details class="qa"><summary>16. OpenRouter or the provider's own API?</summary>
+
+- Direct: one vendor, lowest latency, one contract and data agreement
+- OpenRouter: many vendors behind one key and one bill, free models, failover between providers
+- *Stronger answer:* name the trade-offs: an extra hop (pin the provider for latency-sensitive paths), data policy (switch off providers that train on prompts), and limits on free models. Many teams use direct APIs in production and a router for experiments
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"Build the model layer for an app that must switch between two providers without code changes."* Cover `init_chat_model`, config-driven model names, timeouts, retryable errors and a fallback (Ch8).
 
@@ -904,6 +1054,9 @@ img = {"type": "image", "base64": b64, "mime_type": "image/png"}                
 model.invoke([{"role": "user", "content": [{"type": "text", "text": "Describe"}, img]}])
 [b["type"] for b in reply.content_blocks]          # text, reasoning, refusal, tool_call, non_standard...
 restored = load(dumpd(msg))                         # only on data you control
+init_chat_model("openrouter:openrouter/free")      # free router; the "openrouter:" prefix is required
+ChatOpenRouter(model="openai/gpt-5.4-mini", openrouter_provider={"order": ["openai"], "data_collection": "deny"})
+chain = prompt | model                              # LCEL still works in v1 (langchain-core)
 ```
 
 ## Recap
@@ -919,6 +1072,10 @@ restored = load(dumpd(msg))                         # only on data you control
 - Set `max_retries` and `timeout` explicitly: the default retry count differs by package
 - `reasoning_effort` trades cost for depth; `UsageMetadataCallbackHandler` adds up tokens across calls and models
 - Templates separate structure from variables. Double literal braces
+- OpenRouter: one key, many providers; pin the provider for latency, switch off providers that train on prompts, and know the free limits (50 a day, 1,000 after $10 of credit)
+- In a company, give teams one model entry point: jobs instead of model names, keys held centrally, usage per team
+- Say in the system message which instruction wins on a conflict, and enforce what must hold in code
+- The `|` pipe is not legacy; the old chain classes are (`langchain-classic`)
 
 ## Practice
 
@@ -949,6 +1106,13 @@ restored = load(dumpd(msg))                         # only on data you control
     - 3.7 `batch` with `max_concurrency=2` kept input order
     - 3.9 a custom `profile=` was used, and `model_copy` changed only the copy
     - **Not run:** live calls, so the retry backoff, `reasoning_effort` per call, server-side tool content blocks, logprob values, prompt caching and the provider batch API discount are docs statements
+  - *Update from the class transcripts (2026-11-15), run offline on `langchain` 1.5.0, `langchain-core` 1.8.0, `langchain-openai` 1.8.0, `langchain-openrouter` 0.2.9 with fake models and local stand-in servers (no keys, no network):*
+    - 3.3 `init_chat_model("openrouter/free")` raised `ValueError: Unable to infer model provider`; `"openrouter:openrouter/free"` and `"openrouter:openrouter/auto"` built `ChatOpenRouter`. `ChatOpenRouter` defaults: `app_title="LangChain"` (from `OPENROUTER_APP_TITLE`), sent as the `X-Title` header (read in the package source). The `ChatOpenRouter` block sent `"provider": {"order": ["openai"], "data_collection": "deny"}` and got a reply from a stand-in server
+    - 3.3 company entry point: usage logged per team, each task's model and `max_tokens` in the request, `KeyError` for an unknown task
+    - 3.7 three inputs to `model.batch()` = three HTTP requests
+    - 3.8 `ChatPromptTemplate | model` built and ran a `RunnableSequence`; `from langchain.chains import LLMChain` raised `ModuleNotFoundError`
+    - 3.11 all chunks of one streamed reply shared one id (fake model)
+    - **Not run:** the conflicting-instructions example (it needs a live model); OpenRouter's limits, privacy settings and per-provider latency are web-checked or class figures
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran `invoke`, `stream`, `batch` with `max_concurrency` and read `usage_metadata` on a fake model; `init_chat_model("openai:gpt-4o-mini", temperature=0, max_tokens=500, timeout=30)` was constructed, not called. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 
@@ -964,5 +1128,8 @@ restored = load(dumpd(msg))                         # only on data you control
 - Section 3.13 and the two temperature / `max_retries` findings in 3.3 are added by Claude (checked on the installed packages) and are not from these sources
 - Live-Class-2026, `Weekend 04 - 18-19 Jul/.../Learning/Part 2 - Models/Langchain (1).ipynb` and `Langchain - Colab.ipynb` (reasoning-token output, three-SDK comparison). Both notebooks hold **API keys in their source**. They were not copied. Revoke any that are yours
 - Live-Class-2026, `Weekend 04 - 18-19 Jul/07-08 .../Langchain.pdf` and the Weekend 4 README (whiteboard summary of classes 7 and 8: family, harness, messages, structured output)
+- Class recording transcripts, 18 Jul 2026 (Class 07) and 19 Jul 2026 (Class 08), uploaded by you; teaching part only: the OpenRouter demo, the company entry-point story, conflicting instructions, the batch and pipe claims, and the class questions
+- OpenRouter free-model limits and privacy, web-checked 2026-11-15: [OpenRouter rate limits (TrueFoundry)](https://www.truefoundry.com/es/blog/openrouter-rate-limits-your-free-tier-depends-on-what-youve-already-paid), [OpenRouter privacy and logging](https://openrouter.ai/docs/features/privacy-and-logging), [provider logging](https://openrouter.ai/docs/guides/privacy/provider-logging), [OpenRouter free models: what it costs you (TrueFoundry, Oct 2026)](https://www.truefoundry.com/blog/openrouter-free-models-whats-actually-free-and-what-it-costs-you)
+- Added by Claude: the `max_tokens` direction note and the corrected `openrouter:` string in 3.3, the gateway note, the instruction-hierarchy note in 3.4, interview questions 14–16
 
 Previous: [Chapter 2](02-langchain-family-and-harness-engineering.md) · Next: [Chapter 4, Structured output](04-structured-output.md)

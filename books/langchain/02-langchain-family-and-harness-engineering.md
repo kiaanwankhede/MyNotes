@@ -220,7 +220,7 @@ flowchart LR
 - **Mar 15, 2026:** Deep Agents released
 - **Aug 2026:** Managed Deep Agents in public beta on LangSmith
 
-(The Dec 2022 date is from the class summary. The transcript is vaguer, "late 2022 or 2023". The Mar 2026 date is the class figure.)
+(The Dec 2022 date is from the class summary. The transcript is vaguer, "late 2022 or 2023". The Mar 2026 date is the class figure. *Web check, 2026-11-15:* news reports of the launch are dated 17–18 Mar 2026. The Python package was still 0.6.x in July 2026 (the class project pins `deepagents>=0.6.12`), so "released" here means launched, not version 1.0.)
 
 Key ideas:
 
@@ -348,9 +348,37 @@ print(result["messages"][-1].content_blocks)   # [{'type': 'text', 'text': '...s
   - Cost: often free, or just your hosting
 - **Closed source**
   - Weights never provided, API only
-  - You pay the provider per use. No fine-tuning of the weights
-- Class examples: recent GPT-OSS releases are open-weight. Flagship GPT-5 line and Claude are closed and API-only
+  - You pay the provider per use
+  - **Fine-tuning:** the mentor said a closed model can "never" be fine-tuned. *Web check, 2026-11-15:* some providers sell **hosted** fine-tuning, for example several Gemini models on Google Vertex AI. You get a private model to call, never the weights. OpenAI is winding its fine-tuning API down (closed to new users; new jobs reported to stop on 6 Jan 2027). In practice: if you must fine-tune, plan on open weights
+- Class examples: recent GPT-OSS releases (`gpt-oss`, `gpt-oss-safeguard`) are open-weight. Flagship GPT-5 line and Claude are closed and API-only
 - Running open weights locally is one provider row away: `ollama:<model>` in the table in 2.6
+
+**Free is not the same as open.** The class's two questions:
+
+- **Free or paid?** That is the price
+- **Open or closed?** That is whether you get the weights
+
+| | Open weights | Closed |
+|---|---|---|
+| **Free** | Ollama on your own machine; OpenRouter `:free` models such as NVIDIA Nemotron (the class demo) | Free tiers with limits, such as Gemini's API free tier |
+| **Paid** | Open models that someone else hosts for you (Groq, OpenRouter paid models) | GPT-5.x, Claude, Gemini paid plans |
+
+- "Free" open-weight models still cost someone money: you pay in hardware, or the host pays and limits you (OpenRouter's free tier, 3.3 in the next chapter)
+- In class the mentor said OpenRouter gives closed models for free. Check each model's page: the free list is usually open-weight models that someone else hosts. Price alone doesn't tell you whether you could download the model
+
+```python
+from langchain.chat_models import init_chat_model
+
+local  = init_chat_model("ollama:llama3.2")               # open weights, your hardware, no API key
+hosted = init_chat_model("openrouter:openrouter/free")    # free models someone else hosts, rate-limited
+closed = init_chat_model("openai:gpt-5.4-mini")          # closed, paid per token
+```
+
+**How big is "open"?** The class opened Ollama's DeepSeek-R1 page:
+
+- The full 671B model is a **404 GB** download (4-bit). You need that much disk space to download it, and roughly that much memory (RAM or GPU) to run it
+- *Added by Claude:* the smaller `deepseek-r1` tags (1.5B to 70B) are **distilled** models built on Qwen and Llama, not shrunken copies of the 671B model. They are cheaper to run, and noticeably less capable
+- Smaller models are cheaper and faster, but less smart. The mentor: "they will be behaving very badly" on hard tasks
 
 ## 2.8 FAQs
 
@@ -371,6 +399,14 @@ print(result["messages"][-1].content_blocks)   # [{'type': 'text', 'text': '...s
 - **Old code after upgrading to v1.0?** It does not break silently, but things like `AgentExecutor` raise `ImportError`. Install `langchain-classic`
 - **Is Deep Agents just LangGraph or LangChain with extra steps?** Neither. It is built on `create_agent`, one layer out, with planning, a virtual file system and sub-agents ready-made
 - **Do I need Managed Deep Agents to use Deep Agents?** No. The SDK is the same harness and you host it yourself; managed only takes the hosting off your hands
+
+Asked in the teaching part of classes 07–08 (18–19 Jul):
+
+- **Is Claude's web app an AI or an agent?** An agent: a model plus memory, tools such as web search, and a system prompt you can't change (class 08)
+- **Is Deep Agents related to MCP?** No. Deep Agents is a harness for building agents; MCP is a protocol for connecting tools and data to them. *Added by Claude:* the two meet when an agent loads MCP tools ([Chapter 12](12-mcp-in-langchain.md))
+- **A model is a 404 GB download. Disk or RAM?** Both: disk to store it, and about as much RAM or GPU memory to run it (2.7)
+- **What is a "base model"?** In class: any bare model before you add a harness. *Added by Claude:* in machine learning "base model" usually means a pretrained model **before** instruction tuning. Say "the bare model" in an interview to avoid the mix-up
+- **Do we need a Claude Pro subscription for this course?** No
 
 ## 2.9 Self-check
 
@@ -426,6 +462,13 @@ print(result["messages"][-1].content_blocks)   # [{'type': 'text', 'text': '...s
 - Same harness. Managed: LangSmith runs the server, threads, sandbox, schedules; you write a definition and `mda deploy`
 - SDK: `create_deep_agent` gives a compiled agent; you own backend, store, checkpointer and server
 - *Stronger answer:* decide on data residency, compliance and the team's ops capacity, not features. Managed is beta, so pin the CLI version and keep the agent code portable to the SDK
+
+</details>
+
+<details class="qa"><summary>9. A teammate says: "This model is free, so it's open source." What's wrong?</summary>
+
+- Price and weights are separate questions. Gemini's free tier is closed; an open model that someone else hosts can cost money
+- *Stronger answer:* ask three things before choosing: can we get the weights (self-host, fine-tune)? where does our data go (some free endpoints may train on prompts)? what are the limits (requests a day, context window)? Then pick for data control, cost at scale and capability
 
 </details>
 
@@ -496,6 +539,8 @@ AI assistants and tutorials still produce pre-v1 code. Translate it like this:
 | Switch provider | `uv add langchain-<provider>`, then change the `provider:model` string |
 | Azure OpenAI | `init_chat_model("azure_openai:...", azure_deployment=...)` |
 | Old `AgentExecutor` code | `langchain-classic`, then migrate |
+| Run a model on your own machine | `uv add langchain-ollama`, then `init_chat_model("ollama:llama3.2")` |
+| Free models, no card | `init_chat_model("openrouter:openrouter/free")` (rate-limited; check the data policy) |
 
 ## Recap
 
@@ -507,6 +552,7 @@ AI assistants and tutorials still produce pre-v1 code. Translate it like this:
 - Outdated tutorial? Look for `AgentExecutor`
 - Any provider = one install line + one `provider:model` string. Always write the prefix
 - Sanity check = the overview agent. Restart the kernel after creating `.env`
+- Free or paid is the price; open or closed is the weights. Hosted fine-tuning of closed models exists in places, but you never get the weights
 
 ## Practice
 
@@ -525,6 +571,7 @@ AI assistants and tutorials still produce pre-v1 code. Translate it like this:
 - **Azure snippet:** checked that `azure_openai` is a supported prefix and that `init_chat_model` passes extra keyword arguments such as `azure_deployment` on to the provider class; not run (needs `langchain-openai` and an Azure deployment)
 - **Not run:** any live model call, the `mda` CLI, LangSmith Engine. These come from the LangChain docs and pricing page (Sources)
 - Dates and the class model name are class figures; the timeline's 2023–2025 items come from the docs' philosophy page
+- **Class transcripts (18–19 Jul, teaching part), added 2026-11-15:** the fine-tuning claim, free vs open, the DeepSeek-R1 size and the new FAQ answers. *Ran on `langchain` 1.5.0:* the three `init_chat_model` lines in 2.7 built `ChatOllama`, `ChatOpenRouter` and `ChatOpenAI` (with `langchain-ollama` and `langchain-openrouter` installed; no calls made). *Web-checked:* the Deep Agents launch reports (17–18 Mar 2026), hosted fine-tuning on Vertex AI and OpenAI's wind-down, the 404 GB DeepSeek-R1 download and its distilled smaller tags
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice
 - **Cheat sheet:** it is a table, so there was nothing to run
 
@@ -537,6 +584,8 @@ AI assistants and tutorials still produce pre-v1 code. Translate it like this:
 - [Managed Deep Agents overview](https://docs.langchain.com/langsmith/managed-deep-agents-overview) and [quickstart](https://docs.langchain.com/langsmith/python/managed-deep-agents-quickstart); [Managed Deep Agents is now in public beta (LangChain blog)](https://langchain.com/blog/managed-deep-agents-is-now-in-public-beta)
 - [LangSmith Engine](https://docs.langchain.com/langsmith/engine) and the [LangSmith pricing FAQ](https://docs.langchain.com/langsmith/pricing-faq)
 - [LangSmith pricing](https://www.langchain.com/langsmith-pricing) (plans and trace limits, November 2026)
-- Section 2.11 and the 🏭 boxes are added by Claude and are not from these sources
+- Class recording transcripts, 18 Jul 2026 (Class 07) and 19 Jul 2026 (Class 08), uploaded by you; teaching part only
+- Web checks, 2026-11-15: [Deep Agents launch report (Mar 2026)](https://ascii.co.uk/news/article/news-20260317-3e7156d1/langchain-releases-deep-agents-open-source-llm-agent-framewo); [Gemini supervised tuning on Vertex AI](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/models/gemini-supervised-tuning); [OpenAI is winding down fine-tuning (Developers Digest, Oct 2026)](https://www.developersdigest.tech/blog/openai-fine-tuning-shutdown-alternatives); [DeepSeek-R1 on Ollama, sizes (Morph)](https://www.morphllm.com/ollama-deepseek-r1), [the smaller tags are distilled models (Open WebUI)](https://docs.openwebui.com/tutorials/integrations/deepseekr1-dynamic)
+- Section 2.11 and the 🏭 boxes are added by Claude and are not from these sources. So are the free-vs-open table, the distilled-model note, the "base model" note and interview question 9
 
 Previous: [Chapter 1](01-introduction-to-langchain.md) · Next: [Chapter 3, Models, messages and parameters](03-models-messages-and-parameters.md)
