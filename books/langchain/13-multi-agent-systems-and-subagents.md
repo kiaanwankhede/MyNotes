@@ -85,6 +85,7 @@ Multi-agent just means **more than one agent**. They can be combined in any shap
   - **Routing quality equals description quality.** Overlapping agents ("secondary school maths" and "high school maths") get confused
   - It can still be wrong. Tell it to ask a follow-up when unsure, sharpen the descriptions, and catch mistakes as a developer
   - A request that matches no agent may go to the closest one, which says it cannot help, and the orchestrator then tells the user it is unsupported
+  - **Say it in the supervisor prompt too.** An explicit line such as "use `handle_booking_question` for seat questions" makes delegation more likely than a good description alone (class)
 - **Router agent against LLM router:** the same idea with different words. **OpenRouter** is a catalogue of many models, not a router in this sense
 
 ## 13.4 LangChain's five patterns
@@ -154,6 +155,10 @@ A **supervisor** agent calls sub-agents **as tools**. It decides which to call, 
 - Sub-agents return results **to the supervisor**, not to the user
 - The supervisor can call **several in one turn**, even in parallel
 - **Use it when:** several distinct domains, each with its own tools or logic, and you want centralised control. With just a few tools, one agent is enough
+- **What the live demo showed** (class 25: a `booking_specialist` agent with `check_seat_availability`, wrapped as the tool `handle_booking_question`):
+  - The subagent received the **supervisor's rephrasing**, not the user's words. The supervisor writes the tool's `query` argument
+  - "hi" called **no** subagent: the supervisor answered it itself. A router would still classify it ([Chapter 14](14-handoffs-skills-router-and-custom-workflows.md), 14.5)
+  - Subagents never talk to each other. Everything goes through the supervisor, unless you give one agent another as a tool (a second level)
 
 ### The mechanism
 
@@ -450,6 +455,16 @@ return Command(update={
 - **Interviews: definitions or depth?** Depth. Basic definitions are unlikely. Topics such as middleware are less commonly known, so explain them properly
 - **Two tools return conflicting results. What do you do?** An interview question the class deferred to the GCP project
 - **Next weekend:** a LangChain project on GCP (about $300 free-trial credit), then the other patterns in depth, then a dedicated A2A session
+- **Can the supervisor call a subagent's tools?** No. An agent calls only the tools in its own list
+  - That list can change at run time with middleware ([Chapter 7](07-middleware.md), 7.2), but a subagent's tools stay inside the subagent (13.6, the three layers)
+- **Which model should each request use, to save cost?** Decide in middleware: `request.override(model=...)` in a `wrap_model_call` hook, with any logic (rules, a cheap classifier)
+  - There is no single right rule. See [Chapter 3](03-models-messages-and-parameters.md), 3.3, and per handoff step [Chapter 14](14-handoffs-skills-router-and-custom-workflows.md), 14.2
+- **LangChain or CrewAI for multi-agent work?** Two views:
+  - **Class view:** LangChain and LangGraph, for low-level control. Middleware sees and changes every model call, which is where cost, observability and execution are controlled. In CrewAI it is "possible, just harder to gauge"
+  - **CrewAI's own docs:** a **crew** is a team of agents, each defined by a **role, goal and backstory**
+    - Its tasks run with a **sequential** process, or a **hierarchical** one where a manager agent plans, delegates and checks results
+  - New CrewAI projects keep agents in `agents/*.jsonc` files; `--classic` gives the older `config/agents.yaml` and `config/tasks.yaml`. For explicit control CrewAI adds **Flows**: event-driven workflows with state and branching
+  - Pick by the control you need, and prove it with traces and cost numbers (*added by Claude*)
 
 ## 13.8 Interview corner
 
@@ -474,6 +489,7 @@ return Command(update={
 <details class="qa"><summary>3. Router or hierarchical?</summary>
 
 - A router hands the request off and is done. An orchestrator gets the sub-agent's result back and uses it
+- Example, "hi": a supervisor just answers it. A router still classifies it and sends it to a specialist, or stops with no answer if nothing matches ([Chapter 14](14-handoffs-skills-router-and-custom-workflows.md), 14.5)
 - *Stronger answer:* a LangChain router is usually a classification step, not a full agent, and has no multi-turn state
 
 </details>
@@ -519,6 +535,15 @@ return Command(update={
 
 - When one agent with good tools fits in context, when steps are fixed (use a workflow), or when latency matters more than quality
 - *Stronger answer:* multi-agent multiplies calls and failure points; prove the gain with an eval before adding agents
+
+</details>
+
+<details class="qa"><summary>10. LangChain or CrewAI for a production multi-agent system?</summary>
+
+- CrewAI: role-based agents in a crew; tasks run in sequence or under a manager agent. Quick to stand up, and Flows add explicit, event-driven control
+- LangChain and LangGraph: explicit graphs and state, middleware on every model call, checkpointers and human-in-the-loop built in
+- Production needs the same things in either: tracing, cost caps, approval gates, durable state
+- *Stronger answer:* choose by how much control and visibility the use case needs, and back it with a trace and a cost-per-request number, not a framework preference
 
 </details>
 
@@ -590,10 +615,16 @@ supervisor = create_agent(model, [research], checkpointer=InMemorySaver())
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran a supervisor that called a subagent wrapped as a tool and read `.text` from the subagent's last message. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
 - **Multi-agent overview (2026-11-15):** design guidance with no code; the four pattern diagrams were copied from the docs and checked to render in the reader
+- **Class 25 recording (2026-11-15):** the live-demo bullets in 13.6, the prompt tip in 13.3, the new class questions, Q3's example and Q10 add no new code
+  - The demo's real-model behaviour (the rephrased request, no delegation for "hi") was **not reproduced**: a scripted model cannot show a model's choice
+  - The CrewAI facts are from its README, read 2026-11-15. CrewAI was not installed or run
 
 ## Sources and further reading
 
 - Live-Class-2026, `classes_transcription_summary/23 - 27 Sep - MCP In LangChain.md` (second half: why multi-agent, context isolation, patterns, Q&A)
+- Class recording transcript, 4 Oct 2026 (class 25, teaching part 00:05–03:19, including the short question slot at 02:33–02:42), uploaded by you. The doubt session after it was left out
+  - Used for the 13.3 prompt tip, the 13.6 demo bullets, the new class questions and Q3's example
+- CrewAI README ([crewAIInc/crewAI](https://github.com/crewAIInc/crewAI), sections Understanding Flows and Crews, the project scaffold, Running Your Crew and the FAQ), read 2026-11-15, for the CrewAI view in 13.7 and Q10
 - Live-Class-2026, `Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/`: `README.md`, `00_Multi_Agent_Overview.ipynb`, `01_Subagents_Personal_Assistant.ipynb`, `LangChain_MultiAgent_Patterns_VSCode.ipynb`, and `test.py` (a scratch router snippet that calls undefined tools)
 - Sections marked *checked* and 13.9 are from testing
 - LangChain docs: [Streaming](https://docs.langchain.com/oss/python/langchain/streaming), section "Streaming from sub-agents" (read 2026-11-15 from its source, commit `04d4d4a`), for "The same with `stream()`" in 13.6

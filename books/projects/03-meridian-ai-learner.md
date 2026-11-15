@@ -336,6 +336,7 @@ uvicorn api.main:app --app-dir backend --reload --port 8080
 - Re-running after a failure is safe (per `DEPLOY.md`)
 - Get the index and endpoint IDs with `gcloud ai indexes list` and `gcloud ai index-endpoints list`
 - The service URL appears in the *Deploy to Cloud Run* log step
+- **No Kubernetes needed.** Cloud Run adds and removes copies of the container as traffic changes, up to the guide's cap of 3, so this project needs no cluster (class)
 
 **A snag the guide itself flags (untested there):** the image name uses `gcr.io`. Google's old Container Registry is closed, so you may need an Artifact Registry repository.
 
@@ -343,6 +344,8 @@ uvicorn api.main:app --app-dir backend --reload --port 8080
 
 - **The vector database is billed by the hour while it runs, even if nobody uses it.** This is the main cost
 - New Google Cloud customers get **$300 credit for 90 days**. A card is needed. No automatic charge at the end
+  - *Class observation, India:* sign-up may ask for a ₹1,000 prepayment. Google calls it refundable; the class could not find how. Keep auto-pay off
+  - *Not web-checked:* Google's free-trial page was blocked from the environment these notes were written in
 - **Set a budget alert first.** It emails you. It does **not** stop spending
 - **Do all cloud work in one sitting, then switch it off.** Recreating takes 30-45 minutes
 - **Public URL has no login.** Anyone with it can use your Gemini quota and upload files
@@ -394,6 +397,8 @@ Meridian is already the strongest portfolio piece (RAG + agents + cloud). What m
 > - **Key decisions:** layered packages (`api` → `rag`, `agent` → `config`, `logger`), lazy cloud clients so the API starts without Google, tests with `TestClient` and stand-ins
 > - **How I verified it:** an offline test suite with stand-ins for Google services; expected answers from the sample PDFs; my own duty arithmetic for the README example
 > - **Honest limits:** fictional data, model-knowledge checks, not deployed by me; I can explain exactly what would make it production-ready
+
+- **Class advice:** Meridian is the first project worth putting on a CV. CineBot was practice for learning the concepts
 
 ## 3.11 Interview corner
 
@@ -606,10 +611,12 @@ Meridian is already the strongest portfolio piece (RAG + agents + cloud). What m
   - retrieval: all three retrievers plus an unknown type, with a **stand-in embedding** (word counts) and a **stand-in chat model**. This checks the wiring and the call counts. It says **nothing** about Vertex or Gemini answer quality
 - **Not read:** the Dockerfile, and `deploy.yml` beyond the lines around `generate_json.py`. The frontend is left out at your request
 - **Not run:** the real app, Vertex AI, Gemini, Cloud Storage, the deploy. The price figure in `DEPLOY.md` is third-party, as the guide says
+- **Class 25 recording (2026-11-15):** three bullets (no Kubernetes, the India sign-up note, the CV advice) from the project introduction. Nothing new was run
 
 ## Sources and further reading
 
 - Live-Class-2026, `Weekend 14 - Oct 3 & Oct 4/meridian-ai-learner-main/README.md`, `DEPLOY.md`, `sample_docs/*.pdf`
+- Class recording transcript, 4 Oct 2026 (class 25, the project introduction at about 02:55–03:18 of the teaching part), uploaded by you, for the three class bullets in 3.9, 3.10 and "Talking about this project"
 - Google pricing: https://cloud.google.com/vertex-ai/pricing
 
 Previous: [Chapter 2, Time Tracker (MCP)](02-time-tracker-mcp.md) · Next: [Chapter 4, AI Updater](04-ai-updater.md)

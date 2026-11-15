@@ -20,6 +20,8 @@
 Behaviour changes **with state**. Tools update a state variable (`current_step` or `active_agent`) that survives across turns, and the system reads it to change the prompt and tools, or to route to another agent.
 
 - The word "handoffs" was coined by OpenAI for tool calls such as `transfer_to_sales` that pass control between agents or states
+  - It came from OpenAI's experimental **Swarm** project, where a handoff is a function that returns the next agent. AutoGen's docs credit their handoff pattern to Swarm, as the class said
+  - Today Swarm is replaced by the **OpenAI Agents SDK**, and the AutoGen repository is **archived** (Microsoft points new users to Microsoft Agent Framework). Both checked 2026-11-15
 - **Key traits:** state-driven behaviour, tool-based transitions, **direct conversation with the user** in every state, and state that persists across turns
 - **Use it when:** sequential constraints (unlock a capability only after a precondition), or a multi-stage conversation, such as collecting a movie and showtime before unlocking seat choice
 - **Against subagents:** there is **no supervisor reasoning about where to route**. State alone decides what is active now
@@ -140,6 +142,34 @@ support_agent = create_agent(model, tools=all_tools, state_schema=SupportState,
 
 **The key line: state decides configuration, tools decide state.**
 
+- **Class pictures:** one actor playing every role, with the middleware as the make-up artist who changes the costume before each scene. Or a customer-care call, transferred from desk to desk
+- **Why narrow the tools per step:** registering every tool costs nothing. Sending every tool's description on **every model call** does
+  - The middleware sends only this step's tools: the same mechanism as dynamic tools in [Chapter 7](07-middleware.md), 7.2
+
+**A step can also choose its model.** Add a `model` to each entry, and override it together with the prompt and tools ([Chapter 3](03-models-messages-and-parameters.md), 3.3):
+
+```python
+STEP_CONFIG["warranty_collector"]["model"] = fast_model       # simple steps: a cheap model
+STEP_CONFIG["issue_classifier"]["model"] = fast_model
+STEP_CONFIG["resolution_specialist"]["model"] = strong_model  # the step that needs judgement
+
+@wrap_model_call
+def apply_step_config(request: ModelRequest, handler) -> ModelResponse:
+    step = request.state.get("current_step", "warranty_collector")
+    cfg = STEP_CONFIG[step]
+    for key in cfg["requires"]:
+        if request.state.get(key) is None:
+            raise ValueError(f"{key} must be set before reaching {step}")
+    request = request.override(model=cfg.get("model", request.model),
+                               system_prompt=cfg["prompt"].format(**request.state),
+                               tools=cfg["tools"])
+    return handler(request)
+```
+
+- *Checked (two scripted models, one turn):* the fast model handled the warranty and classification steps, each offered only its own tool. The strong model got the resolution step, with its prompt and its two tools
+- **Pass a model object, not a model id.** *Checked:* `request.override(model="openai:gpt-5-mini")` failed with `AttributeError: 'str' object has no attribute 'bind'`. Build the models once, for example with `init_chat_model(...)`
+- `cfg.get("model", request.model)` keeps the agent's own model for a step without one
+
 ### Letting the customer go back
 
 - Add `go_back_to_warranty` and `go_back_to_classification` as tools that set `current_step` backwards. Each needs a `ToolRuntime` and a `ToolMessage`, as above
@@ -225,6 +255,10 @@ def load_skill(skill_name: str) -> str:
 ```
 
 - **`load_skill(skill_name)` is the whole mechanism.** The skills are listed in the docstring or the system prompt
+- **List the exact names.** In the class run with a real model, the names were removed from the docstring
+  - The model then asked for `refund_and_cancellation_policy`: a skill that does not exist. With the names listed, it asked for `refund_policy`
+- **A skill can steer tool use.** Its text can say which registered tool to call next, and in what order. The class's refund skill pointed to a `process_refund` tool
+  - Skills make the **agent** better at its job. The tools stay the same
 
 ### The SQL assistant project
 
@@ -247,6 +281,10 @@ class SkillMiddleware(AgentMiddleware):
 - ✅ *Verified (details in "How this chapter was checked").*
 - **Why it is worth it:** less context (only the needed skills load), teams maintain skills separately, it scales to dozens or hundreds of skills, and the history stays simple, with one agent and one thread
 - **Trade-offs:** the **first** load costs one extra tool round trip, and basic skills rely on **prompting, not hard rules**. Enforcing "always load A before B" needs custom logic
+- **Why a middleware builds the list:** names typed into the tool's docstring need an edit for every new skill. The middleware builds the list from the registry on every call
+- **The list is sent on every call.** Only names and descriptions, so it stays small
+  - Class estimate: 20–30 tokens per skill, about 2,000 for 100 skills. Measure your own
+  - The full content costs tokens only after it is loaded
 
 ### Make loading a rule, not a request
 
@@ -285,6 +323,54 @@ class CustomState(AgentState):
 - **The notebook's demo does not do this.** `load_skill_with_tools` builds the `new_tools` list and never uses it. It only returns the skill text, and the cell prints what **would** be registered
 - **The working way:** register **all** tools at `create_agent(...)` (see the gotcha in 14.2) and use the handoff-style middleware to **show only the tools whose skill is loaded**, reading `skills_loaded` from state. Not built here, though it combines two checked pieces
 
+### An on/off switch per skill
+
+The class idea: give each skill an `allowed` flag, so it can be switched off. The class compared it to switching a skill or connector off in Claude's settings; how Claude does it inside is not public.
+
+```python
+from langchain.agents.middleware import AgentMiddleware
+from langchain.messages import SystemMessage
+from langchain.tools import tool
+
+SKILLS = {
+    "refund_policy":   {"description": "Refunds and cancellations", "allowed": True,
+                        "content": "Full refund if cancelled 2+ hours before the show; 50% credit within 2 hours. "
+                                   "To refund, call process_refund(booking_id)."},
+    "loyalty_program": {"description": "Points and rewards", "allowed": False,
+                        "content": "1 point per $1; 100 points = one free ticket."},
+}
+
+def enabled() -> dict:
+    return {name: s for name, s in SKILLS.items() if s["allowed"]}    # read on every call: the switch is live
+
+@tool
+def load_skill(skill_name: str) -> str:
+    """Load the full instructions of one skill, by its exact name."""
+    skill = enabled().get(skill_name)
+    if skill is None:                                  # unknown OR switched off: refuse, and say what exists
+        return f"No skill named {skill_name!r}. Available: {', '.join(enabled())}"
+    return skill["content"]
+
+class SkillMiddleware(AgentMiddleware):
+    tools = [load_skill]
+
+    def wrap_model_call(self, request, handler):
+        listing = "\n".join(f"- {name}: {s['description']}" for name, s in enabled().items())
+        addendum = f"\n\n## Available skills\n{listing}\nUse load_skill before answering a question one of them covers."
+        blocks = list(request.system_message.content_blocks) if request.system_message else []
+        new_system = SystemMessage(content=blocks + [{"type": "text", "text": addendum}])
+        return handler(request.override(system_message=new_system))
+```
+
+- **Hide it *and* refuse it** (*added by Claude*). The middleware leaves a switched-off skill out of the list, but a model can still ask for it by name. So `load_skill` refuses too
+- **Refuse helpfully** (*added by Claude*). The error names the skills that exist, so a model that guessed a name can retry
+- *Checked (scripted model, `langchain` 1.5.0):*
+  - the first call listed only `refund_policy`
+  - asking for `loyalty_program`, and for the invented `refund_and_cancellation_policy`, both returned "No skill named … Available: refund_policy"
+  - `refund_policy` loaded, its text pointed to `process_refund`, and that tool ran
+- *Checked:* with no system prompt the middleware still worked. Switching `loyalty_program` on, with no rebuild, listed both skills on the next call, because `enabled()` is read on every call
+- In a real app the flag can come from a database or a per-user setting. Read it per request, and key it by user when users differ (*added by Claude*)
+
 ### Other shapes
 
 | Dimension | Options |
@@ -315,6 +401,9 @@ A **classification step** sends a query to specialised agents **in parallel**, a
 - The router decomposes the query. Zero or more agents run **at the same time**. One response comes back
 - **Router against subagents:** a router is a dedicated classification step, often **one structured-output call**, and keeps no conversation. A supervisor is a full agent that decides turn by turn. Use a router for clear categories and explicit parallelism, a supervisor for flexible orchestration
 - The project: a **GitHub agent**, a **Notion agent** and a **Slack agent**. Asked "How do I authenticate API requests?", the router splits it into a sub-question per source
+- **Three agents defined are not yet a multi-agent system.** It becomes one only when a workflow connects them: here, the graph below. Class trap: most people answer "yes, there are three agents"
+- **Why LangGraph here:** the entry point is a plain function (`classify_query`), not an agent
+- **Use a small, cheap model to classify.** It runs on every request (class)
 
 ### Three state shapes
 
@@ -372,6 +461,25 @@ workflow = (StateGraph(RouterState)
 - **`Send(node, payload)` fans out.** Returning several `Send` objects makes LangGraph run those nodes at once, each receiving **only** its own narrow input (`AgentInput`), not the whole router state
 - **Synthesize** waits for every dispatched branch, and uses the original query so the answer addresses what was asked. Its prompt asks to combine without repeating, highlight what is actionable, and **note disagreements between sources**
 - **`Command(goto=agent)`** routes to **one** agent. `[Send(...), ...]` fans out to several
+
+### When nothing matches: "hi"
+
+- The classifier keeps no conversation and has no "just answer" option. A supervisor answers "hi" itself ([Chapter 13](13-multi-agent-systems-and-subagents.md), 13.6)
+- A router either sends it to a specialist, which wastes calls, or picks nothing
+- *Checked:* when `classify` returned an empty list, `route_to_agents` returned no `Send`, and the graph **stopped after classify** with **no `final_answer`**
+  - The tool wrapper below (`workflow.invoke(...)["final_answer"]`) would then raise `KeyError`
+- **A fallback** (*added by Claude*): go straight to synthesis when nothing was picked
+
+```python
+def route_to_agents(state: RouterState) -> list[Send] | str:
+    if not state["classifications"]:          # "hi", or nothing in scope
+        return "synthesize"                   # skip the specialists, answer directly
+    return [Send(c["source"], {"query": c["query"]}) for c in state["classifications"]]
+```
+
+- List the extra target too: `.add_conditional_edges("classify", route_to_agents, ["github", "notion", "slack", "synthesize"])`
+- Let `synthesize_results` answer from the query alone when `results` is empty
+- *Checked:* with both changes, "hi" got a direct reply, and "How do I authenticate API requests?" still went to the GitHub agent
 
 ### The reducer gotcha
 
@@ -605,6 +713,14 @@ flowchart TD
 - Moving down the tree adds model calls, latency and debugging cost: justify each step with a measured problem (tool-choice errors, context overflow, slow serial calls)
 - In an interview, name the **signal** that pushed you to the next pattern, not just the pattern
 
+### Questions from the class
+
+- **Is a handoff just dynamic prompting?** Mechanically, yes: the prompt and tools are chosen from state on each call
+  - Class answer: "Could the implementation be better in LangChain? Yes. Is this the right way of doing handoff? Yes"
+- **Is the skill list sent on every call?** Yes, the names and descriptions, so the model can choose. The full content is sent only after `load_skill` (14.4)
+- **Skills or a config file?** Skills are just instructions. Use them for complex or repeated jobs you don't want to explain again, such as a code-review skill. Simple switches can stay in config
+- **How is a skill different from RAG?** Different tools. The class deferred it to the RAG lessons; see Q14 below
+
 ## 14.8 Interview corner
 
 **What interviewers listen for:** you can match a **pattern to a problem** (handoffs for sequential steps with the user, router for parallel sources, skills for many specialities), and you explain the cost of each.
@@ -689,8 +805,40 @@ flowchart TD
 
 </details>
 
+<details class="qa"><summary>12. A teammate says "we have a multi-agent system: three agents in <code>agents.py</code>". What do you check?</summary>
+
+- Whether anything connects them: a supervisor with agents as tools, handoff state, or a router graph. Three agents alone are three separate agents
+- Who talks to the user, how control passes, and what state flows between them
+- Whether one agent with good tools would do ([Chapter 13](13-multi-agent-systems-and-subagents.md), 13.1)
+- *Stronger answer:* name the pattern and the signal that justified it (tool confusion, context size, parallel work), and show a trace of one request
+
+</details>
+
+<details class="qa"><summary>13. Add Claude-style skills, with an on/off switch, to a company assistant. How?</summary>
+
+- A registry: name, short description, long content, and an `allowed` flag, per user if needed
+- A middleware that lists only allowed names and descriptions on every call. A `load_skill` tool that returns the content, and refuses switched-off or unknown names while listing the valid ones (14.4)
+- Skill text can name the tools to call next. Track loaded skills in state, with a reducer, if tools depend on them
+- *Stronger answer:* measure the token cost of the list, and log which skills load per request so unused ones can be retired
+
+</details>
+
+<details class="qa"><summary>14. Skill or RAG for a 200-page policy manual?</summary>
+
+- RAG: split the manual into chunks, embed them, retrieve the few most similar chunks per question. It fits a large body of facts ([Projects, Chapter 3](../projects/03-meridian-ai-learner.md), 3.4)
+- A skill: one named block of instructions that the model chooses to load whole. It fits procedures and rules, not 200 pages
+- Combine them: a skill that says *how* to answer policy questions (search first, cite the section), with retrieval as a tool
+- *Stronger answer:* by the size guide in 14.4, anything over about 10K tokens needs search or paging anyway. Retrieval quality then decides the answer, so evaluate it
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"An internal assistant answers questions from GitHub, Notion and Slack and remembers the conversation."* Cover router vs supervisor, parallel fan-out, the reducer, synthesis, and wrapping the router as a tool for memory.
+
+> [!TIP]
+> **💡 Steer the interview** (class advice)
+> - Show depth on purpose: "I use skills in Claude, and I know how to build the same with LangChain middleware."
+> - The natural follow-up is "tell me more", and that takes the interview onto ground you know
 
 ## 14.9 Added by Claude, not from the sources
 
@@ -724,6 +872,7 @@ Items marked *checked* were run with `langchain` 1.4.7 and `langgraph` 1.2.19, u
 - **Router:** classify with structured output, `Send` to fan out, a **reducer** on any key written in parallel, then synthesise. Wrap it as a tool for memory
 - **Custom workflow:** a hand-built graph with agents in nodes. It can hold all the others
 - Fake embeddings test the plumbing, not relevance
+- A handoff step can pick its own model. A skill switch must hide **and** refuse. A router needs a fallback when nothing matches
 - Patterns combine. Pick per sub-problem
 
 ## Practice
@@ -757,11 +906,22 @@ Items marked *checked* were run with `langchain` 1.4.7 and `langgraph` 1.2.19, u
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** it is a table, so there was nothing to run.
 - **Multi-agent overview (2026-11-15):** the call and token counts in 14.7 are the docs' own diagrams, not re-run; the eight diagrams were copied and checked to render in the reader
+- **Class 25 recording (2026-11-15),** `langchain` 1.5.0, `langgraph` 1.2.22, scripted models; the three new blocks ran as printed:
+  - *14.2 per-step model:* one turn passed through all three steps, with the model, prompt and tools of each call logged. A string model id raised `AttributeError`
+  - *14.4 skill switch:* the listing, the two refusals, the load, `process_refund`, the no-system-prompt case and the live switch
+  - *14.5 "hi":* the printed graph with an empty classification (no `final_answer`), then the fallback route with `synthesize` added to the targets
+  - The class's real-model behaviour (the invented skill name, a greeting sent to a specialist) was **not reproduced**
+  - Q12–Q14 and the "Steer the interview" tip were written by Claude from the class points
 
 ## Sources and further reading
 
 - Live-Class-2026, `Weekend 14 - Oct 3 & Oct 4/Multi Agents in Langchain/`: `README.md`, `00_Multi_Agent_Overview.ipynb`, `02_Handoffs_Customer_Support.ipynb`, `03_Router_Knowledge_Base.ipynb`, `04_Skills_SQL_Assistant.ipynb`, `LangChain_MultiAgent_Patterns_VSCode.ipynb`
 - Live-Class-2026, `classes_transcription_summary/23 - 27 Sep - MCP In LangChain.md` (pattern table and class questions, in [Chapter 13](13-multi-agent-systems-and-subagents.md))
+- Class recording transcript, 4 Oct 2026 (class 25, teaching part 00:05–03:19, including the short question slot at 02:33–02:42), uploaded by you. The doubt session after it was left out
+- LangChain docs: [Skills](https://docs.langchain.com/oss/python/langchain/multi-agent/skills) and [Router](https://docs.langchain.com/oss/python/langchain/multi-agent/router)
+  - read in full 2026-11-15 from their source (`langchain-ai/docs`, branch `main`)
+- AutoGen docs, "Handoffs" design pattern: `microsoft/autogen`, `python/docs/src/user-guide/core-user-guide/design-patterns/handoffs.ipynb` (its text cells)
+  - the AutoGen repository README (the archived notice), and the OpenAI Swarm README (`openai/swarm`: its top notice, Overview and Handoffs sections). All read 2026-11-15
 - Sections marked *checked* and 14.9 are from testing
 - LangChain docs: [Middleware overview](https://docs.langchain.com/oss/python/langchain/middleware/overview), section "Use middleware inside a LangGraph workflow" (read in full 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "The agent itself as a node" in 14.6
 - LangChain docs: [Multi-agent overview](https://docs.langchain.com/oss/python/langchain/multi-agent), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`), for the eight call-flow diagrams and the per-scenario reasoning in 14.7 (diagrams copied to `images/`)

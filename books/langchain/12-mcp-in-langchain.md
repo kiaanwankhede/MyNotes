@@ -16,7 +16,7 @@
 - Explain why the class's elicitation demo fails on a modern connection, and the two ways that work
 - Add bearer authentication, and explain why per-user credentials matter in a deployed app
 
-**Not covered yet:** the multi-agent half of class 23 (context isolation, patterns). It goes in [Chapter 13](13-multi-agent-systems-and-subagents.md) and [Chapter 14](14-handoffs-skills-router-and-custom-workflows.md).
+**Multi-agent:** the second half of class 23 (context isolation, patterns) is in [Chapter 13](13-multi-agent-systems-and-subagents.md) and [Chapter 14](14-handoffs-skills-router-and-custom-workflows.md).
 
 ## 12.1 An agent just needs tools
 
@@ -61,6 +61,22 @@ flowchart LR
 - ✅ *Verified (details in "How this chapter was checked").*
 - ✅ *Verified (details in "How this chapter was checked").*
 - **The class's own illustration** (`MCPAdapter(server)`, `list_tools()`, `create_agent(...)`) matches this API. The class notes say the import path was not legible in the recording
+
+> [!WARNING]
+> **A third package with a confusingly close name: `langchain-mcp`.**
+> - In class, "LangChain MCP" means the `langchain[mcp]` extra in the table above
+> - PyPI also has a package literally named **`langchain-mcp`** (0.2.1): an older community project (rectalogic), imported as `langchain_mcp` (`MCPToolkit`), not `langchain.mcp`
+> - It pins `langchain-core~=0.3.37` and `mcp~=1.0`
+> - *Checked (dry runs):* next to `langchain` 1.5.0, pip refused with `ResolutionImpossible`. Installed alone into a LangChain 1.5 environment, it would downgrade `langchain-core` 1.8.0 to 0.3.86 and `mcp` 2.3.0 to 1.30.0
+> - The Weekend 13 `pyproject.toml` lists it (`langchain-mcp>=0.2.1`, `langchain>=0.3.30`). pip resolves that pair to `langchain` 0.3.30, which has no `langchain.mcp`: one more reason the first demo failed
+> - *Added by Claude.*
+
+- **Check a package before it touches your environment:**
+
+```bash
+pip install --dry-run "langchain==1.5.0" "langchain-mcp==0.2.1"
+# ERROR: ResolutionImpossible ... langchain-mcp 0.2.1 depends on langchain-core~=0.3.37
+```
 
 > **Do not install both packages in one environment with FastMCP 4.** *Checked:* installing `langchain-mcp-adapters` replaced `mcp` 2.3.0 with 1.30.0, and `import fastmcp` then failed with "FastMCP server support is not installed". Use a separate virtual environment for each
 >
@@ -123,6 +139,13 @@ if __name__ == "__main__":
     - prebuilt `fastmcp.Client`: when you need full control of transport, response caching and protocol negotiation (12.8)
     - MCP config `{"mcpServers": {...}}`: several servers behind one adapter (12.8)
   - a **bare string that is not a URL is refused.** *Checked:* `MCPAdapter("/path/to/server.py")` raised `ValueError`. The reason in its documentation: a string often comes from configuration or from a model, and a path string would launch a local program
+- **Who writes the answer.** The server returned only the times. The sentence the user reads is the model's
+  - The MCP call itself uses no model tokens. But every tool description and every result is sent to the model, so many tools or large results cost tokens on every call (*this half added by Claude*)
+- **Run this lesson locally, not in Colab.** Class reason: STDIO servers and async code kept failing in Colab (a remote runtime), so the lesson moved to VS Code. *Not tested here*
+  - In any notebook, use top-level `await`. There, `asyncio.run()` raises "cannot be called from a running event loop" (*added by Claude; checked with a nested `asyncio.run`*)
+- **Write the server file before you connect.** In a notebook, run the cell that writes it first. *Checked:*
+  - a missing script raises `FileNotFoundError: Script not found: …` at once
+  - a script that **crashes on start** (here an import error) gives only `MCPError: Connection closed`. The real error is the server's traceback, on stderr or in the transport's `log_file`
 
 ### Call a tool without any agent
 
@@ -157,6 +180,11 @@ async def run_agent(server) -> dict:
 - The comments in the file say it: the **tools hold the client**, so the agent stays usable for the life of the `async with` block. Use the agent **inside** the block
   - **Correction:** the docs now say the agent stays usable **after** the block exits, and that is what the adapter's own docstring says too
   - *Checked:* a tool call after the block worked with an in-process server and with a stdio script. Building the agent inside the block is still the clearest pattern
+- `server` can be a FastMCP object, a URL or a transport (12.4)
+- ✅ *Verified (details in "How this chapter was checked").*
+- **Trap 1: the file name.** It is called `langchain.py`. Run from its own folder, Python finds the file before the real package, and `from langchain.agents import create_agent` fails with "'langchain' is not a package". *Checked* by putting the folder first on the path. Rename it (for example `mcp_agent.py`)
+- **Trap 2: a string model id needs its provider package.** *Checked:* `create_agent("claude-sonnet-5", ...)` with no key raised an `ImportError` saying `langchain-anthropic` must be installed. Whether `claude-sonnet-5` is a valid id was **not checked**; use an id from the provider's current list
+- The same folder's `main.py` is the 3-line `uv init` stub and has nothing to learn
 
 ### How long a STDIO server lives
 
@@ -184,11 +212,6 @@ async with MCPAdapter(transport) as adapter:
 - Its tools (docs): `search_docs_by_lang_chain` (search guides and examples), `query_docs_filesystem_docs_by_lang_chain` (read or search the docs as a virtual file system: `rg`, `head`, `cat`), `submit_feedback` (report a problem with a page)
 - The docs' page "Use docs programmatically" covers IDE and coding-agent setup (Claude Code, Cursor and others)
 - **Not run here:** that host was blocked from the environment these notes were tested in
-- `server` can be a FastMCP object, a URL or a transport (12.4)
-- ✅ *Verified (details in "How this chapter was checked").*
-- **Trap 1: the file name.** It is called `langchain.py`. Run from its own folder, Python finds the file before the real package, and `from langchain.agents import create_agent` fails with "'langchain' is not a package". *Checked* by putting the folder first on the path. Rename it (for example `mcp_agent.py`)
-- **Trap 2: a string model id needs its provider package.** *Checked:* `create_agent("claude-sonnet-5", ...)` with no key raised an `ImportError` saying `langchain-anthropic` must be installed. Whether `claude-sonnet-5` is a valid id was **not checked**; use an id from the provider's current list
-- The same folder's `main.py` is the 3-line `uv init` stub and has nothing to learn
 
 ## 12.5 What the adapter translates
 
@@ -411,6 +434,7 @@ async with MCPAdapter(group) as adapter:
 - ✅ *Verified (details in "How this chapter was checked").*
 - A group **routes each call back to the client that advertised that tool**, and namespaced names stop two servers' identical tool names from colliding
 - **Version handling stays out of the agent's way.** FastMCP negotiates per connection. As the class put it, the agent should only worry about getting tools
+- **Class rule of thumb:** start with an MCP config dictionary. Move to a client group when a legacy and a modern server clash in one fleet, or when servers need different credentials
 - A **single server** target accepts one URL, path or in-memory server. You cannot pass several this way
 - **An in-memory server** defined in your own code can be passed straight in
 
@@ -638,6 +662,12 @@ From the class notebook's last section, with each point from the older package c
 - **Do I need to know how FastMCP wraps the raw client?** Not in depth. FastMCP and the official SDK are now very similar
 - **How do I restrict which tools a user may call?** It is ordinary engineering with middleware, not an MCP feature ([MCP, Chapter 4](../mcp/04-operation-transports-and-shutdown.md), 4.4)
 - **Interview question left for the project:** in an agentic loop, how do you handle two tools returning conflicting results? Class deferred it to the GCP project. Next weekend's project was on Google Cloud, with a free-trial account needed beforehand
+- **How do I know whether a server's tool returns structured data, or declares annotations?**
+  - Print `tool.metadata["mcp"]` after `list_tools()` (12.6), read the server's docs, or open it in an inspector such as MCPJam ([MCP, Chapter 3](../mcp/03-lifecycle-json-rpc-and-capability-negotiation.md), 3.10)
+  - A call's `msg.artifact` is `None` when the tool returned no structured content (12.8)
+- **How does a client know which token a server wants?** The server documents it
+  - Context7, for example: works without a key at lower rate limits; a free API key, sent as `Authorization: Bearer …`, raises them (Context7 README)
+- **The agent asked me for the missing `log_time` details. Was that elicitation?** No. The **model** asked in its own reply. Elicitation is the **server** pausing a tool call to ask (12.7)
 
 ## 12.13 Interview corner
 
@@ -715,6 +745,15 @@ From the class notebook's last section, with each point from the older package c
 - The app shows `interrupt.value["requests"]`, then resumes with `Command(resume={"responses": {key: {"action": "accept", "content": {...}}}})` on the same `thread_id`
 - It needs a checkpointer, and the server must use the modern "return the question" style, not a legacy `ctx.elicit` push
 - *Stronger answer:* the tool reruns on resume (three runs per pause, checked), so anything before the answer check must be idempotent
+
+</details>
+
+<details class="qa"><summary>11. A teammate ran <code>pip install langchain-mcp</code>, and <code>from langchain.mcp import MCPAdapter</code> still fails. Why?</summary>
+
+- `langchain-mcp` on PyPI is a different, older community package (module `langchain_mcp`), not LangChain's adapter
+- LangChain's adapter ships inside `langchain` itself: install the extra, `pip install "langchain[mcp]>=1.4.0"`
+- The community package pins `langchain-core` 0.3, so next to LangChain 1.x pip either refuses or downgrades core (12.3)
+- *Stronger answer:* check with `pip show` and `pip install --dry-run` before changing an environment, keep one virtual environment per project, and pin versions
 
 </details>
 
@@ -807,9 +846,17 @@ agent = create_agent(model, tools)          # tools still work after the context
   - *12.10 `langchain.mcp` against `langchain-mcp-adapters`:* Checked on `langchain-mcp-adapters` 0.3.2: `MultiServerMCPClient` has `get_tools`, `get_resources`, `get_prompt`, `get_server_info` and `session`, and its constructor takes `tool_interceptors`, `tool_name_prefix` and `handle_tool_errors`. That matches the notebook's table. The older package was **not run** against a server here
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran `MCPAdapter` against a local FastMCP server over HTTP, listed its tools and built an agent from them; the `destructive_hint` metadata line was not exercised. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
+- **Weekend 13–14 recordings (2026-11-15),** `langchain` 1.5.0, `langchain-core` 1.8.0, `fastmcp` 4.2.0, `mcp` 2.3.0:
+  - pip dry runs for `langchain-mcp` 0.2.1. Alone: it would install `langchain-core` 0.3.86 and `mcp` 1.30.0. With `langchain==1.5.0`: `ResolutionImpossible`. With the Weekend 13 pins: `langchain` 0.3.30
+  - the package's wheel: module `langchain_mcp` (`toolkit.py`), author and repository from its metadata
+  - `MCPAdapter` with a missing script (`FileNotFoundError: Script not found`) and with a script that fails on import (`MCPError: Connection closed`, traceback on stderr)
+  - a nested `asyncio.run` (`RuntimeError`). Colab itself was not tried
 
 ## Sources and further reading
 
+- Class recording transcripts, 27 Sep 2026 (class 23, teaching part 00:00–01:57) and 3 Oct 2026 (class 24, teaching part 00:03–03:12), uploaded by you. The doubt sessions after them were left out
+- PyPI: [`langchain-mcp`](https://pypi.org/project/langchain-mcp/) 0.2.1, its metadata and wheel, read 2026-11-15 (for 12.3 and Q11)
+- Context7 README ([upstash/context7](https://github.com/upstash/context7), sections Installation and Available Tools), read 2026-11-15 (for 12.12)
 - Live-Class-2026, `classes_transcription_summary/23 - 27 Sep - MCP In LangChain.md` (first half: the adapter, translation, authentication, elicitation)
 - Live-Class-2026, `Weekend 14 - Oct 3 & Oct 4/MCP in Langchain/`: `MCP_in_Langchain.ipynb`, `MCP_MultiServer_Live_Demo.ipynb`, `cinebot_mcp_server.py`, `cinebot_error_server.py`, `cinebot_elicit_server.py`, `cinebot_mcp_server.log` and `pyproject.toml`
 - Live-Class-2026, `Weekend 13 - 27th Sep/Langchain MCP.ipynb` and `langchain.py`
