@@ -296,6 +296,10 @@ def escalation(issue: str, tried: str, sentiment: str, next_step: str) -> str:
 - **Won't many servers blow up the context?** Yes (2.4)
 - **When was HTTP + SSE deprecated?** In the specification released in March 2025. The practical cut-over varies
 - **Is Streamable HTTP the same as REST?** No. The messages are JSON-RPC 2.0 whichever transport carries them
+- **Is MCP stateful or stateless?** The class (23 Aug): it depends, but mostly stateless. Both views hold, at different levels:
+  - The protocol taught in Chapters 3 and 4 is **stateful**: a handshake opens a session, and over HTTP every later request carries an `mcp-session-id` ([Chapter 4](04-operation-transports-and-shutdown.md), 4.9)
+  - Servers can run a **stateless HTTP mode**, and the 2026-07-28 revision removes the handshake and sessions ([Chapter 7](07-legacy-vs-modern-mcp.md), 7.2)
+  - Most **tools** keep no state of their own between calls, which is probably what the class meant
 - **For interviews about MCP security,** read up on **JWT tokens and OAuth flows**. The course covers an authentication layer for MCP servers in a later session
 
 ## 2.11 Added by Claude, not from the sources
@@ -435,6 +439,7 @@ if __name__ == "__main__":
 - Run with `fastmcp` 4.1.4 (the class project pinned `>=3.4.7`): the warm-up server's tool list, descriptions and input schemas, calling `greet` and `add`, a bad-argument error, a real STDIO client and server, `fastmcp list`, the failing `fastmcp dev server.py` and the working `fastmcp dev inspector` command name, raw JSON-RPC messages over STDIO (`initialize`, `tools/list`, `tools/call`), and a server with a tool, a resource and a prompt read by a client
 - **Not run:** the browser Inspector (it needs `npx` and a network download), VS Code, Claude Desktop, a remote server
 - The architecture material (host, client, server, the four reasons, the transports) comes from the class notes. The Ctrl+C behaviour and the token cost are class demonstrations
+- Class 16 recording transcript (23 Aug), added 2026-11-15: only the part before the break was readable (see [Chapter 1](01-why-mcp-exists.md), "How this chapter was checked"). It added one class answer to 2.10 (stateful or stateless), set against Chapters 3, 4 and 7; nothing new was run for it
 
 ## Sources and further reading
 

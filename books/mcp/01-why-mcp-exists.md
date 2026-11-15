@@ -22,7 +22,9 @@
 
 ## 1.1 From black box to hands
 
-- **ChatGPT launched on 30 November 2022.** About **1 million users in a week**, about **100 million within a few months**
+- **ChatGPT launched on 30 November 2022.** It reached **1 million users in about five days**, and an estimated **100 million monthly users by January 2023**, roughly two months after launch
+  - The class rounded these to "a week" and "about three months"
+  - The 100 million is an analyst estimate based on web-traffic data, not a figure from OpenAI *(web-checked; sources at the end)*
 - It was a new way to interact with machines. Before it, machines mostly understood fixed inputs such as buttons. Now natural language went in and natural language came out
 - Underneath, the first ChatGPT was an **LLM: a next-word (next-token) predictor**
 - A useful picture: an LLM at that stage is **"just a brain"**
@@ -40,11 +42,15 @@
 
 > MCP is not about giving the LLM more intelligence. It is about giving it an ability to see more.
 
+- **The class demo:** with web search switched off, a model was asked who currently leads a country whose leadership had changed after its training. It answered from its training data, and the answer was out of date. With search switched on, it found the current answer
+- Same model, same intelligence. Only what it could **see** changed. That is the gap MCP fills for tools and data
+
 ## 1.3 Step 1: function calling (mid-2023)
 
 - OpenAI let you **bind tools (functions)** to a model: describe an action ("send email") and the model tells you **which function to call and with what arguments**
 - In code it is `llm.bind_tools(...)` ([Langchain, Chapter 5](../langchain/05-tools.md))
 - **The model never executes anything.** It only requests the call
+- **The class demo:** asked "Do I have any meetings from 10 to 20 September?", Claude called its calendar connector with arguments it chose itself: start time, end time, time zone, sort order and page size. The connector made the API call and returned no events. The model only wrote the request, then the answer
 - It felt like magic: no more copy-pasting between a chat and your inbox
 - Fine for a hobby project
 
@@ -276,7 +282,8 @@ Not in the course material. Established practice, but check current docs. Items 
 ## How this chapter was checked
 
 - Everything about the history, the arguments and the FAQ comes from the class notes. Nothing here was run, except the check in section 1.9
-- Dates and user numbers in 1.1 are class figures
+- Dates and user numbers in 1.1: the class's figures, set against web sources (2026-11-15). The 1 million in about five days is widely reported; the 100 million in January 2023 is an analyst estimate from web-traffic data
+- Class 16 recording transcript (23 Aug): the teaching part from 00:08 to 01:31 was read in full; the two demos in 1.2 and 1.3 come from it. After the break the transcript is unusable (repeated filler, then only "N." from about 01:52 to 03:06), so the second half of the class was not read from the recording; it is covered from the class summaries, slides and code listed below
 - **Web-checked in the 2026 review:** the foundation, donation date, server count and adopting hosts in the 1.6 bullet and the production box (sources below)
 - The diagram, production box, graded interview and cheat sheet were added in the 2026 review (Added by Claude)
 
@@ -287,5 +294,7 @@ Not in the course material. Established practice, but check current docs. Items 
 - Live-Class-2026, `Weekend 09 - 22-23 Aug/23rd Aug - MCP/Complete MCP/Why MCP Had to Exist.txt` (the questions and answers) and the whiteboard `Complete-MCP.pdf`
 - Section 1.9 is added by Claude and is not from these sources
 - [IT Brief: Linux Foundation unveils Agentic AI standards group](https://itbrief.co.uk/story/linux-foundation-unveils-agentic-ai-standards-group) (18 December 2025), read in full for the 2026 review
+- Class 16 recording transcript (23 Aug 2026), uploaded by you; teaching part up to the break (00:08–01:31), for the figures as said in class and the two demos
+- ChatGPT's early growth (1.1): [Fortune, 2 Feb 2023](https://fortune.com/2023/02/02/chatgpt-fastest-growing-app-in-history-could-revolutionize-trading/) and [TechSpot](https://www.techspot.com/news/97486-chatgpt-adds-100-million-users-two-months-making.html), web-checked 2026-11-15
 
 Previous: [MCP book introduction](README.md) · Next: [Chapter 2, Primitives and architecture](02-primitives-and-architecture.md)

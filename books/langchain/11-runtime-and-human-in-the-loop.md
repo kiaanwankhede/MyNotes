@@ -15,6 +15,7 @@
 - Build a personalised system prompt with `dynamic_prompt`
 - Pause an agent for a human with `HumanInTheLoopMiddleware`, read the interrupt and resume it
 - Interrupt only when it matters, with a condition on the tool call's arguments
+- Keep amounts and identities out of model arguments, and handle a message that arrives while an approval is pending
 
 ## 11.1 The problem runtime solves
 
@@ -139,10 +140,63 @@ priya,  priya2222  ----> RomCom, Horror
 
 - The id travels through `runtime.context.user_id`. The tool reads long-term preferences from the store. The user **never states either in the chat**
 - This is how a chat product "remembers" your name or preferences across sessions: it lives in a store, reached through runtime, separate from message history
-- **Why `ToolRuntime` and not a raw runtime?** LangChain decided that tools do not get a loose reference to a shared object. A tool gets a **`ToolRuntime` parameter, deliberately passed**. It bundles the five components plus tool extras: **state, config and the tool call id**. There is no shortcut to "get the store directly". A tool sees only what it is handed
+- **Why `ToolRuntime` and not a raw runtime?** LangChain hands each tool a **`ToolRuntime` parameter, deliberately passed**. It bundles the five components plus tool extras: **state, config and the tool call id**. The class said there is no other way to reach the store from a tool. There are two (both tested below), and `ToolRuntime` is still the one to use
 - The `runtime` parameter is **hidden from the model**. The tool's visible arguments stay empty (checked, see [Chapter 5](05-tools.md), 5.9)
 
 > **Pitfall (checked).** The class code wrote `runtime.store.get(("users"), user_id)`. `("users")` is **just a string**, not a tuple. With data stored under `("users",)` the lookup quietly returned `None`, and the tool answered "No preferences". A namespace must be a **tuple**: `("users",)`
+
+**Why `runtime.store` and not the store object itself** (class 15)
+
+- The class asked: the store was created right there as `loyalty_store`, so why not call `loyalty_store.get(...)` in the tool?
+- You can, in one script. But `runtime.store` is **whatever store this agent was given**: a Postgres store in production, a fresh one in a test, the server's own on a LangGraph deployment. A module-level object is only ever the one you created
+
+```python
+from dataclasses import dataclass
+from langchain.agents import create_agent
+from langchain.tools import tool, ToolRuntime
+from langgraph.store.memory import InMemoryStore
+
+loyalty_store = InMemoryStore()            # a module-level object
+
+@dataclass(frozen=True)
+class CustomerContext:
+    user_id: str
+
+@tool
+def prefs_from_global(runtime: ToolRuntime[CustomerContext]) -> str:
+    """Read the user's saved preferences (from the module-level store)."""
+    item = loyalty_store.get(("users", runtime.context.user_id), "prefs")
+    return item.value["genres"] if item else "No saved preferences."
+
+@tool
+def prefs_from_runtime(runtime: ToolRuntime[CustomerContext]) -> str:
+    """Read the user's saved preferences (from the agent's store)."""
+    item = runtime.store.get(("users", runtime.context.user_id), "prefs")
+    return item.value["genres"] if item else "No saved preferences."
+
+prod_store = InMemoryStore()               # stands in for the PostgresStore your app passes in production
+prod_store.put(("users", "mayank123"), "prefs", {"genres": "horror, thriller"})
+agent = create_agent(model="openai:gpt-5-mini", tools=[prefs_from_global, prefs_from_runtime],
+                     context_schema=CustomerContext, store=prod_store)
+```
+
+✅ *Verified on 1.5.0 (scripted model): with the data in the store the agent was given, `prefs_from_runtime` answered `horror, thriller` and `prefs_from_global` answered `No saved preferences.`*
+
+- This is the docs' "dependency injection" (11.3): the tool asks the run for what it needs instead of reaching for a global
+
+**Another way in: `get_runtime()`**
+
+```python
+from langgraph.runtime import get_runtime
+
+@tool
+def whoami() -> str:
+    """Return the current user's id."""
+    return get_runtime().context.user_id
+```
+
+- *Tested on 1.5.0:* inside a tool with **no** runtime parameter, `get_runtime()` returned the run's context
+- Prefer `ToolRuntime`: it shows in the tool's signature what the tool depends on, and it is what the docs use. `get_runtime()` hides that dependency
 
 ## 11.6 Who gets what: state, runtime and tool runtime
 
@@ -159,6 +213,8 @@ None of this is optional. It is how LangChain calls your function:
 
 - A hook defined with **zero parameters** fails at once: `TypeError: ... takes 0 positional arguments but 2 were given`. State and runtime are always sent
 - **Parameter names do not matter. Position and count do.** Catching them as `a, b` works exactly like `state, runtime` (checked: the hook received a dict and a `Runtime`)
+- **A wrap hook must return the handler's response.** *Tested:* a `wrap_model_call` that called `handler(request)` but returned nothing failed with `AttributeError: 'NoneType' object has no attribute 'result'`. In class, a placeholder `pass` failed the same way
+- **The `Runtime` a hook receives has no `.state`** (tested). State arrives as its own parameter (node hooks) or as `request.state` (wrap hooks); only a tool's `ToolRuntime` has `.state`. The class caught this in a Claude-generated comparison table that said "read via `runtime.state`"
 - **Names of the function:** for **decorator-based** middleware any function name works, because the decorator registers the hook. For **class-based** middleware the method name **must match the hook** (`before_model`) so the framework knows which hook you are replacing ([Chapter 10](10-shell-tools-and-custom-middleware.md), 10.6)
 
 ## 11.7 State or context? Mutability and persistence
@@ -173,6 +229,7 @@ The class mixed these up once, then corrected it. Here is what a test shows:
 
 - A tool that updated a `call_count` **state** field returned `Command(update={"call_count": n, ...})`. The count was 1, then 2 in the same run, and **3 on the next invoke of the same thread**
 - Context given on the next invoke was a **new object** (it did not carry anything over)
+- **Context is not saved with the thread.** *Tested:* a second turn on the same thread **without** `context=` gave the tool `None` as `runtime.context`. In a chat app, pass the context with **every** message (the class 16 recap: "it has to be sent fresh")
 - A plain-dataclass context **can** be changed mid-run (see the pitfall in 11.4). Freeze it if you want the rule enforced
 
 How this answers "thread_id vs context" (assignment A1 Q3):
@@ -473,6 +530,29 @@ resumed = guarded_agent.invoke(
 print(resumed.value["messages"][-1].content)
 ```
 
+> [!WARNING]
+> **A new message on a paused thread drops the approval.**
+> - *Tested on 1.5.0:* while `cancel_booking` waited for approval, an ordinary `invoke` with a new user message ran as if nothing was pending. The approval was gone, the tool never ran, and the saved thread kept the model's tool call **with no tool result**
+> - Most providers reject a history like that on the next call ([Chapter 6](06-agents-and-memory.md), 6.4). A chat UI that lets the user keep typing while an approval is open runs straight into this
+> - Check for a pending interrupt first and answer it (code below)
+
+```python
+from langgraph.types import Command
+
+def send_user_message(agent, text: str, config: dict):
+    """Answer a pending approval instead of starting a new run on top of it."""
+    pending = agent.get_state(config).interrupts
+    if pending:
+        n = len(pending[0].value["action_requests"])          # batched mode: one decision per call
+        reject = {"type": "reject", "message": f"Not approved. The user wrote instead: {text}"}
+        return agent.invoke(Command(resume={"decisions": [reject] * n}), config)
+    return agent.invoke({"messages": [("user", text)]}, config)
+```
+
+✅ *Verified (scripted model): without the check, the thread was left with tool call `c1` unanswered. With `send_user_message`, the history became human, AI tool call, tool message ("User rejected the tool call for cancel_booking with reason: Not approved. The user wrote instead: …"), AI answer, and nothing was left pending. With no pause, the message went through as usual.*
+
+- Rejecting with the user's new text lets the model answer it in the same turn. Other choices are fine too: block the input until the reviewer decides, or approve first. What matters is never to leave the pause unanswered
+
 **The four decisions** (whiteboard wording; shapes are in [Chapter 7](07-middleware.md), 7.6):
 
 - **`approve`:** execute with the original arguments
@@ -620,6 +700,60 @@ conditional_agent = create_agent(
 - More `when` examples from the docs: pause `write_file` only for paths outside `/workspace/`; pause `execute_sql` unless the query starts with `SELECT`
 - Needs `langchain>=1.3.3`
 
+**Don't let the model set the amount** (class 15's refund example, tested)
+
+- In the class version, the approval check **and** the refund both use the `amount` the model passes, and the model takes it from what the user typed ("refund my $99")
+- *Tested:* for a $20 ticket, "Cancel BK2001 and refund my $99" got **no approval**, and the tool replied `Booking BK2001 cancelled, $99.00 refunded.`
+- Fix: the tool takes only the booking id and reads the price from your database. The `when` function reads it too. The request it receives carries `runtime`, so it reaches the database through context (in class it was said that it could not)
+
+```python
+from dataclasses import dataclass
+from langchain.agents import create_agent
+from langchain.agents.middleware import HumanInTheLoopMiddleware, ToolCallRequest
+from langchain.tools import tool, ToolRuntime
+from langgraph.checkpoint.memory import InMemorySaver
+
+class Bookings:
+    """Stands in for your bookings database."""
+    def __init__(self, rows):
+        self.rows = rows
+    def get(self, booking_id, user_id):
+        row = self.rows.get(booking_id)
+        return row if row and row["user_id"] == user_id else None
+
+@dataclass(frozen=True)
+class ShopContext:
+    user_id: str               # from login
+    bookings: Bookings         # passed in by your app
+
+@tool
+def cancel_booking(booking_id: str, runtime: ToolRuntime[ShopContext]) -> str:
+    """Cancel one of the user's bookings and refund what was paid."""
+    row = runtime.context.bookings.get(booking_id, runtime.context.user_id)
+    if row is None:
+        return "No such booking for this user."
+    return f"Booking {booking_id} cancelled, ${row['price']:.2f} refunded."     # amount from the database
+
+def is_large_refund(request: ToolCallRequest) -> bool:
+    ctx = request.runtime.context                                            # the request carries runtime
+    row = ctx.bookings.get(request.tool_call["args"].get("booking_id"), ctx.user_id)
+    return row is None or row["price"] > 100                                 # unknown booking: ask a human
+
+agent = create_agent(
+    model="openai:gpt-5-mini",
+    tools=[cancel_booking],
+    context_schema=ShopContext,
+    middleware=[HumanInTheLoopMiddleware(interrupt_on={
+        "cancel_booking": {"allowed_decisions": ["approve", "edit", "reject"], "when": is_large_refund}})],
+    checkpointer=InMemorySaver(),
+)
+```
+
+✅ *Verified on 1.5.0 (scripted model, the model swapped in): the $20 ticket claimed at $99 was refunded **$20.00** with no approval; a $500 ticket claimed at $25 paused for approval; another user's booking also paused, and the tool would have refused it ("No such booking for this user.").*
+
+- **Money, limits and identities come from your systems, never from model arguments.** The model chooses *which* booking; your code decides *how much* and *whose*
+- The unknown-booking case asks a human (fail closed), as 11.16 recommends
+
 > [!WARNING]
 > **`when` runs again on resume, and must give the same answer.**
 > - If it returns `False` on resume, the tool runs and the reviewer's answer is **ignored, even a reject** (docs)
@@ -762,6 +896,13 @@ stream = agent.stream_events(Command(resume={"decisions": [{"type": "approve"}]}
 - **Voice-driven document editor?** Build voice-to-text directly. For light workloads, free long-context models are enough
 - **What does the mentor look for when hiring for agentic AI roles?** Software engineering fundamentals and real problem-solving over memorised framework syntax. You should be able to explain **why** code does what it does, including basics such as what Pydantic is for
 - **How do I cut token use in a long-running conversation?** Use long-term memory (the `store`, through runtime). Retrieve only the memories relevant to the current message instead of resending the whole history. Whether to load all, load some or summarise is your design choice. LangChain does not do it for you
+- **How does a tool reach the store?** Through `runtime.store` (11.5). A module-level store object also works, but it may not be the store the agent was given
+- **Is there another way into runtime from a tool?** The class: no. Also true: `get_runtime()` works inside a tool (tested, 11.5). `ToolRuntime` is clearer
+- **Do I pass the context again on every message?** Yes. It is not saved with the thread (11.7)
+- **Is `version="v2"` a version of my agent?** The class: yes, a simple way to version agents. Actually it picks the **format of the result**: with `v2`, `invoke` returns a `GraphOutput` with `.value` and `.interrupts`; without it, a plain dict (11.11). Versioning your agent is a separate concern
+- **Can the `when` function use runtime?** The class: no, it only gets the tool call request. Also true: that request carries `runtime` and `state`, so it can read context (tested, 11.12)
+- **Can an agent with no cancel tool still say it cancelled?** Yes (class 15): it can make that up. Trust the tool messages, not the reply text
+- **What if the user writes again while an approval is pending?** Answer the pause first (11.11)
 
 ## 11.15 Interview corner
 
@@ -853,6 +994,22 @@ stream = agent.stream_events(Command(resume={"decisions": [{"type": "approve"}]}
 
 </details>
 
+<details class="qa"><summary>12. Refunds above $100 need approval. How could a user still get $99 back for a $20 ticket, and how do you stop it?</summary>
+
+- If the approval check and the refund both use the `amount` argument, the model fills it from what the user typed, so a $99 claim skips approval and is paid (tested)
+- Pass only the booking id. Read the price from your database in the tool **and** in the `when` function (it receives `request.runtime`)
+- *Stronger answer:* money, limits and identities always come from your systems; fail closed on unknown bookings, check ownership in the tool, and log every refund with the database amount
+
+</details>
+
+<details class="qa"><summary>13. A run is waiting for approval and the user sends another message. What happens, and what should your app do?</summary>
+
+- A plain `invoke` with the new message runs as if nothing was pending: the approval is dropped and the tool call is left without a result, which most providers then reject (tested)
+- Check `agent.get_state(config).interrupts` first. Answer the pause (for example reject it with the user's new text), or block input until a reviewer decides
+- *Stronger answer:* make the UI show the open approval, keep one source of truth for "pending" (the checkpointer), and add a test that sends a message during a pause
+
+</details>
+
 > [!TIP]
 > **🧩 Design question to practise:** *"An agent books meetings for executives but a human assistant must approve anything over 1 hour."* Cover the conditional interrupt, what the reviewer sees, edit vs reject, and persistence.
 
@@ -890,6 +1047,9 @@ cfg = {"configurable": {"thread_id": "t1"}}
 r = agent.invoke(inp, cfg, context=Ctx(user_id="u1"))
 r["__interrupt__"]                                  # paused
 agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg, context=Ctx("u1"))
+# pass context= on every invoke: it is not saved with the thread (11.7)
+# pending approval? agent.get_state(cfg).interrupts: answer it before sending a new message (11.11)
+# money comes from your database inside the tool and the when-check, never from model arguments (11.12)
 ```
 
 ## Recap
@@ -902,6 +1062,9 @@ agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg, context=
 - **HITL:** needs a checkpointer. `version="v2"` gives `.interrupts` and `.value`. Resume with `Command(resume={"decisions": [...]})` on the same thread
 - `True` = all four decisions, `False` = never pause. `respond` returns the human's words as the tool result
 - **Conditional interrupts:** `"when": fn(ToolCallRequest) -> bool`. Make it fail closed
+- Amounts come from your database in the tool and in `when` (it gets `request.runtime`), never from the model's arguments
+- A new message on a paused thread drops the approval and leaves a tool call unanswered: answer the pause first
+- Context is not saved with the thread: pass it on every invoke. Tools reach runtime through `ToolRuntime` (or `get_runtime()`), and `runtime.store` is the store the agent was given
 
 ## Practice
 
@@ -918,6 +1081,9 @@ agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg, context=
    - B1.2: a `context_schema` with `account_tier` read by a tool through `runtime.context` ([Chapter 6](06-agents-and-memory.md))
    - A2 Q7 and B2.1: the four HITL decisions for `transfer_funds` ([Chapter 7](07-middleware.md))
 10. Set up VS Code ahead of the MCP module. It is taught there, not in Colab
+11. Run the class refund agent with a $20 booking and the message "refund my $99". Then move the price lookup into the tool and the `when` function and run it again
+12. Pause a run for approval, then send a normal message instead of a `Command`. Print the thread and find the unanswered tool call. Then use `send_user_message`
+13. Give an agent a different store than the one your tool imports, and compare `runtime.store` with the module-level object
 
 ## How this chapter was checked
 
@@ -935,6 +1101,13 @@ agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg, context=
 - *Runtime docs page merge (2026-11-15):* `langchain` 1.5.0, `langgraph` 1.2.22, scripted models. The docs' middleware example (`dynamic_prompt`, `before_model` and `after_model` typed `Runtime[Context]`) plus the new `auth_gate`, with `thread_id="t-9"`: hooks logged `John Smith`, the gate passed and logged `t-9`, the model's system message was `You are a helpful assistant. Address the user as John Smith.` Dependency injection: a frozen `AppContext(user_id, db)` with a stand-in `FakeDB` gave `brief and polite`; the tool's `.args` were `{}`. Not run: Agent Server (`server_info`)
 - *HITL while streaming (2026-11-15):* `langchain` 1.5.0, `langgraph` 1.2.22, a scripted streaming model calling `get_weather` for Boston and San Francisco in one turn, `HumanInTheLoopMiddleware(interrupt_on={"get_weather": True})`, `InMemorySaver`. One `__interrupt__` update with two action requests; resume with decisions keyed by the interrupt id (edit Boston, approve San Francisco); the tools update held `It's always sunny in San Francisco!` and the Boston result behind the reviewer note
 - Class 15 has no code folder beyond the notebook and diagram. The Colab link in the README is not in the repo
+- *Class 15 and 16 recordings (22–23 Aug), added 2026-11-15, `langchain` 1.5.0, `langgraph` 1.2.22, scripted fake chat models (no keys, no network); every new block was run as printed with the model swapped in:*
+  - 11.5: `store_block`: `prefs_from_runtime` → `horror, thriller`, `prefs_from_global` → `No saved preferences.`; `get_runtime()` in a tool with no runtime parameter returned `Ctx(user_id='u7')`
+  - 11.6: a `wrap_model_call` without `return` raised `AttributeError: 'NoneType' object has no attribute 'result'`; a `before_model` hook's `runtime` was a `Runtime` with no `state` attribute
+  - 11.7: turn 1 with `context=Ctx("u1")` gave the tool `Ctx(user_id='u1')`; turn 2 on the same thread without `context=` gave `None`
+  - 11.11: a plain `invoke` on the paused thread left `interrupts` empty, `next` `()`, the tool not run, and tool call `c1` with no `ToolMessage`. `send_user_message` resumed with one reject per action request; nothing pending and no unanswered tool call afterwards
+  - 11.12: the class tool and `when` with `amount=99` for a $20 booking: 0 interrupts, `$99.00 refunded`. The fixed block: $20 booking 0 interrupts and `$20.00 refunded`; $500 booking 1 interrupt; another user's booking 1 interrupt. `request.runtime.context` was readable inside `when`
+  - **Not run:** a real provider's reaction to the unanswered tool call (the rejection is from the docs warning in [Chapter 6](06-agents-and-memory.md), 6.4)
 - **Details by section** (moved here from the ✅ markers):
   - *11.3 The five components of runtime:* Checked: the runtime object also has other members (for example `override`, `merge`, `heartbeat`). The five above are the ones to learn
   - *11.3 The five components of runtime:* Checked: `execution_info` carries `thread_id`, `run_id`, `node_attempt`, `checkpoint_id`, `checkpoint_ns` and `task_id`. Outside a server, `run_id` and `server_info` are `None`
@@ -958,5 +1131,8 @@ agent.invoke(Command(resume={"decisions": [{"type": "approve"}]}), cfg, context=
 - LangChain docs: [Context engineering](https://docs.langchain.com/oss/python/langchain/context-engineering), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `context-engineering.mdx`; docs.langchain.com was blocked from this environment), for "Context engineering: the framework" in 11.8: the lever table, transient vs persistent, the store-based prompt, the response-format warning, the tool-write warning and the best practices
 - LangChain docs: [Runtime](https://docs.langchain.com/oss/python/langchain/runtime), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `src/oss/langchain/runtime.mdx`; docs.langchain.com was blocked from this environment), for the 11.3 version note and dependency injection, `Runtime[Context]` in 11.6, and the docs' `auth_gate` in 11.9
 - LangChain docs: [Streaming](https://docs.langchain.com/oss/python/langchain/streaming), section "Streaming with human-in-the-loop" (read 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "HITL while streaming" in 11.13
+- Class 15 recording transcript (22 Aug 2026), uploaded by you; teaching part only (00:00–03:03; the doubt session after it was left out): the store question, "no other way", the hook errors, `version`, the refund example and its runtime question, the made-up cancellation
+- Class 16 recording transcript (23 Aug 2026), its opening state-vs-context recap (the rest of that class is in the MCP book)
+- Added by Claude: the store and `get_runtime()` code in 11.5, `send_user_message` in 11.11, the database-backed refund in 11.12, and interview questions 12–13
 
 Previous: [Chapter 10, Shell tools and custom middleware](10-shell-tools-and-custom-middleware.md) · Next: [Chapter 12, MCP in LangChain](12-mcp-in-langchain.md)
