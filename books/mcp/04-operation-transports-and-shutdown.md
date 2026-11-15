@@ -144,6 +144,56 @@ print("Hello Mayank from Python file")
 
 **Trade-off:** both sides must run on the **same machine**. It does not serve "anyone on the internet". By default STDIO needs the parent and sub-process relationship on one machine
 
+**The rules on the wire** (the class's transport page; the specification, web-checked):
+
+- **One message per line.** Each JSON-RPC message is a single line and must not contain a newline
+- **`stdout` carries only MCP messages.** Logs go to `stderr`, which the client may show, store or ignore (4.8)
+- **No login step.** The server runs as your own process. Secrets reach it as **environment variables** that the host sets
+- **It sees only the variables it is given.** The MCP debugging docs: STDIO servers "inherit only a limited subset of environment variables automatically". Pass more with an `env` block in the host's config
+
+```python
+# env_server.py
+import os
+from fastmcp import FastMCP
+
+mcp = FastMCP("Env Check")
+
+@mcp.tool
+def key_status() -> dict:
+    """Report which settings this server can see (never the values)."""
+    return {name: name in os.environ for name in ("WEATHER_API_KEY", "SHELL_ONLY")}
+
+if __name__ == "__main__":
+    mcp.run(show_banner=False)
+```
+
+```python
+import asyncio, os, sys
+from fastmcp import Client
+from fastmcp.client.transports import StdioTransport
+
+os.environ["SHELL_ONLY"] = "set-in-the-parent-only"
+
+async def main():
+    for env in (None, {"WEATHER_API_KEY": "demo-key"}):
+        transport = StdioTransport(command=sys.executable, args=["env_server.py"], env=env)
+        async with Client(transport) as client:
+            print(env, (await client.call_tool("key_status", {})).data)
+
+asyncio.run(main())
+```
+
+✅ *Verified (`fastmcp` 4.2.0): without `env` the server saw neither variable; with `env` it saw only `WEATHER_API_KEY`. The parent's own variable never reached it.*
+
+- In Claude Desktop's config the same idea is an `env` block next to `command` and `args` ([Chapter 5](05-building-mcp-servers.md), 5.6)
+- This is also why a command that works in your terminal can fail when a host starts it: the host's environment is not your terminal's
+
+**Seen live (class 19): a filesystem server over STDIO**
+
+- In MCPJam the local filesystem server showed its file tools. A `tools/call` to `list_directory` with a folder path returned that folder's files
+- In Claude Desktop, "what files are in my MCP folder?" made Claude ask permission for `list_allowed_directories`, then for `list_directory`
+- 🔒 It can only reach the folders named in its start command (the config in [Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.10). Name a project folder, not your home folder. The class advice: keep folders with personal information out
+
 ## 4.8 STDIO shutdown
 
 Almost always started by the **client**, in this order:
@@ -173,6 +223,7 @@ Almost always started by the **client**, in this order:
 - It **replaces the older HTTP + SSE** (server-sent events) transport, now deprecated. Most existing servers still use the old one
 - Live in class, with an Excalidraw MCP server:
   - `initialize` was a real POST call, then an `initialized` notification, then a `tools/list` POST that returned 5 tools, then a `resources/list` POST
+  - The very first call was the newer `server/discover`, before the classic handshake ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.8)
   - The class's own LangChain MCP server URL also ended in `/mcp`
 
 **Checked, by hand with `httpx` against a FastMCP server on `http://127.0.0.1:8765/mcp`:**
@@ -198,10 +249,26 @@ httpx.post(u, headers=H, json={"jsonrpc": "2.0", "id": 2, "method": "tools/list"
 - `DELETE /mcp` with the session id: **200**, ending the session
 - **The messages are the same JSON-RPC as over STDIO.** Only the carrier changed. That is what "transport-agnostic" means
 
+**What the GET is for** (a class question left open: "I see a GET call in the log. What is it?")
+
+- A client may send `GET /mcp` to open an **event stream**. The server can then send requests and notifications without waiting for a POST (specification)
+- It is the route for server-to-client messages over HTTP, such as an elicitation request ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.12)
+- ✅ *Verified (`fastmcp` 4.2.0): `GET /mcp` with the session id and `Accept: text/event-stream` returned **200** with `text/event-stream`.* A server that offers no stream answers **405** (specification)
+
 ## 4.10 Streamable HTTP shutdown
 
 - Simply **close the HTTP connection**. Like closing a browser tab or turning off Wi-Fi to end a chat
 - **If a server closes unexpectedly**, something went wrong on its side. A well-built client should **try to reconnect**, not fail silently
+
+**How an HTTP session ends** (specification, web-checked; ✅ *verified* on `fastmcp` 4.2.0):
+
+| What happens | The server answers | The client then |
+|---|---|---|
+| Client sends `DELETE /mcp` with its session id | 200 (405 if the server does not allow it) | Is done. That id now gets 404 |
+| Server has ended or forgotten the session (restart, idle timeout) | **404** "Session not found" | Must start again: a new `initialize` with **no** session id |
+| A request other than `initialize` with no session id | **400** "Missing session ID" | Has a bug: it dropped the header |
+
+- Each client's session is separate. ✅ After one client's `DELETE`, a second client's session kept working (200)
 - With this, all three lifecycle phases are covered: **initialization, operation, shutdown**
 
 ## 4.11 Choosing a transport
@@ -233,6 +300,13 @@ flowchart TD
 - **Can I create an MCP server inside Claude?** No. You can **connect** your server to Claude. You do not build or host it there
 - **Are connectors the same as MCP servers?** Yes. Claude uses friendlier words for a general audience
 - **Is a "production-grade" project claim on a resume fine if it was not deployed at scale?** Describe it honestly and frame it around the problem solved. Shallow claims get exposed
+- **Do MCP clients use WebSockets?** No (class 19). The specification defines two standard transports, STDIO and Streamable HTTP, and allows custom ones that keep the same JSON-RPC messages. ✅ `mcp` 2.3.0 has no WebSocket module
+- **Is there a "streamable STDIO"?** No. "Streamable" belongs to the HTTP transport
+- **Where is JSON-RPC in the `input()` demo?** Nowhere. The demo shows only the connection. JSON-RPC is what MCP sends over it (4.6)
+- **Ten clients on one HTTP server: how does it tell them apart?** Each `initialize` gets its own session id, sent on every later request. ✅ Two clients got two different ids
+- **Can a host use a STDIO server and an HTTP server at once?** Yes. One client per server, each on its own transport ([Chapter 2](02-primitives-and-architecture.md), 2.2)
+- **If the connection drops, how long does the server wait?** That is a timeout setting (class answer). FastMCP's HTTP app has `session_idle_timeout` (4.13)
+- **Is it safe to give Claude a folder of personal files?** The class: not if it holds personal information. Allow only the folders a task needs (4.7)
 
 ## 4.13 Hardening a transport
 
@@ -339,6 +413,22 @@ Items marked *checked* were tested with `fastmcp` 4.1.4 and `mcp` 2.3.0. Check c
 
 </details>
 
+<details class="qa"><summary>11. A client gets HTTP 404 on a request that carries a session id. What happened, and what must it do?</summary>
+
+- The server ended or forgot that session: a restart, an idle timeout, or an earlier `DELETE`
+- The specification says the client **must** start a new session: a fresh `initialize` with no session id
+- *Stronger answer:* make re-initialisation automatic, but replay only idempotent calls. If 404s are frequent behind a load balancer, add sticky sessions or a stateless mode
+
+</details>
+
+<details class="qa"><summary>12. A STDIO server finds its API key when you run it in a terminal, but not when Claude Desktop starts it. Why?</summary>
+
+- A host starts STDIO servers with a limited environment, not your terminal's. Your shell's variables do not reach the server
+- Put the key in the server's `env` block in the host's config
+- *Stronger answer:* prove it by starting the server with an empty environment in a test (4.7). Keep keys out of shared files and repositories; use a narrow key per server
+
+</details>
+
 > [!TIP]
 > **🧩 Design question**
 > - *"Your company wants Claude Desktop on employee laptops to use an internal HR database through MCP. Design it."*
@@ -353,6 +443,8 @@ Items marked *checked* were tested with `fastmcp` 4.1.4 and `mcp` 2.3.0. Check c
 | Auth | inherits the user's machine | TLS + OAuth or API key |
 | Shutdown | close stdin, terminate, kill | close the connection or `DELETE /mcp` |
 | Logs go to | `stderr` only | normal server logs |
+| Secrets | `env` block in the host's config | `Authorization` header |
+| Session lost | the process exits | **404**, then a new `initialize` |
 
 ```python
 from pathlib import Path
@@ -372,6 +464,8 @@ async with Client(Path("server.py")) as c:      # STDIO: launches the server as 
 - **STDIO:** sub-process, `stdin` and `stdout`, local, fast, simple. Shutdown: close input, terminate, kill
 - **Streamable HTTP:** POST to `/mcp`, session id, event-stream replies, works anywhere. Shutdown: close the connection, reconnect if unexpected
 - Same JSON-RPC on both transports. HTTP + SSE is deprecated but still widespread
+- STDIO: one message per line, and the server sees only the environment the host passes. Put keys in the config's `env`
+- HTTP sessions: `GET /mcp` opens a stream for server messages. 404 means the session is gone, so start again; 400 means the session id was missing
 
 ## Practice
 
@@ -382,6 +476,9 @@ async with Client(Path("server.py")) as c:      # STDIO: launches the server as 
 5. Trigger an unknown tool and a tool that raises. Write down the two reply shapes
 6. In any inspector, trace one multi-step request and count the LLM calls and the tool calls
 7. Find the three shutdown steps for STDIO and say why there is no JSON-RPC in them
+8. Run the `key_status` server in 4.7 with and without `env`. Then set your own variable in the parent and confirm the server cannot see it
+9. Send `DELETE /mcp`, then reuse the session id. Read the status code, then start a new session
+10. Open `GET /mcp` with `Accept: text/event-stream` and your session id. What comes back?
 
 ## How this chapter was checked
 
@@ -390,6 +487,14 @@ async with Client(Path("server.py")) as c:      # STDIO: launches the server as 
 - **Not run:** Context7, Apple Notes, Claude Desktop, MCPJam Inspector, the Excalidraw server, reconnect after an unexpected close, MIME types, the old HTTP + SSE transport
 - The class material is the source for everything not marked *checked*. Where the class and the test disagree (4.3), both are shown
 - *Class 18 recording (6 Sep), added 2026-11-15:* the inspector in 4.5 is named from the recording. The time-server steps there match it. Nothing new was run for this chapter
+- *Class 19 recording (12 Sep), added 2026-11-15, `fastmcp` 4.2.0 and `mcp` 2.3.0:*
+  - 4.7: the `key_status` blocks, run as printed: with no `env` both values were `False`; with `env` only `WEATHER_API_KEY` was `True`
+  - 4.9: `GET /mcp` with a session id and `Accept: text/event-stream` gave 200 and `text/event-stream`
+  - 4.10: two `initialize` calls gave two different session ids. `DELETE` gave 200 and that id then got 404 "Session not found". An unknown id got 404. A request with no id got 400 "Bad Request: Missing session ID". The other session still got 200
+  - 4.12: `mcp` 2.3.0 has no `mcp.client.websocket` or `mcp.server.websocket` module
+  - Web-checked 2026-11-15: the 2025-11-25 transports page (newline rule, `stderr`, the GET stream, the 400, 404 and `DELETE` rules, custom transports, no WebSocket transport)
+  - Also the MCP debugging docs (limited environment, `env` key). Both were read from the documentation's GitHub source, because the site was blocked from this machine
+  - Not run: the filesystem server, MCPJam, Claude Desktop
 
 ## Sources and further reading
 
@@ -397,5 +502,9 @@ async with Client(Path("server.py")) as c:      # STDIO: launches the server as 
 - Live-Class-2026, `classes_transcription_summary/19 - 12 Sep - MCP - Shutdown, Transport Layer.md` (shutdown, STDIO, Streamable HTTP, questions)
 - Sections marked *checked* and 4.14 are from testing, not from the class sources
 - Class recording transcript, 6 Sep 2026 (class 18, teaching part 00:00–03:10), uploaded by you: the inspector's name in 4.5
+- Class recording transcript, 12 Sep 2026 (class 19, teaching part 00:08–03:11), uploaded by you. The doubt session after it was left out
+  - Used for: the transport rules, the filesystem and Excalidraw runs, and the class questions added to 4.12
+- MCP specification 2025-11-25, [Transports](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports); [MCP debugging docs](https://modelcontextprotocol.io/docs/tools/debugging) (environment variables). Read from [the GitHub source](https://github.com/modelcontextprotocol/modelcontextprotocol), 2026-11-15
+- Added by Claude: the `key_status` test in 4.7, the session table in 4.10, interview questions 11–12
 
 Previous: [Chapter 3, Lifecycle, JSON-RPC and capability negotiation](03-lifecycle-json-rpc-and-capability-negotiation.md) · Next: [Chapter 5, Building MCP servers](05-building-mcp-servers.md)

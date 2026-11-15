@@ -81,6 +81,9 @@ DB_PATH = Path(os.environ.get("TIMETRACK_DB_PATH", "/tmp/timetrack.db"))
 
 The class free-tier note (class 20, not verified): **one developer, up to 200 MCP servers, one-hour log retention.** Code changes deploy automatically through the GitHub connection.
 
+- *Web-checked 2026-11-15 (FastMCP's docs):* Horizon is now called **FastMCP Gateway** ("formerly Horizon"). It "includes a free personal tier for FastMCP users" and is "free for personal projects"
+- A deployed server still gets a URL like `https://your-server-name.fastmcp.app/mcp`. The exact free-tier limits are on Prefect's pricing page, which could not be read from here
+
 **The steps:**
 
 1. **Make a clean, separate repository** with only the server
@@ -452,11 +455,13 @@ async with Client("http://127.0.0.1:8000/mcp") as c:     # remote: a URL
 - Run with `fastmcp` 4.1.4 and `mcp` 2.3.0: the TimeTrack `main.py` with `fastmcp run` (STDIO and HTTP); `fastmcp inspect`; the environment-variable database path; the calculator server and a bad argument; the class client loop and the corrected loop, both with a stand-in for the Anthropic client and a real FastMCP client and server; message order with two tool calls; the read-only switch; and three concurrent calls to a synchronous and an asynchronous tool
 - **Not run:** Prefect Horizon, any deployed URL, Claude Desktop, the real Anthropic API, Vercel, Railway, a gateway, `uvx`, authentication
 - The class transcripts are the source for everything not marked *checked*. Where the class and the test disagree (the concurrency claim in 6.8), both are shown
+- *Added 2026-11-15:* the 6.4 note on the new name, FastMCP Gateway, was web-checked against FastMCP's documentation, read from its GitHub source. Nothing new was run
 
 ## Sources and further reading
 
 - Live-Class-2026, `classes_transcription_summary/21 - 19 Sep - MCP Deployment.md` (deployment, the client, FAQ)
 - Live-Class-2026, `classes_transcription_summary/20 - 13 Sep - MCP - The Time Tracker Project.md` (the Horizon free-tier note, auto-conversion)
 - Sections marked *checked* and 6.10 are from testing
+- FastMCP docs: [FastMCP Gateway](https://gofastmcp.com/deployment/fastmcp-gateway) (formerly Horizon), web-checked 2026-11-15. The class 20 recording (13 Sep) repeated the free-tier note
 
 Previous: [Chapter 5, Building MCP servers](05-building-mcp-servers.md) · Next: [Chapter 7, Legacy vs modern MCP](07-legacy-vs-modern-mcp.md) (not written yet)

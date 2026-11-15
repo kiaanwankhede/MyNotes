@@ -35,6 +35,8 @@
   - The standalone FastMCP is still what most real servers use
 - **FastMCP and FastAPI are not from the same team.** They share a naming style and work well together, because an MCP tool is close to an API endpoint. Do not mix them up in an interview
 - ✅ *Verified:* the installed `fastmcp` 4.1.4 lists Jeremiah Lowin among its authors. The installed `mcp` 2.3.0 has a class named `MCPServer`, which fits the "renamed" story. The Prefect detail and the folding-in story were not verified
+  - *Web-checked 2026-11-15:* FastMCP's documentation says it "created the high-level Python API incorporated into the official MCP Python SDK in 2024", and that FastMCP is made by Prefect
+  - The official SDK's migration guide: "The `FastMCP` class has been renamed to `MCPServer`". ✅ In `mcp` 2.3.0, `import mcp.server.fastmcp` fails with "This is mcp 2.x, where FastMCP was renamed to MCPServer" (5.3)
 - **Language does not matter** to the protocol. Python or Node is a team choice
 
 ## 5.2 The legacy way, and why it hurt
@@ -132,6 +134,8 @@ def plan_weekly_meals() -> str:
 
 - ✅ *Verified:* the client listed the resource `recipe://tags` and the prompt `plan_weekly_meals`, and reading the resource returned the five tags
 - In class the new resource appeared in the Inspector after reconnecting, with **no server restart**. The prompt needed a fresh connect and disconnect. Not re-run here
+  - *Checked since, and different (`fastmcp` 4.2.0, STDIO):* a file edited while a client was connected changed nothing (`['ping']`). After a reconnect the new tool was there (`['ping', 'echo']`)
+  - Over STDIO the Inspector **starts a new server process on every connect**, so a reconnect *is* the restart. A running server does not reload its code
 
 **Why the resource matters, concretely:**
 
@@ -145,6 +149,32 @@ def plan_weekly_meals() -> str:
   - The Precoded version has no resource and no prompts. Its `@mcp.tool` has no brackets; the updated one uses `@mcp.tool()`. Both work in 4.1.4
   - The file ends with comments holding the Inspector and `fastmcp install claude-desktop` commands
 
+### The same server with the official SDK (`mcp` 2.x)
+
+Class 19 showed the official SDK's current syntax next to FastMCP: it has converged.
+
+```python
+from mcp.server.mcpserver import MCPServer      # mcp 2.x: the class once called FastMCP
+
+mcp = MCPServer("Recipe Box (official SDK)")
+
+recipes = {"Weeknight Pasta": ["quick", "weeknight"], "Sunday Roast": ["sunday"]}
+
+@mcp.tool()
+def search_recipes(tag: str) -> list[str]:
+    """Search recipes by tag, e.g. 'quick'."""
+    return [title for title, tags in recipes.items() if tag in tags]
+
+if __name__ == "__main__":
+    mcp.run()                                    # STDIO by default
+```
+
+✅ *Verified (`mcp` 2.3.0, called over STDIO from a FastMCP client): one tool listed; `search_recipes("quick")` returned `['Weeknight Pasta']`.*
+
+- Same idea as FastMCP: a decorator reads the signature and the docstring. The tested version uses `@mcp.tool()` with brackets
+- **Which to pick:** the standalone `fastmcp` package for new servers (the class's choice). It adds the login classes in 5.10, `from_fastapi` in 5.9 and the CLI. Use `MCPServer` where a team allows only the official SDK
+- This is the official SDK's **high-level** class. The low-level `Server` in 5.2 is a different API
+
 ## 5.4 Inspect it, and the port conflict
 
 ```bash
@@ -152,9 +182,56 @@ npx @modelcontextprotocol/inspector python3 recipebox_fastmcp.py
 ```
 
 - **Class failure:** the Inspector would not start, because port `6274` was already in use. A second tool (MCP Jam) was using the same port
-- **The fix was ordinary debugging:** find what holds the port, close it or move the new one. The class used `--client-port 9999`
+- **The fix was ordinary debugging:** find what holds the port, close it or move the new one. The class moved the Inspector's web page with an environment variable (the class file):
+
+```bash
+CLIENT_PORT=9999 npx @modelcontextprotocol/inspector python3 recipebox_fastmcp.py
+```
+
 - Two programs cannot share a port, just as two websites cannot both be `google.com`. This is **not** an MCP problem
-- *Checked on `fastmcp` 4.1.4:* its own wrapper now has `fastmcp dev inspector` with `--ui-port` and `--server-port`. The `--client-port` flag from class was not run. Check `--help` for your version
+- *Checked on `fastmcp` 4.1.4:* its own wrapper now has `fastmcp dev inspector` with `--ui-port` and `--server-port`. Check `--help` for your version
+- *Web-checked:* the Inspector's documentation lists `CLIENT_PORT` as the web page's port, default `6274`
+
+### What the Inspector is, and is not
+
+- It is a **host and a client in one**, with a screen instead of a model. No LLM: you type the arguments yourself (class 19)
+- It does not care how the server was built (FastMCP, the official SDK, Node). It only speaks the protocol
+- On connect it sent the discovery calls: `initialize`, `tools/list`, `resources/list`, `prompts/list` and `resources/templates/list` ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.2)
+- MCPJam is the same idea with more features ([Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.10). A `localhost` Inspector link cannot be shared (5.7)
+
+### Send log messages from a tool
+
+In class 19 a tool that logged to the client was tried live and failed. The working version (Added by Claude):
+
+```python
+import asyncio
+from fastmcp import FastMCP, Client, Context
+
+mcp = FastMCP("TimeTrack")
+
+@mcp.tool
+async def import_entries(rows: int, ctx: Context) -> str:
+    """Import time entries from an uploaded file."""
+    await ctx.info(f"Importing {rows} entries")
+    await ctx.warning("2 entries had no project and were skipped")
+    return f"Imported {rows - 2} entries"
+
+async def show_log(message):
+    print(f"[{message.level}] {message.data['msg']}")
+
+async def main():
+    async with Client(mcp, log_handler=show_log) as client:
+        print((await client.call_tool("import_entries", {"rows": 10})).data)
+
+asyncio.run(main())
+```
+
+✅ *Verified (`fastmcp` 4.2.0): `[info] Importing 10 entries`, `[warning] 2 entries had no project and were skipped`, then `Imported 8 entries`.*
+
+- Add a `ctx: Context` parameter and FastMCP fills it in. It is **not** part of the tool's schema: the model sees only `rows`
+- The messages travel as `notifications/message`, the **logging** capability from [Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.9. The client decides where to show them
+- ⚠️ `fastmcp` 4.2.0 warns that the logging capability is **deprecated as of 2026-07-28**. Modern MCP moves logs to OpenTelemetry or standard error ([Chapter 7](07-legacy-vs-modern-mcp.md), 7.4)
+- For your own debugging on STDIO, write to `stderr` ([Chapter 4](04-operation-transports-and-shutdown.md), 4.8)
 
 ## 5.5 Install into Claude Desktop
 
@@ -186,14 +263,23 @@ Class 20 recap. There are two ways, and they are the same thing underneath.
 - **Connector:** the easy way. Click "Add", paste a name and a hosted URL. It suits a public, already-hosted server (Firecrawl was the live example)
 - **Config file:** `claude_desktop_config.json` on a Mac, with an equivalent on Windows. A developer edits it to run a server **they built and run locally**, since a local server has no public URL to paste
 - **A connector added in the interface also ends up as an entry in this file.** A connector and a config entry are the same underlying thing
+  - *Anthropic's help page says otherwise (web-checked 2026-11-15):* Claude reaches a custom connector "from Anthropic's cloud infrastructure, rather than from your local device"
+  - So that server "must be reachable over the public internet"
+  - Config-file servers "are a separate mechanism and do use your local network". They are not available on claude.ai or in Cowork sessions in the cloud
+  - So: a **connector** suits a public URL and works on every device, the web app included. A **config entry** runs a local command on this computer only
 - **Five connectors means five server entries.** The host starts each one independently, as in [Chapter 2](02-primitives-and-architecture.md), 2.2
 - The entry lists the server's name and the exact command that starts it (see the example in 5.5, and the wiretapped one in [Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.10)
+- **Where the file is** (MCP docs, web-checked): macOS `~/Library/Application Support/Claude/claude_desktop_config.json`; Windows `%APPDATA%\Claude\claude_desktop_config.json`. Settings → Developer → **Edit Config** opens it
+- **After an edit, quit Claude Desktop completely and start it again.** The class killed the app and restarted it
+- **When a server does not appear:** Settings → Developer lists each local server with its command and a **View Logs** button. The log files are in [Chapter 3](03-lifecycle-json-rpc-and-capability-negotiation.md), 3.7
+- **Adding a custom connector** (Anthropic's page): Customize → Connectors → "+ Add" → "Add custom connector". Free plans get one custom connector
 
 **The most common setup bug (class, not run here):**
 
 - A bare `uv` command often **fails quietly** inside Claude Desktop, because the host does not know where `uv` is installed
 - Run `which uv` in a terminal to get the full path, for example `/opt/homebrew/bin/uv`, and put that in the entry's `command`. Restart the host
 - The same applies to `python`. Use `which python`
+- *Why (MCP debugging docs):* a host starts STDIO servers with its own, limited environment, not your terminal's ([Chapter 4](04-operation-transports-and-shutdown.md), 4.7). Keys go in an `env` block in the same entry
 
 **VS Code, the same idea:**
 
@@ -202,6 +288,51 @@ Class 20 recap. There are two ways, and they are the same thing underneath.
 - Every host runs the same architecture with a different settings screen around it
 
 **A doubt settled in class:** the server **never decides** which tool to call. It waits. The client sends `tools/call` naming a tool and its arguments. The deciding happened earlier, on the model side
+
+**More doubts from class 20:**
+
+- **Does every connected server cost tokens?** Yes. Each enabled server's tool list goes to the model as context. The class agreed: switch on only the servers a task needs ([Chapter 2](02-primitives-and-architecture.md))
+- **How do I make Claude use my tool, not a web search?** Sharper tool names and descriptions, or say it in the request ("use the TimeTrack tools")
+- **In Claude Desktop, which part is the host, client and server?** Claude Desktop is the host. It starts one client per server. The server is the process the config starts ([Chapter 2](02-primitives-and-architecture.md), 2.2)
+
+### Third-party servers: local or remote
+
+- **Not every third-party server is remote.** Many run **on your machine** over STDIO and call the service's web API from there (class 20)
+  - A Gmail server, for example, can start with `npx` (Node) or in **Docker**, which keeps your credentials file inside a container
+  - "Local" says where the server runs, not what it can reach. A local server can still call any HTTP API
+- **One service, three ways to add it** (Tavily's README, web-checked):
+  1. **Custom connector:** paste `https://mcp.tavily.com/mcp`. Tavily accepts an OAuth sign-in, or the key as `?tavilyApiKey=`
+  2. **Config entry through a bridge:** `mcp-remote` runs locally over STDIO and forwards to the URL
+  3. **Local server:** `npx -y tavily-mcp@latest`, with the key in `env`
+
+```json
+{
+  "mcpServers": {
+    "tavily-bridge": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.tavily.com/mcp/?tavilyApiKey=<your-api-key>"]
+    },
+    "tavily-local": {
+      "command": "npx",
+      "args": ["-y", "tavily-mcp@latest"],
+      "env": {"TAVILY_API_KEY": "<your-api-key>"}
+    }
+  }
+}
+```
+
+- `mcp-remote` "connects an MCP client that only supports local (stdio) servers to a remote MCP server, with auth support" (its README)
+- `-y` answers "yes" to `npx`'s install question, so the host is never stuck at a prompt
+- The command can be `npx`, `uv`, `python` or `docker`: the host only needs something that starts the server (class 20)
+
+> [!CAUTION]
+> **🔒 Third-party servers run with your permissions**
+> - A local server runs as you: it can read what you can read. Install only servers you have reviewed, from the official source
+> - `npx -y package@latest` downloads and runs the newest code **at every start**. Pin a version so an update cannot change the code you trusted
+> - Give each server its own narrow API key, in `env`. A key in a URL can end up in logs
+> - The class view: the risks are the same as connecting any third-party API, and careless use can lose data
+>
+> *Added by Claude, except the last point.*
 
 ## 5.7 Reaching a local server from outside: a preview
 
@@ -229,6 +360,14 @@ A timesheet tool, in the same category as Toggl or Clockify. **A browser and an 
    - `uv run fastapi dev main.py` gave a Swagger page at `/docs` and a plain HTML, CSS and `app.js` front end. The browser's network tab showed the REST calls behind each action
    - ✅ *Verified:* a FastAPI app with the class's routes served `/docs` (HTTP 200) and listed `/api/entries`, `/api/projects` and `/api/projects/{project}/summary` in its OpenAPI document
 3. **MCP layer on top**, in two ways (5.9)
+
+**Why add an MCP door at all?** (class 20, asked by students)
+
+- **People log time where they already work.** With an MCP server, "log 3 hours on MCP Mastery" works from Claude Desktop, VS Code or Claude Code, with no form to open
+- **A stable contract.** Claude could call the backend with its own scripts, but scripts break when the backend changes. The MCP server owns the contract, and clients rediscover its tools on every connect
+- **Do you need an API underneath?** No ([Chapter 6](06-deployment-and-building-a-client.md), 6.6). But real products have an API first, with its auth and checks, and MCP reuses that work
+- **Tokens:** every call costs model tokens. The class view: worth it when it saves people's time
+- 🔒 The class floated logging hours **automatically** while people work, and questioned whether that is ethical. Anything that records people's work needs their knowledge and consent
 
 *The class attitude, worth keeping:* AI-assisted coding is expected in this course. The goal is to understand the architecture and decisions well enough to explain and defend them, not to memorise syntax.
 
@@ -310,6 +449,65 @@ app.mount("/mcp", mcp_app)
   - A new entry survives a fresh read, and the summary updates
 - `fastmcp inspect` on the app listed **4 tools, 1 prompt, 1 resource**. That matches the table
 
+### The REST layer in code
+
+The class's routes, cut to one GET and one POST:
+
+```python
+from datetime import date
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
+import database as db
+
+db.init_db()
+app = FastAPI(title="TimeTrack")
+
+class NewEntry(BaseModel):              # the JSON body a POST must send
+    employee_name: str
+    project: str
+    entry_date: date                    # "2026-09-13" is parsed and checked
+    hours: float = Field(gt=0, le=24)   # 0 or 30 is refused with 422, before the database
+    description: str = ""
+
+@app.get("/api/entries")
+def list_entries() -> list[dict]:
+    return db.list_all_entries()
+
+@app.post("/api/entries", status_code=201)
+def log_entry(entry: NewEntry) -> dict:
+    return db.log_time(entry.employee_name, entry.project,
+                       entry.entry_date.isoformat(), entry.hours, entry.description)
+```
+
+- In class: `uv run uvicorn <file>:app --reload --port 9998`, then `/docs` (Swagger) to try each route
+- The website's **Log time** button sent three calls: `POST /api/entries`, then `GET /api/entries` and `GET /api/projects` to refresh the page (class, network tab)
+- **Added by Claude: the `date` type and the `Field` limits.** The class model had `entry_date: str` and a bare `hours: float`
+  - ✅ *Verified (FastAPI 0.163.1):* with the class model, `hours: 0` returned **500** (the database's `ValueError` escaped), and the date `13/09/2026` was **stored as is**. With the model above, both got **422** naming the field
+- **The same types on the MCP door** put the limits in the schema the model reads:
+
+```python
+from datetime import date
+from typing import Annotated
+from pydantic import Field
+from fastmcp import FastMCP
+import database as db
+
+mcp = FastMCP("TimeTrack")
+
+@mcp.tool
+def log_time(employee_name: str, project: str, entry_date: date,
+             hours: Annotated[float, Field(gt=0, le=24)], description: str = "") -> dict:
+    """Log hours an employee worked on a project on one day."""
+    return db.log_time(employee_name, project, entry_date.isoformat(), hours, description)
+```
+
+✅ *Verified (`fastmcp` 4.2.0): the schema showed `exclusiveMinimum: 0, maximum: 24` for `hours` and `format: date` for `entry_date`. `hours: 0` and `13/09/2026` were refused as validation errors before the function ran.*
+
+> [!WARNING]
+> **⚠️ Two slips from the live build**
+> - **Run `uv` from inside the project folder.** A file created outside it could not import FastAPI: the packages live in the project's own environment
+> - **Port 8000 already in use?** Start on another one (`--port 9998`). Two programs cannot share a port (5.4)
+
 ### Connect Claude Desktop
 
 ```json
@@ -317,6 +515,10 @@ app.mount("/mcp", mcp_app)
 ```
 
 Not run here. See the trailing-slash note above if a client does not follow redirects.
+
+- *Two views:* this entry is from the class README. The MCP docs' Claude Desktop examples use a **command** that starts a local process
+  - Anthropic treats remote URLs as **connectors**, reached from its cloud, which cannot see `127.0.0.1` (5.6)
+  - Options that match the docs: run the server over STDIO with a command entry, or bridge the URL with `mcp-remote` (5.6). Not run here either
 
 ### Going live
 
@@ -361,6 +563,22 @@ def generate_weekly_report(employee_name: str, week_start: str) -> str:
 - In the Inspector the same lifecycle appeared as for every other server: `initialize`, discovery, then a real `tools/call`
 - The class highlighted the **prompt**: it cannot be copied from a plain API. It guides the AI to **combine several tool calls** into one well-structured answer
 - The class version of `get_timesheet` took `week_start`. The version in 5.8 takes `start_date` and `end_date`. The tool set evolved during the class
+- **Describe prompt arguments.** In class the prompt asked for `week_start` with no hint of the format, and the class noted it should have had a description. This version replaces the prompt above:
+
+```python
+from typing import Annotated
+from pydantic import Field
+
+@mcp.prompt
+def generate_weekly_report(
+    employee_name: Annotated[str, Field(description="Full name, exactly as logged in TimeTrack")],
+    week_start: Annotated[str, Field(description="Monday of the week, as YYYY-MM-DD")],
+) -> str:
+    """Write a weekly hours report for one employee."""
+    return f"Use get_timesheet for {employee_name} for the 7 days from {week_start}, then summarise hours per project."
+```
+
+✅ *Verified (`fastmcp` 4.2.0): `prompts/list` showed both descriptions, each followed by a line FastMCP adds with the JSON schema. Without `Field`, the description was empty (`None`).*
 
 ### Option 2: convert the API automatically (speed)
 
@@ -455,6 +673,19 @@ def query_db(a: int, b: int, c: int) -> int: ...
 - **Two layers:** a tool above your scope is **hidden** from `tools/list`, and calling it by name is also **denied**. Hiding alone would not be security
 - The data in `list_users` and `sales_report` is hard-coded sample data
 - For interviews, the class advised reading up on **JWT and OAuth**. Real servers verify signed tokens from an identity provider, not a fixed dictionary
+
+**FastMCP's login options** (class 20 read this list live; FastMCP docs, web-checked; ✅ every class below imports from `fastmcp` 4.2.0):
+
+| Class | Use it when |
+|---|---|
+| `StaticTokenVerifier` | Learning and tests only: a fixed table of tokens (above) |
+| `JWTVerifier` | Your company already issues signed JWTs. It checks the signature, expiry, issuer and audience |
+| `RemoteAuthProvider` | Your identity provider supports Dynamic Client Registration (the docs name Descope and WorkOS AuthKit) |
+| `OAuthProxy` | The provider needs a pre-registered app: GitHub, Google, Azure, AWS and most enterprise systems |
+| `OAuthProvider` | A full OAuth server inside your MCP server. The docs advise against it without a compelling reason |
+| `MultiAuth` | You accept more than one: for example people through `OAuthProxy` and services with JWTs |
+
+- Per-tool checks work the same whatever the login: `require_scopes` (above). `require_roles` also exists in 4.2.0
 
 > [!IMPORTANT]
 > **🏭 In production: designing a server**
@@ -605,6 +836,8 @@ Items marked *checked* were run with `fastmcp` 4.1.4.
 <details class="qa"><summary>10. A server works in a terminal but does not show up in Claude Desktop. What do you check?</summary>
 
 - Whether `command` is a bare `uv` or `python`. Use the full path from `which`
+- Whether Claude Desktop was fully quit and restarted, and what the server's log says (Settings → Developer → View Logs)
+- *Stronger answer:* the host starts servers with its own limited environment and an undefined working directory. Use absolute paths for the command and the file, and pass keys in `env` ([Chapter 4](04-operation-transports-and-shutdown.md), 4.7)
 
 </details>
 
@@ -619,6 +852,24 @@ Items marked *checked* were run with `fastmcp` 4.1.4.
 
 - Scope-based tool filtering: tools needing `admin` are never listed or callable for that token
 - *Stronger answer:* enforce again inside the tool and at the database (least-privilege DB user); never rely on the model or the prompt to refuse
+
+</details>
+
+<details class="qa"><summary>13. A teammate puts a server's URL into <code>claude_desktop_config.json</code> and it never appears. Why, and what are the options?</summary>
+
+- The documented config entries are commands that start a **local** server (MCP docs). A remote URL belongs in a custom connector
+- A custom connector is reached from **Anthropic's cloud**, so a `localhost` or VPN-only address cannot work there
+- Options: a public URL as a connector; a local STDIO bridge (`mcp-remote`, or FastMCP's `create_proxy`) in the config; or run the server itself over STDIO
+- *Stronger answer:* for an internal server, run the bridge on the laptop inside the company network; for everyone else, host it with TLS and OAuth and add it as a connector
+
+</details>
+
+<details class="qa"><summary>14. Your API returns 500 when a client logs 0 hours. How do you fix it, and what changes for the MCP tool?</summary>
+
+- Validate at the edge: a typed request model with limits (`Field(gt=0, le=24)`, a `date` field) answers **422**, naming the field, before the database is touched
+- A 500 says "the server broke"; a 422 tells the caller what to fix
+- Give the MCP tool the same types: the limits appear in the schema the model reads, and bad calls are refused before the function runs (5.8, tested)
+- *Stronger answer:* one shared validation model for both doors, a database constraint as the last line, and error messages the model can act on
 
 </details>
 
@@ -653,11 +904,18 @@ if __name__ == "__main__":
 - The legacy way means hand-written tool lists, schemas and dispatch. FastMCP needs **one decorator per function**
 - A **resource** can teach the model valid values before it calls a tool
 - `fastmcp install claude-desktop <file>` registers a STDIO server in the host's config
-- A connector and a config-file entry are the same thing. Use the full path for `uv` or `python` in a host's config
+- A connector is a public URL that Anthropic's cloud reaches; a config-file entry runs a local command (the class saw them as one thing; 5.6). Use the full path for `uv` or `python` in a host's config
 - Wrap an existing API by hand (control, prompts, good descriptions) or with `FastMCP.from_fastapi` (fast, no prompts, generated names)
 - TimeTrack: one SQLite database, REST routes and MCP tools sharing the same functions, FastMCP mounted in FastAPI
 - Mount rules: `path="/"` in `http_app`, and `lifespan` at `FastAPI(...)`
 - Authentication and deployment come next, with static tokens as a development-only pattern
+- The official SDK's high-level class is now `MCPServer` (`mcp` 2.x), with the same decorator idea as FastMCP
+- Over STDIO a reconnect starts a new server process. That is how code changes reach the Inspector
+- The Inspector's port moves with `CLIENT_PORT`. `ctx.info()` sends log messages to the client, but the logging capability is deprecated in the 2026-07-28 spec
+- Third-party servers can be local (`npx`, `uv`, Docker) or remote. `mcp-remote` bridges a URL into a STDIO-only config
+- Validate at the edge: typed models with `Field` limits give 422 on the REST door, and schema limits on the MCP door
+- Describe prompt arguments with `Field(description=...)`
+- FastMCP's login classes: JWT verifier, remote provider (DCR), OAuth proxy, full OAuth server, MultiAuth
 
 ## Practice
 
@@ -670,15 +928,31 @@ if __name__ == "__main__":
 7. Make `get_recipe` return a clear error for an unknown id
 8. Wrap a small FastAPI app both ways. Compare the two tool lists. Add a docstring to one route and watch the description change
 9. Break your config on purpose with a bare `uv`, then fix it with the full path from `which uv`
+10. Run the official SDK's `MCPServer` RecipeBox from 5.3 and list its tools from a FastMCP client
+11. Edit a STDIO server while the Inspector is connected. Reconnect and watch the change appear
+12. Add the `import_entries` tool from 5.4 and print its log messages in a client
+13. POST an entry with `hours: 0` to the class model and to the model in 5.8. Compare 500 and 422
+14. Add one third-party server three ways (connector, `mcp-remote`, local) and say where each one runs
 
 ## How this chapter was checked
 
 - **2026 review:** the diagrams, the security and production boxes, the graded interview and the cheat sheet were added (Added by Claude). The cheat-sheet server ran over HTTP with `fastmcp` 4.1.4; a URL client called `log_hours` and read `projects://X/summary`
 - Run: the RecipeBox tools, resource and prompt through a client; the notebook's TimeTrack database code with its own asserts; the generated `main.py` served by `uvicorn` in three variants (correct, `path="/mcp"`, no `lifespan`); the REST route; `POST /mcp` with and without the trailing slash; `fastmcp inspect`; `fastmcp install mcp-json`; and the `fastmcp dev inspector` and `fastmcp install claude-desktop` help text
 - Run for class 20: a FastAPI app with the class's four routes, its `/docs` page and OpenAPI paths, `FastMCP.from_fastapi` with calls to the converted tools, and a docstring's effect on the description
-- **Not run:** the Inspector in a browser, the port conflict, the `which uv` failure, VS Code's `MCP: Add Server`, Firecrawl, Claude Desktop (install or connection), ngrok, Prefect Horizon, the website's static files (a stub page stood in), hot reload of a new resource
+- **Not run:** the Inspector in a browser, the port conflict, the `which uv` failure, VS Code's `MCP: Add Server`, Firecrawl, Claude Desktop (install or connection), ngrok, Prefect Horizon, the website's static files (a stub page stood in)
 - **Read and run since:** the low-level and both FastMCP RecipeBox files, the auth server (5.2, 5.3, 5.10). **Not read yet:** the TimeTrack source files and the web files (`.js`, `.html`, `.css`)
 - The class folder's `first-mcp-server/README.md` and `mcp-warmup-primitives/README.md` are **empty** (0 bytes)
+- *Class 19 and 20 recordings (12–13 Sep), added 2026-11-15, `fastmcp` 4.2.0, `mcp` 2.3.0, FastAPI 0.163.1 (the new blocks run as printed):*
+  - 5.1: `import mcp.server.fastmcp` failed with the rename message quoted there
+  - 5.3: the `MCPServer` block over STDIO listed one tool and returned `['Weeknight Pasta']`. A file edited while connected still showed `['ping']`; after a reconnect, `['ping', 'echo']`
+  - 5.4: the logging block printed the two log lines and `Imported 8 entries`. The tool's schema held only `rows`. `fastmcp` printed a deprecation warning for the logging capability
+  - 5.8: the REST block with the class's `database.py` (test client): GET 200 with 5 seed entries; POST 201; `hours: 0`, `hours: 30` and `13/09/2026` each 422
+  - 5.8: the class model gave 500 for `hours: 0` and stored `13/09/2026`. The MCP `log_time` tool showed the limits in its schema and refused both bad calls
+  - 5.9: arguments with `Field(description=...)` showed their descriptions in `prompts/list`; without it, `None`
+  - 5.10: every class in the table imported from `fastmcp` 4.2.0
+  - Web-checked 2026-11-15: Anthropic's custom-connector help page; the MCP docs' local-server and debugging pages; FastMCP's welcome, authentication and Claude Desktop pages
+  - Also the official SDK's migration guide and the READMEs of Tavily's server, `mcp-remote` and the Inspector. The MCP and FastMCP sites were blocked here, so their GitHub sources were read
+  - Not run: Claude Desktop, VS Code, MCPJam, `mcp-remote`, Tavily, a Gmail server, any custom connector
 
 ## Sources and further reading
 
@@ -687,5 +961,12 @@ if __name__ == "__main__":
 - Live-Class-2026, `classes_summary/18 - 12-13 Sep - Building & Deploying MCP Servers.md` (RecipeBox comparison, authentication, TimeTrack)
 - Live-Class-2026, `Weekend 11 - 12-13 Sep/`: `README.md`, `12-13 Sep - Building & Deploying MCP Servers/README.md`, `MCP-Precoded/README.md`, `TimeTrackProject/timetrack/README.md`, `TimeTrackProject/timetrack_notebook.ipynb`
 - Sections marked *checked*, 5.1's ✅ *verified* line and 5.10 are from testing
+- Class recording transcripts, uploaded by you: 12 Sep 2026 (class 19, teaching part 00:08–03:11) and 13 Sep 2026 (class 20, teaching part 00:04–03:02). The doubt sessions after them were left out
+  - Class 19: the official SDK's syntax, the Inspector's port and role, the logging attempt
+  - Class 20: connectors vs the config file, third-party servers, the doubts, why TimeTrack needs MCP, the REST layer, the prompt-argument remark and the login options
+- [Anthropic: custom connectors using remote MCP](https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp); MCP docs: [connect local servers](https://modelcontextprotocol.io/docs/develop/connect-local-servers), [debugging](https://modelcontextprotocol.io/docs/tools/debugging)
+- FastMCP docs: [welcome](https://gofastmcp.com/getting-started/welcome), [authentication](https://gofastmcp.com/servers/auth/authentication), [Claude Desktop](https://gofastmcp.com/integrations/claude-desktop); [MCP Python SDK migration guide](https://github.com/modelcontextprotocol/python-sdk/blob/main/docs/migration.md)
+- [Tavily MCP](https://github.com/tavily-ai/tavily-mcp); [mcp-remote](https://www.npmjs.com/package/mcp-remote); [MCP Inspector environment variables](https://github.com/modelcontextprotocol/inspector/blob/main/docs/environment-variables.md). All web-checked 2026-11-15
+- Added by Claude: the logging snippet in 5.4, the 🔒 box in 5.6, the `date` and `Field` limits in 5.8, interview questions 13–14
 
 Previous: [Chapter 4, Operation, transports and shutdown](04-operation-transports-and-shutdown.md) · Next: [Chapter 6, Deployment and building a client](06-deployment-and-building-a-client.md)
