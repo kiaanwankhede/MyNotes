@@ -499,7 +499,7 @@ agent = create_agent(model, tools=[search_knowledge_base], checkpointer=InMemory
 
 ### Pattern choice and extras from the multi-agent pages
 
-- *Source: LangChain docs, `multi-agent/index.mdx`, `handoffs.mdx`, `skills.mdx`, `router.mdx`, `custom-workflow.mdx`.*
+- *Source: LangChain docs, `multi-agent/index.mdx` (read in full 2026-11-15, commit `04d4d4a`; its 12 diagrams are in `images/`), `handoffs.mdx`, `skills.mdx`, `router.mdx`, `custom-workflow.mdx`.*
 - **Pattern strengths** (the docs' star table, in words):
   - Subagents: strong for distributed development, parallelism and multi-hop; weak for direct user talk
   - Handoffs: strong for multi-hop and direct user talk; not for parallelism or distributed teams
@@ -550,6 +550,33 @@ agent = create_agent(model, tools=[search_knowledge_base], checkpointer=InMemory
 - **Handoffs and skills:** **stateful**. Once a step or skill is active, a repeat request skips routing or loading, saving **40 to 50%** of calls on the second ask
 - **Router:** stateless per request, with a classification call every time, but true parallel fan-out
 - **Patterns combine freely.** A subagent can be a router inside. A handoff stage can use skills to manage its own context. **Pick per sub-problem, not once for the whole system**
+
+**Where the calls come from: one request, "Buy coffee"** (docs' diagrams):
+
+![Subagents, 4 calls (LangChain docs): the main agent decides (1), calls the coffee subagent, which decides (2), runs buy_coffee and answers (3), then the main agent answers the user (4)](images/oneshot-subagents.png)
+
+![Handoffs, 3 calls (LangChain docs): the main agent hands off with transfer_to_coffee_agent (1); the coffee agent calls buy_coffee (2) and answers the user directly (3)](images/oneshot-handoffs.png)
+
+![Skills, 3 calls (LangChain docs): one agent loads the coffee skill (1), calls buy_coffee with that context (2), and answers (3)](images/oneshot-skills.png)
+
+![Router, 3 calls (LangChain docs): a router LLM picks the coffee agent (1); the coffee agent calls buy_coffee (2) and answers (3)](images/oneshot-router.png)
+
+- Subagents cost one extra call because the result **flows back through the main agent**. That extra call is the price of central control
+
+**Three topics at once: "Compare Python, JS and Rust"** (each topic has about 2K tokens of documentation):
+
+![Subagents, 5 calls, about 9K tokens (LangChain docs): the main agent (1K) fans out in parallel to Python, JS and Rust subagents (2K each), then writes the comparison (2K)](images/multidomain-subagents.png)
+
+![Handoffs, 7+ calls, about 14K+ tokens (LangChain docs): the main agent hands to the Python agent, which hands to JS, which hands to Rust, two calls each, one after another](images/multidomain-handoffs.png)
+
+![Skills, 3 calls, about 15K tokens (LangChain docs): one agent loads all three skills (+6K); its second and third calls each carry 7K tokens](images/multidomain-skills.png)
+
+![Router, 5 calls, about 9K tokens (LangChain docs): a router LLM (1K) fans out in parallel to three agents (2K each); a synthesis LLM combines them (2K)](images/multidomain-router.png)
+
+- **Subagents and router:** parallel, and each worker sees only its own 2K of context
+- **Handoffs:** strictly one agent after another, no parallel calls, and the history grows at every step
+- **Skills:** the fewest calls, but once loaded, **every later call carries all 6K** of skill text. Subagents use about **67% fewer tokens** here
+- **Repeat request:** a stateless router pays its classification call again; the docs suggest wrapping it as a tool inside a stateful agent (14.6, tutorial extras)
 
 > [!IMPORTANT]
 > **🏭 In production**
@@ -729,6 +756,7 @@ Items marked *checked* were run with `langchain` 1.4.7 and `langgraph` 1.2.19, u
   - *Tutorial extras: go back, history, stateful routers, skill storage:* Checked (scripted model): a `go_back` tool moved `current_step` from `resolution` to `warranty`, and the step middleware then offered the warranty tool again; a checkpointed agent wrapping a tool saw 1, 3, 5, 7 messages on successive model calls over two turns (memory kept). Summarization settings were not run here; see Ch7.
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** it is a table, so there was nothing to run.
+- **Multi-agent overview (2026-11-15):** the call and token counts in 14.7 are the docs' own diagrams, not re-run; the eight diagrams were copied and checked to render in the reader
 
 ## Sources and further reading
 
@@ -736,5 +764,6 @@ Items marked *checked* were run with `langchain` 1.4.7 and `langgraph` 1.2.19, u
 - Live-Class-2026, `classes_transcription_summary/23 - 27 Sep - MCP In LangChain.md` (pattern table and class questions, in [Chapter 13](13-multi-agent-systems-and-subagents.md))
 - Sections marked *checked* and 14.9 are from testing
 - LangChain docs: [Middleware overview](https://docs.langchain.com/oss/python/langchain/middleware/overview), section "Use middleware inside a LangGraph workflow" (read in full 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "The agent itself as a node" in 14.6
+- LangChain docs: [Multi-agent overview](https://docs.langchain.com/oss/python/langchain/multi-agent), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`), for the eight call-flow diagrams and the per-scenario reasoning in 14.7 (diagrams copied to `images/`)
 
 Previous: [Chapter 13, Multi-agent systems and subagents](13-multi-agent-systems-and-subagents.md) · Next: [Chapter 15, Testing agents and tracing](15-testing-agents-and-tracing.md)

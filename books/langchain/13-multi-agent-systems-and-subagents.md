@@ -27,6 +27,13 @@
   - **Distributed development:** different teams own different capabilities
   - **Parallelisation:** specialised workers run subtasks at the same time
 - **Default to one agent first.** Add more only when tools, context, teams or latency really demand it
+  - The docs agree: one agent with the right (sometimes dynamic) tools and prompt can often do the job ([Chapter 7](07-middleware.md), 7.2)
+- **Signals that you do need more** (docs):
+  - one agent has **too many tools** and keeps choosing badly
+  - a domain needs **long, specialised context**: its own prompts and its own tools
+  - capabilities must **unlock in order**, only after certain conditions are met
+- **Context engineering is the core of it** (docs): the quality of the system depends on what each agent sees ([Chapter 11](11-runtime-and-human-in-the-loop.md), 11.8)
+- For built-in subagents, skills, planning and a virtual file system, the docs point to **Deep Agents** (self-hosted) or **Managed Deep Agents** ([Chapter 6](06-agents-and-memory.md), 6.1)
 - In LangChain v1 the idea is `Agent = Model + Harness`. A multi-agent system is **several agent objects wired in one of a few well-understood shapes**
 
 > [!IMPORTANT]
@@ -93,6 +100,16 @@ Multi-agent just means **more than one agent**. They can be combined in any shap
 - LangChain's own wording maps to the class shapes: **subagents** are the hierarchical shape, **handoffs** resemble routing, and a **custom workflow** is left open
 - **Patterns combine.** A subagent system can have a sub-agent that is itself a router. A handoff stage can use skills to manage its context. Pick **per sub-problem**, not once for the whole system
 - This chapter covers **subagents**. [Chapter 14](14-handoffs-skills-router-and-custom-workflows.md) covers the other four, and a comparison table
+
+**The four shapes, as the docs draw them:**
+
+![Subagents (LangChain docs): the user request goes to a main agent, which calls subagents A, B and C as tools, each returning to it, then answers](images/pattern-subagents.png)
+
+![Handoffs (LangChain docs): agents pass control to each other through tool calls; each can hand off or answer the user directly](images/pattern-handoffs.png)
+
+![Skills (LangChain docs): one agent stays in control and loads specialised prompts and knowledge on demand](images/pattern-skills.png)
+
+![Router (LangChain docs): a routing step classifies the input, sends it to one or more specialised agents, and the results are combined](images/pattern-router.png)
 
 ## 13.5 Testing without an API key
 
@@ -572,6 +589,7 @@ supervisor = create_agent(model, [research], checkpointer=InMemorySaver())
   - *Subagent design decisions:* Checked (scripted model): a tool returning a `Command` copied the subagent's state key into the parent (`found` became `x-found`) and the tool message carried the subagent's text; an `Enum` argument accepted `"writer"` and rejected `"bogus"` with a `ValidationError`. Async jobs and `get_state(subgraphs=True)` were not run.
 - The 2026 review added the diagrams, 🏭 In production boxes, graded interview layout, extra senior and design questions and the cheat sheet. These are Added by Claude: standard engineering practice. Cheat-sheet APIs were checked against the installed `langchain` 1.4.7 signatures
 - **Cheat sheet:** ran a supervisor that called a subagent wrapped as a tool and read `.text` from the subagent's last message. Ran on `langchain` 1.4.7 with a scripted fake chat model (no API keys, no network), so no real model call was made.
+- **Multi-agent overview (2026-11-15):** design guidance with no code; the four pattern diagrams were copied from the docs and checked to render in the reader
 
 ## Sources and further reading
 
@@ -580,5 +598,6 @@ supervisor = create_agent(model, [research], checkpointer=InMemorySaver())
 - Sections marked *checked* and 13.9 are from testing
 - LangChain docs: [Streaming](https://docs.langchain.com/oss/python/langchain/streaming), section "Streaming from sub-agents" (read 2026-11-15 from its source, commit `04d4d4a`), for "The same with `stream()`" in 13.6
 - LangChain docs: [Event streaming](https://docs.langchain.com/oss/python/langchain/event-streaming), section "Streaming sub-agents" (read 2026-11-15 from its source, `langchain-ai/docs` commit `04d4d4a`), for "Streaming what each subagent says". The plain-subgraph warning is from testing
+- LangChain docs: [Multi-agent overview](https://docs.langchain.com/oss/python/langchain/multi-agent), read in full 2026-11-15 from its source (`langchain-ai/docs` commit `04d4d4a`, `multi-agent/index.mdx`), for the signals and context-engineering points in 13.1 and the four pattern diagrams in 13.4 (copied to `images/`)
 
 Previous: [Chapter 12, MCP in LangChain](12-mcp-in-langchain.md) · Next: [Chapter 14, Handoffs, skills, router and custom workflows](14-handoffs-skills-router-and-custom-workflows.md)
