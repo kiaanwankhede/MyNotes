@@ -34,22 +34,28 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          t=$(gh api "repos/${{ github.repository }}/pages" --jq .build_type 2>/dev/null || echo none)
+          if out=$(gh api "repos/${{ github.repository }}/pages" 2>&1); then
+            t=$(printf '%s' "$out" | jq -r '.build_type // "unknown"')
+          else
+            t=unreadable
+            echo "::warning::Could not read the Pages settings, so trying to publish anyway: $(printf '%s' "$out" | head -c 300)"
+          fi
+          echo "Pages build type: $t"
           echo "build_type=$t" >> "$GITHUB_OUTPUT"
-          if [ "$t" != "workflow" ]; then
+          if [ "$t" = "legacy" ]; then
             echo "::notice::Pages still publishes from a branch, so this run stops here. Switch Settings -> Pages -> Source to GitHub Actions."
           fi
       - uses: actions/checkout@v5
-        if: steps.mode.outputs.build_type == 'workflow'
+        if: steps.mode.outputs.build_type != 'legacy'
       - name: Copy highlights (never the chapter notes)
         id: copy
-        if: steps.mode.outputs.build_type == 'workflow'
+        if: steps.mode.outputs.build_type != 'legacy'
         env:
           HIGHLIGHTS_TOKEN: ${{ secrets.HIGHLIGHTS_TOKEN }}
         run: python3 .github/scripts/public_highlights.py
       - name: Decide whether to publish
         id: decide
-        if: steps.mode.outputs.build_type == 'workflow'
+        if: steps.mode.outputs.build_type != 'legacy'
         run: |
           if [ "${{ github.event_name }}" != "schedule" ] || [ "${{ steps.copy.outputs.changed }}" = "true" ]; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
@@ -65,7 +71,7 @@ jobs:
 
   deploy:
     needs: build
-    if: needs.build.outputs.deploy == 'true'
+    if: needs.build.outputs.deploy == 'true' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
