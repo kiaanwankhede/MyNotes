@@ -1,7 +1,7 @@
-# Publishes the notes site, with a read-only copy of your highlights for browsers that have no token
-# (your office laptop). Your private chapter notes are never copied.
+# Publishes the notes site, with a view-only copy of your highlights and chapter notes for browsers that
+# have no token (your office laptop). The copy is public, like the rest of the site.
 #   - on every change to main (new notes): publish the site
-#   - about every 15 minutes: publish again only if your highlights changed
+#   - about every 15 minutes: publish again only if your highlights or chapter notes changed
 #   - "Run workflow" on GitHub (Actions tab): copy now
 # Needs: the secret HIGHLIGHTS_TOKEN (read-only token for MyNotes-highlights), and
 # Settings -> Pages -> Source set to "GitHub Actions". Until then each run just stops early.
@@ -47,7 +47,7 @@ jobs:
           fi
       - uses: actions/checkout@v5
         if: steps.mode.outputs.build_type != 'legacy'
-      - name: Copy highlights (never the chapter notes)
+      - name: Copy highlights and chapter notes
         id: copy
         if: steps.mode.outputs.build_type != 'legacy'
         env:
@@ -60,7 +60,7 @@ jobs:
           if [ "${{ github.event_name }}" != "schedule" ] || [ "${{ steps.copy.outputs.changed }}" = "true" ]; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
           else
-            echo "deploy=false" >> "$GITHUB_OUTPUT"; echo "No new highlights, nothing to publish."
+            echo "deploy=false" >> "$GITHUB_OUTPUT"; echo "No new highlights or notes, nothing to publish."
           fi
       - uses: actions/configure-pages@v5
         if: steps.decide.outputs.deploy == 'true'

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Copy your highlights (never your private chapter notes) into the site, for browsers without a token.
+"""Copy your highlights and chapter notes into the site, for browsers without a token (view only).
 
 Reads highlights.json from the private highlights repo with the HIGHLIGHTS_TOKEN secret (a read-only token),
-keeps only the fields the reader needs to show each highlight, and writes highlights-public.json next to
-index.html. Writes changed=true or changed=false to $GITHUB_OUTPUT by comparing with the copy that is live now.
+keeps only the fields the reader needs (each highlight, and the text of each chapter note), and writes
+highlights-public.json next to index.html. Everything in it is public, as agreed. Writes changed=true or changed=false to $GITHUB_OUTPUT by comparing with the copy that is live now.
 If the private repo cannot be read, the live copy is kept, so the office view never goes blank by accident.
 """
 import base64, datetime, json, os, sys, urllib.error, urllib.request
@@ -20,13 +20,16 @@ def get_json(url, headers=None):
         return json.loads(r.read().decode("utf-8"))
 
 
-def private_items(token):
+def private_data(token):
     data = get_json(API, {"Authorization": "Bearer " + token, "Accept": "application/vnd.github+json",
                           "X-GitHub-Api-Version": "2022-11-28"})
     raw = base64.b64decode(data["content"]).decode("utf-8") if data.get("content") else "{}"
-    items = json.loads(raw).get("items", {})        # the "notes" part (private chapter notes) is never read
-    return {k: {f: v[f] for f in KEEP if f in v} for k, v in items.items()
-            if isinstance(v, dict) and not v.get("del") and v.get("text")}
+    data = json.loads(raw)
+    items = {k: {f: v[f] for f in KEEP if f in v} for k, v in data.get("items", {}).items()
+             if isinstance(v, dict) and not v.get("del") and v.get("text")}
+    notes = {k: {"text": v["text"], "u": v.get("u", 0)} for k, v in data.get("notes", {}).items()
+             if isinstance(v, dict) and not v.get("del") and v.get("text")}
+    return items, notes
 
 
 def live_copy():
@@ -50,7 +53,7 @@ def main():
     try:
         if not token:
             raise RuntimeError("the HIGHLIGHTS_TOKEN secret is not set")
-        items = private_items(token)
+        items, notes = private_data(token)
     except Exception as e:                          # keep what is live, never publish an empty copy by accident
         print("::warning::Could not read your highlights (%s). Keeping the copy that is live now." % e)
         if live:
@@ -58,11 +61,11 @@ def main():
                 json.dump(live, f)
         say(False)
         return 0
-    copy = {"v": 1, "updated": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "items": items}
+    copy = {"v": 1, "updated": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "items": items, "notes": notes}
     with open(OUT, "w") as f:
         json.dump(copy, f)   # keep \u escapes: a highlight's context can hold half an emoji
-    print("highlights copied:", len(items))
-    say(not live or live.get("items") != items)
+    print("highlights copied:", len(items), "| chapter notes copied:", len(notes))
+    say(not live or live.get("items") != items or live.get("notes", {}) != notes)
     return 0
 
 

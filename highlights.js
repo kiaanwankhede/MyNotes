@@ -13,7 +13,7 @@
   var only = false, busy = false, again = false, timer = null, status = 'local', errMsg = '';
   var pageMode = false, focusId = null, fBook = '', fText = '';
   var pending = null, barMode = null, removeIds = [], barTouch = false, barTimer = null, selTimer = null;
-  var pub = {}, pubAt = '';   // read-only copy published on the site, used only by a browser with no token (office laptop)
+  var pub = {}, pubNotes = {}, pubAt = '';   // view-only copy published on the site, used only by a browser with no token (office laptop)
   try { only = localStorage.getItem(LS_ONLY) === '1'; } catch (e) {}
 
   function loadStore() { try { var d = JSON.parse(localStorage.getItem(LS_DATA)); if (d && d.items) { if (!d.notes) d.notes = {}; return d; } } catch (e) {} return { items: {}, notes: {} }; }
@@ -82,7 +82,7 @@
     if (token()) return;
     fetch('highlights-public.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
       if (!d || !d.items || token()) return;
-      pub = d.items; pubAt = d.updated || '';
+      pub = d.items; pubNotes = d.notes || {}; pubAt = d.updated || '';
       if (pageMode) page(); else if (cur) render();
       setStatus(status);
     }).catch(function () {});
@@ -296,7 +296,9 @@
 
   /* ---------- chapter notes (free-text, per book+chapter) ---------- */
   function noteKey() { return cur ? cur.book + '-' + cur.ch : null; }
-  function getNote() { var k = noteKey(); var n = k && store.notes[k]; return (n && !n.del) ? n.text : ''; }
+  function localNote() { var k = noteKey(); var n = k && store.notes[k]; return (n && !n.del) ? n.text : ''; }
+  function pubNote() { var k = noteKey(); return (!token() && k && pubNotes[k]) ? pubNotes[k].text : ''; }
+  function getNote() { return localNote() || pubNote(); }
   function setNote(text) {
     var k = noteKey(); if (!k) return;
     var prev = store.notes[k];
@@ -318,7 +320,7 @@
     if (inChapter) {
       var has = !!getNote();
       nbtn.classList.toggle('on', has);
-      nbtn.title = has ? 'This chapter has a note — click to view or edit' : 'Add a note for this chapter';
+      nbtn.title = !has ? 'Add a note for this chapter' : localNote() ? 'This chapter has a note — click to view or edit' : 'This chapter has a note copied from your own devices — click to view';
     }
   }
   tbtn.addEventListener('click', function () {
@@ -351,9 +353,10 @@
     if (status === 'ok') return 'Synced ✓';
     if (status === 'busy') return 'Syncing…';
     if (status === 'err') return 'Sync problem: ' + errMsg;
-    var np = token() ? 0 : Object.keys(pub).length;
-    if (np) return 'Showing ' + np + ' highlight' + (np > 1 ? 's' : '') + ' copied from your own devices, view only' +
-      (pubAt ? ' (copied ' + new Date(pubAt).toLocaleString() + ')' : '') + '. Highlights you add here stay on this device.';
+    var np = token() ? 0 : Object.keys(pub).length, nn = token() ? 0 : Object.keys(pubNotes).length;
+    if (np || nn) return 'Showing ' + (np ? np + ' highlight' + (np > 1 ? 's' : '') : '') + (np && nn ? ' and ' : '') +
+      (nn ? nn + ' chapter note' + (nn > 1 ? 's' : '') : '') + ' copied from your own devices, view only' +
+      (pubAt ? ' (copied ' + new Date(pubAt).toLocaleString() + ')' : '') + '. Anything you add here stays on this device.';
     return 'Saved on this device only. Add a token to sync across devices.';
   }
   function schedule() { if (!token()) return; clearTimeout(timer); timer = setTimeout(sync, 1200); }
@@ -407,7 +410,7 @@
     '<li>GitHub → Settings → Developer settings → Fine-grained tokens → Generate new token.</li>' +
     '<li>Repository access: only <code>' + CFG.repo + '</code>. Permissions → Contents: Read and write.</li>' +
     '<li>Copy the token and paste it above, once on each device.</li></ol></details>' +
-    '<p id="hlpub" class="hlhelp" hidden>Office copy: your highlights are copied to the notes site about every 15 minutes, for browsers without a token. ' +
+    '<p id="hlpub" class="hlhelp" hidden>Office copy: your highlights and chapter notes are copied to the public notes site about every 15 minutes, for browsers without a token. ' +
     '<a href="https://github.com/' + CFG.owner + '/' + CFG.site + '/actions/workflows/publish.yml" target="_blank" rel="noopener">Copy now</a> (opens GitHub: tap “Run workflow”).</p>' +
     '<div class="hlrow"><button type="button" id="hlall">★ My highlights</button><button type="button" id="hlexp">Export</button><label class="hlfile">Import<input type="file" id="hlimp" accept="application/json" hidden></label></div>' +
     '<div id="hlorph"></div></div>';
@@ -465,7 +468,7 @@
   npanel.id = 'ntpanel'; npanel.hidden = true; npanel.setAttribute('role', 'dialog'); npanel.setAttribute('aria-label', 'Chapter notes');
   npanel.innerHTML =
     '<div class="hlcard"><div class="hlhead"><strong id="nttitle">Notes</strong><button type="button" id="ntclose" aria-label="Close">✕</button></div>' +
-    '<p class="hlstat">Private notes for yourself about this chapter — what to fix, check, or revisit. Saved and synced the same way as highlights.</p>' +
+    '<p class="hlstat">Notes for yourself about this chapter — what to fix, check, or revisit. Saved and synced the same way as highlights, and copied to the public notes site for your office view.</p>' +
     '<textarea id="nttext" placeholder="e.g. Section 2.3 needs a real code example; double-check the pricing claim in 1.4…"></textarea>' +
     '<p id="ntstat" class="hlstat"></p>' +
     '<div class="hlrow"><button type="button" id="ntclear">Clear note</button></div></div>';
@@ -475,8 +478,10 @@
     if (!cur) return;
     var title = (allItems0Title() || cur.ch);
     document.getElementById('nttitle').textContent = 'Notes: ' + title;
-    ntText.value = getNote();
-    ntStat.textContent = ''; ntStat.className = 'hlstat';
+    var ro = !localNote() && !!pubNote();   // a copied note is view only here
+    ntText.value = getNote(); ntText.readOnly = ro;
+    document.getElementById('ntclear').hidden = ro;
+    ntStat.textContent = ro ? 'Copied from your own devices (view only).' : ''; ntStat.className = 'hlstat';
     npanel.hidden = false; setTimeout(function () { ntText.focus(); }, 30);
   }
   function allItems0Title() {
