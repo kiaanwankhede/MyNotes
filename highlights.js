@@ -5,7 +5,7 @@
    - "Marked only" shows just the highlighted lines (with their headings).
    - Highlights are kept on the device and synced through a private GitHub repo (file highlights.json). */
 (function () {
-  var CFG = { owner: 'kiaanwankhede', repo: 'MyNotes-highlights', path: 'highlights.json' };
+  var CFG = { owner: 'kiaanwankhede', repo: 'MyNotes-highlights', path: 'highlights.json', site: 'MyNotes' };
   var API = 'https://api.github.com/repos/' + CFG.owner + '/' + CFG.repo + '/contents/' + CFG.path;
   var LS_DATA = 'notes-hl-data', LS_TOK = 'notes-hl-token', LS_ONLY = 'notes-hl-only';
   var doc = document.getElementById('doc');
@@ -13,6 +13,7 @@
   var only = false, busy = false, again = false, timer = null, status = 'local', errMsg = '';
   var pageMode = false, focusId = null, fBook = '', fText = '';
   var pending = null, barMode = null, removeIds = [], barTouch = false, barTimer = null, selTimer = null;
+  var pub = {}, pubAt = '';   // read-only copy published on the site, used only by a browser with no token (office laptop)
   try { only = localStorage.getItem(LS_ONLY) === '1'; } catch (e) {}
 
   function loadStore() { try { var d = JSON.parse(localStorage.getItem(LS_DATA)); if (d && d.items) { if (!d.notes) d.notes = {}; return d; } } catch (e) {} return { items: {}, notes: {} }; }
@@ -62,6 +63,7 @@
       if (!e.n.data.slice(from, to).trim()) return;
       var r = document.createRange(); r.setStart(e.n, from); r.setEnd(e.n, to);
       var m = document.createElement('mark'); m.className = kind === 'flag' ? 'hl flag' : 'hl'; m.setAttribute('data-id', id);
+      if (isPub(id)) m.title = 'Copied from your own devices (view only)';
       r.surroundContents(m);
     });
   }
@@ -73,8 +75,17 @@
 
   /* ---------- render ---------- */
   function mine() {
-    return Object.keys(store.items).map(function (k) { return store.items[k]; })
-      .filter(function (h) { return !h.del && cur && h.book === cur.book && h.ch === cur.ch; });
+    return allItems().filter(function (h) { return cur && h.book === cur.book && h.ch === cur.ch; });
+  }
+  function isPub(id) { return !store.items[id] && !!pub[id]; }
+  function loadPub() {   // no token here: show the copy of your highlights that the site publishes, read-only
+    if (token()) return;
+    fetch('highlights-public.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      if (!d || !d.items || token()) return;
+      pub = d.items; pubAt = d.updated || '';
+      if (pageMode) page(); else if (cur) render();
+      setStatus(status);
+    }).catch(function () {});
   }
   function apply(book, ch) { pageMode = false; cur = { book: book, ch: ch || '_intro' }; render(); focus(); }
   function focus() {
@@ -88,7 +99,7 @@
     var old = doc.querySelector('.hlbanner'); if (old) old.remove();
     buildIndex(); orphans = [];
     mine().forEach(function (h) {
-      var r = locate(h); if (!r) { orphans.push(h); return; }
+      var r = locate(h); if (!r) { if (!isPub(h.id)) orphans.push(h); return; }
       wrap(r[0], r[1], h.id, h.kind); buildIndex();
     });
     banner(); applyMode(); updateUi();
@@ -172,7 +183,11 @@
 
   /* ---------- "My highlights" page ---------- */
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
-  function allItems() { return Object.keys(store.items).map(function (k) { return store.items[k]; }).filter(function (h) { return !h.del; }); }
+  function allItems() {
+    var out = Object.keys(store.items).map(function (k) { return store.items[k]; }).filter(function (h) { return !h.del; });
+    if (!token()) Object.keys(pub).forEach(function (k) { if (!store.items[k]) out.push(pub[k]); });
+    return out;
+  }
   function page() {
     pageMode = true; cur = null;
     var items = allItems(), slugs = {}; items.forEach(function (h) { slugs[h.book] = 1; });
@@ -210,7 +225,7 @@
             var row = el('div', 'hlitem' + (h.kind === 'flag' ? ' flag' : '')), q = el('blockquote', '', h.text), acts = el('div', 'hlacts');
             if (h.kind === 'flag') row.appendChild(el('span', 'hltag', '🔴 To revisit'));
             if (t || id === '_intro') { var o = el('a', 'hlopen', 'Open in chapter'); o.href = a.href; o.addEventListener('click', function () { focusId = h.id; }); acts.appendChild(o); }
-            var rm = el('button', '', 'Remove'); rm.type = 'button'; rm.addEventListener('click', function () { removeId(h.id); }); acts.appendChild(rm);
+            if (!isPub(h.id)) { var rm = el('button', '', 'Remove'); rm.type = 'button'; rm.addEventListener('click', function () { removeId(h.id); }); acts.appendChild(rm); }
             row.appendChild(q); row.appendChild(acts); list.appendChild(row);
           });
         });
@@ -262,7 +277,7 @@
       if (sel && !sel.isCollapsed && sel.rangeCount && doc.contains(sel.anchorNode) && doc.contains(sel.focusNode)) {
         var r = sel.getRangeAt(0), hit = [];
         doc.querySelectorAll('mark.hl').forEach(function (m) {
-          if (r.intersectsNode(m)) { var id = m.getAttribute('data-id'); if (hit.indexOf(id) < 0) hit.push(id); }
+          if (r.intersectsNode(m)) { var id = m.getAttribute('data-id'); if (hit.indexOf(id) < 0 && !isPub(id)) hit.push(id); }
         });
         if (hit.length) { removeIds = hit; showBar('rm'); return; }
       }
@@ -274,7 +289,8 @@
   doc.addEventListener('click', function (e) {
     var m = e.target.closest && e.target.closest('mark.hl'); var s = window.getSelection();
     if (!m || (s && !s.isCollapsed)) { if (barMode === 'rm') hideBar(); return; }
-    removeIds = []; for (var x = m; x && x !== doc; x = x.parentElement) if (x.tagName === 'MARK' && x.getAttribute('data-id')) removeIds.push(x.getAttribute('data-id'));
+    removeIds = []; for (var x = m; x && x !== doc; x = x.parentElement) if (x.tagName === 'MARK' && x.getAttribute('data-id') && !isPub(x.getAttribute('data-id'))) removeIds.push(x.getAttribute('data-id'));
+    if (!removeIds.length) { if (barMode === 'rm') hideBar(); return; }   // a view-only copy cannot be removed here
     showBar('rm');
   });
 
@@ -335,6 +351,9 @@
     if (status === 'ok') return 'Synced ✓';
     if (status === 'busy') return 'Syncing…';
     if (status === 'err') return 'Sync problem: ' + errMsg;
+    var np = token() ? 0 : Object.keys(pub).length;
+    if (np) return 'Showing ' + np + ' highlight' + (np > 1 ? 's' : '') + ' copied from your own devices, view only' +
+      (pubAt ? ' (copied ' + new Date(pubAt).toLocaleString() + ')' : '') + '. Highlights you add here stay on this device.';
     return 'Saved on this device only. Add a token to sync across devices.';
   }
   function schedule() { if (!token()) return; clearTimeout(timer); timer = setTimeout(sync, 1200); }
@@ -388,12 +407,15 @@
     '<li>GitHub → Settings → Developer settings → Fine-grained tokens → Generate new token.</li>' +
     '<li>Repository access: only <code>' + CFG.repo + '</code>. Permissions → Contents: Read and write.</li>' +
     '<li>Copy the token and paste it above, once on each device.</li></ol></details>' +
+    '<p id="hlpub" class="hlhelp" hidden>Office copy: your highlights are copied to the notes site about every 15 minutes, for browsers without a token. ' +
+    '<a href="https://github.com/' + CFG.owner + '/' + CFG.site + '/actions/workflows/publish.yml" target="_blank" rel="noopener">Copy now</a> (opens GitHub: tap “Run workflow”).</p>' +
     '<div class="hlrow"><button type="button" id="hlall">★ My highlights</button><button type="button" id="hlexp">Export</button><label class="hlfile">Import<input type="file" id="hlimp" accept="application/json" hidden></label></div>' +
     '<div id="hlorph"></div></div>';
   document.body.appendChild(panel);
   function openPanel() {
     document.getElementById('hltoken').value = token() ? '••••••••••••' : '';
     document.getElementById('hlstatus').textContent = statusText();
+    document.getElementById('hlpub').hidden = !token();
     var box = document.getElementById('hlorph'); box.innerHTML = '';
     if (orphans.length) {
       var h = document.createElement('p'); h.className = 'hlstat'; h.textContent = 'Needs attention on this page (' + orphans.length + '): the text changed, so these could not be placed.'; box.appendChild(h);
@@ -480,4 +502,5 @@
   window.HL = { apply: apply, sync: sync, render: render, page: page };
   setStatus(token() ? 'busy' : 'local');
   sync();
+  loadPub();
 })();
