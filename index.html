@@ -191,18 +191,17 @@ article table td:first-child strong{white-space:nowrap}
 .lib .card:hover{border-color:var(--accent)}.lib .card b{display:block;font-size:1.05rem;margin-bottom:2px}.lib .card span{color:var(--muted);font-size:.92rem}
 .lib h2{font-size:1rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border:0;margin:1.2em 0 .2em}
 /* Line numbers: each block shows the line of the chapter file it starts on. Drawn by CSS, so the page text is unchanged */
-@property --lnh{syntax:'<length>';inherits:true;initial-value:30px}
 #doc{position:relative}
 #doc.ln{padding-left:64px}
-#doc.ln [data-line]{--lnh:1lh}
-#doc.ln pre[data-line]{--lnh:calc(.84rem * 1.5)}
-#doc.ln [data-line]::before{content:attr(data-line);position:absolute;left:6px;width:42px;margin:0;padding:0;border:0;background:none;text-align:right;font:500 11px/var(--lnh) var(--font-mono);letter-spacing:0;text-transform:none;color:var(--muted);opacity:.6;white-space:nowrap;pointer-events:none;-webkit-user-select:none;user-select:none}
+/* line-height 1lh = the line height of the numbered block, so the number sits on its first line; 30px is the fallback for older browsers */
+#doc.ln [data-line]::before{content:attr(data-line);position:absolute;left:6px;width:42px;margin:0;padding:0;border:0;background:none;text-align:right;font-family:var(--font-mono);font-size:11px;font-weight:500;font-style:normal;line-height:30px;line-height:1lh;letter-spacing:0;text-transform:none;color:var(--muted);opacity:.6;white-space:nowrap;pointer-events:none;-webkit-user-select:none;user-select:none}
+#doc.ln pre[data-line]::before{line-height:calc(.84rem * 1.5)}
 #doc.ln details[data-line]::before{margin-top:10px}
 #lnpill{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:55;font:500 12px/1 var(--font-mono);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 11px;box-shadow:0 4px 14px rgba(0,0,0,.14);opacity:0;transition:opacity .35s;pointer-events:none}
 #lnpill.on{opacity:.92}
 #hlpanel label.lnopt{display:flex;align-items:center;gap:8px;margin:.9em 0 .3em;color:var(--ink);font-size:.95rem;cursor:pointer}
 #hlpanel label.lnopt input{width:18px;height:18px;margin:0}
-@media (max-width:760px){#doc.ln{padding-left:44px}#doc.ln [data-line]::before{left:0;width:34px;font-size:10px}#doc.ln pre[data-line]{--lnh:calc(.8rem * 1.5)}}
+@media (max-width:760px){#doc.ln{padding-left:44px}#doc.ln [data-line]::before{left:0;width:34px;font-size:10px}#doc.ln pre[data-line]::before{line-height:calc(.8rem * 1.5)}}
 @media (prefers-reduced-motion:reduce){#lnpill{transition:none}}
 </style>
 </head>
