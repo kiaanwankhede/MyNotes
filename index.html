@@ -203,6 +203,18 @@ article table td:first-child strong{white-space:nowrap}
 #hlpanel label.lnopt input{width:18px;height:18px;margin:0}
 @media (max-width:760px){#doc.ln{padding-left:44px}#doc.ln [data-line]::before{left:0;width:34px;font-size:10px}#doc.ln pre[data-line]::before{line-height:calc(.8rem * 1.5)}}
 @media (prefers-reduced-motion:reduce){#lnpill{transition:none}}
+/* Read aloud */
+#ra.on{background:var(--accent);border-color:transparent;color:#fff}
+#raplayer{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:58;display:flex;align-items:center;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 6px;box-shadow:0 6px 22px rgba(0,0,0,.25);max-width:calc(100vw - 20px)}
+#raplayer[hidden]{display:none}
+#raplayer button{flex:none;border:0;background:none;color:var(--ink);width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font:600 14px var(--font-body);padding:0}
+#raplayer button:hover{background:var(--accent-soft)}
+#raplayer #raplay{background:var(--accent);color:#fff}
+#rainfo{font:500 12px var(--font-mono);color:var(--muted);padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#doc .ra-now{background:var(--accent-soft);border-radius:6px;box-shadow:0 0 0 4px var(--accent-soft)}
+#hlpanel .raopt label{display:block;font-size:.9rem;color:var(--muted);margin-top:.6em}
+#hlpanel .raopt select{width:100%;font:inherit;font-size:16px;padding:8px 10px;margin:4px 0 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+@media (max-width:760px){#ra{order:2}#ra .ralbl{display:none}#raplayer button{width:38px;height:38px}}
 </style>
 </head>
 <body>
@@ -214,6 +226,7 @@ article table td:first-child strong{white-space:nowrap}
   <button id="chbtn" class="icon-btn" aria-haspopup="true" aria-expanded="false" aria-controls="chmenu"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex:none"><path d="M3 5h14M3 10h14M3 15h14"/></svg><span class="lbl" id="chlbl">Chapters</span><svg class="car" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 4l4 4 4-4"/></svg></button>
   <button id="hlt" class="icon-btn" aria-pressed="false">★ Marked only</button>
   <button id="chnote" class="icon-btn" aria-label="Notes for this chapter" hidden>📝 Notes</button>
+  <button id="ra" class="icon-btn" aria-label="Read this chapter aloud" hidden>🔊<span class="ralbl"> Listen</span></button>
   <button id="hlset" class="icon-btn" aria-label="Highlights and sync settings">⚙<span class="dot local"></span></button>
   <button id="theme" class="icon-btn" aria-label="Switch colour theme">Dark</button>
 </header>
@@ -223,6 +236,14 @@ article table td:first-child strong{white-space:nowrap}
   <aside class="right" id="right" aria-label="On this page"></aside>
 </div>
 <div id="lnpill" aria-hidden="true"></div>
+<div id="raplayer" role="group" aria-label="Read aloud" hidden>
+  <button type="button" id="raprev" aria-label="Previous block"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M4 4h2v12H4zM17 4v12L8 10z"/></svg></button>
+  <button type="button" id="raplay" aria-label="Pause"></button>
+  <button type="button" id="ranext" aria-label="Next block"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M14 4h2v12h-2zM3 4v12l9-6z"/></svg></button>
+  <button type="button" id="rarate" aria-label="Reading speed">1×</button>
+  <span id="rainfo"></span>
+  <button type="button" id="raclose" aria-label="Stop reading"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
@@ -314,6 +335,7 @@ function fixLinks(html){
   });
 }
 function show(){
+  if(RA.on) raStop();
   if(location.hash==='#highlights'&&window.HL){
     var my0=++token, b0=bookOf(state.book); renderBooks(); lnApply(document.getElementById('doc'),null);
     document.getElementById('right').innerHTML=''; document.title='My highlights - Study Notes';
@@ -403,7 +425,7 @@ function lnTicks(s){ /* true when every inline code span on the line is closed, 
 }
 function lnApply(doc,r){
   LN.total=r?r.total:0;
-  doc.classList.toggle('ln',LN.on&&!!r);
+  doc.classList.toggle('ln',LN.on&&!!r); raUi();
   if(!r) return;
   var w=document.createTreeWalker(doc,NodeFilter.SHOW_COMMENT), cs=[];
   while(w.nextNode()) cs.push(w.currentNode);
@@ -423,7 +445,7 @@ function lnApply(doc,r){
 }
 function lnPill(){
   var pill=document.getElementById('lnpill'), doc=document.getElementById('doc'), main=document.getElementById('main');
-  if(!LN.on||!LN.total){ pill.classList.remove('on'); return; }
+  if(!LN.on||!LN.total||RA.on){ pill.classList.remove('on'); return; }
   var top=main.getBoundingClientRect().top+64, els=doc.querySelectorAll('[data-line]'), n=0;
   for(var i=0;i<els.length;i++){ var b=els[i].getBoundingClientRect(); if(!b.height) continue; if(b.top<=top) n=+els[i].getAttribute('data-line'); else break; }
   if(main.scrollTop>0&&main.scrollTop+main.clientHeight>=main.scrollHeight-4) n=LN.total;
@@ -442,6 +464,132 @@ function setLineNumbers(on){
   card.insertBefore(row,document.getElementById('hlorph'));
   var cb=row.querySelector('input'); cb.checked=LN.on;
   cb.addEventListener('change',function(){setLineNumbers(cb.checked)});
+})();
+/* Read aloud. The browser's own speech (free, no account; the voices come from the device). It reads the numbered
+   blocks in order from where you are, skips code and diagrams, reads tables row by row, opens each interview question
+   to read its answer, and in "Marked only" mode reads only what is shown. Pause stops and restarts the current block. */
+var RA={on:false,playing:false,i:0,els:[],tok:0,rate:1,voice:'',lock:null};
+var RA_OK=('speechSynthesis' in window)&&('SpeechSynthesisUtterance' in window), RA_RATES=[0.8,1,1.2,1.4,1.7,2];
+var RA_PLAY='<svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6 4l11 6-11 6z"/></svg>';
+var RA_PAUSE='<svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5 4h3.5v12H5zM11.5 4H15v12h-3.5z"/></svg>';
+try{RA.rate=parseFloat(localStorage.getItem('notes-ra-rate'))||1; RA.voice=localStorage.getItem('notes-ra-voice')||'';}catch(e){}
+function raClean(t){
+  return t.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}️‍]/gu,'').replace(/→/g,' to ').replace(/\s·\s/g,', ').replace(/\s+/g,' ').trim();
+}
+function raText(el){
+  var tag=el.tagName, cl=el.classList;
+  if(tag==='PRE') return 'Code example, skipped.';
+  if(cl.contains('mermaid')) return 'Diagram, skipped.';
+  if(tag==='FIGURE'){ var fc=el.querySelector('figcaption'); return 'Picture. '+(fc?fc.textContent:''); }
+  if(cl.contains('tbl')){
+    var rows=[].slice.call(el.querySelectorAll('tr')); if(!rows.length) return '';
+    var head=[].slice.call(rows[0].children).map(function(c){return c.textContent.trim()});
+    return 'Table. '+rows.slice(1).map(function(r){return [].slice.call(r.children).map(function(c,k){return (head[k]?head[k]+': ':'')+c.textContent.trim()}).join('; ')}).join('. ');
+  }
+  if(tag==='DETAILS'){ var s=el.querySelector('summary'); return 'Question. '+(s?s.textContent:''); }
+  var c=el.cloneNode(true);   /* the block's own words: leave out nested blocks that are read on their own */
+  [].slice.call(c.querySelectorAll('ul,ol,pre,.tbl,details,.mermaid,figure,[data-line]')).forEach(function(x){ if(x.parentNode) x.parentNode.removeChild(x); });
+  return c.textContent;
+}
+function raSplit(t,rx){ var p=t.split(rx), s=[]; for(var i=0;i<p.length;i+=2) s.push(p[i]+(p[i+1]||'')); return s; }
+function raChunks(t){   /* short pieces at sentence ends (not inside "13.1"): some browsers stop a long text after ~15 s */
+  var out=[], cur='', parts=[];
+  raSplit(t,/([.!?;:]\s+)/).forEach(function(s){ if(s.length>240) parts=parts.concat(raSplit(s,/(,\s+)/)); else parts.push(s); });
+  parts.forEach(function(s){ if(cur&&(cur+s).length>220){ out.push(cur); cur=''; } cur+=s; });
+  if(cur.trim()) out.push(cur);
+  return out;
+}
+function raShown(el){ return el.getClientRects().length>0; }
+function raVoice(){ if(!RA.voice) return null; return speechSynthesis.getVoices().filter(function(v){return v.name===RA.voice})[0]||null; }
+function raMark(el){
+  var o=document.querySelector('#doc .ra-now'); if(o) o.classList.remove('ra-now');
+  if(!el) return; el.classList.add('ra-now');
+  var m=document.getElementById('main'), r=el.getBoundingClientRect(), mr=m.getBoundingClientRect();
+  if(r.top<mr.top+40||r.top>mr.bottom-120) el.scrollIntoView({block:'center',behavior:'smooth'});
+}
+function raStartIndex(){
+  var top=document.getElementById('main').getBoundingClientRect().top+64, k=0;
+  for(var i=0;i<RA.els.length;i++){ var b=RA.els[i].getBoundingClientRect(); if(!b.height) continue; if(b.top<=top) k=i; else break; }
+  return k;
+}
+function raSpeak(){
+  var tok=++RA.tok, busy=speechSynthesis.speaking||speechSynthesis.pending;
+  speechSynthesis.cancel();
+  while(RA.i<RA.els.length&&!raShown(RA.els[RA.i])) RA.i++;
+  if(RA.i>=RA.els.length){ raStop(); return; }
+  var el=RA.els[RA.i]; raMark(el); raUi();
+  if(el.tagName==='DETAILS') el.open=true;
+  var chunks=raChunks(raClean(raText(el))), v=raVoice();
+  if(!chunks.length){ RA.i++; setTimeout(function(){ if(tok===RA.tok&&RA.playing) raSpeak(); },0); return; }
+  function go(){
+    if(tok!==RA.tok) return;
+    chunks.forEach(function(t,k){
+      var u=new SpeechSynthesisUtterance(t); u.rate=RA.rate;
+      if(v){ u.voice=v; u.lang=v.lang; } else u.lang='en-US';
+      if(k===chunks.length-1) u.onend=function(){ if(tok===RA.tok&&RA.playing){ RA.i++; raSpeak(); } };
+      u.onerror=function(e){ if(tok!==RA.tok||e.error==='interrupted'||e.error==='canceled') return; RA.i++; raSpeak(); };
+      speechSynthesis.speak(u);
+    });
+  }
+  if(busy) setTimeout(go,80); else go();   /* Chrome can drop speech started straight after cancel */
+}
+function raStart(){
+  if(!RA_OK) return;
+  RA.els=[].slice.call(document.querySelectorAll('#doc [data-line]')); if(!RA.els.length) return;
+  RA.i=raStartIndex(); RA.on=true; RA.playing=true; raWake(true); raSpeak();
+}
+function raPause(){ RA.playing=false; RA.tok++; speechSynthesis.cancel(); raWake(false); raUi(); }
+function raResume(){ RA.playing=true; raWake(true); raSpeak(); }
+function raStep(d){
+  var i=RA.i+d; while(i>=0&&i<RA.els.length&&!raShown(RA.els[i])) i+=d;
+  if(i<0||i>=RA.els.length) return; RA.i=i;
+  if(RA.playing) raSpeak(); else { RA.tok++; speechSynthesis.cancel(); raMark(RA.els[i]); raUi(); }
+}
+function raStop(){ RA.on=false; RA.playing=false; RA.tok++; if(RA_OK) speechSynthesis.cancel(); raMark(null); raWake(false); raUi(); }
+function raWake(on){
+  try{
+    if(on&&navigator.wakeLock&&!RA.lock){ RA.lock=true; navigator.wakeLock.request('screen').then(function(l){ if(RA.playing) RA.lock=l; else { l.release(); RA.lock=null; } }).catch(function(){ RA.lock=null; }); }
+    else if(!on&&RA.lock){ if(RA.lock.release) RA.lock.release().catch(function(){}); RA.lock=null; }
+  }catch(e){ RA.lock=null; }
+}
+function raUi(){
+  var b=document.getElementById('ra'), p=document.getElementById('raplayer');
+  b.hidden=!RA_OK||!LN.total; b.classList.toggle('on',RA.on); b.setAttribute('aria-pressed',RA.on);
+  p.hidden=!RA.on; if(!RA.on) return;
+  var pl=document.getElementById('raplay'); pl.innerHTML=RA.playing?RA_PAUSE:RA_PLAY; pl.setAttribute('aria-label',RA.playing?'Pause':'Play');
+  document.getElementById('rarate').textContent=RA.rate+'×';
+  var el=RA.els[RA.i]; document.getElementById('rainfo').textContent=el?'Line '+el.getAttribute('data-line')+(LN.total?' of '+LN.total:''):'';
+}
+document.getElementById('ra').addEventListener('click',function(){ if(RA.on) raStop(); else raStart(); });
+document.getElementById('raplay').addEventListener('click',function(){ if(RA.playing) raPause(); else raResume(); });
+document.getElementById('raprev').addEventListener('click',function(){ raStep(-1); });
+document.getElementById('ranext').addEventListener('click',function(){ raStep(1); });
+document.getElementById('raclose').addEventListener('click',raStop);
+document.getElementById('rarate').addEventListener('click',function(){
+  var k=RA_RATES.indexOf(RA.rate); RA.rate=RA_RATES[(k+1)%RA_RATES.length];
+  try{localStorage.setItem('notes-ra-rate',RA.rate)}catch(e){}
+  if(RA.playing) raSpeak(); else raUi();
+});
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState!=='visible'||!RA.playing) return;
+  RA.lock=null; raWake(true);
+  if(!speechSynthesis.speaking) raSpeak();   /* the phone may have stopped speech while the page was hidden */
+});
+(function(){
+  if(!RA_OK) return;
+  var card=document.querySelector('#hlpanel .hlcard'); if(!card) return;
+  var w=document.createElement('div'); w.className='raopt';
+  w.innerHTML='<label for="ravoice">Read-aloud voice</label><select id="ravoice"></select>';
+  card.insertBefore(w,document.getElementById('hlorph'));
+  var sel=w.querySelector('select');
+  function fill(){
+    var vs=speechSynthesis.getVoices().filter(function(v){return /^en/i.test(v.lang)});
+    sel.innerHTML='<option value="">Device default</option>'+vs.map(function(v){return '<option value="'+esc(v.name)+'"'+(v.name===RA.voice?' selected':'')+'>'+esc(v.name+' ('+v.lang+')')+'</option>'}).join('');
+  }
+  fill();
+  if(speechSynthesis.addEventListener) speechSynthesis.addEventListener('voiceschanged',fill);
+  document.getElementById('hlset').addEventListener('click',fill);
+  sel.addEventListener('change',function(){ RA.voice=sel.value; try{localStorage.setItem('notes-ra-voice',RA.voice)}catch(e){} if(RA.playing) raSpeak(); });
 })();
 function buildToc(){
   var hs=document.querySelectorAll('#doc h2, #doc h3'), out='<p class="nav-title">On this page</p><ul>';
