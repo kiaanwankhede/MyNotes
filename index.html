@@ -190,6 +190,20 @@ article table td:first-child strong{white-space:nowrap}
 .lib .card{display:block;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:12px 16px;text-decoration:none;color:var(--ink)}
 .lib .card:hover{border-color:var(--accent)}.lib .card b{display:block;font-size:1.05rem;margin-bottom:2px}.lib .card span{color:var(--muted);font-size:.92rem}
 .lib h2{font-size:1rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border:0;margin:1.2em 0 .2em}
+/* Line numbers: each block shows the line of the chapter file it starts on. Drawn by CSS, so the page text is unchanged */
+@property --lnh{syntax:'<length>';inherits:true;initial-value:30px}
+#doc{position:relative}
+#doc.ln{padding-left:64px}
+#doc.ln [data-line]{--lnh:1lh}
+#doc.ln pre[data-line]{--lnh:calc(.84rem * 1.5)}
+#doc.ln [data-line]::before{content:attr(data-line);position:absolute;left:6px;width:42px;margin:0;padding:0;border:0;background:none;text-align:right;font:500 11px/var(--lnh) var(--font-mono);letter-spacing:0;text-transform:none;color:var(--muted);opacity:.6;white-space:nowrap;pointer-events:none;-webkit-user-select:none;user-select:none}
+#doc.ln details[data-line]::before{margin-top:10px}
+#lnpill{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:55;font:500 12px/1 var(--font-mono);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 11px;box-shadow:0 4px 14px rgba(0,0,0,.14);opacity:0;transition:opacity .35s;pointer-events:none}
+#lnpill.on{opacity:.92}
+#hlpanel label.lnopt{display:flex;align-items:center;gap:8px;margin:.9em 0 .3em;color:var(--ink);font-size:.95rem;cursor:pointer}
+#hlpanel label.lnopt input{width:18px;height:18px;margin:0}
+@media (max-width:760px){#doc.ln{padding-left:44px}#doc.ln [data-line]::before{left:0;width:34px;font-size:10px}#doc.ln pre[data-line]{--lnh:calc(.8rem * 1.5)}}
+@media (prefers-reduced-motion:reduce){#lnpill{transition:none}}
 </style>
 </head>
 <body>
@@ -209,6 +223,7 @@ article table td:first-child strong{white-space:nowrap}
   <main id="main"><article id="doc"></article></main>
   <aside class="right" id="right" aria-label="On this page"></aside>
 </div>
+<div id="lnpill" aria-hidden="true"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
@@ -290,9 +305,9 @@ function renderLeft(b){
 }
 function fixLinks(html){
   html=html.replace(/src="(images\/[^"]+)"/g,function(m,p){return 'src="books/'+state.book+'/'+p+'"';});
-  html=html.replace(/<p>\s*<img ([^>]*)>\s*<\/p>/g,function(m,attrs){
+  html=html.replace(/<p>\s*<img ([^>]*)>\s*(<!--L\d+-->)?\s*<\/p>/g,function(m,attrs,mark){
     var am=attrs.match(/alt="([^"]*)"/), alt=am?am[1]:'';
-    return '<figure class="shot"><img '+attrs+' loading="lazy">'+(alt?'<figcaption>'+alt+'</figcaption>':'')+'</figure>';
+    return '<figure class="shot">'+(mark||'')+'<img '+attrs+' loading="lazy">'+(alt?'<figcaption>'+alt+'</figcaption>':'')+'</figure>';
   });
   return html.replace(/href="(?:\.\.\/([a-z0-9-]+)\/)?((?!https?:)[^"#]+)\.md"/g,function(m,bk,id){
     if(id==='README') return m;
@@ -301,13 +316,13 @@ function fixLinks(html){
 }
 function show(){
   if(location.hash==='#highlights'&&window.HL){
-    var my0=++token, b0=bookOf(state.book); renderBooks();
+    var my0=++token, b0=bookOf(state.book); renderBooks(); lnApply(document.getElementById('doc'),null);
     document.getElementById('right').innerHTML=''; document.title='My highlights - Study Notes';
     loadBook(b0).then(function(){ if(my0!==token)return; renderLeft(b0); document.getElementById('chlbl').textContent='★ My highlights'; });
     HL.page(); setMenu(false); return;
   }
   if(location.hash===''||location.hash==='#library'){
-    ++token; renderBooks(); document.getElementById('doc').innerHTML=libraryPage(); document.getElementById('right').innerHTML='';
+    ++token; renderBooks(); document.getElementById('doc').innerHTML=libraryPage(); lnApply(document.getElementById('doc'),null); document.getElementById('right').innerHTML='';
     document.getElementById('chmenu').innerHTML=''; document.getElementById('chlbl').textContent='Chapters'; document.title='Library - Study Notes'; setMenu(false); setBk(false); return;
   }
   var p=parseHash(), my=++token; state.book=p.book; renderBooks();
@@ -319,10 +334,10 @@ function show(){
     state.ch=id;
     var c=null; b.chapters.forEach(function(x){if(x.id===id)c=x});
     renderLeft(b);
-    var html;
+    var html, sc=null;
     if(!c){ html=marked.parse(b.intro||('# '+b.title))+'<div class="draftbox">No chapter has been written in this book yet. They appear here as each batch is processed.</div>'; }
     else if(!c.written){ html='<h1>'+esc(c.title)+'</h1><div class="draftbox">This chapter has not been written yet.</div>'; }
-    else { html=marked.parse(c.md); }
+    else { sc=lnScan(c.md); html=marked.parse(sc.md); }
     html=fixLinks(html).replace(/<table>/g,'<div class="tbl"><table>').replace(/<\/table>/g,'</table></div>');
     if(c){
       var reals=b.chapters.filter(function(x){return !x.divider});
@@ -330,7 +345,7 @@ function show(){
       html+='<div class="pager"><span>'+(prev?'<a href="#'+hashFor(b.slug,prev.id)+'"><small>Previous</small>'+esc(prev.title)+'</a>':'')+'</span><span>'+(next?'<a href="#'+hashFor(b.slug,next.id)+'"><small>Next</small>'+esc(next.title)+'</a>':'')+'</span></div>';
     }
     doc.innerHTML=html;
-    callouts(doc); diagrams(doc);
+    lnApply(doc,sc); callouts(doc); diagrams(doc);
     doc.querySelectorAll('pre code').forEach(function(el){try{hljs.highlightElement(el)}catch(e){}});
     document.title=(c?c.title+' - ':'')+b.title+' - Study Notes';
     document.getElementById('main').scrollTop=0;
@@ -344,11 +359,12 @@ function callouts(root){
   root.querySelectorAll('blockquote').forEach(function(bq){
     var p=bq.querySelector('p'); if(!p) return;
     var m=p.innerHTML.match(/^\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(<br>)?\s*/i); if(!m) return;
-    var k=m[1].toLowerCase(); p.innerHTML=p.innerHTML.slice(m[0].length);
+    var k=m[1].toLowerCase(), dl=p.getAttribute('data-line'); p.innerHTML=p.innerHTML.slice(m[0].length);
     var title=ALERT[k], first=p.firstElementChild;
     if(first&&first.tagName==='STRONG'&&p.innerHTML.indexOf('<strong>')===0){title=first.innerHTML; first.remove(); p.innerHTML=p.innerHTML.replace(/^\s*(<br>)?\s*/,'');}
     if(!p.textContent.trim()&&!p.querySelector('*')) p.remove();
     var d=document.createElement('div'); d.className='callout '+k;
+    if(dl){ d.setAttribute('data-line',dl); p.removeAttribute('data-line'); }
     d.innerHTML='<p class="ctitle">'+title+'</p>'; while(bq.firstChild) d.appendChild(bq.firstChild);
     bq.parentNode.replaceChild(d,bq);
   });
@@ -356,9 +372,78 @@ function callouts(root){
 var mermaidReady=false;
 function diagrams(root){
   var els=root.querySelectorAll('pre code.language-mermaid'); if(!els.length||!window.mermaid) return;
-  els.forEach(function(c){var d=document.createElement('div');d.className='mermaid';d.textContent=c.textContent;c.parentNode.parentNode.replaceChild(d,c.parentNode);});
+  els.forEach(function(c){var d=document.createElement('div');d.className='mermaid';d.textContent=c.textContent;var dl=c.parentNode.getAttribute('data-line');if(dl)d.setAttribute('data-line',dl);c.parentNode.parentNode.replaceChild(d,c.parentNode);});
   try{var dk=isDark();mermaid.initialize({startOnLoad:false,theme:'base',securityLevel:'strict',fontFamily:'Inter, system-ui, sans-serif',themeVariables:dk?{primaryColor:'#16303a',primaryTextColor:'#e4e9ef',primaryBorderColor:'#5cc0de',lineColor:'#9aa6b4',secondaryColor:'#221a35',tertiaryColor:'#161c24',clusterBkg:'#1b232d',clusterBorder:'#5cc0de',actorBkg:'#16303a',actorBorder:'#5cc0de',actorTextColor:'#e4e9ef',noteBkgColor:'#2c2111',noteTextColor:'#e4e9ef',signalColor:'#e4e9ef',signalTextColor:'#e4e9ef',edgeLabelBackground:'#161c24'}:{primaryColor:'#e1f1f6',primaryTextColor:'#1c2430',primaryBorderColor:'#0b6b8a',lineColor:'#5d6877',secondaryColor:'#f4efff',tertiaryColor:'#ffffff',clusterBkg:'#f7fbfc',clusterBorder:'#0b6b8a',actorBkg:'#e1f1f6',actorBorder:'#0b6b8a',noteBkgColor:'#fff6e6',edgeLabelBackground:'#ffffff'}});mermaid.run({nodes:root.querySelectorAll('.mermaid')});}catch(e){}
 }
+/* Line numbers. Each block gets the line of the chapter file it starts on (the numbers used in batch reports).
+   Before parsing, an HTML comment <!--Ln--> is added at the end of each eligible line; after rendering, each
+   comment becomes a data-line attribute on its block and is removed. Code blocks and tables are numbered by
+   their order. The numbers are drawn by CSS, so the page text (and so the highlights) is unchanged. */
+var LN={on:true,total:0}, lnTimer=null, lnRaf=0;
+try{LN.on=localStorage.getItem('notes-ln')!=='off'}catch(e){}
+function lnScan(md){
+  var lines=md.split('\n'), out=[], fence='', inTable=false, r={fences:[],tables:[]};
+  lines.forEach(function(L,i){
+    var body=L.replace(/^(\s*>)*\s*/,''), fm=body.match(/^(`{3,}|~{3,})/), n=i+1, tag='<!--L'+n+'-->';
+    if(fence){ if(fm&&fm[1].charAt(0)===fence.charAt(0)&&fm[1].length>=fence.length&&!body.slice(fm[1].length).trim()) fence=''; out.push(L); return; }
+    if(fm){ fence=fm[1]; r.fences.push(n); inTable=false; out.push(L); return; }
+    if(body.charAt(0)==='|'){ if(!inTable) r.tables.push(n); inTable=true; out.push(L); return; }
+    inTable=false;
+    if(body.indexOf('</summary>')>=0){ out.push(L.replace('</summary>',tag+'</summary>')); return; }
+    if(!body.trim()||body.charAt(0)==='<'||/^([-*_=])(\s*\1){2,}\s*$/.test(body)||/^\[[^\]]+\]:\s/.test(body)||!lnTicks(body)){ out.push(L); return; }
+    var m=L.match(/^(.*?)(\\|\s+)?$/);
+    out.push(m[1]+tag+(m[2]||''));
+  });
+  r.md=out.join('\n'); r.total=lines.length-(lines[lines.length-1]===''?1:0);
+  return r;
+}
+function lnTicks(s){ /* true when every inline code span on the line is closed, so a mark cannot land inside code */
+  var runs=s.match(/`+/g)||[], i=0;
+  while(i<runs.length){ var j=i+1; while(j<runs.length&&runs[j].length!==runs[i].length) j++; if(j>=runs.length) return false; i=j+1; }
+  return true;
+}
+function lnApply(doc,r){
+  LN.total=r?r.total:0;
+  doc.classList.toggle('ln',LN.on&&!!r);
+  if(!r) return;
+  var w=document.createTreeWalker(doc,NodeFilter.SHOW_COMMENT), cs=[];
+  while(w.nextNode()) cs.push(w.currentNode);
+  cs.forEach(function(c){
+    var m=/^L(\d+)$/.exec(c.data); if(!m) return;
+    var el=c.parentElement&&c.parentElement.closest('li,p,h1,h2,h3,h4,h5,h6,summary,dt,dd,td,th,figure');
+    if(!el) el=c.nextElementSibling;
+    if(el&&el.tagName==='SUMMARY') el=el.parentElement;
+    if(el&&!el.hasAttribute('data-line')) el.setAttribute('data-line',m[1]);
+    c.parentNode.removeChild(c);
+  });
+  doc.normalize();
+  [['pre',r.fences],['.tbl',r.tables]].forEach(function(x){
+    var els=doc.querySelectorAll(x[0]); if(els.length!==x[1].length) return;
+    els.forEach(function(e,k){ if(!e.hasAttribute('data-line')) e.setAttribute('data-line',x[1][k]); });
+  });
+}
+function lnPill(){
+  var pill=document.getElementById('lnpill'), doc=document.getElementById('doc'), main=document.getElementById('main');
+  if(!LN.on||!LN.total){ pill.classList.remove('on'); return; }
+  var top=main.getBoundingClientRect().top+64, els=doc.querySelectorAll('[data-line]'), n=0;
+  for(var i=0;i<els.length;i++){ var b=els[i].getBoundingClientRect(); if(!b.height) continue; if(b.top<=top) n=+els[i].getAttribute('data-line'); else break; }
+  if(main.scrollTop>0&&main.scrollTop+main.clientHeight>=main.scrollHeight-4) n=LN.total;
+  n=n||1;
+  pill.textContent='Line '+n+' of '+LN.total+' · '+Math.round(n*100/LN.total)+'%';
+  pill.classList.add('on'); clearTimeout(lnTimer); lnTimer=setTimeout(function(){pill.classList.remove('on')},1600);
+}
+function setLineNumbers(on){
+  LN.on=on; try{localStorage.setItem('notes-ln',on?'on':'off')}catch(e){}
+  document.getElementById('doc').classList.toggle('ln',on&&LN.total>0); lnPill();
+}
+(function(){
+  var card=document.querySelector('#hlpanel .hlcard'); if(!card) return;
+  var row=document.createElement('label'); row.className='lnopt';
+  row.innerHTML='<input type="checkbox" id="lnchk"> Show line numbers';
+  card.insertBefore(row,document.getElementById('hlorph'));
+  var cb=row.querySelector('input'); cb.checked=LN.on;
+  cb.addEventListener('change',function(){setLineNumbers(cb.checked)});
+})();
 function buildToc(){
   var hs=document.querySelectorAll('#doc h2, #doc h3'), out='<p class="nav-title">On this page</p><ul>';
   hs.forEach(function(h,i){h.id='s'+i; out+='<li><a href="#s'+i+'" data-t="s'+i+'" class="'+h.tagName.toLowerCase()+'">'+esc(h.textContent)+'</a></li>';});
@@ -379,6 +464,7 @@ document.getElementById('main').addEventListener('scroll',function(){
   var hs=document.querySelectorAll('#doc h2, #doc h3'), cur=null, top=document.getElementById('main').getBoundingClientRect().top;
   hs.forEach(function(h){if(h.getBoundingClientRect().top-top<90)cur=h.id;});
   document.querySelectorAll('aside.right a').forEach(function(a){a.classList.toggle('on',a.getAttribute('data-t')===cur)});
+  if(!lnRaf) lnRaf=requestAnimationFrame(function(){lnRaf=0; lnPill();});
 });
 window.addEventListener('hashchange',function(){ if(/^#s\d+$/.test(location.hash))return; show(); });
 function setMenu(open){var m=document.getElementById('chmenu');m.hidden=!open;document.getElementById('chbtn').setAttribute('aria-expanded',open)}
