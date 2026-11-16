@@ -55,12 +55,12 @@ def main():
         print("::warning::Could not read your highlights (%s). Keeping the copy that is live now." % e)
         if live:
             with open(OUT, "w") as f:
-                json.dump(live, f, ensure_ascii=False)
+                json.dump(live, f)
         say(False)
         return 0
     copy = {"v": 1, "updated": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "items": items}
     with open(OUT, "w") as f:
-        json.dump(copy, f, ensure_ascii=False)
+        json.dump(copy, f)   # keep \u escapes: a highlight's context can hold half an emoji
     print("highlights copied:", len(items))
     say(not live or live.get("items") != items)
     return 0
