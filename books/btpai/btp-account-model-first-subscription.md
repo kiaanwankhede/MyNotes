@@ -7,7 +7,7 @@
 > - **You will learn:** global accounts and subaccounts, how entitlements activate a licence, subscriptions versus instances, why an app needs a role collection, and the trial traps
 > - **You will build:** a subaccount in AWS US East with Cloud Transport Management subscribed and opened, the same flow as Assignment 1
 > - **Level:** beginner · **Time:** about 30 minutes reading, 20 minutes hands-on in a trial
-> - **Builds on:** [Inside BTP: Neo, hyperscalers and regions](btp-neo-hyperscalers-regions.md). **Leads to:** the next BTP Foundations chapter, written after Lecture 2
+> - **Builds on:** [Inside BTP: Neo, hyperscalers and regions](btp-neo-hyperscalers-regions.md). **Leads to:** [Choosing BTP services for a requirement](btp-services-for-a-requirement.md)
 
 **After this chapter you can:**
 
@@ -47,6 +47,25 @@ flowchart LR
 - One service can appear with two technical names. Here `alm-ts` is the app you open in a browser and `transport` is the API you call from code.
 - A service that shows up in Service Assignments is one you are licensed for. If it is not there, nothing later will work.
 
+## 4.2a How a global account reaches you, and what its header shows
+
+- **Ordering is a business task.** A procurement or business team orders the BTP services; consultants don't.
+- While ordering, they name one person as the first administrator.
+- When the order is processed (a few hours), that person gets a "Welcome to SAP BTP" email with the cockpit URL. They log in with their company S-user.
+- The new global account is empty: one user, no subaccounts, no directories. The first job is to check that the licences in Service Assignments match the bill of material.
+
+| In the Account Explorer header | Meaning |
+|---|---|
+| Global account name | Usually the company name |
+| Subdomain | The global account's own subdomain, unique across all of BTP |
+| Open in Audit Log Viewer | Every admin action (creating subaccounts, adding users, assigning licences) is recorded and can be reviewed |
+| Switch Global Account | Jump to another global account you have access to |
+| Delete Trial Account | Exists only in trials. A productive global account cannot be deleted from the cockpit |
+
+- **Few people get global-account access:** senior BTP administrators, sometimes finance (for cost) and the platform owner.
+- Everyone else works in the subaccounts that match their job: integration people where Integration Suite runs, AI people where the AI services run, and so on.
+- Only a global account administrator can move entitlements. A subaccount administrator can't, unless they also have global-account rights.
+
 ## 4.3 Subaccount: your foothold in one region
 
 - A **subaccount** belongs to a global account and points at **one region of one provider**, such as US East (VA) on AWS.
@@ -68,6 +87,36 @@ flowchart LR
 
 ![Account Explorer showing two subaccounts, cTMS and trial, both on Amazon Web Services in US East (VA), environment Multi-Environment](images/acct-account-explorer.png)
 
+## 4.3a Creating subaccounts like a project, not one by one
+
+**One subaccount per app per landscape**
+- A custom app usually gets one subaccount per landscape tier, such as `LeaveApp-Dev`, `LeaveApp-Test` and `LeaveApp-Prod`.
+- All three need the same services, because it is the same app.
+- Some services are different: Cloud Transport Management is one central instance that moves releases between the dev, test and prod subaccounts. It is never tripled.
+- When to share a subaccount and when to split is an "account model" decision. The course covers it later.
+
+**Copy an existing subaccount instead of repeating the entitlements**
+- Real UI path: *Account Explorer → Create*, then the option to create from an existing subaccount. This opens the **Create as New Subaccount** dialog.
+- Pick the **Source Subaccount** and keep **Copy service plan assignments** on.
+- The new subaccount gets the same entitlements. **Subscriptions and instances are not copied**: you still subscribe in each one.
+
+![Create as New Subaccount: source subaccount LeaveApp-Dev, display name, region US East (VA) - AWS, subdomain, Copy service plan assignments switched on, Used for production and Enable beta features check boxes, Labels](images/acct-create-as-new-subaccount.png)
+
+- Missed an entitlement in dev after copying it to test? Add it by hand in both: *Entity Assignments → select dev → Edit → add*, then the same for test.
+- The copy only works if the global account still has enough free quota for every plan.
+
+**The optional fields under Advanced**
+
+| Field | What it does |
+|---|---|
+| Used for production | Marks the subaccount as productive |
+| Enable beta features | Lets this subaccount use services and features SAP still has in beta |
+| Labels | Free-text name and value tags (for example `app: leaveapp`, `region: europe`). For finding and grouping; no technical effect |
+
+![Create Subaccount with Advanced open: Enable beta features ticked and a label named leaveapp](images/acct-create-subaccount-labels.png)
+
+- In Account Explorer, **Hide entities you don't have access to** trims the list to your own subaccounts. You can switch between a list (tree) view and a tile view.
+
 ## 4.4 Entitlements: switch the licence on in that region
 
 - The hyperscaler will not run a paid service until it sees a licence in that region. You show it by assigning an **entitlement** to the subaccount.
@@ -88,6 +137,35 @@ flowchart LR
 | Service Assignments | Global account → Entitlements | Everything the company bought, and total quota |
 | Entity Assignments | Global account → Entitlements | What each subaccount or directory has been given |
 | Entitlements | Subaccount | What this subaccount may use now |
+
+## 4.4a Entitlements in depth
+
+**Service Assignments vs Entity Assignments**
+- **Service Assignments** shows the whole contract: every service, plan and total quota in the global account.
+- What it shows depends on the commercial model. Under a subscription contract you see what you bought. Under CPEA/BTPEA or Pay-As-You-Go you see everything you may consume.
+- **Entity Assignments** shows what one *entity* has. An entity is a subaccount or a directory.
+- You can select several entities at once and compare them. Paid accounts add a central search across all selected subaccounts.
+- In edit mode you can tick several plans and add them in one go, or remove several at once, then **Save**.
+
+![Entity Assignments in a paid global account: several subaccounts selected, with Service, Service Technical Name, Plan, Set Quota Limit, Quota Assignment and Remaining Quota columns; Audit Log Management Service, Cloud Foundry Environment, Connectivity Service and others listed](images/acct-entity-assignments-paid.png)
+
+**The four columns, and what each means**
+
+| Column | Meaning | Example |
+|---|---|---|
+| Service | Readable name | Cloud Transport Management |
+| Service technical name | Unique across BTP; what the CLI, Terraform and `mta.yaml` use | `alm-ts`, `transport`, `cloudfoundry`, `xsuaa` |
+| Plan | One way of using the service | `lite (Application)` for the UI, `standard` for APIs |
+| Quota | How much, in the service's own unit (its "metric") | Cloud Foundry in GB of memory, Business Application Studio in users, Integration Suite in messages |
+
+**Why one service has several plans**
+- **Audit Log Management:** `central` reads the global account's audit logs, `default` reads one subaccount's (web-checked).
+- **Cloud Transport Management:** the application plan gives people the UI. The `standard` plan gives another system, such as Cloud ALM, API access to monitor transports.
+- Because plans are counted separately, a subaccount can show more entitlements than the global account has services. One service with four plans counts four times.
+
+**Always-free services**
+- Some services are always free. Every new subaccount gets them automatically, if they are offered in its region.
+- Discovery Center marks them **Always Free**. Paid services you still assign by hand in Entity Assignments.
 
 ## 4.5 Subscribe: install the app in the subaccount
 
@@ -159,6 +237,24 @@ flowchart LR
 ![Welcome to Your Personal Trial: choose US East (VA) - AWS or Singapore - Azure, then Create Account](images/trial-choose-region.png)
 
 - The trial lasts **90 days**. Log in at least once every 30 days, or the account may be deleted (SAP trial FAQ, checked 19 Nov 2026).
+- You need an sap.com account first; the sign-up asks to verify a phone number.
+- One email and phone number give one trial global account. Inside it you can create as many subaccounts as you like, but only in the two trial regions.
+- Because SAP assumes you are new, it sets everything up for you. A productive global account arrives empty instead.
+
+![Welcome to Your Personal Trial, setup in progress: region US East (VA) - AWS, global account created, subaccount trial, Cloud Foundry org Processing, space Pending](images/trial-setup-progress.png)
+
+| SAP creates | What it is |
+|---|---|
+| Global account | Your trial "contract" |
+| Subaccount `trial` | In the region you picked, holding **all** of the trial's quota |
+| Cloud Foundry org | The Cloud Foundry account registered to that subaccount |
+| Space `dev` | Where apps and service instances actually run inside the org |
+| Business Application Studio subscription | Ready to use; it can't be removed while subscribed |
+
+![Subaccount trial, Overview: Cloud Foundry Environment with its API endpoint, org name, org ID, 4,096 MB org memory limit, a Disable Cloud Foundry button and one space, dev](images/trial-cloud-foundry-org-space.png)
+
+- The subaccount's left menu gains a **Cloud Foundry** section (Spaces, Space Quotas, Org Members) once Cloud Foundry is enabled.
+- Org and space are covered properly in the Cloud Foundry chapter (Assignment 2 practises creating a space).
 - SAP creates a subaccount called **trial** and gives it **all** of the trial's quota.
 - So a new subaccount you create shows every paid service greyed out, with 0 quota left.
 - Fix: release quota from "trial" first.
@@ -169,6 +265,9 @@ flowchart LR
 > [!WARNING]
 > **⚠️ Pitfall: never remove Cloud Foundry Runtime from the "trial" subaccount**
 > The class slides warn that a trial cannot re-enable the Cloud Foundry runtime entitlement once it is removed. Release other services' quota instead.
+
+- You also can't remove an entitlement that is in use. Unsubscribe or delete the instance first, or the cockpit refuses.
+- Forgetting **Save** after removing quota is the usual reason the plan still looks greyed out in the new subaccount.
 
 | | Trial account | Free tier in a productive account |
 |---|---|---|
@@ -318,6 +417,22 @@ resource "btp_subaccount_role_collection_assignment" "viewer" {
 
 </details>
 
+<details class="qa"><summary>9. You built LeaveApp-Dev with ten entitlements. How do you create test and production without repeating the work?</summary>
+
+- Create them from the existing subaccount ("Create as New Subaccount") with "Copy service plan assignments" on
+- Only entitlements are copied; subscriptions and instances are created again in each subaccount
+- *Stronger answer:* check free quota first, and remember a later addition to dev must be added by hand to test and prod too (or script it)
+
+</details>
+
+<details class="qa"><summary>10. Why does one service show several plans, and what is a quota unit?</summary>
+
+- A plan is one way of using a service, for example a UI application plan vs an API plan, or Audit Log Management's central (global account) vs default (subaccount)
+- Quota is the amount in the service's own metric: GB of memory for Cloud Foundry, users for Business Application Studio, messages for Integration Suite
+- *Stronger answer:* the technical name plus plan is exactly what you put in the CLI, Terraform or `mta.yaml`
+
+</details>
+
 > [!TIP]
 > **🧩 Design question**
 > *"A customer bought five BTP services for a European rollout. Design their first subaccounts and the provisioning steps."* Talk about:
@@ -345,6 +460,10 @@ resource "btp_subaccount_role_collection_assignment" "viewer" {
 - A new subscription still needs a role collection, and the user must log in again to pick it up
 - In a trial, the "trial" subaccount holds all the quota; release some before using a new subaccount, but never remove Cloud Foundry Runtime
 - The same steps can be scripted with the btp CLI or Terraform, which real projects do
+- A business team orders BTP, and the named administrator receives an empty global account; very few people get global-account access
+- "Create as New Subaccount" copies entitlements (not subscriptions), which suits dev, test and prod copies of one app
+- Entity Assignments shows one subaccount's or directory's licences; Service Assignments shows the whole contract; plans and quota units differ per service
+- A trial sets up the global account, the "trial" subaccount, a Cloud Foundry org, a dev space and Business Application Studio for you
 
 ## Practice
 
@@ -373,10 +492,19 @@ Then, as a stretch: write the btp CLI commands for steps 1, 3 and 4, and compare
   - that region and subdomain can't be changed after creation
   - the btp CLI and Terraform resource names
 - **Not run:** the btp CLI and Terraform snippets, which need a BTP login. Flags follow SAP samples and tutorials, not a live run.
+- **Enriched on 19 Nov 2026** (sections 4.2a, 4.3a, 4.4a, the trial part of 4.7, questions 9 and 10):
+  - Lecture 1 captions 2:29:33 to 3:49:04, read in full once they became available
+  - Lecture 2 captions 50:52 to 1:11:34 and 2:22:42 to 2:41:19, with their questions, read in full
+  - Day 2 Notes pages 9 and 13 to 16
+- **New screenshots:** Lecture 2 at 1:06:43, 1:22:45 and 2:30:12; Lecture 1 at 3:01:25 and 3:05:10. IDs, company names, org IDs and avatars are pixelated.
+- **Web-checked:** the Audit Log Management central and default plans. That the copy dialog exists was confirmed by an SAP KBA and by the recording's screen.
 
 ## Sources and further reading
 
 - BTPAI course, Lecture 1 recording, 27 Sep 2026 (BT001); *Day 1 BTP Fundamentals* slides (BT005); *Assignment 1* (BT003); *How to create a sub account and subscribe a service* (BT004); *1. BTP Basics* notes (BT002)
+- BTPAI course, Lecture 2 recording, *BTP capabilities and global account walkthrough* (BT006); *SAP BTP Fundamentals Day 2 Notes* (BT008)
+- SAP Knowledge Base, KBA 3720222 (central vs subaccount audit logs): https://userapps.support.sap.com/sap/support/knowledge/en/3720222
+- SAP Knowledge Base, KBA 3610974 (creating a subaccount from a source subaccount): https://userapps.support.sap.com/sap/support/knowledge/en/3610974
 - SAP, *SAP BTP trial*, FAQ: https://www.sap.com/products/technology-platform/trial.html (read 19 Nov 2026)
 - SAP Developers, *Get started with SAP Cloud Transport Management*: https://developers.sap.com/tutorials/btp-transport-management-getting-started.html
 - SAP Developers, *Manage entitlements on SAP BTP trial*: https://developers.sap.com/tutorials/cp-trial-entitlements.html
@@ -384,4 +512,4 @@ Then, as a stretch: write the btp CLI commands for steps 1, 3 and 4, and compare
 - Terraform Registry, *SAP/btp provider*: https://registry.terraform.io/providers/SAP/btp/latest/docs
 - SAP Learning, *Explaining SAP BTP account model*: https://learning.sap.com/courses/operating-sap-business-technology-platform/explaining-sap-btp-account-model
 
-Previous: [Inside BTP: Neo, hyperscalers and regions](btp-neo-hyperscalers-regions.md) · Next: [BTPAI book introduction](README.md)
+Previous: [Inside BTP: Neo, hyperscalers and regions](btp-neo-hyperscalers-regions.md) · Next: [Choosing BTP services for a requirement](btp-services-for-a-requirement.md)

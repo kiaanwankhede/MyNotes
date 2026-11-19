@@ -101,6 +101,15 @@ flowchart LR
   - **run DevOps** and **add AI**
 - An **extension** adds what a standard product lacks, for example a custom step in SuccessFactors or S/4HANA.
 - You can also build a **standalone app** on BTP, such as a customer portal or a leave-management app.
+- BTP offers two kinds of services:
+  - **technical** services you build on (runtimes, databases, IDEs)
+  - finished **functional** solutions you just use, the way you use SaaS
+- Functional solutions that run on BTP include:
+  - SAP Cloud Identity Access Governance (IAG) and SAP Digital Manufacturing
+  - PAPM Cloud and SAP Advanced Financial Closing
+  - SAP Sustainability Control Tower
+- Other SAP functional cloud products, such as SuccessFactors and Ariba, don't run on BTP. SAP built or acquired them, and runs them in its own or partner data centres.
+- They all connect through APIs. Integration Suite or a direct API connection links any of them to BTP apps.
 
 | Area | Services named in class | Use it when |
 |---|---|---|
@@ -166,6 +175,10 @@ flowchart TB
 **What they mean for S/4HANA**
 - **S/4HANA Cloud Public Edition** is SaaS. You order it, SAP sends a URL and users, and everything runs in the browser.
 - **S/4HANA Cloud Private Edition** is your own S/4HANA system on a hyperscaler, set up by SAP. It behaves much like on-premise, with newer features.
+- **What you can customise differs:**
+  - Private Edition keeps on-premise flexibility: GUI and Fiori access, and your own code in the system.
+  - Public Edition allows only what SAP opens up: key-user (in-app) extensibility and side-by-side extensions on BTP.
+  - In Public Edition only SAP upgrades the system or changes standard functionality.
 - Before 2021 a customer rented AWS or Azure servers, bought S/4HANA separately and installed it themselves, paying each vendor apart.
 
 **The programs that bundle all this**
@@ -319,6 +332,9 @@ flowchart TB
   - acquisition years; the BDC announcement and its provisioning through SAP for Me
   - BTPEA versus CPEA; RISE and GROW contents and dates; the IdM maintenance dates
 - **Not checked:** maintenance end dates for PI/PO, Solution Manager and BW, which is why none are given.
+- **Enriched on 19 Nov 2026:**
+  - Lecture 1 captions 2:39 to 2:47 (questions on public vs private, and functional solutions on BTP), read once they became available
+  - Lecture 2 captions 1:02 to 2:07 (what BTP is), read in full
 - Nothing in this chapter is code.
 
 ## Sources and further reading

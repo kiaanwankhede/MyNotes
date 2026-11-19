@@ -146,6 +146,8 @@ btp create accounts/subaccount --display-name "cTMS" --subdomain "ctms-demo-1234
 
 - Region IDs are worth memorising for the CLI and for reading URLs: `us10` is AWS US East (VA), `eu10` is AWS Europe (Frankfurt) and `ap21` is Azure Singapore. The BTP trial offers `us10` and `ap21`.
 - The region shows up in every endpoint. For example, the Cloud Foundry API for US East is `https://api.cf.us10.hana.ondemand.com`, and Cloud Foundry app URLs end in `cfapps.us10.hana.ondemand.com`.
+- A subaccount can land on an extension landscape of the region: the trial in the Lecture 1 recording shows `https://api.cf.us10-001.hana.ondemand.com`.
+- So copy the exact API endpoint from *Subaccount → Overview → Cloud Foundry Environment*.
 - Large customers often run the same app in two regions (for example US and EU) with separate subaccounts. That is part of the "account model" a later lecture covers.
 
 ## 3.7 Interview corner

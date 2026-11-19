@@ -106,7 +106,9 @@
     "Cloud computing and the service models",
     "SAP's cloud journey and the BTP landscape",
     "Inside BTP: Neo, hyperscalers and regions",
-    "Global account, subaccount and your first service subscription"
+    "Global account, subaccount and your first service subscription",
+    "Choosing BTP services for a requirement",
+    "Global account tools: Resource Providers, Boosters and System Landscape"
    ]
   }
  }
