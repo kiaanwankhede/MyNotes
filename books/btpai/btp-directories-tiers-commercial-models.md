@@ -179,12 +179,13 @@ resource "btp_subaccount" "app2_dev" {
 ## 9.4 Who creates gets access
 
 - The rule: whoever **creates** a directory, subaccount, Cloud Foundry org or space gets access to it. Nobody else does by default.
-- That includes other global account admins. Being admin one level up gives you nothing one level down.
+- Global account admins don't automatically get admin rights in subaccounts either (SAP docs, 20 Nov 2026).
+- But a global account admin can give themselves access: *Account Explorer → the subaccount's Actions (…) → Add Me as Admin*. A company can opt out of this shortcut through an SAP support request.
 
 **An example with two global account admins, A and B**
-- A creates subaccount S1. B creates directory D2. Neither can open the other's object until the creator adds them.
-- A third admin, C, joins later. C sees the tree but has access to nothing below the global account.
-- A makes C a Directory Administrator of D1. C can now hand out D1's quota, but still can't work inside the subaccounts A created there.
+- A creates subaccount S1 and becomes its administrator automatically. B has no access to S1 yet.
+- B gets in either by using **Add Me as Admin** on S1, or by A adding B under S1's *Security → Users*.
+- A makes a third person, C, Directory Administrator of D1. C can now hand out D1's quota, but has no access inside the subaccounts below until added.
 - A enables Cloud Foundry in S1, and creates a space. Other S1 admins must be added as org and space members to see them.
 
 **Skip the hierarchy**
@@ -196,17 +197,11 @@ resource "btp_subaccount" "app2_dev" {
 |---|---|---|
 | Global account | The admins SAP onboarded | *Global account → Security → Users* |
 | Directory (user management on) | The creator, as Directory Administrator | *Directory → Users* |
-| Subaccount | The creator, as administrator | *Subaccount → Security → Users* |
+| Subaccount | The creator, as administrator | *Subaccount → Security → Users*; global account admins can use Add Me as Admin |
 | Cloud Foundry org | The person who enabled Cloud Foundry | *Subaccount → Cloud Foundry → Org Members* |
 | Cloud Foundry space | The person who created the space | *Space → Members* |
 
 ![Directory App_Dev_Dir, Users: one user from the default identity provider (email pixelated) with the Directory Administrator role collection, and the Assign Role Collection action open](images/dir-users-directory-admin.png)
-
-> [!NOTE]
-> **What SAP's docs add (web-checked 20 Nov 2026)**
-> - The creator of a subaccount is assigned as its administrator automatically, which matches the rule above.
-> - A global account administrator can also choose **Add Me as Admin** in a subaccount's *Actions* menu in Account Explorer, and get in without the creator's help.
-> - A company can opt out of that shortcut through an SAP support request.
 
 ```mermaid
 flowchart TB
@@ -305,7 +300,7 @@ flowchart TB
 > **🔒 Unlimited entitlements need approvals**
 > - In consumption accounts every eligible service is available in unlimited quantity. Nothing stops an admin assigning, or a user subscribing, something nobody approved.
 > - Assign only approved entitlements, and keep the assignment rights to a few people.
-> - In a global account that moved from Pay-As-You-Go to an enterprise agreement, check which plan row you assign. The course warns that the wrong row skips your negotiated discount.
+> - A global account can't hold two consumption flavours. After a move from Pay-As-You-Go to an enterprise agreement, check *Service Assignments* with **Show commercial info** to confirm what each plan now bills under.
 
 ## 9.7 Watching spend: usage views and budgets
 
@@ -382,9 +377,9 @@ flowchart TB
 
 <details class="qa"><summary>5. A global account admin can't open a subaccount another admin created. Why, and what do you do?</summary>
 
-- Who creates gets access; global account admin rights don't flow down
-- The creator adds them under the subaccount's *Security → Users*
-- *Stronger answer:* a global account admin can also use **Add Me as Admin** in Account Explorer, unless the company opted out
+- Who creates gets access; global account admins don't get subaccount admin rights automatically
+- They can use **Add Me as Admin** in Account Explorer, or the creator adds them under *Security → Users*
+- *Stronger answer:* mention that a company can opt out of Add Me as Admin through SAP support, and that this shortcut is one more reason to keep the global account admin list short
 
 </details>
 
@@ -439,7 +434,7 @@ flowchart TB
 | Manage entitlements or users in a directory | Directory → Entitlements or Users → Enable (one directory per path) |
 | Give a directory quota | Global account → Entity Assignments → select the directory |
 | Move a subaccount | Account Explorer → Actions (…) → Move |
-| Get into a subaccount you didn't create | Ask its admin, or Account Explorer → Actions → Add Me as Admin |
+| Get into a subaccount you didn't create | Account Explorer → Actions → Add Me as Admin (global account admins), or ask its admin |
 | See the commercial model | Service Assignments → Show commercial info |
 | Set a budget | Costs and Usage → Budgets → Create |
 | Limits | 5 directory levels · 1 Cloud Foundry org per subaccount · 30 active budgets |

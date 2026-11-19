@@ -42,7 +42,7 @@ flowchart TB
 | Deploy apps in Cloud Foundry | Cloud Foundry org and space | Org or space roles |
 
 - Role collections in the global account don't exist in subaccounts, and the reverse is also true (SAP Learning, web-checked).
-- Whoever creates a directory, subaccount, org or space gets access to it automatically; everyone else must be added.
+- Whoever creates a directory, subaccount, org or space gets access to it automatically; everyone else must be added. Global account admins can add themselves to a subaccount with Add Me as Admin.
   - The rule, with an example: [Directories, landscape tiers and commercial models](btp-directories-tiers-commercial-models.md).
 
 ## 7.2 Adding a user, and who checks their login
@@ -254,7 +254,7 @@ resource "btp_globalaccount_role_collection_assignment" "ram" {
 <details class="qa"><summary>4. A user is Global Account Administrator but can't open anything in a subaccount. Why?</summary>
 
 - Global-account users and role collections don't carry into subaccounts
-- They must be added to the subaccount and given subaccount role collections
+- They must be added to the subaccount and given subaccount role collections, or use **Add Me as Admin** in Account Explorer
 - *Stronger answer:* the same goes again for Cloud Foundry org and space membership
 
 </details>
