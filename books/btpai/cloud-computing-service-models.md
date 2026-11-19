@@ -92,7 +92,7 @@ flowchart LR
 - Every upgrade, patch and broken disk is your job, even if a partner does the work.
 
 **IaaS: rent the hardware layer**
-- Around the mid-2000s, AWS and later Azure built huge data centres and rented the hardware out over the internet.
+- From 2006 AWS (S3 storage, then EC2 servers), and from 2010 Azure, rented out their data-centre hardware over the internet.
 - A web console replaces your server room: a virtual network (AWS VPC), storage (S3), servers (EC2).
 - You choose the OS when you launch a virtual machine, so the OS is still your decision.
 - You still install the runtime, the database, the IDE and the test tools on those machines.
@@ -137,11 +137,10 @@ cf push my-shop -m 512M
 - "You choose" marks a layer where the provider runs it but you pick the option, which is why class diagrams often draw it as yours.
 - In SaaS your data is still *your* data. You just don't manage where or how it is stored.
 
-> [!WARNING]
-> **⚠️ Two dates for the start of IaaS**
-> - **The lecture and the Day 1 slides:** AWS and Azure began renting infrastructure around 2002 to 2004.
-> - **Public records (web-checked 19 Nov 2026):** Amazon S3 launched in March 2006, EC2 in August 2006 (general availability October 2008), and Windows Azure became commercially available in February 2010.
-> - This chapter says "mid-2000s" until you choose which to keep.
+> [!NOTE]
+> **When IaaS started**
+> - Public records (web-checked 19 Nov 2026): Amazon S3 launched in March 2006 and EC2 in August 2006 (general availability October 2008). Windows Azure became commercially available in February 2010.
+> - The lecture and the Day 1 slides place the start around 2002 to 2004.
 
 ## 1.5 Virtualization: one big machine, many small ones
 
@@ -302,7 +301,7 @@ flowchart TB
 - **Day 1 slides** (slides 3 to 5) and the **BTP Basics notes** deck (pages 2 to 5: definition, benefits, types of cloud, shared responsibility): read in full and merged.
 - **Run on 19 Nov 2026:** `ping -n 2 google.com` (2 sent, 2 received, about 5 ms) and `curl -sI https://discovery-center.cloud.sap` (`HTTP/1.1 200 OK`).
 - **Not run:** the `aws` and `cf` commands, which need accounts. Their syntax follows each tool's public reference.
-- **Web-checked:** the IaaS launch dates, which disagree with the lecture (see the warning in section 1.4).
+- **Web-checked:** the IaaS launch dates. They differ from the lecture's, and the public dates are used, by your choice on 19 Nov 2026 (see the note in section 1.4).
 
 ## Sources and further reading
 

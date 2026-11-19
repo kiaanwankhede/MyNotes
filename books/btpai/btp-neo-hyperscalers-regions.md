@@ -99,12 +99,12 @@ sequenceDiagram
 - The free plan of the same service is offered in a few fewer regions. Always check the plan you will actually buy.
 - A service missing from a region cannot be subscribed there, whatever your licence says.
 
-> [!WARNING]
-> **⚠️ Sources disagree: does BTP still use SAP's own data centres?**
+> [!NOTE]
+> **Does BTP still use SAP's own data centres? Both views hold**
 > - **The lecture:** SAP is phasing out its own data centres for BTP. It keeps them for products such as S/4HANA Cloud Public Edition and IBP, but BTP services run on AWS, Azure and Google Cloud.
 > - **Discovery Center (19 Nov 2026):** "SAP" is still a provider for Cloud Transport Management in seven regions, several marked "EU Access" or "SAP Cloud Infrastructure".
 > - Neo also keeps running in SAP data centres until 2028.
-> - Both may be true for different services. This chapter shows both until you decide.
+> - Each holds for different services, so check the provider list for the service you need.
 
 ## 3.5 Choosing a region
 

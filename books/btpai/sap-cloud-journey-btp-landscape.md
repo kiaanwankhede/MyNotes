@@ -174,17 +174,17 @@ flowchart TB
 |---|---|---|
 | **RISE with SAP** (since Jan 2021) | Existing ECC or S/4HANA on-premise customers moving to the cloud | S/4HANA Cloud (usually Private Edition) set up on a hyperscaler by SAP, BTP credits, process tools such as SAP Signavio, higher tiers add SAP LeanIX |
 | **GROW with SAP** (since 2023) | Net-new, often mid-size, customers starting in the cloud | S/4HANA Cloud Public Edition, BTP, adoption services and best practices |
-| **BTP enterprise agreement or Pay-As-You-Go** | Customers who only need BTP (and maybe BDC), no ERP move | Prepaid credits with a yearly commitment, or monthly billing at list price |
+| **CPEA (now BTPEA) or Pay-As-You-Go** | Customers who only need BTP (and maybe BDC), no ERP move | Prepaid credits with a yearly commitment, or monthly billing at list price |
 
 - RISE is a **program**, not a technology. SAP builds the landscape, installs NetWeaver and S/4HANA, and handles the basic Basis work.
 - After go-live, SAP can also run the system for a fee, or the customer's IT team or a partner does it.
 - A training company that only needs BTP, for example, sits on an enterprise agreement without RISE or GROW.
 
-> [!WARNING]
-> **⚠️ Sources disagree: what is the BTP-only contract called?**
-> - **Day 1 slides:** "CEPEA / Pay-As-You-Go". **BTP Basics notes deck:** "CPEA" (Cloud Platform Enterprise Agreement).
-> - **SAP today (web-checked 19 Nov 2026):** SAP BTPEA (SAP BTP Enterprise Agreement) was introduced in April 2024 as the evolution of CPEA. Discovery Center lists both "CPEA" and "SAP BTPEA".
-> - "CEPEA" does not appear in SAP's material. It looks like a slip for CPEA. This chapter uses CPEA and BTPEA until you decide.
+> [!NOTE]
+> **CPEA, now BTPEA**
+> - CPEA is the Cloud Platform Enterprise Agreement: prepaid credits with a yearly commitment, spent on any BTP service.
+> - SAP introduced SAP BTPEA (SAP BTP Enterprise Agreement) in April 2024 as its successor. Discovery Center still lists both (web-checked 19 Nov 2026).
+> - The Day 1 slides write "CEPEA". That is a typo for CPEA.
 
 > [!WARNING]
 > **⚠️ A number to handle with care**
