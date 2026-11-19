@@ -222,7 +222,7 @@ flowchart LR
 > **Role collection names vary**
 > - The cockpit in the recording offered `TMS_LandscapeOperator_RC` and `TMS_Viewer_RC`. Use the collections your own cockpit lists.
 > - The Day 1 slides call it "TMS_Admin". SAP's developer tutorial instead creates a "TMS Admin" collection by hand and adds the app's *Administrator* role to it (web-checked).
-> - The users, roles and security chapter (after Lecture 2) goes deeper.
+> - [Users, role collections and access at every level](btp-users-role-collections.md) goes deeper.
 
 > [!CAUTION]
 > **🔒 Security**

@@ -175,7 +175,7 @@ flowchart TB
 
 > [!NOTE]
 > - Some single BTP services feel like SaaS: Cloud Transport Management gives you a finished app with a URL.
-> - The course treats BTP as a whole as PaaS, and promises a rule of thumb for single services in a later lecture.
+> - The course treats BTP as a whole as PaaS. For single services its rule of thumb is: a Deploy button means PaaS, with AI Launchpad as the exception. See [Inside a subaccount](btp-subaccount-walkthrough.md), section 8.5.
 
 > [!IMPORTANT]
 > **🏭 In production**

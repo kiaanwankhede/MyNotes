@@ -28,8 +28,8 @@
 | Disaster Recovery | New in late 2026 (see 6.6) | 6.6 |
 | System Landscape | Systems, Formations, Consent Requests | 6.4, 6.5 |
 | Entitlements | Service Assignments and Entity Assignments | [Account model](btp-account-model-first-subscription.md) |
-| Security | Users, role collections and trust at global-account level | A later chapter |
-| Usage / Costs and Usage | Consumption and cost per subaccount and service | A later chapter |
+| Security | Users, role collections and trust at global-account level | [Users and role collections](btp-users-role-collections.md) |
+| Usage / Costs and Usage | Consumption and cost per subaccount and service | 6.6a |
 
 ## 6.2 Resource Providers: a hyperscaler database for a BTP app
 
@@ -177,6 +177,22 @@ stateDiagram-v2
 - The lecturer's first reading: it is for high-availability database replicas. For example, HANA Cloud replicas in another region take over if the primary fails.
 - The course promised to cover it once there is a proper use case. Treat this as preliminary: it was not checked against SAP documentation here.
 
+## 6.6a Usage: what you consumed, where
+
+- Real UI path: *Global account → Usage* (called *Costs and Usage* in some paid accounts).
+- It shows each **service plan**, how many subaccounts use it, the **usage** and the **metric** it is measured in.
+- Filter by service, subaccount or directory, and month (current or previous). Open a row to see usage per subaccount.
+- Paid accounts add cost and billing views with charts.
+
+![Global account Usage for the previous month: service plans such as Destination - Lite (51 API calls in 2 subaccounts), Integration Suite - Trial (1 tenant) and SAP HANA Cloud - HANA Free (56,640 GB-hours, 46 capacity units), each with its metric](images/ga-usage.png)
+
+- Each service has its own **metric**, for example:
+  - GB-hours of storage or compute, and capacity units for HANA Cloud
+  - API calls or configuration records for Destination
+  - tenants for Integration Suite
+- Inside a subaccount, *Usage Analytics* shows the same for that subaccount only.
+- How each metric turns into a bill is the "commercial model" topic of a later lecture.
+
 ## 6.7 Customer ID, S-user ID and SAP Universal ID
 
 | ID | Belongs to | Used for |
@@ -305,6 +321,10 @@ stateDiagram-v2
 - **SAP Help, "Automating Integrations Using Formations":** read in full on 19 Nov 2026. It is the source of the statuses, the formation types and the prerequisites.
 - **Web-checked on 19 Nov 2026:** the PostgreSQL and Redis hyperscaler options, consent requests and auto-discovery, and the S-user vs Universal ID definitions.
 - **Not run:** the `cf` commands, which need a Cloud Foundry login. The Disaster Recovery reading in 6.6 is unverified.
+- **Enriched on 19 Nov 2026** (section 6.6a):
+  - Lecture 3 captions 24:58 to 29:02 read in full
+  - Day 3 Notes page 5
+  - screenshot at 26:25
 
 ## Sources and further reading
 
@@ -315,4 +335,4 @@ stateDiagram-v2
 - SAP Learning, *Integrating and maintaining UCL components*: https://learning.sap.com/courses/sap-btp-fundamentals-level-2-administration-security-extensibility-data-to-value/integrating-and-maintaining-ucl-components
 - SAP, *SAP Universal ID*: https://www.sap.com/sea/account/universal-id.html
 
-Previous: [Choosing BTP services for a requirement](btp-services-for-a-requirement.md) · Next: [BTPAI book introduction](README.md)
+Previous: [Choosing BTP services for a requirement](btp-services-for-a-requirement.md) · Next: [Users, role collections and access at every level](btp-users-role-collections.md)
