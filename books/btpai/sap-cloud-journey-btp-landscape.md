@@ -141,6 +141,29 @@ flowchart LR
 > [!NOTE]
 > The lecture dates the split to "about a year ago". SAP's announcement was February 2025, about 19 months before this course started.
 
+## 2.4a SAP Business AI Platform (2026)
+
+- At SAP Sapphire on **13 May 2026**, SAP announced the **SAP Business AI Platform (BAIP)**.
+- SAP's press release says it unifies **BTP, Business Data Cloud and SAP Business AI** in one governed environment.
+- It names two new building blocks: the **SAP Knowledge Graph** and **Joule Studio**, for building agents grounded in business context.
+- **BTP is a part of BAIP, not replaced by it.** Global accounts, subaccounts, entitlements and BTPEA all still apply, and SAP's docs still use those names.
+- Some SAP docs now say "SAP platform", for example "Cloud Foundry runtime on SAP platform". The ABAP environment appears as "SAP Business AI Platform ABAP environment".
+- In the lecture's words: BAIP = BTP + BDC + AI, where AI means both AI features inside SAP's business apps and the AI tools on BTP.
+
+```mermaid
+flowchart TB
+    BAIP["SAP Business AI Platform (2026)"] --> BTP["SAP BTP<br/>accounts, runtimes, integration, security"]
+    BAIP --> BDC["SAP Business Data Cloud<br/>Datasphere, SAC, SAP Databricks"]
+    BAIP --> AI["SAP Business AI<br/>Joule and AI services"]
+    BAIP --> NEW["New building blocks<br/>SAP Knowledge Graph, Joule Studio"]
+```
+
+> [!NOTE]
+> **What exactly does BAIP combine?**
+> - **The lecture and SAP's press release (13 May 2026):** BTP, Business Data Cloud and SAP Business AI.
+> - **An SAP Community post (July 2026):** BTP, Business Data Cloud and SAP Business Transformation Management.
+> - This book follows the press release. The SAP AI part of this book goes deeper.
+
 ## 2.5 What a customer landscape looks like today
 
 - Few customers are fully on one side. Most are **hybrid**:
@@ -192,6 +215,7 @@ flowchart TB
 - RISE is a **program**, not a technology. SAP builds the landscape, installs NetWeaver and S/4HANA, and handles the basic Basis work.
 - After go-live, SAP can also run the system for a fee, or the customer's IT team or a partner does it.
 - A training company that only needs BTP, for example, sits on an enterprise agreement without RISE or GROW.
+- How each BTP model bills, and where to see yours: [Directories, landscape tiers and commercial models](btp-directories-tiers-commercial-models.md).
 
 > [!NOTE]
 > **CPEA, now BTPEA**
@@ -335,6 +359,10 @@ flowchart TB
 - **Enriched on 19 Nov 2026:**
   - Lecture 1 captions 2:39 to 2:47 (questions on public vs private, and functional solutions on BTP), read once they became available
   - Lecture 2 captions 1:02 to 2:07 (what BTP is), read in full
+- **Enriched on 20 Nov 2026:**
+  - section 2.4a from Lecture 4 captions 3:12:03 to 3:15:09
+  - SAP's press release of 13 May 2026 and the SAP Community post on BAIP, both read in full
+  - SAP's docs checked for the "SAP platform" and "SAP Business AI Platform ABAP environment" names
 - Nothing in this chapter is code.
 
 ## Sources and further reading
@@ -343,6 +371,8 @@ flowchart TB
 - SAP Discovery Center, platform service catalogue: https://discovery-center.cloud.sap/servicecatalog (opened 19 Nov 2026)
 - SAP, company history 2011 to 2020 (acquisitions): https://www.sap.com/about/company/history/2011-2020.html
 - SAP News, *SAP and Databricks open a bold new era of data and AI* (Feb 2025): https://news.sap.com/2025/02/sap-databricks-open-bold-new-era-data-ai/
+- SAP News, *SAP unveils the Autonomous Enterprise* (13 May 2026): https://news.sap.com/hk/2026/05/sap-sapphire-sap-unveils-autonomous-enterprise/
+- SAP Community, *SAP Business AI Platform: what it means for SAP BTP & SAP BDC customers*: https://community.sap.com/t5/technology-blog-posts-by-sap/sap-business-ai-platform-what-it-means-for-sap-btp-amp-sap-bdc-customers/ba-p/14439249
 - SAP Learning, *Provisioning your SAP BDC cockpit and its components*: https://learning.sap.com/courses/cloud-onboarding-for-sap-business-data-cloud/provisioning-your-sap-bdc-cockpit-and-its-components
 - SAP Developers, *Get started with SAP BTP enterprise accounts* (BTPEA, April 2024): https://developers.sap.com/tutorials/btp-ea-onboard-01-intro.html
 - SAPinsider, *SAP announces GROW with SAP*: https://sapinsider.org/blogs/sap-announces-grow-with-sap/

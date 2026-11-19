@@ -48,11 +48,20 @@
 | Tenant ID and Subaccount ID | The **same** GUID, set by SAP and unique worldwide. Both names are used in support tickets and docs |
 | Provider and Region | Where it runs, for example AWS, US East (VA) |
 | Environment: Multi-Environment | Cloud Foundry, Kyma and ABAP can all be enabled here |
-| Used for Production | When Yes, the subaccount can't be deleted until you unmark it: a guard against accidents |
+| Used for Production | A label telling your team and SAP's operators the subaccount is productive. It blocks *force* deletion (see the note below) |
 | Beta Features | Enable in dev or test to see SAP's new features early; usually off in production |
 | Created On / Modified On | Modified changes when you edit name, description, beta flag and so on |
 
 - Edit these details from the global account's Account Explorer (the subaccount's "…" menu).
+
+> [!NOTE]
+> **What "Used for production" really protects**
+> - **The course:** a subaccount marked for production can't be deleted until you unmark it.
+> - **SAP's docs (read 20 Nov 2026):** the flag changes nothing in the subaccount's configuration. What it does block is **force deletion**.
+>   - An empty subaccount can be deleted normally, flag or not.
+>   - One with content must be emptied first (instances, subscriptions, spaces), or force-deleted, which wipes all its data.
+>   - Force delete is offered only if the global account allows it and the subaccount isn't marked as used for production.
+> - So set the flag on every Prod subaccount. It stops the one-click wipe, not a deliberate clean-up.
 
 ## 8.3 Environments: Cloud Foundry, Kyma, ABAP
 
@@ -61,6 +70,23 @@
 - Kyma and ABAP show an enable option only once their entitlement is assigned to the subaccount. Cloud Foundry is usually entitled already.
 - The ABAP environment uses Cloud Foundry underneath.
 - Best practice: enable **one environment per subaccount**. Mixing them is possible but makes the subaccount harder to manage.
+- A subaccount can have **only one** Cloud Foundry org, so only one Cloud Foundry environment.
+
+**The runtimes compared**
+
+| | Neo | Cloud Foundry | Kyma | ABAP environment |
+|---|---|---|---|---|
+| Built on | SAP's own platform, in SAP data centres | Open-source Cloud Foundry, deployed with **BOSH** | Open-source Kubernetes (project Kyma) | SAP's ABAP application server |
+| You run | Java, HTML5, SAP HANA XS apps | Apps in Java, Node.js, Python, Go, Ruby, PHP, .NET and more, through buildpacks | Anything that runs on Kubernetes: containers, microservices, even third-party databases | ABAP Cloud code only |
+| Billed by | (legacy) | Runtime memory actually used (GB) | Its own Kyma runtime plan (see Discovery Center) | ABAP and HANA compute units (16 GB blocks) |
+| Status | Ends 31 Dec 2028 | The common default for custom apps | For container and Kubernetes teams | For ABAP developers and extensions |
+
+- **BOSH, not Bosch.** BOSH is the open-source tool that deploys and runs Cloud Foundry on the hyperscaler's VMs. It has nothing to do with the company Bosch.
+- Cloud Foundry and Kyma can run the same languages. The real choice is the operating model: push code and let Cloud Foundry handle the rest, or manage containers on Kubernetes.
+- **The ABAP environment and Cloud Foundry:**
+  - The course explains that the ABAP system is a separate server, and Cloud Foundry only hosts the way in. You aren't charged Cloud Foundry memory for it.
+  - SAP's docs describe it like this: you create the ABAP system as a service instance in a Cloud Foundry space. It is billed in ABAP compute units and HANA compute units, not Cloud Foundry memory.
+- Creating an instance of a paid service, such as SAP AI Core, in a Cloud Foundry space adds no Cloud Foundry charge: you pay for the service. Cloud Foundry memory is charged for the apps you deploy yourself.
 
 ![LeaveApp-Dev, Cloud Foundry Environment tab after enabling: API endpoint api.cf.us10-001.hana.ondemand.com, org name and ID (pixelated), Org Memory Limit 0MB, Disable Cloud Foundry, Spaces (0) with a Create Space button](images/sa-cloud-foundry-enabled.png)
 
@@ -71,7 +97,9 @@
 > [!NOTE]
 > **How much Cloud Foundry memory comes by default?**
 > - **The lecture:** every new productive subaccount gets 200 GB automatically, and you pay only for what apps use. A trial has 4 GB in total, all in the "trial" subaccount.
-> - **Web check (19 Nov 2026):** no current official figure found. A 2020 SAP Community answer mentions 50 GB per subaccount for CPEA.
+> - **SAP's docs (read 20 Nov 2026):** in consumption-based global accounts (BTPEA, CPEA, Pay-As-You-Go), every subaccount gets a default runtime-memory quota of **200 GB** for the standard plan.
+>   - It is a ceiling on what apps may use at once, and you are billed for the memory actually consumed.
+>   - A global account admin can change the default. Subscription contracts get the GB they ordered.
 > - Check *Global account → Entity Assignments* for your contract before relying on any number.
 
 ## 8.4 Application, Service, Environment: the three marketplace types
@@ -214,6 +242,22 @@ flowchart LR
     CC --> S4["S/4HANA on-premise"]
 ```
 
+**Where your app's own data lives**
+- A custom app on BTP (a leave app, a supplier portal) creates data of its own. That data needs a database next to the app, in the cloud:
+  - SAP HANA Cloud on BTP, or
+  - a hyperscaler database such as PostgreSQL or Redis through Resource Providers ([global account tools](btp-global-account-tools.md)).
+- S/4HANA's own database is not the app's database. The app reads and writes S/4HANA data **through APIs** (OData, via destinations and Cloud Connector).
+- That is the clean-core idea: no custom tables inside S/4HANA, so its upgrades stay simple. The extension and its data live on BTP.
+
+> [!NOTE]
+> **Can a BTP app use an on-premise database at all?**
+> - **The lecture:** no. An app running in a US East data centre can't use an on-premise database as its back end.
+> - **SAP's Connectivity docs (read 20 Nov 2026):** the Connectivity service offers a SOCKS5 proxy, so apps can reach on-premise systems over TCP-based protocols through Cloud Connector.
+> - So it is technically possible, but the wrong design for the app's own data:
+>   - every query crosses the tunnel, so latency and on-premise outages hit the app
+>   - it works against clean core
+> - Keep the app's data in a cloud database; reach on-premise data through APIs.
+
 ## 8.11 What multitenancy means on BTP
 
 - **SAP's definition (web-checked):**
@@ -229,7 +273,7 @@ flowchart LR
 
 - Cloud Foundry injects bound credentials into the `VCAP_SERVICES` environment variable. Libraries such as `@sap/xsenv` (Node.js) read it, so code never contains secrets.
 - Service keys are long-lived credentials. Treat them like passwords: create one per consumer, rotate them, and delete unused keys.
-- "Used for production" protects against deleting the subaccount, not against deleting what is inside it. Instances and spaces still need their own care and backups.
+- "Used for production" only blocks force deletion. Anyone with the rights can still delete instances, spaces and subscriptions one by one, so they need their own care and backups.
 
 ## 8.13 Interview corner
 
@@ -255,7 +299,8 @@ flowchart LR
 
 <details class="qa"><summary>3. What does "Used for production" do?</summary>
 
-- It marks the subaccount as productive and blocks deleting it until you unmark it
+- It marks the subaccount as productive for your team and SAP's operators; it changes no configuration
+- It blocks force deletion, the option that wipes a subaccount with all its data
 - *Stronger answer:* pair it with beta features off in production and on in dev or test
 
 </details>
@@ -325,6 +370,9 @@ flowchart LR
 | Destination | Where and how to call another system |
 | Cloud Connector | On-premise tunnel; listed, not run, in BTP |
 | Tenant ID | Same as subaccount ID |
+| Used for production | Blocks force deletion only |
+| Cloud Foundry per subaccount | One org at most; 200 GB default memory quota in consumption accounts |
+| App's own data | A cloud database (HANA Cloud or a hyperscaler database), not the S/4HANA database |
 
 ## Recap
 
@@ -354,8 +402,14 @@ Stretch: deploy any small static app to the space, create an XSUAA instance ther
 - **Web-checked on 19 Nov 2026:**
   - the "Other" environment (subaccount-level instances, Service Manager)
   - multitenancy (provider and consumer subaccounts, SaaS Registry)
-  - the default Cloud Foundry quota: no current official figure found
+  - the default Cloud Foundry quota: no current official figure found (superseded on 20 Nov 2026, below)
 - **Not run:** the `cf` commands, which need a Cloud Foundry login.
+- **Enriched on 20 Nov 2026** (the production-flag note, the runtimes table, the 200 GB note, where an app's data lives):
+  - Lecture 4 captions 1:56:37 to 2:00:47 (what Cloud Foundry costs), 2:43:22 to 2:56:51 (runtimes) and 3:01:44 to 3:21:23 (databases) read in full
+  - SAP Fundamentals Notes pages 5, 15 and 19 to 20 read in full
+  - checked against SAP's docs: deleting and force-deleting subaccounts, the 200 GB default, Cloud Foundry and Kyma environments
+  - also against SAP's docs: ABAP environment plans and metering, and TCP access to on-premise systems through the Connectivity service
+  - checked against bosh.io: what BOSH is
 
 ## Sources and further reading
 
@@ -363,5 +417,12 @@ Stretch: deploy any small static app to the space, create an XSUAA instance ther
 - SAP Developers, *Create service instances in the SAP BTP cockpit*: https://developers.sap.com/tutorials/btp-cockpit-instances.html
 - SAP Community, *Fundamentals of multitenancy in SAP BTP*: https://community.sap.com/t5/technology-blog-posts-by-sap/fundamentals-of-multitenancy-in-sap-btp/ba-p/13527283
 - SAP Learning, *Setting up SAP BTP, Cloud Foundry runtime*: https://learning.sap.com/courses/developing-applications-for-sap-btp-cloud-foundry-runtime/setting-up-sap-btp-cloud-foundry-runtime
+- BTPAI course, Lecture 4 recording (BT011); *SAP BTP Fundamentals Notes* (BT014)
+- SAP Help, *Delete a subaccount*: https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/50-administration-and-ops/delete-a-subaccount-419dc3d.md
+- SAP Help, *Change subaccount details* (Used for production): https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/50-administration-and-ops/change-subaccount-details-567d4a8.md
+- SAP Help, *What is the consumption-based commercial model?* (200 GB default): https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/10-concepts/what-is-the-consumption-based-commercial-model-7047eb4.md
+- SAP Help, *Creating an ABAP system*: https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/20-getting-started/creating-an-abap-system-50b32f1.md
+- SAP Help, *Using the TCP protocol for cloud applications*: https://github.com/SAP-docs/btp-connectivity/blob/main/docs/1-connectivity-documentation/using-the-tcp-protocol-for-cloud-applications-cd15837.md
+- Cloud Foundry BOSH documentation: https://bosh.io/docs/
 
-Previous: [Users, role collections and access at every level](btp-users-role-collections.md) · Next: [BTPAI book introduction](README.md)
+Previous: [Users, role collections and access at every level](btp-users-role-collections.md) · Next: [Directories, landscape tiers and commercial models](btp-directories-tiers-commercial-models.md)

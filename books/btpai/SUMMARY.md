@@ -11,5 +11,6 @@
 * [Global account tools: Resource Providers, Boosters and System Landscape](btp-global-account-tools.md)
 * [Users, role collections and access at every level](btp-users-role-collections.md)
 * [Inside a subaccount: service types, environments and connectivity](btp-subaccount-walkthrough.md)
+* [Directories, landscape tiers and commercial models](btp-directories-tiers-commercial-models.md)
 
 ## SAP AI

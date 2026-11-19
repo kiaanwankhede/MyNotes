@@ -163,6 +163,18 @@ flowchart LR
 - **Cloud Transport Management:** the application plan gives people the UI. The `standard` plan gives another system, such as Cloud ALM, API access to monitor transports.
 - Because plans are counted separately, a subaccount can show more entitlements than the global account has services. One service with four plans counts four times.
 
+**Shared units, and who may change a subaccount's entitlements**
+- Some plans count in **shared units**. One unit is a bundle, for example a block of API calls or users, that several subaccounts draw on.
+- The quota isn't split up front. Whichever subaccounts use the service consume the bundle between them, month by month.
+- Trial accounts make most free plans shared, so "1 shared unit" appears everywhere. In a paid account the quantities are usually clearer.
+- Cloud Foundry Runtime memory is the exception in a trial: all 4 GB sit in the "trial" subaccount and can't be moved elsewhere.
+
+![Subaccount trial, Entitlements: Authorization and Trust Management plans and others at 1 shared unit assigned and 1 remaining, Cloud Management Service local and central at 5 shared units, and Cloud Foundry Runtime MEMORY at 4 units](images/sa-entitlements-shared-units.png)
+
+- A subaccount's own *Entitlements* page is the same list as *Entity Assignments* with only that subaccount selected.
+- Its **Edit** button works only if you are also a global account admin. A subaccount admin alone sees it greyed out.
+- In a managed directory, the directory admin assigns the plans instead ([directories](btp-directories-tiers-commercial-models.md)).
+
 **Always-free services**
 - Some services are always free. Every new subaccount gets them automatically, if they are offered in its region.
 - Discovery Center marks them **Always Free**. Paid services you still assign by hand in Entity Assignments.
@@ -498,11 +510,13 @@ Then, as a stretch: write the btp CLI commands for steps 1, 3 and 4, and compare
   - Day 2 Notes pages 9 and 13 to 16
 - **New screenshots:** Lecture 2 at 1:06:43, 1:22:45 and 2:30:12; Lecture 1 at 3:01:25 and 3:05:10. IDs, company names, org IDs and avatars are pixelated.
 - **Web-checked:** the Audit Log Management central and default plans. That the copy dialog exists was confirmed by an SAP KBA and by the recording's screen.
+- **Enriched on 20 Nov 2026** (shared units and subaccount entitlement rights in 4.4a): Lecture 4 captions 16:07 to 22:18 read in full; screenshot at 19:55, account name and avatar pixelated.
 
 ## Sources and further reading
 
 - BTPAI course, Lecture 1 recording, 27 Sep 2026 (BT001); *Day 1 BTP Fundamentals* slides (BT005); *Assignment 1* (BT003); *How to create a sub account and subscribe a service* (BT004); *1. BTP Basics* notes (BT002)
 - BTPAI course, Lecture 2 recording, *BTP capabilities and global account walkthrough* (BT006); *SAP BTP Fundamentals Day 2 Notes* (BT008)
+- BTPAI course, Lecture 4 recording, *Sub Account Walkthrough, Directory Concept, Commercial Model* (BT011)
 - SAP Knowledge Base, KBA 3720222 (central vs subaccount audit logs): https://userapps.support.sap.com/sap/support/knowledge/en/3720222
 - SAP Knowledge Base, KBA 3610974 (creating a subaccount from a source subaccount): https://userapps.support.sap.com/sap/support/knowledge/en/3610974
 - SAP, *SAP BTP trial*, FAQ: https://www.sap.com/products/technology-platform/trial.html (read 19 Nov 2026)

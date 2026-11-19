@@ -26,6 +26,8 @@
 ```mermaid
 flowchart TB
     GA["Global account<br/>Security → Users, Role Collections"] --> SA["Subaccount<br/>Security → Users, Role Collections"]
+    GA --> DIR["Directory (optional, with user management)<br/>Users"]
+    DIR --> SA
     SA --> APP["Apps subscribed in the subaccount<br/>(app role collections appear here)"]
     SA --> ORG["Cloud Foundry org<br/>Org Members"]
     ORG --> SPACE["Cloud Foundry space<br/>Space Members"]
@@ -34,11 +36,14 @@ flowchart TB
 | Person needs to… | Add them at | Give them |
 |---|---|---|
 | Manage entitlements, formations, global users | Global account | A global-account role collection |
+| Hand out a directory's licences to its subaccounts | A directory with user management | Directory Administrator (Directory Viewer to only look) |
 | Work in a subaccount (destinations, subscriptions, users) | Subaccount | Subaccount role collections |
 | Use an app such as Cloud Transport Management | The subaccount where the app runs | That app's role collections |
 | Deploy apps in Cloud Foundry | Cloud Foundry org and space | Org or space roles |
 
 - Role collections in the global account don't exist in subaccounts, and the reverse is also true (SAP Learning, web-checked).
+- Whoever creates a directory, subaccount, org or space gets access to it automatically; everyone else must be added.
+  - The rule, with an example: [Directories, landscape tiers and commercial models](btp-directories-tiers-commercial-models.md).
 
 ## 7.2 Adding a user, and who checks their login
 
@@ -134,6 +139,62 @@ resource "btp_globalaccount_role_collection_assignment" "ram" {
 
 - A custom app collection works the same way, for example `TMSViewer` holding only the TMS viewer role. The person can then look but not change anything.
 - Real UI path: *Subaccount → Security → Role Collections → Create*, then **Edit → Add Role**. Filter by the app's identifier (`alm-ts` for Cloud Transport Management).
+
+## 7.5a The rest of the subaccount Security menu
+
+- *Subaccount → Security* has six entries: Users, Role Collections, **Roles**, **Trust Configuration**, **Encryption** and **Settings**.
+
+**Roles**
+- One list of every role in the subaccount: from platform services and from every subscribed app.
+- Columns: application name, role template, role name and description.
+- The global account has no Roles page. There you only see roles while editing a role collection (*Edit → Add Role*).
+
+![Subaccount trial, Security → Roles: roles listed by application, such as RegistryAdmin and RegistryDeveloper for applicationdevelopment, Auditlog_Auditor, Central Disaster Recovery Administrator, and Subaccount Admin and Subaccount Viewer for cis-local, each with its role template and description](images/sa-security-roles.png)
+
+**Trust Configuration**
+- Lists the identity providers this subaccount trusts. Out of the box, that is only the default identity provider (sap.com accounts).
+- Companies add their own SAP Cloud Identity Services tenant here, and the global account gets its own trust as well.
+
+**Encryption**
+- A newer page, about key management. In the recording it is still disabled.
+- SAP's docs describe customer-managed keys with SAP Data Custodian for some services, for example encrypting content in the HTML5 Application Repository.
+
+**Settings**
+- Three tabs: **Trusted Domains**, **Token Validity** and **Signing Keys**.
+- *Token Validity* sets how long the tokens of SAP Authorization and Trust Management service (XSUAA) last, for every app in the subaccount.
+
+| Token | What it does | Default | Allowed range |
+|---|---|---|---|
+| Access token | Proves who you are on each call to an app or API | 43,200 s (12 hours) | 60 s to 24 hours |
+| Refresh token | Gets new access tokens without a new login; when it expires, you log in again | 604,800 s (7 days) | 60 s to 1 year |
+
+![Subaccount trial, Security → Settings: tabs Trusted Domains, Token Validity and Signing Keys; Token Validity sliders show the current access token validity of 43200 seconds and refresh token validity of 604800 seconds, with a Set Token Validity button](images/sa-settings-token-validity.png)
+
+- One app can override the subaccount values in its `xs-security.json`:
+
+```json
+{
+  "xsappname": "leave-app",
+  "tenant-mode": "dedicated",
+  "oauth2-configuration": {
+    "token-validity": 1800,
+    "refresh-token-validity": 43200
+  }
+}
+```
+
+✅ *Verified: the JSON parses (details at the end).*
+
+> [!NOTE]
+> **Why you get logged out**
+> - **The course:** you have to log in again after 15 to 30 minutes of doing nothing, because of the token validity set here.
+> - **SAP's docs:** this page sets access-token and refresh-token lifetimes. SAP advises keeping them as short as possible, but **not below 30 minutes**.
+> - So there is no single idle timeout to quote. How soon you must log in again depends on these values and on the app.
+
+> [!CAUTION]
+> **🔒 Security**
+> - Longer tokens mean fewer logins, but a stolen token also works for longer. Shorten them for admin-heavy subaccounts.
+> - Change these values in Dev first: very short refresh tokens break long-running browser sessions and background jobs.
 
 ## 7.6 Platform users and application users
 
@@ -272,10 +333,20 @@ Assignment 2, Part 1, in your trial:
   - the default global-account collections can't be changed or deleted
   - global-account role collections don't exist in subaccounts
 - **Not run:** the Terraform snippet. Its resource and attribute names follow the SAP/btp provider; copy the role template and app ID from your own cockpit.
+- **Enriched on 20 Nov 2026** (the directory level in 7.1, section 7.5a):
+  - Lecture 4 captions 10:00 to 16:07 (Roles, Trust Configuration, Encryption, Settings) and 1:23:38 to 1:45:16 (access by level) read in full
+  - screenshots at 12:52 and 15:20; account name and avatar pixelated
+  - SAP Fundamentals Notes page 5 (security controls and settings) read in full
+  - web-checked against SAP's docs: token validity defaults, ranges and the 30-minute advice; the `oauth2-configuration` keys; customer-managed keys
+  - **Run:** the `xs-security.json` snippet was parsed with Python's `json` module. It was not deployed.
 
 ## Sources and further reading
 
 - BTPAI course, Lecture 3 recording, *Sub account walkthrough* (BT009); *SAP BTP Fundamentals Day 3 Notes* (BT010); *Assignment 2* (BT007); *1. BTP Basics* notes (BT002)
+- BTPAI course, Lecture 4 recording (BT011); *SAP BTP Fundamentals Notes* (BT014)
+- SAP Help, *Configure token policy for SAP Authorization and Trust Management service*: https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/50-administration-and-ops/configure-token-policy-for-sap-authorization-and-trust-management-service-40290a9.md
+- SAP Help, *Application security descriptor configuration syntax* (`oauth2-configuration`): https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/30-development/application-security-descriptor-configuration-syntax-517895a.md
+- SAP Help, *Encryption using customer-managed keys*: https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/30-development/encryption-using-customer-managed-keys-3b9934d.md
 - SAP Learning, *Assigning roles and managing authorizations*: https://learning.sap.com/courses/sap-btp-fundamentals-level-2-administration-security-extensibility-data-to-value/assigning-roles-and-managing-authorizations
 - SAP Learning, *Managing users and authorizations on SAP BTP*: https://learning.sap.com/courses/operating-sap-business-technology-platform/managing-users-and-authorizations-on-sap-btp
 - Terraform Registry, *SAP/btp provider*: https://registry.terraform.io/providers/SAP/btp/latest/docs
