@@ -59,6 +59,12 @@
       "title": "SAP AI",
       "shelf": "SAP",
       "blurb": "AI Core, Launchpad, Generative AI hub, orchestration, RAG, agents."
+    },
+    {
+      "slug": "btpai",
+      "title": "BTPAI",
+      "shelf": "SAP",
+      "blurb": "BTP foundations to SAP Business AI: accounts, entitlements, identity, Joule and agents."
     }
   ]
 }

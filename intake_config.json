@@ -98,6 +98,16 @@
   "SAP AI": {
    "folder": "books/sap-ai",
    "chapters": []
+  },
+  "BTPAI": {
+   "folder": "books/btpai",
+   "sections": ["BTP Foundations", "SAP AI"],
+   "chapters": [
+    "Cloud computing and the service models",
+    "SAP's cloud journey and the BTP landscape",
+    "Inside BTP: Neo, hyperscalers and regions",
+    "Global account, subaccount and your first service subscription"
+   ]
   }
  }
 }
