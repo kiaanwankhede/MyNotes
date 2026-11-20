@@ -406,8 +406,10 @@ print(prompt.splitlines()[1])
 
 | Target | Who can use it |
 |---|---|
-| **Sandbox** | A few testers, while you develop |
-| **Joule base** | Everyone in the company, wherever Joule appears: BTP cockpit, S/4HANA, SAP Build Work Zone, SAP Analytics Cloud |
+| **Private environment** (sandbox) | You, and anyone you add, while you develop and test |
+| **Shared environment** | The users given access to it, wherever Joule appears: BTP cockpit, S/4HANA, SAP Build Work Zone, SAP Analytics Cloud |
+
+- Environments, and the older public environment, are explained in chapter 19 (19.3 and 19.8).
 
 - **An agent is your proxy.** It can do what the signed-in user is allowed to do, and nothing more. The backend roles still decide, for example S/4HANA authorizations for posting a GL account.
 - Access to the agent itself is managed in SAP Build (Joule Studio's lobby); access to the data is managed in the backend.

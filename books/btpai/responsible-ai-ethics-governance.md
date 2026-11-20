@@ -237,6 +237,19 @@ print(unmask(answer, mapping))
 | **Input and output filtering** | Blocks harmful content going in or coming out |
 | **Translation** | Translates input and output |
 
+**Data masking in detail (SAP Help)**
+- **Anonymisation** replaces personal data with a `MASKED_ENTITY` placeholder. The original is not kept, so it cannot be restored.
+- **Pseudonymisation** uses `MASKED_ENTITY_ID` placeholders, which are restored in the response, like the snippet in 17.6.
+- The service is **SAP Data Privacy Integration, Anonymization**. It detects categories such as:
+  - person names (English), organisations, locations and US addresses, phone numbers, email addresses and URLs
+  - user names and passwords, national IDs, IBANs, credit card numbers, passports and driver's licences
+  - sensitive data: nationality, religion, political group, gender and pronouns, sexual orientation, trade union, ethnicity
+- For anything else, define **custom entities** with regular expressions.
+- SAP's two cautions:
+  - detection is automatic, so it cannot guarantee that every item is found
+  - anonymisation can remove meaning: two different people both become the same placeholder, and the model can no longer tell them apart
+- Joule Studio agents can use the same orchestration modules (chapter 19).
+
 **Content filtering options**
 - **Azure Content Safety:** four categories (hate, violence, sexual, self-harm), each with a severity of 0, 2, 4 or 6.
   - It also offers **prompt attack detection** (Prompt Shields), which flags inputs trying to override instructions. It runs first and is billed separately.
@@ -434,4 +447,4 @@ flowchart LR
 - SAP Architecture Center, *Integration, Security, Ethics & Governance* (North Star): https://architecture.learning.sap.com/docs/ai-native-north-star-architecture/integration-security-ethics-governance
 - GitHub, *SAP Datasphere MCP server* (community, rahulsethi): https://github.com/rahulsethi/SAPDatasphereMCP
 
-Previous: [Joule for Consultants: grounded answers, provisioning and AI units](joule-for-consultants.md) · Next: [BTPAI book introduction](README.md)
+Previous: [Joule Studio Classic: setup, skills, agents, testing and deployment](joule-studio-classic.md) · Next: [BTPAI book introduction](README.md)

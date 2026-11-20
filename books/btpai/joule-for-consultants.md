@@ -258,8 +258,8 @@ print(f"busy month: {busy:,.0f} AI units = EUR {busy * EUR_PER_UNIT:,.0f}")
 | Tool | What it does | Cost |
 |---|---|---|
 | **Joule for Consultants** | Answers SAP project questions from curated SAP knowledge; standalone web app | 35 AI units per user per month |
-| **Joule for Developers, ABAP AI capabilities** | Works inside ABAP development tools: generates, tests and remediates code, and adapts custom code for SAP S/4HANA | Licensed separately; see SAP's AI pricing page |
-| **Joule Studio** | Builds custom agents and skills on top of SAP's standard Joule; lets you pick the model | Design time free to end-2026 (chapter 11); running agents is not covered by that offer |
+| **Joule for Developers, ABAP AI capabilities** | Works inside ABAP development tools: generates, tests and remediates code, and adapts custom code for SAP S/4HANA | A free offer at the time of writing; AI units after it ends (chapter 18) |
+| **Joule Studio** | Builds custom agents and skills on top of SAP's standard Joule; lets you pick the model | Authoring free; production runtime billed on consumption (chapter 18, 18.8) |
 | **Joule in SAP Business Accelerator Hub** (api.sap.com) | Answers questions about SAP's published APIs, with links; SAP labels it beta | Free with a sign-in |
 | **Joule embedded in SAP applications** | Assistants and agents inside S/4HANA, SuccessFactors and other products | Base AI is included; premium features cost AI units |
 
@@ -416,4 +416,4 @@ print(f"busy month: {busy:,.0f} AI units = EUR {busy * EUR_PER_UNIT:,.0f}")
 - SAP Discovery Center, *Enable SAP Joule for Consultants* (mission 4633): https://discovery-center.cloud.sap/missiondetail/4633/
 - SAP Business Accelerator Hub (Joule integration, beta): https://api.sap.com
 
-Previous: [Prompt engineering: from zero-shot to grounded prompts](prompt-engineering.md) · Next: [Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms](responsible-ai-ethics-governance.md)
+Previous: [Prompt engineering: from zero-shot to grounded prompts](prompt-engineering.md) · Next: [The Joule family: Joule Work, embedded Joule, assistants, agents and skills](joule-family.md)

@@ -25,6 +25,8 @@
 
 ## Joule
 * [Joule for Consultants: grounded answers, provisioning and AI units](joule-for-consultants.md)
+* [The Joule family: Joule Work, embedded Joule, assistants, agents and skills](joule-family.md)
+* [Joule Studio Classic: setup, skills, agents, testing and deployment](joule-studio-classic.md)
 
 ## Responsible AI
 * [Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms](responsible-ai-ethics-governance.md)

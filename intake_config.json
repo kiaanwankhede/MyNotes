@@ -119,7 +119,9 @@
     "Inside a large language model: from prompt to answer",
     "Prompt engineering: from zero-shot to grounded prompts",
     "Joule for Consultants: grounded answers, provisioning and AI units",
-    "Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms"
+    "Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms",
+   "The Joule family: Joule Work, embedded Joule, assistants, agents and skills",
+   "Joule Studio Classic: setup, skills, agents, testing and deployment"
    ]
   }
  }
