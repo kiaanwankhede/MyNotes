@@ -101,7 +101,7 @@
   },
   "BTPAI": {
    "folder": "books/btpai",
-   "sections": ["BTP Foundations", "SAP AI", "AI Fundamentals", "Joule"],
+   "sections": ["BTP Foundations", "SAP AI", "AI Fundamentals", "Joule", "Responsible AI"],
    "chapters": [
     "Cloud computing and the service models",
     "SAP's cloud journey and the BTP landscape",
@@ -118,7 +118,8 @@
     "AI, machine learning, deep learning and generative AI",
     "Inside a large language model: from prompt to answer",
     "Prompt engineering: from zero-shot to grounded prompts",
-    "Joule for Consultants: grounded answers, provisioning and AI units"
+    "Joule for Consultants: grounded answers, provisioning and AI units",
+    "Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms"
    ]
   }
  }

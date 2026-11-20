@@ -384,5 +384,7 @@ print("new student (4 h study, 7 h sleep):", round(predict((4, 7)), 2))
 - Hugging Face, *Models*: https://huggingface.co/models
 - fast.ai, the *Practical Deep Learning for Coders* course and book (recommended in the lecture for AI fundamentals): https://www.fast.ai
 - Michael Nielsen, *Neural Networks and Deep Learning* (recommended on the Playground page): http://neuralnetworksanddeeplearning.com
+- MIT, *6.S087: Foundation Models & Generative AI* (non-technical lecture series, recommended in Lecture 8): https://futureofai.mit.edu
+- MIT, *AI 101* video (recommended in Lecture 8 as a 40-minute introduction; not reviewed for this book): https://www.youtube.com/watch?v=KsHOdrSUYZ0
 
 Previous: [SAP AI certifications, roles and staying current](sap-ai-careers-certifications.md) · Next: [Inside a large language model: from prompt to answer](llm-prompt-to-answer.md)

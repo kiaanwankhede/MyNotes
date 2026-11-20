@@ -49,6 +49,87 @@ flowchart TB
 - Most AI projects stay stuck in pilots. SAP names three gaps: business and process context, connection to live data, and governance.
 - Its argument: an ERP vendor already holds the process knowledge and the business data, so its AI can reason over how the business really runs.
 
+**Five core elements** (SAP's executive summary of the North Star architecture, and its Sapphire release)
+
+| Element | What it is |
+|---|---|
+| **Joule** | The new engagement layer. **Joule Work** is where people state their intent and act |
+| **SAP Autonomous Suite** | The five autonomous domains, each with assistants that coordinate agents |
+| **Industry AI** | Sector-specific solutions with industry processes, data models and regulatory rules built in |
+| **SAP Business AI Platform** | SAP BTP, SAP Business Data Cloud, the business transformation management solutions and the AI foundation |
+| **Accelerated adoption** | RISE with SAP and SAP GROW, with an agent-led migration toolchain (11.1b) |
+
+**Why domains instead of products**
+- One area like HR spans several SAP products: the HCM module in S/4HANA, SuccessFactors, and Fieldglass for contract workers.
+- People who know all three are rare, and once trained they are hard to keep.
+- A domain assistant hides which product does the work. An HR person states the goal, say "hire 30 contract staff for the peak season". Joule finds the right agents in whatever products the company runs.
+- Grouping by domain also gives SAP a unit to package, price and track.
+
+**Why accuracy decides adoption**
+- At Sapphire 2026, SAP's CEO Christian Klein said 80% accuracy may do for consumer AI but "is just not good enough" for business-critical work.
+- A slide in the course deck, credited to BCG:
+  - generic LLM accuracy is about 80%
+  - 42% of organisations name data access and quality as the leading barrier
+  - 74% are stuck in pilot mode with no path to scale
+
+> [!NOTE]
+> **Whose survey?** The course attributed the pilot figures to Gartner; the slide itself credits BCG. This book quotes the slide. Treat the numbers as the vendor's framing, not as figures checked here.
+
+## 11.1a What is available today, and what is coming
+
+- **Keynotes announce visions.** In May 2026 SAP spoke of more than 50 Joule Assistants orchestrating over 200 agents, "available in the coming months".
+- **Three places, in order of trust:**
+
+| Source | Tells you | Note |
+|---|---|---|
+| **SAP Discovery Center**, *Business AI → Joule Assistants / Joule Agents* | What is released, per autonomous domain, with the agents inside each assistant and the products it needs | On 20 Nov 2026 it listed **44 Joule Assistants and 327 Joule Agents** |
+| **SAP Road Map Explorer** | What is planned, by product and quarter | Needs an SAP sign-in |
+| Social media, keynotes and demos | Direction and ideas | Often early, sometimes dropped; never a commitment |
+
+- Each catalogue card shows the assistant's purpose and its agents. For example, the Accounts Payable Assistant "resolves payment exceptions and reconciles vendors".
+- Cards also show **which product a feature needs**. Many work only with SAP Cloud ERP, some only with the Private edition. Check this before promising a feature.
+- The Discovery Center also hosts the **Business AI Estimator**, to size the AI units a set of assistants needs.
+
+## 11.1b Industry AI and accelerated adoption
+
+**Industry AI**
+- SAP builds **autonomous industry solutions** on top of the five domains. Its May 2026 release names seven. A course slide shows them with lighthouse customers:
+
+| Industry solution | Industry | Example customer on the slide |
+|---|---|---|
+| Autonomous Asset Management | Oil, gas and energy | RWE |
+| Autonomous Commodity Management | Agribusiness | CHS |
+| Autonomous Adaptive Production | Industrial manufacturing | Kaeser |
+| Autonomous Regulated Manufacturing | Life sciences | Takeda |
+| Autonomous Revenue Growth Management | Consumer products | Coca-Cola HBC, CONA |
+| Autonomous Unified Commerce | Retail | Salling Group |
+| Autonomous Project Delivery | Professional services | Deloitte |
+
+- One industry domain holds several assistants, one per persona.
+  - For asset management in oil and gas, there are separate assistants for the executive, the asset master data team, reliability engineers, maintenance planners, logistics and technicians.
+  - Each works across SAP products (asset management, master data governance, Cloud ERP, field logistics) and outside data such as weather.
+- **How SAP builds it (the course):** co-innovation with a few customers per industry, often through **forward-deployed teams** that sit with the customer ([chapter 12](sap-ai-careers-certifications.md)).
+  - Proven solutions later become standard.
+
+**Accelerated adoption**
+- **RISE with SAP** moves existing customers from ECC or on-premise S/4HANA to SAP Cloud ERP, Private edition by default. SAP commits to activating **three Joule Assistants in the first year**.
+- **SAP GROW** is for net-new customers: start lean in one domain, then grow. GROW customers get the **full Joule Assistants portfolio** at onboarding.
+- Both run on SAP's **agent-led toolchain**:
+
+| Tool | Role in the move |
+|---|---|
+| SAP LeanIX | Maps the enterprise architecture and its dependencies |
+| SAP Signavio | Analyses and redesigns the business processes |
+| SAP Cloud ALM | Plans, runs and governs the project; the operational hub |
+| SAP Build and SAP Integration Suite | Clean-core extensions and integration |
+| WalkMe | In-app guidance for user adoption |
+| Tricentis | Automated testing |
+| Syniti; OpenText | Data migration; archiving of historical data |
+
+- Its **migration and modernization assistants** follow the SAP Activate phases: system analysis, data management, custom code, configuration, test management, change management and rollout.
+  - They build on SAP Joule for Developers and SAP Joule for Consultants.
+- **SAP's figures differ by page:** "more than 35%" less migration effort (Sapphire release); "35% faster project execution" and "30% cut in business transformation costs" (toolchain product page). Quote the page you rely on.
+
 ## 11.2 The AI North Star architecture: four layers
 
 - The **AI North Star architecture** is SAP's reference architecture for building the Autonomous Enterprise. It has four layers:
@@ -62,6 +143,90 @@ flowchart TB
 
 - Read it top-down: a user asks Joule, a domain agent does the work, the data and its meaning come from the foundation, and the platform runs and governs it all.
 
+> [!NOTE]
+> **SAP revised the document**
+> - The North Star text in the SAP Architecture Center was updated on 23 Oct 2026.
+> - The course walked through an earlier version, which drew separate boxes for design-time tools, gateways and processes. This book follows the current text.
+> - SAP calls it "a direction of travel", not a specification, roadmap or delivery promise.
+
+**System of record, system of context**
+- Classic ERP is a **system of record**: it stores business facts and enforces rules.
+- SAP's North Star adds a **system of context**: data, process knowledge, decision history, interactions and their meaning, connected so agents can reason with them.
+- SAP's tagline: data was the moat of the last decade; **context** is the moat of the next.
+- **AI-first** means AI added inside one application. **AI-native** means AI designed into every layer, working across application boundaries.
+
+**Inside each layer** (SAP Architecture Center, Oct 2026)
+
+| Layer | Shift | What sits there |
+|---|---|---|
+| **User experience** | Static → adaptive | **Joule Work** as the single entry point, on desktop, web and mobile (with in-car and more named); voice; interfaces generated for each intent |
+| **Process** | Predefined → agentic | Agents organised by business domain, and **Joule Studio** as the one design-time environment for agents and agentic solutions |
+| **Foundation** | System of record → system of context | **SAP Business Data Cloud** (governed data products), **SAP Knowledge Graph** (business meaning), decision traces, the generative AI hub with SAP and third-party models |
+| **Platform** | Hosting apps → running SAP-managed agents | A **managed agent runtime**: sandbox, identity, memory, observability, tenant isolation; it includes SAP BTP |
+
+**Experience layer: Joule Work**
+- Five modes:
+  - **Discover:** prioritised tasks and alerts
+  - **Conversations:** dialogue with Joule
+  - **Spaces:** workspaces assembled for a goal
+  - **Jobs:** agentic work running within guardrails, traceable
+  - **Develop:** building agents in Joule Studio
+- It complements SAP's application UIs, it does not replace them. SAP Fiori stays for stable, high-frequency processes.
+- Example from the course: "which documents are waiting for my approval?" → details of the first one → "approve it" or "reject it with this comment", without opening the app.
+
+**Process layer: how agents are built**
+- **A spectrum from deterministic to autonomous:** plain apps and workflows; **bounded agents** with fixed tools and guardrails; open-ended agents. Deterministic steps need no LLM call, so they cost no tokens.
+- Agents follow a reason, act, observe loop. Work starts from a conversation, a business event or a schedule.
+- **Human in the loop:** when an agent needs approval, the request goes to the responsible person's conversation or inbox, and the agent pauses.
+- **Two build paths, one runtime:** code-based agents with SAP's agent SDK, or **intent-based development** in Joule Studio. Both produce version-controlled code.
+- **Agent skills:** packages of instructions and tools that Joule or an agent loads when needed. Joule Studio agents are moving to this skill-based model.
+- **The process map behind it:** SAP's **Reference Business Architecture** describes an enterprise's whole business scope in standard terms.
+  - It links business capability, process, data and organisation models.
+  - Its process model has eight business process groups, the end-to-end processes such as source to pay or lead to cash.
+  - SAP's standard agents are built for these processes (SAP Help; the course).
+
+**Foundation layer: data and meaning**
+- **SAP Knowledge Graph** is the semantic backbone. It links natural language to SAP's APIs, data models and business entities, so "show me overdue orders" maps to the right objects.
+  - It does not enforce authorizations; the Authorization Management Service and the systems of record do.
+  - SAP lists the **SAP BDC Ontology Manager** for Q4 2026, turning data products into a business ontology.
+- **Memory:** semantic memory (what Joule knows about you) and episodic memory (summaries of past conversations), shared by Joule and its agents.
+- **SAP HANA Cloud** brings a **vector engine** (similarity search over embeddings) and a **knowledge graph engine** (relationships, queried with SPARQL).
+  - One query can combine both, with relational and spatial data (SAP News, July 2025).
+- Third-party models come **SAP-managed** through the generative AI hub in SAP AI Core. SAP holds the contracts; you pay consumption through AI Core.
+
+**Platform layer: the managed agent runtime**
+- SAP supplies the "harness": security, observability (OpenTelemetry), tenant isolation, sandboxing and persistent memory. Planned: an agent sandbox, a skills registry and continuous agent evaluations.
+- Agents extend in four ways: tools through **MCP**, skills, pre- and post-execution hooks, and developer-defined extension points.
+- **Deployment options:** public cloud, private cloud, **SAP Sovereign Cloud** and **SAP Sovereign Cloud On-Site** (in the customer's chosen data centres).
+
+**Across the layers: integration, identity and defence**
+- Two open protocols: **Model Context Protocol** (tools) and **Agent2Agent** (agents talking to agents).
+- The **agent gateway** is the governed bridge between agents, tools and backends. It handles identity, access, observability and approvals. SAP's FAQ planned it for general availability around TechEd 2026.
+  - It does not replace SAP Cloud Connector or the Destination service.
+  - MCP access to backends comes through **SAP Integration Suite** and its MCP gateway.
+- **Agents are first-class identities**: registered applications with policies and scoped authorizations.
+  - A user-acting agent carries the user's rights, or fewer.
+  - An autonomous agent uses its own identity, with explicitly defined permissions.
+  - Third-party agents authenticate through SAP's identity services.
+- A **three-tier defence:**
+  - foundation tier: zero-trust authentication, prompt-injection detection
+  - supervision tier: input validation, output filtering, human oversight for high-risk decisions
+  - automation tier: security-operations agents
+
+**Key terms worth knowing** (SAP's glossary)
+
+| Term | Meaning |
+|---|---|
+| Context engineering | Assembling the right, authorized, current context for each AI interaction |
+| Harness engineering | Wrapping models and agents with enterprise controls: identity, policy, sandbox, memory, observability, evaluation |
+| Specification engineering | Defining agent behaviour, limits and success criteria precisely enough to test |
+| Semantic grounding | Anchoring AI output in metadata, domain models and authorization rules |
+| Sovereign AI | AI designed around data residency, regulation, infrastructure and model sovereignty |
+| Human-in-the-loop | People review, approve, override or guide AI actions for high-risk decisions |
+
+> [!TIP]
+> When a term in SAP's AI material is new to you, ask an AI assistant with the page open to explain it "in simple terms, for an SAP consultant". Then check it against SAP's glossary.
+
 ## 11.3 The SAP Business AI Platform
 
 - SAP describes it as the foundation to build, give context to, and govern AI across SAP and non-SAP systems (sap.com, read 20 Nov 2026).
@@ -73,6 +238,37 @@ flowchart TB
 | **Contextualize and reason** | **SAP Business Data Cloud** (AI-ready data from SAP and third parties), **SAP Knowledge Graph** (a semantic layer of business meaning), **SAP AI Services and Models** (including tabular foundation models) |
 | **Govern** | **SAP AI Agent Hub** (one view of every agent, LLM and MCP server), **Joule Studio runtime** (managed runtime for agents), value realization with SAP LeanIX and SAP Signavio, and identity and access for agents |
 
+> [!NOTE]
+> **Was BTP renamed to BAIP?**
+> - **The course:** yes; SAP announced in mid-2026 that BTP is renamed, and certifications will follow.
+> - **SAP:** the Business AI Platform *unifies* SAP BTP, SAP Business Data Cloud and SAP Business AI (Sapphire release, May 2026). The North Star text says it *includes* BTP.
+> - **What was renamed** on 30 Jun 2026 is the **partner competency**: "SAP BTP Competency" became "SAP Business AI Platform Competency" (SAP Partner Portal, as reported on SAP Community).
+>   - Existing partners moved over automatically.
+>   - New specialisations come in October 2026 and new proficiency requirements in January 2027.
+> - So BTP is still the platform you provision in (this book's chapters 1 to 10). BAIP is the larger AI-centred package and brand around it.
+
+**What the pillars contain** (SAP slide in the course deck)
+- **Build:** Joule Studio and SAP Integration Suite.
+- **Contextualize and reason:** SAP Knowledge Graph (linking business data, processes and industry knowledge), SAP and non-SAP models, and SAP Business Data Cloud.
+  - Data can come from SAP and non-SAP sources such as Databricks, Microsoft, Google Cloud, Snowflake and AWS.
+- **Govern:** SAP AI Agent Hub, value realization, Joule Studio runtime, and identity, access and security.
+- Above the platform sit the Autonomous Suite domains, partner agents and third-party AI agents, all reached through Joule.
+
+**SAP's own claims for the platform** (same slide; vendor figures, not checked here)
+
+| Pillar | Claim |
+|---|---|
+| Build | 95% successful intent-to-prototype translations, at the first attempt and without manual code changes |
+| Contextualize and reason | About 2× better predictions across SAP business tasks (SAP-RPT-1-large vs narrow AI); 98% SQL reasoning accuracy (vs 76% for a GPT-4.1 benchmark) |
+| Govern | 55,000+ live agents managed through SAP AI Agent Hub |
+
+- **SAP AI Agent Hub** is built on SAP LeanIX. SAP announced it for general availability in Q3 2026, included in the Business AI Platform at no additional charge.
+  - It shows every agent, standard and custom, and lets you monitor or disable one.
+  - LeanIX customers see it as part of LeanIX; others get it as a separate app (the course).
+- **SAP Knowledge Graph** is what Joule's agents read for business meaning. SAP's FAQ says direct access for custom agents is "under discussion".
+  - The course called it unavailable for purchase on its own; this book did not confirm that.
+  - Don't confuse it with the HANA Cloud knowledge graph engine, where you build your own graphs.
+
 **The new Joule Studio (SAP News, May 2026)**
 - **Intent-based development:** you describe a goal in natural language. Joule Studio produces requirements, technical specs, code scaffolding, tests and a live preview.
 - In practice the business user writes the intent and specification, and a developer takes over from there to build, test and deploy.
@@ -80,6 +276,17 @@ flowchart TB
 - Agents run on a managed **Joule Studio runtime**.
 - Through the end of 2026, SAP customers and partners get **free design-time access**, under fair-use limits. Running agents is not covered by that offer.
 - The earlier tool, now called **Joule Studio Classic**, lives in SAP Build and works closely with SAP Build Process Automation.
+  - It builds agents and skills low-code only; the new Joule Studio adds intent-based development and pro-code.
+- SAP named **NVIDIA OpenShell** as the secure runtime for Joule Studio, and **n8n** for workflow orchestration in it (Sapphire release, May 2026).
+
+> [!NOTE]
+> **"Joule and AI units are free until the end of 2026"?**
+> - **The course:** SAP made Joule and AI units free for customers until December 2026, investing 100 million.
+> - **SAP (May 2026):**
+>   - a **€100 million fund for SAP partners**, to help customers put SAP-built assistants and agents into production and to build partner agents on Joule Studio
+>   - free **Joule Studio design time** through the end of 2026
+>   - no free AI units announced
+> - This book follows SAP. Check your contract for what is free in your account.
 
 ## 11.4 The models underneath
 
@@ -217,6 +424,16 @@ print(prompt.splitlines()[1])
 > - **SAP's press release (May 2026):** customers that commit to moving the majority of their landscape to SAP Cloud ERP get access to "select AI scenarios".
 > - The 50% figure and the Max Success Plan appear in press reports, not in SAP's release. This book follows SAP's wording; check the current contract terms with SAP.
 
+**Where your data goes when SAP AI calls a partner model**
+- Partner LLMs usually run on a hyperscaler, not in SAP's own data centres. The data does leave SAP's landscape.
+- SAP's enterprise contracts with model providers keep it in the region you chose, for example EU10. That includes the provider's disaster-recovery copy (the course).
+- **SAP's commitments** (Responsible AI page, AI Ethics Handbook, AI Terms v.8-2026):
+  - customer data is not given to third-party model providers to train their models
+  - with a third-party hosted model, data is sent only for processing and is not stored by the provider
+  - customers can opt out of SAP using their data to train SAP's own models
+- **Regional options:** SAP's EU AI Cloud (hosted in European data centres, aligned with the GDPR and the EU AI Act), SAP Sovereign Cloud, and SAP Sovereign Cloud On-Site.
+- The contract side (who answers for AI output) is in [chapter 17](responsible-ai-ethics-governance.md).
+
 **SAP's API policy and outside AI tools**
 - SAP's **API Policy v.4.2026a** (section 2.2.2) prohibits two uses of SAP APIs, except through SAP-endorsed architectures and pathways:
   - connecting autonomous or generative AI systems that plan, select or execute sequences of API calls
@@ -324,6 +541,24 @@ print(prompt.splitlines()[1])
 
 </details>
 
+<details class="qa"><summary>10. A customer saw a demo of an SAP assistant at a keynote. How do you check whether they can use it?</summary>
+
+- Look it up in the SAP Discovery Center's Business AI catalogue: is it released, which agents does it contain, which product and edition does it need?
+- If it is not there, check SAP Road Map Explorer for the planned quarter
+- Size the AI units with the Business AI Estimator before promising anything
+- *Stronger answer:* treat keynotes and social posts as direction only, and confirm edition fit (for example Private edition only) before the proposal
+
+</details>
+
+<details class="qa"><summary>11. What is the difference between a system of record and a system of context?</summary>
+
+- System of record: the ERP's transactions and rules, the single source of truth
+- System of context: data plus meaning, process knowledge and decision history (Business Data Cloud, Knowledge Graph, memory) so agents can reason
+- Numbers still come from governed data and business services; the LLM does not invent them
+- *Stronger answer:* add that authorizations stay enforced by the systems of record, not by the LLM or the Knowledge Graph
+
+</details>
+
 > [!TIP]
 > **🧩 Design question**
 > *"Our support team resolves the same 50 interface errors every week. Design an AI solution in the SAP landscape."* Talk about:
@@ -344,6 +579,11 @@ print(prompt.splitlines()[1])
 | RAG | Retrieve your documents, then answer from them |
 | Agent release | Sandbox (testers) or Joule base (whole company) |
 | API Policy 2.2.2 | Outside AI agents and bulk extraction only through SAP-endorsed pathways |
+| Five core elements | Joule · Autonomous Suite · Industry AI · Business AI Platform · Accelerated adoption |
+| What is real today | Discovery Center catalogue (released) · Road Map Explorer (planned, sign-in) · keynotes (vision) |
+| BTP vs BAIP | BAIP unifies BTP, BDC and AI; the partner competency was renamed on 30 Jun 2026 |
+| North Star extras | Joule Work modes · bounded agents · skills · MCP and A2A · agent gateway · agent identity |
+| Data commitments | No customer data for third-party model training · opt-out from SAP training · regional and sovereign options |
 
 ## Recap
 
@@ -353,6 +593,9 @@ print(prompt.splitlines()[1])
 - LLMs come mostly from partners via the generative AI hub; SAP builds SAP-ABAP-1 and the SAP-RPT-1 tabular models
 - Agents pursue goals with tools; RAG grounds them in your own documents to reduce hallucinations
 - Custom agents go from sandbox to the Joule base, act with the user's permissions, and must use SAP-endorsed data paths
+- SAP's five core elements add Industry AI and accelerated adoption (RISE, GROW and the agent-led toolchain)
+- Check availability in the Discovery Center catalogue, not in keynotes; plans are in Road Map Explorer
+- The North Star turns ERP from a system of record into a system of context, with Joule Work, skills, MCP and A2A, and agents as identities
 
 ## Practice
 
@@ -360,6 +603,8 @@ print(prompt.splitlines()[1])
 2. Extend the toy retrieval to return the top two entries, and print both in the prompt.
 3. Sketch an RPT-1 table prompt for your domain: five context rows with known values and two rows marked `[PREDICT]`. Which column is the target, and which columns would help the model most?
 4. Pick one process from your own domain. Write one sentence each for: the goal an agent would get, the tools it needs, the documents it must be grounded in, and the roles that limit it.
+5. In the SAP Discovery Center, open *Business AI → Joule Assistants*, pick one assistant from your domain, and note its agents and the products and editions it needs.
+6. Read the *Key Terms* page of SAP's AI-native North Star architecture and explain harness engineering in one sentence of your own.
 
 ## How this chapter was checked
 
@@ -373,6 +618,18 @@ print(prompt.splitlines()[1])
 - **Lecture 7 recording (added in the Lecture 7 batch):** the Q&A on SAP-RPT-1, TabPFN and SAP's own models (2:38 to 2:47) read in full.
 - **Read in full on 20 Nov 2026 (Lecture 7 batch):** SAP Help, *SAP-RPT-1* (models, limits, deployment).
 - **Read in part (Lecture 7 batch):** arXiv 2602.19237, the RPT-1 evaluation paper. Read: the abstract, sections 1 and 2, the limitations and the references, from the PDF text.
+- **Lecture 8 recording (Lecture 8 batch):** captions 0:02 to 3:00:19 read in full; the break, 1:17 to 1:27, has no teaching content.
+- **Read in full on 20 Nov 2026 (Lecture 8 batch):**
+  - SAP's AI-native North Star architecture (updated 23 Oct 2026), read by reading helpers:
+    - the executive summary; the vision, user experience, process, foundation and platform layers
+    - integration, security, ethics and governance; sovereign cloud; the FAQ; key terms
+  - SAP's Autonomous Enterprise page; SAP Help on the SAP Reference Business Architecture; SAP's agent-led toolchain page
+  - the Discovery Center Business AI catalogue, read in part: the counts and the first 25 of 44 assistants, on 20 Nov 2026
+  - SAP News: the Sapphire 2026 keynote article and the Autonomous Enterprise release (read by a reading helper); HANA Cloud's vector and knowledge graph engines (July 2025, by a reading helper)
+  - the SAP Community member blog on the BTP to BAIP competency rename (30 Jun 2026)
+  - SAP's Responsible AI page, and the SAP AI Terms v.8-2026 (downloaded with your approval)
+- **Course Drive (read in full):** *SAP BAIP* slides (27 slides; slide 27 is a course advertisement and was left out).
+- **Not read:** SAP Road Map Explorer (needs a sign-in) and SAP's guide *The Beginning of Better* (behind an e-mail form).
 - **Run:** the retrieval snippet with Python 3; it prints `['KB-101']` and the context line.
 - **Not run:** nothing else in this chapter is code.
 
@@ -388,6 +645,18 @@ print(prompt.splitlines()[1])
 - BTPAI course, Lecture 7 recording (BT018): the Q&A on SAP's own models
 - SAP Help, *SAP-RPT-1* (generative AI hub models): https://help.sap.com/docs/sap-ai-core/generative-ai/sap-rpt-1
 - Amit Lal, *Evaluating SAP RPT-1 for Enterprise Business Process Prediction* (arXiv, Feb 2026): https://arxiv.org/abs/2602.19237
+- BTPAI course, Lecture 8 recording (BT019), and the course Drive *SAP BAIP* slides (BT083)
+- SAP Architecture Center, *SAP AI-native North Star Reference Architecture* (updated Oct 2026): https://architecture.learning.sap.com/docs/ai-native-north-star-architecture
+- SAP Architecture Center, *Key Terms*: https://architecture.learning.sap.com/docs/north-star-arch/ai-native-northstar-arch/key-terms
+- SAP, *Autonomous Enterprise*: https://www.sap.com/products/autonomous-enterprise.html
+- SAP News, *SAP Unveils Business AI Platform to Power the Autonomous Enterprise* (Sapphire keynote, 13 May 2026): https://news.sap.com/2026/05/sap-sapphire-keynote-business-ai-platform-power-autonomous-enterprise/
+- SAP News, *SAP Sapphire: SAP Unveils the Autonomous Enterprise* (12 May 2026): https://news.sap.com/2026/05/sap-sapphire-sap-unveils-autonomous-enterprise/
+- SAP Discovery Center, *Business AI: Joule Assistants and Agents*: https://discovery-center.cloud.sap/ai-assistants/
+- SAP Help, *SAP Reference Business Architecture*: https://help.sap.com/docs/SAP_ENTERPRISE_ARCHITECTURE_FRAMEWORK/60bc20e6e0a24426a817705bcb415220/1dff8a3560e0424298b83b2faf1b73c8.html
+- SAP, *What is SAP's agent-led toolchain?*: https://www.sap.com/products/erp/rise/what-is-sap-integrated-toolchain.html
+- SAP Community (member blog), *From BTP to BAIP: SAP's Platform Rename Is a Much Bigger Architectural Signal*: https://community.sap.com/t5/technology-blog-posts-by-members/from-btp-to-baip-sap-s-platform-rename-is-a-much-bigger-architectural/ba-p/14440430
+- SAP News, *Unifying AI workloads: SAP HANA Cloud, one database* (July 2025): https://news.sap.com/2025/07/unifying-ai-workloads-sap-hana-cloud-one-database/
+- SAP, *Responsible AI*: https://www.sap.com/products/artificial-intelligence/ai-ethics.html
 - SAP, *SAP API Policy* (v.4.2026a): https://help.sap.com/doc/sap-api-policy/latest/en-US/API_Policy_latest.pdf
 - The Register, *SAP U-turn brings AI features to ECC and on-prem S/4HANA* (May 2026): https://www.theregister.com/ai-ml/2026/05/13/sap-u-turn-brings-ai-features-to-ecc-and-on-prem-s/4hana/5239040
 - SAVIC, *SAP Joule Work for on-premise ECC and S/4HANA* (partner article, used only for the press-report view): https://www.savictech.com/insights/sap-joule-work-on-premise-ai-ecc-s4hana-2026/

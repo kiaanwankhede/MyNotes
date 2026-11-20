@@ -29,6 +29,12 @@
 
 - Skills that grow in value: product ownership, a sense of design and user experience, and **testing**, because AI output must be checked.
 - **Forward-deployed engineers** work inside the customer's team, or with the customer at the table. Requirement, build and feedback happen in days, not months. The role was made popular by Palantir.
+  - They usually work as a small team, backed by product teams at home (the course):
+    - an industry or process expert who translates the business
+    - someone deep in the platform (BTP, Integration Suite, Joule Studio)
+    - a data specialist
+  - What counts: quick prototyping with AI tools, comfort in front of the customer, and turning feedback into a working demo within days.
+  - SAP uses this co-innovation model for its Industry AI solutions ([chapter 11, §11.1b](sap-ai-landscape.md)).
 - An exercise worth doing: search current job postings for SAP AI roles in your country, and list the skills they ask for. Then feed your CV to an AI search tool and ask which roles fit you after this training.
 
 ## 12.2 SAP AI certifications
@@ -249,10 +255,12 @@ flowchart LR
 - **Course Drive (read in full):** the Python library reference for Joule Studio pro-code work, and the instructor's digest prompts (summarised, not copied).
 - **Web-checked:** `deepagents` on PyPI (LangChain's Deep Agents).
 - **Run:** the Pydantic snippet with Python 3 and Pydantic 2.13; it prints the valid record and "2 errors" (company code and GL account).
+- **Lecture 8 recording (Lecture 8 batch):** the Q&A on forward-deployed teams (2:27 to 2:31) read in full.
 
 ## Sources and further reading
 
 - BTPAI course, Lecture 6 recording (BT017); course Drive: *joule_python_libraries* and *Perplexity Tasks*
+- BTPAI course, Lecture 8 recording (BT019): forward-deployed teams
 - SAP Learning, *SAP Certified – SAP Generative AI Developer* (C_AIG): https://learning.sap.com/certifications/sap-certified-associate-sap-generative-ai-developer
 - SAP Learning, *SAP Certified – Solution Architect – SAP Business AI Platform* (C_BAIPA): https://learning.sap.com/certifications/sap-certified-solution-architect-sap-business-ai-platform
 - SAP Learning, *SAP Certified – Positioning SAP Business AI Platform* (C_BCAIP): https://learning.sap.com/certifications/sap-certified-positioning-sap-business-ai-platform-1

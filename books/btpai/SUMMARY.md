@@ -25,3 +25,6 @@
 
 ## Joule
 * [Joule for Consultants: grounded answers, provisioning and AI units](joule-for-consultants.md)
+
+## Responsible AI
+* [Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms](responsible-ai-ethics-governance.md)
