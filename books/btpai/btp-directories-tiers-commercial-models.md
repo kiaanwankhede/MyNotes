@@ -450,12 +450,34 @@ flowchart TB
 
 ## Practice
 
-In your trial account:
+**Exercise 1: the rules, hands-on.** In your trial account:
 
 1. Create two directories, *App Dev* and *Security*, under the global account.
 2. Enable entitlement management on *App Dev*. Create a directory inside it and try to enable entitlement management there too. Note the message.
 3. Move an existing subaccount into *App Dev*, and check that its region and subscriptions are unchanged.
 4. In the global account's Entity Assignments, give *App Dev* an always-free plan, then assign it from the directory to the subaccount.
+
+**Exercise 2: the course's org-structure assignment.** The course's assignment 4 (on the course page titled "Assignment - 3") asks you to build this tree in your trial global account:
+
+```mermaid
+flowchart TB
+    GA["Company XYZ<br/>(global account)"] --> A["Team A<br/>directory"]
+    GA --> K["Team K<br/>directory (manager of Team K)"]
+    GA --> L["Team L: Security project<br/>subaccount"]
+    A --> B["Team B<br/>directory"]
+    A --> C["Team C: App development<br/>subaccount"]
+    B --> D["Team D: Analytics<br/>subaccount"]
+    B --> E["Team E: Data warehouse<br/>subaccount"]
+    K --> I["Team I<br/>directory (manager of Team I)"]
+    K --> J["Team J: Process automation<br/>subaccount"]
+    I --> F["Team F: ABAP extension<br/>subaccount"]
+    I --> G["Team G: Integration<br/>subaccount"]
+    I --> H["Team H: Data intelligence<br/>subaccount"]
+```
+
+1. Create the four directories with the right parents, then the eight subaccounts inside them.
+2. Decide where licences are handed out in Team K's branch: on Team K or on Team I, never both (one directory per path).
+3. Make the Team I manager a Directory Administrator of the directory you chose, so they can distribute its quota.
 
 Stretch: write the same structure as Terraform with `btp_directory`, `btp_directory_entitlement` and `btp_subaccount`.
 
@@ -466,6 +488,7 @@ Budgets need a consumption-based global account, so you can't try them in a tria
 - **Lecture 4 recording:** captions 26:27 to 3:33:57 read in full (tiers, directories, access, commercial models, budgets, questions). 1:45:25 to 1:55:36 is the break.
 - **Screenshots:** frames at 44:16, 52:33, 56:58, 1:40:12, 2:31:50, 2:42:40 and 2:42:58. Account names, IDs, emails, the company name and avatars are pixelated. The budget screenshot is cropped above the cost history chart.
 - **SAP BTP Fundamentals Notes:** pages 6 to 15 and 17 to 20 read in full and merged (tiers, directories, case study, access, commercial models, Q&As).
+- **Added on 20 Nov 2026:** the course page "Assignment - 3" (a one-page PDF titled "SAP BTP Assignment - 4"), read in full and redrawn as Exercise 2 in Practice.
 - **Discovery Center:** Business Application Studio pricing tab read on 20 Nov 2026 (opened in the lecture at 2:04:54).
 - **Web-checked on 20 Nov 2026 against SAP's docs:**
   - directory depth and features, the one-per-path rule, moving subaccounts, Add Me as Admin, Directory Administrator and Viewer
@@ -474,7 +497,7 @@ Budgets need a consumption-based global account, so you can't try them in a tria
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 4 recording, *Sub Account Walkthrough, Directory Concept, Commercial Model* (BT011); *SAP BTP Fundamentals Notes* (BT014)
+- BTPAI course, Lecture 4 recording, *Sub Account Walkthrough, Directory Concept, Commercial Model* (BT011); *SAP BTP Fundamentals Notes* (BT014); *Assignment - 3* course page (BT012)
 - SAP Discovery Center, *Business Application Studio, pricing*: https://discovery-center.cloud.sap/serviceCatalog/business-application-studio?region=all&tab=service_plan
 - SAP Help (docs source on GitHub), *Account model*: https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/10-concepts/account-model-8ed4a70.md
 - SAP Help, *Create a directory*: https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/50-administration-and-ops/create-a-directory-b8ef1c4.md
@@ -487,4 +510,4 @@ Budgets need a consumption-based global account, so you can't try them in a tria
 - SAP Developers, *Get started with SAP BTP enterprise accounts* (BTPEA as the evolution of CPEA): https://developers.sap.com/tutorials/btp-ea-onboard-01-intro.html
 - Terraform Registry, *SAP/btp provider*: https://registry.terraform.io/providers/SAP/btp/latest/docs
 
-Previous: [Inside a subaccount: service types, environments and connectivity](btp-subaccount-walkthrough.md) · Next: [BTPAI book introduction](README.md)
+Previous: [Inside a subaccount: service types, environments and connectivity](btp-subaccount-walkthrough.md) · Next: [Identity: Cloud Identity Services, trust and federated authorization](btp-identity-trust-federation.md)

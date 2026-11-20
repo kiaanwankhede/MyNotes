@@ -58,7 +58,7 @@ flowchart TB
 **Why companies replace the default identity provider**
 - A company with 50,000 employees will not ask everyone to create an sap.com account, or keep its staff list at SAP.
 - Instead it runs its own user store in **SAP Cloud Identity Services**, which is a BTP service, and connects it under *Security → Trust Configuration*.
-- Then employees log in with company accounts and single sign-on. The course covers this after Lecture 5.
+- Then employees log in with company accounts and single sign-on. How to set it up: [Identity: Cloud Identity Services, trust and federated authorization](btp-identity-trust-federation.md).
 
 ## 7.3 Roles, role templates and role collections
 
@@ -153,7 +153,7 @@ resource "btp_globalaccount_role_collection_assignment" "ram" {
 
 **Trust Configuration**
 - Lists the identity providers this subaccount trusts. Out of the box, that is only the default identity provider (sap.com accounts).
-- Companies add their own SAP Cloud Identity Services tenant here, and the global account gets its own trust as well.
+- Companies add their own SAP Cloud Identity Services tenant here, and the global account gets its own trust as well ([identity chapter](btp-identity-trust-federation.md)).
 
 **Encryption**
 - A newer page, about key management. In the recording it is still disabled.

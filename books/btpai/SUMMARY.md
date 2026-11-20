@@ -12,5 +12,6 @@
 * [Users, role collections and access at every level](btp-users-role-collections.md)
 * [Inside a subaccount: service types, environments and connectivity](btp-subaccount-walkthrough.md)
 * [Directories, landscape tiers and commercial models](btp-directories-tiers-commercial-models.md)
+* [Identity: Cloud Identity Services, trust and federated authorization](btp-identity-trust-federation.md)
 
 ## SAP AI
