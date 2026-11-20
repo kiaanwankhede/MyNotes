@@ -6,6 +6,7 @@
 > **📍 At a glance**
 > - **You will learn:**
 >   - which product someone means when they say "Joule"
+>   - the four types of things Joule can do, from answering questions to changing data
 >   - how Joule assistants, agents and skills divide the work, and why SAP built it in levels
 >   - where to look up what SAP ships, and what a Business Value 3-Pager tells you
 >   - how one Joule runtime serves every entry point, including Microsoft Teams
@@ -71,6 +72,39 @@
 > - The course and its handbook say Anthropic's Claude is SAP's main model for Joule and its agents.
 > - SAP's own Joule for Developers page lists a mix: OpenAI, PaLM 2, Gemini, Anthropic, Llama and Mistral models, plus SAP's ABAP LLM.
 > - SAP does not publish one model for Joule (chapter 16). In Joule Studio you choose the model per agent (chapter 19).
+
+## 18.2a What Joule can do: four capability types
+
+SAP groups everything Joule does into four types.
+
+| Type | What Joule does | Example request |
+|---|---|---|
+| **Informational** | Answers from SAP documentation and your grounded documents, with links to the sources | "What is a global account?" |
+| **Navigational** | Shows or opens the right app or screen | "Where can I create a purchase order?" |
+| **Transactional** | Creates, reads or updates business data through the conversation | "Add this user to the subaccount as administrator" |
+| **Analytical** | Answers with charts, key figures or summaries | "Show discount by sales manager as a chart" |
+
+- **Informational:** in an SAP product, Joule answers from SAP Help and from documents you added through document grounding. Only answers with source links count as SAP content.
+- **Navigational** often comes with information: in the course demo, Joule listed the subaccounts and offered *View in Cockpit*.
+- **Transactional:** if details are missing, Joule asks for them one by one. Before it changes anything, it shows what it will do and waits for *Confirm*.
+- **Analytical** needs **SAP Analytics Cloud**: Joule draws the charts from an SAC model, not straight from S/4HANA or SuccessFactors.
+
+```text
+You:   Create a user in subaccount demo-dev.
+Joule: Which email address?          You: anna@example.com
+Joule: Which role collection?        You: Subaccount Administrator
+Joule: I will add anna@example.com with Subaccount Administrator. Confirm / Cancel
+```
+
+- **Joule uses your rights.** In a subaccount where you are not an administrator, the same request fails.
+- **Read the confirmation.** It is the human check before a change. If one value is wrong, cancel and say exactly what to fix.
+- **Give all details in one message when you can.** Each round trip makes the task slower, and an agent's AI units are billed per step (18.8).
+
+> [!NOTE]
+> **Does every Joule message cost AI units?**
+> - **The course:** every question and answer in Joule is one request that consumes AI units.
+> - **SAP's pricing page (20 Nov 2026):** Base AI, which includes everyday Joule in SAP apps, uses no AI units. AI units apply to Premium AI, such as agents, which are billed per action.
+> - This book follows SAP's page (18.8).
 
 ## 18.3 Assistants, agents and skills
 
@@ -408,6 +442,7 @@ advanced: 1,500 AI units = EUR 10,500 per month
 | Topic | Key points |
 |---|---|
 | Family | Joule Work · embedded Joule · Joule Studio Classic · new Joule Studio · Joule for Developers · Joule for Consultants |
+| Capabilities | Informational · navigational · transactional (asks, then confirms) · analytical (needs SAP Analytics Cloud) |
 | Levels | Assistant (SAP, per persona) → agent (loop, billed per action) → skill (one action) |
 | Why levels | Progressive disclosure against context bloat; descriptions are the routing table |
 | Find them | Discovery Center → Business AI: 44 assistants, 327 agents (Nov 2026); Business Value 3-Pager |
@@ -434,6 +469,8 @@ advanced: 1,500 AI units = EUR 10,500 per month
 ## How this chapter was checked
 
 - **Lecture 9 recording:** captions 0:00 to 1:20 (the Joule family, the levels, progressive disclosure, the Copilot integration, the Joule core service) read in full.
+- **Lecture 10 Part A recording (Lecture 10 batch):** read in full (42 minutes; the hands-on exercise that followed was not recorded). Source of 18.2a.
+- **Read in full on 21 Nov 2026:** SAP Learning, *Introducing SAP Joule Core Capabilities*.
 - **Read in full (downloaded with your approval):**
   - *Decoding All Things Joule* (course Drive, 31 pages, May 2026). The handbook marks itself as AI-generated, so its dates and prices were checked against SAP's pages.
   - SAP's *Accounts Payable Assistant* Business Value 3-Pager (3 pages, from Discovery Center)
@@ -455,5 +492,7 @@ advanced: 1,500 AI units = EUR 10,500 per month
 - SAP Discovery Center, *Joule Assistants*: https://discovery-center.cloud.sap/ai-assistants/
 - SAP, *Accounts Payable Assistant* Business Value 3-Pager: https://dam.sap.com/mac/embed/public/pdf/a/JK6wpDj
 - SAP Help, *Integration with SAP SuccessFactors*: https://help.sap.com/docs/joule/integrating-joule-with-sap/integration-with-sap-successfactors
+- BTPAI course, Lecture 10 Part A recording (BT021)
+- SAP Learning, *Introducing SAP Joule Core Capabilities*: https://learning.sap.com/courses/implementing-sap-s-4hana-cloud-public-edition-sales-fundamental-business-processes/introducing-sap-joule-core-capabilities_b30625c8-5908-4220-b172-c45d0fa525d5
 
 Previous: [Joule for Consultants: grounded answers, provisioning and AI units](joule-for-consultants.md) · Next: [Joule Studio Classic: setup, skills, agents, testing and deployment](joule-studio-classic.md)

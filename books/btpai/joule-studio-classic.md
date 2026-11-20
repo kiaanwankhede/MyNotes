@@ -258,6 +258,7 @@ agent, 1 step: stopped: maximum number of thinking steps reached
 | The agent replies without the skill's nice message | A *Send Message* card shows only when a user starts the skill; an agent sees only the skill **output** | Return the message text in the skill output |
 | Scenario selection returns nothing | No capability matches, for example a news question | Expected; add a skill only if the use case needs it |
 | Only about 5 rows in the card, up to about 20 when expanded | Classic chat cards are small (course observation) | Ask narrower questions; agents can still pass large data to each other |
+| "Not subscribed" or "access denied" when creating a project, though your roles are right | Stale browser cache (seen several times in the course) | Try a private window first; if it works there, clear the cache |
 
 ## 19.8 Release and deploy
 
@@ -420,4 +421,4 @@ agent, 1 step: stopped: maximum number of thinking steps reached
 - SAP Architecture Center, *Joule Skills with Joule Studio*: https://architecture.learning.sap.com/docs/golden-path/ai-golden-path/build-and-deliver/joule-skills
 - Northwind OData service (public sample data): https://services.odata.org/V4/Northwind/Northwind.svc/
 
-Previous: [The Joule family: Joule Work, embedded Joule, assistants, agents and skills](joule-family.md) · Next: [Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms](responsible-ai-ethics-governance.md)
+Previous: [The Joule family: Joule Work, embedded Joule, assistants, agents and skills](joule-family.md) · Next: [The new Joule Studio: intent-based development, agents and extensions](joule-studio-intent-based.md)

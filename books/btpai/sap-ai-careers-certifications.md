@@ -44,8 +44,9 @@
 | SAP Certified – SAP Generative AI Developer | C_AIG | System-based assessment, 3 hours | 76% | Developers and consultants using the generative AI hub |
 | SAP Certified – Solution Architect – SAP Business AI Platform | C_BAIPA | Scenario-based assessment, 2 hours | 60% | Architects designing end-to-end solutions |
 | SAP Certified – Positioning SAP Business AI Platform | C_BCAIP | Scenario-based assessment, 2 hours | 60% | Entry level; pre-sales, leads, consultants who pitch the platform |
+| SAP Certified – Joule Studio Developer | C_JSD | Hands-on practice, then a scenario-based assessment, 2 hours | 60% | Anyone building agents in the new Joule Studio (chapter 20) |
 
-(learning.sap.com, read 20 Nov 2026)
+(learning.sap.com, read 20 and 21 Nov 2026)
 
 - **C_AIG** covers solving business problems with the generative AI hub: prompt engineering techniques, prompt development, template management and orchestration workflows in SAP AI Launchpad.
 - **Scenario-based** exams put you in a realistic case, sometimes with an AI avatar asking questions. **System-based** exams have you work in a live system.
@@ -57,6 +58,39 @@
 > - **SAP (read 20 Nov 2026):** a 3-hour system-based assessment on prompt engineering, prompt templates and orchestration workflows in AI Launchpad.
 >   - Joule for Consultants is offered in "selected" system-based exams; C_AIG is not named.
 > - Check the exam's own page before you book.
+
+**How a scenario-based exam works (SAP's FAQ and the C_JSD page, read 21 Nov 2026)**
+- Start from the certification page with **Go to exam**. You need a valid attempt and your SAP Universal ID; C_JSD showed a free voucher.
+- **C_JSD runs in three steps:**
+  1. Check your computer and network with SAP's technical readiness checklist.
+  2. Complete the learning journey *Developing with Joule Studio* and the hands-on exercises in the practice environment.
+  3. Take the AI role-play: an AI avatar asks you to show the agents you built and answer questions about them.
+- SAP's warning on the C_JSD page: skipping the instructions and practice exercises is the most common reason learners fail.
+- **Two ways to take it:**
+  - an AI-guided interview (SAP's recommendation)
+  - a recorded video for a human reviewer; results take up to 20 business days, and for C_JSD it is English only
+- **Pause** freezes the role-play, not the 2-hour clock.
+- **Scoring:** each exam objective gets 1 (insufficient) to 5 (excellent) against experts' criteria. Use *Save and view analysis* to see your score, then submit if you passed.
+- **If you fail with time left,** you can retry at once, and it counts as the same attempt.
+  - Otherwise: at most 4 attempts in 12 months, 24 hours apart. After four failures, you wait a year.
+
+**From the course (C_JSD in Nov 2026)**
+- The practice system stays open for 24 hours once started, and was often at full capacity. Start it when you have a free day, and take the exam in the same session after the hands-on.
+- In one learner's exam, the AI first asked them to share their screen and walk through the hands-on. About eight theory questions followed.
+- **Answer like a consultant:** your point, why, and a concrete example, in about 30 to 60 seconds. Use business language and the correct SAP product names.
+- The voice AI takes a long silence as the end of your answer. Pause the role-play to think instead.
+
+> [!NOTE]
+> **Do SAP keywords raise your score?**
+> - **The course:** the assessing AI likes SAP terms, so name as many products and technical terms as you can.
+> - **SAP's FAQ:** the AI "doesn't just look for keywords"; it analyses the semantic intent of your answer.
+> - So use SAP terms where they belong, but the score comes from showing you understand.
+
+**Staying certified (SAP's FAQ)**
+- Certifications are valid for 12 months. A **Stay Certified** assessment taken in the 90 days before expiry adds 12 months from the original expiry date.
+- Depending on the certification, it is multiple choice or a short AI role-play.
+- You need an **SAP Learning Hub** subscription for it; the subscription also includes four exam attempts a year. Without one, you retake the full exam each year.
+- The course called these renewals free and open book; SAP's FAQ says a subscription is required.
 
 **Outside SAP**
 - **Claude Certified Architect – Foundations** (Anthropic, offered through its Partner Academy): 60 questions in 120 minutes, scaled pass score 720 of 1,000, USD 125, valid 12 months.
@@ -256,6 +290,9 @@ flowchart LR
 - **Web-checked:** `deepagents` on PyPI (LangChain's Deep Agents).
 - **Run:** the Pydantic snippet with Python 3 and Pydantic 2.13; it prints the valid record and "2 errors" (company code and GL account).
 - **Lecture 8 recording (Lecture 8 batch):** the Q&A on forward-deployed teams (2:27 to 2:31) read in full.
+- **Lecture 10 Part B recording (Lecture 10 batch):** the certification talk and questions (0:00 to 0:27 and 1:17 to 1:45) read in full, as part of reading the whole video.
+- **Read in full on 21 Nov 2026:** the C_JSD page again, SAP's *Scenario-based assessment FAQs* and SAP's *Staying certified* FAQ.
+- **Left out, by your decision:** the course's tips to use another AI live during the voice exam, and to cite a bad connection to regain an attempt. SAP's pages do not say that either is allowed.
 
 ## Sources and further reading
 
@@ -265,6 +302,8 @@ flowchart LR
 - SAP Learning, *SAP Certified – Solution Architect – SAP Business AI Platform* (C_BAIPA): https://learning.sap.com/certifications/sap-certified-solution-architect-sap-business-ai-platform
 - SAP Learning, *SAP Certified – Positioning SAP Business AI Platform* (C_BCAIP): https://learning.sap.com/certifications/sap-certified-positioning-sap-business-ai-platform-1
 - SAP Learning, *SAP Certified – Joule Studio Developer* (C_JSD): https://learning.sap.com/certifications/sap-certified-joule-studio-developer
+- SAP Learning, *Scenario-based assessment FAQs*: https://learning.sap.com/helpcenter/certification-support/scenario-based-assessment-faqs
+- SAP Learning, *Staying certified – FAQ*: https://learning.sap.com/helpcenter/certification-support/staying-certified
 - SAP Learning help center, *Joule for Consultants in system-based assessments*: https://learning.sap.com/helpcenter/certification-support/joule-for-consultants-system-based-assessments
 - Anthropic Academy, *Claude Certified Architect – Foundations*: https://anthropic-partners.skilljar.com/claude-certified-architect-foundations-certification
 - LLM Stats, *AI leaderboard*: https://llm-stats.com
