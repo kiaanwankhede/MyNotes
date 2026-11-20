@@ -101,7 +101,7 @@
   },
   "BTPAI": {
    "folder": "books/btpai",
-   "sections": ["BTP Foundations", "SAP AI"],
+   "sections": ["BTP Foundations", "SAP AI", "AI Fundamentals", "Joule"],
    "chapters": [
     "Cloud computing and the service models",
     "SAP's cloud journey and the BTP landscape",
@@ -114,7 +114,11 @@
     "Directories, landscape tiers and commercial models",
     "Identity: Cloud Identity Services, trust and federated authorization",
     "The SAP AI landscape: Autonomous Enterprise, AI North Star and the Business AI Platform",
-    "SAP AI certifications, roles and staying current"
+    "SAP AI certifications, roles and staying current",
+    "AI, machine learning, deep learning and generative AI",
+    "Inside a large language model: from prompt to answer",
+    "Prompt engineering: from zero-shot to grounded prompts",
+    "Joule for Consultants: grounded answers, provisioning and AI units"
    ]
   }
  }

@@ -267,6 +267,7 @@ flowchart TB
 - Each month's usage is deducted, and SAP sends a balance statement: opening credits, this month's use, closing credits.
 - Unused credits expire at the end of the contract year. SAP occasionally carries them over, for large customers only.
 - Running out does not stop your services. The overage is billed.
+- SAP's premium AI features use a separate currency, **AI units**, bought under their own SKU. Chapter 16 shows how they are counted: [Joule for Consultants, §16.6](joule-for-consultants.md).
 
 **Where to see your model**
 - *Global account → Entitlements → Service Assignments*. Switch on **Show commercial info**, or filter by **Entitlement Source**.

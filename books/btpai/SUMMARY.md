@@ -17,3 +17,11 @@
 ## SAP AI
 * [The SAP AI landscape: Autonomous Enterprise, AI North Star and the Business AI Platform](sap-ai-landscape.md)
 * [SAP AI certifications, roles and staying current](sap-ai-careers-certifications.md)
+
+## AI Fundamentals
+* [AI, machine learning, deep learning and generative AI](ai-ml-deep-learning-genai.md)
+* [Inside a large language model: from prompt to answer](llm-prompt-to-answer.md)
+* [Prompt engineering: from zero-shot to grounded prompts](prompt-engineering.md)
+
+## Joule
+* [Joule for Consultants: grounded answers, provisioning and AI units](joule-for-consultants.md)

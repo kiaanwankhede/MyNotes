@@ -8,6 +8,7 @@
 > - **You will build:** a toy retrieval step in Python that grounds an answer in your own documents
 > - **Level:** beginner · **Time:** about 40 minutes
 > - **Builds on:** [SAP's cloud journey and the BTP landscape](sap-cloud-journey-btp-landscape.md) (section 2.4a) and [Identity](btp-identity-trust-federation.md)
+>   - New to terms such as LLM, tokens or RAG? Read [AI, ML, deep learning and GenAI](ai-ml-deep-learning-genai.md) and [Inside a large language model](llm-prompt-to-answer.md) first
 
 **After this chapter you can:**
 
@@ -95,6 +96,38 @@ flowchart TB
 - General LLMs know ABAP only roughly, because little ABAP is public. That is why SAP trained its own.
 - Classic forecasting trains a model per use case on historical data. A tabular foundation model is given examples at the time of the request instead.
 - In July 2026 SAP closed its acquisition of Prior Labs, the team behind the TabPFN models, and committed more than EUR 1 billion to tabular AI over four years (SAP Community blog, read 20 Nov 2026).
+
+**SAP-RPT-1 in practice** (SAP Help, read 20 Nov 2026)
+- RPT-1 is a "relational pretrained transformer", developed by SAP, for classification and regression on table data.
+- **The prompt is a table.** It holds context rows with known values, and the cells to predict marked `[PREDICT]`:
+
+| PRODUCT | PRICE | ORDERDATE | ID | COSTCENTER |
+|---|---|---|---|---|
+| Couch | 999.99 | 28-11-2025 | 35 | **[PREDICT]** |
+| Office Chair | 150.8 | 02-11-2025 | 44 | Office Furniture |
+| Server Rack | 2200.00 | 01-11-2025 | 104 | Data Infrastructure |
+
+- One API call returns the prediction, learned from the context rows. No training or fine-tuning step is needed (in-context learning).
+
+| | sap-rpt-1-small | sap-rpt-1-large |
+|---|---|---|
+| Pick when | Medium complexity; low latency and high throughput matter | Complex scenarios; best accuracy matters |
+| Max context | 2,048 rows, 100 columns | 65,536 rows, 256 columns |
+| Recommended context | 500 to 2,000 rows | 4,000 to 8,000 rows |
+| Per request | Up to 128 rows and 10 columns to predict | Same |
+
+- **Deploy it in SAP AI Core** through the foundation-models scenario: executable `aicore-sap`, model `sap-rpt-1-small` or `sap-rpt-1-large`. Later versions (RPT-1.5, RPT-1.6) are listed alongside.
+- An open-source variant, `sap-rpt-1-oss`, is on Hugging Face. SAP also runs an **RPT playground** at rpt.cloud.sap, which needs a sign-in.
+- **The model stores nothing.** Keep the table in your database (HANA or any other), send the rows with each request, and write the predictions back. Otherwise you predict, and pay, again next time.
+- **TabPFN stays a Prior Labs model.** SAP Help lists Prior Labs as its own vendor in the generative AI hub. SAP says Prior Labs keeps its brand, leadership and open research after the acquisition.
+
+> [!NOTE]
+> **Who wrote the RPT-1 evaluation paper?**
+> - **The course:** an SAP paper on arXiv compares RPT-1 with traditional forecasting.
+> - **arXiv 2602.19237 (22 Feb 2026):** the evaluation paper has one author, from Microsoft. It tests the open-source `sap-rpt-1-oss` on three synthetic SAP scenarios.
+>   - With no training, it reached 91 to 96% of the accuracy of tuned gradient-boosted trees such as XGBoost.
+>   - With little data (about 75 to 100 context rows) it beat XGBoost; on regression and larger datasets the trees kept a clear lead.
+> - **The architecture paper:** RPT-1 is built on ConTextTab (Spinaci et al.), presented at NeurIPS 2025.
 
 **Decision models: a new category**
 - On 15 September 2026, TypeSafe AI released **Jev**, a "System One" decision model. It returns typed decisions (yes/no, a choice, a score) with a calibrated confidence, in milliseconds, not text.
@@ -325,7 +358,8 @@ print(prompt.splitlines()[1])
 
 1. Draw the four North Star layers from memory and place Joule, Business Data Cloud, Joule Studio and an Accounts Payable assistant in them.
 2. Extend the toy retrieval to return the top two entries, and print both in the prompt.
-3. Pick one process from your own domain. Write one sentence each for: the goal an agent would get, the tools it needs, the documents it must be grounded in, and the roles that limit it.
+3. Sketch an RPT-1 table prompt for your domain: five context rows with known values and two rows marked `[PREDICT]`. Which column is the target, and which columns would help the model most?
+4. Pick one process from your own domain. Write one sentence each for: the goal an agent would get, the tools it needs, the documents it must be grounded in, and the roles that limit it.
 
 ## How this chapter was checked
 
@@ -336,6 +370,9 @@ print(prompt.splitlines()[1])
   - SAP News on the new Joule Studio, and SAP's Sapphire press release on the Autonomous Enterprise (both May 2026)
 - **SAP user-group deck "Welcome to the Autonomous Enterprise"** (28 pages): only slides marked PUBLIC used; slides marked internal were not used.
 - **Web-checked:** SAP-ABAP-1 and Joule for Developers (sap.com), the generative AI hub and SAP Note 3437766, press coverage of on-premise Joule (The Register).
+- **Lecture 7 recording (added in the Lecture 7 batch):** the Q&A on SAP-RPT-1, TabPFN and SAP's own models (2:38 to 2:47) read in full.
+- **Read in full on 20 Nov 2026 (Lecture 7 batch):** SAP Help, *SAP-RPT-1* (models, limits, deployment).
+- **Read in part (Lecture 7 batch):** arXiv 2602.19237, the RPT-1 evaluation paper. Read: the abstract, sections 1 and 2, the limitations and the references, from the PDF text.
 - **Run:** the retrieval snippet with Python 3; it prints `['KB-101']` and the context line.
 - **Not run:** nothing else in this chapter is code.
 
@@ -348,6 +385,9 @@ print(prompt.splitlines()[1])
 - SAP News, *New Joule Studio for enterprise-scale agentic development* (May 2026): https://news.sap.com/2026/05/new-joule-studio-enterprise-scale-agentic-development/
 - SAP Community, *Jev vs. RPT: The decision layer is here*: https://community.sap.com/t5/technology-blog-posts-by-sap/jev-vs-rpt-the-decision-layer-is-here-and-rpt-already-speaks-its-language/ba-p/14497557
 - SAP, *What is SAP-ABAP-1?*: https://www.sap.com/products/artificial-intelligence/sap-abap.html
+- BTPAI course, Lecture 7 recording (BT018): the Q&A on SAP's own models
+- SAP Help, *SAP-RPT-1* (generative AI hub models): https://help.sap.com/docs/sap-ai-core/generative-ai/sap-rpt-1
+- Amit Lal, *Evaluating SAP RPT-1 for Enterprise Business Process Prediction* (arXiv, Feb 2026): https://arxiv.org/abs/2602.19237
 - SAP, *SAP API Policy* (v.4.2026a): https://help.sap.com/doc/sap-api-policy/latest/en-US/API_Policy_latest.pdf
 - The Register, *SAP U-turn brings AI features to ECC and on-prem S/4HANA* (May 2026): https://www.theregister.com/ai-ml/2026/05/13/sap-u-turn-brings-ai-features-to-ecc-and-on-prem-s/4hana/5239040
 - SAVIC, *SAP Joule Work for on-premise ECC and S/4HANA* (partner article, used only for the press-report view): https://www.savictech.com/insights/sap-joule-work-on-premise-ai-ecc-s4hana-2026/

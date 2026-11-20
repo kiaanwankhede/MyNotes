@@ -264,4 +264,4 @@ flowchart LR
 - GitHub, *SAP Datasphere MCP server* (community project): https://github.com/MarioDeFelipe/sap-datasphere-mcp
 - PyPI, *deepagents*: https://pypi.org/project/deepagents/
 
-Previous: [The SAP AI landscape](sap-ai-landscape.md) · Next: [BTPAI book introduction](README.md)
+Previous: [The SAP AI landscape](sap-ai-landscape.md) · Next: [AI, machine learning, deep learning and generative AI](ai-ml-deep-learning-genai.md)
