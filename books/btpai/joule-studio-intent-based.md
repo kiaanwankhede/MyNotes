@@ -34,6 +34,9 @@
 | **Develop** | Developers and builders | The new Joule Studio |
 
 - **Your role decides what you see.** A user with only the end-user role sees Conversations and Spaces, not Develop.
+- **Who runs it:** Joule Studio Classic is *customer-managed*: you provision Joule, subscribe services and run boosters in your own BTP subaccount (chapters 18 and 19).
+  - The new Joule Work and Joule Studio follow an *SAP-managed* model: you provision through SAP for Me, and SAP runs the platform side.
+  - That is the course's description; SAP was still moving customers over in Nov 2026.
 - **It is still pre-release.** SAP's own tutorials say so: features, screens and terms may change. Date what you learn.
 - The **C_JSD** certification (chapter 12) tests this new Studio, not the classic one.
 
@@ -307,4 +310,4 @@ GAP       Draft a status email to the customer
 - SAP Developer Center, tutorial navigator (search "Joule"): https://developers.sap.com/tutorial-navigator.html
 - SAP Learning, *SAP Certified – Joule Studio Developer* (C_JSD): https://learning.sap.com/certifications/sap-certified-joule-studio-developer
 
-Previous: [Joule Studio Classic: setup, skills, agents, testing and deployment](joule-studio-classic.md) · Next: [Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms](responsible-ai-ethics-governance.md)
+Previous: [Joule Studio Classic: setup, skills, agents, testing and deployment](joule-studio-classic.md) · Next: [Tutorial: Set up environments and destinations for Joule skills](tutorial-joule-skill-setup.md)

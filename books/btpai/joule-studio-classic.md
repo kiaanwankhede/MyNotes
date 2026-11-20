@@ -9,6 +9,7 @@
 >   - what a subaccount needs before you can build, and where the tool opens
 >   - the control tower: environments, destinations and deployed capabilities
 >   - every setting of a Joule skill and a Joule agent, and what it changes
+>   - how destinations and action projects connect a skill to a real system
 >   - how to test with the timeline, avoid ambiguous routing, and deploy to production
 > - **You will build:** a small simulation of a skill and an agent calling the same API, where only the agent recovers from a failure
 > - **Level:** beginner to intermediate · **Time:** about 45 minutes
@@ -87,6 +88,30 @@ The lobby's **control tower** holds the admin settings Joule Studio uses.
 - A skill never names a real destination. It uses a **destination variable**, and you pick the real destination when you test or deploy.
 - So the same project can point at a test system in one environment and production in another.
 
+**Three steps before a skill can reach a system**
+
+```mermaid
+flowchart LR
+    D["1 Destination<br/>in the BTP subaccount<br/>(base URL, authentication)"] --> C["2 Add it in the<br/>control tower<br/>(all or chosen environments)"]
+    C --> A["3 Action project<br/>(endpoints, release, publish)"]
+    A --> S["Skill: Call action<br/>+ destination variable"]
+```
+
+1. **Destination in the subaccount:** where the system is and how to log on. For use in action projects, SAP's tutorial adds three properties:
+
+| Property | Value |
+|---|---|
+| `sap.processautomation.enabled` | `true` |
+| `sap.applicationdevelopment.actions.enabled` | `true` |
+| `sap.build.usage` | `odata_gen` |
+
+2. **Add it in the control tower** (admins only), for all environments or for chosen ones.
+3. **Create an action project** for the endpoints you need (19.4a).
+
+- Steps 1 and 2 are usually the admin team's job; the AI developer starts at step 3.
+- A system on premise also needs SAP Cloud Connector between BTP and the system (chapter 8).
+- A destination imported from a ready-made project does not need the three properties, because no actions are generated from it (tutorial 26).
+
 **Deployed capabilities**
 - Under *Joule → Joule Assistants*, the **Joule Shared Capabilities** tab lists deployed custom skills and agents.
   - It shows each one's type, environment, version and last update, and lets an admin stop it.
@@ -118,6 +143,15 @@ The lobby's **control tower** holds the admin settings Joule Studio uses.
   - The action has success and failure branches. Inside an agent you rarely need them, because the agent reads errors and reacts.
 - The **design console** lists errors before you can test, for example "generate response is on, so define a skill output".
 
+**Inputs, outputs and data types**
+- **Skill inputs are always text**, because they come from a chat. If an action field needs a number, use *Apply formula* and convert, for example with the string-to-number function.
+- Mark an input **Required** and Joule asks the user for it when it is missing. In the course, "Get customer details" without an ID made Joule ask for the customer ID first.
+- Joule fills inputs from the conversation in a step the timeline calls **resolving input slots**. The input's name and description are what it matches against, so write them like a prompt, with an example.
+- **Optional inputs** can drive OData query options. For example, a "number of orders to return" input mapped to `$top` turns "show me the top five orders" into `$top=5`.
+- **Outputs:** set the output's type to the action's success schema (the one ending in `200`), then bind the action's result to it in the End step.
+  - If *result* cannot be selected, the two types do not match. Usually the wrong action's schema was picked.
+- Add each call to the **success path** (the 2XX branch) of the previous call. The error branch (4XX) carries only the error payload.
+
 **Limits for action tasks (SAP Help, Quotas)**
 
 | Limit | Value |
@@ -136,6 +170,58 @@ The lobby's **control tower** holds the admin settings Joule Studio uses.
 > - Use **asynchronous calls** for long-running backend work, to avoid timeouts.
 > - Turn API errors into clear messages; never show raw technical errors to users.
 > - Use **scenario dependencies** for simple skill chaining, and a custom agent when the task needs reasoning or state.
+
+## 19.4a Action projects: the API layer
+
+An **action** is SAP Build's name for one API call; an **action project** groups the actions for one destination. The name comes from SAP's process automation tools.
+
+- **Create:** Lobby → Connectors → Actions → *Create* → choose the API source:
+  - an **OData destination**, to generate actions from the service
+  - SAP Business Accelerator Hub, for SAP's standard APIs (for example SuccessFactors or S/4HANA)
+  - others, such as CAP, ABAP, BAPI, Integration Suite, an uploaded specification, or from scratch
+- **Pick the operations.** From an OData destination the generator proposes every get, create, update and delete for every entity.
+  - It does not check what the service supports, so keep only what works.
+  - Read-only services, such as the course's Northwind and SAP's mock S/4HANA, support only GET.
+- **Adjust** inputs and outputs: remove fields you do not need, and change types where needed, for example a badge ID to number.
+- **Test** each action against a real destination on the *Test* tab.
+- **Release, then publish.** The status moves from *editable* to *released* to *published*. Only published actions appear in Joule Studio's *Browse All Actions*.
+- One action project uses **one destination**. It can hold many actions for that system: business partners, invoices and sales orders can share one S/4HANA project.
+- Prefix action projects with your name when many people share a tenant, so you find your own in the filter.
+
+**What an action call sends, in miniature**
+
+```python
+# What an action call really sends: destination base URL + action endpoint + OData query options
+from urllib.parse import urlencode, quote
+
+destination = "https://services.odata.org/V4/Northwind/Northwind.svc"  # set in the BTP destination
+actions = {
+    "Get entities from customers": "/Customers",
+    "Get entity from customers by key": "/Customers('{CustomerID}')",
+}
+
+def call_url(action, params=None, query=None):
+    path = actions[action].format(**(params or {}))
+    url = destination + quote(path, safe="/()'")
+    return url + ("?" + urlencode(query, safe="$',", quote_via=quote) if query else "")
+
+print(call_url("Get entities from customers", query={"$top": 5}))
+print(call_url("Get entities from customers", query={"$filter": "Country eq 'Germany'", "$select": "CompanyName,City"}))
+print(call_url("Get entity from customers by key", params={"CustomerID": "ANTON"}))
+```
+
+Output:
+
+```text
+https://services.odata.org/V4/Northwind/Northwind.svc/Customers?$top=5
+https://services.odata.org/V4/Northwind/Northwind.svc/Customers?$filter=Country%20eq%20'Germany'&$select=CompanyName,City
+https://services.odata.org/V4/Northwind/Northwind.svc/Customers('ANTON')
+```
+
+✅ *Verified: run with Python 3.12 (details at the end).*
+
+- The destination supplies the first half, the action the second, and the query options narrow the result. That is why the same action works against any system you plug in as the destination.
+- OData query options: `$top` (how many), `$skip` (start later), `$filter` (condition), `$select` (fields), `$orderby` (sort), `$count` (total only).
 
 ## 19.5 Building an agent
 
@@ -169,6 +255,30 @@ An agent is not a flow. It is a set of prompts, models and tools.
 - **For people:** Text, with *Allow Joule to interpret* on, so the reply reads naturally.
 - **For another agent:** JSON, Markdown or a Data Type, with interpretation off, so the structure survives.
 - SAP Help: build **small agents for specific tasks**; they perform better than one large agent.
+
+**Writing instructions that work**
+- Write instructions like a program in plain English: what to do first, what next, and what the answer should look like.
+- Start each case with **"When the user asks…"**, so several cases read like a case statement:
+
+```text
+When the user asks for order information:
+1. Use "Get Orders" to get the orders.
+2. For each order, use "Get Customer by Key" with its customer ID.
+3. Answer with a table: order ID, company name, city. Do not show the customer ID.
+```
+
+- Name tools in double quotes exactly as they appear in the Tools list.
+- If writing is hard, describe the task to an AI assistant and ask it for a concise prompt (*meta-prompting*), then review it.
+- Try two or three real requests with each model provider before choosing one; results differ.
+
+**Tools you can attach (SAP Help, *Add a Tool*)**
+- **Calculator**, **Documents** (document grounding; needs a resource group from SAP AI Core), **Joule skill**, and **Joule agent** (a subagent).
+- Only skills and agents in the **same project** can be attached; every project deploys as one unit. Classic has no extension of SAP's own agents (chapter 20 has).
+- **Require user confirmation before running:** a setting on an attached skill.
+  - The agent shows what it is about to do and waits for *Yes, proceed* or *No, cancel*.
+  - Use it on every skill that creates, changes or deletes data. A *Prompt for Generated Response* sets what the confirmation shows.
+- A skill's own **Send Message** cards do not run when the skill is an agent's tool. The agent reads only the skill's outputs.
+- An agent can call a subagent, but not the other way round: SAP does not allow cycles.
 
 ## 19.6 Skill or agent? Loops, tools and MCP
 
@@ -275,6 +385,11 @@ agent, 1 step: stopped: maximum number of thinking steps reached
 > **🔒 An agent is only as safe as its user's roles**
 > - A user without permission to create sales orders cannot create them through Joule either, even if your skill can.
 > - So review backend roles before go-live, and test with real business users, not an administrator.
+
+**Moving projects and reusing processes**
+- **Export and import:** a project can be exported as an `.mtar` file and imported in another lobby with *Import* (SAP's agent tutorial ships its skills this way).
+  - If someone in the same tenant already imported it, rename your copy (for example with your name as a prefix) to avoid a name clash.
+- **Publish to Library** is separate from deploy. A Process Automation process must be released, deployed and then published to the library before a Joule skill can run it (tutorial 25).
 
 ## 19.9 Added by Claude, not from the sources
 
@@ -395,12 +510,14 @@ agent, 1 step: stopped: maximum number of thinking steps reached
 ## How this chapter was checked
 
 - **Lecture 9 recording:** captions 1:03 to 3:21 (the subaccount, the SAP Build lobby, the control tower, the skill and agent demos, testing and questions) read in full.
+- **Lecture 11 (Part A, 4 h; Part B, 7 min) and Lecture 12 (3 h 11) recordings:** read in full (Lecture 11–12 batch). Sources of the connection steps, 19.4a, inputs and outputs, instructions, tools and export.
+- **Read in full on 21 Nov 2026:** SAP Help, *Add a Tool*; SAP's six Joule Studio Classic tutorials (each has its own page, chapters 21 to 26).
 - **Read in full (SAP Help, Joule Studio, classic edition), on 20 Nov 2026:**
   - *What is Joule Studio, classic edition?*, *Initial Setup and Prerequisites*, *Create a Joule Skill*, *Create a Joule Agent*
   - *Quotas*, *Known Limitations*, *Manage Joule Skills and Agents Across Environments*
 - **Read in part:** *Creating Agents with Vibe Coding* (the deprecation note), and SAP Build Process Automation's *Environments* (the environment types).
 - **Read in full on 20 Nov 2026:** SAP Architecture Center, *Joule Skills with Joule Studio*.
-- **Run with Python 3.12, standard library only:** the skill-and-agent snippet prints the output shown.
+- **Run with Python 3.12, standard library only:** the skill-and-agent snippet and the action-URL snippet print the output shown.
 - **Not checked:**
   - the quota of 100 deployed capabilities (seen only in the course tenant)
   - the card row limits (course observation)
@@ -417,6 +534,9 @@ agent, 1 step: stopped: maximum number of thinking steps reached
 - SAP Help, *Known Limitations*: https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/known-limitations
 - SAP Help, *Creating Agents with Vibe Coding: Capabilities and Limitations*: https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/creating-agents-with-vibe-coding-capabilities-and-limitations
 - SAP Help, *Manage Joule Skills and Agents Across Environments*: https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/manage-joule-skills-and-agents-across-environments
+- SAP Help, *Add a Tool*: https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/add-tool
+- BTPAI course, Lecture 11 Part A and Part B (BT023, BT024) and Lecture 12 (BT025) recordings
+- SAP Developer Center, *Build Your First Joule Skill in Joule Studio, Classic Edition* (tutorial group): https://developers.sap.com/group.joule-studio-first-skill.html
 - SAP Help, SAP Build Process Automation, *Environments*: https://help.sap.com/docs/build-process-automation/sap-build-process-automation/environments
 - SAP Architecture Center, *Joule Skills with Joule Studio*: https://architecture.learning.sap.com/docs/golden-path/ai-golden-path/build-and-deliver/joule-skills
 - Northwind OData service (public sample data): https://services.odata.org/V4/Northwind/Northwind.svc/

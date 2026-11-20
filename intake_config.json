@@ -101,7 +101,7 @@
   },
   "BTPAI": {
    "folder": "books/btpai",
-   "sections": ["BTP Foundations", "SAP AI", "AI Fundamentals", "Joule", "Responsible AI"],
+   "sections": ["BTP Foundations", "SAP AI", "AI Fundamentals", "Joule", "Joule Tutorials", "Responsible AI"],
    "chapters": [
     "Cloud computing and the service models",
     "SAP's cloud journey and the BTP landscape",
@@ -122,7 +122,15 @@
     "Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms",
    "The Joule family: Joule Work, embedded Joule, assistants, agents and skills",
    "Joule Studio Classic: setup, skills, agents, testing and deployment",
-   "The new Joule Studio: intent-based development, agents and extensions"
+   "The new Joule Studio: intent-based development, agents and extensions",
+   "Tutorial: Set up environments and destinations for Joule skills",
+   "Tutorial: Create action projects",
+   "Tutorial: Create and deploy a Joule skill",
+   "Tutorial: Filter an action and let Joule write the reply",
+   "Tutorial: Run an automated process from a Joule skill",
+   "Tutorial: Create a Joule agent in Joule Studio Classic",
+   "Tutorial: Build an HR assistant with intent-based development",
+   "Tutorial: Extend SAP's AP Invoice Agent"
    ]
   }
  }

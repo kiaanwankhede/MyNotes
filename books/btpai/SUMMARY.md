@@ -29,5 +29,15 @@
 * [Joule Studio Classic: setup, skills, agents, testing and deployment](joule-studio-classic.md)
 * [The new Joule Studio: intent-based development, agents and extensions](joule-studio-intent-based.md)
 
+## Joule Tutorials
+* [Tutorial: Set up environments and destinations for Joule skills](tutorial-joule-skill-setup.md)
+* [Tutorial: Create action projects](tutorial-joule-action-projects.md)
+* [Tutorial: Create and deploy a Joule skill](tutorial-joule-skill-create.md)
+* [Tutorial: Filter an action and let Joule write the reply](tutorial-joule-action-filter.md)
+* [Tutorial: Run an automated process from a Joule skill](tutorial-joule-skill-process.md)
+* [Tutorial: Create a Joule agent in Joule Studio Classic](tutorial-joule-agent-create.md)
+* [Tutorial: Build an HR assistant with intent-based development](tutorial-joule-studio-hr-assistant.md)
+* [Tutorial: Extend SAP's AP Invoice Agent](tutorial-joule-studio-agent-extension.md)
+
 ## Responsible AI
 * [Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms](responsible-ai-ethics-governance.md)

@@ -9,6 +9,7 @@ Notes for an SAP consultant or developer who starts from zero on SAP Business Te
   * **SAP AI:** SAP's AI strategy, platform and careers
   * **AI Fundamentals:** how machine learning and large language models work, and prompting
   * **Joule:** SAP's assistant family: Joule for Consultants, the Joule family and its pricing, building skills and agents in Joule Studio Classic, and intent-based development in the new Joule Studio
+  * **Joule Tutorials:** one page per SAP hands-on tutorial used in the course, in our own words, with the mistakes seen in class
   * **Responsible AI:** ethics, regulation and SAP's AI terms
 * New to AI? The AI Fundamentals chapters (13 to 15) can be read before the SAP AI chapters.
 * Chapters are added lecture by lecture, as each one is read in full. A later lecture enriches an existing chapter rather than adding a second one on the same idea.
