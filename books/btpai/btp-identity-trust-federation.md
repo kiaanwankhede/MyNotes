@@ -522,4 +522,4 @@ Stretch: create the platform trust in your global account, and log on to the coc
 - OASIS, *SAML 2.0 Core*: https://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
 - Terraform Registry, *SAP/btp provider*: https://registry.terraform.io/providers/SAP/btp/latest/docs
 
-Previous: [Directories, landscape tiers and commercial models](btp-directories-tiers-commercial-models.md) · Next: [BTPAI book introduction](README.md)
+Previous: [Directories, landscape tiers and commercial models](btp-directories-tiers-commercial-models.md) · Next: [The SAP AI landscape](sap-ai-landscape.md)

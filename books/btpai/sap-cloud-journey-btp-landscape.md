@@ -162,7 +162,7 @@ flowchart TB
 > **What exactly does BAIP combine?**
 > - **The lecture and SAP's press release (13 May 2026):** BTP, Business Data Cloud and SAP Business AI.
 > - **An SAP Community post (July 2026):** BTP, Business Data Cloud and SAP Business Transformation Management.
-> - This book follows the press release. The SAP AI part of this book goes deeper.
+> - This book follows the press release. The SAP AI part of this book goes deeper, starting with [The SAP AI landscape](sap-ai-landscape.md).
 
 ## 2.5 What a customer landscape looks like today
 

@@ -15,3 +15,5 @@
 * [Identity: Cloud Identity Services, trust and federated authorization](btp-identity-trust-federation.md)
 
 ## SAP AI
+* [The SAP AI landscape: Autonomous Enterprise, AI North Star and the Business AI Platform](sap-ai-landscape.md)
+* [SAP AI certifications, roles and staying current](sap-ai-careers-certifications.md)
