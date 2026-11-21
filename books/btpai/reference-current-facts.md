@@ -9,7 +9,7 @@
 > - **Level:** reference
 > - **Last checked:** 21 Nov 2026
 
-## 39.1 How to re-check
+## 41.1 How to re-check
 
 1. Open the chapter's source for the fact (listed in that chapter's *Sources*).
 2. If the value changed, update the chapter first, then the row here.
@@ -21,7 +21,7 @@
 > - After SAP Sapphire (May) and TechEd (autumn), when SAP announces most changes.
 > - At each AI-unit or BTP contract renewal.
 
-## 39.2 Prices and SKUs
+## 41.2 Prices and SKUs
 
 | Fact | Value | Checked | Chapter |
 |---|---|---|---|
@@ -37,7 +37,7 @@
 | Cloud Foundry in consumption accounts | default runtime-memory quota of 200 GB per subaccount; you pay for memory used | 20 Nov 2026 | [8.3](btp-subaccount-walkthrough.md), [9.6](btp-directories-tiers-commercial-models.md) |
 | SAP Document AI, premium edition | sold in blocks of 100 documents; price on request | 21 Nov 2026 | [34.1](tutorial-document-ai-python.md) |
 
-## 39.3 Free offers and end dates
+## 41.3 Free offers and end dates
 
 | Fact | Value | Checked | Chapter |
 |---|---|---|---|
@@ -47,7 +47,7 @@
 | Generative AI features in Joule Studio | deprecated; no longer available from January 2027 | 21 Nov 2026 | [19.1](joule-studio-classic.md) |
 | Generative AI hub | only on the SAP AI Core **extended** plan; plans are standard and extended (enterprise accounts); a 30-day basic trial exists | 21 Nov 2026 | [33.1](tutorial-genai-hub-python.md), [36.1](tutorial-rag-grounding-genai-hub.md) |
 
-## 39.4 Counts and quotas
+## 41.4 Counts and quotas
 
 | Fact | Value | Checked | Chapter |
 |---|---|---|---|
@@ -61,7 +61,7 @@
 | Document Translation limits | sync: 500 MB and 40,000 characters (fewer for ja, zh, ko, th); async: 2,500,000 characters; job results kept 3 days | 21 Nov 2026 | [35.4](tutorial-translation-hub-python.md), [35.5](tutorial-translation-hub-python.md) |
 | SAP AI Core quotas | at most 50 resource groups and 5 tenant-wide generic secrets per tenant | 21 Nov 2026 | [36.5](tutorial-rag-grounding-genai-hub.md) |
 
-## 39.5 Release changes that alter the steps
+## 41.5 Release changes that alter the steps
 
 | Change | Effect | Checked | Chapter |
 |---|---|---|---|

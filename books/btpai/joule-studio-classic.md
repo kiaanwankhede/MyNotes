@@ -70,6 +70,34 @@ flowchart LR
 2. Choose **Create**. The options depend on what the subaccount has; Joule Studio appears as *Joule agent and skill*.
 3. Name the project. Joule Studio opens in a new tab, with *Create Joule Skill* and *Create Joule Agent*.
 
+## 19.2a Who builds, who uses, and two switches
+
+**Role collections (SAP Help, classic edition)**
+
+| Subaccount | Role collection | Lets the user |
+|---|---|---|
+| Where **Joule** is subscribed | `extensibility_developer` | Build, compile and deploy custom skills and agents; deploying a project requires it |
+| Where **Joule** is subscribed | `end_user` | Use Joule, including the skills and agents you deploy |
+| Where **SAP Build Process Automation** is subscribed | `ProcessAutomationAdmin` | Manage settings, permissions and authorizations |
+| Same | `ProcessAutomationDeveloper` | Create, edit and publish processes and automations |
+| Same | `ProcessAutomationParticipant` | Run processes, automations and actions (no debugging, no environments) |
+
+> [!NOTE]
+> **Course guide vs SAP Help**
+> - The course's *Joule Studio How-To Guide* names the builder collection `joule_extensibility`.
+> - SAP Help's *Authorizations* page names it `extensibility_developer`. This book follows SAP Help.
+
+**Two switches in the control tower (SAP Help)**
+- **AI Agent Builder Activation** tile: switch it on before you deploy a project that contains a Joule agent.
+- **Generative AI** tile: switch it on to get vibe coding (building an agent by describing it to the Joule assistant).
+  - It turns on generative AI for the tenant and accepts the related terms.
+  - These features are deprecated from January 2027 (19.1).
+
+**The new Joule Studio works differently** ([chapter 20](joule-studio-intent-based.md)):
+- No BTP role collections. Access comes from two groups in SAP Cloud Identity Services, `JouleStudioDeveloper` and `JouleStudioAdministrator`.
+- Assign them separately in the non-productive and the productive tenant.
+- Developers see only their own solutions; administrators see and deploy everything.
+
 ## 19.3 The control tower
 
 The lobby's **control tower** holds the admin settings Joule Studio uses.
@@ -524,6 +552,9 @@ agent, 1 step: stopped: maximum number of thinking steps reached
   - the quota of 100 deployed capabilities (seen only in the course tenant)
   - the card row limits (course observation)
   - the new Joule Studio itself, which the course could not access
+- **Added 21 Nov 2026 (19.2a):**
+  - Read on SAP Help, for the role collections and the two control-tower switches: *Authorizations*, *Deploy a Project* and *Create a Joule Agent with Vibe Coding* (classic edition), and *Role Management for Joule Studio*.
+  - The course's *Joule Studio How-To Guide* (BT074) prompted the section. Where its role name differs, SAP Help is followed.
 
 ## Sources and further reading
 
@@ -542,5 +573,9 @@ agent, 1 step: stopped: maximum number of thinking steps reached
 - SAP Help, SAP Build Process Automation, *Environments*: https://help.sap.com/docs/build-process-automation/sap-build-process-automation/environments
 - SAP Architecture Center, *Joule Skills with Joule Studio*: https://architecture.learning.sap.com/docs/golden-path/ai-golden-path/build-and-deliver/joule-skills
 - Northwind OData service (public sample data): https://services.odata.org/V4/Northwind/Northwind.svc/
+- SAP Help, *Authorizations* (Joule Studio, classic edition): https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/authorizations
+- SAP Help, *Deploy a Project* (classic edition): https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/deploy-project
+- SAP Help, *Role Management for Joule Studio*: https://help.sap.com/docs/joule-studio/joule-studio/role-management-for-joule-studio
+- BTPAI course Drive: *Joule-Studio-How-To-Guide.pdf* (BT074)
 
 Previous: [The Joule family: Joule Work, embedded Joule, assistants, agents and skills](joule-family.md) · Next: [The new Joule Studio: intent-based development, agents and extensions](joule-studio-intent-based.md)

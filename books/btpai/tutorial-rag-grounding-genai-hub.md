@@ -282,4 +282,4 @@ SAP Help lists these orchestration modules. Each module's output is the next one
 - SAP Help, *Grounding Management*: https://help.sap.com/docs/ai-launchpad/sap-ai-launchpad/grounding-management
 - SAP Help, *Build Your Orchestration Workflow*: https://help.sap.com/docs/ai-launchpad/sap-ai-launchpad/build-your-orchestration-workflow
 
-Previous: [Hands-on: Translate text and documents with SAP Translation Hub from Python](tutorial-translation-hub-python.md) · Next: [Reference: Joule setup building blocks](reference-joule-setup-building-blocks.md)
+Previous: [Hands-on: Translate text and documents with SAP Translation Hub from Python](tutorial-translation-hub-python.md) · Next: [Practice: 10 Joule skill assignments](practice-joule-skills.md)

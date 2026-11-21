@@ -9,7 +9,7 @@
 > - **Level:** reference
 > - **Last checked:** 21 Nov 2026
 
-## 38.1 Acronyms
+## 40.1 Acronyms
 
 | Term | Meaning | Chapter |
 |---|---|---|
@@ -28,7 +28,7 @@
 | **IaaS / PaaS / SaaS** | Rent the hardware / also the platform / the finished application | [1](cloud-computing-service-models.md) |
 | **IAS** | Identity Authentication: SAP's login service in Cloud Identity Services | [10](btp-identity-trust-federation.md) |
 | **IDS** | Identity Directory: the user store in Cloud Identity Services | [10](btp-identity-trust-federation.md) |
-| **IPS** | Identity Provisioning: copies users and groups from a source system to a target | [10](btp-identity-trust-federation.md), [37.5](reference-joule-setup-building-blocks.md) |
+| **IPS** | Identity Provisioning: copies users and groups from a source system to a target | [10](btp-identity-trust-federation.md), [39.5](reference-joule-setup-building-blocks.md) |
 | **J4C** | Joule for Consultants: answers SAP project questions from curated SAP knowledge | [16](joule-for-consultants.md) |
 | **J4D** | Joule for Developers: Joule in development tools, for example ABAP | [16](joule-for-consultants.md), [18](joule-family.md) |
 | **JWT** | JSON Web Token: the signed token a service returns after sign-in; some APIs need a user-specific one | [35](tutorial-translation-hub-python.md) |
@@ -48,7 +48,7 @@
 | **SSO** | Single sign-on: one login for many systems | [10](btp-identity-trust-federation.md) |
 | **XSUAA** | SAP Authorization and Trust Management service: issues the tokens that carry a user's roles in a subaccount | [7](btp-users-role-collections.md), [8](btp-subaccount-walkthrough.md) |
 
-## 38.2 Terms
+## 40.2 Terms
 
 | Term | Meaning | Chapter |
 |---|---|---|
@@ -59,10 +59,10 @@
 | **Assistant (Joule)** | SAP's grouping of agents for one business area, for example Accounts Payable | [18](joule-family.md) |
 | **Booster** | A guided setup wizard in the global account | [6](btp-global-account-tools.md) |
 | **Cloud Connector** | On-premise software that opens a secure tunnel to BTP | [8](btp-subaccount-walkthrough.md) |
-| **Content provider** | A Work Zone channel that imports a product's roles and apps | [37.4](reference-joule-setup-building-blocks.md) |
+| **Content provider** | A Work Zone channel that imports a product's roles and apps | [39.4](reference-joule-setup-building-blocks.md) |
 | **Control tower** | Joule Studio's admin area: environments, destinations, settings | [19](joule-studio-classic.md) |
 | **Deployment (AI Core)** | One running instance of a model in SAP AI Core, with its own ID | [33](tutorial-genai-hub-python.md) |
-| **Destination** | Stored connection details for another system, used by name | [8](btp-subaccount-walkthrough.md), [37.2](reference-joule-setup-building-blocks.md) |
+| **Destination** | Stored connection details for another system, used by name | [8](btp-subaccount-walkthrough.md), [39.2](reference-joule-setup-building-blocks.md) |
 | **Destination variable** | A placeholder in a skill; the real destination is chosen at test or deploy time | [19](joule-studio-classic.md), [23](tutorial-joule-skill-create.md) |
 | **Directory** | A folder of subaccounts in a global account, with its own licences and admins | [9](btp-directories-tiers-commercial-models.md) |
 | **Document AI** | SAP service that extracts fields from business documents; its API was called Document Information Extraction | [34](tutorial-document-ai-python.md) |
@@ -91,7 +91,7 @@
 | **Translation Hub** | SAP service for translating application texts and documents by API | [35](tutorial-translation-hub-python.md) |
 | **Trust configuration** | The link between a subaccount and an identity provider | [10](btp-identity-trust-federation.md) |
 | **Vector engine** | SAP HANA Cloud's store for embeddings; finds the chunks nearest to a question | [36](tutorial-rag-grounding-genai-hub.md) |
-| **Work Zone** | SAP Build Work Zone: the launchpad service that Joule uses for navigation and roles | [29](tutorial-joule-sac-analytical-insights.md), [37.4](reference-joule-setup-building-blocks.md) |
+| **Work Zone** | SAP Build Work Zone: the launchpad service that Joule uses for navigation and roles | [29](tutorial-joule-sac-analytical-insights.md), [39.4](reference-joule-setup-building-blocks.md) |
 
 ## How this page was built
 

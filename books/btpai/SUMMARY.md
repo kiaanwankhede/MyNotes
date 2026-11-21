@@ -56,6 +56,10 @@
 * [Hands-on: Translate text and documents with SAP Translation Hub from Python](tutorial-translation-hub-python.md)
 * [Hands-on: RAG and document grounding with the generative AI hub](tutorial-rag-grounding-genai-hub.md)
 
+## Joule Studio: Practice
+* [Practice: 10 Joule skill assignments](practice-joule-skills.md)
+* [Practice: 10 Joule agent assignments](practice-joule-agents.md)
+
 ## Reference
 * [Reference: Joule setup building blocks](reference-joule-setup-building-blocks.md)
 * [Reference: Glossary](reference-glossary.md)
