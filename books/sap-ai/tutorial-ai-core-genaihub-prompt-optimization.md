@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Prompt optimization](https://developers.sap.com/tutorials/ai-core-genaihub-prompt-optimization) by Smita Naik · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-genaihub-prompt-optimization/)
-> - **Changes for this book:** page layout; steps numbered 32.1 to 32.12; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 33.1 to 33.12; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 The process optimizes a prompt for a specific model, stores metrics in the ML Tracking Service, and saves the optimized prompt and results back to the Prompt Registry and Object Store.
@@ -35,14 +35,14 @@ The process optimizes a prompt for a specific model, stores metrics in the ML Tr
 [SAP AI Core Service Plans](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/service-plans?version=CLOUD)
 7. You've prepared a prompt template and your template is available in the prompt registry. For more information, see [Save a Template](https://help.sap.com/docs/AI_LAUNCHPAD/3f71b1e9d5124e26ace1aa1edb11e450/49d4248485644184ab3ca2ddf36119a6.html?locale=en-US&state=DRAFT&version=DEV)
 
-## 32.1 Pre-Read
+## 33.1 Pre-Read
 Before starting this tutorial, ensure that you:
 - Understand the basics of Generative AI workflows in SAP AI Core.
 - Are familiar with creating and managing prompt templates, artifacts, and object stores
 - Have the required roles such as genai_manager or custom_evaluation.
 - Have completed the Quick Start tutorial or equivalent setup for SAP AI Core and AI Launchpad access.
   
-## 32.2 Architecture Overview
+## 33.2 Architecture Overview
 
 - Prompt Optimization in SAP AI Core connects the Prompt Registry, Object Store, and ML Tracking Service to form an end-to-end optimization workflow.
 - The dataset (for example, Test-Data.json) is stored in the Object Store and registered as an artifact.
@@ -52,7 +52,7 @@ Before starting this tutorial, ensure that you:
 
 ![img](images/ai-core-genaihub-prompt-optimization/img/image_arch.png)
 
-## 32.3 Notebook Reference
+## 33.3 Notebook Reference
 
 For hands-on execution and end-to-end reference, use the accompanying [Prompt Optimization Notebook](https://github.com/SAP-samples/aicore-genai-samples/blob/main/genai-sample-apps/prompt-optimizer/prompt-optimizer.ipynb). It includes complete Python code examples that align with each step of this tutorial — from dataset preparation and artifact registration to configuration creation, execution, and result retrieval.
 
@@ -63,7 +63,7 @@ For hands-on execution and end-to-end reference, use the accompanying [Prompt Op
 - Configure your environment variables such as AICORE_BASE_URL, AICORE_AUTH_TOKEN, and object store credentials .
 - Execute each cell in order to reproduce the complete prompt optimization workflow demonstrated in this tutorial.
 
-## 32.4 Environment Variables Setup
+## 33.4 Environment Variables Setup
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -153,7 +153,7 @@ client = GenAIHubProxyClient(
 
 </details>
 
-## 32.5 Register Object Store Secret in AI Core
+## 33.5 Register Object Store Secret in AI Core
 
 The object store is used by Prompt Optimization to read datasets and store generated artifacts and results.
 In most environments, a default object store is already registered.
@@ -268,7 +268,7 @@ Use the below payload to create a secret for AWS S3 with NoAuthentication as aut
 
 </details>
 
-## 32.6 Prepare Dataset
+## 33.6 Prepare Dataset
 
 The dataset provides the examples used by the Prompt Optimization process to evaluate and refine your input prompt.
 Each record should contain a sample input message and its corresponding expected structured JSON output, which represents the correct behavior you want the model to learn.
@@ -315,7 +315,7 @@ Example record from facility-train.json:
 
 - Ensure it’s available locally for upload in the next step.
 
-## 32.7 Register Dataset Artifact
+## 33.7 Register Dataset Artifact
 
 The dataset used for optimization must be registered as an artifact in SAP AI Core.
 Artifacts act as the link between your files stored in the object store and the services that use them during prompt optimization runs.Each artifact is uniquely identified by its name and associated with a scenario.
@@ -557,7 +557,7 @@ A successful response returns the artifact ID, which you’ll use later in the o
 
 </details>
 
-## 32.8 Create and save the prompt template
+## 33.8 Create and save the prompt template
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -737,7 +737,7 @@ Content-Type: application/json
 
 </details>
 
-## 32.9 Register an Optimization Configuration
+## 33.9 Register an Optimization Configuration
 
 The optimization configuration defines how prompt optimization runs — it links the dataset artifact, prompt template, model, and metric into one executable setup.
 When you run the optimization, SAP AI Core uses this configuration to iteratively tune your prompt so that the chosen metric (for example, json_exact_match) is maximized.
@@ -904,7 +904,7 @@ ai-resource-group: {{resource_group}}
 For the latest updates, refer to [SAP Note 3437766](https://me.sap.com/notes/3437766) – Model Availability and Support for Generative AI Hub
 .
 
-## 32.10 Run the Prompt Optimization Execution
+## 33.10 Run the Prompt Optimization Execution
 
 After registering the optimization configuration, the next step is to execute the optimization run.
 This execution launches the prompt optimization workflow in SAP AI Core, which iteratively refines your prompt using the specified dataset and metric.
@@ -968,7 +968,7 @@ ai-resource-group: {{resource_group}}
 
 </details>
 
-## 32.11 Monitor and View Optimization Progress
+## 33.11 Monitor and View Optimization Progress
 
 After triggering the prompt optimization execution, you can monitor the progress and verify its status in real time.
 Monitoring helps ensure that your run completes successfully and allows you to access intermediate and final optimization results.
@@ -1053,7 +1053,7 @@ These messages confirm a successful optimization.
 
 </details>
 
-## 32.12 Review Optimization Results
+## 33.12 Review Optimization Results
 
 Once the prompt optimization execution completes successfully, the system generates an optimized version of your prompt and stores it in the Prompt Registry.
 You can review the optimization results, inspect metrics, and compare the base and optimized prompts to understand how performance has improved.

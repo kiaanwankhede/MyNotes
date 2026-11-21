@@ -332,6 +332,11 @@ print(f"10,000 calls/day: ${per_call * 10_000:,.2f} per day")
   - **Context window:** how much text the model can take in at once.
   - **Speed:** critical for voice agents, where a pause after you speak feels unnatural. Fast "Flash"-type models suit voice.
   - **Cost:** per token, multiplied by how often the task runs.
+- **Also filter by what the model can do** (Lecture 13):
+  - text generation, image recognition (read an invoice image), image generation, speech-to-text, speech-to-speech
+  - **reasoning** models plan before answering: better on hard multi-step tasks, but they use more tokens and cost more
+  - **embedding** models return vectors, not text, for search and RAG
+  - Most current models are **multimodal** (text, images, audio). In SAP, the model library in AI Launchpad filters by these capabilities: [chapter 7.5](sap-ai-core-launchpad.md).
 - **Then weigh accuracy against risk.**
   - Say a small model is 98% accurate for $150 a year, and a mid-size one 99.9% for $500.
   - For automatic invoice approval, pay for the better model: one wrong approval can cost far more.

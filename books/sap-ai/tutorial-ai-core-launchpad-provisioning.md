@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Use Boosters for Use of SAP AI Core and SAP AI Launchpad](https://developers.sap.com/tutorials/ai-core-launchpad-provisioning) by Dhrubajyoti Paul · about 20 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-launchpad-provisioning/)
-> - **Changes for this book:** page layout; steps numbered 12.1 to 12.6; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 13.1 to 13.6; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -27,7 +27,7 @@ SAP AI Core and SAP AI Launchpad are services which you can link to your BTP glo
 
 ---
 
-## 12.1 Provision SAP AI Core in your global account
+## 13.1 Provision SAP AI Core in your global account
 
 Open the SAP BTP cockpit and access your global account.
 
@@ -48,7 +48,7 @@ Save your new entitlement.
 
 ![Save](images/ai-core-launchpad-provisioning/img/saveentitlement.png)
 
-## 12.2 Run the booster for SAP AI Core
+## 13.2 Run the booster for SAP AI Core
 
 Choose `Boosters` from the navigation pane. Find and choose the booster for `SAP AI Core` from the selection. 
 
@@ -75,7 +75,7 @@ After the execution completes, follow the steps shown to navigate to your subacc
 
 ![booster execution success](images/ai-core-launchpad-provisioning/img/aicore_booster_successful_execution.png)
 
-## 12.3 View your instances and create your keys
+## 13.3 View your instances and create your keys
 
 In the subaccount section of SAP BTP Cockpit, choose `Services` from the left navigation menu and `Instances and subscriptions` from the page. 
 
@@ -96,14 +96,14 @@ Once your keys have been created, you can view or download them at any time by l
 
 ![Locate the keys in SAP AI Cockpit](images/ai-core-launchpad-provisioning/img/viewkeys.png)
 
-## 12.4 Provision SAP AI Launchpad in your global account
+## 13.4 Provision SAP AI Launchpad in your global account
 
 > **Note:** SAP AI Launchpad is optional, but is the recommended interface for use with SAP AI Core.
 
 Configure your entitlement as before, but select `SAP AI Launchpad`.
 
 ![SAP AI Launchpad account information](images/ai-core-launchpad-provisioning/img/lpentitlement.png)
-## 12.5 Run the booster for SAP AI Launchpad
+## 13.5 Run the booster for SAP AI Launchpad
 
 Choose `Boosters` from the navigation pane, and then choose the booster for `SAP AI Launchpad` from the selection. 
 
@@ -122,7 +122,7 @@ Review the subaccount and entitlement details you have selected previously and c
 ![execution in progress](images/ai-core-launchpad-provisioning/img/AIL_creation_inprogress.png)
 wait until setup completes. Once completed, navigate to your subaccount.
 
-## 12.6 View your instances
+## 13.6 View your instances
 
 View your SAP AI Launchpad instance by navigating to `Instances and subscriptions`. To see the details of your new instance, click the chevron on the entry.
 

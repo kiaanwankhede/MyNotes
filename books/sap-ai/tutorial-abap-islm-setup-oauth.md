@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Set Up SAP BTP and Integrate SAP AI Core with ISLM](https://developers.sap.com/tutorials/abap-islm-setup-oauth) by Daniel Funkert · about 25 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/abap-core-development](https://github.com/sap-tutorials/abap-core-development/blob/main/tutorials/abap-islm-setup-oauth/)
-> - **Changes for this book:** page layout; steps numbered 50.1 to 50.11; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 51.1 to 51.11; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -21,7 +21,7 @@
 
 ---
 
-## 50.1 Overview
+## 51.1 Overview
 In this tutorial, you connect your **SAP S/4HANA** system to **SAP BTP** and enable **Intelligent Scenario Lifecycle Management** (ISLM) to communicate with **SAP AI Core**. You provision the required SAP BTP services, configure OAuth 2.0 authentication, and establish the communication from **SAP S/4HANA** to **SAP AI Core**. This enables ISLM to execute custom generative AI scenarios using **SAP AI Core**.
 
 For learning purposes, the required services are set up manually in this tutorial. You can also use the available boosters and only complete the additional steps described in this tutorial.
@@ -35,7 +35,7 @@ The diagram illustrates how ISLM is embedded in the overall architecture and how
 - Learn more about Intelligent Scenario Lifecycle Management (ISLM) on SAP Help Portal: [Intelligent Scenario Lifecycle Management](https://help.sap.com/docs/ABAP_PLATFORM_NEW/7989a582039547ae91d8f483e487058d/436151b128614f0e84024015136043d3.html?version=latest)
 - Explore additional resources in the SAP Community: [Intelligent Scenario Lifecycle Management for SAP S/4HANA](https://pages.community.sap.com/topics/intelligent-scenario-lifecycle-management-s4hana)
 
-## 50.2 Add Entitlements to the SAP BTP Subaccount
+## 51.2 Add Entitlements to the SAP BTP Subaccount
 In this step, you assign the required entitlements in your SAP BTP subaccount for SAP AI Core and SAP AI Launchpad.
 
 1\. Log on to your **SAP BTP subaccount** (or create a new one) and open **Entitlements**.
@@ -64,7 +64,7 @@ In this step, you assign the required entitlements in your SAP BTP subaccount fo
 
 7\. Congratulations! You have now successfully assigned the required entitlements.
 
-## 50.3 Create an SAP AI Core Service Instance
+## 51.3 Create an SAP AI Core Service Instance
 In this step, you create an SAP AI Core service instance and binding. The binding provides the credentials required to connect your SAP S/4HANA system.
 
 1\. Log on to your **SAP BTP subaccount** and open **Services** &gt; **Instances and Subscriptions**.
@@ -106,7 +106,7 @@ In this step, you create an SAP AI Core service instance and binding. The bindin
 
 10\. Congratulations! You have successfully created the SAP AI Core service instance and binding.
 
-## 50.4 Subscribe to SAP AI Launchpad
+## 51.4 Subscribe to SAP AI Launchpad
 In this step, you subscribe to SAP AI Launchpad and assign the required role collections to your user to access the application.
 
 1\. Log on to your **SAP BTP subaccount** and open **Services** &gt; **Instances and Subscriptions**.
@@ -150,7 +150,7 @@ In this step, you subscribe to SAP AI Launchpad and assign the required role col
 
 9\. Congratulations! You have now successfully subscribed to SAP AI Launchpad and assigned the required role collections.
 
-## 50.5 Verify SAP AI Launchpad Access
+## 51.5 Verify SAP AI Launchpad Access
 In this step, you verify that SAP AI Launchpad is correctly configured and connected to SAP AI Core. You create an AI API connection using the previously generated service binding and confirm that the setup is ready for use in ISLM scenarios.
 
 1\. Log on to your **SAP BTP subaccount** and open **Services** &gt; **Instances and Subscriptions**.
@@ -184,7 +184,7 @@ In this step, you verify that SAP AI Launchpad is correctly configured and conne
 
 7\. Congratulations! You have now successfully verified SAP AI Launchpad access and confirmed that the integration is ready for your ISLM scenarios.
 
-## 50.6 Enable Document Grounding Using the API (Optional)
+## 51.6 Enable Document Grounding Using the API (Optional)
 In this optional exercise, you enable Document Grounding for your SAP AI Core resource group using the API. This is only required if Document Grounding is not already enabled by default for your resource group.
 
 1\. Open **Bruno** (or Postman) and choose **Create Collection**.
@@ -258,7 +258,7 @@ In this optional exercise, you enable Document Grounding for your SAP AI Core re
 
 13\. Congratulations! You have successfully enabled Document Grounding for the default resource group. 
 
-## 50.7 Import the Root CA Certificate into the Trust Store
+## 51.7 Import the Root CA Certificate into the Trust Store
 In this step, you import the Root CA certificate of SAP AI Core into the trust store of your SAP S/4HANA system. This ensures that secure HTTPS communication with SAP AI Core can be established.
 
 1\. From the **SAP AI Core** service binding, copy the `AI_API_URL`.
@@ -293,7 +293,7 @@ In this step, you import the Root CA certificate of SAP AI Core into the trust s
 
 11\. Congratulations! You have successfully imported the Root CA Certificate into the trust store.
 
-## 50.8 Create an OAuth 2.0 Client in SAP S/4HANA
+## 51.8 Create an OAuth 2.0 Client in SAP S/4HANA
 In this step, you create an OAuth 2.0 client in your SAP S/4HANA system. This client is used to authenticate requests from ISLM to SAP AI Core using the OAuth 2.0 client credentials flow.
 
 1\. Log on to your **SAP S/4HANA** system and open transaction **OA2C_CONFIG** (OAuth 2.0 Clients).
@@ -326,7 +326,7 @@ In this step, you create an OAuth 2.0 client in your SAP S/4HANA system. This cl
 
 6\. Congratulations! You have successfully created the OAuth 2.0 client for ISLM.
 
-## 50.9 Create an HTTP Destination to SAP AI Core
+## 51.9 Create an HTTP Destination to SAP AI Core
 In this step, you create an HTTP destination in your SAP S/4HANA system to enable communication with SAP AI Core. This destination is used by ISLM to call the SAP AI Core API.
 
 1\. Log on to your **SAP S/4HANA** system and open transaction **SM59** (Configuration of RFC Destinations).
@@ -370,7 +370,7 @@ In this step, you create an HTTP destination in your SAP S/4HANA system to enabl
 
 9\. Congratulations! You have successfully created the HTTP destination.
 
-## 50.10 Maintain the Usage Type for the Generative AI Scenario
+## 51.10 Maintain the Usage Type for the Generative AI Scenario
 In this step, you assign the HTTP destination to the generative AI usage type in ISLM. This enables ISLM to use the configured connection when executing generative AI scenarios.
 
 1\. Log on to your **SAP S/4HANA** system and open transaction **ISLM_REUSE_CFGV** (Maintain Intelligent Scenario Usage).
@@ -401,7 +401,7 @@ In this step, you assign the HTTP destination to the generative AI usage type in
 
 7\. Congratulations! You have successfully configured the usage type for the generative AI scenario.
 
-## 50.11 Test yourself
+## 51.11 Test yourself
 Test your understanding of the concepts covered in this tutorial. Select the correct answer and choose **Check Answer**.
 
 ---

@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Build a House Price Predictor with SAP AI Core using VS Code Toolkit](https://developers.sap.com/tutorials/ai-core-vs-code-toolkit) by Dhrubajyoti Paul · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-vs-code-toolkit/)
-> - **Changes for this book:** page layout; steps numbered 44.1 to 44.17; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 45.1 to 45.17; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -25,7 +25,7 @@ You may still complete this tutorial if you are not familiar with the Python pro
 
 ---
 
-## 44.1 Create a Docker account and generate a Docker access token
+## 45.1 Create a Docker account and generate a Docker access token
 
 You need a Docker repository to store your AI code on the cloud in the form of Docker images. SAP AI core will fetch your code from this Docker repository. The image ensures that your code is bundled along with all of the dependencies, directory structure and drivers that are required when using GPU.
 
@@ -45,7 +45,7 @@ Follow the guided steps, and then store the token that you receive in your local
 
 > **SECURITY TIP**: This access token means that SAP AI Core can access the specified Docker repository without you sharing you Docker credentials. It also means that you can revoke access by deleting the token, rather than having to change your credentials.
 
-## 44.2 Install Docker Desktop
+## 45.2 Install Docker Desktop
 
 [Download and Install](https://www.docker.com/products/docker-desktop) Docker Desktop. You will need Docker Desktop to help you build Docker images of your AI code.
 
@@ -53,7 +53,7 @@ Run your Docker Desktop. You will observe "whale icon" on your tray when Docker 
 
 ![image](images/ai-core-vs-code-toolkit/img/docker-desktop.png)
 
-## 44.3 Write AI code for house price prediction
+## 45.3 Write AI code for house price prediction
 
 Create a directory (folder) named **hello-aicore-code**.
 
@@ -100,7 +100,7 @@ sklearn==0.0
 
 The code builds a model using the [California Housing Dataset](https://scikit-learn.org/stable/datasets/real_world.html#california-housing-dataset) available in Scikit-Learn. Note that the code neither reads a datafile nor stores the model. We will cover both of these in a different tutorial.
 
-## 44.4 Transform your AI code into a Docker image
+## 45.4 Transform your AI code into a Docker image
 
 In the same directory, create a file named `Dockerfile` with **no extension**. This file stores instructions for Docker to build an image. Your Docker image is a Linux distribution, therefore commands in this `Dockerfile` are similar to Linux commands with verbs for Docker as the suffix. Paste the following content **exactly** as it is, into the file:
 
@@ -146,7 +146,7 @@ The result of this command should be:
 
 ![image](images/ai-core-vs-code-toolkit/img/docker-build.png)
 
-## 44.5 Connect your local system to a Docker account
+## 45.5 Connect your local system to a Docker account
 
 Login to your Docker account from your terminal. This is a one time step that stores your Docker account credentials in your local Docker Desktop.
 
@@ -160,7 +160,7 @@ Copy and paste your generated Docker Access Token to use as your password. For s
 
 ![image](images/ai-core-vs-code-toolkit/img/docker-login.png)
 
-## 44.6 Upload a Docker image to the cloud
+## 45.6 Upload a Docker image to the cloud
 
 ```BASH
 docker push docker.io/<YOUR_USERNAME>/house-price:01
@@ -168,7 +168,7 @@ docker push docker.io/<YOUR_USERNAME>/house-price:01
 
 ![image](images/ai-core-vs-code-toolkit/img/docker-push.png)
 
-## 44.7 Adding GitHub
+## 45.7 Adding GitHub
 
 Here we will be adding our GitHub repository to AI core.
 
@@ -192,7 +192,7 @@ Step 3: Fill the details GitHub URL, Name for GitHub, Username, password/token a
 
 ![](images/ai-core-vs-code-toolkit/img/Adding_GitHub6.png)
 
-## 44.8 Creating an application
+## 45.8 Creating an application
 
 Here we add an application from the GitHub repository we just added to AI core.
 
@@ -213,7 +213,7 @@ This would mark as Completion of registering an application.
 
 ![](images/ai-core-vs-code-toolkit/img/Creating_application5.png)
 
-## 44.9 Setting up docker secret
+## 45.9 Setting up docker secret
 
 Docker secrets are required to Perform the authentication while fetching Docker Images from docker hub.
 
@@ -224,7 +224,7 @@ Docker secrets are required to Perform the authentication while fetching Docker 
 ![](images/ai-core-vs-code-toolkit/img/docker1.png)
 for more info you can reffer [here](https://developers.sap.com/tutorials/ai-core-code.html#9219aeb5-63bb-460a-b5a4-a2d1dd4db740).
 
-## 44.10 Connecting docker secrets to AI core
+## 45.10 Connecting docker secrets to AI core
 
 **Step 1 :** Select Ai core connection > Go inside admin operations > right click on Docker Credentials and click on create docker credentials.
 
@@ -246,7 +246,7 @@ Enter the your docker secret secret creds that we created in the previous step
 
 ![](images/ai-core-vs-code-toolkit/img/Connecting_docker5.png)
 
-## 44.11 Uploading the dataset to S3
+## 45.11 Uploading the dataset to S3
 
 Your First task will be to download the dataset from <https://raw.githubusercontent.com/sap-tutorials/Tutorials/master/tutorials/ai-core-data/train.csv>
 
@@ -261,7 +261,7 @@ Then using [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-st
 
 **You can reffer the steps here for uploading Files to S3 [here](https://developers.sap.com/tutorials/ai-core-data.html#dc4f71c0-ed4f-409f-bb1b-695c32438e80)**
 
-## 44.12 Creating object store credentials
+## 45.12 Creating object store credentials
 
 Object store credentials are required to access the data stored inside S3 bucket.
 
@@ -285,7 +285,7 @@ Enter your AWS Access Key ID
 
 Enter your AWS Access Secret Key
 
-## 44.13 Creating an Artifact
+## 45.13 Creating an Artifact
 
 Step 1: Select Ai core connection > Go inside ML operations > > Go inside ML Scenarios > Name of the Scenario you created > right click on Artifacts and click on Create Artifact.
 
@@ -307,7 +307,7 @@ A pop-up will appear on the screen enter the values as per the screenshots below
 
 ![](images/ai-core-vs-code-toolkit/img/Artifact5.png)
 
-## 44.14 Creating a Configuration
+## 45.14 Creating a Configuration
 
 **Step 1:** Select Ai core connection > Go ML operations > select Resource groups and choose the resource group.
 
@@ -327,7 +327,7 @@ Step 4: A pop up will appear on the top of screen Enter all the required details
 
 ![](images/ai-core-vs-code-toolkit/img/training_config5.png)
 
-## 44.15 Running Training
+## 45.15 Running Training
 
 Go inside training configurations and choose the created Configuration and right click on Execution and click on Start execution to start the training.
 
@@ -349,7 +349,7 @@ Step 5: Once the execution is complete and the status shows as 'Completed,' you 
 
 ![image](images/ai-core-vs-code-toolkit/img/step15.png)
 
-## 44.16 Deployment
+## 45.16 Deployment
 
 As soon as training ends the second part would be to deploy the model. So, we will be again creating a deployment configuration using the same steps as we used for creating the configuration for training but this time we would refer these steps under serving configurations.
 
@@ -386,7 +386,7 @@ Json Body shown in Screen shot
 |<p>{</p><p>`    `"MedInc": 8.3252,</p><p>`    `"HouseAge": 41,</p><p>`    `"AveRooms": 6.984126984,</p><p>`    `"AveBedrms":1.023809524,</p><p>`    `"Population":322,</p><p>`    `"AveOccup": 2.555555556,</p><p>`    `"Latitude":37.88,</p><p>`    `"Longitude":-122.23</p><p>}</p>|
 | :- |
 
-## 44.17 Troubleshooting ERRORS
+## 45.17 Troubleshooting ERRORS
 
 If you get RBAC: Access Denied then check the following in the order mentioned.
 

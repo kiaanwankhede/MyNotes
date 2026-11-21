@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Strategic Prediction with SAP RPT-1: A Comprehensive Guide](https://developers.sap.com/tutorials/ai-core-genaihub-sap-rpt-model-usage) by Smita Naik · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-genaihub-sap-rpt-model-usage/)
-> - **Changes for this book:** page layout; steps numbered 36.1 to 36.8; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 37.1 to 37.8; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## You Will Learn
@@ -98,7 +98,7 @@ By the end of this tutorial, you will have run your first regression and classif
 
 Refer to the [SAP RPT-1 documentation](https://help.sap.com/docs/sap-ai-core/generative-ai/sap-rpt-1) for complete API reference information.
 
-## 36.1 The Dataset Used in This Tutorial
+## 37.1 The Dataset Used in This Tutorial
 
 This tutorial uses a single local CSV file. Two prediction targets are demonstrated simultaneously in one API call.
 
@@ -136,7 +136,7 @@ TXN C18O8PW7      Small Business   Education   Europe           GBP         1276
 
 > **Note:** Rows with known `Days Late` and `Risk Score` values are context rows — the model learns from these. Rows marked `[PREDICT]` are the prediction rows the model will fill in.
 
-## 36.2 Companion Notebooks
+## 37.2 Companion Notebooks
 
 This tutorial is accompanied by two Jupyter notebooks that provide a complete, executable version of all prediction steps covered in the Python SDK and JavaScript SDK sections. Download them from the tutorial's GitHub repository before starting the hands-on sections.
 
@@ -147,7 +147,7 @@ This tutorial is accompanied by two Jupyter notebooks that provide a complete, e
 
 > **Note:** Replace the `#` placeholders above with the actual GitHub repository links once the notebooks are published. Each notebook follows the same step sequence as the corresponding section in this tutorial — credentials setup, dataset loading, context/prediction row split, model call, result parsing, and CSV export.
 
-## 36.3 Deploy SAP RPT-1
+## 37.3 Deploy SAP RPT-1
 
 <details class="qa"><summary>AI Launchpad</summary>
 
@@ -512,7 +512,7 @@ The `configurationId` from the previous step to be filled here. The post-respons
 
 ---
 
-## 36.4 Prepare the Parquet File
+## 37.4 Prepare the Parquet File
 
 This step is run **once** before using any of the prediction methods. The same `payment_transactions.parquet` file is shared across Python SDK (advanced), JavaScript SDK, and Bruno — no need to create it separately for each method.
 
@@ -542,7 +542,7 @@ print("Parquet file generated successfully!")
 
 ---
 
-## 36.5 Run Predictions Using SAP RPT-1
+## 37.5 Run Predictions Using SAP RPT-1
 
 With the deployment running and credentials configured, you are now ready to send prediction requests.
 
@@ -1145,7 +1145,7 @@ Ensure your RPT-1 deployment status is **Running** in AI Launchpad before sendin
 
 </details>
 
-## 36.6 Context Row Best Practices
+## 37.6 Context Row Best Practices
 
 Regardless of which access method you use, the quality of your context rows directly affects prediction accuracy.
 
@@ -1159,7 +1159,7 @@ Regardless of which access method you use, the quality of your context rows dire
 
 ---
 
-## 36.7 Troubleshooting
+## 37.7 Troubleshooting
 
 | Error | Likely Cause | Fix |
 |---|---|---|
@@ -1171,7 +1171,7 @@ Regardless of which access method you use, the quality of your context rows dire
 
 ---
 
-## 36.8 Summary
+## 37.8 Summary
 
 You have now covered all four ways to work with SAP RPT-1, from the point-and-click AI Launchpad for deployment management, to the Python SDK,JavaScript SDK and Bruno REST API for full programmatic control.
 

@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Deploy a Movie Recommendation System to AI Core Using Template Generator](https://developers.sap.com/tutorials/ai-core-template-wizard) by Dhrubajyoti Paul · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-template-wizard/)
-> - **Changes for this book:** page layout; steps numbered 45.1 to 45.3; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 46.1 to 46.3; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -20,7 +20,7 @@
 ## Intro
 In this tutorial we would be Creating a movie recommendation Template and deploying the same using AI core.
 
-## 45.1 Installing Application wizard in Visual Studio Code
+## 46.1 Installing Application wizard in Visual Studio Code
 
 In your Visual Studio Code Application, go to extensions and search for application wizard. Go to the Applictation wizard by SAP OS and install it.
 
@@ -38,7 +38,7 @@ Search for *ai core* and install the **@sap/ai-core** generator.
 
 ![image](images/ai-core-template-wizard/img/inst3.png)
 
-## 45.2 Generate a template for movie recommendaiton
+## 46.2 Generate a template for movie recommendaiton
 
 -  press Command + shift + p for *mac* and Control + shift + p for *Windows* to open control center and choose open template wizard.
 
@@ -76,7 +76,7 @@ Search for *ai core* and install the **@sap/ai-core** generator.
 
 ![image](images/ai-core-template-wizard/img/tempelate_gen9.png)
 
-## 45.3 Deploying Template to AI Core
+## 46.3 Deploying Template to AI Core
 
 In the generated template visit Template folder > Pipelines and replace `ai-core_creds.json` and `S3_creds.json` with your actual AI core credentials.
 

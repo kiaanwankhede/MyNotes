@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Orchestration with Grounding Capabilities in SAP AI Core](https://developers.sap.com/tutorials/ai-core-orchestration-grounding) by Smita Naik · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-orchestration-grounding/)
-> - **Changes for this book:** page layout; steps numbered 20.1 to 20.8; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 21.1 to 21.8; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## You will learn
@@ -32,7 +32,7 @@
  Step-by-step guide to set up AI Launchpad:
  [AI Launchpad Tutorial](https://developers.sap.com/tutorials/ai-launchpad-provisioning.html)
 
-## 20.1 Pre-read
+## 21.1 Pre-read
 
 In this tutorial, we explore how to extend orchestration capabilities in SAP AI Core by incorporating **grounding**—the process of enriching GenAI outputs with **enterprise-specific or domain-relevant context** to ensure accurate and reliable responses.
 
@@ -57,7 +57,7 @@ By the end of this tutorial, you will:
 - Understand how to use grounding module in Orchestration and apply it to practical, enterprise-relevant use cases.
 - Learn how to use the solution using **SAP AI Launchpad**, **Python SDK**, **Java**, **JavaScript**, and **API(Bruno Client)**.
 
-## 20.2 1. Create service key for AI Core instance
+## 21.2 1. Create service key for AI Core instance
 
 <details class="qa"><summary>Bruno</summary>
 
@@ -133,7 +133,7 @@ To interact with SAP AI Core using the python Gen AI SDK, you first need to crea
 
 </details>
 
-## 20.3 2. Generate token
+## 21.3 2. Generate token
 
 <details class="qa"><summary>Bruno</summary>
 
@@ -161,7 +161,7 @@ As the access token is automatically initially requested and sent with every req
 
 </details>
 
-## 20.4 3. Create resource group
+## 21.4 3. Create resource group
 
 <details class="qa"><summary>Bruno</summary>
 
@@ -285,7 +285,7 @@ System.out.println("Created Resource Group with ID: " + resourceGroup.getResourc
 
 </details>
 
-## 20.5 4. Create generic secret
+## 21.5 4. Create generic secret
 
 <details class="qa"><summary>Bruno</summary>
 
@@ -554,7 +554,7 @@ System.out.println(secret.getMessage());
 
 </details>
 
-## 20.6 5. Prepare knowledge base (data repository) and verification
+## 21.6 5. Prepare knowledge base (data repository) and verification
 
 <details class="qa"><summary>Bruno</summary>
 
@@ -841,7 +841,7 @@ console.log('Created Pipeline with ID: ', pipeline.pipelineId);
 
 </details>
 
-## 20.7 6. Ensuring Accurate Responses with Grounding
+## 21.7 6. Ensuring Accurate Responses with Grounding
 
 In the previous steps, we have completed the data preparation for grounding. Before initiating model inference or orchestration, ensure that there is an active orchestration deployment (**scenario ID: orchestration**). To verify the available orchestration deployments and their status, use the **get_deployment** API under the **"Deployments"** section in the **Bruno collection**. Additionally, update the **orchestration_service_url** in the environment. 
 
@@ -1132,7 +1132,7 @@ print(response.orchestration_result.choices[0].message.content)
 
 </details>
 
-## 20.8 Conclusion
+## 21.8 Conclusion
 
 Adding Grounding significantly enhances the model's ability to provide Accurate and Context-specific responses. Without Grounding, the model generates generic replies, while with grounding, it retrieves precise information from the uploaded document. Screenshots showcasing both responses are provided for comparison.
 

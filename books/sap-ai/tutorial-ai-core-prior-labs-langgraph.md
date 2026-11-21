@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Add Prior Labs TabPFN-3.5 Plus on SAP AI Core to your AI Agent](https://developers.sap.com/tutorials/ai-core-prior-labs-langgraph) by Nora von Thenen · about 60 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-prior-labs-langgraph/)
-> - **Changes for this book:** page layout; steps numbered 38.1 to 38.16; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 39.1 to 39.16; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## You will learn
@@ -20,7 +20,7 @@ SAP AI Core instance with **Extended Service Plan** (required for Generative AI 
 
 > 🚨 If you running this as part of the Developer Garage at TechEd Berlin 2026 please follow the instructions below to get a service key from SAP AI Core.
 
-## 38.1 🚨 ONLY FOR DEVELOPER GARAGE AT TECHED 2026 IN BERLIN
+## 39.1 🚨 ONLY FOR DEVELOPER GARAGE AT TECHED 2026 IN BERLIN
 There are temporary (limited lifetime) service keys available for your use
 at the Developer Garage during SAP TechEd 2026 in Berlin. In this step, you'll
 retrieve such a service key, and store the credentials in your .env file. Instructions will follow below.
@@ -36,7 +36,7 @@ password-protected ZIP files, which are suffixed with a timestamp
 
 ---
 
-## 38.2 Architecture Overview
+## 39.2 Architecture Overview
 
 The agent follows a simple three-step flow:
 
@@ -48,7 +48,7 @@ The agent follows a simple three-step flow:
 
 ---
 
-## 38.3 Dataset
+## 39.3 Dataset
 
 This tutorial uses the **E-Commerce Delivery & Shipping Dataset 2026**, which contains 50,000 simulated e-commerce orders with logistics attributes such as shipping method, carrier, distance, package weight, warehouse processing time, weather conditions, and delivery outcome.
 
@@ -63,7 +63,7 @@ The agent uses a representative sample of 50 training rows (every 1,000th order)
 
 ---
 
-## 38.4 Deploy TabPFN-3.5 Plus on SAP AI Core
+## 39.4 Deploy TabPFN-3.5 Plus on SAP AI Core
 
 Before writing any code you need a running deployment of TabPFN-3.5 Plus in your SAP AI Core instance.
 
@@ -83,7 +83,7 @@ Once the deployment status is **Running**, copy the deployment ID. You will need
 
 ---
 
-## 38.5 Create your project folder
+## 39.5 Create your project folder
 
 Create a new empty folder on your machine for this project — for example `prior-labs-agent`. Open it in VS Code using **File > Open Folder**.
 
@@ -91,7 +91,7 @@ All files you create in this tutorial (`.env`, `payload_data.py`, and `agent-pri
 
 ---
 
-## 38.6 Configure environment variables
+## 39.6 Configure environment variables
 
 Create a file named `.env` in your project folder and add the following variables. Use the [.env.example](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-prior-labs-langgraph/.env.example) as a reference. Never commit this file! Add `.env` to your `.gitignore`. When deploying to Cloud Foundry you can simply bind those variables using [environmental variables](https://docs.cloudfoundry.org/devguide/deploy-apps/environment-variable.html).
 
@@ -111,7 +111,7 @@ You can find all SAP AI Core credentials in the SAP BTP cockpit under your SAP A
 
 ---
 
-## 38.7 Install Python dependencies
+## 39.7 Install Python dependencies
 
 In your terminal/IDE of choice: Create and activate a virtual environment, then install the required packages:
 
@@ -135,7 +135,7 @@ pip install --isolated langchain langchain-litellm requests pandas python-dotenv
 
 ---
 
-## 38.8 Create the Python file
+## 39.8 Create the Python file
 
 Create a file named `agent-prior-labs.py` in your project folder. Start with the imports and top-level setup:
 
@@ -166,7 +166,7 @@ A few things worth noting here:
 
 ---
 
-## 38.9 Add the authentication helper
+## 39.9 Add the authentication helper
 
 SAP AI Core uses OAuth 2.0 client credentials. Add this helper function to your code to get your Bearer token:
 
@@ -189,7 +189,7 @@ def _get_auth_token() -> str:
 
 ---
 
-## 38.10 Prepare the prediction data
+## 39.10 Prepare the prediction data
 
 Calling TabPFN or SAP-RPT via Generative AI Hub work differently from most ML APIs: you do not need to train the model separately. Instead, you send everything in one request: rows with known labels teach the model on the fly (in context learning), and rows marked with a `[PREDICT]` placeholder become the test set (missing values to predict).
 
@@ -269,7 +269,7 @@ payload = {
 
 ---
 
-## 38.11 Build the TabPFN prediction function
+## 39.11 Build the TabPFN prediction function
 
 Now define which columns the model should use as input features. Both target columns — `DELAY_DAYS` and `LATE` — are deliberately excluded:
 
@@ -364,7 +364,7 @@ The response always comes back as `{"prediction": [...]}` — a list of values i
 
 ---
 
-## 38.12 Build the agent
+## 39.12 Build the agent
 
 A LangChain agent is built from three things: a **language model** (which decides what to do next), **tools** (which the model can call), and a **system prompt** (which defines the model's role and behaviour).
 
@@ -414,7 +414,7 @@ forecast_agent = create_agent(
 
 ---
 
-## 38.13 Add the evaluation function
+## 39.13 Add the evaluation function
 
 After the agent returns its predictions you can verify how well TabPFN performed against the known ground truth values from `GROUND_TRUTH`. Add the following function to your file:
 
@@ -454,7 +454,7 @@ The function expects the raw JSON string returned by `call_tabpfn`. It computes:
 
 ---
 
-## 38.14 Add the main function
+## 39.14 Add the main function
 
 Finally, add `main()` to invoke the agent and print the results, followed by the entry-point guard:
 
@@ -485,7 +485,7 @@ if __name__ == "__main__":
 
 ---
 
-## 38.15 Run the agent
+## 39.15 Run the agent
 
 Run the script from your project folder:
 
@@ -522,7 +522,7 @@ International
 
 ---
 
-## 38.16 Complete source code
+## 39.16 Complete source code
 
 The complete agent script is available at [agent-prior-labs.py](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-prior-labs-langgraph/agent-prior-labs.py).
 

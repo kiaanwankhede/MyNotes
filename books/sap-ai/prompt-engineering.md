@@ -102,6 +102,19 @@ flowchart TD
 | Typical content | "You are a finance architect…" | Tone, format, glossary, rules, refusals |
 | Example | "As a BTP security architect, review this role assignment" | "Answer in bullets. Say 'unknown' if unsure." |
 
+- **The system prompt outranks the user.** A rule typed by the user in the chat ("always answer in Pig Latin") is soon forgotten; the same rule as a system instruction holds for every turn. (Lecture 13 demo.)
+- **Scope is a guardrail.** "You are a tour guide" still answers tax questions. "Answer only travel questions; for anything else say it is outside your scope" refuses them. A support bot that answers off-topic questions (the class example was the Joule on api.sap.com) is missing this.
+- **Who outranks whom:**
+
+| Level | Set by | Can the user override it? |
+|---|---|---|
+| Vendor safety rules | The model maker, built into the model | No; attempts to break them are called **jailbreaking** |
+| System prompt | The app or agent builder | Should not; harden it against "ignore your instructions" |
+| User prompt | The end user | — |
+
+- **In Joule Studio** the agent's instructions play the role of the system prompt; put guardrails such as "read-only, never delete data" in the first instruction blocks, not in additional context.
+- **Messages in a stored template:** system (rules), user (question), assistant (a sample answer, which makes it one-shot or few-shot) and variables. How to build and version one in SAP AI Launchpad: [chapter 7.7](sap-ai-core-launchpad.md).
+
 ## 5.5 ReAct: reason, then act
 
 - **ReAct** (Yao et al., 2022) interleaves **thoughts** with **actions**, such as a search or a tool call, and **observations** of the results.

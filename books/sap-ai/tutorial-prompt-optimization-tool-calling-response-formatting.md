@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Prompt Optimization with Tool Calling and Response Formatting](https://developers.sap.com/tutorials/prompt-optimization-tool-calling-response-formatting) by Smita Naik · about 50 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/prompt-optimization-tool-calling-response-formatting/)
-> - **Changes for this book:** page layout; steps numbered 34.1 to 34.14; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 35.1 to 35.14; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## You will learn
@@ -40,7 +40,7 @@
 8. A BFCL v3 dataset file (e.g., `BFCL_v3_parallel_multiple_10tools.json`) is available locally.
 9. A **running Orchestration Service deployment** in your resource group. Response Formatting and the live inference comparison are executed through the Orchestration `/completion` endpoint, so you need its deployment URL. See [Create a Deployment for Orchestration](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/orchestration).
 
-## 34.1 Pre-Read
+## 35.1 Pre-Read
 Before starting this tutorial, ensure that you:
 - Understand the basics of Generative AI workflows in SAP AI Core.
 - Are familiar with function calling / tool calling concepts in LLMs.
@@ -50,7 +50,7 @@ Before starting this tutorial, ensure that you:
   - **Response Formatting** — an Orchestration Service parameter that constrains the model's output at the *API level*, independent of prompt wording.
 - Have completed the Quick Start tutorial or equivalent setup for SAP AI Core access.
 
-## 34.2 Architecture Overview
+## 35.2 Architecture Overview
 
 - Prompt Optimization for tool calling connects the Prompt Registry, AI Core Dataset Storage, and ML Tracking Service to form an end-to-end optimization workflow. Response Formatting sits on the Orchestration Service and is applied at inference time.
 - A BFCL v3 dataset is loaded, normalized, and split into train and test sets. All four files (train goldens, test goldens, tool definitions, and prompt template) are uploaded to a shared folder in AI Core's built-in dataset storage.
@@ -61,7 +61,7 @@ Before starting this tutorial, ensure that you:
 - Separately, a JSON Schema is built from the unioned tool definitions. At inference time it can be attached as a `response_format` to the Orchestration call to guarantee the wire format is valid JSON — regardless of prompt wording.
 - After completion, the base and optimized prompts are fetched and compared via live inference, both with and without the `response_format` schema.
 
-## 34.3 Notebook Reference
+## 35.3 Notebook Reference
 
 For hands-on execution and end-to-end reference, use the accompanying notebook `Prompt_Optimization_With_Tool_Calling_And_Response_Formatting.ipynb`. It runs the entire pipeline top to bottom — from loading the BFCL dataset and uploading files, through configuration creation, execution, monitoring, and the inference comparison — and includes a Response Formatting primer right after the connection step.
 
@@ -75,7 +75,7 @@ For hands-on execution and end-to-end reference, use the accompanying notebook `
 
 ---
 
-## 34.4 Environment Variables Setup
+## 35.4 Environment Variables Setup
 
 <details class="qa"><summary>Python SDK</summary>
 
@@ -150,7 +150,7 @@ print(f"   Resource group: {resource_group}")
 
 ---
 
-## 34.5 Configure Optimization Parameters
+## 35.5 Configure Optimization Parameters
 
 Before running the pipeline, define the key configuration constants used throughout the notebook.
 
@@ -221,7 +221,7 @@ These parameters are defined in the Python notebook. For Bruno, the equivalent v
 
 ---
 
-## 34.6 Load and Normalize the BFCL v3 Dataset
+## 35.6 Load and Normalize the BFCL v3 Dataset
 
 The BFCL v3 dataset contains parallel and multi-tool function calling samples. The notebook uses a robust reader that handles three file formats — JSON array, standard JSONL, and concatenated JSON objects — before normalizing samples into the SAP optimizer golden format. The optimizer expects each example as a **golden record**: `{"fields": {"question": ...}, "answer": "<JSON string>"}`.
 
@@ -492,7 +492,7 @@ Run the Python notebook up to the "Local files written." output before proceedin
 
 ---
 
-## 34.7 Upload Files and Register Dataset Artifact
+## 35.7 Upload Files and Register Dataset Artifact
 
 All four files — train goldens, test goldens, tool definitions, and the prompt template — are serialized locally and then uploaded to a shared folder in AI Core's dataset storage. The shared folder is then registered as a single artifact.
 
@@ -643,7 +643,7 @@ ai-resource-group: {{resource_group}}
 
 ---
 
-## 34.8 Create and Register the Base Prompt Template
+## 35.8 Create and Register the Base Prompt Template
 
 The base prompt template is pushed to the Prompt Registry. It is intentionally minimal — system `"You are a helpful assistant."` and user `{{?question}}` — so the optimizer has maximum room to add structure (JSON-only output instructions, tool schemas, reasoning steps) and you can clearly see the value it adds in the final comparison.
 
@@ -730,7 +730,7 @@ A successful response:
 
 ---
 
-## 34.9 Register an Optimization Configuration
+## 35.9 Register an Optimization Configuration
 
 The optimization configuration links the artifact, base prompt, reference model, target model, and metric into one executable setup. Creating a configuration does not run anything yet — think of it as saving a recipe.
 
@@ -877,7 +877,7 @@ For the latest updates, refer to [SAP Note 3437766](https://me.sap.com/notes/343
 
 ---
 
-## 34.10 Run the Prompt Optimization Execution
+## 35.10 Run the Prompt Optimization Execution
 
 After registering the configuration, trigger the optimization execution. The optimizer iteratively refines the base prompt using the train goldens and evaluates candidate prompts against the test goldens using the `JSON_Match` metric.
 
@@ -939,7 +939,7 @@ A successful response returns the execution `id`:
 
 ---
 
-## 34.11 Monitor Optimization Progress
+## 35.11 Monitor Optimization Progress
 
 After triggering the execution, monitor its status. The execution transitions through `UNKNOWN` → `RUNNING` (with progress updates) → `COMPLETED`. Expect roughly 20–30 minutes for 25 train + 15 test samples. The notebook also fetches logs automatically if the execution fails.
 
@@ -1024,7 +1024,7 @@ A completed execution response:
 
 ---
 
-## 34.12 Review Optimization Results
+## 35.12 Review Optimization Results
 
 Once the execution completes, the optimized prompt is stored in the Prompt Registry. Retrieve it by its ID to inspect how the optimizer refined the base prompt.
 
@@ -1107,7 +1107,7 @@ ai-resource-group: {{resource_group}}
 
 ---
 
-## 34.13 Compare Base vs Optimized Prompt via Live Inference (with Response Formatting)
+## 35.13 Compare Base vs Optimized Prompt via Live Inference (with Response Formatting)
 
 After retrieving both prompt templates, run live inference on the same test questions to compare output quality between the base and optimized prompts — and, additionally, demonstrate what `response_format=json_schema` adds on top of the optimized prompt.
 
@@ -1279,7 +1279,7 @@ OPTIMIZED    → valid JSON ✅ | tools called: ['currency_conversion', 'event_f
 
 ---
 
-## 34.14 Summary
+## 35.14 Summary
 
 In this tutorial, you optimized a function-calling prompt using SAP AI Core with a BFCL v3 dataset, and paired it with Response Formatting for API-level structured-output guarantees:
 

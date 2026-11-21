@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Setup Generative AI Hub in SAP AI Launchpad](https://developers.sap.com/tutorials/ai-launchpad-provisioning) by Smita Naik · about 20 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-launchpad-provisioning/)
-> - **Changes for this book:** page layout; steps numbered 56.1 to 56.7; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 57.1 to 57.7; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -35,7 +35,7 @@ Boosters is available for SAP AI Launchpad. Boosters are a set of guided interac
 
 ---
 
-## 56.1 Add AI Launchpad Entitlements to your subaccount
+## 57.1 Add AI Launchpad Entitlements to your subaccount
 
 > **Note:** SAP AI Launchpad is optional, but is the recommended interface for use with SAP AI Core.
 
@@ -64,7 +64,7 @@ Save your new entitlement.
 
 ![Save](images/ai-launchpad-provisioning/img/ail_save_entitlement.png)
 
-## 56.2 Run the booster for SAP AI Launchpad
+## 57.2 Run the booster for SAP AI Launchpad
 
 Choose `Boosters` from the navigation pane, and then choose the booster for `SAP AI Launchpad` from the selection. 
 
@@ -90,13 +90,13 @@ Review the subaccount and entitlement details you have selected previously and c
 
 wait until setup completes. Once completed, navigate to your subaccount.
 
-## 56.3 View your instances
+## 57.3 View your instances
 
 View your SAP AI Launchpad instance by navigating to `Instances and subscriptions`. To see the details of your new instance, click the chevron on the entry.
 
 ![Success screen](images/ai-launchpad-provisioning/img/ail_subscription_success.png)
 
-## 56.4 Setup SAP AI Launchpad for usage with SAP AI Core
+## 57.4 Setup SAP AI Launchpad for usage with SAP AI Core
 Click on the **Workspaces** app. Click **Add** to create connection to your SAP AI Core instance.
 
 ![image](images/ai-launchpad-provisioning/img/ail/add.png)
@@ -107,7 +107,7 @@ Enter the name `my-ai-core` for the connection . Fill other details from your SA
 
 ![image](images/ai-launchpad-provisioning/img/ail/key.png)
 
-## 56.5 Connect with SAP AI Core
+## 57.5 Connect with SAP AI Core
 
 Click on `my-ai-core` under the **Workspaces** app. You will observe the connection name on the header. You can find new apps on the side navigation bar, like **Generative AI Hub**.
 
@@ -117,7 +117,7 @@ Select `default` from the **Resource Groups** Pane. Again this selection is upda
 
 ![image](images/ai-launchpad-provisioning/img/ail/connection2.png)
 
-## 56.6 Get started with Orchestration in Generative AI Hub
+## 57.6 Get started with Orchestration in Generative AI Hub
 
 As part of the SAP AI Core onboarding process, an `orchestration deployment` is automatically created in the `default resource group`.
 
@@ -127,7 +127,7 @@ Click on `Generative AI Hub` > `Orchestration`
 
 ![image](images/ai-launchpad-provisioning/img/ail/ail_generative_ai_hub_orch.png)
 
-## 56.7 What's Next?
+## 57.7 What's Next?
 
 You can proceed to the [Orchestration Tutorial](https://developers.sap.com/tutorials/ai-core-orchestration-consumption.html) to learn `how to consume generative AI models using the orchestration capabilities available in the Generative AI Hub`.
 

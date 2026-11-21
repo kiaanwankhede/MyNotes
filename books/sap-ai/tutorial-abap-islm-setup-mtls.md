@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Enhance ISLM Connectivity to SAP AI Core with mTLS](https://developers.sap.com/tutorials/abap-islm-setup-mtls) by Daniel Funkert · about 25 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/abap-core-development](https://github.com/sap-tutorials/abap-core-development/blob/main/tutorials/abap-islm-setup-mtls/)
-> - **Changes for this book:** page layout; steps numbered 51.1 to 51.12; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 52.1 to 52.12; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -20,7 +20,7 @@
 
 ---
 
-## 51.1 Overview
+## 52.1 Overview
 In this tutorial, you enhance the authentication of **Intelligent Scenario Lifecycle Management** (ISLM) with mutual TLS (mTLS) for communication with **SAP AI Core**. You configure certificate-based authentication, create the required service bindings, and update the communication setup in **SAP S/4HANA**. 
 
 This tutorial demonstrates a generic approach. You can also use your own public key infrastructure (PKI) if your certificates are issued by a trusted certificate authority supported by SAP BTP.
@@ -35,7 +35,7 @@ The diagram illustrates how ISLM is embedded in the overall architecture and how
 - Explore additional resources in the SAP Community: [Intelligent Scenario Lifecycle Management for SAP S/4HANA](https://pages.community.sap.com/topics/intelligent-scenario-lifecycle-management-s4hana)
 - Review supported certificate authorities for mTLS: [Trusted Authorities for X.509 Certificates](https://help.sap.com/docs/btp/sap-business-technology-platform/trusted-certificate-authorities-for-x-509-secrets?version=Cloud)
 
-## 51.2 Generate a Client Certificate in SAP BTP
+## 52.2 Generate a Client Certificate in SAP BTP
 In this step, you create a client certificate in SAP BTP to enable secure communication using mutual TLS (mTLS). This demonstrates a generic approach, but you can also use your own PKI if the certificate is issued by a supported certificate authority.
 
 1\. Log on to your **SAP BTP subaccount** and open **Connectivity** &gt; **Destination Certificates**.
@@ -66,7 +66,7 @@ In this step, you create a client certificate in SAP BTP to enable secure commun
 
 6\. Congratulations! You have successfully created the client certificate.
 
-## 51.3 Create a Destination Service Instance for API Access
+## 52.3 Create a Destination Service Instance for API Access
 In this step, you create a Destination service instance in SAP BTP and generate a service binding to retrieve the credentials required for API access. Since the private key of the client certificate is not available for download in the SAP BTP cockpit, you use the Destination Service REST API to download the full certificate.
 
 1\. Log on to your **SAP BTP subaccount** and open **Services** &gt; **Instances and Subscriptions**.
@@ -108,7 +108,7 @@ In this step, you create a Destination service instance in SAP BTP and generate 
 
 10\. Congratulations! You have successfully created the destination service instance and binding.
 
-## 51.4 Download the Client Certificate using the Destination Service API
+## 52.4 Download the Client Certificate using the Destination Service API
 In this step, you use the Destination Service REST API to download the client certificate along with its private key, and prepare it for use in SAP S/4HANA.
 
 1\. Open **Bruno** (or Postman) and choose **Create Collection**.
@@ -177,7 +177,7 @@ Set-Content client_certificate.pem -Value $bytes -Encoding Byte
      
 11\. Congratulations! You have successfully downloaded and prepared the client certificate for SAP S/4HANA.
 
-## 51.5 Import the Client Certificate into SAP S/4HANA
+## 52.5 Import the Client Certificate into SAP S/4HANA
 In this step, you create a new SSL client identity, import the client certificate into your SAP S/4HANA system, and assign it to the corresponding SSL client configuration for secure communication.
 
 1\. Log on to your **SAP S/4HANA** system and open transaction **STRUST** (Trust Manager).
@@ -224,7 +224,7 @@ In this step, you create a new SSL client identity, import the client certificat
 
 13\. Congratulations! You have successfully imported and assigned the client certificate to SAP S/4HANA.
 
-## 51.6 Export Public Certificate from ISLM Keystore for mTLS
+## 52.6 Export Public Certificate from ISLM Keystore for mTLS
 In this step, you export the public certificate from your SAP S/4HANA keystore to use it in the service binding configuration to enable mTLS.
 
 1\. Log on to your **SAP S/4HANA** system and open transaction **STRUST** (Trust Manager).
@@ -243,7 +243,7 @@ In this step, you export the public certificate from your SAP S/4HANA keystore t
 
 5\. Congratulations! You have successfully exported the public certificate for mTLS.
 
-## 51.7 Create an SAP AI Core Service Binding with mTLS Authentication
+## 52.7 Create an SAP AI Core Service Binding with mTLS Authentication
 In this step, you create an additional SAP AI Core service binding for mTLS. You use the public certificate to establish trust and enable certificate-based authentication in the binding parameters.
 
 1\. The **public certificate** extracted in the previous step must be converted into a single-line format before it can be used in the **service binding** configuration. Convert the certificate as follows:
@@ -300,7 +300,7 @@ tr -d '\r' < DEV.cer | sed 's/$/\\n/' | tr -d '\n'; echo
 
 10\. Congratulations! You have successfully created the SAP AI Core service binding for mTLS.
 
-## 51.8 Import the Root CA Certificate into the Trust Store
+## 52.8 Import the Root CA Certificate into the Trust Store
 In this step, you import the Root CA certificate into your SAP S/4HANA trust store to establish trust with the SAP BTP endpoint used for mTLS authentication and token requests.
 
 1\. Open the [DigiCert](https://cacerts.digicert.com/DigiCertGlobalRootG2.crt) URL in a browser and download the Root CA certificate.
@@ -327,7 +327,7 @@ In this step, you import the Root CA certificate into your SAP S/4HANA trust sto
 
 8\. Congratulations! You have successfully imported the Root CA Certificate into the trust store.
 
-## 51.9 Create an OAuth 2.0 Client for mTLS Authentication
+## 52.9 Create an OAuth 2.0 Client for mTLS Authentication
 In this step, you create an OAuth 2.0 client configured for mTLS authentication to securely obtain tokens from SAP AI Core.
 
 1\. Log on to your **SAP S/4HANA** system and open transaction **OA2C_CONFIG** (OAuth 2.0 Clients).
@@ -362,7 +362,7 @@ In this step, you create an OAuth 2.0 client configured for mTLS authentication 
 
 6\. Congratulations! You have successfully created the OAuth 2.0 client for ISLM.
 
-## 51.10 Update the Destination with the New OAuth Client
+## 52.10 Update the Destination with the New OAuth Client
 In this step, you update the existing HTTP destination in your SAP S/4HANA system to use the OAuth client configured for mTLS authentication. This ensures that communication with SAP AI Core is secured using certificate-based authentication.
 
 1\. Log on to your **SAP S/4HANA** system and open transaction **SM59** (Configuration of RFC Destinations).
@@ -387,7 +387,7 @@ In this step, you update the existing HTTP destination in your SAP S/4HANA syste
 
 7\. Congratulations! You have successfully updated the HTTP destination to use the mTLS-enabled OAuth client.
 
-## 51.11 Test the Usage Type for the Generative AI Scenario with mTLS
+## 52.11 Test the Usage Type for the Generative AI Scenario with mTLS
 In this step, you test the assigned HTTP destination for the generative AI usage type in ISLM. This verifies that the configured mTLS-based connection is working correctly when used in ISLM.
 
 1\. Log on to your **SAP S/4HANA** system and open transaction **ISLM_REUSE_CFGV** (Maintain Intelligent Scenario Usage).
@@ -402,7 +402,7 @@ In this step, you test the assigned HTTP destination for the generative AI usage
 
 4\. Congratulations! You have successfully updated and verified the usage type for the generative AI scenario with mTLS.
 
-## 51.12 Test yourself
+## 52.12 Test yourself
 Test your understanding of the concepts covered in this tutorial. Select the correct answer and choose **Check Answer**.
 
 ---

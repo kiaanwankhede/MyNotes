@@ -23,7 +23,7 @@
 - Get typed answers with Pydantic, stream long answers, and let a model call your function
 - Create embeddings for search and RAG
 
-## 7.1 How a call travels
+## 8.1 How a call travels
 
 ```mermaid
 flowchart LR
@@ -42,7 +42,7 @@ flowchart LR
   - SAP Help lists two plans today, *standard* and *extended*, both for enterprise accounts. You can upgrade from standard to extended, but not back.
   - To try the hub first, SAP offers a **30-day basic trial**. SAP's older setup tutorial still mentions a free tier; the *Service Plans* page doesn't (checked 21 Nov 2026).
 
-## 7.2 Set up
+## 8.2 Set up
 
 **Step 1: Get a service key**
 
@@ -106,7 +106,7 @@ load_aicore_key()          # run this before importing gen_ai_hub clients
 > - With no settings yet, it fails: *No credentials found in any source*.
 > - Load the key first, then import.
 
-## 7.3 First calls: deployments and chat
+## 8.3 First calls: deployments and chat
 
 **See which models you can use**
 
@@ -143,7 +143,7 @@ print(response.usage.total_tokens, "tokens")
 - `role` values: **system** sets the rules, **user** asks, **assistant** holds earlier answers for multi-turn context ([prompt engineering](prompt-engineering.md)).
 - The response also carries `content_filter_results`: the hub's safety filter verdicts for each answer.
 
-## 7.4 The Responses API and typed answers
+## 8.4 The Responses API and typed answers
 
 **Responses: instructions plus input, no message list**
 
@@ -186,7 +186,7 @@ print(r.output_parsed.name)
 - You get a validated Python object instead of text to parse. Use it to turn a ticket or an email into fields you can post to S/4HANA.
 - More on schemas: [Pydantic: validating LLM output](../pydantic/05-validating-llm-output.md).
 
-## 7.5 Gemini and streaming through the same key
+## 8.5 Gemini and streaming through the same key
 
 ```python
 from gen_ai_hub.proxy import get_proxy_client
@@ -210,7 +210,7 @@ for chunk in client.models.generate_content_stream(
 - Stream when a person is waiting, as in a chat UI; the first words show in a fraction of the total time.
 - The response also reports `thoughts_token_count` for thinking models. Those tokens are billed too.
 
-## 7.6 Tool calling: let the model call your function
+## 8.6 Tool calling: let the model call your function
 
 ```python
 from google.genai import types
@@ -249,7 +249,7 @@ sequenceDiagram
 - The course does it twice: a dummy weather function, then a real one calling the free Open-Meteo API. In a project, the function calls S/4HANA or SuccessFactors instead.
 - Write good docstrings: they are the only thing the model knows about your tool.
 
-## 7.7 Embeddings: text to vectors
+## 8.7 Embeddings: text to vectors
 
 ```python
 from gen_ai_hub.proxy.native.openai import embeddings
@@ -265,19 +265,19 @@ print(len(vector))          # 1536 in the course run
 - Similar meanings give vectors that are close together. That powers semantic search, duplicate-ticket detection, classification and RAG ([Prompt engineering](prompt-engineering.md), grounded prompts).
 - Store the vectors in a vector store, for example the SAP HANA Cloud vector engine, and search them before you prompt.
 
-## 7.8 When it fails
+## 8.8 When it fails
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | *No credentials found in any source* | Clients imported before the settings were loaded | Run `load_aicore_key()` first, then import |
 | *No module named 'google'* | Plain install has no Gemini support | `pip install "sap-ai-sdk-gen[google]"` |
-| *No module named 'botocore'* when importing `gen_ai_hub.proxy.langchain…` | The SDK's LangChain package also loads its Amazon module | `pip install "sap-ai-sdk-gen[all]"` ([chapter 10](tutorial-rag-grounding-genai-hub.md)) |
+| *No module named 'botocore'* when importing `gen_ai_hub.proxy.langchain…` | The SDK's LangChain package also loads its Amazon module | `pip install "sap-ai-sdk-gen[all]"` ([chapter 11](tutorial-rag-grounding-genai-hub.md)) |
 | *No module named 'gen_ai_hub'* | Wrong notebook kernel | Select the `.venv` kernel, or run `uv sync` again |
 | *401 Unauthorized* | Expired or wrong service key | Create a new key in the cockpit |
-| *Deployment not found* | An example ID from someone else's tenant | List your deployments (7.3) and use one of yours |
+| *Deployment not found* | An example ID from someone else's tenant | List your deployments (8.3) and use one of yours |
 | `responses` missing | SDK older than 6.10.0 | Upgrade `sap-ai-sdk-gen` |
 
-## 7.9 Things to watch
+## 8.9 Things to watch
 
 - **Model names change.** Providers retire versions; list your deployments before hard-coding a name.
 - **Every call costs.** The usage block in each response shows prompt, completion and thinking tokens. Log it.
@@ -331,7 +331,7 @@ print(len(vector))          # 1536 in the course run
 - **SAP's docs read on 21 Nov 2026:**
   - the SDK README and release notes (6.10.0 added the Responses API)
   - the provisioning tutorial (pre-read and step 1: extended plan required)
-  - SAP Help's *Service Plans* page and SAP's AI Core trial page. The 7.1 plan note was corrected to follow them, the same day.
+  - SAP Help's *Service Plans* page and SAP's AI Core trial page. The 8.1 plan note was corrected to follow them, the same day.
 - **Left out:** the course tenant's deployment IDs, which appear in the notebook's saved outputs.
 
 ## Sources
@@ -343,4 +343,4 @@ print(len(vector))          # 1536 in the course run
 - SAP Help, *Service Plans* (SAP AI Core): https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/service-plans
 - SAP, *SAP AI Core trial*: https://www.sap.com/products/artificial-intelligence/core-ai-trial.html
 
-Previous: [Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms](responsible-ai-ethics-governance.md) · Next: [Hands-on: Extract invoice data with SAP Document AI from Python](tutorial-document-ai-python.md)
+Previous: [SAP AI Core, the generative AI hub and SAP AI Launchpad](sap-ai-core-launchpad.md) · Next: [Hands-on: Extract invoice data with SAP Document AI from Python](tutorial-document-ai-python.md)

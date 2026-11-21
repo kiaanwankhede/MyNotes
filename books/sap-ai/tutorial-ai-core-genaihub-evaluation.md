@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Generative AI Custom Evaluation - Quickstart](https://developers.sap.com/tutorials/ai-core-genaihub-evaluation) by Smita Naik · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-genaihub-evaluation/)
-> - **Changes for this book:** page layout; steps numbered 28.1 to 28.10; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 29.1 to 29.10; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## You will learn
@@ -46,7 +46,7 @@ Download [requirements.txt](https://github.com/sap-tutorials/Tutorials/blob/mast
 This tutorial is designed for users who are unfamiliar with AI Core services and do not require flexibility in their use case. This tutorial is setup in a way that provides automatic setup for your evaluation where only the dataset is minimally required.
 It demonstrates a quick start simplified workflow for using AI Core's custom evaluation capabilities to benchmark Large Language Models (LLMs), and evaluate different prompts for a specific use case. It utilizes the public [MedicationQA dataset](https://langtest.org/docs/pages/benchmarks/medical/medicationqa/) to showcase how to compute industry-standard metrics and assess the reliability of LLM-generated responses.
 
-## 28.1 Environment Variables Setup
+## 29.1 Environment Variables Setup
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -149,7 +149,7 @@ client = GenAIHubProxyClient(
 
 </details>
 
-## 28.2 Preparing Dataset Files
+## 29.2 Preparing Dataset Files
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -206,7 +206,7 @@ else:
 
 </details>
 
-## 28.3 Registering an Object Store Secret in AI Core
+## 29.3 Registering an Object Store Secret in AI Core
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -352,7 +352,7 @@ Use the below payload to create a secret for AWS S3 with NoAuthentication as aut
 > - For **input artifacts**, you may create additional object store secrets with different names if needed.
 > - If a user defined name (for eg: default) is not configured, orchestration runs will **fail** due to missing output target setup.
 
-## 28.4 Upload and Register Dataset
+## 29.4 Upload and Register Dataset
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -554,7 +554,7 @@ Save the ai://… URL — you will use this when creating the dataset artifact.
 
 </details>
 
-## 28.5 Create a Prompt Template in Prompt Registry
+## 29.5 Create a Prompt Template in Prompt Registry
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -735,7 +735,7 @@ Content-Type: application/json
 
 🔑 Tip: Always increment the version (e.g., 1.0.1, 1.0.2) when updating a template. This ensures reproducibility across evaluations.
 
-## 28.6 Providing Models and Metrics for Evaluation
+## 29.6 Providing Models and Metrics for Evaluation
 
 Metrics determine how your model outputs are evaluated during an evaluation run. They define the scoring logic that SAP AI Core uses to compare models, measure quality, and validate improvements over time.
 
@@ -857,7 +857,7 @@ When multiple models are provided, the evaluation system automatically creates s
 evaluation runs for each model within the same execution. This enables the evaluation workflow 
 to compare the runs and compute head-to-head win rates across the selected models.
 
-## 28.7 Define and Create Evaluation Configurations
+## 29.7 Define and Create Evaluation Configurations
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -1077,7 +1077,7 @@ Below is the sample request body to create configuration.
 
 </details>
 
-## 28.8 Create and Run Evaluation Execution
+## 29.8 Create and Run Evaluation Execution
 
 After creating the Evaluation Configuration, the next step is to execute it.
 
@@ -1250,7 +1250,7 @@ check the status of created execution by passing the execution ID, The Current S
 
 </details>
 
-## 28.9 View and Analyze Evaluation Results
+## 29.9 View and Analyze Evaluation Results
 
 Once the evaluation execution is complete, SAP AI Core generates both aggregated metrics and detailed instance-level results.
 These results help compare model performance, understand quality metrics, and debug issues.
@@ -1841,7 +1841,7 @@ Open the SQLite DB in any client to inspect:
 
 </details>
 
-## 28.10 Delete Evaluation Artifacts and Configurations
+## 29.10 Delete Evaluation Artifacts and Configurations
 
 Over time, your workspace may accumulate old configurations, executions, and metrics.
 SAP AI Core allows you to safely delete these resources once they are no longer needed.

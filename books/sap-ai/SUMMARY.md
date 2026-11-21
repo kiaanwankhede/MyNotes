@@ -14,6 +14,9 @@
 ## Responsible AI
 * [Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms](responsible-ai-ethics-governance.md)
 
+## SAP AI Core and AI Launchpad
+* [SAP AI Core, the generative AI hub and SAP AI Launchpad](sap-ai-core-launchpad.md)
+
 ## SAP AI Services: Hands-On
 * [Hands-on: Call LLMs through the generative AI hub from Python](tutorial-genai-hub-python.md)
 * [Hands-on: Extract invoice data with SAP Document AI from Python](tutorial-document-ai-python.md)

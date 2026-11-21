@@ -4,7 +4,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Setup SAP AI Core Basic Trial](https://developers.sap.com/tutorials/teched2026-aicore-basic-trial) by Nora von Thenen · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/developer-advocates](https://github.com/sap-tutorials/developer-advocates/blob/main/tutorials/teched2026-aicore-basic-trial/)
-> - **Changes for this book:** page layout; steps numbered 57.1 to 57.3; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 58.1 to 58.3; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 You will learn how to access your SAP AI Core Basic Trial environment.
@@ -22,7 +22,7 @@ You will learn how to access your SAP AI Core Basic Trial environment.
 
 This tutorial will guide you through the steps to access your SAP AI Core Basic Trial environment. The trial provides a hands-on experience with SAP AI Core.
 
-## 57.1 Register for a SAP AI Core instance
+## 58.1 Register for a SAP AI Core instance
 
 Register for the SAP AI Core Trial at: https://www.sap.com/products/artificial-intelligence/core-ai-trial.html
 
@@ -36,7 +36,7 @@ You should also receive an email with the same information.
 
 ![Welcome Email](images/teched2026-aicore-basic-trial/images/email.png)
 
-## 57.2 Start Your Basic Trial and Access the Workbook
+## 58.2 Start Your Basic Trial and Access the Workbook
 
 Click **Start your basic trial!**
 
@@ -58,7 +58,7 @@ This workbook includes multiple exercises feel free to do them all. To finish th
 
 > Good news: You have access to this user account and workbook for 30 days from the registration date. You can complete the other exercises after finishing this tutorial.
 
-## 57.3 Knowledge Check
+## 58.3 Knowledge Check
 
 Congratulations! You have explored Generative AI Hub and SAP AI Launchpad.
 

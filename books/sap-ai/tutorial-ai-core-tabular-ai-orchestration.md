@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Tabular AI Orchestration in SAP AI Core](https://developers.sap.com/tutorials/ai-core-tabular-ai-orchestration) by Smita Naik · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-tabular-ai-orchestration/)
-> - **Changes for this book:** page layout; steps numbered 37.1 to 37.15; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed; one missing code-fence line added before `def summarize(` (missing in SAP's source)
+> - **Changes for this book:** page layout; steps numbered 38.1 to 38.15; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed; one missing code-fence line added before `def summarize(` (missing in SAP's source)
 > - **Last checked:** 21 Nov 2026
 
 ## You will learn
@@ -39,7 +39,7 @@
 8. A tabular dataset (CSV) uploaded to a storage location that Tabular AI can read — this tutorial uses SAP HANA Data Lake Files with a used-cars dataset. The dataset used in this tutorial is available [here](https://github.com/SAP-samples/aicore-genai-samples/tree/main/genai-sample-apps/tabular-ai-orchestration) 
 9. **Read access to that storage from your resource group.** HDL Files authorizes clients by certificate: the subject pattern of your resource group's certificate must be registered in the HDL instance, otherwise reads fail with `401 ... may not be registered in HDL`.
 
-## 37.1 Pre-Read
+## 38.1 Pre-Read
 Before starting this tutorial, ensure that you:
 - Understand the basics of Generative AI workflows in SAP AI Core.
 - Are familiar with creating configurations and deployments in SAP AI Core.
@@ -48,7 +48,7 @@ Before starting this tutorial, ensure that you:
   - **Scenario configuration** — a Context Registry object that describes *which data* a prediction should draw context from.
 - Understand the core idea of Tabular AI: the model does not receive your whole dataset. You register the dataset once, and at prediction time the service retrieves a subset of rows as context. How that subset is chosen is the **context selection strategy**, and it is the main quality lever in this tutorial.
 
-## 37.2 Overview
+## 38.2 Overview
 
 - Tabular AI predictions combine three AI Core pieces: the **`tabular-orchestration` deployment** (the inference endpoint), the **Context Registry** (which knows where your data lives), and the **tabular model** (for example `sap-rpt-1.5-large`) that performs the prediction.
 - A configuration is created for the `tabular-orchestration` scenario and a virtual deployment is created from it. Predictions are only possible once that deployment reaches `RUNNING`.
@@ -57,7 +57,7 @@ Before starting this tutorial, ensure that you:
 - The service retrieves context rows from the registered dataset according to the chosen strategy, sends them along with the query rows to the tabular model, and returns predictions with confidence scores and metadata describing how much context was used.
 - Running the same query rows under different strategies shows the effect of retrieval quality: weak retrieval tends to produce the dataset's most common value with low confidence, while targeted retrieval produces more differentiated predictions.
 
-## 37.3 Bruno Collection Reference
+## 38.3 Bruno Collection Reference
 
 For hands-on execution, use the accompanying Bruno collection `TabularAI`. It runs the entire pipeline top to bottom — bearer token, AI Core scenario and deployment, the three Context Registry registrations, and one prediction request per context selection strategy.
 
@@ -71,7 +71,7 @@ For hands-on execution, use the accompanying Bruno collection `TabularAI`. It ru
 
 ---
 
-## 37.4 Environment Variables Setup
+## 38.4 Environment Variables Setup
 
 <details class="qa"><summary>Python</summary>
 
@@ -226,7 +226,7 @@ Use Basic auth with `clientid` / `clientsecret`. Its post-response script writes
 
 ---
 
-## 37.5 Create a Configuration and Virtual Deployment
+## 38.5 Create a Configuration and Virtual Deployment
 
 <details class="qa"><summary>Python</summary>
 
@@ -358,7 +358,7 @@ Run the requests in the **`1. AI Core`** folder in order.
 
 ---
 
-## 37.6 Register the Data Destination
+## 38.6 Register the Data Destination
 
 <details class="qa"><summary>Python</summary>
 
@@ -470,7 +470,7 @@ GET {{ai_api_url}}/v2/admin/tcr/dataDestinations/{{test_prefix}}-platform-test-d
 </details>
 
 ---
-## 37.7 Subject Pattern Configuration in HANA Data Lake
+## 38.7 Subject Pattern Configuration in HANA Data Lake
 
 If the resource group certificate is not yet registered in the HANA Data Lake Files instance, configure the subject patterns before registering the Tabular Artifact.
 
@@ -489,7 +489,7 @@ If the resource group certificate is not yet registered in the HANA Data Lake Fi
 
 ---
 
-## 37.8 Register the Tabular Artifact
+## 38.8 Register the Tabular Artifact
 
 <details class="qa"><summary>Python</summary>
 
@@ -654,7 +654,7 @@ Access works, but the file is not at that path — correct `path` and re-registe
 
 ---
 
-## 37.9 Register the Scenario Configuration
+## 38.9 Register the Scenario Configuration
 
 <details class="qa"><summary>Python</summary>
 
@@ -718,7 +718,7 @@ Check the status:
 
 ---
 
-## 37.10 Run Predictions
+## 38.10 Run Predictions
 
 <details class="qa"><summary>Python</summary>
 
@@ -778,7 +778,7 @@ show(result)
 ```
 ![img](images/ai-core-tabular-ai-orchestration/img/19.png)
 
-## 37.11 Summarize Predictions:
+## 38.11 Summarize Predictions:
 
 ```python
 def summarize(result, column="Location"):
@@ -856,7 +856,7 @@ POST {{ai_api_url}}/v2/inference/deployments/{{deployment_id}}/predict
 
 ---
 
-## 37.12 Compare Context Selection Strategies
+## 38.12 Compare Context Selection Strategies
 
 <details class="qa"><summary>Python</summary>
 
@@ -887,7 +887,7 @@ for label, cfg in STRATEGIES:
 ```
 ![img](images/ai-core-tabular-ai-orchestration/img/21.png)
 
-## 37.13 Top K Predictions:
+## 38.13 Top K Predictions:
 ```python
 topk_targets = [{
     "name": "Location",
@@ -928,7 +928,7 @@ summarize(inline)
 ```
 ![img](images/ai-core-tabular-ai-orchestration/img/23.png)
 
-## 37.14 Side By Side Comparison:
+## 38.14 Side By Side Comparison:
 ```python
 rows = []
 
@@ -1272,7 +1272,7 @@ The last two rows have a known `Location` and act as the context; the first thre
 
 ---
 
-## 37.15 Summary
+## 38.15 Summary
 
 In this tutorial, you ran the complete Tabular AI flow in SAP AI Core and compared its context selection strategies:
 

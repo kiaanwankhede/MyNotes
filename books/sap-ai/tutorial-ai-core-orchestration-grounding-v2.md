@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Orchestration(V2) with Grounding Capabilities in SAP AI Core](https://developers.sap.com/tutorials/ai-core-orchestration-grounding-v2) by Smita Naik · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-orchestration-grounding-v2/)
-> - **Changes for this book:** page layout; steps numbered 19.1 to 19.12; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 20.1 to 20.12; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## You will learn
@@ -57,7 +57,7 @@ For additional context, refer to:
 
 ![img](images/ai-core-orchestration-grounding-v2/img/grounding-usage-flow1.png)
 
-## 19.1 Create service key for AI Core instance
+## 20.1 Create service key for AI Core instance
 
 <details class="qa"><summary>Bruno</summary>
 
@@ -127,7 +127,7 @@ To interact with SAP AI Core using the python Gen AI SDK, you first need to crea
 
 </details>
 
-## 19.2 Generate token
+## 20.2 Generate token
 
 <details class="qa"><summary>Bruno</summary>
 
@@ -149,7 +149,7 @@ As the access token is automatically initially requested and sent with every req
 
 </details>
 
-## 19.3 Create/Update resource group to use grounding module
+## 20.3 Create/Update resource group to use grounding module
 
 Resource groups segment workloads and manage resources for specific AI Core services.
 
@@ -308,7 +308,7 @@ except Exception as e:
 
 </details>
 
-## 19.4 Create generic secret
+## 20.4 Create generic secret
 
 This step is required only if you are using external document repositories such as Amazon S3 or Microsoft SharePoint for grounding.
 
@@ -692,7 +692,7 @@ print("Secret creation:", response.status_code, response.text)
 
 </details>
 
-## 19.5 Data Ingestion from Document Repositories via Pipeline API
+## 20.5 Data Ingestion from Document Repositories via Pipeline API
 
 Choose your data repository type and set up the integration.
 
@@ -899,7 +899,7 @@ print(pipelines_api_client.get_pipeline_status(response.pipelineId))
 
 </details>
 
-## 19.6 Data Ingestion of Chunks via Vector API
+## 20.6 Data Ingestion of Chunks via Vector API
 
 Vector API processes the chunks provided by user and stores their semantic embeddings in collections.
 
@@ -945,7 +945,7 @@ These steps help inspect vector collections and documents to confirm successful 
 
 </details>
 
-## 19.7 Get Data Repository ID
+## 20.7 Get Data Repository ID
 
 <details class="qa"><summary>Bruno</summary>
 
@@ -961,7 +961,7 @@ This ID uniquely identifies the knowledge base (data repository) created using e
 
 </details>
 
-## 19.8 Retrieval Search Without Orchestration - Optional Step
+## 20.8 Retrieval Search Without Orchestration - Optional Step
 
 If you only want to test semantic matching from the data repository without involving LLM inference or orchestration, you can use this standalone retrieval search option.
 
@@ -979,7 +979,7 @@ This is useful for **debugging retrieval quality** before plugging into a larger
 
 ![img](images/ai-core-orchestration-grounding-v2/img/image068.png)
 
-## 19.9 Get or create orchestration deployment
+## 20.9 Get or create orchestration deployment
 
 Before beginning inference, make sure:
 
@@ -991,7 +991,7 @@ Update the orchestration_service_url in your environment variables accordingly.
 
 NOTE: If you don’t have an orchestration deployment or would like to refer GET Deployment steps, refer to "Create Configuration for Orchestration Deployment" step in this tutorial [tutorial] (https://developers.sap.com/tutorials/ai-core-orchestration-consumption.html#130d0b6a-6d86-4505-9a80-6d268f9e2e51).
 
-## 19.10 Configure Grounding Module in Orchestration Workflow
+## 20.10 Configure Grounding Module in Orchestration Workflow
 
 <details class="qa"><summary>Bruno</summary>
 
@@ -1164,7 +1164,7 @@ grounding_config = GroundingModuleConfig(
 
 </details>
 
-## 19.11 Run Orchestration with Prompt to Get Context-aware Response
+## 20.11 Run Orchestration with Prompt to Get Context-aware Response
 
 <details class="qa"><summary>Bruno</summary>
 
@@ -1262,7 +1262,7 @@ print(response.final_result.choices[0].message.content)
 
 </details>
 
-## 19.12 Conclusion
+## 20.12 Conclusion
 
 Adding Grounding significantly enhances the model's ability to provide Accurate and Context-specific responses. Without Grounding, the model generates generic replies, while with grounding, it retrieves precise information from the uploaded document. Screenshots showcasing both responses are provided for comparison.
 

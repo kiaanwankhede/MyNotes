@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Optimize Prompts for Tool Calling Using a Custom LLM-as-a-Judge Metric in SAP AI Core](https://developers.sap.com/tutorials/prompt-optimization-custom-metric) by Smita Naik · about 60 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/prompt-optimization-custom-metric/)
-> - **Changes for this book:** page layout; steps numbered 35.1 to 35.12; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 36.1 to 36.12; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -33,7 +33,7 @@ This tutorial goes one step further than simply *using* a pre-existing metric: y
 
 ---
 
-## 35.1 Understand the pipeline (Pre-Read)
+## 36.1 Understand the pipeline (Pre-Read)
 
 Before writing any code, it helps to hold the whole flow in your head. Every step below re-uses a single authenticated `client` object and builds on variables created earlier, so the notebook cells (and the steps here) are meant to run **in order, top to bottom**.
 
@@ -76,7 +76,7 @@ A few SAP AI Core terms used throughout:
 
 ---
 
-## 35.2 Set up your environment and connect to AI Core
+## 36.2 Set up your environment and connect to AI Core
 
 Create a `.env` file in your working directory with the credentials from your AI Core service key:
 
@@ -141,7 +141,7 @@ print(f"   Resource group: {resource_group}")
 
 ---
 
-## 35.3 Verify and create the custom evaluation metric
+## 36.3 Verify and create the custom evaluation metric
 
 The built-in `JSON_Match` metric does a rigid structural comparison between the model's JSON and the golden answer. It catches gross formatting errors, but it can't tell "the model called the *wrong* tool" apart from "the model got the right tool but phrased an argument slightly differently." A **custom LLM-as-a-judge metric** solves this: a second LLM reads the candidate output alongside the golden answer and scores it against criteria you define.
 
@@ -305,7 +305,7 @@ A `201` returns the new metric `id` — save it as `CUSTOM_METRIC_ID`. A `409` m
 
 ---
 
-## 35.4 Configure the optimization parameters
+## 36.4 Configure the optimization parameters
 
 Define every constant the run needs. Note the difference between the **reference model** (`gpt-4o:2024-08-06`, a teacher the optimizer compares against) and the **target model** (`gemini-2.5-pro:001`, the model the final prompt is actually tuned for). The **train/test split** (25 train, 15 test) mirrors traditional ML: train samples refine candidate prompts, held-out test samples score them so the reported score reflects generalization, not memorization.
 
@@ -376,7 +376,7 @@ testDataset         = bfcl_test.json
 
 ---
 
-## 35.5 Load and normalize the BFCL v3 dataset
+## 36.5 Load and normalize the BFCL v3 dataset
 
 The optimizer doesn't understand BFCL's native structure — it expects each example as a **golden record**: `{"fields": {"question": ...}, "answer": "<JSON object string>"}`. This step is the translation layer. Several helper functions handle it: a robust reader (BFCL v3 ships as concatenated JSON objects with no separators), a tool-schema normalizer (BFCL's `float`/`dict`/`any` → OpenAI's `number`/`object`/`string`), a deduplicator for same-named tools with different schemas, and a golden-record builder.
 
@@ -564,7 +564,7 @@ Run the Python notebook up to the "Local files written." output before proceedin
 
 ---
 
-## 35.6 Upload the dataset files and register the artifact
+## 36.6 Upload the dataset files and register the artifact
 
 Serialize the four prepared objects (`bfcl_train.json`, `bfcl_test.json`, `bfcl_tools.json`, `bfcl_prompt_template.json`) to local files, upload each to the shared remote folder `default/datasets/bfcl-optimizer/`, then register that folder as a single **dataset artifact** under the `genai-optimizations` scenario. The optimizer reads all files from this artifact folder.
 
@@ -654,7 +654,7 @@ Save the returned `id` as `artifactId` — it's bound as the configuration input
 
 ---
 
-## 35.7 Register the base prompt template
+## 36.7 Register the base prompt template
 
 Push the deliberately minimal base prompt (system `"You are a helpful assistant."`, user `{{?question}}`) to the Prompt Registry. Starting from a weak, generic prompt gives the optimizer maximum room to add structure — JSON-only instructions, tool schemas, reasoning steps — and makes the improvement in Step 9 obvious. `{{?question}}` is a placeholder that gets replaced by the actual user question at inference time.
 
@@ -706,7 +706,7 @@ A `2xx` registers the prompt; a `409` means it already exists and can be reused 
 
 ---
 
-## 35.8 Configure, trigger, and monitor the optimization run
+## 36.8 Configure, trigger, and monitor the optimization run
 
 This is the heart of the pipeline. Build a **configuration** from the parameters (base prompt reference, models, dataset filenames, and — crucially — the `customMetricId`), create an **execution** from it, then poll until the execution reaches a terminal state.
 
@@ -845,7 +845,7 @@ GET {{ai_api_url}}/v2/lm/executions/{{executionId}}
 
 ---
 
-## 35.9 Retrieve the optimized prompt
+## 36.9 Retrieve the optimized prompt
 
 The Prompt Registry has no "get by name" shortcut here, so first **list every prompt template** to find the `id` matching your `targetPromptMapping` output name (`bfcl-tool-optimized-custom:0.0.1`), then **fetch that ID** to see its full content. The optimized prompt will be dramatically more detailed than the two-line base — expect a structured-output parser role, strict JSON constraints (no markdown, no backticks), full tool schemas across all functions with per-field normalization rules, a conflict-resolution policy, and internal reasoning steps.
 
@@ -892,7 +892,7 @@ The response's `spec.template` contains the full optimized `system` and `user` m
 
 ---
 
-## 35.10 Compare base vs optimized prompts via live inference using Python
+## 36.10 Compare base vs optimized prompts via live inference using Python
 
 This is the "proof in the pudding" step. Run four multi-tool test questions through **both** the base and optimized prompts on `gemini-2.5-pro` and compare. Live inference runs through a **deployed** orchestration scenario (a running service with its own URL), so first find a deployment with `scenario=orchestration` and `status=RUNNING`, then run the comparison.
 
@@ -994,7 +994,7 @@ For the Tokyo question, the base prompt apologizes that it has no real-time weat
 
 ---
 
-## 35.11 Compare the custom metric against `JSON_Match`
+## 36.11 Compare the custom metric against `JSON_Match`
 
 Because this tutorial creates its *own* metric, it's worth asking: does `tool-call-accuracy` (LLM-as-a-judge) actually change what the optimizer produces versus the built-in `JSON_Match`? Optimizing the same base prompt and dataset separately under each metric reveals a consistent difference.
 
@@ -1008,7 +1008,7 @@ To try `JSON_Match` yourself, re-run Step 7 with the metric parameter swapped �
 
 ---
 
-## 35.12 Test yourself
+## 36.12 Test yourself
 
 In the v1 orchestration `/completion` request, where do the prompt template messages live?
 

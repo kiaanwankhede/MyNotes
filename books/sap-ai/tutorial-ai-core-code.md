@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Build a House Price Predictor with SAP AI Core](https://developers.sap.com/tutorials/ai-core-code) by Dhrubajyoti Paul · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-code/)
-> - **Changes for this book:** page layout; steps numbered 40.1 to 40.16; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed; 7 screenshot(s) missing in SAP's source marked as such
+> - **Changes for this book:** page layout; steps numbered 41.1 to 41.16; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed; 7 screenshot(s) missing in SAP's source marked as such
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -32,7 +32,7 @@ Please find downloadable sample notebooks for the tutorials : . Note that these 
 
 ---
 
-## 40.1 Create a Docker account and generate a Docker access token
+## 41.1 Create a Docker account and generate a Docker access token
 
 You need a Docker repository to store your AI code on the cloud in the form of Docker images. SAP AI core will fetch your code from this Docker repository. The image ensures that your code is bundled along with all of the dependencies, directory structure and drivers that are required when using GPU.
 
@@ -52,7 +52,7 @@ Follow the guided steps, and then store the token that you receive in your local
 
 > **SECURITY TIP**: This access token means that SAP AI Core can access the specified Docker repository without you sharing you Docker credentials. It also means that you can revoke access by deleting the token, rather than having to change your credentials.
 
-## 40.2 Install Docker Desktop
+## 41.2 Install Docker Desktop
 
 [Download and Install](https://www.docker.com/products/docker-desktop) Docker Desktop. You will need Docker Desktop to help you build Docker images of your AI code.
 
@@ -60,7 +60,7 @@ Run your Docker Desktop. You will observe "whale icon" on your tray when Docker 
 
 ![image](images/ai-core-code/img/docker-desktop.png)
 
-## 40.3 Write AI code for house price prediction
+## 41.3 Write AI code for house price prediction
 
 Create a directory (folder) named **hello-aicore-code**.
 
@@ -107,7 +107,7 @@ scikit-learn
 
 The code builds a model using the [California Housing Dataset](https://scikit-learn.org/stable/datasets/real_world.html#california-housing-dataset) available in Scikit-Learn. Note that the code neither reads a datafile nor stores the model. We will cover both of these in a different tutorial.
 
-## 40.4 Transform your AI code into a Docker image
+## 41.4 Transform your AI code into a Docker image
 
 In the same directory, create a file named `Dockerfile` with **no extension**. This file stores instructions for Docker to build an image. Your Docker image is a Linux distribution, therefore commands in this `Dockerfile` are similar to Linux commands with verbs for Docker as the suffix. Paste the following content **exactly** as it is, into the file:
 
@@ -158,7 +158,7 @@ The result of this command should be:
 
 ![image](images/ai-core-code/img/docker-build.png)
 
-## 40.5 Connect your local system to a Docker account
+## 41.5 Connect your local system to a Docker account
 
 Login to your Docker account from your terminal. This is a one time step that stores your Docker account credentials in your local Docker Desktop.
 
@@ -172,7 +172,7 @@ Copy and paste your generated Docker Access Token to use as your password. For s
 
 ![image](images/ai-core-code/img/docker-login.png)
 
-## 40.6 Upload a Docker image to the cloud
+## 41.6 Upload a Docker image to the cloud
 
 ```BASH
 docker push docker.io/<YOUR_USERNAME>/house-price:01
@@ -180,7 +180,7 @@ docker push docker.io/<YOUR_USERNAME>/house-price:01
 
 ![image](images/ai-core-code/img/docker-push.png)
 
-## 40.7 Store your Docker credentials in SAP AI Core as a Docker registry secret
+## 41.7 Store your Docker credentials in SAP AI Core as a Docker registry secret
 
 This step is required once. Storing Docker credentials enables SAP AI Core to pull (download) your Docker images from a **private** Docker repository. Use of a private Docker image prevents others from seeing your content.
 
@@ -250,7 +250,7 @@ print(response.__dict__)
 
 > **TIP** You can store multiple Docker credentials in SAP AI Core.
 
-## 40.8 Reference a Docker image in your AI workflow
+## 41.8 Reference a Docker image in your AI workflow
 
 This step requires the GitHub folder that you synced in [this tutorial](https://developers.sap.com/tutorials/ai-core-helloworld.html/#). In this folder, create another YAML file called `code-pipeline.yaml`. (This filename is not used as an identifier within SAP AI Core.)
 
@@ -289,7 +289,7 @@ spec:
         - "python /app/src/main.py"
 ```
 
-## 40.9 Description of edits in your workflow.
+## 41.9 Description of edits in your workflow.
 
 Observe the difference between the `hello.yaml` (created in the prerequisite tutorial) and `code-pipeline.yaml`.
 
@@ -298,7 +298,7 @@ Observe the difference between the `hello.yaml` (created in the prerequisite tut
 1. `imagePullSecrets`: A key that specifies which credentials will be used to access the Docker registry. The value `credstutorialrepo` specifies the Docker registry secret that you created previously to store Docker information in SAP AI Core.
 2. `image`: A key that specifies which code to use in the workflow and which commands to execute within the Docker image.
 
-## 40.10 Check the sync status of your workflow
+## 41.10 Check the sync status of your workflow
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -394,7 +394,7 @@ for executable in response.resources:
 > ### How is a different Scenario created even when the application is syncing the your GitHub folder?
 > The application's only task is to sync and look for syntax errors in YAML files. By modifying annotations (`scenarios.ai.sap.com/id`, `scenarios.ai.sap.com/name` and `scenarios.ai.sap.com/description`) within the YAML you create new scenario.
 
-## 40.11 Run your AI workflow
+## 41.11 Run your AI workflow
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -539,7 +539,7 @@ response.__dict__
 
 The execution will go from **UNKNOWN** to **RUNNING** then to the **DEAD** state. Resolving this is covered in next step.
 
-## 40.12 Look for error logs in execution
+## 41.12 Look for error logs in execution
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -587,7 +587,7 @@ for log in response.data.result:
 
 We can see that `scikit-learn` was unable to create directory for caching. Let's resolve this in the next step.
 
-## 40.13 Fix and update code
+## 41.13 Fix and update code
 
 Update the highlighted line in `main.py`. Set the parameter `data_home` of function `dataset.fetch_california_housing` to `/app/src`. You had already set elevated permissions for this directory in your `Dockerfile`.
 
@@ -609,7 +609,7 @@ docker push docker.io/<YOUR_DOCKER_USERNAME>/house-price:02
 
 ![image](images/ai-core-code/img/code-push-2.png)
 
-## 40.14 Update your AI workflow
+## 41.14 Update your AI workflow
 
 Locate your workflow (YAML file) in GitHub. Click on the **Pencil Icon** to edit your workflow. The original code is also available by following [this link](https://raw.githubusercontent.com/SAP-samples/ai-core-samples/main/02_ai_core/tutorials/01_create_your_first_machine_learning_project_using_sap_ai_core/01_03_build_a_house_price_predictor_with_sap_ai_core/step-8-code-pipeline.yaml)
 
@@ -624,7 +624,7 @@ Click **Commit Changes** after editing.
 > ### Why update the version each time you make changes to your workflow?
 > The executable version is denoted by `ai.sap.com/version`. SAP AI Core syncs you workflows every three minutes and the version number is easily observable. You can be confident that your changes have synced. An alternative method of checking is to check that the latest **REVISION** number from GitHub is reflected in AI Core.
 
-## 40.15 Create execution
+## 41.15 Create execution
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -671,7 +671,7 @@ Check the status of your execution. When the status turns to **COMPLETED**, you 
 
 </details>
 
-## 40.16 Scheduling Execution (optional)
+## 41.16 Scheduling Execution (optional)
 
 AI core Also provides the functionality to auto schedule Executions based on Time. 
 

@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [GenAI Grounding Evaluations with SAP AI Core](https://developers.sap.com/tutorials/ai-core-genaihub-evaluation-with-grounding) by Smita Naik · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-genaihub-evaluation-with-grounding/)
-> - **Changes for this book:** page layout; steps numbered 30.1 to 30.11; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 31.1 to 31.11; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 In RAG-based enterprise applications, model responses must be grounded in trusted data sources such as enterprise documents, knowledge bases, or curated repositories. SAP AI Core’s evaluation capabilities allow you to systematically measure grounding quality, retrieval relevance, and alignment of generated responses with source content.
@@ -46,7 +46,7 @@ Download [requirements.txt](https://github.com/sap-tutorials/Tutorials/blob/mast
 
 **Below are the Steps to Run a GenAI Evaluation in SAP AI Core**
 
-## 30.1 Pre-Read
+## 31.1 Pre-Read
 
 This tutorial uses a structured evaluation dataset named **emanual.csv** Placed inside the folder **DATASET_RAG**
 
@@ -72,7 +72,7 @@ It leverages the publicly available **emanual.csv**, which contains commonly ask
 
 - The grounding metrics evaluate if the output faithfully uses the provided context.
 
-## 30.2 Notebook Reference
+## 31.2 Notebook Reference
 
 For hands-on execution and end-to-end reference, use the accompanying [Evaluation Grounding Notebook](https://github.com/SAP-samples/aicore-genai-samples/blob/main/genai-sample-apps/Evaluation/evaluation_with_grounding/evaluation_RAG.ipynb ). It includes complete Python code examples that align with each step of this tutorial — from dataset preparation and artifact registration to configuration creation, execution, and result retrieval.
 
@@ -83,7 +83,7 @@ For hands-on execution and end-to-end reference, use the accompanying [Evaluatio
 - Configure your environment variables such as AICORE_BASE_URL, AICORE_AUTH_TOKEN, and object store credentials .
 - Execute each cell in order to reproduce the complete Evaluation Grounding workflow demonstrated in this tutorial.
 
-## 30.3 Environment Variables Setup
+## 31.3 Environment Variables Setup
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -184,7 +184,7 @@ client = GenAIHubProxyClient(
 
 **Important Note:**  Please note that for using the document grounding service, your request must contain the **document grounding label** set to **true**. Therefore, existing resource groups without the label won’t work.
 
-## 30.4 Preparing Dataset Files and Reference Files
+## 31.4 Preparing Dataset Files and Reference Files
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -242,7 +242,7 @@ else:
 
 </details>
 
-## 30.5 Registering an Object Store Secret in AI Core
+## 31.5 Registering an Object Store Secret in AI Core
 
 You can upload the orchestration run files, grounding test datasets, and any optional metric definitions to SAP AI Core using the Tracking API. To upload these files, you must first register an object store secret containing your object store credentials
 
@@ -363,7 +363,7 @@ Use the below payload to create a secret for AWS S3 with NoAuthentication as aut
 > - For **input artifacts**, you may create additional object store secrets with different names if needed.
 > - If a secret named `default` is not configured, orchestration runs will **fail** due to missing output target setup.
 
-## 30.6 Create a Generic Secret
+## 31.6 Create a Generic Secret
 
 In the next step, we create a secret that enables grounding by adding on the "labels" config. This generic secret needs to be created to provide details of the hyperscaler and bucket details so that grounding service will know how to retrieve data from it.
 
@@ -518,7 +518,7 @@ Use the below payload to create a secret for AWS S3 with NoAuthentication as aut
 
 </details>
 
-## 30.7 Create a Grounding Pipeline
+## 31.7 Create a Grounding Pipeline
 
 Before running grounding evaluations, you must create a grounding pipeline in SAP AI Core. This pipeline is responsible for reading documents from your object store, processing them, and preparing them for retrieval.
 
@@ -610,7 +610,7 @@ This creates the S3-based grounding pipeline and links it to your previously cre
 
 </details>
 
-## 30.8 Upload Evaluation Files to Object Store and Register Artifact in AI Core
+## 31.8 Upload Evaluation Files to Object Store and Register Artifact in AI Core
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -813,7 +813,7 @@ Save the ai://… URL — you will use this when creating the dataset artifact.
 
 </details>
 
-## 30.9 Create an Evaluation Configuration
+## 31.9 Create an Evaluation Configuration
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -1317,7 +1317,7 @@ Below is a sample configuration payload that you can use in **Bruno** to trigger
 
 </details>
 
-## 30.10 Evaluation Execution Creation
+## 31.10 Evaluation Execution Creation
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
 - Once the evaluation configuration is created, the system automatically triggers an evaluation execution.
@@ -1443,7 +1443,7 @@ check the status of created execution by passing the execution ID, The Current S
 
 </details>
 
-## 30.11 Evaluation Results Analysis
+## 31.11 Evaluation Results Analysis
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 

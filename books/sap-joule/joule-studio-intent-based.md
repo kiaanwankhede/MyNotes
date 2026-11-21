@@ -176,6 +176,11 @@ GAP       Draft a status email to the customer
 | **Classic Joule skill** | A low-code flow in Joule Studio Classic | Existing Classic projects (chapter 3) |
 
 - n8n plays the same role as other workflow tools, such as SAP Build Process Automation or graph frameworks like LangGraph. MCP plays a different role: it supplies tools. The two work together.
+- **Classic skills vs the new Studio** (the trainer's view, Lecture 13, Nov 2026):
+  - A classic skill is a low-code wrapper around the API calls of an action project. The new Joule Studio has no such skill: it turns each API into a generated **MCP tool**, and the Python code uses real agent skills.
+  - The main reason customers will prefer the new Studio is **extensions**: Classic only lets you use a standard agent as it is or build your own from scratch; the new Studio lets you extend SAP's agent (4.6).
+  - SAP had given no migration path from Classic to the new Studio, so companies already live on Classic will run both side by side; new adopters start on the new Studio.
+  - **What to learn as a functional consultant:** *context engineering* (the prompt plus the documents, graphs and data you give the agent) and **testing**: probe the generated agent with the edge cases your domain experience knows, and make it correct itself.
 
 ## 4.9 Added by Claude, not from the sources
 

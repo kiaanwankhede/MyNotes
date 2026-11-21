@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Leveraging Prompt Registry for Seamless Orchestration](https://developers.sap.com/tutorials/ai-core-genaihub-prompt-registry) by Smita Naik · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-genaihub-prompt-registry/)
-> - **Changes for this book:** page layout; steps numbered 21.1 to 21.5; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 22.1 to 22.5; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## You will learn
@@ -35,7 +35,7 @@
 8. Basic Knowledge:
     Familiarity with the orchestration workflow is recommended
 
-## 21.1 Pre-read
+## 22.1 Pre-read
 
 In this tutorial, we explore the **Prompt Registry** feature within the **Generative AI Hub**, focusing on how to efficiently manage and utilize prompt templates in orchestration pipelines.
 
@@ -67,7 +67,7 @@ There are two key approaches to managing prompts in a **Prompt Registry**:
 For more information on prompt registry, refer to the official documentation:  
 [Prompt Registry in SAP Generative AI Hub – Help Portal](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/prompt-registry?version=CLOUD)
 
-## 21.2 Create a Prompt Template (Declarative)
+## 22.2 Create a Prompt Template (Declarative)
 
 <details class="qa"><summary>AI Launchpad</summary>
 
@@ -110,7 +110,7 @@ spec:
 
 </details>
 
-## 21.3 Onboarding Github and Application on AI core
+## 22.3 Onboarding Github and Application on AI core
 
 <details class="qa"><summary>AI Launchpad</summary>
 
@@ -166,7 +166,7 @@ After synchronization, navigate to **ML Operations > Scenarios** in the **SAP AI
 
 </details>
 
-## 21.4 Verifying and Consuming the Prompt Template
+## 22.4 Verifying and Consuming the Prompt Template
 
 <details class="qa"><summary>AI Launchpad</summary>
 
@@ -206,7 +206,7 @@ Once the template is synced to the **AI Core Launchpad**, follow these steps to 
 
 </details>
 
-## 21.5 Prompt Templates for Different Use Cases and Reusability
+## 22.5 Prompt Templates for Different Use Cases and Reusability
 
 <details class="qa"><summary>AI Launchpad</summary>
 

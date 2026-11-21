@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Ingest Live Data into your House Price Predictor with SAP AI Core](https://developers.sap.com/tutorials/ai-core-data) by Dhrubajyoti Paul · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-data/)
-> - **Changes for this book:** page layout; steps numbered 41.1 to 41.22; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 42.1 to 42.22; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -45,7 +45,7 @@ Please find downloadable sample notebooks for the tutorials : . Note that these 
 [Link to notebook](https://github.com/SAP-samples/ai-core-samples/blob/main/02_ai_core/tutorials/01_create_your_first_machine_learning_project_using_sap_ai_core/01_04_ingest_live_data_into_your_house_price_predictor_with_sap_ai_core/ingest-data-house-predictor.ipynb)
 
 ---
-## 41.1 Modify AI code
+## 42.1 Modify AI code
 
 Create a new directory named `hello-aicore-data`. The code is different from [previous tutorial](https://developers.sap.com/tutorials/ai-core-code.html/#) as it reads the data from folder (volumes, virtual storage spaces). The content of these volumes is dynamically loaded during execution of workflows.
 
@@ -87,7 +87,7 @@ import pickle
 pickle.dump(clf, open(MODEL_PATH, 'wb'))
 ```
 
-## 41.2 Understanding your code
+## 42.2 Understanding your code
 
 Your code reads the data file `train.csv` from the location `/app/data`, which will be prepared in a later step. It also reads the variable (hyper-parameter) `DT_MAX_DEPTH` from the environment variables later. When generated, your model will be stored in the location `/app/model/` . You will also learn how to transport this code from SAP AI Core to your own cloud storage.
 
@@ -140,7 +140,7 @@ docker build -t docker.io/<YOUR_DOCKER_USERNAME>/house-price:03 .
 docker push docker.io/<YOUR_DOCKER_USERNAME>/house-price:03
 ```
 
-## 41.3 Create placeholders for datasets in workflows
+## 42.3 Create placeholders for datasets in workflows
 
 Create a pipeline (YAML file) named `house-price-train.yaml` in your GitHub repository. Use the existing GitHub path which is already synced by your application of SAP AI Core.
 
@@ -182,7 +182,7 @@ spec:
         - "python /app/src/main.py"
 ```
 
-## 41.4 Understanding changes in your workflow
+## 42.4 Understanding changes in your workflow
 
 This change to your workflow creates a placeholder through which you can specify a data path (volume) to the container (Docker image in execution).
 
@@ -195,7 +195,7 @@ This change to your workflow creates a placeholder through which you can specify
 ### Why do we need to create placeholders?
 SAP AI Core only uses your workflows as an interface, so is unaware of the volume/ attachments specified in your Docker image. Your data path is specified in your Dockerfile and has a placeholder in your workflow and data is then expected by the Docker image.
 
-## 41.5 Create placeholders for hyperparameters
+## 42.5 Create placeholders for hyperparameters
 
 In your workflow, you have used the variable `DT_MAX_DEPTH` to incorporate a static value from the corresponding environment variable. Let's make this a variable in the workflow.
 
@@ -256,7 +256,7 @@ The following shows the new important lines in the workflows.
 
 Commit the changes in the GitHub.
 
-## 41.6 Set resource plan
+## 42.6 Set resource plan
 
 Add the following snippet in your workflow to specify resource plan. The resource plan helps specify computing resource required to run your Docker image. The computing resources includes GPU, RAM and Processor. If not mentioned the resource plan defaults to `starter` which is the entry level [resource plan](https://help.sap.com/docs/AI_CORE/2d6c5984063c40a59eda62f4a9135bee/57f4f19d9b3b46208ee1d72017d0eab6.html?locale=en-US).
 
@@ -274,7 +274,7 @@ spec:
 
 **INFORMATION**: You can always verify computing resource allocated using the following command `echo $(lscpu)` within your Docker image. The command is the the shell script command of Linux to print system configuration.
 
-## 41.7 Observe your scenario and placeholder
+## 42.7 Observe your scenario and placeholder
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -372,7 +372,7 @@ labels : None
 
 Observe the value of the `name` variable in both `inputArtifacts` and `parameters`. These represent the placeholder names which were specified earlier in the process. You are required use these names later when creating your **configuration**.
 
-## 41.8 Create cloud storage for datasets and models
+## 42.8 Create cloud storage for datasets and models
 ## Why use cloud storage?
 SAP AI Core only provides your ephemeral (short-lived) storage, while training or inferencing a model.  Amazon Web Services (AWS) S3 Object store is the cloud storage used by SAP AI Core for storing datasets and models. Here, they can be stored over a longer time period, and can be transferred to and from SAP AI Core during training or online inferencing.
 
@@ -381,7 +381,7 @@ You need to create AWS S3 object store, using one of the following links:
 - If you are a BTP user, create your storage through the [SAP Business Technology Platform](https://help.sap.com/docs/ObjectStore/2ee77ef7ea4648f9ab2c54ee3aef0a29/4236b942f67349d5a583773162d99660.html). While BTP offers alternative storage solutions, this tutorial uses AWS S3.
 - If you are not a BTP user, go directly through [AWS site](https://aws.amazon.com/free/?all-free-tier.sort-by=item.additionalFields.SortRank&all-free-tier.sort-order=asc&awsf.Free%20Tier%20Categories=categories%23storage&trk=e31669e1-2406-4016-9dc4-feb8ed89019b&sc_channel=ps&sc_campaign=acquisition&sc_medium=ACQ-P|PS-BI|Brand|Desktop|SU|Storage|S3|IN|EN|Text&s_kwcid=AL!4422!10!71880729042342!71881173212098&ef_id=77e85e62d00a1077e8c33c3e3fbff9e2:G:s&s_kwcid=AL!4422!10!71880729042342!71881173212098&awsf.Free%20Tier%20Types=*all)
 
-## 41.9 Connect local system to AWS S3
+## 42.9 Connect local system to AWS S3
 
 Download and Install the [AWS Command Line Interface (CLI)](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 
@@ -397,7 +397,7 @@ Enter your AWS credentials. Note that the appearance of the screen will not chan
 
 Your credentials are stored in your system and used by the AWS CLI to interact with AWS. Fore more information, see [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html)
 
-## 41.10 Upload datasets to AWS S3
+## 42.10 Upload datasets to AWS S3
 
  Download the `train.csv` [dataset](https://raw.githubusercontent.com/sap-tutorials/Tutorials/master/tutorials/ai-core-data/train.csv). You need to right click, and save the page as `train.csv`.
 
@@ -432,7 +432,7 @@ aws s3 ls s3://<YOUR_BUCKET_NAME/example-dataset/house-price-toy/data/
 
 ![image](images/ai-core-data/img/aws-upload2.png)
 
-## 41.11 Store an object store secret in SAP AI Core
+## 42.11 Store an object store secret in SAP AI Core
 
 An object store secret is required to store credentials to access your AWS S3 buckets, and limit access to a particular directory.
 
@@ -529,7 +529,7 @@ With your object store secret created, you can now reference any sub-folders to 
 
 > **INFORMATION** You may create any number of object store secrets each with unique `name`. They can point to the same or different object stores.
 
-## 41.12 Create artifact to specify folder of dataset
+## 42.12 Create artifact to specify folder of dataset
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -662,7 +662,7 @@ You have learnt to add data artifacts, allowing you to ingest more data over tim
 2. The `url` points to a directory, not a file, which gives you advantage that you can store multiple files in an AWS S3 directory and register the directory containing all files as a single artifact.
 3. All the files present in the path referenced by artifact will be copied from your S3 storage to your SAP AI Core instance during training or inferencing. This includes subfolders, apart from where `Kind = MODEL`.
 
-## 41.13 Locate artifacts
+## 42.13 Locate artifacts
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -739,7 +739,7 @@ modified_at : 2022-04-18 12:31:34
 
 Copy the artifact ID of the January dataset. You will use this value in the placeholders of your workflows to create your execution. The **ID** of artifacts allows SAP AI Core to ingest data into workflows.
 
-## 41.14 Use artifacts with workflows using a configuration
+## 42.14 Use artifacts with workflows using a configuration
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -830,7 +830,7 @@ print(response.__dict__)
 
 This is how you bind values to placeholders to your workflows.
 
-## 41.15 Run you workflow using execution
+## 42.15 Run you workflow using execution
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -881,7 +881,7 @@ for log in response.data.result:
 
 Until now you have ingested data and specified variables in SAP AI Core. To save your model to use later, you need to extract the model to cloud storage. We will complete this in the next step.
 
-## 41.16 Set model pipeline in workflow
+## 42.16 Set model pipeline in workflow
 
 In your GitHub repository, edit the workflow `house-price-train.yaml` and replace the contents with the below snippet. Make sure to add your Docker credentials and artifact details to the relevant fields.
 
@@ -935,7 +935,7 @@ spec:
         - "python /app/src/main.py"
 ```
 
-## 41.17 Description of changes
+## 42.17 Description of changes
 
 ![image](images/ai-core-data/img/code-model.png)
 
@@ -943,7 +943,7 @@ You added a new `outputs` section, where you specified files and their directori
 
 All of the contents within your `/app/model/` directory, as defined in your Docker image, will be uploaded to AWS S3. This implies you may generate multiple files of any format after training, for example `class_labels.npy`, `model.h5`, `classifier.pkl` or `tokens.json`.
 
-## 41.18 Create required object store secret `default` for model
+## 42.18 Create required object store secret `default` for model
 
 It is compulsory to create a object store secret named `default` within your resource group, for your executable to **generate models and store them in AWS S3**. After execution the model will be saved to `PATH_PREFIX_of_default/<execution_id>/housepricemodel` in your AWS S3. The `housepricemodel` is mentioned in the workflow in the previous step.
 
@@ -1015,7 +1015,7 @@ The value of the `name` key must be `default`. This should not be confused with 
 
 </details>
 
-## 41.19 Create another configuration with new data
+## 42.19 Create another configuration with new data
 
 This time, train the model with the `feb` dataset and with a different hyper-parameter value.
 
@@ -1092,7 +1092,7 @@ print(response.__dict__)
 
 </details>
 
-## 41.20 Create another execution
+## 42.20 Create another execution
 
 Use your new configuration to create an execution.
 
@@ -1146,7 +1146,7 @@ When your execution shows status **COMPLETED**, you will see that a new model ar
 
 Generating and associating metrics (model quality) will covered in a separate tutorial.
 
-## 41.21 Schedule your execution (Optional)
+## 42.21 Schedule your execution (Optional)
 
 Go to executions and click on *Schedule*.
 
@@ -1176,7 +1176,7 @@ Now go to **Schedules** to see your schedules.
 
 ![image](images/ai-core-data/img/ail/sch7.png)
 
-## 41.22 Locate your model in AWS S3
+## 42.22 Locate your model in AWS S3
 
 List your new files by pasting and editing the following snippet in your terminal.
 

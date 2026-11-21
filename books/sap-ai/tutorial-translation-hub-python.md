@@ -20,7 +20,7 @@
 - Pick sync or async by document size, and choose how to upload and receive the file
 - Run a job end to end: create, poll, fetch the result, delete
 
-## 9.1 Two services, one key
+## 10.1 Two services, one key
 
 - **SAP Translation Hub** has two parts: **Software Translation** (UI texts of applications) and **Document Translation** (files and text). This chapter uses Document Translation.
 - One service key holds the login details and both base URLs. The course's `.env` maps them like this:
@@ -57,7 +57,7 @@ sequenceDiagram
 > - SAP Help describes testing the API with a **BTP free tier** account on SAP Business Accelerator Hub.
 > - Choose region `us10` or `eu10`, then paste your client ID and secret.
 
-## 9.2 Get a token
+## 10.2 Get a token
 
 ```python
 import os, requests
@@ -79,7 +79,7 @@ base = os.environ["DOCTRANS_BASE"]
 - The course's version prints an error when the token request fails, then still returns `access_token`, which was never set. The next line fails with a confusing error. `raise_for_status()` stops at the real cause.
 - Tokens expire. When a call returns **401**, get a new token.
 
-## 9.3 Translate text
+## 10.3 Translate text
 
 ```python
 def translate_text(base, token, text, target, source=None, model="llm"):
@@ -105,7 +105,7 @@ print(translate_text(base, token, "Happy journey to the moon", "fr-FR", "en-US")
 - The reply echoes the languages and model, and puts the translation in `data`.
 - `encoding` is `plain` for text and `base64` for binary content.
 
-## 9.4 Translate a short document (synchronous)
+## 10.4 Translate a short document (synchronous)
 
 SAP Help's limits for the synchronous API:
 
@@ -142,7 +142,7 @@ print("\n".join(p.text for p in Document(BytesIO(r.content)).paragraphs))
 - **Don't set `Content-Type: multipart/form-data` yourself.** `requests` sets it, with the boundary, when you pass `files=`.
 - The JSON-body route lost some line structure in the course run ("if: more natural formulations"). The file routes kept whole sentences.
 
-## 9.5 Translate a long document (asynchronous job)
+## 10.5 Translate a long document (asynchronous job)
 
 SAP Help's limits for the asynchronous API: **500 MB** and **2,500,000 characters** per file.
 
@@ -202,7 +202,7 @@ if info["status"] == "DONE":
 > - It needs a JWT from the *Authorization Code* or *Password Credentials* grant (SAP Help). A client-credentials token like the one above won't do.
 > - Deleting follows the token type too (course notebook). With user tokens, only that user's jobs can be deleted; without them, only jobs created without user tokens.
 
-## 9.6 Things to watch
+## 10.6 Things to watch
 
 - **Size decides the API, not taste:** check the character count first, then pick sync or async.
 - **Glossaries** keep company terms consistent. SAP Help has a page on using the API with a term-aware glossary.

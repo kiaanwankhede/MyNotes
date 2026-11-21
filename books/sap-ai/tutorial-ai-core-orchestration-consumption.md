@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Consumption of GenAI models Using Orchestration - A Beginner's Guide](https://developers.sap.com/tutorials/ai-core-orchestration-consumption) by Smita Naik · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-orchestration-consumption/)
-> - **Changes for this book:** page layout; steps numbered 16.1 to 16.4; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 17.1 to 17.4; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## You will learn
@@ -29,7 +29,7 @@
 6. An Extended SAP AI Core service plan is required, as the Generative AI Hub is not available in the Free or Standard tiers. For more details, refer to 
 [SAP AI Core Service Plans](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/service-plans?version=CLOUD)
 
-## 16.1 Pre-Read
+## 17.1 Pre-Read
 
 This tutorial provides a basic introduction to using **orchestration in SAP AI Core**.
 
@@ -55,7 +55,7 @@ By the end of this tutorial,
 
    Refer to the [orchestration documentation](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/orchestration-8d022355037643cebf775cd3bf662cc5?locale=en-US&version=CLOUD) for more information.
 
-## 16.2 Set Up Your Environment and Configure Access
+## 17.2 Set Up Your Environment and Configure Access
 
 <details class="qa"><summary>AI Launchpad</summary>
 
@@ -200,7 +200,7 @@ AICORE_SERVICE_KEY={"clientid": "...", "clientsecret": "...", "url": "...", "ser
 
 </details>
 
-## 16.3 Create Configuration for Orchestration deployment - Optional Step
+## 17.3 Create Configuration for Orchestration deployment - Optional Step
 
 > Execute this step only if orchestration deployment is not available. Other wise **skip** this step and proceed to the next step `Consume LLM's in Generative AI Hub through Orchestration`
 
@@ -526,7 +526,7 @@ Follow the screenshot attached for reference.
 
 </details>
 
-## 16.4 Consume LLM's in Generative AI Hub through Orchestration
+## 17.4 Consume LLM's in Generative AI Hub through Orchestration
 
 Please note that the **model** and **model-version** referenced in the tutorial may differ from the current offerings. Refer to the [SAP Note](https://me.sap.com/notes/3437766) for the list of available models.
 

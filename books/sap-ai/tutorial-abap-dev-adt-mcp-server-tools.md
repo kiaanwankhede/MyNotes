@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Enable the ADT MCP Server in ABAP Development Tools for VS Code](https://developers.sap.com/tutorials/abap-dev-adt-mcp-server-tools) by Wolfgang Woehrle · about 15 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/abap-core-development](https://github.com/sap-tutorials/abap-core-development/blob/main/tutorials/abap-dev-adt-mcp-server-tools/)
-> - **Changes for this book:** page layout; steps numbered 55.1 to 55.4; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 56.1 to 56.4; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Overview
@@ -54,7 +54,7 @@ You have installed Visual Studio Code and the [**ABAP Development Tools for Visu
 
 ## Procedure
 
-## 55.1 Enable the ADT MCP Server in the Visual Studio Code Settings
+## 56.1 Enable the ADT MCP Server in the Visual Studio Code Settings
 [^Top of page](#)
 
 > Enable the built-in ADT MCP Server in the Visual Studio Code extension settings.
@@ -95,7 +95,7 @@ Note that you only change this if port 2236 is occupied on your machine. Proceed
 
 ---
 
-## 55.2 Verify the ADT MCP Server is Running
+## 56.2 Verify the ADT MCP Server is Running
 [^Top of page](#)
 
 > Check and confirm that the ADT MCP Server started successfully.
@@ -158,7 +158,7 @@ If the ADT MCP Server does not appear or fails to start:
 
 ---
 
-## 55.3 Verify the ADT MCP Tools in your coding agent
+## 56.3 Verify the ADT MCP Tools in your coding agent
 [^Top of page](#)
 
 > Open the **Chat** view of your coding agent in the agent mode. Confirm that the ADT MCP tools are loaded and available.
@@ -208,7 +208,7 @@ If the ADT MCP Server does not appear or fails to start:
 
 ---
 
-## 55.4 Summary & Next Exercise
+## 56.4 Summary & Next Exercise
 [^Top of page](#)
 
 You have successfully:

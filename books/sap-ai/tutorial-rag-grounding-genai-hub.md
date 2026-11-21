@@ -11,7 +11,7 @@
 >   - SAP Help: *Service Plans*, *Roles and Authorizations*, *Grounding Management*, *Build Your Orchestration Workflow*; SAP's AI Core trial page (all read 21 Nov 2026)
 > - **You will build:** a question-answering chain over a 27-page insurance policy, with chunks stored in SAP HANA Cloud; then the same idea with no code in AI Launchpad
 > - **You need:**
->   - SAP AI Core on the extended plan (or SAP's 30-day trial) and its service key ([chapter 7](tutorial-genai-hub-python.md))
+>   - SAP AI Core on the extended plan (or SAP's 30-day trial) and its service key ([chapter 8](tutorial-genai-hub-python.md))
 >   - Code route: an SAP HANA Cloud instance with the vector engine
 >   - No-code route: SAP AI Launchpad, and an object store on BTP
 > - **Level:** intermediate
@@ -25,7 +25,7 @@
 - Set up document grounding in AI Launchpad and use it in an orchestration flow
 - Choose between the code route and the no-code route
 
-## 10.1 Where the pieces sit
+## 11.1 Where the pieces sit
 
 | Piece | What it does | You use it to |
 |---|---|---|
@@ -54,7 +54,7 @@ flowchart TB
 - The course's guide says the extended plan needs a BTPEA or CPEA contract, "not plain Pay-As-You-Go". SAP's trial page names Pay-As-You-Go too, so this book follows SAP.
 - **Not the same as Joule's document grounding** ([SAP Joule 16.5](../sap-joule/joule-integration-other-sap-solutions.md)). That one lets Joule answer from your documents. This chapter builds grounding into your own app.
 
-## 10.2 Route A: set up
+## 11.2 Route A: set up
 
 ```bash
 pip install "sap-ai-sdk-gen[all]" langchain-hana hdbcli pypdf python-dotenv
@@ -93,7 +93,7 @@ connection = dbapi.connect(
 > - Saved notebooks travel: Drive folders, Git, email. Keep secrets in `.env` or a secret store, and use a user with rights only on the vector table, not an admin user.
 > - If a password ever appeared in a shared file, change it.
 
-## 10.3 Load, split, embed, store
+## 11.3 Load, split, embed, store
 
 ```python
 from langchain_community.document_loaders import PyPDFLoader
@@ -126,7 +126,7 @@ for text, meta in cur.fetchall():
 > - The course runs `db.delete(filter={})` before loading, so a re-run doesn't add duplicates. An empty filter matches **every** row.
 > - Fine for a lab table. In a shared table, delete by your own metadata instead, for example `db.delete(filter={"source": "policy.pdf"})`.
 
-## 10.4 Ask questions
+## 11.4 Ask questions
 
 ```python
 from langchain_core.prompts import ChatPromptTemplate
@@ -155,7 +155,7 @@ print(len(out["context"]), "chunks used")
 - **Older code uses `RetrievalQA`.** It's deprecated. In LangChain 1.x, `create_retrieval_chain` lives in the `langchain_classic` package.
 - **Shortcut:** `init_llm("gpt-4o", max_tokens=300)` from `gen_ai_hub.proxy.langchain.init_models` builds the chat model for you. Its default `max_tokens` is 256, too short for long answers.
 
-## 10.5 Route B: grounding without code (AI Launchpad)
+## 11.5 Route B: grounding without code (AI Launchpad)
 
 **What you need first (SAP Help, *Grounding Management*):**
 
@@ -195,7 +195,7 @@ Context from document grounding: {{?grounding_output_variable}}
 
 - **Limits (SAP Help, *Service Plans*):** a tenant can have at most **5 tenant-wide generic secrets** and **50 resource groups**.
 
-## 10.6 Orchestration: the pipeline around the model
+## 11.6 Orchestration: the pipeline around the model
 
 SAP Help lists these orchestration modules. Each module's output is the next one's input, and SAP sets the order:
 
@@ -212,7 +212,7 @@ SAP Help lists these orchestration modules. Each module's output is the next one
 - One API call runs the whole chain. You switch modules on and off in AI Launchpad, or send the configuration as JSON.
 - You need a running **orchestration deployment**, and `orchestration_executor`, `genai_experimenter` or `genai_manager`.
 
-## 10.7 Which route?
+## 11.7 Which route?
 
 | | Code (LangChain + HANA) | No code (Launchpad grounding) |
 |---|---|---|
@@ -221,7 +221,7 @@ SAP Help lists these orchestration modules. Each module's output is the next one
 | Masking and filters | Build them yourself | Orchestration modules, switched on |
 | Extra service | SAP HANA Cloud | Object store |
 
-## 10.8 Things to watch
+## 11.8 Things to watch
 
 - **Chunk size is a trade-off.** Small chunks match precisely but lose context; large ones carry more noise and cost more tokens. Try a few sizes on real questions.
 - **Re-index when documents change.** The code route re-runs `add_documents`. In the Launchpad, each repository shows its sync history, and you can trigger a sync by hand.

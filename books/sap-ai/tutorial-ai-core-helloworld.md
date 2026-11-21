@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Quick Start for Your First AI Project Using SAP AI Core](https://developers.sap.com/tutorials/ai-core-helloworld) by Dhrubajyoti Paul · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-helloworld/)
-> - **Changes for this book:** page layout; steps numbered 39.1 to 39.10; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 40.1 to 40.10; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## You will learn
@@ -31,7 +31,7 @@ The terms "executable" and "workflow" can be used interchangeably to refer to th
 Please find downloadable sample notebooks for the tutorials : . Note that these tutorials are for demonstration purposes only and should not be used in production environments. To execute them properly, you'll need to set up your own S3 bucket or provision services from BTP, including an AI Core with a standard plan for narrow AI and an extended plan for GenAI HUB. Ensure you input the service keys of these services into the relevant cells of the notebook.
 [Link to notebook](https://github.com/SAP-samples/ai-core-samples/blob/main/02_ai_core/tutorials/01_create_your_first_machine_learning_project_using_sap_ai_core/01_02_quick_start_for_your_first_ai_project_using_ai_core/quick_start_helloworld.ipynb)
 
-## 39.1 Create a GitHub repository
+## 40.1 Create a GitHub repository
 
 Create account on [GitHub](https://github.com/).
 
@@ -46,7 +46,7 @@ Create a repository named `aicore-pipelines`. It is recommended have this reposi
 
 ![Link text e.g., Destination screen](images/ai-core-helloworld/img/create_repo.png)
 
-## 39.2 Generate a GitHub personal access token
+## 40.2 Generate a GitHub personal access token
 
 Click on your GitHub profile icon. Select **Settings**.
 
@@ -72,7 +72,7 @@ Store your generated access token locally.
 
 ![image](images/ai-core-helloworld/img/token_3.png)
 
-## 39.3 Onboard GitHub to SAP AI Core
+## 40.3 Onboard GitHub to SAP AI Core
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -140,7 +140,7 @@ You will see your GitHub onboarding completed in a few seconds. In the next step
 
 > **CAUTION** These onboarding steps only store credentials to access the specified SAP AI Core instance within your GitHub account. Therefore, this **Completed** status does not guarantee that your SAP AI Core is able to access a given file, in your GitHub repository. If you need to debug this, follow the steps of application creation and debugging.
 
-## 39.4 Place a workflow in GitHub
+## 40.4 Place a workflow in GitHub
 
 Workflows for SAP AI Core are created using **YAML** or **JSON** files that are compatible with the SAP AI Core schema. Let's start with a simple workflow which will output a log file, containing: `Hello from SAP AI Core`.
 
@@ -217,7 +217,7 @@ The code first takes takes a public [docker image of python](https://hub.docker.
 >
 > While the code in this tutorial is written directly in the workflow, in actual production you will store the code scripts within your Docker Image. The number of code files and programming language are your preferences.
 
-## 39.5 Create an application to sync workflows with SAP AI Core
+## 40.5 Create an application to sync workflows with SAP AI Core
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -277,7 +277,7 @@ Use the following information for reference:
 
 > **IMPORTANT** Not all the files from your GitHub repository will be synced. Only the files present in the path mentioned in **Path in Repository** will be searched for YAML files and synced with SAP AI Core, excluding subfolders. This means that to sync different folders and subfolders of your GitHub in your production system, you are required to create multiple applications. Your path entry should have the format: `path/to/folder`.
 
-## 39.6 Check for errors
+## 40.6 Check for errors
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -336,7 +336,7 @@ Most common errors likely to occur are:
 
 Please refer the [Troubleshooting guide](https://help.sap.com/docs/AI_CORE/2d6c5984063c40a59eda62f4a9135bee/7f1e35be58fb4f909e43d44d994ab77d.html?locale=en-US) if encounter them.
 
-## 39.7 Check your scenario
+## 40.7 Check your scenario
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -392,7 +392,7 @@ Check the values between your code output and workflow to better understand the 
 
 </details>
 
-## 39.8 Run executable
+## 40.8 Run executable
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -528,7 +528,7 @@ If your execution is successful, you will see the log message `Hello from SAP AI
 > ### Why not directly create an execution ?
 > An execution is just an instance of the configuration running. The configuration is set of binding information between your workflow and datasets. In this tutorial you are just using the workflow information in the configuration.
 
-## 39.9 Update your workflow
+## 40.9 Update your workflow
 
 Having set all of the automation in the previous steps, it is easy to update your workflow and execute it.
 
@@ -544,7 +544,7 @@ Click **Commit Changes**.
 
 ![image](images/ai-core-helloworld/img/edit_3.png)
 
-## 39.10 Create new execution
+## 40.10 Create new execution
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 

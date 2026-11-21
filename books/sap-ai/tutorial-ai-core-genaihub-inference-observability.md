@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Inference Observability & Feedback Workflow in SAP AI Core](https://developers.sap.com/tutorials/ai-core-genaihub-inference-observability) by Smita Naik · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-genaihub-inference-observability/)
-> - **Changes for this book:** page layout; steps numbered 31.1 to 31.8; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 32.1 to 32.8; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## You will learn
@@ -52,7 +52,7 @@ By enabling observability, AI systems move from being black-box models to transp
 
 **Note:** Inference data is recorded only when explicitly enabled using observability headers in the request. 
 
-## 31.1 Bruno Collection
+## 32.1 Bruno Collection
 
 To simplify execution, this tutorial provides a pre-configured Bruno collection containing all required API requests.
 
@@ -93,7 +93,7 @@ After importing the collection:
 
 Note: If the token expires during execution, regenerate it using the same request.
 
-## 31.2 Initial Setup Overview
+## 32.2 Initial Setup Overview
 
 Before working with inference observability, certain foundational components must be in place.
 
@@ -119,7 +119,7 @@ To store complete inference data (request, response, and feedback), an **Amazon 
 
 **Important:** Only **S3 object stores** are supported by inference observability
 
-## 31.3 Execute Inference and Enable Observability
+## 32.3 Execute Inference and Enable Observability
 
 In this step, you will execute an inference request and enable observability to record the interaction.
 
@@ -199,7 +199,7 @@ This forms the foundation for tracking and analysis.
 
 **Important:** Only inferences sent to orchestration services or foundation model deployments are recorded in Inference Observability.
 
-## 31.4 Retrieve and Analyze Inference (Observability)
+## 32.4 Retrieve and Analyze Inference (Observability)
 
 Once an inference is recorded, you can retrieve its details for analysis.
 
@@ -264,7 +264,7 @@ Retrieve all inferences with label.yml
 
 This request retrieves inferences that match the specified label criteria.
 
-## 31.5 Add Feedback to Improve Responses
+## 32.5 Add Feedback to Improve Responses
 
 Feedback helps improve the quality of AI responses over time by capturing user evaluation of model outputs.
 
@@ -303,7 +303,7 @@ Click **Send** to submit feedback.
 
 > **Important:** Feedback is supported only when persistence mode is set to `full`.
 
-## 31.6 Retrieve Feedback
+## 32.6 Retrieve Feedback
 
 Once feedback is added, you can retrieve it to analyze response quality and user ratings.
 
@@ -315,7 +315,7 @@ This request retrieves all feedback associated with a specific inference, enabli
 
 ![img](images/ai-core-genaihub-inference-observability/img/img_007.png)
 
-## 31.7 Use Labels for Filtering and Analysis
+## 32.7 Use Labels for Filtering and Analysis
 
 Labels allow you to categorize and organize inference data for better monitoring and targeted analysis.
 
@@ -356,7 +356,7 @@ Labels help:
     - Maximum of 16 labels per inference  
     - Keys and values must not exceed 64 characters  
 
-## 31.8 Cleanup (Optional)
+## 32.8 Cleanup (Optional)
 
 Cleanup is performed using the delete inference API, where you can specify filters such as time range and labels.
 

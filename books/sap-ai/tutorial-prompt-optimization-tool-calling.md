@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Prompt Optimization with Tool Calling](https://developers.sap.com/tutorials/prompt-optimization-tool-calling) by Smita Naik · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/prompt-optimization-tool-calling/)
-> - **Changes for this book:** page layout; steps numbered 33.1 to 33.15; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed; 2 screenshot(s) missing in SAP's source marked as such
+> - **Changes for this book:** page layout; steps numbered 34.1 to 34.15; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed; 2 screenshot(s) missing in SAP's source marked as such
 > - **Last checked:** 21 Nov 2026
 
 ## You will learn
@@ -37,14 +37,14 @@
 7. You have access to the `genai-optimizations` scenario and have the required roles such as `mloperations_editor` or `genai_manager`.
 8. A BFCL v3 dataset file (e.g., `BFCL_v3_parallel_multiple_10tools.json`) is available locally.
 
-## 33.1 Pre-Read
+## 34.1 Pre-Read
 Before starting this tutorial, ensure that you:
 - Understand the basics of Generative AI workflows in SAP AI Core.
 - Are familiar with function calling / tool calling concepts in LLMs.
 - Are familiar with creating and managing prompt templates and artifacts in SAP AI Core.
 - Have completed the Quick Start tutorial or equivalent setup for SAP AI Core access.
 
-## 33.2 Architecture Overview
+## 34.2 Architecture Overview
 
 - Prompt Optimization for tool calling connects the Prompt Registry, AI Core Dataset Storage, and ML Tracking Service to form an end-to-end optimization workflow.
 - A BFCL v3 dataset is loaded, normalized, and split into train and test sets. All four files (train goldens, test goldens, tool definitions, and prompt template) are uploaded to a shared folder in AI Core's built-in dataset storage.
@@ -54,7 +54,7 @@ Before starting this tutorial, ensure that you:
 - During execution, the optimizer iteratively refines the prompt. Metrics are tracked in the ML Tracking Service, and the optimized prompt is saved back to the Prompt Registry.
 - After completion, the base and optimized prompts are compared via live inference through the Orchestration Service.
 
-## 33.3 Notebook Reference
+## 34.3 Notebook Reference
 
 For hands-on execution and end-to-end reference, use the accompanying notebook `bffcl23.ipynb`. It is a single self-contained notebook that runs the entire pipeline — from loading the BFCL dataset and uploading files, to configuration creation, execution, monitoring, and inference comparison.
 
@@ -68,7 +68,7 @@ For hands-on execution and end-to-end reference, use the accompanying notebook `
 
 ---
 
-## 33.4 Environment Variables Setup
+## 34.4 Environment Variables Setup
 
 <details class="qa"><summary>Python SDK</summary>
 
@@ -160,7 +160,7 @@ Run the `get_token` request first. It automatically sets `access_token` in your 
 
 ---
 
-## 33.5 Configure Optimization Parameters
+## 34.5 Configure Optimization Parameters
 
 Before running the pipeline, define the key configuration constants used throughout the notebook.
 
@@ -230,7 +230,7 @@ These parameters are defined in the Python notebook. For Bruno, the equivalent v
 
 ---
 
-## 33.6 Load and Normalize the BFCL v3 Dataset
+## 34.6 Load and Normalize the BFCL v3 Dataset
 
 The BFCL v3 dataset contains parallel and multi-tool function calling samples. The notebook uses a robust reader that handles three file formats — JSON array, standard JSONL, and concatenated JSON objects — before normalizing samples into the SAP optimizer golden format.
 
@@ -454,7 +454,7 @@ The dataset loading and normalization is handled entirely in the Python notebook
 
 ---
 
-## 33.7 Upload Dataset Files to AI Core Storage
+## 34.7 Upload Dataset Files to AI Core Storage
 
 All four files are uploaded to a shared folder in AI Core's built-in dataset storage via the `/lm/dataset/files` endpoint. No S3 or external object store is required.
 
@@ -530,7 +530,7 @@ Repeat the same request for the remaining three files:
 
 ---
 
-## 33.8 Register Dataset Artifact
+## 34.8 Register Dataset Artifact
 
 After all four files are uploaded to the same shared folder, register that folder as a single artifact. The optimizer reads all files from this artifact folder.
 
@@ -622,7 +622,7 @@ A successful response returns HTTP `201`:
 
 ---
 
-## 33.9 Create and Register the Base Prompt Template
+## 34.9 Create and Register the Base Prompt Template
 
 The base prompt template is pushed to the Prompt Registry. The optimizer uses this as the starting point and iteratively refines it to improve tool-calling accuracy.
 
@@ -716,7 +716,7 @@ A successful response returns HTTP `200`:
 
 ---
 
-## 33.10 Register an Optimization Configuration
+## 34.10 Register an Optimization Configuration
 
 The optimization configuration links all required inputs — the artifact, base prompt, reference model, target model, and metric — into one executable setup.
 
@@ -888,7 +888,7 @@ For the latest updates, refer to [SAP Note 3437766](https://me.sap.com/notes/343
 
 ---
 
-## 33.11 Run the Prompt Optimization Execution
+## 34.11 Run the Prompt Optimization Execution
 
 After registering the configuration, trigger the optimization run. The optimizer iteratively refines the base prompt using the train goldens and evaluates candidate prompts against the test goldens using the `JSON_Match` metric.
 
@@ -952,7 +952,7 @@ A successful response returns HTTP `202`:
 
 ---
 
-## 33.12 Monitor and View Optimization Progress
+## 34.12 Monitor and View Optimization Progress
 
 After triggering the execution, monitor its status until it reaches `COMPLETED`. The execution transitions through `UNKNOWN` → `RUNNING` → `COMPLETED`.
 
@@ -1043,7 +1043,7 @@ The status transitions through the following states:
 
 ---
 
-## 33.13 Review Optimization Results
+## 34.13 Review Optimization Results
 
 Once the execution completes, the optimized prompt is stored in the Prompt Registry under the name you specified in `targetPromptMapping`. Retrieve it to inspect how the optimizer refined the base prompt.
 
@@ -1115,7 +1115,7 @@ AI-Resource-Group: {{resource_group}}
 
 ---
 
-## 33.14 Compare Base vs Optimized Prompt via Orchestration Service
+## 34.14 Compare Base vs Optimized Prompt via Orchestration Service
 
 After retrieving both prompt templates, use the Orchestration Service to run live inference and compare output quality between the base and optimized prompts.
 
@@ -1411,7 +1411,7 @@ Run the same request a second time with `"content": "You are a helpful assistant
 
 ---
 
-## 33.15 Summary
+## 34.15 Summary
 
 In this tutorial, you completed the following steps to optimize a function-calling prompt using SAP AI Core with a BFCL v3 dataset:
 

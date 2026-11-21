@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Make Predictions for House Prices with SAP AI Core](https://developers.sap.com/tutorials/ai-core-deploy) by Dhrubajyoti Paul · about 20 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-deploy/)
-> - **Changes for this book:** page layout; steps numbered 42.1 to 42.10; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 43.1 to 43.10; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -34,7 +34,7 @@ Please find downloadable sample notebooks for the tutorials : . Note that these 
 
 ---
 
-## 42.1 Write code for serving engine
+## 43.1 Write code for serving engine
 
 Create a new directory in your local system named `hello-aicore-server`.
 
@@ -130,7 +130,7 @@ Flask==2.0.1
 gunicorn==20.1.0
 ```
 
-## 42.2 Bundle and publish code to cloud
+## 43.2 Bundle and publish code to cloud
 
 Create a file called `Dockerfile` in the folder `hello-aicore-server` with the following contents. The `Dockerfile` contains instructions to package your code files as a single Docker image.
 
@@ -173,7 +173,7 @@ Upload your Docker image to your Docker repository, by adapting the following co
 docker push docker.io/<YOUR_DOCKER_USERNAME>/house-server:01
 ```
 
-## 42.3 Set Compute Resources for Serving - Pre Read
+## 43.3 Set Compute Resources for Serving - Pre Read
 
 SAP AI Core allows you to configure compute resources for serving workloads using either an instance type or a resource plan. You must specify at least one of these options.
 
@@ -200,7 +200,7 @@ labels:
 
   - [SAP Note 3660109 – Available Instance Types](https://me.sap.com/notes/3660109)
 
-## 42.4 Create a serving executable
+## 43.4 Create a serving executable
 
 Create an executable (YAML file) named `house-price-server.yaml` in your GitHub repository. You may use the existing GitHub path which is already tracked synced to your application of SAP AI Core.
 
@@ -269,7 +269,7 @@ spec:
 6. You use the placeholder `env` to pass your `inputs` values as environment variables in your Docker image.
 7. You use the model placeholder value (reference to cloud storage) `STORAGE_URI` through the environment variables. The model files stored in your cloud storage (referenced by the value of your input artifacts placeholder) will be copied to the path `/mnt/models` inside your Docker image.
 
-## 42.5 Select a model to deploy using a configuration
+## 43.5 Select a model to deploy using a configuration
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -318,7 +318,7 @@ print(response.__dict__)
 
 >**IMPORTANT** An artifact is a reference to files stored in your cloud storage. A single artifact can refer to a location containing multiple files. For model artifacts, your artifact must not point to a directory which contains a subdirectory. For example, if your artifact points to `s3://my/storage/of/house/modelv2`, `modelv2` must not contain sub-directories.
 
-## 42.6 Start a deployment
+## 43.6 Start a deployment
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -355,7 +355,7 @@ print(response.__dict__)
 
 </details>
 
-## 42.7 Make a prediction
+## 43.7 Make a prediction
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -453,7 +453,7 @@ print('Inference result:', response.json())
 
 The prediction value is expressed in hundreds of thousands of dollars ($100,000) for [this specific use case](https://scikit-learn.org/stable/datasets/real_world.html#california-housing-dataset).
 
-## 42.8 Switch the deployed model
+## 43.8 Switch the deployed model
 
 Switching between deployed models means that you can update the model used in your deployment server, without affecting the deployment URL.
 
@@ -519,7 +519,7 @@ The **Current Status** of your deployment changes to **Unknown** while your new 
 
 ![deployment update](images/ai-core-deploy/img/ail/dep_update3.jpg)
 
-## 42.9 Stop a deployment
+## 43.9 Stop a deployment
 
 A running deployment incurs cost because it is allocated cloud resources. Stopping the deployment frees up these resources and therefore there is no charge for a deployment of status **Stopped**.
 
@@ -552,7 +552,7 @@ print(response.__dict__)
 
 ---
 
-## 42.10 Check Running Resources (optional)
+## 43.10 Check Running Resources (optional)
 
 You can check the current running Pods Using in AI Launchpad, choosing the Deployment, and clicking on Scaling tab
 

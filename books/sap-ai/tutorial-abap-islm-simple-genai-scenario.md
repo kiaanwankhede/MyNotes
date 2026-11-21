@@ -4,7 +4,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Implement a Simple Custom ABAP AI Scenario in Your SAP S/4HANA System](https://developers.sap.com/tutorials/abap-islm-simple-genai-scenario) by Jasmin Gruschke · about 20 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/abap-core-development](https://github.com/sap-tutorials/abap-core-development/blob/main/tutorials/abap-islm-simple-genai-scenario/)
-> - **Changes for this book:** page layout; steps numbered 52.1 to 52.4; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 53.1 to 53.4; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
  Learn how to implement a simple Intelligent Scenario using the ABAP AI SDK powered by Intelligent Scenario Lifecycle Management (ISLM).
@@ -22,7 +22,7 @@ You have successfully configured your system as described in [Set Up Your SAP S/
 ## Pre-Read
 Intelligent Scenario Lifecycle Management (ISLM) features the creation and deployment of an intelligent scenario (INTS). This intelligent scenario facilitates the interaction with a large language model (LLM) deployment on SAP AI Core in custom ABAP AI scenarios. The runtime APIs for this purpose are provided by the ABAP AI SDK powered by ISLM. More information can be found in the [Developing Your Own AI-Enabled Applications](https://help.sap.com/docs/abap-ai/generative-ai-in-abap-cloud/developing-your-own-ai-enabled-applications?version=s4_hana) documentation.
 
-## 52.1 Create an Intelligent Scenario
+## 53.1 Create an Intelligent Scenario
 
 **Goal:** Let's first create and publish the intelligent scenario.
 
@@ -50,7 +50,7 @@ Intelligent Scenario Lifecycle Management (ISLM) features the creation and deplo
 
 **Conclusion:** The intelligent scenario is now available in the ISLM framework. 
 
-## 52.2 Deploy and Activate the Intelligent Scenario
+## 53.2 Deploy and Activate the Intelligent Scenario
 
 **Goal:** Let's continue with the deployment and activation of the just created Intelligent Scenario in order to facilitate interactions with an LLM deployment.
 
@@ -87,7 +87,7 @@ Deploying the intelligent scenario technically creates a deployment in your SAP 
 
 **Conclusion:** Well done! You are ready to consume the intelligent scenario, i.e. you are ready to interact with an LLM - let's do so in the next step!
 
-## 52.3 Consume the Intelligent Scenario in a simple ABAP Class
+## 53.3 Consume the Intelligent Scenario in a simple ABAP Class
 
 **Goal:** Now that you've successfully published and activated the intelligent scenario in the ABAP system, it's time to consume it in your ABAP coding. For ease of understanding, this tutorial uses a simple ABAP class including a console output, but you may of course use more complex ABAP logic. 
 
@@ -168,7 +168,7 @@ Quick suggestions to improve fit
 
 **Conclusion:** Wohoo, you finished your (first) custom ABAP AI scenario, interacting with a large language model deployed on SAP AI Core using the Intelligent Scenario Lifecycle Management framework!
 
-## 52.4 Test yourself
+## 53.4 Test yourself
 
 ---
 

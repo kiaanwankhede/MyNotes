@@ -21,7 +21,7 @@
 - Read a result: values, raw text, confidence, page and position
 - Check totals and confidence in code, and know why that step is not optional
 
-## 8.1 What Document AI does
+## 9.1 What Document AI does
 
 ```mermaid
 flowchart LR
@@ -44,7 +44,7 @@ flowchart LR
 > - SAP's two free-tier setup tutorials for Document AI (*Use Free Tier to Set Up Account for SAP Document AI…*) returned "page not found" on 21 Nov 2026.
 > - Look up the current plans in SAP Discovery Center before you plan any free practice.
 
-## 8.2 Set up
+## 9.2 Set up
 
 1. Create a Document AI instance and a **service key** in your subaccount.
 2. Install the library and helpers:
@@ -68,7 +68,7 @@ UAADOMAIN=<uaa.url>
 > - `.env` holds the client secret. Add `.env` to `.gitignore`, and share a `.env.example` with placeholders instead.
 > - **The results are personal data too.** An invoice result contains names, addresses and tax IDs: the course's `result.json` did. Store results like the documents themselves, and never commit them.
 
-## 8.3 Extract an invoice
+## 9.3 Extract an invoice
 
 ```python
 import json, os
@@ -102,7 +102,7 @@ with open("result.json", "w", encoding="utf-8") as f:
 - `client_id="default"` is a Document AI client, which groups documents. The course uses the one called `default`; the commented-out lines in its script show `get_clients()` and `create_client()` for more.
 - Ask only for the fields you need: fewer fields, a smaller result, less to check.
 
-## 8.4 Read the result
+## 9.4 Read the result
 
 A trimmed result, with made-up values but the same structure as the course run:
 
@@ -139,7 +139,7 @@ A trimmed result, with made-up values but the same structure as the course run:
 - **Totals that don't add up:** the gross amount was read from page 1 with low confidence, and didn't equal net plus the tax lines from page 2.
 - So a result is a **proposal**, not a fact. The next section checks it.
 
-## 8.5 Check before you trust *(added by Claude)*
+## 9.5 Check before you trust *(added by Claude)*
 
 ```python
 def header(result, name):
@@ -167,7 +167,7 @@ for p in check_extraction(result):
 - Anything flagged goes to a person; clean results can flow on. This is the same rule as SAP's own *instant learning*: corrections come from people.
 - Tune `min_confidence` per field. A wrong amount costs more than a wrong address line.
 
-## 8.6 See what was extracted, on the page
+## 9.6 See what was extracted, on the page
 
 The course's `utils.py` draws a box around each value on a copy of the PDF, so a reviewer can see it in place. The key step converts Document AI's fractions into PDF points:
 
@@ -189,7 +189,7 @@ print(to_points({"x": 0.64, "y": 0.12, "w": 0.12, "h": 0.01}, 595, 842))   # A4 
 >
 > *Added by Claude; not run here*
 
-## 8.7 Things to watch
+## 9.7 Things to watch
 
 - **Throughput:** one call per document, each polling until done. For volume, run documents in parallel and respect the service's limits.
 - **Language and country:** the result reports both (`languageCodes`, `country`). Tax fields differ by country, for example the GST lines in the course invoice.

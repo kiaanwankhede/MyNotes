@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Setup Azure Data Bucket with AI Core](https://developers.sap.com/tutorials/ai-core-azure) by Dhrubajyoti Paul · about 10 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-azure/)
-> - **Changes for this book:** page layout; steps numbered 48.1 to 48.2; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 49.1 to 49.2; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -31,7 +31,7 @@ If you are an external developer or a customer or a partner kindly refer to this
 
 Azure Data Store refers to a collection of data storage solutions offered by Microsoft Azure, including Azure Blob Storage, Azure Data Lake Storage, Azure Queue Storage, and Azure Table Storage. These solutions provide scalable, highly available, and secure data storage options for a variety of use cases, such as big data analytics, `NoSQL` databases, content delivery, and message queuing.
 
-## 48.1 System Setup
+## 49.1 System Setup
 For Detailed docs refer : [AI Core Setup](https://developers.sap.com/tutorials/ai-core-setup.html)
 
 - Downloading `config` for Postman
@@ -52,7 +52,7 @@ Go to [AI core API](https://api.sap.com/api/AI_CORE_API/overview) and download t
 
 ![image](images/ai-core-azure/img/postman.png)
 
-## 48.2 Creating Object store Secret
+## 49.2 Creating Object store Secret
 
 At Postman at AI core API Go to admin > Object store secret > create object store secret.
 And set the following json as body

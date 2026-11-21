@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Set up Generative AI Hub in SAP AI Core](https://developers.sap.com/tutorials/ai-core-genaihub-provisioning) by Smita Naik · about 20 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-genaihub-provisioning/)
-> - **Changes for this book:** page layout; steps numbered 13.1 to 13.4; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 14.1 to 14.4; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -47,7 +47,7 @@ Boosters is available for SAP AI Core. Boosters are a set of guided interactive 
 
 ---
 
-## 13.1 Add SAP AI Core Entitlements to your subaccount
+## 14.1 Add SAP AI Core Entitlements to your subaccount
 
 Entitlements and quota are managed at the global account and directory levels, distributed to directories and subaccounts, and consumed by the subaccounts. See also [Entitlements and Quotas](https://help.sap.com/viewer/65de2977205c403bbc107264b8eccf4b/Cloud/en-US/00aa2c23479d42568b18882b1ca90d79.html).
 
@@ -78,7 +78,7 @@ Save your new entitlement.
 
 ![Save](images/ai-core-genaihub-provisioning/img/save_aicore_extended_entitlement.png)
 
-## 13.2 Run the booster for SAP AI Core
+## 14.2 Run the booster for SAP AI Core
 
 Choose `Boosters` from the navigation pane. Find and choose the booster for `SAP AI Core` from the selection. 
 
@@ -112,7 +112,7 @@ After the execution completes, follow the steps shown to navigate to your subacc
 
 ![booster execution success](images/ai-core-genaihub-provisioning/img/aicore_booster_successful_execution.png)
 
-## 13.3 View your instances and create your keys
+## 14.3 View your instances and create your keys
 
 In the subaccount section of SAP BTP Cockpit, choose `Services` from the left navigation menu and `Instances and subscriptions` from the page. 
 
@@ -133,7 +133,7 @@ Once your keys have been created, you can view or download them at any time by l
 
 ![Locate the keys in SAP AI Cockpit](images/ai-core-genaihub-provisioning/img/viewkeys.png)
 
-## 13.4 Get Started with Orchestration
+## 14.4 Get Started with Orchestration
 
 As part of the SAP AI Core onboarding process, an `orchestration deployment` is automatically created in the `default resource group`.
 

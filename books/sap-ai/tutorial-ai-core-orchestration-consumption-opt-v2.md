@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Leveraging Orchestration(V2) Capabilities to Enhance Responses](https://developers.sap.com/tutorials/ai-core-orchestration-consumption-opt-v2) by Smita Naik · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-orchestration-consumption-opt-v2/)
-> - **Changes for this book:** page layout; steps numbered 17.1 to 17.8; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 18.1 to 18.8; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## You will learn
@@ -36,7 +36,7 @@
 10. Basic Knowledge:
     Familiarity with the orchestration workflow is recommended
 
-## 17.1 Pre-Read
+## 18.1 Pre-Read
 
 This tutorial builds on the foundational orchestration concepts introduced in the [beginner's tutorial](https://developers.sap.com/tutorials/ai-core-orchestration-consumption.html) and focuses on enhancing GenAI responses using orchestration service V2 modules such as **data masking**, **translation** and **content filtering**.
 
@@ -65,7 +65,7 @@ By the end of this tutorial
   
   * Learn how to implement the solution using **SAP AI Launchpad**, **Python SDK**, **Java**, **JavaScript**, and **Bruno**.
 
-## 17.2 Accessing Orchestration Capabilities
+## 18.2 Accessing Orchestration Capabilities
 
 **In this tutorial**, we will build upon the orchestration framework introduced in [Tutorial](https://developers.sap.com/tutorials/ai-core-orchestration-consumption.html). The focus will shift from basic orchestration to leveraging optional modules to enhance data privacy and refine response quality. These enhancements include: 
 
@@ -130,7 +130,7 @@ console.log(txtContent);
 
 </details>
 
-## 17.3 Template Configuration
+## 18.3 Template Configuration
 
 The templating module is a mandatory step in orchestration. It allows you to define dynamic inputs using placeholders, construct structured prompts, and generate a final query that will be passed to the model configuration module.
 
@@ -246,7 +246,7 @@ Orchestration provides direct access to models without requiring separate deploy
 
 </details>
 
-## 17.4 Setting Up Data Masking Parameters
+## 18.4 Setting Up Data Masking Parameters
 
 The **Data Masking** Module ensures data privacy by anonymizing or pseudonymizing sensitive information before it is processed. 
 
@@ -373,7 +373,7 @@ For this tutorial, we use anonymization:
 
 </details>
 
-## 17.5 Translation
+## 18.5 Translation
 
 The Translation Module enables multilingual processing by translating content sent to and received from the generative AI model. This is especially useful when the user input or model output is not in the default language expected by the LLM.
 
@@ -491,7 +491,7 @@ To test translation in Bruno:
 
 </details>
 
-## 17.6 Defining Content Filtering Rules
+## 18.6 Defining Content Filtering Rules
 
 The **Content Filtering** Module allows screening of both input and output content to remove inappropriate or unwanted elements such as hate speech or violent content. This ensures that sentiment analysis is performed on safe and relevant inputs, and the responses generated are also safe for consumption.
 
@@ -713,7 +713,7 @@ Update your JSON body for the **05_orchestration** section:
 
 </details>
 
-## 17.7 Executing the Orchestration Workflow
+## 18.7 Executing the Orchestration Workflow
 
 This step runs the orchestration pipeline for each selected LLM model using the provided input text for sentiment analysis. It captures and stores the model-generated responses, enabling comparison of output quality across different models.
 
@@ -925,7 +925,7 @@ By following these steps, you can successfully mask sensitive data and apply con
 
 </details>
 
-## 17.8 Conclusion :
+## 18.8 Conclusion :
 Once the orchestration completes, you can observe that the output is now more refined, with sensitive information masked and inappropriate content filtered. This demonstrates the power of modules like data masking and content filtering to enhance privacy and ensure response quality.  
 
 While this tutorial used a sentiment analysis use case, the same principles can be applied to other use cases. You can customize the Data Masking and Content Filtering settings based on your specific requirements to handle sensitive or categorized data effectively.  

@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Retrieval Augmented Generation using generative-ai-hub-sdk and HANA vector search](https://developers.sap.com/tutorials/ai-core-genai-hana-vector) by Dhrubajyoti Paul · about 20 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-genai-hana-vector/)
-> - **Changes for this book:** page layout; steps numbered 25.1 to 25.10; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 26.1 to 26.10; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -26,7 +26,7 @@ If you are an external developer or a customer or a partner kindly refer to this
 Please find downloadable sample notebooks for the tutorials : Note that these tutorials are for demonstration purposes only and should not be used in production environments. To execute them properly, you'll need to set up your own S3 bucket or provision services from BTP, including an AI Core with a standard plan for narrow AI and an extended plan for GenAI HUB. Ensure you input the service keys of these services into the relevant cells of the notebook.
 [Link to notebook](https://github.com/SAP-samples/ai-core-samples/blob/main/09_BusinessAIWeek/workshop_notebook-final.ipynb)
 
-## 25.1 Installing generative-ai-hub-sdk
+## 26.1 Installing generative-ai-hub-sdk
 
 To install the generative-ai-hub-sdk package in your system, open your terminal or command prompt and run the following command.
 
@@ -44,7 +44,7 @@ The default path can be overridden by setting the AICORE_HOME environment variab
 
 Source: https://pypi.org/project/generative-ai-hub-sdk/
 
-## 25.2 Loading vector data from a csv file
+## 26.2 Loading vector data from a csv file
 
 The dataset in [GRAPH_DOCU_2503.csv](https://raw.githubusercontent.com/SAP-samples/ai-core-samples/main/09_BusinessAIWeek/files/GRAPH_DOCU_2503.csv) includes pre-computed vector embeddings. We have incorporated these vectors into the CSV file to facilitate a quick start with vector search, eliminating the need to generate embeddings using an additional function.
 
@@ -66,7 +66,7 @@ with open('GRAPH_DOCU_2503.csv', encoding='utf-8') as csvfile:
 
 ![image](images/ai-core-genai-hana-vector/images/step2.png)
 
-## 25.3 Creating a connection using dbapi
+## 26.3 Creating a connection using dbapi
 
 First, you'll need to install the hdbcli library to connect to the SAP HANA database. Run the following command to install it:
 
@@ -94,7 +94,7 @@ cc = dbapi.connect(
 
 ![image](images/ai-core-genai-hana-vector/images/step3.png)
 
-## 25.4 Creating a table and adding data
+## 26.4 Creating a table and adding data
 
 HANA Vector storage organizes data in tables. To store your data, you can create a table in HANA Vector storage. Replace TABLENAME with a name of your choice, ensuring that it contains only uppercase letters and numbers. 
 
@@ -123,7 +123,7 @@ cursor.executemany(sql_insert,data[1:])
 
 ![image](images/ai-core-genai-hana-vector/images/step4.png)
 
-## 25.5 Setting up hana_ml and generative-ai-hub-sdk
+## 26.5 Setting up hana_ml and generative-ai-hub-sdk
 
 First, you'll need to install the hana_ml package to work with SAP HANA and set up the AI Core proxy using generative-ai-hub-sdk. Run the following command to install hana_ml:
 
@@ -142,7 +142,7 @@ proxy_client = get_proxy_client('gen-ai-hub') # for an AI Core proxy
 ```
 ![image](images/ai-core-genai-hana-vector/images/step5.png)
 
-## 25.6 Get Embeddings
+## 26.6 Get Embeddings
 
 Embeddings are vector representations of text data that capture the semantic meaning of the text. Define a get_embedding() function to generate embeddings from text data using the text-embedding-ada-002 model. This function will be used to convert user prompts into embeddings.
 
@@ -162,7 +162,7 @@ def get_embedding(input, model="text-embedding-ada-002") -> str:
 
 ![image](images/ai-core-genai-hana-vector/images/step6.png)
 
-## 25.7 Running vector search
+## 26.7 Running vector search
 
 Define a function run_vector_search(). This function will search the vector database and finds the rows which are most similar to a given query.
 
@@ -187,7 +187,7 @@ def run_vector_search(query: str, metric="COSINE_SIMILARITY", k=4):
 
 **Note**: By default, we are using cosine similarity for RAG.
 
-## 25.8 Creating a prompt template
+## 26.8 Creating a prompt template
 
 Create a prompt template to do retrieval augmented generation on your prompts. Execute the following python code.
 
@@ -208,7 +208,7 @@ promptTemplate = PromptTemplate.from_template(promptTemplate_fstring)
 
 ![image](images/ai-core-genai-hana-vector/images/step8.png)
 
-## 25.9 Querying the LLM
+## 26.9 Querying the LLM
 
 Now create a function retrieve_and_query_llm() to query the LLM while using the similar vectors as context.
 
@@ -237,7 +237,7 @@ def retrieve_and_query_llm(query: str, metric='COSINE_SIMILARITY', k = 4) -> str
 
 ![image](images/ai-core-genai-hana-vector/images/step9.png)
 
-## 25.10 Testing the function
+## 26.10 Testing the function
 
 Now you can test the function using a query. Run the following python code for the same - 
 

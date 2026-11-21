@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Generate Metrics and Compare Models in SAP AI Core](https://developers.sap.com/tutorials/ai-core-metrics) by Dhrubajyoti Paul · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-metrics/)
-> - **Changes for this book:** page layout; steps numbered 43.1 to 43.11; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 44.1 to 44.11; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -29,7 +29,7 @@ In this tutorial, you'll use SAP AI Launchpad to compare two models that have be
 
 ---
 
-## 43.1 Starter code
+## 44.1 Starter code
 
 Create a folder named `hello-aicore-metrics`. Within it, create a file called `main.py`, and paste the following starter code to this file.
 
@@ -109,7 +109,7 @@ pickle.dump(clf, open(MODEL_PATH, 'wb'))
 
 This Python script contains all of the modifications needed for logging metrics, meaning that you can leave your previous workflows as they are.
 
-## 43.2 Add connection
+## 44.2 Add connection
 
 Add the following code snippet.
 
@@ -121,7 +121,7 @@ aic_connection = Tracking()
 
 > **CAUTION**: This code snippet is very similar to the code used to connect the SAP AI Core SDK to your local system. However, in this case, it is required to establish a connection within the SAP AI Core execution environment.
 
-## 43.3 Add basic metric logging
+## 44.3 Add basic metric logging
 
 Add the following snippet to log the number of observations in your dataset.
 
@@ -139,7 +139,7 @@ After execution, this is shown in SAP AI Launchpad. You can zoom in for details.
 
 ![image](images/ai-core-metrics/img/ail/basic.png)
 
-## 43.4 Step information
+## 44.4 Step information
 
 Add the following snippet to store metrics for step information. This snippet is also useful for tracking the metrics on epochs of the training process.
 
@@ -155,7 +155,7 @@ The variable `i` is already present in your code to pass to the parameter `step=
 
 ![image](images/ai-core-metrics/img/ail/step.png)
 
-## 43.5 Attach metrics to generated model
+## 44.5 Attach metrics to generated model
 
 Add the following snippet to store metrics for artifact information.
 
@@ -184,7 +184,7 @@ After execution, this is shown in SAP AI Launchpad.
 
 ![image](images/ai-core-metrics/img/ail/modelB.png)
 
-## 43.6 Custom metrics for model inspection
+## 44.6 Custom metrics for model inspection
 
 Add the following snippet to store metrics based on a customized structure.
 
@@ -226,7 +226,7 @@ After execution, you can see this in SAP AI Launchpad.
 > - Contributes to model transparency,
 > - The method or function used to measure "error" can be customized, with reference to `scikit` package implementation.
 
-## 43.7 Add tags for execution meta after training
+## 44.7 Add tags for execution meta after training
 
 Add the following snippet to tag your execution. The `tags` are customizable key-values.
 
@@ -243,7 +243,7 @@ After execution, you can see this in SAP AI Launchpad.
 
 ![image](images/ai-core-metrics/img/ail/tag.png)
 
-## 43.8 Complete files
+## 44.8 Complete files
 
 Check your modified `main.py` by comparing it with the following expected `main.py`.
 
@@ -441,7 +441,7 @@ spec:
         - "python /app/src/main.py"
 ```
 
-## 43.9 Create configuration and execution
+## 44.9 Create configuration and execution
 
 Create a configuration using the following values. The values are taken from the workflow from previous steps. For help creating a configuration, see step 11 of [this tutorial](https://developers.sap.com/tutorials/ai-core-data.html/#).
 
@@ -462,7 +462,7 @@ Attach your registered artifact to `Input Artifact`, by specifying `housedataset
 
 Create an execution from this configuration.
 
-## 43.10 Retrieve metrics
+## 44.10 Retrieve metrics
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -544,7 +544,7 @@ Unnamed: 0: 0.000 +/- 0.000
 
 </details>
 
-## 43.11 Compare metrics (optional)
+## 44.11 Compare metrics (optional)
 
 Create two configurations: one with `DT_MAX_DEPTH = 3` and the other with `DT_MAX_DEPTH = 6`, then create executions for both configurations.
 

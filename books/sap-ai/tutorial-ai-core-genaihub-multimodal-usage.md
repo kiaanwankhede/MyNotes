@@ -4,7 +4,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Multimodal Response Assistant Chatbot Using SAP AI Core](https://developers.sap.com/tutorials/ai-core-genaihub-multimodal-usage) by Smita Naik · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-genaihub-multimodal-usage/)
-> - **Changes for this book:** page layout; steps numbered 22.1 to 22.7; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 23.1 to 23.7; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -25,7 +25,7 @@
    [AI Core Setup Tutorial](https://developers.sap.com/tutorials/ai-core-setup.html)
 6. An Extended SAP AI Core service plan is required, as the Generative AI Hub is not available in the Free or Standard tiers. For more details, refer to [SAP AI Core Service Plans](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/service-plans?version=CLOUD)
 
-## 22.1 PREREAD
+## 23.1 PREREAD
 
 ### What We’re Building
 A **web-based intelligent chatbot** capable of interacting with users via **text**, **audio**, **images**, and **video**. It returns **context-aware responses** using a **multimodal AI model**.
@@ -53,7 +53,7 @@ Multimodal assistants are the future of enterprise automation. With varied input
 
 ---
 
-## 22.2 Clone the GitHub Repository and Install Dependencies
+## 23.2 Clone the GitHub Repository and Install Dependencies
 
 Clone the project from the repository:
 
@@ -72,7 +72,7 @@ In **VS Code**, open the cloned folder and install dependencies:
 pip install -r requirements.txt
 ```
 
-## 22.3 Application Environment Setup
+## 23.3 Application Environment Setup
 
 ### Deployment Steps
 To deploy **Gemini 2.0 Flash**, follow the steps from the official SAP tutorial:
@@ -112,7 +112,7 @@ streamlit run main.py
 
 ![Image](images/ai-core-genaihub-multimodal-usage/img/image003.png)
 
-## 22.4 Video Input – Demo and Analysis
+## 23.4 Video Input – Demo and Analysis
 
 ### ➕ Upload Video
 - Choose a short video file in formats: **MP4 or MOV**
@@ -127,7 +127,7 @@ streamlit run main.py
 
 ---
 
-## 22.5 Audio Input – Demo and Analysis
+## 23.5 Audio Input – Demo and Analysis
 
 ### ➕ Upload or Record Audio
 - Use an audio file in formats: WAV or MP3, or record live.
@@ -142,7 +142,7 @@ streamlit run main.py
 
 ---
 
-## 22.6 Image Input – Demo and Analysis
+## 23.6 Image Input – Demo and Analysis
 
 Upload an image in formats like JPG or PNG for analysis.
 
@@ -159,7 +159,7 @@ Upload an image in formats like JPG or PNG for analysis.
 
 ---
 
-## 22.7 Summary & Use Cases
+## 23.7 Summary & Use Cases
 
 ### Summary
 The assistant delivers accurate, context-aware responses across media types. It’s an enterprise-ready, scalable solution leveraging SAP’s AI infrastructure.

@@ -4,7 +4,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Implement a Custom ABAP AI Scenario including Grounding Capabilities in Your SAP S/4HANA System](https://developers.sap.com/tutorials/abap-islm-orchestration-grounding-consumption) by Jasmin Gruschke · about 25 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/abap-core-development](https://github.com/sap-tutorials/abap-core-development/blob/main/tutorials/abap-islm-orchestration-grounding-consumption/)
-> - **Changes for this book:** page layout; steps numbered 54.1 to 54.5; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 55.1 to 55.5; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 Learn how to implement an Intelligent Scenario including Grounding capabilities using the ABAP AI SDK powered by Intelligent Scenario Lifecycle Management (ISLM)
@@ -26,7 +26,7 @@ Want to learn more? Please see the [Orchestration documentation](https://help.sa
 
 ---
 
-## 54.1 Prepare the Execution Flow Template (optional)
+## 55.1 Prepare the Execution Flow Template (optional)
 
 Usage of SAP AI Core orchestration service requires the configuration of the orchestration service pipeline. In order to create a custom configuration, you may e.g. use the SAP AI Launchpad as explained in tutorial [Implement a Custom ABAP AI Scenario Consuming SAP AI Core Orchestration Service in Your SAP S/4HANA System](https://github.com/sap-tutorials/abap-core-development/blob/main/tutorials/abap-islm-orchestration-grounding-consumption/abap-islm-orchestration-service-consumption). The consumption of the orchestration service pipeline in ABAP requires an intelligent scenario (INTS) including an execution flow template in the enclosed intelligent model (INTM). 
 
@@ -36,7 +36,7 @@ You may use the above mentioned tutorial for obtaining your own `JSON` file, whi
 
 > **NOTE:** If you would like to dive deeper into SAP AI Core's orchestration service grounding module, please also check tutorial [Orchestration(V2) with Grounding Capabilities in SAP AI Core](https://github.com/sap-tutorials/abap-core-development/blob/main/tutorials/abap-islm-orchestration-grounding-consumption/ai-core-orchestration-grounding-v2).
 
-## 54.2 Create an Intelligent Scenario
+## 55.2 Create an Intelligent Scenario
 
 **Goal:** Create and publish the intelligent scenario, including the consumption of SAP AI Core's Orchestration Service modules.
 
@@ -98,7 +98,7 @@ You may use the above mentioned tutorial for obtaining your own `JSON` file, whi
 14. Confirm the intelligent scenario to be published
 ![Confirm to publish the intelligent scenario](images/abap-islm-orchestration-grounding-consumption/imgs/Create_INTS_15_Confirm_Package.png)
 
-## 54.3 Deploy and Activate the Intelligent Scenario
+## 55.3 Deploy and Activate the Intelligent Scenario
 
 **Goal:** Continue with the deployment and activation of the newly created intelligent scenario to enable interactions with the SAP AI Core orchestration service pipeline comprising the grounding capabilities as well as the LLM deployment.
 
@@ -131,7 +131,7 @@ You may use the above mentioned tutorial for obtaining your own `JSON` file, whi
 
 **Conclusion:** Well done! You are now ready to consume the intelligent scenario and interact with an LLM via SAP AI Core's Orchestration Service — let's do that in the next step!
 
-## 54.4 Consume the Intelligent Scenario in a Simple ABAP Class
+## 55.4 Consume the Intelligent Scenario in a Simple ABAP Class
 
 **Goal:** Now that you have successfully published and activated the intelligent scenario, it is time to consume it in your ABAP code. For clarity, this tutorial uses a simple ABAP class with console output, but you can of course apply more complex ABAP logic.
 
@@ -293,7 +293,7 @@ MASKED_PERSON is a career changer with basic computer literacy and customer serv
 
 **Conclusion:** Congratulations! You implemented an intelligent scenario using the SAP AI Core orchestration service including the grounding capabilities. You're now well equipped to build you own Custom ABAP GenAI scenario!
 
-## 54.5 Test yourself
+## 55.5 Test yourself
 
 ---
 

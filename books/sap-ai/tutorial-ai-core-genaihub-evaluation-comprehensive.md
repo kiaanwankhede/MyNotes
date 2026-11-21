@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Custom Evaluation for Generative AI – Comprehensive Guide](https://developers.sap.com/tutorials/ai-core-genaihub-evaluation-comprehensive) by Smita Naik · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-genaihub-evaluation-comprehensive/)
-> - **Changes for this book:** page layout; steps numbered 29.1 to 29.12; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 30.1 to 30.12; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 It extends the Quick Start tutorial and is intended for Application Developers and Data Scientists who already know the basics of GenAI workflows in SAP AI Core.
@@ -48,7 +48,7 @@ Download [requirements.txt](https://github.com/sap-tutorials/Tutorials/blob/mast
 This tutorial which showcases how a user can use AI Core custom evaluation to benchmark their large language models, evaluate orchestration configuration or prompts for their use case.
 It uses publicly available [MedicationQA dataset](https://langtest.org/docs/pages/benchmarks/medical/medicationqa/) which consists of commonly asked consumer questions about medications. The workload computes industry standard metrics to check the reliability of the response generate by llm.
 
-## 29.1 Environment Variables Setup
+## 30.1 Environment Variables Setup
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -151,7 +151,7 @@ client = GenAIHubProxyClient(
 
 </details>
 
-## 29.2 Preparing Dataset Files
+## 30.2 Preparing Dataset Files
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -208,7 +208,7 @@ else:
 
 </details>
 
-## 29.3 Registering an Object Store Secret in AI Core
+## 30.3 Registering an Object Store Secret in AI Core
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -354,7 +354,7 @@ Use the below payload to create a secret for AWS S3 with NoAuthentication as aut
 > - For **input artifacts**, you may create additional object store secrets with different names if needed.
 > - If a user defined name (for eg: default) is not configured, orchestration runs will **fail** due to missing output target setup.
 
-## 29.4 Upload and Register Dataset
+## 30.4 Upload and Register Dataset
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -555,7 +555,7 @@ Save the ai://… URL — you will use this when creating the dataset artifact.
 
 </details>
 
-## 29.5 Approach Selection – How to Provide Prompts (Read-Up)
+## 30.5 Approach Selection – How to Provide Prompts (Read-Up)
 
 In this evaluation workflow, prompts can be provided in two different ways.
 Before proceeding, understand the available approaches and choose the one that fits your requirement.
@@ -588,7 +588,7 @@ If you want reusable, versioned prompts that can be managed independently.
 
 If the prompt is specific to this evaluation and does not need reuse or versioning.
 
-## 29.6 Create a Prompt Template in Orchestration Registry
+## 30.6 Create a Prompt Template in Orchestration Registry
 
 In this tutorial, we will use the **Orchestration Registry (Inline Prompt)** approach.
 
@@ -721,7 +721,7 @@ POST {{AICORE_BASE_URL}}/v2/registry/v2/orchestrationConfigs
 
 </details>
 
-## 29.7 Understanding Metrics (Pre-Read)
+## 30.7 Understanding Metrics (Pre-Read)
 
 Metrics determine how your model outputs are evaluated during an evaluation run. They define the scoring logic that SAP AI Core uses to compare models, measure quality, and validate improvements over time.
 
@@ -849,7 +849,7 @@ The system defines a structure for the judge prompts and users provide the metri
 
     - Evaluation service depends on this specific model version
 
-## 29.8 Providing Models and Metrics for Evaluation
+## 30.8 Providing Models and Metrics for Evaluation
 
 Metrics determine how your model outputs are evaluated during an evaluation run. They define the scoring logic that SAP AI Core uses to compare models, measure quality, and validate improvements over time.
 
@@ -1165,7 +1165,7 @@ This metric ID can be directly passed into the evaluation configuration.
 
 To evaluate and compare multiple models in a single execution, you must create a distinct orchestration registry ID for each model you wish to test. Assign a different foundation model to each registry ID, and then pass this list of registry IDs into your evaluation configuration. This ensures the system generates separate, comparable runs for each model simultaneously.
 
-## 29.9 Define and Create Evaluation Configurations
+## 30.9 Define and Create Evaluation Configurations
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -1379,7 +1379,7 @@ Below is the sample request body to create configuration.
 
 </details>
 
-## 29.10 Create and Run Evaluation Execution
+## 30.10 Create and Run Evaluation Execution
 
 After creating the Evaluation Configuration, the next step is to execute it.
 
@@ -1552,7 +1552,7 @@ check the status of created execution by passing the execution ID, The Current S
 
 </details>
 
-## 29.11 View and Analyze Evaluation Results
+## 30.11 View and Analyze Evaluation Results
 
 Once the evaluation execution is complete, SAP AI Core generates both aggregated metrics and detailed instance-level results.
 These results help compare model performance, understand quality metrics, and debug issues.
@@ -2071,7 +2071,7 @@ Open the SQLite DB in any client to inspect:
 
 </details>
 
-## 29.12 Delete Evaluation Artifacts and Configurations
+## 30.12 Delete Evaluation Artifacts and Configurations
 
 Over time, your workspace may accumulate old configurations, executions, and metrics.
 SAP AI Core allows you to safely delete these resources once they are no longer needed.

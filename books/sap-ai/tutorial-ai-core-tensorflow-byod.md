@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Use Pre-Trained Tensorflow Models with a GPU in SAP AI Core](https://developers.sap.com/tutorials/ai-core-tensorflow-byod) by Dhrubajyoti Paul · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-tensorflow-byod/)
-> - **Changes for this book:** page layout; steps numbered 46.1 to 46.13; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 47.1 to 47.13; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -47,7 +47,7 @@ Please complete the prerequisites before you get started.
 
 ---
 
-## 46.1 Create workspace (resource group)
+## 47.1 Create workspace (resource group)
 
 Create a **resource group** with ID `tf-demo`. You may use any existing resource group or even create multiple resource groups with different IDs.
 
@@ -66,7 +66,7 @@ for rg in response.resources:
 
 ![img](images/ai-core-tensorflow-byod/img/acs/1.png)
 
-## 46.2 Upload model files to AWS S3
+## 47.2 Upload model files to AWS S3
 
 1. Install the AWS CLI client. [Download here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 
@@ -117,7 +117,7 @@ for rg in response.resources:
 
     ![img](images/ai-core-tensorflow-byod/img/model-ls.png)
 
-## 46.3 Connect AWS S3 to SAP AI Core
+## 47.3 Connect AWS S3 to SAP AI Core
 
 Create an **object store secret** to connect your AWS S3 bucket to SAP AI Core. You can create multiple object store secrets.
 
@@ -149,7 +149,7 @@ You should see the following response:
 
 > Note that depending on your region, your  AWS endpoint syntax may differ from the example above. In the event of an error, try this step again with alternative syntax. For available syntaxes, please see the [AWS documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteEndpoints.html)
 
-## 46.4 Create workflow to serve your model
+## 47.4 Create workflow to serve your model
 
 Save the following executable file in your local system:
 
@@ -169,7 +169,7 @@ In the executable, ensure the following.
 
 Save your executable.
 
-## 46.5 Sync workflow with SAP AI Core
+## 47.5 Sync workflow with SAP AI Core
 
 You will create a folder in your GitHub repository connected SAP AI Core, where you will store the workflow (executable). You will then register this folder as an **Application** in SAP AI Core to enable syncing of the workflow as an executable.
 
@@ -210,7 +210,7 @@ You should then see:
 
 After your workflows are synced, your **Scenario** will be automatically created in SAP AI Core. The name and ID of the scenario will be same as the one mentioned in your workflows. After The syncing, your workflow will be recognized as an executable.
 
-## 46.6 Register model as artifact
+## 47.6 Register model as artifact
 
 An **artifact** is a reference to your model files located in AWS S3.
 
@@ -240,7 +240,7 @@ You should see the following response:
 
 > Important: Make a note of the ID. This ID uniquely identifies your artifact.
 
-## 46.7 Set up serving code
+## 47.7 Set up serving code
 
 Download and save each of the following files to your local computer. These are the code files that you will upload as a docker image and use later for deployment in SAP AI Core.
 
@@ -307,7 +307,7 @@ Follow the steps to upload the files downloaded in step two as a docker image.
 
     ![img](images/ai-core-tensorflow-byod/img/docker-push.png)
 
-## 46.8 Create configuration for deployment
+## 47.8 Create configuration for deployment
 
 Here are the important pieces of your configuration:
 
@@ -345,7 +345,7 @@ You should then see:
 
 >Important: Note down the ID generated. This is your unique configuration identification.
 
-## 46.9 Start deployment
+## 47.9 Start deployment
 
 Replace the `configuration_id` field value with the ID from the previous step.  Execute the code.
 
@@ -361,7 +361,7 @@ You should then see:
 
 >Important: Note the unique ID generated of your deployment. You may create multiple deployments using the same configuration ID, each of which will have s unique endpoint.
 
-## 46.10 Check deployment status
+## 47.10 Check deployment status
 
 Replace with the `deployment_id` field value with the ID from previous step and execute your code.
 
@@ -382,7 +382,7 @@ You should then see:
 
 ![img](images/ai-core-tensorflow-byod/img/acs/10_1.png)
 
-## 46.11 Make a prediction
+## 47.11 Make a prediction
 
 Replace the `deployment_id` field value with your deployment ID and execute the code.
 
@@ -411,7 +411,7 @@ You should then see something like:
 
 Your prediction will be either a `positive` or `negative` along with a confidence value between 0 and 1. This prediction return structure is dependent of the code in docker the image. You can change this as per your requirement.
 
-## 46.12 Verify GPU availability
+## 47.12 Verify GPU availability
 
 In the preceding steps, you saw that your docker code has the following lines, which will log the number of GPUs that the `Tensorflow` package recognizes during deployment.
 
@@ -434,7 +434,7 @@ The output will contain the log message on the number of GPUs available.
 
 ![img](images/ai-core-tensorflow-byod/img/acs/12_1.png)
 
-## 46.13 Stop deployment
+## 47.13 Stop deployment
 
 A running deployment incurs costs.
 

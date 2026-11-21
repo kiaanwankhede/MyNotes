@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Set Up the Metaflow Library for SAP AI Core](https://developers.sap.com/tutorials/ai-core-metaflow-setup) by Karim Mohraz · about 20 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-metaflow-setup/)
-> - **Changes for this book:** page layout; steps numbered 47.1 to 47.8; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 48.1 to 48.8; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -23,7 +23,7 @@ Discover how Metaflow assists you, with diagrams and visualization from producti
 
 ---
 
-## 47.1 Set up your system, and Python
+## 48.1 Set up your system, and Python
 
 <details class="qa"><summary>Linux & MacOS</summary>
 
@@ -121,7 +121,7 @@ You should now use this Docker container as the sandbox environment to complete 
 
 </details>
 
-## 47.2 Set environment variables
+## 48.2 Set environment variables
 
 Set your environment variables.
 
@@ -133,7 +133,7 @@ export USERNAME=tutorialuser
 export HOME=/root
 ```
 
-## 47.3 Install Metaflow package
+## 48.3 Install Metaflow package
 
 Install the Metaflow package.
 
@@ -141,7 +141,7 @@ Install the Metaflow package.
 pip install sap-ai-core-metaflow
 ```
 
-## 47.4 Configure Metaflow
+## 48.4 Configure Metaflow
 
 Create a configuration file for Metaflow. Metaflow uses settings from configurations to store snippets of pipeline in your AWS S3 storage.
 
@@ -160,7 +160,7 @@ Edit the following snippet and the paste in the `config.json` file, created abov
 }
 ```
 
-## 47.5 Configure AWS
+## 48.5 Configure AWS
 
 Create a credentials file for your AWS S3 Object Store. The file is used by the Metaflow package access your AWS S3 store.
 
@@ -179,7 +179,7 @@ aws_secret_access_key = <YOUR_S3_ACCESS_KEY>
 
 > **INFORMATION** the Metaflow library for SAP AI Core uses AWS, however you may skip the installation of AWS CLI.
 
-## 47.6 Metaflow HelloWorld
+## 48.6 Metaflow HelloWorld
 
 Create a file `hellometaflow.py` with following contents.
 
@@ -230,7 +230,7 @@ if __name__ == "__main__":
 
 > **INFORMATION** You may discover more snippets in the [official Metaflow tutorials.](https://docs.metaflow.org/getting-started/tutorials)
 
-## 47.7 Run Metaflow pipeline locally
+## 48.7 Run Metaflow pipeline locally
 
 Inspect the steps of the Metaflow pipeline `hellometaflow.py` using following snippet.
 
@@ -246,7 +246,7 @@ python hellometaflow.py run
 
 ![metaflow](images/ai-core-metaflow-setup/img/hello-metaflow.png)
 
-## 47.8 Save set up environment
+## 48.8 Save set up environment
 
 <details class="qa"><summary>Python virtual environment</summary>
 

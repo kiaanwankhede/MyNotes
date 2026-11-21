@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Prompt LLMs in the generative AI hub in SAP AI Core & Launchpad](https://developers.sap.com/tutorials/ai-core-generative-ai) by Dhrubajyoti Paul · about 20 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-generative-ai/)
-> - **Changes for this book:** page layout; steps numbered 14.1 to 14.17; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 15.1 to 15.17; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -27,7 +27,7 @@ For more information, see [SAP AI Core documentation](https://help.sap.com/docs/
 - How to deploy an LLM model.
 - How to use the models to execute different queries.
 
-## 14.1 Provisioning SAP AI Core
+## 15.1 Provisioning SAP AI Core
 
 ### Provision SAP AI Core in your global account
 
@@ -100,7 +100,7 @@ Click `Start` when you are ready.
 
 ![Start the booster](images/ai-core-generative-ai/images/lpboosterstart.png)
 
-## 14.2 Checking for foundation-models scenario
+## 15.2 Checking for foundation-models scenario
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -135,7 +135,7 @@ Open `Administrative > 2 - List Scenarios` and send the request. Verify that the
 
 </details>
 
-## 14.3 Creating a configuration
+## 15.3 Creating a configuration
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -213,7 +213,7 @@ Implement one of the following model upgrade options:
 
 </details>
 
-## 14.4 Creating a deployment
+## 15.4 Creating a deployment
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -249,7 +249,7 @@ Open `Administrative > 6 - List Deployments` and send the request. The post-resp
 
 </details>
 
-## 14.5 Querying the LLMs
+## 15.5 Querying the LLMs
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -388,7 +388,7 @@ print('Response:', response)
 
 </details>
 
-## 14.6 Prompt Management
+## 15.6 Prompt Management
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -422,7 +422,7 @@ You can also select multiple prompts and delete them.
 
 </details>
 
-## 14.7 Prompt Administration
+## 15.7 Prompt Administration
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -438,7 +438,7 @@ If the user data is found, the **Delete** button will become active. Click on th
 
 </details>
 
-## 14.8 Text Summarization
+## 15.8 Text Summarization
 
 This example tasks the LLM with condensing and summarizing a given text. The text, clearly demarcated with triple backticks, is expected to be distilled into a concise summary of no more than 30 words. The focus is on extracting the most salient points and presenting them in a succinct manner, ensuring that the essence of the original content is retained without excessive verbosity. This format is designed to challenge the LLM's capability to discern key details and convey them efficiently. For this demo we have taken 2 pages from SAP annual report 2 on Independent Assurance Practitioner's Report by KPMG.
 
@@ -585,7 +585,7 @@ print('Response:', response)
 
 </details>
 
-## 14.9 Question Answering
+## 15.9 Question Answering
 
 This example instructs the LLM to formulate a concise response to a specific question, with the context provided for reference. The LLM's answer should be encapsulated within triple backticks, ensuring a clear distinction between the question and the response. If the LLM is uncertain about the correct answer based on the provided context, it is instructed to reply with "Unsure about answer", offering a clear acknowledgment of uncertainty rather than providing potentially inaccurate information. Where we took a part of memo by Christian Klein from SAP Annual report.
 
@@ -731,7 +731,7 @@ print('Response:', response)
 
 </details>
 
-## 14.10 Text Classification - Sentiment Analysis
+## 15.10 Text Classification - Sentiment Analysis
 
 This example directs an LLM to perform sentiment analysis on a provided product review. The LLM is instructed to assess the sentiment of the review text and respond with a single word, either "positive" or "negative". The review text is clearly delineated using triple backticks, ensuring clarity about which portion of the text needs to be analyzed. This format aims to extract concise and direct sentiment evaluations without any ambiguity.
 
@@ -785,7 +785,7 @@ print('Response:', response)
 
 </details>
 
-## 14.11 Expansion
+## 15.11 Expansion
 
 Here in this demo we are going to try out show text expansion qualities of AI core, where we wrote a few sentences about AI core and asked the LLM model to write a 500 word blog post or paragraph based on the context it understands.
 
@@ -833,7 +833,7 @@ print('Response:', response)
 
 </details>
 
-## 14.12 Tone adjustment
+## 15.12 Tone adjustment
 
 Here in tone Adjustment we are trying to showcase use the LLM's capabilities to change/modify the tone of a text written by a new employee at SAP to proper professional tone.
 
@@ -880,7 +880,7 @@ print('Response:', response)
 
 </details>
 
-## 14.13 Spell-check / Grammar-check
+## 15.13 Spell-check / Grammar-check
 
 Here we picked a paragraph on SAP and made a few spelling and grammatical errors. Now we will be asking the LLM to fix those errors by proofreading the content.
 
@@ -925,7 +925,7 @@ print('Response:', response)
 
 </details>
 
-## 14.14 Doing multiple tasks at once
+## 15.14 Doing multiple tasks at once
 
 We picked up a random review from trust pilot on SAP ERP and want the LLM to perform multiple tasks at once which include sentiment analysis, checking if the user is angry with the product, which product/item they are talking about and which brand does it belong to.
 
@@ -992,7 +992,7 @@ print('Response:', response)
 
 </details>
 
-## 14.15 Few-Shot Prompting
+## 15.15 Few-Shot Prompting
 
 The following example demonstrates a few-shot learning approach in prompt engineering, where the model is provided with a couple of examples to understand the desired task and format. Instead of explicitly stating the task, the LLM is given a context in which it should operate.
 
@@ -1039,7 +1039,7 @@ Open `Inference > 1 - Inference GPT` and update the request body with the prompt
 
 </details>
 
-## 14.16 Zero-Shot prompting
+## 15.16 Zero-Shot prompting
 
 The following example showcases an advanced application of prompt engineering that encapsulates a multi-step task for the LLM.
 
@@ -1093,7 +1093,7 @@ Open `Inference > 1 - Inference GPT` and update the request body with the prompt
 
 </details>
 
-## 14.17 Visual Prompting
+## 15.17 Visual Prompting
 
 The next example allows us to evaluate visual prompting capabilities in AI Launchpad.
 

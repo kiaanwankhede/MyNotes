@@ -9,9 +9,10 @@ Notes for an SAP consultant or developer on SAP's AI stack: SAP's AI strategy an
   * **SAP AI:** SAP's AI strategy, platform and careers
   * **AI Fundamentals:** how machine learning and large language models work, and prompting
   * **Responsible AI:** ethics, regulation and SAP's AI terms
+  * **SAP AI Core and AI Launchpad:** where SAP's models run, workspaces and resource groups, the model library, prompt editor and management, rate limits and cost
   * **SAP AI Services: Hands-On:** Python code that calls the generative AI hub, SAP Document AI and SAP Translation Hub, and RAG with SAP HANA Cloud or AI Launchpad grounding
-  * **AI Core Tutorials (SAP Developer Center):** one page per SAP tutorial for SAP AI Core, in SAP's own words and screenshots (CC BY 4.0): setup, the generative AI hub and orchestration, evaluation and prompt optimization, tabular AI, classic ML, and ABAP with ISLM (chapters 11 to 55)
-  * **AI Launchpad Tutorials (SAP Developer Center):** setting up the generative AI hub in SAP AI Launchpad and the SAP AI Core basic trial, in SAP's own words and screenshots (chapters 56 and 57)
+  * **AI Core Tutorials (SAP Developer Center):** one page per SAP tutorial for SAP AI Core, in SAP's own words and screenshots (CC BY 4.0): setup, the generative AI hub and orchestration, evaluation and prompt optimization, tabular AI, classic ML, and ABAP with ISLM (chapters 12 to 56)
+  * **AI Launchpad Tutorials (SAP Developer Center):** setting up the generative AI hub in SAP AI Launchpad and the SAP AI Core basic trial, in SAP's own words and screenshots (chapters 57 and 58)
   * **Reference:** a glossary and the current facts (prices, quotas, dates) to re-check
 * New to AI? The AI Fundamentals chapters (3 to 5) can be read before the SAP AI chapters (1 and 2).
 * Reading paths for each role, across all three books, are on the [SAP BTP book's introduction](../sap-btp/README.md).

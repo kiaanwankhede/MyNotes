@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Batch Consumption](https://developers.sap.com/tutorials/ai-core-genaihub-batch-consumption) by Smita Naik · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-genaihub-batch-consumption/)
-> - **Changes for this book:** page layout; steps numbered 24.1 to 24.13; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 25.1 to 25.13; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## You Will Learn
@@ -43,7 +43,7 @@
 9. **SAP Batch consumption Collection**
    Clone the SAP Batch consumption Bruno collection from [github.com PLACEHOLDER](https://github.com/SAP-samples/aicore-genai-samples/tree/main/genai-sample-apps/Batch_consumption)
 
-## 24.1 Pre-Read
+## 25.1 Pre-Read
 
 ### What Is Batch Consumption?
 
@@ -87,7 +87,7 @@ Do not use batch consumption when:
 | Maximum input files (no expiry set) | 500 |
 | Maximum input files (expiry set) | 10,000 |
 
-## 24.2 Architecture
+## 25.2 Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -136,7 +136,7 @@ Do not use batch consumption when:
                        │  (single file, N lines)│
                        └────────────────────────┘
 ```
-## 24.3 Step 1: Connect to SAP AI Core Instance
+## 25.3 Step 1: Connect to SAP AI Core Instance
 
 <details class="qa"><summary>Bruno</summary>
 
@@ -160,7 +160,7 @@ Do not use batch consumption when:
 
 </details>
 
-## 24.4 Step 2: Register an Object Store Secret
+## 25.4 Step 2: Register an Object Store Secret
 
 Generic secrets securely store object store credentials required for batch input and output file access.
 
@@ -191,7 +191,7 @@ Use the following payload to create a secret for AWS S3:
 
 </details>
 
-## 24.5 Step 3: Prepare Your Input File
+## 25.5 Step 3: Prepare Your Input File
 
 Batch jobs require a **JSON Lines (`.jsonl`)** file as input. Each line is a self-contained JSON object representing one inference request. Lines must not be separated by commas, and the file must end with a newline after the last line.
 
@@ -253,7 +253,7 @@ The `content` field is an array containing a text prompt and a publicly accessib
 
 > **Important:** The image URL must be reachable by the LLM provider's servers at processing time — not just from your browser. GitHub raw URLs, internal network URLs, and short-expiry presigned URLs will fail with a `400` error. Use stable public CDN or object store URLs.
 
-## 24.6 Batch Example 1 — Multiple Requests of the Same Input Type
+## 25.6 Batch Example 1 — Multiple Requests of the Same Input Type
 
 The `input-batch-text.jsonl` file contains three text requests in a single batch job.
 
@@ -277,7 +277,7 @@ The `input-batch-text.jsonl` file contains three text requests in a single batch
 
 > **Note:** `request-3` demonstrates how to pass a short context passage alongside a question. The context is embedded directly in the `user` message — no special formatting is required by the batch service.
 
-## 24.7 Batch Example 2 — Multiple Requests of Different Input Types
+## 25.7 Batch Example 2 — Multiple Requests of Different Input Types
 
 The `input-batch-mixed.jsonl` file contains four requests — one per input type.
 
@@ -307,7 +307,7 @@ The `input-batch-mixed.jsonl` file contains four requests — one per input type
 
 > **Note:** For `request-2`, replace `<base64_encoded_product_image>` with your actual base64 image string. For `request-3`, replace the URL with a stable, publicly accessible URL reachable by the LLM provider's servers.
 
-## 24.8 Step 4: Upload Your Input File to the Object Store
+## 25.8 Step 4: Upload Your Input File to the Object Store
 
 Upload your input file to your object store. SAP AI Core accesses it using the `ai://` URI scheme, which maps to a registered object store secret.
 
@@ -332,7 +332,7 @@ ai://batch-consumption/batch_input/input-batch-mixed.jsonl
 ai://batch-consumption/batch_output/
 ```
 
-## 24.9 Step 5: Create a Batch Job
+## 25.9 Step 5: Create a Batch Job
 
 <details class="qa"><summary>Bruno</summary>
 
@@ -389,7 +389,7 @@ Send the request.
 
 </details>
 
-## 24.10 Step 6: Check Batch Job Status
+## 25.10 Step 6: Check Batch Job Status
 
 <details class="qa"><summary>Bruno</summary>
 
@@ -424,7 +424,7 @@ Resend the request periodically until `current_status` is `COMPLETED` before pro
 
 </details>
 
-## 24.11 Step 7: Retrieve and Interpret Your Results
+## 25.11 Step 7: Retrieve and Interpret Your Results
 
 Once the batch status is `COMPLETED`, download the output file from your object store.
 
@@ -478,7 +478,7 @@ The output file contains four response lines — one per input type.
 
 > **Note:** `status_code: 200` means the request was processed without error. It does not mean the LLM produced the output you expected — always review the `content` field.
 
-## 24.12 Step 8: Manage Your Batch Jobs
+## 25.12 Step 8: Manage Your Batch Jobs
 
 **Get Batch Details**
 
@@ -545,7 +545,7 @@ Under the **04 - Manage Batch Jobs** folder, select the **Delete Batch Job** req
 
 </details>
 
-## 24.13 Troubleshooting
+## 25.13 Troubleshooting
 
 **Error Codes**
 

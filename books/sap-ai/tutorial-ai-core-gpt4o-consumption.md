@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Using Multimodal inputs with GPT4o for Image Recognition on SAP AI Core](https://developers.sap.com/tutorials/ai-core-gpt4o-consumption) by Dhrubajyoti Paul · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-gpt4o-consumption/)
-> - **Changes for this book:** page layout; steps numbered 23.1 to 23.5; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 24.1 to 24.5; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## You will learn
@@ -24,7 +24,7 @@ If you are an external developer or a customer or a partner kindly refer to this
 Multimodality refers to the ability of a model to process and interpret different types of inputs, such as text, images, audio, or video. In the context of GPT-4o on SAP AI Core, multimodal input allows the model to understand and generate responses that incorporate both text and visual data. This enhances the model's ability to perform complex tasks, such as scene detection, object recognition, and image analysis, by combining the strengths of both language processing and image recognition.
 In this tutorial, we will demonstrate these capabilities with the help of GPT-4o, with a sample input and output, which can be replicated in future for various use cases.
 
-## 23.1 Scene Detection
+## 24.1 Scene Detection
 
 In this step, we demonstrate how to use GPT-4o to describe a scene depicted in an image. By providing both text and an image URL as input, the model is able to generate a descriptive response that captures the key elements of the scene. This capability is particularly useful for applications like automated content tagging, visual storytelling, or enhancing user experience in multimedia platforms and more.
 
@@ -214,7 +214,7 @@ By following this example, you can easily integrate image-based inputs with the 
 
 For more information on the models refer to [Hello GPT-4o](https://openai.com/index/hello-gpt-4o/)
 
-## 23.2 Object Detection
+## 24.2 Object Detection
 
 This step focuses on identifying and labeling objects within an image. The multimodal input allows GPT-4o to analyze the visual data and generate a list of objects detected in the scene. Object detection is crucial for tasks such as inventory management, autonomous driving, and augmented reality applications and such.
 
@@ -404,7 +404,7 @@ By following this example, you can easily integrate image-based inputs with the 
 
 For more information on the models refer to [Hello GPT-4o](https://openai.com/index/hello-gpt-4o/)
 
-## 23.3 Graph Analysis
+## 24.3 Graph Analysis
 
 Here, the tutorial demonstrates how GPT-4o can be used to interpret and analyze data presented in graphical form. By combining text and image input, the model can extract meaningful insights from charts, graphs, and other visual data representations. This step is valuable for data analysis, reporting, and decision-making processes.
 
@@ -594,7 +594,7 @@ By following this example, you can easily integrate image-based inputs with the 
 
 For more information on the models refer to [Hello GPT-4o](https://openai.com/index/hello-gpt-4o/)
 
-## 23.4 Math
+## 24.4 Math
 
 In this step, we explore how GPT-4o handles mathematical problems that involve both textual descriptions and visual data. The model can solve equations, interpret mathematical expressions in images, and provide detailed explanations of its reasoning. This capability is useful in educational tools, scientific research, and engineering applications.
 
@@ -784,7 +784,7 @@ By following this example, you can easily integrate image-based inputs with the 
 
 For more information on the models refer to [Hello GPT-4o](https://openai.com/index/hello-gpt-4o/)
 
-## 23.5 Image to Text
+## 24.5 Image to Text
 
 The final step focuses on converting visual information into text. By providing an image as input, GPT-4o generates a textual description or transcription of the content. This step is particularly beneficial for accessibility tools, content creation, and archiving visual data.
 

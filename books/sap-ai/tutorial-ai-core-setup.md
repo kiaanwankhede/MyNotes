@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Set Up Tools to Connect With and Operate SAP AI Core](https://developers.sap.com/tutorials/ai-core-setup) by Dhrubajyoti Paul · about 20 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-setup/)
-> - **Changes for this book:** page layout; steps numbered 11.1 to 11.7; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 12.1 to 12.7; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -29,7 +29,7 @@ Please find downloadable sample notebooks for the tutorials : . Note that these 
   
 ---
 
-## 11.1 Get your SAP AI Core keys
+## 12.1 Get your SAP AI Core keys
 
 Using your SAP Business Technology Platform (BTP), to generate keys for the SAP AI Core instance, using [Provision SAP AI Core](https://help.sap.com/docs/AI_CORE/2d6c5984063c40a59eda62f4a9135bee/38c4599432d74c1d94e70f7c955a717d.html)
 
@@ -49,7 +49,7 @@ The following is a set of keys for **example reference only**. Please generate k
 }
 ```
 
-## 11.2 Get tools to connect to SAP AI Core
+## 12.2 Get tools to connect to SAP AI Core
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -111,7 +111,7 @@ pip install notebook
 
 </details>
 
-## 11.3 Set up tools for usage with SAP AI Core
+## 12.3 Set up tools for usage with SAP AI Core
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -232,7 +232,7 @@ Use this notebook in the tutorial to try out python commands for yourself. Pleas
 
 </details>
 
-## 11.4 Connect with SAP AI Core
+## 12.4 Connect with SAP AI Core
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -306,7 +306,7 @@ ai_api_client = AIAPIV2Client(
 
 </details>
 
-## 11.5 Perform an action in SAP AI Core
+## 12.5 Perform an action in SAP AI Core
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -359,7 +359,7 @@ ai_api_client.rest_client.get(
 
 </details>
 
-## 11.6 Discover tool specific nuances
+## 12.6 Discover tool specific nuances
 
 <details class="qa"><summary>SAP AI Launchpad</summary>
 
@@ -423,7 +423,7 @@ Visit [SAP API Business Hub](https://api.sap.com/api/AI_CORE_API/resource) to fi
 
 </details>
 
-## 11.7 Find help provisions for your interface, and the SAP AI Core help page
+## 12.7 Find help provisions for your interface, and the SAP AI Core help page
 
 <details class="qa"><summary>Postman</summary>
 

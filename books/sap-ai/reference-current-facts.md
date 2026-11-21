@@ -9,7 +9,7 @@
 > - **Level:** reference
 > - **Last checked:** 21 Nov 2026
 
-## 59.1 How to re-check
+## 60.1 How to re-check
 
 
 1. Open the chapter's source for the fact (listed in that chapter's *Sources*).
@@ -22,31 +22,34 @@
 > - After SAP Sapphire (May) and TechEd (autumn), when SAP announces most changes.
 > - At each AI-unit or BTP contract renewal.
 
-## 59.2 Prices and SKUs
+## 60.2 Prices and SKUs
 
 | Fact | Value | Checked | Chapter |
 |---|---|---|---|
-| SAP Document AI, premium edition | sold in blocks of 100 documents; price on request | 21 Nov 2026 | [8.1](tutorial-document-ai-python.md) |
+| SAP AI Launchpad, standard plan | fixed monthly price per subaccount (billing metric: tenant), whatever the usage | 22 Nov 2026 | [7.12](sap-ai-core-launchpad.md) |
+| SAP Document AI, premium edition | sold in blocks of 100 documents; price on request | 21 Nov 2026 | [9.1](tutorial-document-ai-python.md) |
 
-## 59.3 Free offers and end dates
-
-| Fact | Value | Checked | Chapter |
-|---|---|---|---|
-| Generative AI hub | only on the SAP AI Core **extended** plan; plans are standard and extended (enterprise accounts); a 30-day basic trial exists | 21 Nov 2026 | [7.1](tutorial-genai-hub-python.md), [10.1](tutorial-rag-grounding-genai-hub.md) |
-
-## 59.4 Counts and quotas
+## 60.3 Free offers and end dates
 
 | Fact | Value | Checked | Chapter |
 |---|---|---|---|
+| SAP AI Launchpad free plan | discontinued on 22 May 2026; a 30-day trial (with generative AI hub) is offered instead | 22 Nov 2026 | [7.12](sap-ai-core-launchpad.md) |
+| Generative AI hub | only on the SAP AI Core **extended** plan; plans are standard and extended (enterprise accounts); a 30-day basic trial exists | 21 Nov 2026 | [8.1](tutorial-genai-hub-python.md), [11.1](tutorial-rag-grounding-genai-hub.md) |
+
+## 60.4 Counts and quotas
+
+| Fact | Value | Checked | Chapter |
+|---|---|---|---|
+| Prompt optimisation dataset | at least 25 and at most 200 examples (JSON artifact); Mistral and DeepSeek models not supported | 22 Nov 2026 | [7.9](sap-ai-core-launchpad.md) |
 | SAP certifications | valid 12 months; *Stay Certified* in the 90 days before expiry adds 12 months | 21 Nov 2026 | [2.2](sap-ai-careers-certifications.md) |
-| Document Translation limits | sync: 500 MB and 40,000 characters (fewer for ja, zh, ko, th); async: 2,500,000 characters; job results kept 3 days | 21 Nov 2026 | [9.4](tutorial-translation-hub-python.md), [9.5](tutorial-translation-hub-python.md) |
-| SAP AI Core quotas | at most 50 resource groups and 5 tenant-wide generic secrets per tenant | 21 Nov 2026 | [10.5](tutorial-rag-grounding-genai-hub.md) |
+| Document Translation limits | sync: 500 MB and 40,000 characters (fewer for ja, zh, ko, th); async: 2,500,000 characters; job results kept 3 days | 21 Nov 2026 | [10.4](tutorial-translation-hub-python.md), [10.5](tutorial-translation-hub-python.md) |
+| SAP AI Core quotas | at most 50 resource groups and 5 tenant-wide generic secrets per tenant | 21 Nov 2026 | [11.5](tutorial-rag-grounding-genai-hub.md) |
 
-## 59.5 Release changes that alter the steps
+## 60.5 Release changes that alter the steps
 
 | Change | Effect | Checked | Chapter |
 |---|---|---|---|
-| SAP Cloud SDK for AI (Python) | `sap-ai-sdk-gen` 7.4.1 installed; Responses API since 6.10.0; Gemini needs the `[google]` extra; its LangChain classes need `[all]` | 21 Nov 2026 | [7.2](tutorial-genai-hub-python.md), [7.4](tutorial-genai-hub-python.md) |
+| SAP Cloud SDK for AI (Python) | `sap-ai-sdk-gen` 7.4.1 installed; Responses API since 6.10.0; Gemini needs the `[google]` extra; its LangChain classes need `[all]` | 21 Nov 2026 | [8.2](tutorial-genai-hub-python.md), [8.4](tutorial-genai-hub-python.md) |
 
 ## How this page was built
 

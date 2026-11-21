@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Consumption of GenAI models Using Orchestration(V2) service - A Beginner's Guide](https://developers.sap.com/tutorials/ai-core-orchestration-consumption-v2) by Smita Naik · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-orchestration-consumption-v2/)
-> - **Changes for this book:** page layout; steps numbered 15.1 to 15.4; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 16.1 to 16.4; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## You will learn
@@ -32,7 +32,7 @@
  Step-by-step guide to set up AI Launchpad:
  [AI Launchpad Tutorial](https://developers.sap.com/tutorials/ai-launchpad-provisioning.html)
 
-## 15.1 Pre-Read
+## 16.1 Pre-Read
 
 This tutorial provides a basic introduction to using **orchestration service V2 in SAP AI Core**.
 
@@ -54,7 +54,7 @@ By the end of this tutorial,
 
    Refer to the [orchestration documentation](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/orchestration-8d022355037643cebf775cd3bf662cc5?locale=en-US&version=CLOUD) for more information.
 
-## 15.2 Set Up Your Environment and Configure Access
+## 16.2 Set Up Your Environment and Configure Access
 
 <details class="qa"><summary>AI Launchpad</summary>
 
@@ -163,7 +163,7 @@ The SDK parses the service key from the environment variable to interact with th
 
 </details>
 
-## 15.3 Create Configuration for Orchestration deployment - Optional Step
+## 16.3 Create Configuration for Orchestration deployment - Optional Step
 
 > Execute this step only if orchestration deployment is not available. Other wise **skip** this step and proceed to the next step `Consume LLM's in Generative AI Hub through Orchestration`
 
@@ -430,7 +430,7 @@ Follow the screenshot attached for reference.
 
 </details>
 
-## 15.4 Consume LLM's in Generative AI Hub through Orchestration
+## 16.4 Consume LLM's in Generative AI Hub through Orchestration
 
 <details class="qa"><summary>AI Launchpad</summary>
 

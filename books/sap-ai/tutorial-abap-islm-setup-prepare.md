@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Configure Your SAP S/4HANA System for ISLM](https://developers.sap.com/tutorials/abap-islm-setup-prepare) by Daniel Funkert · about 20 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/abap-core-development](https://github.com/sap-tutorials/abap-core-development/blob/main/tutorials/abap-islm-setup-prepare/)
-> - **Changes for this book:** page layout; steps numbered 49.1 to 49.5; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 50.1 to 50.5; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## Prerequisites
@@ -21,7 +21,7 @@
 
 ---
 
-## 49.1 Overview
+## 50.1 Overview
 In this tutorial, you prepare your **SAP S/4HANA** system to enable **Intelligent Scenario Lifecycle Management** (ISLM) for custom generative AI scenarios. You implement the required SAP Notes, configure the necessary business roles, and enable background processing. This establishes the foundation for integrating SAP AI Core in the next tutorials.
 
 The diagram illustrates how **Intelligent Scenario Lifecycle Management** is embedded in the overall architecture and how it connects to **SAP AI Core**. This tutorial focuses on the **SAP S/4HANA** components highlighted in the diagram.
@@ -33,7 +33,7 @@ The diagram illustrates how **Intelligent Scenario Lifecycle Management** is emb
 - Learn more about Intelligent Scenario Lifecycle Management (ISLM) on SAP Help Portal: [Intelligent Scenario Lifecycle Management](https://help.sap.com/docs/ABAP_PLATFORM_NEW/7989a582039547ae91d8f483e487058d/436151b128614f0e84024015136043d3.html?version=latest)
 - Explore additional resources in the SAP Community: [Intelligent Scenario Lifecycle Management for SAP S/4HANA](https://pages.community.sap.com/topics/intelligent-scenario-lifecycle-management-s4hana)
 
-## 49.2 Implement Required SAP Notes
+## 50.2 Implement Required SAP Notes
 In this step, you implement the required SAP Notes and Transport-Based Correction Instructions (TCIs) in your SAP S/4HANA system. SAP Notes contain correction instructions that adjust or enhance existing functionality in your system. During implementation, the system checks your release and identifies any prerequisite notes that must be processed first. This provides the technical foundation for custom generative AI scenarios with ISLM and enables integration with SAP AI Core.
 
 1\. Log on to your **SAP S/4HANA** system and open transaction **SNOTE** (Note Assistant).
@@ -83,7 +83,7 @@ In this step, you implement the required SAP Notes and Transport-Based Correctio
 
 10\. Congratulations! You have successfully implemented the required SAP Notes and TCIs.
 
-## 49.3 Activate Business Role for Intelligent Scenarios
+## 50.3 Activate Business Role for Intelligent Scenarios
 In this step, you activate and assign the required business role for Intelligent Scenario Lifecycle Management (ISLM) in your SAP S/4HANA system. You use the content activation task list to generate and activate the required business roles and SAP Fiori content. This enables access to the ISLM applications in the SAP Fiori launchpad.
 
 1\. Log on to your **SAP S/4HANA** system and open transaction **STC01** (Task Manager for Technical Configuration).
@@ -130,7 +130,7 @@ In this step, you activate and assign the required business role for Intelligent
 
 12\. Congratulations! You have successfully activated and assigned the required business role.
 
-## 49.4 Set Up bgRFC Queue
+## 50.4 Set Up bgRFC Queue
 In this step, you configure the bgRFC queue in your SAP S/4HANA system to enable asynchronous background processing. ISLM uses the bgRFC queue for operations such as activation and deployment of intelligent scenarios. It consists of a supervisor destination, an inbound destination, and a scheduler. Together, these components ensure reliable processing of asynchronous background tasks and the communication with SAP AI Core.
 
 1\. Log on to your **SAP S/4HANA** system and open transaction **SBGRFCCONF** (bgRFC Configuration).
@@ -173,7 +173,7 @@ The scheduler ensures that queued background tasks are processed automatically.
 
 12\. Congratulations! You have successfully configured the bgRFC queue for ISLM.
 
-## 49.5 Test yourself
+## 50.5 Test yourself
 Test your understanding of the concepts covered in this tutorial. Select the correct answer and choose **Check Answer**.
 
 ---

@@ -6,7 +6,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Using small language models on SAP AI Core](https://developers.sap.com/tutorials/ai-core-custom-slm) by Dhrubajyoti Paul · about 45 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/Tutorials](https://github.com/sap-tutorials/Tutorials/blob/master/tutorials/ai-core-custom-slm/)
-> - **Changes for this book:** page layout; steps numbered 27.1 to 27.8; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 28.1 to 28.8; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 ## You will learn
@@ -19,14 +19,14 @@ Ai core Instance with Standard Plan or Extended Plan
 Docker Desktop Setup [Download and Install](https://www.docker.com/products/docker-desktop)
 GitHub Account
 
-## 27.1 Architecture Overview
+## 28.1 Architecture Overview
 In this tutorial we are deploying Ollama an open-source project that serves as a powerful and user-friendly platform for running LLMs on on SAP AI core. which acts as a bridge between the complexities of LLM technology and the desire for an accessible and customizable AI experience.
 
 ![image](images/ai-core-custom-slm/img/solution-architecture.png)
 
 We can pick any model from the above model hubs and connect it to AI core for the example we are going to deploy Ollama on AI core and enable Gemma and inference the same.
 
-## 27.2 Adding workflow file to github
+## 28.2 Adding workflow file to github
 Workflows for SAP AI Core are created using YAML or JSON files that are compatible with the SAP AI Core schema. Let’s start with adding a Argo Workflow file to manage: `ollama`.
 
 In your GitHub Create a new repository, click **Add file** > **Create new file**.
@@ -82,7 +82,7 @@ Replace `<YOUR_DOCKER_SECRET>` with the exact name of the Docker Registry Secret
 
 **NOTE** - we'll generate the docker image referred here in the following steps.
 
-## 27.3 Create a Docker account and generate a Docker access token and Install Docker
+## 28.3 Create a Docker account and generate a Docker access token and Install Docker
 [Sign Up](https://www.docker.com/) for a Docker account.
 
 Click on the profile button (your profile name) and then select **Account Settings**.
@@ -174,7 +174,7 @@ docker build --platform=linux/amd64 -t docker.io/<YOUR_DOCKER_USER>/ollama:ai-co
 docker push docker.io/<YOUR_DOCKER_USER>/ollama:ai-core
 ```
 
-## 27.4 Storing docker secrets to AI core
+## 28.4 Storing docker secrets to AI core
 
 This step is required once. Storing Docker credentials enables SAP AI Core to pull (download) your Docker images from a private Docker repository. Use of a private Docker image prevents others from seeing your content.
 
@@ -190,7 +190,7 @@ A Pop up will appear on screen and add the following Json with the details to yo
 }
 ```
 
-## 27.5 Onboarding GitHub and application on AI core
+## 28.5 Onboarding GitHub and application on AI core
 
 Select on your SAP AI Core connection under **Workspaces app** in the SAP AI Launchpad.
 
@@ -249,7 +249,7 @@ Use the following information for reference:
 
 4. Refresh the launchpad, and create a fresh application.   
 
-## 27.6 Creating configuration
+## 28.6 Creating configuration
 
 Go to **ML Operations** > **Configurations**. Click on the **Create** button.
 
@@ -265,7 +265,7 @@ Enter the model Name and choose the workflow with following parameters
 
 Then click on **next** > **review and create**.
 
-## 27.7 Deploying Ollama to AI core
+## 28.7 Deploying Ollama to AI core
 
 In the model click on **create deployment**. A screen will appear
 
@@ -279,7 +279,7 @@ Once you create the deployment, wait for the current status to be set to RUNNING
 
 Once the deployment is running, you can access the LLM’s using Ollama.
 
-## 27.8 Pulling llava-phi3 and Performing Inference
+## 28.8 Pulling llava-phi3 and Performing Inference
 
 Now we need to import llava-phi3 to our Ollama pod before we can inference the model so here we would be using SAP AI API to call pull model call in Ollama.
 
