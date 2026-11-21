@@ -250,6 +250,9 @@ flowchart LR
 ![Welcome to Your Personal Trial: choose US East (VA) - AWS or Singapore - Azure, then Create Account](images/trial-choose-region.png)
 
 - The trial lasts **90 days**. Log in at least once every 30 days, or the account may be deleted (SAP trial FAQ, checked 19 Nov 2026).
+  - SAP Help (*Trial Accounts and Free Tier*, read 21 Nov 2026) is more exact: the 90 days run in intervals, and each sign-in extends the current one automatically, by up to 30 days.
+  - 30 days without signing in **suspends** the account, and suspended accounts are deleted.
+  - After 90 days the trial is deleted anyway. To delete it sooner: *global account → Account Explorer → Delete Trial Account*. Another trial needs a new account.
 - You need an sap.com account first; the sign-up asks to verify a phone number.
 - One email and phone number give one trial global account. Inside it you can create as many subaccounts as you like, but only in the two trial regions.
 - Because SAP assumes you are new, it sets everything up for you. A productive global account arrives empty instead.
@@ -554,6 +557,7 @@ Then, as a stretch: write the btp CLI commands for steps 1, 3 and 4, and compare
 - **Web-checked:** the Audit Log Management central and default plans. That the copy dialog exists was confirmed by an SAP KBA and by the recording's screen.
 - **Enriched on 20 Nov 2026** (shared units and subaccount entitlement rights in 4.4a): Lecture 4 captions 16:07 to 22:18 read in full; screenshot at 19:55, account name and avatar pixelated.
 - **Lab 4 (added 21 Nov 2026):** `btp` syntax checked against SAP's btp CLI command reference; the commands were not run, because they need a trial login.
+- **Added 21 Nov 2026 (4.7):** the trial lifecycle from SAP Help's *Trial Accounts and Free Tier* (the *Trial Lifecycle* section, read in full), under the FAQ line it refines.
 
 ## Sources and further reading
 
@@ -569,5 +573,6 @@ Then, as a stretch: write the btp CLI commands for steps 1, 3 and 4, and compare
 - Terraform Registry, *SAP/btp provider*: https://registry.terraform.io/providers/SAP/btp/latest/docs
 - SAP Learning, *Explaining SAP BTP account model*: https://learning.sap.com/courses/operating-sap-business-technology-platform/explaining-sap-btp-account-model
 - SAP Help, *btp CLI command reference* (used by the lab): https://help.sap.com/docs/btp/btp-cli-command-reference/btp-cli-command-reference
+- SAP Help, *Trial Accounts and Free Tier*: https://help.sap.com/docs/btp/sap-business-technology-platform/trial-accounts-and-free-tier
 
 Previous: [Inside BTP: Neo, hyperscalers and regions](btp-neo-hyperscalers-regions.md) · Next: [Choosing BTP services for a requirement](btp-services-for-a-requirement.md)
