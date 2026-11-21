@@ -26,9 +26,22 @@
 
 - **Development happens best in the terminal.** You will later work on cloud servers, which are Linux machines with no desktop
 - Mac and Linux have a terminal built in. **Windows** has only `cmd` and PowerShell; the class uses **Git Bash** or Windows Terminal
+  - Install `uv` with the command for your system. The common class mistake: running the Mac/Linux `curl … | sh` line on Windows
+  - In VS Code on Windows, run **Terminal: Select Default Profile** and pick **Git Bash**, so the editor's terminal takes the same commands
+  - Office laptops often block scripts and installers. Use a personal machine for the course
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh                                   # Mac, Linux
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"  # Windows, in PowerShell
+```
+
 - **Python 3.10 or newer.** Check with `python3 --version`
   - Versions are like Office 2007, 2010, 2013: several can live on one machine, and each project picks one
+  - `python` and `python3` can be **two different installs**. See where each name points: `which python` and `which python3` (Mac, Linux, Git Bash)
+  - On Windows, `py list` shows every install (`py -0p` with the older launcher). *Windows commands added by Claude, from Python's docs*
+  - Both just have to be 3.10+. Use whichever name works
 - **VS Code + `.py` files** for real projects. This is an agentic AI course, not data science: scripts, a terminal and a debugger, with notebooks only for exploring
+  - The class's reason: AI coding tools (Claude Code, Codex, Cursor) edit `.py` files directly, and code kept in notebook cells costs extra tokens
 
 ![Class whiteboard: Anaconda crossed out; pip, venv or conda replaced by uv, "10-100x faster than pip"](images/whiteboard-uv-replaces-pip-venv-conda.png)
 
@@ -47,6 +60,15 @@
 - With one, a project gets exactly the **libraries it wants** and the **Python version** it wants
 
 ![Class whiteboard: a terminal with a global Python 3.12.9 cluttered with packages, next to a venv on Python 3.13.2 holding only requests: "libraries I want" plus "Python version"](images/whiteboard-venv-libraries-and-python-version.png)
+
+- Pick the Python per environment: `uv venv --python 3.12`
+  - Without `--python`, `uv` uses a Python it finds (in class it picked 3.13.2)
+  - If `.venv` already exists, `uv` asks before replacing it
+- A fresh environment sees **none** of the global packages
+  - In class, `import requests` worked in the global Python but failed inside the new venv with `ModuleNotFoundError: No module named 'requests'`
+  - It worked once `requests` was installed inside the venv
+- Activate = enter the room (`source .venv/bin/activate`; Windows: `.venv\Scripts\activate`). `deactivate` = leave it
+  - While you are inside, the prompt shows the environment's name
 
 ### The `uv` workflow
 
@@ -340,11 +362,23 @@ for day_temp in forecast:                          # the class file uses if/else
 | Should I code along in class? | No. Watch and understand live, then practise with the recording |
 | Do I need Python experience? | Helpful, not mandatory. Beginners should reinforce basics fast |
 | Will Microsoft Copilot Studio be covered? | Only if the mentor can get access |
+| Do I still activate the venv with `uv`? | Not for `uv add` or `uv run`: `uv` finds the project's `.venv` itself. Activate only to run `python` directly in that terminal |
+| `requirements.txt` and `pyproject.toml` in one project? | `uv` works from `pyproject.toml` and `uv.lock`. Import an old `requirements.txt` once with `uv add -r`. Don't mix `pip install` and `uv add` in one project |
+| How do I move a project to a newer Python? | `uv python pin 3.13` writes `.python-version`; the next `uv sync` or `uv run` uses it. `uv python upgrade` only updates Pythons that `uv` installed, to their latest patch (uv docs, added by Claude) |
+| Can I use WSL instead of Git Bash? | Yes. It is a full Linux inside Windows: heavier, and slow when reaching Windows files (the mentor's experience from 2 to 3 years ago; it may have improved). Git Bash is enough for the course |
+| Is Python enough, or another language too? | Python is enough, plus a little SQL |
+| Where can data leak in a RAG system? | In two places: the vector database that stores the chunks, and the LLM call that receives them. For sensitive data, self-host both |
+| Can RAG summarise all my research notes? | No. RAG fetches the chunks that match a question; a summary needs every note read, so loop LLM calls over the notes. About 18,000 lines (90 days × 200) doesn't need RAG at all |
+| Why do AI projects fail in production? | Mostly not because of the AI: the team didn't understand the data and the domain. In the mentor's experience, AI is about 20% of the work |
+| Are no-code agent tools enough? | Good for quick POCs, not for production: too little control (the mentor's view) |
+| AI is getting expensive. What do we do? | Treat tokens as a resource: smaller contexts, sub-agents, `CLAUDE.md` files. Use AI wisely rather than drop it (the mentor's view) |
 
 - After class: install Python 3.10+, UV and VS Code; Windows users install Git Bash or Windows Terminal; redo the commands from the recording
 - Left out: ground rules and two job referrals (not teaching content)
 
 *Source: `classes_transcription_summary/01`, Q&A and action items.*
+
+*Rows from "Do I still activate the venv" on: the class 01 recording subtitles (27 Jun 2026).*
 
 ## 1.6 Added by Claude, not from the sources
 
@@ -415,6 +449,9 @@ uv init proj && cd proj        # new project
 uv add requests                # add a dependency (writes pyproject.toml + uv.lock)
 uv run main.py                 # run in the project env
 uv sync --locked               # CI: exact rebuild, fail on a stale lock
+uv venv --python 3.12          # an environment with a chosen Python
+uv python pin 3.13             # the project's Python, written to .python-version
+which python python3           # where each name points (Windows: py list)
 ```
 
 ```python
@@ -450,14 +487,17 @@ TOOL_REGISTRY[func.__name__] = wrapper             # name → function, for the 
 - **1.3:** the retry session against a local server that returned `503` twice then `200` (3 requests), and one that always returned `503` (`RetryError` after 4)
 - **1.4:** `tools.py` as written; the SQL-shaped string was caught; `9**9**9` killed after 5 s; `safe_calc` on the cases listed
 - **1.5:** `Python_foundamentals.py` as written
-- **Not run:** the live Frankfurter API (blocked here)
+- **1.1 and the class 01 Q&A, from the class 01 subtitles:** web-checked on 22 Nov 2026 against uv's install page (both install commands), uv's Python versions page (`uv python pin`, and `uv python upgrade` for uv-installed Pythons only), VS Code's terminal profiles page and Python's Windows docs (`py list`; `py -0p` kept for compatibility)
+- **Not run:** the live Frankfurter API (blocked here); the new 1.1 commands (`uv` is not installed on this machine)
 
 ## Sources and further reading
 
 - Live-Class-2026, `Weekend 01 - 27-28 Jun/01 - 27 Jun - Python Setup & API Basics/`: `README.md`, `Python_foundamentals.py`, `currency.py`, `functions or tools.py`, `tools.py`, `notebook.ipynb`, `my-first-project/` (re-read in full 2026-11-15)
 - Live-Class-2026, the Class 1 whiteboard `Class-1-Python-and-AI.pdf` (four figures in `images/`) and the Day 2 whiteboard `Agentic-3-0.pdf` (the code-to-LLM figure)
 - Live-Class-2026, `02-03 - 28 Jun & 4 Jul .../_5_calling_a_real_api.py` (the `convert_currency` function in 1.2)
-- `uv` documentation: [docs.astral.sh/uv](https://docs.astral.sh/uv/)
-- Added by Claude: 1.3, `safe_calc` in 1.4, 1.6, interview questions 4–5
+- Class 01 recording subtitles, 27 Jun 2026 (the setup walk-through and the after-class Q&A), and the class's Craft resource page, "Class 1 - Python" (setup links, `uv venv --python 3.12`)
+- `uv` documentation: [docs.astral.sh/uv](https://docs.astral.sh/uv/), [installation](https://docs.astral.sh/uv/getting-started/installation/), [Python versions](https://docs.astral.sh/uv/concepts/python-versions/)
+- [VS Code terminal profiles](https://code.visualstudio.com/docs/terminal/profiles) and [Using Python on Windows](https://docs.python.org/3/using/windows.html) (both checked 22 Nov 2026)
+- Added by Claude: 1.3, `safe_calc` in 1.4, 1.6, interview questions 4–5, the Windows `py list` commands in 1.1, and the `uv python upgrade` limit in the class 01 Q&A
 
 Next: [Chapter 2, Python refresher](02-python-refresher.md)
