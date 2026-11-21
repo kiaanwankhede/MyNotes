@@ -34,3 +34,12 @@
 * [Reference: Joule setup building blocks](reference-joule-setup-building-blocks.md)
 * [Reference: Glossary](reference-glossary.md)
 * [Reference: Current facts to re-check](reference-current-facts.md)
+
+## Joule Studio Tutorials (SAP Developer Center)
+* [Tutorial: Use Joule Studio to Create an AI Assistant for Sales Reps](tutorial-joule-studio-cx-agent-create.md)
+* [Tutorial: Use Joule Studio to Create an FI Collection Email Drafting Assistant](tutorial-joule-studio-fi-collection-assistant.md)
+* [Tutorial: Use Joule Studio to Create an FI Collection Workbench](tutorial-joule-studio-fi-collection-workbench.md)
+* [Tutorial: Use Joule Studio to Create an Assistant to Monitor Supplier Risk](tutorial-joule-studio-spend-supplier-assistant.md)
+* [Tutorial: Use Joule Studio to Create an Assistant for Equipment Troubleshooting](tutorial-joule-studio-scm-equipment-assistant.md)
+* [Tutorial: Use Joule Studio to Create an IT Incident Triage and Auto Routing Agent with N8N, SAP Task Center Node and SAP Agent Node](tutorial-joule-studio-n8n-workflow-create.md)
+* [Tutorial: Build a Billing Completeness Data Product with Joule Studio](tutorial-joule-studio-bdc-agent-create.md)

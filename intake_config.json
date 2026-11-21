@@ -164,7 +164,7 @@
   },
   "SAP Joule": {
    "folder": "books/sap-joule",
-   "sections": ["Joule", "Joule Family and Joule Studio", "Joule Tutorials", "Joule Integrations", "Joule Studio: Practice", "Reference"],
+   "sections": ["Joule", "Joule Family and Joule Studio", "Joule Tutorials", "Joule Integrations", "Joule Studio: Practice", "Reference", "Joule Studio Tutorials (SAP Developer Center)"],
    "chapters": [
     "Joule for Consultants: grounded answers, provisioning and AI units",
     "The Joule family: Joule Work, embedded Joule, assistants, agents and skills",
@@ -186,7 +186,14 @@
     "Practice: 10 Joule agent assignments",
     "Reference: Joule setup building blocks",
     "Reference: Glossary",
-    "Reference: Current facts to re-check"
+    "Reference: Current facts to re-check",
+    "Tutorial: Use Joule Studio to Create an AI Assistant for Sales Reps",
+    "Tutorial: Use Joule Studio to Create an FI Collection Email Drafting Assistant",
+    "Tutorial: Use Joule Studio to Create an FI Collection Workbench",
+    "Tutorial: Use Joule Studio to Create an Assistant to Monitor Supplier Risk",
+    "Tutorial: Use Joule Studio to Create an Assistant for Equipment Troubleshooting",
+    "Tutorial: Use Joule Studio to Create an IT Incident Triage and Auto Routing Agent with N8N, SAP Task Center Node and SAP Agent Node",
+    "Tutorial: Build a Billing Completeness Data Product with Joule Studio"
    ]
   }
  }

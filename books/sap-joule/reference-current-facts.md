@@ -75,4 +75,4 @@
 
 - The chapters linked in each row, and their *Sources* sections.
 
-Previous: [Reference: Glossary](reference-glossary.md) · Next: [SAP Joule book introduction](README.md)
+Previous: [Reference: Glossary](reference-glossary.md) · Next: [Tutorial: Use Joule Studio to Create an AI Assistant for Sales Reps](tutorial-joule-studio-cx-agent-create.md)

@@ -1,0 +1,140 @@
+# Tutorial: Use Joule Studio to Create an AI Assistant for Sales Reps
+
+> [!NOTE]
+> **📍 At a glance**
+> - **Source:** SAP Developer Center tutorial [Use Joule Studio to Create an AI Assistant for Sales Reps](https://developers.sap.com/tutorials/joule-studio-cx-agent-create) by Martin Plummer · about 20 min
+> - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/sap-build-process-automation](https://github.com/sap-tutorials/sap-build-process-automation/blob/main/tutorials/joule-studio-cx-agent-create/)
+> - **Changes for this book:** page layout; steps numbered 22.1 to 22.5; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Last checked:** 21 Nov 2026
+
+Use Joule Studio to Create an AI Assistant for Customer Experience Sales Reps.
+
+## Prerequisites
+
+- Access to Joule Work and Joule Studio in the Agent Lab
+- You have been provided with the logon information
+
+## You will learn
+
+- How to use intent-based development to create AI solutions
+- How SAP Domain Models and other resources are leveraged to contextualize the generated solution
+
+## Intro
+
+>**IMPORTANT**
+>
+>**Welcome to the Agent Lab**
+>
+>You are working with a pre-release version of the Joule Studio. This gives you an early look at our upcoming capabilities. Please keep the following in mind:
+>
+> - **Features are subject to change:** The UI, terminology, and functionality you see may differ from the final product.
+> - **Educational use only:** This environment is designed for learning and experimentation, not for production use.
+> - **Potential instability:** As a preview version, you may encounter occasional instability or unexpected behavior.
+
+Sales Representatives want an AI assistant to suggest 2–3 ranked discount strategies based on the customer's order history and the margin targets so that they can negotiate from a position of data rather than instinct.​ Each strategy should include suggested discount %, rationale, estimated win probability, and projected margin impact.​ In this tutorial, you will be provided with a prompt that focusses on the agent creation. This will give you the best chance to see the development process in a short time.
+
+---
+
+## 22.1 Getting Started
+
+1. Go to **Joule Work**.
+
+    If you do not see the tiles, choose **<> Develop**.
+
+    ![Joule Work](images/joule-studio-cx-agent-create/joule-work-01.png)  
+
+2. On the **Agent** tile, choose **Create**.
+
+3. Leave the selected **New Solution** unchanged, and fill in the agent details:
+
+    Agent Name:
+
+   ```COPY
+   AI Sales Assistant
+   ```
+
+    Intent statement:
+
+   ```COPY
+   AI-powered discount strategy suggestion agent that analyzes customer orders and margin targets from SAP S/4HANA SD, providing sales reps with contextualized discount recommendations.
+   ```
+
+    Select **Quick create**.
+
+    ![Joule Work](images/joule-studio-cx-agent-create/joule-work-02.png)
+
+    Quick-create will allow you to experience the power of the tool without investing much time.
+
+4. Choose **OK**.
+
+    In the panel on the right, you can see that your intent statement has been taken as the starting prompt. Quick create has added **Fast Track** to the prompt.
+
+    ![Joule Work](images/joule-studio-cx-agent-create/joule-work-03.png)
+
+## 22.2 Intent
+
+This is where the tool tries to understand your intentions. The tool will attempt to understand your prompt and will likely ask you clarifying questions if you have not chosen quick-create as recommended above.
+
+Once it decides it understands enough, it will map the challenge to SAP's Reference Business Architecture and performs a fit-gap analysis. It has access to SAP Knowledge Graph, SAP LeanIX, and SAP Domain Models to help it create the intent document. Intent fit indicates how closely the proposed solution corresponds to your requirement.
+
+1. If required, answer the questions set by the tool.
+
+    The questions that the tool asks cannot be predicted, so you have to use your judgement. Bear in mind that the landscape has S/4HANA as a backend so tailor your responses accordingly. The more complex you make your scenario, the longer it will take to generate and test the solution. The screenshot below is just an indication of what you might see. Joule might provide a selection of answers that you can choose from.
+
+    ![Joule Work](images/joule-studio-cx-agent-create/joule-work-04.png)
+
+Once the intent document is created, proceed to the next phase, which is requirement generation. This might happen automatically if you have selected quick-create at the start.
+
+1. If processesing is waiting for your input to proceed, enter **Create Requirement** or similar.
+
+    While the requirements are being generated, you can explore the intent on the **Idea Board**.
+
+    ![Idea Board](images/joule-studio-cx-agent-create/idea-board-01.png)
+
+## 22.3 Requirement
+
+When the requirement is ready, you have the opprotunity to review and refine it. For this tutorial, you will accept suggested product requirement document without changes. To progress to the next phase, you need to transform the PRD into a technical specification.
+
+Depending on your role in your company, you might be finished at this point and make the PRD available to a different team to take further. However, in this tutorial, you are taking the project forward with the generation of a technical specification.
+
+1. Enter **Create Specification**. This might happen automatically if you have selected quick-create at the start.
+
+    While the specification is being generated, you can explore the **Requirement**.
+
+    ![Requirement](images/joule-studio-cx-agent-create/requirement-01.png)
+
+    In particular, look at the **Solution Architecture** section to see what will be created.
+
+    ![Requirement](images/joule-studio-cx-agent-create/requirement-02.png)
+
+## 22.4 Specification
+
+When the specification is complete you could pass it on to another team to do the implementation. However, here you are going to get the tool to implement the agent.  This might happen automatically if you have selected quick-create at the start.
+
+1. If processesing is waiting for your input, enter **Implement the Solution**.
+
+    The tool will work through the tasks defined in the specification. When it is finished, it will update the specification to show the tasks have been done.
+
+    While the solution is being generated, you can explore the **Specification**.
+
+    ![Requirement](images/joule-studio-cx-agent-create/specification-01.png)
+
+## 22.5 Solution and Testing
+
+Wait until the unit tests are finished successfully. You can then try out your agent.
+
+1. Go to **Testing** and see the results of the unit testing.
+
+2. Go to **Solution** and try your agent. What you can do will depend on what has been implemented.
+
+    ![Requirement](images/joule-studio-cx-agent-create/solution-01.png)
+
+3. Ask **`How can I use this solution?`**.
+
+    ![Requirement](images/joule-studio-cx-agent-create/solution-02.png)
+
+   For the Agent Lab, you will not be deploying your agent. However, the code that has been generated follows SAP best practices and would be deployable to the runtime by choosing **Deploy**.
+
+   For your next steps, try the other scenarios provided as part of the Agent Lab or repeat this exercise without quick-create enabled.
+
+Previous: [Reference: Current facts to re-check](reference-current-facts.md) · Next: [Tutorial: Use Joule Studio to Create an FI Collection Email Drafting Assistant](tutorial-joule-studio-fi-collection-assistant.md)

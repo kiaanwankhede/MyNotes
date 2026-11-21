@@ -12,5 +12,6 @@ Notes for an SAP consultant or developer on Joule: what it is and how it is lice
   * **Joule Integrations:** the admin steps to switch Joule on in SAP SuccessFactors, S/4HANA and other SAP products, and document grounding
   * **Joule Studio: Practice:** 10 graded skill assignments and 10 agent assignments, each with a folded build guide
   * **Reference:** setup building blocks, a glossary, and the current facts (prices, SKUs, dates) to re-check
+  * **Joule Studio Tutorials (SAP Developer Center):** seven more of SAP's Joule Studio tutorials, one page each, in SAP's own words and screenshots (CC BY 4.0), chapters 22 to 28
 * Reading paths for each role, across all three books, are on the [SAP BTP book's introduction](../sap-btp/README.md).
 * Anything not taught in the course is labelled **Added by Claude**, and every claim about the current state of an SAP product is web-checked and dated.
