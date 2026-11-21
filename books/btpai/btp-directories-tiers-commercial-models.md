@@ -451,6 +451,61 @@ flowchart TB
 - Subscription is a fixed order at a fixed price; Pay-As-You-Go and BTPEA give all services and bill actual use, BTPEA from prepaid, discounted credits
 - Budgets in Costs and Usage alert you but never stop services; each level watches its own usage
 
+## 🧪 Lab 9: Directories, a move and the one-per-path rule
+
+> [!NOTE]
+> **Lab card**
+> - **Goal:** build part of a 9.2 structure: two directories, `lab-dev` moved into one, and the one-per-path rule of 9.3 tested
+> - **Time:** about 25 minutes · **Cost:** free · **Needs:** lab 3
+
+> *Commands: syntax checked against SAP's btp CLI command reference on 21 Nov 2026. Not run here: they need your own trial login.*
+
+**Steps**
+
+1. Create two directories. Only the first manages entitlements:
+
+    ```bash
+    btp create accounts/directory --display-name "App Dev" --features DEFAULT,ENTITLEMENTS
+    btp create accounts/directory --display-name "Security"
+    btp get accounts/global-account --show-hierarchy        # copy both directory IDs
+    ```
+
+2. Save `lab-dev`'s entitlements, move it into App Dev, and compare:
+
+    ```bash
+    btp list accounts/entitlement --subaccount <lab-dev-id> > before-move.txt
+    btp move accounts/subaccount <lab-dev-id> --to-directory <app-dev-id>
+    btp list accounts/entitlement --subaccount <lab-dev-id> > after-move.txt
+    btp list accounts/entitlement --directory <app-dev-id>
+    ```
+
+   - SAP's reference: a subaccount moves with its plans and quota, and the directories' entitlements adjust to match.
+   - The move runs in the background. SAP advises checking the entitlements afterwards, as above.
+3. Test the one-per-path rule. A second managed directory inside App Dev should be refused:
+
+    ```bash
+    btp create accounts/directory --display-name "Team A" --parent-directory <app-dev-id> --features DEFAULT,ENTITLEMENTS
+    ```
+
+   - Write down the message. Then create "Team A" again without `--features`: grouping alone is allowed.
+4. Run `btp get accounts/global-account --show-hierarchy` again.
+
+**Check it worked:** the hierarchy shows `lab-dev` and Team A under App Dev, and the two entitlement files match.
+
+**Clean up** (keep `lab-dev`; lab 10 uses it):
+
+```bash
+btp move accounts/subaccount <lab-dev-id> --to-global-account
+btp delete accounts/directory <team-a-id>
+btp delete accounts/directory <app-dev-id>
+btp delete accounts/directory <security-id>
+```
+
+> [!WARNING]
+> **⚠️ Pitfall: `--force-delete`**
+> - Without it, `btp delete accounts/directory` runs only on an empty directory. That is the safe default.
+> - With it, SAP's reference says every subdirectory and subaccount inside is deleted, data included. Never use it in this lab.
+
 ## Practice
 
 **Exercise 1: the rules, hands-on.** In your trial account:
@@ -497,6 +552,7 @@ Budgets need a consumption-based global account, so you can't try them in a tria
   - directory depth and features, the one-per-path rule, moving subaccounts, Add Me as Admin, Directory Administrator and Viewer
   - the three consumption flavours, the subscription model, the mixing rules, the 200 GB default, and budgets
 - **Not run:** the Terraform snippet. Resource and attribute names follow the SAP/btp provider docs.
+- **Lab 9 (added 21 Nov 2026):** `btp` syntax checked against SAP's btp CLI command reference, including how `move` treats quota and what `--force-delete` does; the commands were not run, because they need a trial login.
 
 ## Sources and further reading
 
@@ -512,5 +568,6 @@ Budgets need a consumption-based global account, so you can't try them in a tria
 - SAP Help, *Managing budgets in your global account*: https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/50-administration-and-ops/managing-budgets-in-your-global-account-e115d5f.md
 - SAP Developers, *Get started with SAP BTP enterprise accounts* (BTPEA as the evolution of CPEA): https://developers.sap.com/tutorials/btp-ea-onboard-01-intro.html
 - Terraform Registry, *SAP/btp provider*: https://registry.terraform.io/providers/SAP/btp/latest/docs
+- SAP Help, *btp CLI command reference* (used by the lab): https://help.sap.com/docs/btp/btp-cli-command-reference/btp-cli-command-reference
 
 Previous: [Inside a subaccount: service types, environments and connectivity](btp-subaccount-walkthrough.md) · Next: [Identity: Cloud Identity Services, trust and federated authorization](btp-identity-trust-federation.md)

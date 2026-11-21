@@ -342,6 +342,39 @@ flowchart TB
 - Most customers are hybrid: some on-premise, some SaaS, plus BTP
 - RISE (existing customers, usually Private Edition) and GROW (new customers, Public Edition) bundle ERP, BTP and tools; BTP-only customers use an enterprise agreement or Pay-As-You-Go
 
+## 🧪 Lab 2: Map your trial's services to BTP's areas
+
+> [!NOTE]
+> **Lab card**
+> - **Goal:** see what your trial offers, and sort it into the areas of the table in 2.3
+> - **Time:** about 20 minutes · **Cost:** free · **Needs:** lab 1
+
+> *Commands: syntax checked against SAP's btp CLI command reference on 21 Nov 2026. Not run here: they need your own trial login.*
+
+**Steps**
+
+1. Find your trial subaccount's ID, and make it the default target for the next commands:
+
+    ```bash
+    btp list accounts/subaccount                  # copy the ID of "trial"
+    btp target --subaccount <trial-subaccount-id>
+    ```
+
+2. List what the subaccount can use:
+
+    ```bash
+    btp list services/offering                    # services you can create instances of
+    btp list accounts/subscription                # applications you can subscribe to
+    btp --format json list services/offering > offerings.json   # the same, as JSON for your notes
+    ```
+
+3. Pick ten entries and sort them into the areas of the 2.3 table: build, integration, security, DevOps, AI and data.
+4. Mark each one: **service** (you create an instance) or **application** (you subscribe).
+
+**Check it worked:** you can name at least one trial entry per area, or say which area the trial lacks.
+
+**Clean up:** nothing to remove.
+
 ## Practice
 
 1. Without looking, fill in the cloud successor for seven legacy SAP tools.
@@ -365,6 +398,7 @@ flowchart TB
   - SAP's press release of 13 May 2026 and the SAP Community post on BAIP, both read in full
   - SAP's docs checked for the "SAP platform" and "SAP Business AI Platform ABAP environment" names
 - Nothing in this chapter is code.
+- **Lab 2 (added 21 Nov 2026):** `btp` syntax checked against SAP's btp CLI command reference; the commands were not run, because they need a trial login.
 
 ## Sources and further reading
 
@@ -378,5 +412,6 @@ flowchart TB
 - SAP Developers, *Get started with SAP BTP enterprise accounts* (BTPEA, April 2024): https://developers.sap.com/tutorials/btp-ea-onboard-01-intro.html
 - SAPinsider, *SAP announces GROW with SAP*: https://sapinsider.org/blogs/sap-announces-grow-with-sap/
 - SAP Community, *Preparing for SAP Identity Management's end of maintenance in 2027*: https://blogs.sap.com/t5/technology-blogs-by-sap/preparing-for-sap-identity-management-s-end-of-maintenance-in-2027/ba-p/13596101
+- SAP Help, *btp CLI command reference* (used by the lab): https://help.sap.com/docs/btp/btp-cli-command-reference/btp-cli-command-reference
 
 Previous: [Cloud computing and the service models](cloud-computing-service-models.md) · Next: [Inside BTP: Neo, hyperscalers and regions](btp-neo-hyperscalers-regions.md)

@@ -385,6 +385,88 @@ flowchart LR
 - Custom apps bind to instances in the same space; destinations and Cloud Connector connect them to other systems
 - Multitenancy means one deployment serving many subscribing tenants; several regional copies is multi-region deployment
 
+## 🧪 Lab 8: Push a small app and bind XSUAA with the cf CLI
+
+> [!NOTE]
+> **Lab card**
+> - **Goal:** the 8.8 flow from the command line: a space, a running Node.js app, and a service instance bound to it
+> - **Time:** about 30 minutes · **Cost:** free · **Needs:** lab 1; Node.js 20 or later to try the app locally
+
+> *Commands: cf syntax checked against the Cloud Foundry CLI v8 reference on 21 Nov 2026. Not run here: they need your own trial login.*
+
+**The app:** two files in a folder called `hello-btp`.
+
+```json
+{
+  "name": "hello-btp",
+  "version": "1.0.0",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=20" }
+}
+```
+
+```js
+// server.js
+const http = require("http");
+const port = process.env.PORT || 8080;          // Cloud Foundry sets PORT
+
+http.createServer((req, res) => {
+  // VCAP_SERVICES holds the bound services' credentials; print only their names
+  const services = JSON.parse(process.env.VCAP_SERVICES || "{}");
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end(`Hello from BTP. Bound services: ${Object.keys(services).join(", ") || "none"}\n`);
+}).listen(port, () => console.log(`listening on ${port}`));
+```
+
+✅ *Verified: the app ran locally and listed bound services from `VCAP_SERVICES` (details at the end).*
+
+**Steps**
+
+1. Try it locally: `npm start`, then open `http://localhost:8080`. It says "Bound services: none".
+2. Log in to Cloud Foundry in the `trial` subaccount, where SAP already enabled it (4.7). The API endpoint is on that subaccount's overview page.
+
+    ```bash
+    cf login -a <api-endpoint> --sso     # gives a one-time passcode URL; without --sso, cf asks for email and password
+    cf create-space lab-dev
+    cf target -s lab-dev
+    ```
+
+3. Push, from inside the `hello-btp` folder:
+
+    ```bash
+    cf push hello-btp -m 128M --random-route   # a random hostname avoids clashing with other trial users
+    cf app hello-btp                           # state, memory and the route
+    ```
+
+4. Create an XSUAA instance and bind it (8.8):
+
+    ```bash
+    cf create-service xsuaa application lab-xsuaa
+    cf bind-service hello-btp lab-xsuaa
+    cf restage hello-btp                       # the app sees a new binding only after a restage
+    ```
+
+5. Open the route from step 3.
+
+**Check it worked:** the page reads "Bound services: xsuaa", and `cf services` shows `lab-xsuaa` bound to `hello-btp`.
+
+**Clean up:**
+
+```bash
+cf delete hello-btp -r -f        # -r also deletes the route; the trial allows 10
+cf delete-service lab-xsuaa -f
+cf delete-space lab-dev -f
+```
+
+> [!CAUTION]
+> **🔒 Security**
+> - `cf env hello-btp` prints `VCAP_SERVICES` with the XSUAA client secret. Never paste that output into notes, chats or tickets.
+> - That is why the app prints only the service names.
+
+> [!TIP]
+> - Trial apps are stopped every night (SAP Help, *Trial Accounts and Free Tier*). `cf start hello-btp` brings yours back.
+> - To use `lab-dev` instead of `trial`, enable Cloud Foundry there first, as in Practice step 2 below.
+
 ## Practice
 
 Assignment 2, Part 2, in your trial:
@@ -411,6 +493,9 @@ Stretch: deploy any small static app to the space, create an XSUAA instance ther
   - checked against SAP's docs: deleting and force-deleting subaccounts, the 200 GB default, Cloud Foundry and Kyma environments
   - also against SAP's docs: ABAP environment plans and metering, and TCP access to on-premise systems through the Connectivity service
   - checked against bosh.io: what BOSH is
+- **Lab 8 (added 21 Nov 2026):** `cf` syntax checked against the Cloud Foundry CLI v8 reference (`push`, `login`, `delete`, `delete-service`, `delete-space`). The `cf` commands were not run, because they need a trial login.
+  - Run on 21 Nov 2026 with Node.js 24.19: the app answered "Hello from BTP. Bound services: none" on port 8080.
+  - With `PORT=9090` and a sample `VCAP_SERVICES` holding an `xsuaa` entry, it answered "Bound services: xsuaa".
 
 ## Sources and further reading
 
@@ -425,5 +510,7 @@ Stretch: deploy any small static app to the space, create an XSUAA instance ther
 - SAP Help, *Creating an ABAP system*: https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/20-getting-started/creating-an-abap-system-50b32f1.md
 - SAP Help, *Using the TCP protocol for cloud applications*: https://github.com/SAP-docs/btp-connectivity/blob/main/docs/1-connectivity-documentation/using-the-tcp-protocol-for-cloud-applications-cd15837.md
 - Cloud Foundry BOSH documentation: https://bosh.io/docs/
+- Cloud Foundry CLI v8 reference (used by the lab): https://cli.cloudfoundry.org/en-US/v8/
+- SAP Help, *Trial Accounts and Free Tier* (trial limits in the lab): https://help.sap.com/docs/btp/sap-business-technology-platform/trial-accounts-and-free-tier
 
 Previous: [Users, role collections and access at every level](btp-users-role-collections.md) · Next: [Directories, landscape tiers and commercial models](btp-directories-tiers-commercial-models.md)

@@ -476,6 +476,50 @@ resource "btp_subaccount_role_collection_assignment" "ctms_operator" {
 - Application trust lives in each subaccount; platform trust is created once in the global account
 - Shadow users are created at logon unless switched off; groups sent at logon map to role collections, so access follows group membership
 
+## 🧪 Lab 10: Trust a tenant from the CLI, and find the shadow user
+
+> [!NOTE]
+> **Lab card**
+> - **Goal:** the Practice assignment with the CLI: trust between `lab-dev` and your trial Cloud Identity Services tenant, a tenant user in `Lab_Viewers`, and the shadow user BTP keeps for them
+> - **Time:** about 40 minutes · **Cost:** free · **Needs:** labs 4 and 7, and a tenant (Practice steps 1 and 2, below)
+
+> *Commands: syntax checked against SAP's btp CLI command reference on 21 Nov 2026. Not run here: they need your own trial login.*
+
+**Steps**
+
+1. Get the tenant (10.4) and activate its admin account from the email.
+2. Find the tenant and create the trust. A trust in a subaccount is for application users (10.8):
+
+    ```bash
+    btp list security/available-idp                     # tenants you can connect
+    btp create security/trust --idp <tenant>.accounts.ondemand.com --subaccount <lab-dev-id> --name lab-trust
+    btp list security/trust --subaccount <lab-dev-id>   # copy the origin of lab-trust
+    ```
+
+3. In the tenant's admin console, create a user under *Users & Authorizations → User Management*. Use an email you can read, and activate the user.
+4. Give that tenant user the collection from lab 7. With `--of-idp` it is a different user from the same email in the default identity provider (10.9):
+
+    ```bash
+    btp assign security/role-collection "Lab_Viewers" --to-user <tenant-user-email> --of-idp <origin> --subaccount <lab-dev-id>
+    btp get security/user <tenant-user-email> --of-idp <origin> --subaccount <lab-dev-id>
+    ```
+
+   - The assignment creates the shadow user before the first logon (SAP's reference for `assign`).
+5. In a private browser window, open the Cloud Transport Management URL, choose the tenant's link on the logon page, and sign in as the tenant user.
+   - No link for the tenant? Open the trust in the cockpit and tick *Available for User Logon* (10.7).
+
+**Check it worked:** the app opens. *Security → Users* lists the user with `lab-trust` as its identity provider (10.9).
+
+**Clean up:** this ends the track.
+
+```bash
+btp delete security/trust <origin> --subaccount <lab-dev-id>
+btp unsubscribe accounts/subaccount --subaccount <lab-dev-id> --from-app alm-ts --confirm
+btp delete accounts/subaccount <lab-dev-id> --confirm
+```
+
+- Then give the Cloud Transport Management entitlement back to `trial` in the cockpit if you want it there, and delete the test user in the tenant.
+
 ## Practice
 
 Assignment 3 from the course (on the course page titled "Assignment -4"), in your trial:
@@ -503,6 +547,7 @@ Stretch: create the platform trust in your global account, and log on to the coc
   - Microsoft: the Entra ID rename; OASIS SAML Core and OpenID Connect Core: assertion and token expiry
 - **Run:** the Python mapping snippet with Python 3 (prints `['TMS_LandscapeOperator_RC']`), and the SAML metadata XML parsed with Python's `xml.etree`.
 - **Not run:** the btp CLI and Terraform snippets, which need a BTP login. Names follow SAP's docs and the SAP/btp provider docs.
+- **Lab 10 (added 21 Nov 2026):** `btp` syntax checked against SAP's btp CLI command reference (`create security/trust`, `assign security/role-collection`, `delete security/trust`); the commands were not run, because they need a trial login.
 
 ## Sources and further reading
 
@@ -522,5 +567,6 @@ Stretch: create the platform trust in your global account, and log on to the coc
 - OpenID Foundation, *OpenID Connect Core 1.0*: https://openid.net/specs/openid-connect-core-1_0-final.html
 - OASIS, *SAML 2.0 Core*: https://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
 - Terraform Registry, *SAP/btp provider*: https://registry.terraform.io/providers/SAP/btp/latest/docs
+- SAP Help, *btp CLI command reference* (used by the lab): https://help.sap.com/docs/btp/btp-cli-command-reference/btp-cli-command-reference
 
 Previous: [Directories, landscape tiers and commercial models](btp-directories-tiers-commercial-models.md) · Next: [The SAP AI landscape](sap-ai-landscape.md)

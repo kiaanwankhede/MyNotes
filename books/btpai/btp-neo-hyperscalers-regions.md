@@ -237,6 +237,47 @@ btp create accounts/subaccount --display-name "cTMS" --subdomain "ctms-demo-1234
 - Discovery Center tells you which providers and regions offer each service and plan
 - Choose a region by data residency, user location, co-location and existing cloud footprint, because it can't be changed later
 
+## 🧪 Lab 3: Create a subaccount in a region you choose
+
+> [!NOTE]
+> **Lab card**
+> - **Goal:** a second subaccount, `lab-dev`, in a region you picked on purpose
+> - **Time:** about 15 minutes · **Cost:** free · **Needs:** lab 1
+
+> *Commands: syntax checked against SAP's btp CLI command reference on 21 Nov 2026. Not run here: they need your own trial login.*
+
+**Steps**
+
+1. See which regions your global account may use:
+
+    ```bash
+    btp list accounts/available-region
+    ```
+
+2. Choose one with the rules in 3.5. Lab 4 subscribes to Cloud Transport Management here, so confirm in Discovery Center that the region offers it.
+3. Create the subaccount. The subdomain becomes part of every URL and cannot be changed, so make it unique:
+
+    ```bash
+    btp create accounts/subaccount --display-name "lab-dev" \
+      --subdomain "<yourname>-lab-dev" --region <region-from-step-1>
+    ```
+
+4. The command runs in the background (SAP's tip). Check the result:
+
+    ```bash
+    btp list accounts/subaccount                  # copy the new ID
+    btp get accounts/subaccount <lab-dev-id>      # region and state
+    ```
+
+**Check it worked:** `lab-dev` appears with the region you chose.
+
+**Clean up:** keep `lab-dev`; labs 4 to 10 use it.
+
+> [!TIP]
+> **Trial regions**
+> - A trial offers only its two regions ([4.7](btp-account-model-first-subscription.md)), so the list in step 1 is short.
+> - Shared SAP HANA Cloud HDI containers exist only in `cf-us10` in the trial (SAP Help, *Trial Accounts and Free Tier*). Pick US East if you will try HANA later.
+
 ## Practice
 
 1. In Discovery Center, look up SAP Business Application Studio and note three regions on two different providers.
@@ -250,6 +291,7 @@ btp create accounts/subaccount --display-name "cTMS" --subdomain "ctms-demo-1234
 - **Discovery Center:** the Cloud Transport Management pricing tab was opened on 19 Nov 2026, and the region table was copied from it.
 - **Web-checked on 19 Nov 2026:** the name history and dates, and the Neo end date with its migration terms.
 - **Not run:** the `btp` CLI commands, which need a BTP login. The region IDs and endpoint pattern are added by Claude from SAP's public naming, not from the course.
+- **Lab 3 (added 21 Nov 2026):** `btp` syntax checked against SAP's btp CLI command reference, and the trial HANA note against SAP Help; the commands were not run, because they need a trial login.
 
 ## Sources and further reading
 
@@ -259,5 +301,7 @@ btp create accounts/subaccount --display-name "cTMS" --subdomain "ctms-demo-1234
 - SAP, *Migrate from the SAP BTP Neo environment to the multi-cloud foundation*: https://www.sap.com/products/technology-platform/neo-migration.html
 - Wikipedia, *SAP BTP* (name history): https://en.wikipedia.org/wiki/SAP_BTP
 - SAP Learning, *Explaining SAP BTP account model* (region fixed after creation): https://learning.sap.com/courses/operating-sap-business-technology-platform/explaining-sap-btp-account-model
+- SAP Help, *btp CLI command reference* (used by the lab): https://help.sap.com/docs/btp/btp-cli-command-reference/btp-cli-command-reference
+- SAP Help, *Trial Accounts and Free Tier* (trial limits in the lab): https://help.sap.com/docs/btp/sap-business-technology-platform/trial-accounts-and-free-tier
 
 Previous: [SAP's cloud journey and the BTP landscape](sap-cloud-journey-btp-landscape.md) · Next: [Global account, subaccount and your first service subscription](btp-account-model-first-subscription.md)

@@ -290,6 +290,40 @@ flowchart TB
 - Virtualization is the technology that lets providers rent out slices of large machines
 - SAP BTP is a PaaS that rents its infrastructure from hyperscalers
 
+## 🧪 Lab 1: Get a BTP trial and the command-line tools
+
+> [!NOTE]
+> **Lab card**
+> - **Goal:** a working SAP BTP trial, and the `btp` and `cf` command-line tools logged in to it
+> - **Time:** about 30 minutes · **Cost:** free
+> - **Track:** labs 1 to 10 build on each other in the same trial; do them in order
+
+> *Commands: syntax checked against SAP's btp CLI command reference on 21 Nov 2026. Not run here: they need your own trial login.*
+
+**Steps**
+
+1. **Register for a trial** from SAP's trial page. Pick US East (VA) on AWS or Singapore on Azure, the two trial regions ([4.7](btp-account-model-first-subscription.md)).
+   - A trial lasts **90 days**. Sign in at least every 30 days. Otherwise SAP Help (*Trial Accounts and Free Tier*) says the trial is suspended; SAP's trial FAQ (4.7) says it may be deleted.
+2. **Install the `btp` CLI:** SAP Help, *Download and Start Using the btp CLI Client* (Windows, macOS and Linux).
+3. **Install the `cf` CLI:** the Cloud Foundry command-line tool, version 8, from the Cloud Foundry project.
+4. **Log in and look around:**
+
+    ```bash
+    btp                                            # prints the client version
+    btp login --sso                                # signs you in through the browser
+    btp list accounts/subaccount                   # your trial subaccount, called "trial"
+    btp get accounts/global-account --show-hierarchy
+    cf --version
+    ```
+
+5. **Name the service models** you just touched (1.4):
+   - the CLI talks to a **platform** you did not install (PaaS)
+   - SAP runs the servers underneath on a hyperscaler (IaaS, chapter 3)
+
+**Check it worked:** `btp list accounts/subaccount` shows the `trial` subaccount, with its ID and region.
+
+**Clean up:** nothing; keep the trial for the next labs. `btp logout` ends the session.
+
 ## Practice
 
 1. Draw the nine-layer stack and colour who manages each layer in all four models, without looking.
@@ -303,6 +337,7 @@ flowchart TB
 - **Run on 19 Nov 2026:** `ping -n 2 google.com` (2 sent, 2 received, about 5 ms) and `curl -sI https://discovery-center.cloud.sap` (`HTTP/1.1 200 OK`).
 - **Not run:** the `aws` and `cf` commands, which need accounts. Their syntax follows each tool's public reference.
 - **Web-checked:** the IaaS launch dates. They differ from the lecture's, and the public dates are used, by your choice on 19 Nov 2026 (see the note in section 1.4).
+- **Lab 1 (added 21 Nov 2026):** `btp` syntax checked against SAP's btp CLI command reference, and the trial facts against SAP Help; the commands were not run, because they need a trial login.
 
 ## Sources and further reading
 
@@ -311,5 +346,8 @@ flowchart TB
 - NIST SP 800-145, *The NIST Definition of Cloud Computing* (2011): https://csrc.nist.gov/pubs/sp/800/145/final
 - AWS, *Amazon EC2 exits beta* (Oct 2008): https://aws.amazon.com/about-aws/whats-new/2008/10/23/amazon-ec2-exits-beta-and-now-offers-a-service-level-agreement
 - DZone, *5 key events in the history of cloud computing* (S3 and EC2 in 2006, Azure GA in 2010): https://dzone.com/articles/5-key-events-history-cloud
+- SAP Help, *btp CLI command reference* (used by the lab): https://help.sap.com/docs/btp/btp-cli-command-reference/btp-cli-command-reference
+- SAP Help, *Download and Start Using the btp CLI Client*: https://help.sap.com/docs/btp/sap-business-technology-platform/download-and-start-using-btp-cli-client
+- SAP Help, *Trial Accounts and Free Tier* (trial limits in the lab): https://help.sap.com/docs/btp/sap-business-technology-platform/trial-accounts-and-free-tier
 
 Previous: [BTPAI book introduction](README.md) · Next: [SAP's cloud journey and the BTP landscape](sap-cloud-journey-btp-landscape.md)

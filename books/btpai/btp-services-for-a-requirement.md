@@ -270,6 +270,37 @@ resources:
 - Cloud Connector is on-premise software, not a BTP service; data tools sit in BDC
 - Each chosen service still needs a subaccount, an entitlement and a supported region
 
+## 🧪 Lab 5: Check a service list against your trial
+
+> [!NOTE]
+> **Lab card**
+> - **Goal:** take the leave-app service list from 5.3 and check which services your trial really offers
+> - **Time:** about 20 minutes · **Cost:** free · **Needs:** labs 1 and 3
+
+> *Commands: syntax checked against SAP's btp CLI command reference on 21 Nov 2026. Not run here: they need your own trial login.*
+
+**Steps**
+
+1. Copy the services from the leave-app mapping in 5.3 into a table: *service | needed for | in trial? | plan*.
+2. Ask the trial:
+
+    ```bash
+    btp list services/offering --subaccount <lab-dev-id>       # services you can instantiate
+    btp list accounts/entitlement --subaccount <lab-dev-id>    # plans and quota assigned here
+    btp list accounts/entitlement                              # everything the global account holds
+    ```
+
+3. Fill the *in trial?* column. For each missing service, open its Discovery Center page and note whether it has a **free tier** plan instead.
+
+**Check it worked:** every row has *yes*, *no* or *free tier only*, with the plan name where it is *yes*.
+
+**Clean up:** nothing to remove.
+
+> [!TIP]
+> **Trial limits that change the design** (SAP Help, *Trial Accounts and Free Tier*)
+> - 4 GB of memory for applications and 8 GB for service instances.
+> - 10 routes and 40 services in total; applications are stopped every night.
+
 ## Practice
 
 1. In Discovery Center, filter Capabilities = Security and list the services with one line each.
@@ -283,6 +314,7 @@ resources:
 - **Discovery Center, opened on 19 Nov 2026:** the service catalogue (filters and count), and the Advanced Event Mesh page (tabs, Resources, support component). Screenshot taken then.
 - **What's New for SAP BTP:** the page structure and filters were checked; its 3,665 entries were not read.
 - **Run on 19 Nov 2026:** the `mta.yaml` was parsed with PyYAML to check its syntax. It was not deployed.
+- **Lab 5 (added 21 Nov 2026):** `btp` syntax checked against SAP's btp CLI command reference, and the trial limits against SAP Help; the commands were not run, because they need a trial login.
 
 ## Sources and further reading
 
@@ -290,5 +322,7 @@ resources:
 - SAP Discovery Center, service catalogue: https://discovery-center.cloud.sap/servicecatalog (opened 19 Nov 2026)
 - SAP Discovery Center, *SAP Integration Suite, advanced event mesh*: https://discovery-center.cloud.sap/serviceCatalog/advanced-event-mesh (opened 19 Nov 2026)
 - SAP Help Portal, *What's New for SAP Business Technology Platform*: https://help.sap.com/whats-new/cf0cb2cb149647329b5d02aa96303f56
+- SAP Help, *btp CLI command reference* (used by the lab): https://help.sap.com/docs/btp/btp-cli-command-reference/btp-cli-command-reference
+- SAP Help, *Trial Accounts and Free Tier* (trial limits in the lab): https://help.sap.com/docs/btp/sap-business-technology-platform/trial-accounts-and-free-tier
 
 Previous: [Global account, subaccount and your first service subscription](btp-account-model-first-subscription.md) · Next: [Global account tools: Resource Providers, Boosters and System Landscape](btp-global-account-tools.md)

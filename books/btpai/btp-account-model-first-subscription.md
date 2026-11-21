@@ -478,6 +478,47 @@ resource "btp_subaccount_role_collection_assignment" "viewer" {
 - Entity Assignments shows one subaccount's or directory's licences; Service Assignments shows the whole contract; plans and quota units differ per service
 - A trial sets up the global account, the "trial" subaccount, a Cloud Foundry org, a dev space and Business Application Studio for you
 
+## 🧪 Lab 4: Entitlement, subscription and role, as commands
+
+> [!NOTE]
+> **Lab card**
+> - **Goal:** course assignment 1 with the `btp` CLI: move the Cloud Transport Management entitlement to `lab-dev`, subscribe, get a role, open the app
+> - **Time:** about 30 minutes · **Cost:** free · **Needs:** labs 1 and 3
+
+> *Commands: syntax checked against SAP's btp CLI command reference on 21 Nov 2026. Not run here: they need your own trial login.*
+
+**Steps**
+
+1. See where the entitlement sits now:
+
+    ```bash
+    btp list accounts/entitlement --subaccount <trial-subaccount-id>   # look for alm-ts, plan lite
+    ```
+
+2. **Free it in the cockpit** (4.7): *Global account → Entitlements → Entity Assignments → trial → Edit*. Remove `alm-ts`/`lite` and **Save**.
+   - Leave `trial` its Cloud Foundry Runtime: 4.7 warns a trial cannot get it back.
+3. Give the entitlement to `lab-dev`, then subscribe:
+
+    ```bash
+    btp assign accounts/entitlement --to-subaccount <lab-dev-id> --for-service alm-ts --plan lite --enable true
+    btp subscribe accounts/subaccount --subaccount <lab-dev-id> --to-app alm-ts --plan lite
+    btp list accounts/subscription --subaccount <lab-dev-id>           # state should read subscribed
+    ```
+
+   - `lite` is an application plan with no amount, hence `--enable true`. For a plan with a quota you would use `--amount 1` (4.8).
+4. Find the role collections the subscription brought, and assign one to yourself:
+
+    ```bash
+    btp list security/role-collection --subaccount <lab-dev-id>
+    btp assign security/role-collection "<a TMS role collection>" --to-user <your-email> --subaccount <lab-dev-id>
+    ```
+
+5. **Log out and in again** (4.6), then open the app from *Instances and Subscriptions*.
+
+**Check it worked:** the app opens instead of showing the "at least the Viewer role" error.
+
+**Clean up:** keep the subscription; labs 7 and 10 use it. Lab 10 ends with the full clean-up.
+
 ## Practice
 
 Assignment 1 from the course, in your own trial:
@@ -512,6 +553,7 @@ Then, as a stretch: write the btp CLI commands for steps 1, 3 and 4, and compare
 - **New screenshots:** Lecture 2 at 1:06:43, 1:22:45 and 2:30:12; Lecture 1 at 3:01:25 and 3:05:10. IDs, company names, org IDs and avatars are pixelated.
 - **Web-checked:** the Audit Log Management central and default plans. That the copy dialog exists was confirmed by an SAP KBA and by the recording's screen.
 - **Enriched on 20 Nov 2026** (shared units and subaccount entitlement rights in 4.4a): Lecture 4 captions 16:07 to 22:18 read in full; screenshot at 19:55, account name and avatar pixelated.
+- **Lab 4 (added 21 Nov 2026):** `btp` syntax checked against SAP's btp CLI command reference; the commands were not run, because they need a trial login.
 
 ## Sources and further reading
 
@@ -526,5 +568,6 @@ Then, as a stretch: write the btp CLI commands for steps 1, 3 and 4, and compare
 - SAP Developers, *Get started with the Terraform provider for SAP BTP*: https://developers.sap.com/tutorials/btp-terraform-get-started.html
 - Terraform Registry, *SAP/btp provider*: https://registry.terraform.io/providers/SAP/btp/latest/docs
 - SAP Learning, *Explaining SAP BTP account model*: https://learning.sap.com/courses/operating-sap-business-technology-platform/explaining-sap-btp-account-model
+- SAP Help, *btp CLI command reference* (used by the lab): https://help.sap.com/docs/btp/btp-cli-command-reference/btp-cli-command-reference
 
 Previous: [Inside BTP: Neo, hyperscalers and regions](btp-neo-hyperscalers-regions.md) · Next: [Choosing BTP services for a requirement](btp-services-for-a-requirement.md)

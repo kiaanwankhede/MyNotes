@@ -26,6 +26,7 @@ Pick the path for your role; the numbers are chapters. Chapters 33 to 35 are loo
 | **Developer:** build skills, agents and apps | 4, 7, 8 → 14, 15 → 19 → 21 to 26 → 20 → 27, 28, 30 | 2, 11 |
 | **Administrator:** set up and integrate Joule | 4, 6, 7, 9, 10 → 16, 18 → 19 (19.2, 19.3) → 21 → 29, 31, 32 | 13 to 15 |
 | **C_JSD exam:** Joule Studio developer certification | 12 → 18, 19, 20 → 21 to 28 | 16, 17 |
+| **Hands-on:** practise BTP in a free trial | The 🧪 lab just before Practice in chapters 1 to 10, in order. They share one trial and take about 4.5 hours | The chapter each lab sits in |
 
 * Chapters are added lecture by lecture, as each one is read in full. A later lecture enriches an existing chapter rather than adding a second one on the same idea.
 * Screenshots come from the recordings and from public SAP pages. Names, emails and account IDs are pixelated. Slides are redrawn as diagrams or tables, not pasted.

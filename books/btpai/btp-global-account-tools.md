@@ -306,6 +306,45 @@ stateDiagram-v2
 - Formation statuses are Draft, Synchronizing, Ready, Action Required and Error; Resynchronize fixes Error
 - A customer ID belongs to the company, an S-user ID to a person within one customer, and a Universal ID to the person for life
 
+## 🧪 Lab 6: See exactly what a booster did
+
+> [!NOTE]
+> **Lab card**
+> - **Goal:** run one booster, then prove what it changed by comparing CLI snapshots from before and after
+> - **Time:** about 30 minutes · **Cost:** free · **Needs:** lab 1
+
+> *Commands: syntax checked against SAP's btp CLI command reference on 21 Nov 2026. Not run here: they need your own trial login.*
+
+**Steps**
+
+1. Pick the subaccount the booster will use (usually `trial`), and save three snapshots:
+
+    ```bash
+    btp list accounts/entitlement --subaccount <id>          > before-entitlements.txt
+    btp list accounts/subscription --subaccount <id>         > before-subscriptions.txt
+    btp list accounts/environment-instance --subaccount <id> > before-environments.txt
+    ```
+
+2. Run a booster (6.3): *Global account → Boosters*. Pick one your trial lists, and read its last step before **Finish**: it names what it will create.
+3. Save the same three lists as `after-*.txt`, then compare each pair:
+
+    ```bash
+    diff before-entitlements.txt after-entitlements.txt      # macOS, Linux, Git Bash
+    ```
+
+    ```powershell
+    Compare-Object (Get-Content before-entitlements.txt) (Get-Content after-entitlements.txt)   # Windows PowerShell
+    ```
+
+4. Rebuild the manual-path table of 6.3 for your booster: one row per change the diffs show.
+5. Open *Global account → System Landscape → Systems* (6.4), press **Refresh**, and look for what the booster subscribed to.
+
+✅ *Verified: both compare commands ran on two sample text files (details at the end).*
+
+**Check it worked:** every change the booster made appears in one of the three diffs.
+
+**Clean up:** remove what the diffs show (unsubscribe, delete the instance), unless you want to keep it.
+
 ## Practice
 
 1. In your trial, open Boosters and list three boosters with one line on what each sets up.
@@ -326,6 +365,8 @@ stateDiagram-v2
   - Lecture 3 captions 24:58 to 29:02 read in full
   - Day 3 Notes page 5
   - screenshot at 26:25
+- **Lab 6 (added 21 Nov 2026):** `btp` syntax checked against SAP's btp CLI command reference; the commands were not run, because they need a trial login.
+  - Run on 21 Nov 2026: `diff` (Git Bash) and `Compare-Object` (Windows PowerShell 5.1) on two sample text files. Both showed the one changed line.
 
 ## Sources and further reading
 
@@ -335,5 +376,6 @@ stateDiagram-v2
 - SAP Community, *Redis on SAP BTP, hyperscaler option*: https://blogs.sap.com/t5/technology-blogs-by-sap/redis-on-sap-btp-hyperscaler-option-now-available-for-customers-on-btp/ba-p/13656621
 - SAP Learning, *Integrating and maintaining UCL components*: https://learning.sap.com/courses/sap-btp-fundamentals-level-2-administration-security-extensibility-data-to-value/integrating-and-maintaining-ucl-components
 - SAP, *SAP Universal ID*: https://www.sap.com/sea/account/universal-id.html
+- SAP Help, *btp CLI command reference* (used by the lab): https://help.sap.com/docs/btp/btp-cli-command-reference/btp-cli-command-reference
 
 Previous: [Choosing BTP services for a requirement](btp-services-for-a-requirement.md) · Next: [Users, role collections and access at every level](btp-users-role-collections.md)

@@ -314,6 +314,45 @@ resource "btp_globalaccount_role_collection_assignment" "ram" {
 - Subscribing to an app adds that app's role collections to the subaccount
 - Platform users work in the cockpit; application users only need the app's URL and its role collections
 
+## 🧪 Lab 7: Build a role collection from one role
+
+> [!NOTE]
+> **Lab card**
+> - **Goal:** the 7.3 rule in practice: wrap one role in your own role collection, `Lab_Viewers`, and give it to a second user
+> - **Time:** about 20 minutes · **Cost:** free · **Needs:** lab 4, and a second person with an sap.com account (7.2)
+
+> *Commands: syntax checked against SAP's btp CLI command reference on 21 Nov 2026. Not run here: they need your own trial login.*
+
+**Steps**
+
+1. Find the role to wrap. The output gives each role's name, role template and application identifier:
+
+    ```bash
+    btp list security/role --subaccount <lab-dev-id>     # the Cloud Transport Management viewer role; its app ID starts with alm-ts
+    ```
+
+2. Create the collection, and add that one role with the three values from step 1:
+
+    ```bash
+    btp create security/role-collection "Lab_Viewers" --description "Read-only Cloud Transport Management" --subaccount <lab-dev-id>
+    btp add security/role "<role name>" --to-role-collection "Lab_Viewers" \
+      --of-app "<application identifier>" --of-role-template "<role template>" --subaccount <lab-dev-id>
+    ```
+
+3. Give it to the second user, who logs in through the default identity provider:
+
+    ```bash
+    btp assign security/role-collection "Lab_Viewers" --to-user <second-email> --subaccount <lab-dev-id>
+    btp get security/user <second-email> --subaccount <lab-dev-id>       # lists the user's role collections
+    ```
+
+   - SAP's reference: `assign` creates the user in the subaccount if it is missing (`--create-user-if-missing` is on by default).
+4. The second user opens the Cloud Transport Management URL from *Instances and Subscriptions*, and signs in.
+
+**Check it worked:** `btp get security/user` lists `Lab_Viewers`, and the second user sees the app instead of the 4.6 error.
+
+**Clean up:** keep `Lab_Viewers`; lab 10 reuses it.
+
 ## Practice
 
 Assignment 2, Part 1, in your trial:
@@ -340,6 +379,7 @@ Assignment 2, Part 1, in your trial:
   - SAP Fundamentals Notes page 5 (security controls and settings) read in full
   - web-checked against SAP's docs: token validity defaults, ranges and the 30-minute advice; the `oauth2-configuration` keys; customer-managed keys
   - **Run:** the `xs-security.json` snippet was parsed with Python's `json` module. It was not deployed.
+- **Lab 7 (added 21 Nov 2026):** `btp` syntax checked against SAP's btp CLI command reference, including `--create-user-if-missing`; the commands were not run, because they need a trial login.
 
 ## Sources and further reading
 
@@ -351,5 +391,6 @@ Assignment 2, Part 1, in your trial:
 - SAP Learning, *Assigning roles and managing authorizations*: https://learning.sap.com/courses/sap-btp-fundamentals-level-2-administration-security-extensibility-data-to-value/assigning-roles-and-managing-authorizations
 - SAP Learning, *Managing users and authorizations on SAP BTP*: https://learning.sap.com/courses/operating-sap-business-technology-platform/managing-users-and-authorizations-on-sap-btp
 - Terraform Registry, *SAP/btp provider*: https://registry.terraform.io/providers/SAP/btp/latest/docs
+- SAP Help, *btp CLI command reference* (used by the lab): https://help.sap.com/docs/btp/btp-cli-command-reference/btp-cli-command-reference
 
 Previous: [Global account tools](btp-global-account-tools.md) · Next: [Inside a subaccount: service types, environments and connectivity](btp-subaccount-walkthrough.md)
