@@ -282,4 +282,4 @@ SAP Help lists these orchestration modules. Each module's output is the next one
 - SAP Help, *Grounding Management*: https://help.sap.com/docs/ai-launchpad/sap-ai-launchpad/grounding-management
 - SAP Help, *Build Your Orchestration Workflow*: https://help.sap.com/docs/ai-launchpad/sap-ai-launchpad/build-your-orchestration-workflow
 
-Previous: [Hands-on: Translate text and documents with SAP Translation Hub from Python](tutorial-translation-hub-python.md) · Next: [Reference: Glossary](reference-glossary.md)
+Previous: [Hands-on: Translate text and documents with SAP Translation Hub from Python](tutorial-translation-hub-python.md) · Next: [Tutorial: Set Up Tools to Connect With and Operate SAP AI Core](tutorial-ai-core-setup.md)
