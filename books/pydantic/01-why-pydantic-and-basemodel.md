@@ -43,6 +43,20 @@ register_user(name="Rohan", email="rohan@example.com", age=10000)
 
 - `"twenty-eight"` is a **type** problem. `10000` is a valid `int` but not a valid age: a **data** problem
 - **Type vs data validation:** `10000` is a valid `int` but not a valid age; value rules come in [Chapter 2](02-field-and-special-types.md)
+- **Checking by hand doesn't scale** (class 02). You can guard one function with `isinstance`, but `update_user`, `delete_user` and every other function then repeat the same lines, and a rule change means editing them all. A model states the rules once:
+
+```python
+def create_user(name, age):                       # by hand: repeated in every function
+    if not isinstance(name, str) or not isinstance(age, int):
+        raise TypeError("name must be str, age must be int")
+
+class User(BaseModel):                            # once, used everywhere
+    name: str
+    age: int
+
+def update_user(user: User): ...                  # every function just takes a User
+User(name="Mayank", age=[25])                     # ValidationError: int_type
+```
 
 ![Class whiteboard: Python and JavaScript are both dynamically typed, which "becomes a very big issue" when you deploy to production; a VS Code screenshot shows typed lists and dicts such as settings: dict[str, str]](images/whiteboard-dynamic-typing-and-type-hints.png)
 
@@ -282,6 +296,7 @@ u.model_dump(); u.model_dump_json(); User.model_json_schema()
 - **1.2:** two `missing` errors for `SignupForm(username="Mayank")`; the coercion results listed above; `_8_pydantic_with_ai.py` as written (`float_parsing` for `"five hundred"`, `"100"` → `100.0`)
 - **1.3:** the 2026 review checked these switches on Pydantic 2.13; the code ran again on 2.14.3
 - **Class transcript:** the teaching part of the 4 Jul recording, read in full on 2026-11-15, for the typing, cooking-analogy, prompt-tip and `None` points
+- **1.1, "Checking by hand doesn't scale":** from the class 02 subtitles (28 Jun 2026); the snippet ran on `pydantic` 2.13.5 on 22 Nov 2026 (`create_user("Mayank", "25")` raised `TypeError`; `User(name="Mayank", age=[25])` raised `int_type`)
 
 ## Sources and further reading
 
@@ -289,6 +304,7 @@ u.model_dump(); u.model_dump_json(); User.model_json_schema()
 - Live-Class-2026, `_8_pydantic_with_ai.py` (Parts 1 and 2)
 - Live-Class-2026 whiteboards: Day 2 `Agentic-3-0.pdf` ("Python is not type safe") and `Class-3-4.pdf` (dynamic typing, form to model); three figures in `images/`
 - Class recording's transcript, 4 Jul 2026 (uploaded by you; teaching part only)
+- Class 02 recording subtitles, 28 Jun 2026 (the Pydantic introduction: manual checks across many functions)
 - Earlier sources for this chapter: `classes_summary/03 - 4 Jul - Pydantic Deep Dive.md` and its transcription summary
 - [Pydantic docs: Models](https://docs.pydantic.dev/latest/concepts/models/), [Conversion table](https://docs.pydantic.dev/latest/concepts/conversion_table/)
 - Added by Claude: 1.3, 1.4, 1.5, interview question 4

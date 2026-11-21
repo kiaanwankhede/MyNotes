@@ -70,6 +70,23 @@ warm_cities = [r["city"] for r in readings if r["temperature_c"] > 20]   # ['Tok
 | `array.array` / NumPy array | yes | yes | yes | many numbers of **one type**, fast maths |
 
 - *Tested:* assigning to a tuple item raised `TypeError: 'tuple' object does not support item assignment`
+- **A dict is how Python holds JSON.** For this course treat them as one thing (the class: "dict is JSON")
+  - JSON text needs double quotes; a Python dict takes either. *Tested:* `json.loads("{'name': 'Alice'}")` failed with "Expecting property name enclosed in double quotes"
+  - APIs reply in JSON, and `response.json()` turns the reply into a dict
+- Nested JSON mixes the two containers: a list value holds items, a dict value holds named keys
+
+```python
+profile = {
+    "name": "Alice",
+    "skills": ["Python", "SQL", "Docker"],           # list: 3 items; append one and it's 4
+    "address": {"city": "Mumbai", "pin": "400001"},  # dict: 2 named keys
+}
+profile["skills"][0]           # 'Python'
+profile["address"]["city"]     # 'Mumbai'
+
+fact = requests.get("https://catfact.ninja/fact", timeout=10).json()   # the free API the class used
+print(fact["fact"], fact["length"])                                    # a dict with two keys; no API key needed
+```
 
 ## 2.2 Classes and dataclasses
 
@@ -177,6 +194,9 @@ for t in [Upper(), Reverse()]:      # polymorphism: same call, different result
 
 - *Tested:* `Tool()` itself raised `TypeError` (can't instantiate an abstract class)
 
+> [!TIP]
+> **Watch objects being built.** [Python Tutor](https://pythontutor.com) runs pasted code one step at a time and draws every object. The class used it to show `__init__` filling in two separate `BankAccount` objects.
+
 ## 2.3 Decorators
 
 - A decorator is a gift wrapper: the function inside doesn't change, but every call gets something extra (`_4_decorators.py`):
@@ -260,6 +280,9 @@ except KeyError:
 ```
 
 - `finally` runs on success **and** on failure: *tested*, it printed after both `read_setting("42")` and `read_setting("oops")`
+  - Its typical job is clean-up that must happen either way, such as closing a database connection
+- A **SyntaxError** is a different kind of error: code written wrongly, for example an unclosed bracket. `ZeroDivisionError` or `ValueError` happen while correct code runs, which is what `try/except` handles
+  - A SyntaxError stops the whole file before it runs, so a `try/except` in that file can't catch it. *Tested:* compiling a file with an unclosed bracket raised `SyntaxError: '(' was never closed` (*added by Claude*)
 - In a tool, the same idea returns a message instead of crashing:
 
 ```python
@@ -295,6 +318,9 @@ def get_weather(city: str, unit: Literal["c", "f"] = "c") -> dict:
 
 - Frameworks turn hints + docstring into the **tool schema**; nothing checks them at run time (Pydantic does)
 - The class files use the modern forms: `float | str` (either type), `dict[str, Callable]`, `list[dict]`
+- `from __future__ import annotations` (used in the class's fake-AI file) stores every hint as a string instead of evaluating it. A hint can then name a class that is defined later
+  - *Tested on Python 3.12:* with it, `f.__annotations__` gave `{'x': 'NotDefinedYet', 'return': 'int'}`; without it, the same function raised `NameError`
+  - Python 3.14 evaluates hints only when needed, so new code there doesn't need the import. Python's docs call it deprecated, with removal not before Python 3.13's end of life in 2029 (What's New in Python 3.14, checked 22 Nov 2026)
 
 ## 2.6 Generators (streaming) and context managers
 
@@ -382,8 +408,17 @@ if __name__ == "__main__":            # demo: runs on `uv run file.py` only
 | Guardrails for sensitive data? | Covered later with dedicated guardrail tools ([Langchain Ch 8](../langchain/08-prebuilt-middleware-limits-fallback-and-pii.md)) |
 | When do deployment and AgentOps come? | After fundamentals and frameworks, about 1.5 to 2 months in, on a VPS or cloud |
 | How is 3.0 different from 2.0? | More project and AgentOps focus, with newer tools (Claude Code, latest LangChain) |
+| Why did Copilot give two developers different answers to the same prompt? | AI output varies from run to run, and the tool also carries session memory and instruction files (such as `AGENTS.md`). Give precise instructions: "compare the two models field by field", not "compare these files" (the mentor's view) |
+| How was the course's doubt-solver GPT built? | A custom GPT: written instructions plus knowledge files such as the syllabus. No code, about half a day including testing. It works from those files, not from live data |
+| Open-source or frontier models in client work? | The mentor ships frontier models (OpenAI, Claude): for small clients, hosting and testing open models costs more than API calls. Companies with their own hardware may choose differently (his view) |
+| RAG with or without embeddings? | Decide from the data and the domain, after experiments. In his client work, short, well-structured warranty documents got a structured approach without embeddings; large documents got embeddings |
+| Are Copilot Studio or Logic Apps enough for agents? | For internal, repetitive orchestration, yes. For custom products they give too little control and don't scale (the mentor's view) |
+| Is agent orchestration machine learning? | No. It is software design: which agent runs, in what order, with what data |
+| `uv` picked my Anaconda Python for the class files. What now? | The class files are standalone scripts: run them directly, or make one environment for the folder and activate it. Not one environment per file. To choose the Python, see `uv venv --python` ([Ch 1](01-setup-and-api-basics.md)) |
 
 *Source: `classes_transcription_summary/02`, Q&A. This answers the glossary term "vibe coding" ([LLM Ch 4](../llm/04-glossary.md)).*
+
+*Rows from "Why did Copilot give two developers" on: the class 02 recording subtitles (28 Jun 2026).*
 
 ## 2.10 Added by Claude, not from the sources
 
@@ -489,13 +524,16 @@ if __name__ == "__main__": main()                          # demo code only here
 - **2.4:** `finally` printed for both calls
 - **2.7:** `gather` of three 0.2 s calls took 0.20 s
 - **2.9:** running `_7` and `_11` printed `_6`'s module-level demo first
+- **Class 02 subtitle additions (22 Nov 2026), on Python 3.12:** the `profile` lookups; `json.loads` rejecting single quotes; the unclosed-bracket `SyntaxError`; the `__future__` annotations with and without the import. The Cat Facts call was made with `urllib` (same URL, same reply shape: a dict with `fact` and `length`), because `requests` isn't installed on this machine
 - **Not run:** live API calls (the currency host and model providers are blocked here)
 
 ## Sources and further reading
 
 - Live-Class-2026, `Weekend 01 - 27-28 Jun/02-03 - 28 Jun & 4 Jul - Python Refresher & Pydantic Deep Dive/`: `README.md`, `_0_basics_refresher.py` to `_4_decorators.py`, `_6_fake_ai_call.py`, `Python_run.ipynb` (re-read in full 2026-11-15)
 - Live-Class-2026, `01 - 27 Jun - Python Setup & API Basics/OOPS.py` (the six OOP ideas)
-- Python docs: [dataclasses](https://docs.python.org/3/library/dataclasses.html), [functools.wraps](https://docs.python.org/3/library/functools.html#functools.wraps), [asyncio](https://docs.python.org/3/library/asyncio.html)
-- Added by Claude: the type table in 2.1, the OOP examples, sections 2.5 to 2.8 and 2.10, interview questions 4–5
+- Python docs: [dataclasses](https://docs.python.org/3/library/dataclasses.html), [functools.wraps](https://docs.python.org/3/library/functools.html#functools.wraps), [asyncio](https://docs.python.org/3/library/asyncio.html), [What's New in Python 3.14: annotations](https://docs.python.org/3/whatsnew/3.14.html#from-future-import-annotations)
+- Class 02 recording subtitles, 28 Jun 2026 (JSON and dicts, Python Tutor, error kinds, `__future__` annotations, the after-class Q&A)
+- [Python Tutor](https://pythontutor.com) and the [Cat Facts API](https://catfact.ninja/fact), both used in class
+- Added by Claude: the type table in 2.1, the OOP examples, sections 2.5 to 2.8 and 2.10, interview questions 4–5, and the uncatchable-SyntaxError point in 2.4
 
 Previous: [Chapter 1](01-setup-and-api-basics.md) · Next: [Chapter 3, Anatomy of an agent](03-anatomy-of-an-agent.md)

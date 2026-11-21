@@ -29,6 +29,11 @@
   - Install `uv` with the command for your system. The common class mistake: running the Mac/Linux `curl … | sh` line on Windows
   - In VS Code on Windows, run **Terminal: Select Default Profile** and pick **Git Bash**, so the editor's terminal takes the same commands
   - Office laptops often block scripts and installers. Use a personal machine for the course
+  - That class mistake shows up in CMD or PowerShell as `'sh' is not recognized as an internal or external command`. In Git Bash the Mac/Linux line works
+  - On a fresh Windows, typing `python` opens the Microsoft Store: Python isn't installed yet
+  - In the Git for Windows installer, tick the option that adds a Git Bash profile to Windows Terminal, and keep the other defaults. Git Bash then appears in Windows Terminal and in VS Code's terminal list
+  - After installing `uv`, close and reopen the terminal so it picks up the new PATH
+  - `uv python install` installs a Python for you, with no python.org installer
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh                                   # Mac, Linux
@@ -42,6 +47,7 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
   - Both just have to be 3.10+. Use whichever name works
 - **VS Code + `.py` files** for real projects. This is an agentic AI course, not data science: scripts, a terminal and a debugger, with notebooks only for exploring
   - The class's reason: AI coding tools (Claude Code, Codex, Cursor) edit `.py` files directly, and code kept in notebook cells costs extra tokens
+  - To run a `.ipynb` in VS Code, accept its offer to install `ipykernel`, or use Google Colab
 
 ![Class whiteboard: Anaconda crossed out; pip, venv or conda replaced by uv, "10-100x faster than pip"](images/whiteboard-uv-replaces-pip-venv-conda.png)
 
@@ -69,6 +75,7 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
   - It worked once `requests` was installed inside the venv
 - Activate = enter the room (`source .venv/bin/activate`; Windows: `.venv\Scripts\activate`). `deactivate` = leave it
   - While you are inside, the prompt shows the environment's name
+  - In Git Bash on Windows, use `source .venv/Scripts/activate`. Windows environments have `Scripts`, not `bin` (the class demo tried `bin` first)
 
 ### The `uv` workflow
 
@@ -452,6 +459,8 @@ uv sync --locked               # CI: exact rebuild, fail on a stale lock
 uv venv --python 3.12          # an environment with a chosen Python
 uv python pin 3.13             # the project's Python, written to .python-version
 which python python3           # where each name points (Windows: py list)
+uv python install              # get a Python through uv
+source .venv/Scripts/activate  # Git Bash on Windows (Mac/Linux: .venv/bin/activate)
 ```
 
 ```python
@@ -488,6 +497,7 @@ TOOL_REGISTRY[func.__name__] = wrapper             # name → function, for the 
 - **1.4:** `tools.py` as written; the SQL-shaped string was caught; `9**9**9` killed after 5 s; `safe_calc` on the cases listed
 - **1.5:** `Python_foundamentals.py` as written
 - **1.1 and the class 01 Q&A, from the class 01 subtitles:** web-checked on 22 Nov 2026 against uv's install page (both install commands), uv's Python versions page (`uv python pin`, and `uv python upgrade` for uv-installed Pythons only), VS Code's terminal profiles page and Python's Windows docs (`py list`; `py -0p` kept for compatibility)
+- **1.1, the Windows steps from the class 02 subtitles:** the Git installer option checked against Git for Windows' release notes, which call it the "Windows Terminal Profile" option (22 Nov 2026)
 - **Not run:** the live Frankfurter API (blocked here); the new 1.1 commands (`uv` is not installed on this machine)
 
 ## Sources and further reading
@@ -496,6 +506,7 @@ TOOL_REGISTRY[func.__name__] = wrapper             # name → function, for the 
 - Live-Class-2026, the Class 1 whiteboard `Class-1-Python-and-AI.pdf` (four figures in `images/`) and the Day 2 whiteboard `Agentic-3-0.pdf` (the code-to-LLM figure)
 - Live-Class-2026, `02-03 - 28 Jun & 4 Jul .../_5_calling_a_real_api.py` (the `convert_currency` function in 1.2)
 - Class 01 recording subtitles, 27 Jun 2026 (the setup walk-through and the after-class Q&A), and the class's Craft resource page, "Class 1 - Python" (setup links, `uv venv --python 3.12`)
+- Class 02 recording subtitles, 28 Jun 2026 (the setup demo on a fresh Windows machine)
 - `uv` documentation: [docs.astral.sh/uv](https://docs.astral.sh/uv/), [installation](https://docs.astral.sh/uv/getting-started/installation/), [Python versions](https://docs.astral.sh/uv/concepts/python-versions/)
 - [VS Code terminal profiles](https://code.visualstudio.com/docs/terminal/profiles) and [Using Python on Windows](https://docs.python.org/3/using/windows.html) (both checked 22 Nov 2026)
 - Added by Claude: 1.3, `safe_calc` in 1.4, 1.6, interview questions 4–5, the Windows `py list` commands in 1.1, and the `uv python upgrade` limit in the class 01 Q&A
