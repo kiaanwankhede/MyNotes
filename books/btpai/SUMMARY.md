@@ -45,3 +45,7 @@
 * [Tutorial: Extend SAP's AP Invoice Agent](tutorial-joule-studio-agent-extension.md)
 * [Tutorial: Bring SAP Analytics Cloud insights into Joule](tutorial-joule-sac-analytical-insights.md)
 * [Tutorial: Build a full-stack CAP app with AI Chat (Joule) in Business Application Studio](tutorial-joule-bas-full-stack-cap.md)
+
+## Joule Integrations
+* [Joule with SAP SuccessFactors: the integration steps](joule-integration-successfactors.md)
+* [Joule with other SAP solutions: S/4HANA, planning and documents](joule-integration-other-sap-solutions.md)

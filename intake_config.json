@@ -101,7 +101,7 @@
   },
   "BTPAI": {
    "folder": "books/btpai",
-   "sections": ["BTP Foundations", "SAP AI", "AI Fundamentals", "Joule", "Responsible AI", "Joule Family and Joule Studio", "Joule Tutorials"],
+   "sections": ["BTP Foundations", "SAP AI", "AI Fundamentals", "Joule", "Responsible AI", "Joule Family and Joule Studio", "Joule Tutorials", "Joule Integrations"],
    "chapters": [
     "Cloud computing and the service models",
     "SAP's cloud journey and the BTP landscape",
@@ -132,7 +132,9 @@
    "Tutorial: Build an HR assistant with intent-based development",
    "Tutorial: Extend SAP's AP Invoice Agent",
    "Tutorial: Bring SAP Analytics Cloud insights into Joule",
-   "Tutorial: Build a full-stack CAP app with AI Chat (Joule) in Business Application Studio"
+   "Tutorial: Build a full-stack CAP app with AI Chat (Joule) in Business Application Studio",
+   "Joule with SAP SuccessFactors: the integration steps",
+   "Joule with other SAP solutions: S/4HANA, planning and documents"
    ]
   }
  }

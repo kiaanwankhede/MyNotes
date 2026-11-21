@@ -189,4 +189,4 @@ Build each with the same four prompts (starter, model, sample data, rules):
 - SAP Help, *Full Stack Cloud Application* (dev space type): https://help.sap.com/docs/bas/sap-business-application-studio/full-stack-cloud-application
 - SAP Developer Center, *Develop a Full-Stack CAP Application with Joule* (retired; now opens the AI Chat page): https://developers.sap.com/tutorials/build-code-complex.html
 
-Previous: [Tutorial: Bring SAP Analytics Cloud insights into Joule](tutorial-joule-sac-analytical-insights.md) · Next: [BTPAI book introduction](README.md)
+Previous: [Tutorial: Bring SAP Analytics Cloud insights into Joule](tutorial-joule-sac-analytical-insights.md) · Next: [Joule with SAP SuccessFactors: the integration steps](joule-integration-successfactors.md)
