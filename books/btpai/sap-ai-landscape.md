@@ -46,35 +46,13 @@ flowchart TB
 - SAP's press release speaks of more than 50 domain-specific Joule Assistants.
 - The Autonomous Suite is largely a repackaging of existing SAP cloud products with AI on top. The AI parts are add-ons, charged in **AI units**.
 
-**Why SAP says this is needed (public slides)**
-- Most AI projects stay stuck in pilots. SAP names three gaps: business and process context, connection to live data, and governance.
-- Its argument: an ERP vendor already holds the process knowledge and the business data, so its AI can reason over how the business really runs.
-
-**Five core elements** (SAP's executive summary of the North Star architecture, and its Sapphire release)
-
-| Element | What it is |
-|---|---|
-| **Joule** | The new engagement layer. **Joule Work** is where people state their intent and act |
-| **SAP Autonomous Suite** | The five autonomous domains, each with assistants that coordinate agents |
-| **Industry AI** | Sector-specific solutions with industry processes, data models and regulatory rules built in |
-| **SAP Business AI Platform** | SAP BTP, SAP Business Data Cloud, the business transformation management solutions and the AI foundation |
-| **Accelerated adoption** | RISE with SAP and SAP GROW, with an agent-led migration toolchain (11.1b) |
-
 **Why domains instead of products**
 - One area like HR spans several SAP products: the HCM module in S/4HANA, SuccessFactors, and Fieldglass for contract workers.
 - People who know all three are rare, and once trained they are hard to keep.
 - A domain assistant hides which product does the work. An HR person states the goal, say "hire 30 contract staff for the peak season". Joule finds the right agents in whatever products the company runs.
 - Grouping by domain also gives SAP a unit to package, price and track.
 
-**Why accuracy decides adoption**
-- At Sapphire 2026, SAP's CEO Christian Klein said 80% accuracy may do for consumer AI but "is just not good enough" for business-critical work.
-- A slide in the course deck, credited to BCG:
-  - generic LLM accuracy is about 80%
-  - 42% of organisations name data access and quality as the leading barrier
-  - 74% are stuck in pilot mode with no path to scale
-
-> [!NOTE]
-> **Whose survey?** The course attributed the pilot figures to Gartner; the slide itself credits BCG. This book quotes the slide. Treat the numbers as the vendor's framing, not as figures checked here.
+- **Keynote detail:** SAP's case for the vision, the five core elements and the accuracy argument are in *Appendix A1* at the end of this chapter.
 
 ## 11.1a What is available today, and what is coming
 
@@ -94,42 +72,12 @@ flowchart TB
 ## 11.1b Industry AI and accelerated adoption
 
 **Industry AI**
-- SAP builds **autonomous industry solutions** on top of the five domains. Its May 2026 release names seven. A course slide shows them with lighthouse customers:
-
-| Industry solution | Industry | Example customer on the slide |
-|---|---|---|
-| Autonomous Asset Management | Oil, gas and energy | RWE |
-| Autonomous Commodity Management | Agribusiness | CHS |
-| Autonomous Adaptive Production | Industrial manufacturing | Kaeser |
-| Autonomous Regulated Manufacturing | Life sciences | Takeda |
-| Autonomous Revenue Growth Management | Consumer products | Coca-Cola HBC, CONA |
-| Autonomous Unified Commerce | Retail | Salling Group |
-| Autonomous Project Delivery | Professional services | Deloitte |
-
-- One industry domain holds several assistants, one per persona.
-  - For asset management in oil and gas, there are separate assistants for the executive, the asset master data team, reliability engineers, maintenance planners, logistics and technicians.
-  - Each works across SAP products (asset management, master data governance, Cloud ERP, field logistics) and outside data such as weather.
-- **How SAP builds it (the course):** co-innovation with a few customers per industry, often through **forward-deployed teams** that sit with the customer ([chapter 12](sap-ai-careers-certifications.md)).
-  - Proven solutions later become standard.
+- SAP builds **autonomous industry solutions** on top of the five domains, with lighthouse customers in each industry. Its May 2026 release names seven: the list and an example are in *Appendix A2*.
 
 **Accelerated adoption**
 - **RISE with SAP** moves existing customers from ECC or on-premise S/4HANA to SAP Cloud ERP, Private edition by default. SAP commits to activating **three Joule Assistants in the first year**.
 - **SAP GROW** is for net-new customers: start lean in one domain, then grow. GROW customers get the **full Joule Assistants portfolio** at onboarding.
-- Both run on SAP's **agent-led toolchain**:
-
-| Tool | Role in the move |
-|---|---|
-| SAP LeanIX | Maps the enterprise architecture and its dependencies |
-| SAP Signavio | Analyses and redesigns the business processes |
-| SAP Cloud ALM | Plans, runs and governs the project; the operational hub |
-| SAP Build and SAP Integration Suite | Clean-core extensions and integration |
-| WalkMe | In-app guidance for user adoption |
-| Tricentis | Automated testing |
-| Syniti; OpenText | Data migration; archiving of historical data |
-
-- Its **migration and modernization assistants** follow the SAP Activate phases: system analysis, data management, custom code, configuration, test management, change management and rollout.
-  - They build on SAP Joule for Developers and SAP Joule for Consultants.
-- **SAP's figures differ by page:** "more than 35%" less migration effort (Sapphire release); "35% faster project execution" and "30% cut in business transformation costs" (toolchain product page). Quote the page you rely on.
+- Both run on SAP's **agent-led migration toolchain**: SAP LeanIX, SAP Signavio, SAP Cloud ALM and more. The full table and SAP's effort figures are in *Appendix A2*.
 
 ## 11.2 The AI North Star architecture: four layers
 
@@ -156,77 +104,7 @@ flowchart TB
 - SAP's tagline: data was the moat of the last decade; **context** is the moat of the next.
 - **AI-first** means AI added inside one application. **AI-native** means AI designed into every layer, working across application boundaries.
 
-**Inside each layer** (SAP Architecture Center, Oct 2026)
-
-| Layer | Shift | What sits there |
-|---|---|---|
-| **User experience** | Static → adaptive | **Joule Work** as the single entry point, on desktop, web and mobile (with in-car and more named); voice; interfaces generated for each intent |
-| **Process** | Predefined → agentic | Agents organised by business domain, and **Joule Studio** as the one design-time environment for agents and agentic solutions |
-| **Foundation** | System of record → system of context | **SAP Business Data Cloud** (governed data products), **SAP Knowledge Graph** (business meaning), decision traces, the generative AI hub with SAP and third-party models |
-| **Platform** | Hosting apps → running SAP-managed agents | A **managed agent runtime**: sandbox, identity, memory, observability, tenant isolation; it includes SAP BTP |
-
-**Experience layer: Joule Work**
-- Five modes:
-  - **Discover:** prioritised tasks and alerts
-  - **Conversations:** dialogue with Joule
-  - **Spaces:** workspaces assembled for a goal
-  - **Jobs:** agentic work running within guardrails, traceable
-  - **Develop:** building agents in Joule Studio
-- It complements SAP's application UIs, it does not replace them. SAP Fiori stays for stable, high-frequency processes.
-- Example from the course: "which documents are waiting for my approval?" → details of the first one → "approve it" or "reject it with this comment", without opening the app.
-
-**Process layer: how agents are built**
-- **A spectrum from deterministic to autonomous:** plain apps and workflows; **bounded agents** with fixed tools and guardrails; open-ended agents. Deterministic steps need no LLM call, so they cost no tokens.
-- Agents follow a reason, act, observe loop. Work starts from a conversation, a business event or a schedule.
-- **Human in the loop:** when an agent needs approval, the request goes to the responsible person's conversation or inbox, and the agent pauses.
-- **Two build paths, one runtime:** code-based agents with SAP's agent SDK, or **intent-based development** in Joule Studio. Both produce version-controlled code.
-- **Agent skills:** packages of instructions and tools that Joule or an agent loads when needed. Joule Studio agents are moving to this skill-based model.
-- **The process map behind it:** SAP's **Reference Business Architecture** describes an enterprise's whole business scope in standard terms.
-  - It links business capability, process, data and organisation models.
-  - Its process model has eight business process groups, the end-to-end processes such as source to pay or lead to cash.
-  - SAP's standard agents are built for these processes (SAP Help; the course).
-
-**Foundation layer: data and meaning**
-- **SAP Knowledge Graph** is the semantic backbone. It links natural language to SAP's APIs, data models and business entities, so "show me overdue orders" maps to the right objects.
-  - It does not enforce authorizations; the Authorization Management Service and the systems of record do.
-  - SAP lists the **SAP BDC Ontology Manager** for Q4 2026, turning data products into a business ontology.
-- **Memory:** semantic memory (what Joule knows about you) and episodic memory (summaries of past conversations), shared by Joule and its agents.
-- **SAP HANA Cloud** brings a **vector engine** (similarity search over embeddings) and a **knowledge graph engine** (relationships, queried with SPARQL).
-  - One query can combine both, with relational and spatial data (SAP News, July 2025).
-- Third-party models come **SAP-managed** through the generative AI hub in SAP AI Core. SAP holds the contracts; you pay consumption through AI Core.
-
-**Platform layer: the managed agent runtime**
-- SAP supplies the "harness": security, observability (OpenTelemetry), tenant isolation, sandboxing and persistent memory. Planned: an agent sandbox, a skills registry and continuous agent evaluations.
-- Agents extend in four ways: tools through **MCP**, skills, pre- and post-execution hooks, and developer-defined extension points.
-- **Deployment options:** public cloud, private cloud, **SAP Sovereign Cloud** and **SAP Sovereign Cloud On-Site** (in the customer's chosen data centres).
-
-**Across the layers: integration, identity and defence**
-- Two open protocols: **Model Context Protocol** (tools) and **Agent2Agent** (agents talking to agents).
-- The **agent gateway** is the governed bridge between agents, tools and backends. It handles identity, access, observability and approvals. SAP's FAQ planned it for general availability around TechEd 2026.
-  - It does not replace SAP Cloud Connector or the Destination service.
-  - MCP access to backends comes through **SAP Integration Suite** and its MCP gateway.
-- **Agents are first-class identities**: registered applications with policies and scoped authorizations.
-  - A user-acting agent carries the user's rights, or fewer.
-  - An autonomous agent uses its own identity, with explicitly defined permissions.
-  - Third-party agents authenticate through SAP's identity services.
-- A **three-tier defence:**
-  - foundation tier: zero-trust authentication, prompt-injection detection
-  - supervision tier: input validation, output filtering, human oversight for high-risk decisions
-  - automation tier: security-operations agents
-
-**Key terms worth knowing** (SAP's glossary)
-
-| Term | Meaning |
-|---|---|
-| Context engineering | Assembling the right, authorized, current context for each AI interaction |
-| Harness engineering | Wrapping models and agents with enterprise controls: identity, policy, sandbox, memory, observability, evaluation |
-| Specification engineering | Defining agent behaviour, limits and success criteria precisely enough to test |
-| Semantic grounding | Anchoring AI output in metadata, domain models and authorization rules |
-| Sovereign AI | AI designed around data residency, regulation, infrastructure and model sovereignty |
-| Human-in-the-loop | People review, approve, override or guide AI actions for high-risk decisions |
-
-> [!TIP]
-> When a term in SAP's AI material is new to you, ask an AI assistant with the page open to explain it "in simple terms, for an SAP consultant". Then check it against SAP's glossary.
+- **Layer by layer** (Joule Work's modes, how agents are built, data and memory, the managed agent runtime, agent identity and defence, SAP's key terms): *Appendix A3*.
 
 ## 11.3 The SAP Business AI Platform
 
@@ -248,37 +126,10 @@ flowchart TB
 >   - New specialisations come in October 2026 and new proficiency requirements in January 2027.
 > - So BTP is still the platform you provision in (this book's chapters 1 to 10). BAIP is the larger AI-centred package and brand around it.
 
-**What the pillars contain** (SAP slide in the course deck)
-- **Build:** Joule Studio and SAP Integration Suite.
-- **Contextualize and reason:** SAP Knowledge Graph (linking business data, processes and industry knowledge), SAP and non-SAP models, and SAP Business Data Cloud.
-  - Data can come from SAP and non-SAP sources such as Databricks, Microsoft, Google Cloud, Snowflake and AWS.
-- **Govern:** SAP AI Agent Hub, value realization, Joule Studio runtime, and identity, access and security.
-- Above the platform sit the Autonomous Suite domains, partner agents and third-party AI agents, all reached through Joule.
-
-**SAP's own claims for the platform** (same slide; vendor figures, not checked here)
-
-| Pillar | Claim |
-|---|---|
-| Build | 95% successful intent-to-prototype translations, at the first attempt and without manual code changes |
-| Contextualize and reason | About 2× better predictions across SAP business tasks (SAP-RPT-1-large vs narrow AI); 98% SQL reasoning accuracy (vs 76% for a GPT-4.1 benchmark) |
-| Govern | 55,000+ live agents managed through SAP AI Agent Hub |
-
 - **SAP AI Agent Hub** is built on SAP LeanIX. SAP announced it for general availability in Q3 2026, included in the Business AI Platform at no additional charge.
   - It shows every agent, standard and custom, and lets you monitor or disable one.
   - LeanIX customers see it as part of LeanIX; others get it as a separate app (the course).
-- **SAP Knowledge Graph** is what Joule's agents read for business meaning. SAP's FAQ says direct access for custom agents is "under discussion".
-  - The course called it unavailable for purchase on its own; this book did not confirm that.
-  - Don't confuse it with the HANA Cloud knowledge graph engine, where you build your own graphs.
-
-**The new Joule Studio (SAP News, May 2026)**
-- **Intent-based development:** you describe a goal in natural language. Joule Studio produces requirements, technical specs, code scaffolding, tests and a live preview.
-- In practice the business user writes the intent and specification, and a developer takes over from there to build, test and deploy.
-- Pro-code work happens in VS Code, Cursor and similar IDEs, with Python frameworks such as LangChain, Pydantic AI and LlamaIndex. **n8n** is embedded for visual workflows.
-- Agents run on a managed **Joule Studio runtime**.
-- Through the end of 2026, SAP customers and partners get **free design-time access**, under fair-use limits. Running agents is not covered by that offer.
-- The earlier tool, now called **Joule Studio Classic**, lives in SAP Build and works closely with SAP Build Process Automation.
-  - It builds agents and skills low-code only; the new Joule Studio adds intent-based development and pro-code.
-- SAP named **NVIDIA OpenShell** as the secure runtime for Joule Studio, and **n8n** for workflow orchestration in it (Sapphire release, May 2026).
+- **More detail** (the slide's breakdown, SAP's own claims, the Knowledge Graph, the new Joule Studio's launch): *Appendix A4*. The new Joule Studio itself is [chapter 20](joule-studio-intent-based.md).
 
 > [!NOTE]
 > **"Joule and AI units are free until the end of 2026"?**
@@ -303,7 +154,6 @@ flowchart TB
 
 - General LLMs know ABAP only roughly, because little ABAP is public. That is why SAP trained its own.
 - Classic forecasting trains a model per use case on historical data. A tabular foundation model is given examples at the time of the request instead.
-- In July 2026 SAP closed its acquisition of Prior Labs, the team behind the TabPFN models, and committed more than EUR 1 billion to tabular AI over four years (SAP Community blog, read 20 Nov 2026).
 
 **SAP-RPT-1 in practice** (SAP Help, read 20 Nov 2026)
 - RPT-1 is a "relational pretrained transformer", developed by SAP, for classification and regression on table data.
@@ -327,26 +177,7 @@ flowchart TB
 - **Deploy it in SAP AI Core** through the foundation-models scenario: executable `aicore-sap`, model `sap-rpt-1-small` or `sap-rpt-1-large`. Later versions (RPT-1.5, RPT-1.6) are listed alongside.
 - An open-source variant, `sap-rpt-1-oss`, is on Hugging Face. SAP also runs an **RPT playground** at rpt.cloud.sap, which needs a sign-in.
 - **The model stores nothing.** Keep the table in your database (HANA or any other), send the rows with each request, and write the predictions back. Otherwise you predict, and pay, again next time.
-- **TabPFN stays a Prior Labs model.** SAP Help lists Prior Labs as its own vendor in the generative AI hub. SAP says Prior Labs keeps its brand, leadership and open research after the acquisition.
-
-> [!NOTE]
-> **Who wrote the RPT-1 evaluation paper?**
-> - **The course:** an SAP paper on arXiv compares RPT-1 with traditional forecasting.
-> - **arXiv 2602.19237 (22 Feb 2026):** the evaluation paper has one author, from Microsoft. It tests the open-source `sap-rpt-1-oss` on three synthetic SAP scenarios.
->   - With no training, it reached 91 to 96% of the accuracy of tuned gradient-boosted trees such as XGBoost.
->   - With little data (about 75 to 100 context rows) it beat XGBoost; on regression and larger datasets the trees kept a clear lead.
-> - **The architecture paper:** RPT-1 is built on ConTextTab (Spinaci et al.), presented at NeurIPS 2025.
-
-**Decision models: a new category**
-- On 15 September 2026, TypeSafe AI released **Jev**, a "System One" decision model. It returns typed decisions (yes/no, a choice, a score) with a calibrated confidence, in milliseconds, not text.
-- SAP's researchers compared it with their tabular model on an independent benchmark and on ticket routing:
-
-| Test | Jev 1.13.0 | SAP RPT-1.6 | RPT-1.6 with SAP's CASE embeddings |
-|---|---|---|---|
-| Typed-decisions benchmark (accuracy) | 72.7% | 76.75% | 78.75% |
-| Ticket routing, 164 tickets (accuracy) | 49.4% | 68.9% | 72.0% |
-
-- The lesson SAP draws: fast specialised models take the millions of well-defined decisions, and LLMs take the open-ended reasoning and writing.
+- **Background** (the Prior Labs acquisition, the RPT-1 evaluation paper, and a decision-model benchmark against RPT-1.6): *Appendix A5*.
 
 ## 11.5 AI applications, autonomous agents and grounding
 
@@ -444,11 +275,7 @@ print(prompt.splitlines()[1])
 - SAP may monitor API use and respond with **throttling, suspension or termination** of access.
 - So: building your own agent in Joule Studio, or reading data through Business Data Cloud and documented destinations, is fine.
 - An outside agent that crawls OData services, or a bulk copy into a generic data lake for an outside AI, is not.
-
-> [!NOTE]
-> **When did this change?**
-> - **The course:** SAP changed the policy "about three weeks" before the October 2026 session.
-> - **SAP's document:** the policy in force is version 4.2026a; its file is dated April 2026, and press coverage of the AI clause dates from late April 2026.
+- When the AI clause appeared: *Appendix A6*.
 
 > [!IMPORTANT]
 > **🏭 In production**
@@ -609,6 +436,209 @@ print(prompt.splitlines()[1])
 5. In the SAP Discovery Center, open *Business AI → Joule Assistants*, pick one assistant from your domain, and note its agents and the products and editions it needs.
 6. Read the *Key Terms* page of SAP's AI-native North Star architecture and explain harness engineering in one sentence of your own.
 
+## Appendix: keynote and announcement detail (dated)
+
+*Moved here word for word from sections 11.1 to 11.7 on 21 Nov 2026, so the main sections stay practical. Vendor figures and dates change: re-check before you quote them.*
+
+### A1 · From 11.1: SAP's case, the five core elements, accuracy
+
+**Why SAP says this is needed (public slides)**
+- Most AI projects stay stuck in pilots. SAP names three gaps: business and process context, connection to live data, and governance.
+- Its argument: an ERP vendor already holds the process knowledge and the business data, so its AI can reason over how the business really runs.
+
+**Five core elements** (SAP's executive summary of the North Star architecture, and its Sapphire release)
+
+| Element | What it is |
+|---|---|
+| **Joule** | The new engagement layer. **Joule Work** is where people state their intent and act |
+| **SAP Autonomous Suite** | The five autonomous domains, each with assistants that coordinate agents |
+| **Industry AI** | Sector-specific solutions with industry processes, data models and regulatory rules built in |
+| **SAP Business AI Platform** | SAP BTP, SAP Business Data Cloud, the business transformation management solutions and the AI foundation |
+| **Accelerated adoption** | RISE with SAP and SAP GROW, with an agent-led migration toolchain (11.1b) |
+
+**Why accuracy decides adoption**
+- At Sapphire 2026, SAP's CEO Christian Klein said 80% accuracy may do for consumer AI but "is just not good enough" for business-critical work.
+- A slide in the course deck, credited to BCG:
+  - generic LLM accuracy is about 80%
+  - 42% of organisations name data access and quality as the leading barrier
+  - 74% are stuck in pilot mode with no path to scale
+
+> [!NOTE]
+> **Whose survey?** The course attributed the pilot figures to Gartner; the slide itself credits BCG. This book quotes the slide. Treat the numbers as the vendor's framing, not as figures checked here.
+
+### A2 · From 11.1b: industry solutions and the migration toolchain
+
+**Industry AI**
+- SAP builds **autonomous industry solutions** on top of the five domains. Its May 2026 release names seven. A course slide shows them with lighthouse customers:
+
+| Industry solution | Industry | Example customer on the slide |
+|---|---|---|
+| Autonomous Asset Management | Oil, gas and energy | RWE |
+| Autonomous Commodity Management | Agribusiness | CHS |
+| Autonomous Adaptive Production | Industrial manufacturing | Kaeser |
+| Autonomous Regulated Manufacturing | Life sciences | Takeda |
+| Autonomous Revenue Growth Management | Consumer products | Coca-Cola HBC, CONA |
+| Autonomous Unified Commerce | Retail | Salling Group |
+| Autonomous Project Delivery | Professional services | Deloitte |
+
+- One industry domain holds several assistants, one per persona.
+  - For asset management in oil and gas, there are separate assistants for the executive, the asset master data team, reliability engineers, maintenance planners, logistics and technicians.
+  - Each works across SAP products (asset management, master data governance, Cloud ERP, field logistics) and outside data such as weather.
+- **How SAP builds it (the course):** co-innovation with a few customers per industry, often through **forward-deployed teams** that sit with the customer ([chapter 12](sap-ai-careers-certifications.md)).
+  - Proven solutions later become standard.
+
+- Both run on SAP's **agent-led toolchain**:
+
+| Tool | Role in the move |
+|---|---|
+| SAP LeanIX | Maps the enterprise architecture and its dependencies |
+| SAP Signavio | Analyses and redesigns the business processes |
+| SAP Cloud ALM | Plans, runs and governs the project; the operational hub |
+| SAP Build and SAP Integration Suite | Clean-core extensions and integration |
+| WalkMe | In-app guidance for user adoption |
+| Tricentis | Automated testing |
+| Syniti; OpenText | Data migration; archiving of historical data |
+
+- Its **migration and modernization assistants** follow the SAP Activate phases: system analysis, data management, custom code, configuration, test management, change management and rollout.
+  - They build on SAP Joule for Developers and SAP Joule for Consultants.
+- **SAP's figures differ by page:** "more than 35%" less migration effort (Sapphire release); "35% faster project execution" and "30% cut in business transformation costs" (toolchain product page). Quote the page you rely on.
+
+### A3 · From 11.2: the North Star, layer by layer
+
+**Inside each layer** (SAP Architecture Center, Oct 2026)
+
+| Layer | Shift | What sits there |
+|---|---|---|
+| **User experience** | Static → adaptive | **Joule Work** as the single entry point, on desktop, web and mobile (with in-car and more named); voice; interfaces generated for each intent |
+| **Process** | Predefined → agentic | Agents organised by business domain, and **Joule Studio** as the one design-time environment for agents and agentic solutions |
+| **Foundation** | System of record → system of context | **SAP Business Data Cloud** (governed data products), **SAP Knowledge Graph** (business meaning), decision traces, the generative AI hub with SAP and third-party models |
+| **Platform** | Hosting apps → running SAP-managed agents | A **managed agent runtime**: sandbox, identity, memory, observability, tenant isolation; it includes SAP BTP |
+
+**Experience layer: Joule Work**
+- Five modes:
+  - **Discover:** prioritised tasks and alerts
+  - **Conversations:** dialogue with Joule
+  - **Spaces:** workspaces assembled for a goal
+  - **Jobs:** agentic work running within guardrails, traceable
+  - **Develop:** building agents in Joule Studio
+- It complements SAP's application UIs, it does not replace them. SAP Fiori stays for stable, high-frequency processes.
+- Example from the course: "which documents are waiting for my approval?" → details of the first one → "approve it" or "reject it with this comment", without opening the app.
+
+**Process layer: how agents are built**
+- **A spectrum from deterministic to autonomous:** plain apps and workflows; **bounded agents** with fixed tools and guardrails; open-ended agents. Deterministic steps need no LLM call, so they cost no tokens.
+- Agents follow a reason, act, observe loop. Work starts from a conversation, a business event or a schedule.
+- **Human in the loop:** when an agent needs approval, the request goes to the responsible person's conversation or inbox, and the agent pauses.
+- **Two build paths, one runtime:** code-based agents with SAP's agent SDK, or **intent-based development** in Joule Studio. Both produce version-controlled code.
+- **Agent skills:** packages of instructions and tools that Joule or an agent loads when needed. Joule Studio agents are moving to this skill-based model.
+- **The process map behind it:** SAP's **Reference Business Architecture** describes an enterprise's whole business scope in standard terms.
+  - It links business capability, process, data and organisation models.
+  - Its process model has eight business process groups, the end-to-end processes such as source to pay or lead to cash.
+  - SAP's standard agents are built for these processes (SAP Help; the course).
+
+**Foundation layer: data and meaning**
+- **SAP Knowledge Graph** is the semantic backbone. It links natural language to SAP's APIs, data models and business entities, so "show me overdue orders" maps to the right objects.
+  - It does not enforce authorizations; the Authorization Management Service and the systems of record do.
+  - SAP lists the **SAP BDC Ontology Manager** for Q4 2026, turning data products into a business ontology.
+- **Memory:** semantic memory (what Joule knows about you) and episodic memory (summaries of past conversations), shared by Joule and its agents.
+- **SAP HANA Cloud** brings a **vector engine** (similarity search over embeddings) and a **knowledge graph engine** (relationships, queried with SPARQL).
+  - One query can combine both, with relational and spatial data (SAP News, July 2025).
+- Third-party models come **SAP-managed** through the generative AI hub in SAP AI Core. SAP holds the contracts; you pay consumption through AI Core.
+
+**Platform layer: the managed agent runtime**
+- SAP supplies the "harness": security, observability (OpenTelemetry), tenant isolation, sandboxing and persistent memory. Planned: an agent sandbox, a skills registry and continuous agent evaluations.
+- Agents extend in four ways: tools through **MCP**, skills, pre- and post-execution hooks, and developer-defined extension points.
+- **Deployment options:** public cloud, private cloud, **SAP Sovereign Cloud** and **SAP Sovereign Cloud On-Site** (in the customer's chosen data centres).
+
+**Across the layers: integration, identity and defence**
+- Two open protocols: **Model Context Protocol** (tools) and **Agent2Agent** (agents talking to agents).
+- The **agent gateway** is the governed bridge between agents, tools and backends. It handles identity, access, observability and approvals. SAP's FAQ planned it for general availability around TechEd 2026.
+  - It does not replace SAP Cloud Connector or the Destination service.
+  - MCP access to backends comes through **SAP Integration Suite** and its MCP gateway.
+- **Agents are first-class identities**: registered applications with policies and scoped authorizations.
+  - A user-acting agent carries the user's rights, or fewer.
+  - An autonomous agent uses its own identity, with explicitly defined permissions.
+  - Third-party agents authenticate through SAP's identity services.
+- A **three-tier defence:**
+  - foundation tier: zero-trust authentication, prompt-injection detection
+  - supervision tier: input validation, output filtering, human oversight for high-risk decisions
+  - automation tier: security-operations agents
+
+**Key terms worth knowing** (SAP's glossary)
+
+| Term | Meaning |
+|---|---|
+| Context engineering | Assembling the right, authorized, current context for each AI interaction |
+| Harness engineering | Wrapping models and agents with enterprise controls: identity, policy, sandbox, memory, observability, evaluation |
+| Specification engineering | Defining agent behaviour, limits and success criteria precisely enough to test |
+| Semantic grounding | Anchoring AI output in metadata, domain models and authorization rules |
+| Sovereign AI | AI designed around data residency, regulation, infrastructure and model sovereignty |
+| Human-in-the-loop | People review, approve, override or guide AI actions for high-risk decisions |
+
+> [!TIP]
+> When a term in SAP's AI material is new to you, ask an AI assistant with the page open to explain it "in simple terms, for an SAP consultant". Then check it against SAP's glossary.
+
+### A4 · From 11.3: the platform slide, SAP's claims, the Knowledge Graph, the new Joule Studio
+
+**What the pillars contain** (SAP slide in the course deck)
+- **Build:** Joule Studio and SAP Integration Suite.
+- **Contextualize and reason:** SAP Knowledge Graph (linking business data, processes and industry knowledge), SAP and non-SAP models, and SAP Business Data Cloud.
+  - Data can come from SAP and non-SAP sources such as Databricks, Microsoft, Google Cloud, Snowflake and AWS.
+- **Govern:** SAP AI Agent Hub, value realization, Joule Studio runtime, and identity, access and security.
+- Above the platform sit the Autonomous Suite domains, partner agents and third-party AI agents, all reached through Joule.
+
+**SAP's own claims for the platform** (same slide; vendor figures, not checked here)
+
+| Pillar | Claim |
+|---|---|
+| Build | 95% successful intent-to-prototype translations, at the first attempt and without manual code changes |
+| Contextualize and reason | About 2× better predictions across SAP business tasks (SAP-RPT-1-large vs narrow AI); 98% SQL reasoning accuracy (vs 76% for a GPT-4.1 benchmark) |
+| Govern | 55,000+ live agents managed through SAP AI Agent Hub |
+
+- **SAP Knowledge Graph** is what Joule's agents read for business meaning. SAP's FAQ says direct access for custom agents is "under discussion".
+  - The course called it unavailable for purchase on its own; this book did not confirm that.
+  - Don't confuse it with the HANA Cloud knowledge graph engine, where you build your own graphs.
+
+**The new Joule Studio (SAP News, May 2026)**
+- **Intent-based development:** you describe a goal in natural language. Joule Studio produces requirements, technical specs, code scaffolding, tests and a live preview.
+- In practice the business user writes the intent and specification, and a developer takes over from there to build, test and deploy.
+- Pro-code work happens in VS Code, Cursor and similar IDEs, with Python frameworks such as LangChain, Pydantic AI and LlamaIndex. **n8n** is embedded for visual workflows.
+- Agents run on a managed **Joule Studio runtime**.
+- Through the end of 2026, SAP customers and partners get **free design-time access**, under fair-use limits. Running agents is not covered by that offer.
+- The earlier tool, now called **Joule Studio Classic**, lives in SAP Build and works closely with SAP Build Process Automation.
+  - It builds agents and skills low-code only; the new Joule Studio adds intent-based development and pro-code.
+- SAP named **NVIDIA OpenShell** as the secure runtime for Joule Studio, and **n8n** for workflow orchestration in it (Sapphire release, May 2026).
+
+### A5 · From 11.4: Prior Labs, the RPT-1 paper, decision models
+
+- In July 2026 SAP closed its acquisition of Prior Labs, the team behind the TabPFN models, and committed more than EUR 1 billion to tabular AI over four years (SAP Community blog, read 20 Nov 2026).
+- **TabPFN stays a Prior Labs model.** SAP Help lists Prior Labs as its own vendor in the generative AI hub. SAP says Prior Labs keeps its brand, leadership and open research after the acquisition.
+
+> [!NOTE]
+> **Who wrote the RPT-1 evaluation paper?**
+> - **The course:** an SAP paper on arXiv compares RPT-1 with traditional forecasting.
+> - **arXiv 2602.19237 (22 Feb 2026):** the evaluation paper has one author, from Microsoft. It tests the open-source `sap-rpt-1-oss` on three synthetic SAP scenarios.
+>   - With no training, it reached 91 to 96% of the accuracy of tuned gradient-boosted trees such as XGBoost.
+>   - With little data (about 75 to 100 context rows) it beat XGBoost; on regression and larger datasets the trees kept a clear lead.
+> - **The architecture paper:** RPT-1 is built on ConTextTab (Spinaci et al.), presented at NeurIPS 2025.
+
+**Decision models: a new category**
+- On 15 September 2026, TypeSafe AI released **Jev**, a "System One" decision model. It returns typed decisions (yes/no, a choice, a score) with a calibrated confidence, in milliseconds, not text.
+- SAP's researchers compared it with their tabular model on an independent benchmark and on ticket routing:
+
+| Test | Jev 1.13.0 | SAP RPT-1.6 | RPT-1.6 with SAP's CASE embeddings |
+|---|---|---|---|
+| Typed-decisions benchmark (accuracy) | 72.7% | 76.75% | 78.75% |
+| Ticket routing, 164 tickets (accuracy) | 49.4% | 68.9% | 72.0% |
+
+- The lesson SAP draws: fast specialised models take the millions of well-defined decisions, and LLMs take the open-ended reasoning and writing.
+
+### A6 · From 11.7: when the API policy changed
+
+> [!NOTE]
+> **When did this change?**
+> - **The course:** SAP changed the policy "about three weeks" before the October 2026 session.
+> - **SAP's document:** the policy in force is version 4.2026a; its file is dated April 2026, and press coverage of the AI clause dates from late April 2026.
+
 ## How this chapter was checked
 
 - **Lecture 6 recording:** captions 0:00 to 2:59:39 read in full (no break).
@@ -635,6 +665,7 @@ print(prompt.splitlines()[1])
 - **Not read:** SAP Road Map Explorer (needs a sign-in) and SAP's guide *The Beginning of Better* (behind an e-mail form).
 - **Run:** the retrieval snippet with Python 3; it prints `['KB-101']` and the context line.
 - **Not run:** nothing else in this chapter is code.
+- **Trimmed on 21 Nov 2026:** keynote and vendor detail moved word for word from 11.1 to 11.7 into the appendix; section numbers unchanged; no new sources.
 
 ## Sources and further reading
 
