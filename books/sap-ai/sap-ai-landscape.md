@@ -427,6 +427,14 @@ print(prompt.splitlines()[1])
 - Check availability in the Discovery Center catalogue, not in keynotes; plans are in Road Map Explorer
 - The North Star turns ERP from a system of record into a system of context, with Joule Work, skills, MCP and A2A, and agents as identities
 
+## 🧪 Try it hands-on
+
+*Added by Claude: SAP's own tutorials in this book that let you try what this chapter teaches.*
+
+- **Predict on a business table with SAP-RPT-1:** [Strategic Prediction with SAP RPT-1](tutorial-ai-core-genaihub-sap-rpt-model-usage.md), then [Tabular AI Orchestration in SAP AI Core](tutorial-ai-core-tabular-ai-orchestration.md)
+- **AI inside ABAP (needs your own S/4HANA system):** [Configure Your SAP S/4HANA System for ISLM](tutorial-abap-islm-setup-prepare.md), then [Implement a Simple Custom ABAP AI Scenario](tutorial-abap-islm-simple-genai-scenario.md)
+- **The generative AI hub:** start from the list in [SAP AI Core, the generative AI hub and SAP AI Launchpad](sap-ai-core-launchpad.md)
+
 ## Practice
 
 1. Draw the four North Star layers from memory and place Joule, Business Data Cloud, Joule Studio and an Accounts Payable assistant in them.

@@ -35,6 +35,7 @@
 |---|---|---|---|
 | SAP AI Launchpad free plan | discontinued on 22 May 2026; a 30-day trial (with generative AI hub) is offered instead | 22 Nov 2026 | [7.12](sap-ai-core-launchpad.md) |
 | Generative AI hub | only on the SAP AI Core **extended** plan; plans are standard and extended (enterprise accounts); a 30-day basic trial exists | 21 Nov 2026 | [8.1](tutorial-genai-hub-python.md), [11.1](tutorial-rag-grounding-genai-hub.md) |
+| Orchestration V1 workflow API | deprecated; switch-off moved from 31 Oct 2026 to **31 Dec 2026**; use V2 | 22 Nov 2026 | [17](tutorial-ai-core-orchestration-consumption.md), [19](tutorial-ai-core-orchestration-consumption-opt.md), [21](tutorial-ai-core-orchestration-grounding.md) |
 
 ## 60.4 Counts and quotas
 

@@ -289,6 +289,18 @@ GAP       Draft a status email to the customer
 - Extensions add instructions, MCP servers or hooks to SAP's agents without changing them
 - MCP servers give an agent tools; n8n workflows fix the order of steps
 
+## 🧪 Try it hands-on
+
+*Added by Claude: SAP's own tutorials in this book that let you try what this chapter teaches.*
+
+- **Start here:** [Build an HR assistant](tutorial-joule-studio-hr-assistant.md), then [Extend SAP's AP Invoice Agent](tutorial-joule-studio-agent-extension.md)
+- **Finance:** [FI collection email assistant](tutorial-joule-studio-fi-collection-assistant.md), [FI collection workbench](tutorial-joule-studio-fi-collection-workbench.md), [balance confirmations](notes-balance-confirmation-agent.md), [budget variances](notes-budget-variance-agent.md)
+- **Financial close (the C_JSD agent):** [draft the intent in Joule Work](notes-joule-work-financial-close-intent.md) → [closing advisor agent](notes-financial-closing-advisor-agent.md) → [extend a standard agent](notes-create-agent-extension.md)
+- **Supply chain and procurement:** [supplier risk](tutorial-joule-studio-spend-supplier-assistant.md), [equipment troubleshooting](tutorial-joule-studio-scm-equipment-assistant.md), [cable rolls](notes-cable-roll-optimizer-agent.md), [demand spikes](notes-demand-spike-agent.md), [supplier disruption (CLI)](notes-supplier-disruption-response-agent.md), [supplier performance](notes-supplier-performance-assistant-agent.md)
+- **Sales and HR:** [assistant for sales reps](tutorial-joule-studio-cx-agent-create.md), [discount decisions](notes-ai-sales-assistant-agent.md), [performance and goals](notes-performance-goals-recommendations-agent.md)
+- **Workflows and data:** [IT incident triage with n8n](tutorial-joule-studio-n8n-workflow-create.md), [invoice exceptions with n8n](notes-invoice-exception-agent-n8n.md), [billing completeness data product](tutorial-joule-studio-bdc-agent-create.md)
+- Pages titled "Tutorial notes" are my own-words notes with screen maps and links to SAP's step screens.
+
 ## Practice
 
 1. Write an intent statement for an agent that answers "where is my order?" for sales reps, with two example requests.

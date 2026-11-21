@@ -4,7 +4,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Use Joule Studio to Create an AI Assistant for Sales Reps](https://developers.sap.com/tutorials/joule-studio-cx-agent-create) by Martin Plummer · about 20 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/sap-build-process-automation](https://github.com/sap-tutorials/sap-build-process-automation/blob/main/tutorials/joule-studio-cx-agent-create/)
-> - **Changes for this book:** page layout; steps numbered 22.1 to 22.5; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 19.1 to 19.5; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 Use Joule Studio to Create an AI Assistant for Customer Experience Sales Reps.
@@ -35,7 +35,7 @@ Sales Representatives want an AI assistant to suggest 2–3 ranked discount stra
 
 ---
 
-## 22.1 Getting Started
+## 19.1 Getting Started
 
 1. Go to **Joule Work**.
 
@@ -71,7 +71,7 @@ Sales Representatives want an AI assistant to suggest 2–3 ranked discount stra
 
     ![Joule Work](images/joule-studio-cx-agent-create/joule-work-03.png)
 
-## 22.2 Intent
+## 19.2 Intent
 
 This is where the tool tries to understand your intentions. The tool will attempt to understand your prompt and will likely ask you clarifying questions if you have not chosen quick-create as recommended above.
 
@@ -91,7 +91,7 @@ Once the intent document is created, proceed to the next phase, which is require
 
     ![Idea Board](images/joule-studio-cx-agent-create/idea-board-01.png)
 
-## 22.3 Requirement
+## 19.3 Requirement
 
 When the requirement is ready, you have the opprotunity to review and refine it. For this tutorial, you will accept suggested product requirement document without changes. To progress to the next phase, you need to transform the PRD into a technical specification.
 
@@ -107,7 +107,7 @@ Depending on your role in your company, you might be finished at this point and 
 
     ![Requirement](images/joule-studio-cx-agent-create/requirement-02.png)
 
-## 22.4 Specification
+## 19.4 Specification
 
 When the specification is complete you could pass it on to another team to do the implementation. However, here you are going to get the tool to implement the agent.  This might happen automatically if you have selected quick-create at the start.
 
@@ -119,7 +119,7 @@ When the specification is complete you could pass it on to another team to do th
 
     ![Requirement](images/joule-studio-cx-agent-create/specification-01.png)
 
-## 22.5 Solution and Testing
+## 19.5 Solution and Testing
 
 Wait until the unit tests are finished successfully. You can then try out your agent.
 
@@ -137,4 +137,4 @@ Wait until the unit tests are finished successfully. You can then try out your a
 
    For your next steps, try the other scenarios provided as part of the Agent Lab or repeat this exercise without quick-create enabled.
 
-Previous: [Reference: Current facts to re-check](reference-current-facts.md) · Next: [Tutorial: Use Joule Studio to Create an FI Collection Email Drafting Assistant](tutorial-joule-studio-fi-collection-assistant.md)
+Previous: [Practice: 10 Joule agent assignments](practice-joule-agents.md) · Next: [Tutorial: Use Joule Studio to Create an FI Collection Email Drafting Assistant](tutorial-joule-studio-fi-collection-assistant.md)

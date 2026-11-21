@@ -7,7 +7,7 @@
 > - **SAP's tutorial:** [How to create an Invoice Exception Agent with an n8n Workflow](https://developers.sap.com/tutorials/create-invoice-exception-agent-with-n8n) by Zeena Qarqash · about 20 min · beginner · SAP runs it on a pre-release Joule Studio
 > - **About this page:** *Added by Claude.* Written in my own words from SAP's tutorial, whose text and images may not be copied ([its licence](https://github.com/sap-tutorials/joule-studio/blob/main/LICENSE.txt)). The screen map is my own sketch; each step links to SAP's real screens.
 > - **You need:** Joule Studio, and a configured connection to SAP S/4HANA
-> - **Builds on:** [The new Joule Studio](joule-studio-intent-based.md) (chapter 4), [the n8n triage agent](tutorial-joule-studio-n8n-workflow-create.md) (chapter 27)
+> - **Builds on:** [The new Joule Studio](joule-studio-intent-based.md) (chapter 4), [the n8n triage agent](tutorial-joule-studio-n8n-workflow-create.md) (chapter 24)
 > - **Last checked:** 22 Nov 2026
 
 **After this tutorial you can:**
@@ -16,7 +16,7 @@
 - See how Joule grounds a design in the SAP Knowledge Graph, SAP Signavio and SAP LeanIX
 - Read a generated workflow on the n8n canvas, node by node
 
-## 40.1 What you build
+## 37.1 What you build
 
 Accounts payable has a backlog of **blocked (parked) invoices** where the three-way match between purchase order, goods receipt and invoice failed. That costs early-payment discounts and supplier goodwill, pushes up days payable outstanding, eats AP time, and leaves risk open at month end.
 
@@ -104,7 +104,7 @@ flowchart LR
 - **3** Requirements (the PRD) · **4** Specifications · **5** File tree: `specification.md`, `assets` (the workflow JSON), `solution.yaml`
 - **6** Solution Artifacts → `blocked-invoice-release-workflow` opens the canvas. Don't press **Execute workflow** or **Deploy** in this lab
 
-## 40.2 Create the n8n workflow solution (SAP step 2)
+## 37.2 Create the n8n workflow solution (SAP step 2)
 
 - **Screen:** Joule Work → **Joule Studio**. The *Create a New Solution* dialog shows only for your first project; otherwise choose **New** in the *Solutions* pane (top left). Choose **Create** on the **n8n Workflow** tile.
 - **Name:** `Invoice Exception Agent` · **Intent:** copy SAP's text from step 2. It describes: a webhook trigger called by a Joule agent; read all blocked supplier invoices through the SAP MCP Client; an SAP agent finds the block reason from PO, goods receipt and supplier contract; the clerk sees the findings in SAP Task Center (human in the loop); approved invoices are released through the MCP Client.
@@ -117,7 +117,7 @@ flowchart LR
 - **Everything is files:** edit the `.md` files directly, in the Intent Summary, or by asking Joule; changes show everywhere at once. *Solution Progress* ticks off each finished phase.
 - [SAP's screens for step 2 ↗](https://developers.sap.com/tutorials/create-invoice-exception-agent-with-n8n#step-2)
 
-## 40.3 Review the requirements (SAP step 3)
+## 37.3 Review the requirements (SAP step 3)
 
 - **Screen:** *Solution Progress* → **Requirements**.
 - **The business need:** a block always comes from one of three mismatches (PO price or quantity, missing goods receipt, contract deviation), each needing manual digging.
@@ -132,14 +132,14 @@ flowchart LR
 - **Guardrails:** every release needs the clerk's sign-off (no automatic path); a rejection writes nothing back; the webhook always answers, even if a step fails. **Joule also asks you who the approver is** instead of guessing.
 - [SAP's screens for step 3 ↗](https://developers.sap.com/tutorials/create-invoice-exception-agent-with-n8n#step-3)
 
-## 40.4 Read the specification (SAP step 4)
+## 37.4 Read the specification (SAP step 4)
 
 - **Screen:** *Solution Progress* → **Specifications**; expand each section.
 - **The six parts:** webhook trigger → read blocked invoices → get PO, GR and contract → agent analysis → approval in Task Center → act on the decision (release where allowed).
 - **Remember:** the specification is the plan. It doesn't mean every integration or agent setting is ready to run.
 - [SAP's screens for step 4 ↗](https://developers.sap.com/tutorials/create-invoice-exception-agent-with-n8n#step-4)
 
-## 40.5 Look at the generated files (SAP step 5)
+## 37.5 Look at the generated files (SAP step 5)
 
 - **Screen:** *File tree*.
   - `specification.md`: the workflow's layout, steps and integrations
@@ -147,14 +147,14 @@ flowchart LR
   - `solution.yaml`: the solution's structure and assets
 - [SAP's screens for step 5 ↗](https://developers.sap.com/tutorials/create-invoice-exception-agent-with-n8n#step-5)
 
-## 40.6 Explore the workflow on the canvas (SAP step 6)
+## 37.6 Explore the workflow on the canvas (SAP step 6)
 
 - **Screen:** *Solution Artifacts* → **`blocked-invoice-release-workflow`** opens the visual n8n editor.
 - **Follow the nodes:** read blocked invoices → add PO, GR and contract → the embedded **AI Agent node** analyses the block → **SAP Human-in-the-Loop** sends it to the clerk → the decision is processed (release, or handle the rejection).
 - ⚠️ **Preview limits:** setting up the AI agent, running, testing and deploying aren't part of this preview. **Don't press *Execute workflow* or *Deploy*.**
 - [SAP's screens for step 6 ↗](https://developers.sap.com/tutorials/create-invoice-exception-agent-with-n8n#step-6)
 
-## 40.7 Pitfalls
+## 37.7 Pitfalls
 
 - **It's a design you explore,** not a running workflow. The canvas shows the plan, not a tested automation.
 - **Name the approver** when Joule asks; it won't assume one.
@@ -197,4 +197,4 @@ flowchart LR
 - SAP Developer Center tutorial: https://developers.sap.com/tutorials/create-invoice-exception-agent-with-n8n
 - Its licence: https://github.com/sap-tutorials/joule-studio/blob/main/LICENSE.txt
 
-Previous: [Tutorial notes: Extend a standard Joule agent with intent-based development](notes-create-agent-extension.md) · Next: [SAP Joule book introduction](README.md)
+Previous: [Tutorial notes: Extend a standard Joule agent with intent-based development](notes-create-agent-extension.md) · Next: [Reference: Joule setup building blocks](reference-joule-setup-building-blocks.md)

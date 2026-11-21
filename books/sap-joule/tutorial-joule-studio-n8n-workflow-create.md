@@ -4,7 +4,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Use Joule Studio to Create an IT Incident Triage and Auto Routing Agent with N8N, SAP Task Center Node and SAP Agent Node](https://developers.sap.com/tutorials/joule-studio-n8n-workflow-create) by Deval Khatri · about 20 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/sap-build-process-automation](https://github.com/sap-tutorials/sap-build-process-automation/blob/main/tutorials/joule-studio-n8n-workflow-create/)
-> - **Changes for this book:** page layout; steps numbered 27.1 to 27.5; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 24.1 to 24.5; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 Use Joule Studio to create and test an agent for an IT Incident Management and Auto Routing including Human in the Loop via SAP Task Center and triggering other Solution based AI Agents via SAP Agent Node.
@@ -33,7 +33,7 @@ Use Joule Studio to create and test an agent for an IT Incident Management and A
 
 Using Joule Studio's **intent-based development**, learn to create an intelligent IT Incident Triage and Auto-Routing assistant that supports IT operations teams by automating incident classification, severity assessment, root cause identification, and workflow-based escalation handling. The assistant acts as a virtual IT operations coordinator for support engineers — analyzing incoming incidents from monitoring tools, chat platforms, APIs, and system logs; identifying business impact and probable issue categories; and automatically routing incidents to the correct support teams or n8n workflows in real time. This enables IT teams to reduce manual triage effort, accelerate incident resolution, and shift from reactive support operations toward proactive and intelligent service management.
 
-## 27.1 Get Started
+## 24.1 Get Started
 
 1. Open Joule Studio and select the **Develop+** area.
 
@@ -70,7 +70,7 @@ Using Joule Studio's **intent-based development**, learn to create an intelligen
 
 1. Choose **OK** to launch Joule Studio.
 
-## 27.2 Intent
+## 24.2 Intent
 
 1. This is where the tool tries to understand your intentions. The tool will attempt to understand your prompt and will likely ask you clarifying questions if you have not chosen quick-create as recommended above. Once it decides it understands enough, it will map the challenge to SAP's Reference Business Architecture and performs a fit-gap analysis. It has access to SAP Knowledge Graph, SAP LeanIX, and SAP Domain Models to help it create the intent document. Intent fit indicates how closely the proposed solution corresponds to your requirement.
 
@@ -84,7 +84,7 @@ Using Joule Studio's **intent-based development**, learn to create an intelligen
 
     ![intent-tools](images/joule-studio-n8n-workflow-create/040-Intent-Ready-Now.png)
 
-## 27.3 Requirements
+## 24.3 Requirements
 
 When the requirement is ready, you have the opprotunity to review and refine it. For this tutorial, you will accept suggested product requirement document without changes. To progress to the next phase, you need to transform the PRD into a technical specification.
 
@@ -97,7 +97,7 @@ If you need to update it manually, you can just proceed clicking on the text in 
 
 ![Technical  overview](images/joule-studio-n8n-workflow-create/060-PRD-Ready1.png)
 
-## 27.4 Specification
+## 24.4 Specification
 
 When the specification is complete you could pass it on to another team to do the implementation. However, here you are going to get the tool to implement the agent.  This might happen automatically if you have selected quick-create at the start.
 
@@ -113,7 +113,7 @@ If processing is waiting for your input, enter **Implement the Solution**
 
 ![Generated solution code](images/joule-studio-n8n-workflow-create/070-Spec-Ready2.png)
 
-## 27.5 Solution
+## 24.5 Solution
 
 1. Wait until the implementation is finished successfully
 

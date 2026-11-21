@@ -4,7 +4,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Use Joule Studio to Create an FI Collection Workbench](https://developers.sap.com/tutorials/joule-studio-fi-collection-workbench) by Ilya Belozerov · about 30 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/sap-build-process-automation](https://github.com/sap-tutorials/sap-build-process-automation/blob/main/tutorials/joule-studio-fi-collection-workbench/)
-> - **Changes for this book:** page layout; steps numbered 24.1 to 24.5; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 21.1 to 21.5; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 Use Joule Studio to create and test an agent for an intelligent finance workbrench.
@@ -33,7 +33,7 @@ Use Joule Studio to create and test an agent for an intelligent finance workbren
 
 Collections specialists are losing productive hours manually monitoring overdue accounts, deciding who to follow up with, and writing generic dunning letters that customers ignore. They need a purpose-built workbench that surfaces the right accounts at the right time, automatically dispatches tiered reminder emails, and uses AI to draft personalized collection correspondence grounded in each customer's actual payment history, all in one place. Learn how to create such an intelligent finance workbench in a short time using Joule Studio's **intent-based development**.
 
-## 24.1 Getting Started
+## 21.1 Getting Started
 
 1. Open **Joule Work** and choose **+ Create**.
 
@@ -51,7 +51,7 @@ Collections specialists are losing productive hours manually monitoring overdue 
 
     ![Intent generation](images/joule-studio-fi-collection-workbench/033-start-creation.png)
 
-## 24.2 Intent
+## 21.2 Intent
 
 This is where the tool tries to understand your intentions. The tool will attempt to understand your prompt and will likely ask you clarifying questions if you have not chosen quick-create as recommended above.
 
@@ -65,7 +65,7 @@ Once it decides it understands enough, it will map the challenge to SAP’s Refe
 
     ![Joule generates the PRD](images/joule-studio-fi-collection-workbench/055-intent-is-ready.png)
 
-## 24.3 Requirement
+## 21.3 Requirement
 
 When the requirement is ready, you have the opportunity to review and refine it. For this tutorial, you will accept suggested product requirement document without changes. To progress to the next phase, you need to transform the PRD into a technical specification.
 
@@ -79,7 +79,7 @@ Depending on your role in your company, you might be finished at this point and 
 
     ![Architecture](images/joule-studio-fi-collection-workbench/067-solution-architecture-section.png)
 
-## 24.4 Specification
+## 21.4 Specification
 
 When the specification is complete you could pass it on to another team to do the implementation. However, here you are going to get the tool to implement the solution. This might happen automatically if you have selected quick-create at the start.
 
@@ -87,7 +87,7 @@ When the specification is complete you could pass it on to another team to do th
 
     ![Generated solution code](images/joule-studio-fi-collection-workbench/070-spec-is-ready.png)
 
-## 24.5 Solution
+## 21.5 Solution
 
 1. Wait until the solution is implemented successfully. You can then preview your solution.
 

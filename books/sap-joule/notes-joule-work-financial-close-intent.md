@@ -7,7 +7,7 @@
 > - **SAP's tutorial:** [Draft a Financial Close Recommendation Agent Intent with Joule Work](https://developers.sap.com/tutorials/get-productive-with-joule-work-for-financial-closing-advisor) by Rebecca Yang · about 10 min · beginner
 > - **About this page:** *Added by Claude.* Written in my own words from SAP's tutorial, whose text and images may not be copied ([its licence](https://github.com/sap-tutorials/joule-studio/blob/main/LICENSE.txt)). The screen map is my own sketch; each step links to SAP's real screens.
 > - **You need:** Joule Work, and an S/4HANA Cloud system with a close in progress (only as context: nothing is written)
-> - **Do it before:** [the closing advisor notes](notes-financial-closing-advisor-agent.md) (chapter 31), where you paste the intent this produces
+> - **Do it before:** [the closing advisor notes](notes-financial-closing-advisor-agent.md) (chapter 28), where you paste the intent this produces
 > - **Last checked:** 22 Nov 2026
 
 **After this tutorial you can:**
@@ -16,7 +16,7 @@
 - Get Joule Work to write a Joule Studio intent statement for you, with all the guardrails in it
 - Check that intent for its required parts before you paste it
 
-## 32.1 What you do
+## 29.1 What you do
 
 Two turns in one Joule Work conversation, then you switch to Joule Studio.
 
@@ -25,7 +25,7 @@ flowchart LR
     A["Turn 1: ask your real<br/>close-day question"] --> B["Joule Work: no live<br/>close data; offers<br/>generic help"]
     B --> C["Turn 2: describe the<br/>agent you want and ask<br/>for a paste-ready intent"]
     C --> D["Joule Work: breakdown<br/>+ one plain paragraph"]
-    D --> E["Paste into Joule Studio<br/>(chapter 31)"]
+    D --> E["Paste into Joule Studio<br/>(chapter 28)"]
 ```
 
 **Screen map: a Joule Work conversation** *(my own sketch of the layout, not SAP's screenshot; numbers are SAP's steps)*
@@ -67,7 +67,7 @@ flowchart LR
 - **2** Same conversation: type the turn-2 request; the reply card holds the breakdown and the paragraph
 - **3** The `<>` icon opens Joule Studio, where the paragraph goes into the intent field
 
-## 32.2 Turn 1: ask the real close-day question (SAP step 1)
+## 29.2 Turn 1: ask the real close-day question (SAP step 1)
 
 - **Screen:** Joule Work → chat → new conversation → message box.
 - **What to ask:** copy SAP's turn-1 question from step 1. In short: you are a few days into the month-end close, with accruals, journals, reconciliations, intercompany, FX and sub-ledger tie-outs in flight; you have the task list and know the sequence, but you need help seeing where things actually stand in the numbers.
@@ -75,7 +75,7 @@ flowchart LR
 - **The point of turn 1:** the agent you need, one that reads live close data and ranks what to do with reasons, isn't available ready-made. That gap justifies building it.
 - [SAP's screens for step 1 ↗](https://developers.sap.com/tutorials/get-productive-with-joule-work-for-financial-closing-advisor#step-1)
 
-## 32.3 Turn 2: describe the agent and ask for the intent (SAP step 2)
+## 29.3 Turn 2: describe the agent and ask for the intent (SAP step 2)
 
 - **Same conversation.** Copy SAP's turn-2 request from step 2. In short: you want your own *Financial Close Recommendation Agent* that looks at live data in those six areas, ranks the work by materiality, blocking, deadline and risk, shows its evidence, flags anything odd or overdue, admits missing data instead of guessing, only recommends (never posts), stays short and ends with one next action. You ask for a structured breakdown **and** one plain paragraph with no headings or bullets.
 - **Check the paragraph contains all eight parts:**
@@ -96,13 +96,13 @@ flowchart LR
 - **Your paragraph will differ** from SAP's and from your next run. That's fine: Joule Studio reads the meaning, so it only has to contain all eight parts.
 - [SAP's screens for step 2 ↗](https://developers.sap.com/tutorials/get-productive-with-joule-work-for-financial-closing-advisor#step-2)
 
-## 32.4 Paste it into Joule Studio (SAP step 3)
+## 29.4 Paste it into Joule Studio (SAP step 3)
 
 - **Screen:** `<>` → Joule Studio → **Create** → new agent solution → paste the paragraph into *Intent Statement*.
-- **Then follow** [the closing advisor notes](notes-financial-closing-advisor-agent.md) (chapter 31) through requirements, specification, build, tests and deployment. Once deployed, you can call the agent back in Joule Work on close day.
+- **Then follow** [the closing advisor notes](notes-financial-closing-advisor-agent.md) (chapter 28) through requirements, specification, build, tests and deployment. Once deployed, you can call the agent back in Joule Work on close day.
 - [SAP's screens for step 3 ↗](https://developers.sap.com/tutorials/get-productive-with-joule-work-for-financial-closing-advisor#step-3)
 
-## 32.5 Pitfalls
+## 29.5 Pitfalls
 
 - **Turn 1 is not a dead end.** Whatever Joule Work offers, the signal is the same: the agent you need isn't off the shelf.
 - **Don't paste the breakdown,** only the single paragraph.

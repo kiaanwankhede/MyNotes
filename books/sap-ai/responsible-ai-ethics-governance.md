@@ -416,6 +416,13 @@ flowchart LR
 - Bias comes from data; mask what should not matter, measure fairness and keep people in decisions about people
 - SAP's AI Terms leave output and agent actions to the customer, and keep customer data out of third-party training
 
+## 🧪 Try it hands-on
+
+*Added by Claude: SAP's own tutorials in this book that let you try what this chapter teaches.*
+
+- **Data masking and content filtering:** [Leveraging Orchestration(V2) Capabilities to Enhance Responses](tutorial-ai-core-orchestration-consumption-opt-v2.md)
+- **Grounding, to cut made-up answers:** [Orchestration(V2) with Grounding Capabilities](tutorial-ai-core-orchestration-grounding-v2.md), then check it with [GenAI Grounding Evaluations](tutorial-ai-core-genaihub-evaluation-with-grounding.md)
+
 ## Practice
 
 1. Run the doctor and nurse test from 6.6 in any chat model. Then ask it to continue the story "without assuming gender", and compare.

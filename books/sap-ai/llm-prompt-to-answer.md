@@ -468,6 +468,13 @@ choose       context window · speed · cost · risk; pin the version; test on y
 - LLMs generate rather than retrieve, so answers vary and can be wrong; ground them in real data
 - Tokens are billed per million, output more than input; choose models by context, speed, cost and risk
 
+## 🧪 Try it hands-on
+
+*Added by Claude: SAP's own tutorials in this book that let you try what this chapter teaches.*
+
+- **Send prompts and change the model settings:** [Prompt LLMs in the generative AI hub in SAP AI Core & Launchpad](tutorial-ai-core-generative-ai.md)
+- **Run a small open model yourself:** [Using small language models on SAP AI Core](tutorial-ai-core-custom-slm.md)
+
 ## Practice
 
 1. In the OpenAI tokenizer, compare "SAP S/4HANA", "sap s/4hana" and "SAPS4HANA". Count the tokens and explain the difference.

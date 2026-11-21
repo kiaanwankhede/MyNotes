@@ -4,7 +4,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Use Joule Studio to Create an Assistant for Equipment Troubleshooting](https://developers.sap.com/tutorials/joule-studio-scm-equipment-assistant) by Zeena Qarqash · about 20 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/sap-build-process-automation](https://github.com/sap-tutorials/sap-build-process-automation/blob/main/tutorials/joule-studio-scm-equipment-assistant/)
-> - **Changes for this book:** page layout; steps numbered 26.1 to 26.5; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 23.1 to 23.5; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 Use Joule studio to create and test an agent for intelligent maintenance assistance in supply chain management
@@ -33,7 +33,7 @@ Use Joule studio to create and test an agent for intelligent maintenance assista
 
 Using Joule Studio's **intent-based development**, learn to create an intelligent Supply Chain Management (SCM) assistant that helps technicians quickly access equipment history and troubleshooting guidance.
 
-## 26.1 Get Started
+## 23.1 Get Started
 
 1. Open **Joule Work** and select the **Develop** area.
 
@@ -63,7 +63,7 @@ Using Joule Studio's **intent-based development**, learn to create an intelligen
 
 4. Choose **Create**.
 
-## 26.2 Intent
+## 23.2 Intent
 
 1. This is where the tool tries to understand your intentions. The tool will attempt to understand your prompt and will likely ask you clarifying questions if you have not chosen **Quick Create** as recommended above. Once it decides it understands enough, it will map the challenge to SAP's Reference Business Architecture and performs a fit-gap analysis. It has access to SAP Knowledge Graph, SAP LeanIX, and SAP Domain Models to help it create the intent document. Intent fit indicates how closely the proposed solution corresponds to your requirement.
 
@@ -82,7 +82,7 @@ Through its integration with SAP Signavio, Joule can map your intent to the rele
 
     ![intent-fit](images/joule-studio-scm-equipment-assistant/013bis-intent-fit.png)
 
-## 26.3 Requirements
+## 23.3 Requirements
 
 When the requirement is ready, you have the opportunity to review and refine it. For this tutorial, you will accept suggested Product Requirement Document (PRD) without changes. To progress to the next phase, you need to transform the PRD into a technical specification.
 
@@ -96,7 +96,7 @@ If you need to update the PRD manually, you can simply click on the text in the 
 
 ![Technical  overview](images/joule-studio-scm-equipment-assistant/014bis-edit-PRD.png)
 
-## 26.4 Specification
+## 23.4 Specification
 
 Once the specification is complete, you could hand it over to another team for implementation. However, here, you can have the tool implement the agent for you. This may happen automatically if you selected **Quick Create** at the start.
 
@@ -109,7 +109,7 @@ While the solution is being generated, you can explore the specification in the 
    The tool will work through the tasks defined in the specification. When it is finished, it will start building the agent.
 ![Solution code](images/joule-studio-scm-equipment-assistant/080bis-implementation-in-progress.png)
 
-## 26.5 Solution
+## 23.5 Solution
 
 1. Wait until the implementation is finished successfully. That includes the successful automated tests.
 

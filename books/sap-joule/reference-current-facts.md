@@ -9,7 +9,7 @@
 > - **Level:** reference
 > - **Last checked:** 21 Nov 2026
 
-## 21.1 How to re-check
+## 40.1 How to re-check
 
 
 1. Open the chapter's source for the fact (listed in that chapter's *Sources*).
@@ -22,7 +22,7 @@
 > - After SAP Sapphire (May) and TechEd (autumn), when SAP announces most changes.
 > - At each AI-unit or BTP contract renewal.
 
-## 21.2 Prices and SKUs
+## 40.2 Prices and SKUs
 
 | Fact | Value | Checked | Chapter |
 |---|---|---|---|
@@ -35,7 +35,7 @@
 | Partner test licence | TDD Joule Base, SKU 8020592 | 21 Nov 2026 | [3.2](joule-studio-classic.md) |
 | Joule for Developers, ABAP | free licence on request: SKU 8019124 (customers), 8019541 (partners) | 20 Nov 2026 | [2.8](joule-family.md) |
 
-## 21.3 Free offers and end dates
+## 40.3 Free offers and end dates
 
 | Fact | Value | Checked | Chapter |
 |---|---|---|---|
@@ -44,7 +44,7 @@
 | AI quota in Business Application Studio | free quota in SAP Build Code and SAP Build ends 31 Dec 2026; bring your own key from 1 Jan 2027 | 21 Nov 2026 | [14](tutorial-joule-bas-full-stack-cap.md) |
 | Generative AI features in Joule Studio | deprecated; no longer available from January 2027 | 21 Nov 2026 | [3.1](joule-studio-classic.md) |
 
-## 21.4 Counts and quotas
+## 40.4 Counts and quotas
 
 | Fact | Value | Checked | Chapter |
 |---|---|---|---|
@@ -54,7 +54,7 @@
 | Document grounding certificate | service key valid 365 days | 21 Nov 2026 | [16.5](joule-integration-other-sap-solutions.md) |
 | S/4HANA Public Edition rate limit | 3,000 Joule requests per minute per tenant (SAP's 2024 guide) | 21 Nov 2026 | [16.3](joule-integration-other-sap-solutions.md) |
 
-## 21.5 Release changes that alter the steps
+## 40.5 Release changes that alter the steps
 
 | Change | Effect | Checked | Chapter |
 |---|---|---|---|
@@ -75,4 +75,4 @@
 
 - The chapters linked in each row, and their *Sources* sections.
 
-Previous: [Reference: Glossary](reference-glossary.md) · Next: [Tutorial: Use Joule Studio to Create an AI Assistant for Sales Reps](tutorial-joule-studio-cx-agent-create.md)
+Previous: [Reference: Glossary](reference-glossary.md) · Next: [SAP Joule book introduction](README.md)

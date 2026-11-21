@@ -4,7 +4,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Build a Billing Completeness Data Product with Joule Studio](https://developers.sap.com/tutorials/joule-studio-bdc-agent-create) by Fenja Schulz · about 20 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/sap-build-process-automation](https://github.com/sap-tutorials/sap-build-process-automation/blob/main/tutorials/joule-studio-bdc-agent-create/)
-> - **Changes for this book:** page layout; steps numbered 28.1 to 28.4; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 25.1 to 25.4; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 Use Joule Studio to build a Billing Completeness Data Product using SAP S/4HANA order-to-cash data.
@@ -38,7 +38,7 @@ In this tutorial, you will use Joule Studio to generate a data product and AI ag
 
 ---
 
-## 28.1 Getting Started
+## 25.1 Getting Started
 
 1. Go to **Joule Work** and choose **<> Develop**.
 
@@ -61,7 +61,7 @@ In this tutorial, you will use Joule Studio to generate a data product and AI ag
 
     ![Joule Work](images/joule-studio-bdc-agent-create/joule-work-03.png)
 
-## 28.2 Intent
+## 25.2 Intent
 
 This is where the tool tries to understand your intentions. The tool will attempt to understand your prompt and will likely ask you clarifying questions if you have not chosen quick-create as recommended above.
 
@@ -75,7 +75,7 @@ Once it decides it understands enough, it will map your request to the correct f
 
 Once the intent document is created, we will skip the Requirement and Specification phase, since we directly created the Data Product. This might happen automatically if you have selected quick-create at the start.
 
-## 28.3 Solution
+## 25.3 Solution
 
 Once you have approved all steps and transformations, you will see the data product in view mode. You might also be asked whether you would like to see a preview of your created data.
 In this demo landscape, you have to enter the following promt for data preview: **`show a data preview of the first 10 rows in md format`**
@@ -90,7 +90,7 @@ In this demo landscape, you have to enter the following promt for data preview: 
 
 Congratulations, you have created your first data product using Data Product Creation Agent and Joule Studio!
 
-## 28.4 Test
+## 25.4 Test
 
 For the Agent Lab at SAPPHIRE, you will not be deploying an agent. Instead, you can try out an agent we have pre-deployed which shows how analytics can be created on an analytic model which is built on top of the derived data product from the previous section.
 

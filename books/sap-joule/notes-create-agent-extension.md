@@ -16,7 +16,7 @@
 - Create an instruction extension for a delivered agent from a plain-language intent
 - Tell apart the four extension layers: pre-hook, tool extension, instruction extension, post-hook
 
-## 39.1 What you build
+## 36.1 What you build
 
 SAP's **Journal Entry agent** (part of the Financial Closing Assistant) turns a request or an uploaded file into a journal entry proposal in S/4HANA Cloud Public Edition, with no extra checks. Real finance teams want more, and extensions add it without building a new agent.
 
@@ -129,12 +129,12 @@ flowchart LR
 - **5** The chat: generate requirements, create the specification, build; the result is in Solution Artifacts
 - **6** Optional: a second extension, same flow
 
-## 39.2 Prepare (SAP step 2)
+## 36.2 Prepare (SAP step 2)
 
 - Download SAP's sample file `agent_lab_journal_entry.xlsx` from step 2 and save it on your desktop.
 - [SAP's screens for step 2 ↗](https://developers.sap.com/tutorials/create-agent-extension#step-2)
 
-## 39.3 See the standard agent first (SAP step 3)
+## 36.3 See the standard agent first (SAP step 3)
 
 - **Optional, but useful:** it shows the behaviour you are about to change.
 - **Screen:** Joule Work chat. Address the assistant by name with `@Financial Closing Assistant`, followed by a request to create a journal entry proposal from a file (SAP's exact prompt is in step 3).
@@ -142,7 +142,7 @@ flowchart LR
 - **Result:** a proposal, ready in the *Manage Journal Entry Proposals* app. No checks, no flags, no report: that's the baseline.
 - [SAP's screens for step 3 ↗](https://developers.sap.com/tutorials/create-agent-extension#step-3)
 
-## 39.4 Create an instruction extension (SAP step 4)
+## 36.4 Create an instruction extension (SAP step 4)
 
 - **Screen:** Joule Studio → **Create** on the **Extension** tile → *Create an Agent Extension*.
 - **Pick the agent:** search the *Agent Catalog* for the Journal Entry agent → **Add**. You see its available extension points. → **Select Agent**.
@@ -150,14 +150,14 @@ flowchart LR
 - **Create**, then answer the questions (pick a business reason, **Submit Answer**; they vary), confirm the intent analysis, and read **Intent Summary** (also `intent.md` in the *File tree*).
 - [SAP's screens for step 4 ↗](https://developers.sap.com/tutorials/create-agent-extension#step-4)
 
-## 39.5 Requirements, specification, build (SAP step 5)
+## 36.5 Requirements, specification, build (SAP step 5)
 
 - **In the chat:** generate the requirements, then create the specification, then build the solution.
 - **What you get:** clarifying questions, an intent summary and PRD, and a ready-to-deploy **`extension.yaml`**, with no hand-written YAML.
 - ⚠️ **Don't deploy it in SAP's lab:** your lab user isn't allowed to, and a deployed extension would affect the other participants.
 - [SAP's screens for step 5 ↗](https://developers.sap.com/tutorials/create-agent-extension#step-5)
 
-## 39.6 Optional: a four-layer extension (SAP step 6)
+## 36.6 Optional: a four-layer extension (SAP step 6)
 
 - **Same agent, a new extension** named `Journal Entry Extension`. Copy SAP's longer intent from step 6.
 - **What that intent asks for:**
@@ -169,7 +169,7 @@ flowchart LR
 - ⚠️ **This part needs features your system may not have.** If MCP tools and n8n hooks are switched off, Joule says so and proposes a reduced scope.
 - [SAP's screens for step 6 ↗](https://developers.sap.com/tutorials/create-agent-extension#step-6)
 
-## 39.7 Pitfalls
+## 36.7 Pitfalls
 
 - **An extension changes SAP's agent for everyone using it.** That's why the lab forbids deploying.
 - **Hooks and tool extensions depend on tenant features** (MCP tools, n8n hooks).

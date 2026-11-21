@@ -366,4 +366,4 @@ spec:
 
 </details>
 
-Previous: [Tutorial: Orchestration with Grounding Capabilities in SAP AI Core](tutorial-ai-core-orchestration-grounding.md) · Next: [Tutorial: Multimodal Response Assistant Chatbot Using SAP AI Core](tutorial-ai-core-genaihub-multimodal-usage.md)
+Previous: [Tutorial: Orchestration with Grounding Capabilities in SAP AI Core (V1, deprecated)](tutorial-ai-core-orchestration-grounding.md) · Next: [Tutorial: Multimodal Response Assistant Chatbot Using SAP AI Core](tutorial-ai-core-genaihub-multimodal-usage.md)

@@ -9,6 +9,12 @@
 > - **Changes for this book:** page layout; steps numbered 21.1 to 21.8; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
+> [!WARNING]
+> **⚠️ Older API: orchestration V1**
+> - SAP has deprecated the Orchestration V1 workflow API. It is due to be switched off on **31 December 2026**, a date SAP moved from 31 October 2026 ([What's New for SAP AI Core](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/what-s-new-for-sap-ai-core), entry of 22 Oct 2026, checked 22 Nov 2026).
+> - Learn and build with the V2 version instead: [Orchestration(V2) with Grounding Capabilities in SAP AI Core](tutorial-ai-core-orchestration-grounding-v2.md). Keep this page for reading older code.
+> - *Added by Claude*
+
 ## You will learn
 - How to set up orchestration pipelines, enable document grounding, and perform vector retrieval using SAP AI Core's grounding capabilities
 

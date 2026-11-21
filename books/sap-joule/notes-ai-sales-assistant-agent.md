@@ -11,7 +11,7 @@
 >   - SAP S/4HANA Cloud: sales order history (Sales Order API), pricing and margin data (Pricing Conditions or Sales Order Simulation API)
 >   - SAP Sales Cloud: open opportunities, deal stage and forecast (Opportunity API)
 >   - some opportunity-to-order knowledge
-> - **Builds on:** [The new Joule Studio](joule-studio-intent-based.md) (chapter 4), [the supplier performance notes](notes-supplier-performance-assistant-agent.md) (chapter 36, the same flow)
+> - **Builds on:** [The new Joule Studio](joule-studio-intent-based.md) (chapter 4), [the supplier performance notes](notes-supplier-performance-assistant-agent.md) (chapter 33, the same flow)
 > - **Last checked:** 22 Nov 2026
 
 **After this tutorial you can:**
@@ -20,7 +20,7 @@
 - Check a recommendation agent's guardrails: no writes, a margin floor, partial data, prompt injection
 - Fix the two most likely test failures and read the reasoning in Traces
 
-## 37.1 What you build
+## 34.1 What you build
 
 A discount adviser for the moment of negotiation. Today the rep combines order history (S/4HANA), the pipeline (Sales Cloud) and margin targets (S/4HANA pricing) in their head, sees the margin effect only after the order is posted, writes down no reason, and every rep discounts differently.
 
@@ -107,7 +107,7 @@ flowchart LR
 - **6** The chat (start the build), Solution Artifacts, `agent.py` in the File tree
 - **7** Testing → Overview, Preview with Traces · **8** Deploy, **Actions** for GitHub sync, **Manage**
 
-## 37.2 Create the agent with a two-sentence intent (SAP step 2)
+## 34.2 Create the agent with a two-sentence intent (SAP step 2)
 
 - **Screen:** Joule Work → `<>` (Joule Studio) → *Create a new solution* → **Create** on the **Agent** tile.
 - **In the dialog:** keep **New Solution** · *Name* `AI Sales Assistant` · *Intent*: copy SAP's text from step 2 (a discount suggestion agent that analyses orders, pipeline and margin targets from Sales Cloud and S/4HANA Cloud and gives reps contextual recommendations).
@@ -115,7 +115,7 @@ flowchart LR
 - 💡 **Why two sentences are enough:** they name the purpose (discount advice), the systems (Sales Cloud and S/4HANA Cloud), the data (orders, pipeline, margin targets) and the user (sales reps).
 - [SAP's screens for step 2 ↗](https://developers.sap.com/tutorials/build-an-ai-sales-assistant-agent#step-2)
 
-## 37.3 Check intent, milestones and fit (SAP step 3)
+## 34.3 Check intent, milestones and fit (SAP step 3)
 
 - **Screen:** *Solution Progress* → **Intent Summary**.
 - **The challenge should say:** reps can't see history, pipeline and margin together, which leads to too much discount (lost margin) or too little (lost deals), and the agent advises at the moment of negotiation.
@@ -124,7 +124,7 @@ flowchart LR
 - **Intent fit** of about 80% or more is good; lower means a missing element (purpose, systems, data or user).
 - [SAP's screens for step 3 ↗](https://developers.sap.com/tutorials/build-an-ai-sales-assistant-agent#step-3)
 
-## 37.4 Review the requirements (SAP step 4)
+## 34.4 Review the requirements (SAP step 4)
 
 - **Screen:** *Solution Progress* → **Requirements**. Users: sales reps and managers. Check the business metric you gave is in *Business Metrics*.
 - **Must-haves:** order history, pipeline data, margin reasoning, the recommendation, and chat-style refinement.
@@ -136,21 +136,21 @@ flowchart LR
 
 - [SAP's screens for step 4 ↗](https://developers.sap.com/tutorials/build-an-ai-sales-assistant-agent#step-4)
 
-## 37.5 Look at the specification (SAP step 5)
+## 34.5 Look at the specification (SAP step 5)
 
 - **Screen:** *Solution Progress* → **Specifications**: *Solution Setup*, then *Asset Implementation*.
 - **The chat summary** maps the case to SAP's Lead to Cash process (sales planning and performance). No ready-made MCP servers exist for these APIs, so Joule Studio generates them from the API specs (downloaded as EDMX).
 - **MCP servers** (usually 2 to 4, read-only): sales orders (S/4HANA), pricing or margin (Pricing Conditions *or* Sales Order Simulation, depending on the run), opportunities (Sales Cloud).
 - [SAP's screens for step 5 ↗](https://developers.sap.com/tutorials/build-an-ai-sales-assistant-agent#step-5)
 
-## 37.6 Build the solution (SAP step 6)
+## 34.6 Build the solution (SAP step 6)
 
 - **In *Message Joule*:** `execute specification/specification.md` (or "Build the solution"); ask "What is the status?" if it stalls.
 - **Screen:** *Solution Artifacts* → the agent: *LLM Configuration* (a low creativity setting, so the same input gives the same advice) and *Agent Configurations*. Code: *File tree* → `assets` → agent → `app` → `agent.py`.
 - **MCP Servers** show typed tools generated from each OData spec. **Evaluation → Generate scenarios** creates a first set.
 - [SAP's screens for step 6 ↗](https://developers.sap.com/tutorials/build-an-ai-sales-assistant-agent#step-6)
 
-## 37.7 Test and preview (SAP step 7)
+## 34.7 Test and preview (SAP step 7)
 
 - **Tests run by themselves:** content safety, prompt-injection resistance, each server's tools, and the full read → reason → recommend path.
 - **When tests fail:**
@@ -163,14 +163,14 @@ flowchart LR
 - **Preview → the agent:** ask for a discount strategy for SAP's demo customer *Best Run SAP Company*. The **Traces** tab shows the tools called, the data returned and the reasoning.
 - [SAP's screens for step 7 ↗](https://developers.sap.com/tutorials/build-an-ai-sales-assistant-agent#step-7)
 
-## 37.8 Deploy to development (SAP step 8)
+## 34.8 Deploy to development (SAP step 8)
 
 - **Screen:** **Deploy** in the top bar, then **Deploy** in the dialog; `deploy_result.json` gets the endpoint and runtime ID. **GitHub sync** is under **Actions**; production isn't deployed from Joule Studio.
 - **In use:** a rep asks Joule what discount to offer on a deal, and Joule routes it here. The agent reads the sources (carrying on if one fails), calculates the margin for each candidate discount in SAP without posting, classifies the risk, and answers with a range, the margin impact, the risk and the reason. A new percentage in a follow-up triggers a fresh margin calculation. Everything is logged; applying the discount stays the rep's job.
 - **Monitor** it under **Manage**.
 - [SAP's screens for step 8 ↗](https://developers.sap.com/tutorials/build-an-ai-sales-assistant-agent#step-8)
 
-## 37.9 Pitfalls
+## 34.9 Pitfalls
 
 - **Pricing must be maintained** for the test customer, or the margin server's tests fail.
 - **The injection guard can be too strict** and block harmless input; tune it, don't switch it off.

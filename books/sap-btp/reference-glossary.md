@@ -21,7 +21,7 @@
 | **IaaS / PaaS / SaaS** | Rent the hardware / also the platform / the finished application | [1](cloud-computing-service-models.md) |
 | **IAS** | Identity Authentication: SAP's login service in Cloud Identity Services | [10](btp-identity-trust-federation.md) |
 | **IDS** | Identity Directory: the user store in Cloud Identity Services | [10](btp-identity-trust-federation.md) |
-| **IPS** | Identity Provisioning: copies users and groups from a source system to a target | [10](btp-identity-trust-federation.md), [SAP Joule 19.5](../sap-joule/reference-joule-setup-building-blocks.md) |
+| **IPS** | Identity Provisioning: copies users and groups from a source system to a target | [10](btp-identity-trust-federation.md), [SAP Joule 38.5](../sap-joule/reference-joule-setup-building-blocks.md) |
 | **OIDC** | OpenID Connect: the token-based trust protocol, preferred over SAML for BTP trust | [10](btp-identity-trust-federation.md) |
 | **PAYG** | Pay-As-You-Go: BTP billed monthly for what you use, no upfront commitment | [9](btp-directories-tiers-commercial-models.md) |
 | **RISE / GROW** | SAP's cloud offers: RISE for existing ERP customers moving to S/4HANA Cloud (usually Private Edition); GROW for new customers starting on Public Edition | [2](sap-cloud-journey-btp-landscape.md), [SAP AI 1](../sap-ai/sap-ai-landscape.md) |
@@ -36,7 +36,7 @@
 |---|---|---|
 | **Booster** | A guided setup wizard in the global account | [6](btp-global-account-tools.md) |
 | **Cloud Connector** | On-premise software that opens a secure tunnel to BTP | [8](btp-subaccount-walkthrough.md) |
-| **Destination** | Stored connection details for another system, used by name | [8](btp-subaccount-walkthrough.md), [SAP Joule 19.2](../sap-joule/reference-joule-setup-building-blocks.md) |
+| **Destination** | Stored connection details for another system, used by name | [8](btp-subaccount-walkthrough.md), [SAP Joule 38.2](../sap-joule/reference-joule-setup-building-blocks.md) |
 | **Directory** | A folder of subaccounts in a global account, with its own licences and admins | [9](btp-directories-tiers-commercial-models.md) |
 | **Entitlement** | Permission to use a service plan, assigned to a subaccount | [4](btp-account-model-first-subscription.md) |
 | **Environment (BTP)** | A runtime for your own code: Cloud Foundry, Kyma or ABAP | [8](btp-subaccount-walkthrough.md) |

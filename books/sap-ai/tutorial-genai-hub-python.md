@@ -292,6 +292,15 @@ print(len(vector))          # 1536 in the course run
 >
 > *Added by Claude*
 
+## 🧪 Try it hands-on
+
+*Added by Claude: SAP's own tutorials in this book that let you try what this chapter teaches.*
+
+- **Set up the SDK and service key:** [Set Up Tools to Connect With SAP AI Core](tutorial-ai-core-setup.md)
+- **Orchestration from code:** [Consumption of GenAI models Using Orchestration(V2)](tutorial-ai-core-orchestration-consumption-v2.md), then [Leveraging Orchestration(V2) Capabilities](tutorial-ai-core-orchestration-consumption-opt-v2.md)
+- **Images in, text out:** [Multimodal Response Assistant Chatbot](tutorial-ai-core-genaihub-multimodal-usage.md)
+- **Many requests in one job:** [Batch Consumption](tutorial-ai-core-genaihub-batch-consumption.md)
+
 ## Check yourself
 
 <details class="qa"><summary>Why does importing the chat client fail before you load the key?</summary>

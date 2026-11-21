@@ -10,7 +10,7 @@
 > - **Builds on:** [Global account tools](../sap-btp/btp-global-account-tools.md), [Subaccount walkthrough](../sap-btp/btp-subaccount-walkthrough.md), [Identity and trust](../sap-btp/btp-identity-trust-federation.md), [Joule for Consultants](joule-for-consultants.md), [The Joule family](joule-family.md)
 > - **Last checked:** 21 Nov 2026
 
-## 19.1 How the blocks fit
+## 38.1 How the blocks fit
 
 ```mermaid
 flowchart LR
@@ -36,7 +36,7 @@ flowchart LR
 8. Permissions for users in the product and in BTP.
 9. Test in Joule from the product.
 
-## 19.2 Destinations
+## 38.2 Destinations
 
 - A **destination** stores how to reach another system: URL, authentication, user or OAuth client ([SAP BTP 8.10](../sap-btp/btp-subaccount-walkthrough.md)).
 - You create it in the **subaccount**. Joule Studio sees it only after an admin adds it in the **control tower** ([3.3](joule-studio-classic.md)).
@@ -53,7 +53,7 @@ flowchart LR
 | SharePoint destination | Document grounding | `https://graph.microsoft.com`, OAuth2Password, scope `…/.default` | [16.5](joule-integration-other-sap-solutions.md) |
 | `NavigationService` | Older Joule setups | Not needed by hand for setups after 13 Oct 2025 | [13](tutorial-joule-sac-analytical-insights.md) |
 
-## 19.3 Booster and formation
+## 38.3 Booster and formation
 
 - A **booster** is a guided setup wizard in the global account ([SAP BTP 6.3](../sap-btp/btp-global-account-tools.md)).
 - A **formation** groups SAP systems for one scenario and sets up baseline trust between them ([SAP BTP 6.5](../sap-btp/btp-global-account-tools.md)).
@@ -64,7 +64,7 @@ flowchart LR
 - **Joule already running?** Do not run the booster again: add the system to the existing formation instead ([13](tutorial-joule-sac-analytical-insights.md), [16.3](joule-integration-other-sap-solutions.md)).
 - **Registering a system** first: *Systems → Add System → Get Token*, then paste the token in the product ([15](joule-integration-successfactors.md) for SuccessFactors, [16.3](joule-integration-other-sap-solutions.md) for S/4HANA Public).
 
-## 19.4 SAP Build Work Zone: the content provider
+## 38.4 SAP Build Work Zone: the content provider
 
 - Work Zone's navigation service decides which apps and content a user may reach through Joule.
 - It needs two inputs: the product's **roles and content** (content provider), and the **users with their roles** (Identity Provisioning).
@@ -73,18 +73,18 @@ flowchart LR
 | Field | Usual value |
 |---|---|
 | Title / ID | `sac.analytics` (SAC), `sfsf` (SuccessFactors), your own ID (S/4HANA) |
-| Design-Time / Runtime Destination | the product's DT and RT destinations (19.2) |
+| Design-Time / Runtime Destination | the product's DT and RT destinations (38.2) |
 | Runtime Destination for Dynamic Data | Use default runtime destination |
 | Automatically add all content items to subaccount | on |
 | Use the Identity Provisioning service to provision user authorizations | on |
 
-- The **service key** of the Work Zone instance feeds the Identity Provisioning target (19.5).
+- The **service key** of the Work Zone instance feeds the Identity Provisioning target (38.5).
 
-## 19.5 Identity Provisioning (IPS)
+## 38.5 Identity Provisioning (IPS)
 
 - IPS copies **users** and their **roles as groups** from a source system to a target system ([SAP BTP 10.3](../sap-btp/btp-identity-trust-federation.md)).
 - For Joule, the target is **SAP Build Work Zone, standard edition**. Its properties come from the Work Zone service key; [15.2](joule-integration-successfactors.md) has a snippet that builds them.
-- The target's `cflp.providerId` must equal the content provider ID (19.4).
+- The target's `cflp.providerId` must equal the content provider ID (38.4).
 
 | Source | Settings that matter | Chapter |
 |---|---|---|
@@ -95,7 +95,7 @@ flowchart LR
 
 **Jobs, in this order:** *Simulate* → check *Provisioning Logs* → *Read* → check again → *Resync* if roles are missing → **schedule** *Read* at least every 24 hours.
 
-## 19.6 AI units
+## 38.6 AI units
 
 - SAP's currency for **Premium AI**, bought yearly into one pool. Base AI needs none ([1.6](joule-for-consultants.md), [2.8](joule-family.md)).
 
@@ -117,4 +117,4 @@ flowchart LR
 
 - The chapters linked in each section above.
 
-Previous: [Practice: 10 Joule agent assignments](practice-joule-agents.md) · Next: [Reference: Glossary](reference-glossary.md)
+Previous: [Tutorial notes: Create an invoice exception workflow with n8n in Joule Studio](notes-invoice-exception-agent-n8n.md) · Next: [Reference: Glossary](reference-glossary.md)

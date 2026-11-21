@@ -10,7 +10,7 @@
 >   - Joule Studio
 >   - SAP S/4HANA Cloud with supplier evaluation scores (Supplier Evaluation Scorecard API), operational KPI trends (Operational Score API), purchase order history (Purchase Order API), and maintained approved-supplier data
 >   - some procure-to-pay and supplier evaluation knowledge
-> - **Builds on:** [The new Joule Studio](joule-studio-intent-based.md) (chapter 4), [the closing advisor notes](notes-financial-closing-advisor-agent.md) (chapter 31)
+> - **Builds on:** [The new Joule Studio](joule-studio-intent-based.md) (chapter 4), [the closing advisor notes](notes-financial-closing-advisor-agent.md) (chapter 28)
 > - **Last checked:** 22 Nov 2026
 
 **After this tutorial you can:**
@@ -19,7 +19,7 @@
 - Check milestones, fit-gap findings and the guardrails of a read-only advisory agent
 - Diagnose the two most likely test failures, and read the agent's reasoning in Traces
 
-## 36.1 What you build
+## 33.1 What you build
 
 An early-warning assistant for procurement managers. Supplier reviews happen monthly or quarterly, but problems build up in weeks; the three data sources sit in separate Fiori apps; alternatives are searched by hand under pressure; and nobody records why a supplier was flagged.
 
@@ -102,7 +102,7 @@ flowchart LR
 - **6** The chat (start the build), Solution Artifacts (LLM, MCP servers, Evaluation), `agent.py` in the File tree
 - **7** Testing → Overview, Preview with its Traces tab · **8** Deploy, **Actions** for GitHub sync, **Manage**
 
-## 36.2 Create the agent with a one-sentence intent (SAP step 2)
+## 33.2 Create the agent with a one-sentence intent (SAP step 2)
 
 - **Screen:** Joule Work → **Joule Studio**. The *Create a new solution* page offers four solution types; choose **Create** on the **Agent** tile.
 - **In the dialog:** keep **New Solution** · *Name* `Supplier Performance Assistant` · *Intent*: copy SAP's one sentence from step 2 (monitor supplier performance, find at-risk suppliers, recommend approved alternatives, using SAP procurement data).
@@ -111,7 +111,7 @@ flowchart LR
 - 💡 **Why one sentence is enough:** it names the purpose (monitor), the decision (who is at risk), the action (recommend alternatives) and the data (SAP procurement data). Joule Studio works out the APIs, thresholds and guardrails.
 - [SAP's screens for step 2 ↗](https://developers.sap.com/tutorials/build-a-supplier-performance-assistant-agent#step-2)
 
-## 36.3 Check intent, milestones and fit (SAP step 3)
+## 33.3 Check intent, milestones and fit (SAP step 3)
 
 - **Screen:** *Solution Progress* → **Intent Summary**: business challenge, business goals table, key milestones.
 - **The challenge should say** that teams spot bad suppliers too late, that today's review is manual and reactive, and that the agent must monitor continuously, flag and suggest alternatives.
@@ -120,7 +120,7 @@ flowchart LR
 - **Intent fit:** about 80% or more is a strong match. Much lower usually means one of the four elements is missing from the intent.
 - [SAP's screens for step 3 ↗](https://developers.sap.com/tutorials/build-a-supplier-performance-assistant-agent#step-3)
 
-## 36.4 Review the requirements (SAP step 4)
+## 33.4 Review the requirements (SAP step 4)
 
 - **Screen:** *Solution Progress* → **Requirements**. Category *AI Agent*; users are procurement and category managers. Check the meaning, not SAP's exact wording.
 - **Check** that *Business Metrics* carries the goal you confirmed, and that *Solution Architecture* lists the Python A2A agent and one MCP server per OData API.
@@ -132,14 +132,14 @@ flowchart LR
 
 - [SAP's screens for step 4 ↗](https://developers.sap.com/tutorials/build-a-supplier-performance-assistant-agent#step-4)
 
-## 36.5 Look at the specification (SAP step 5)
+## 33.5 Look at the specification (SAP step 5)
 
 - **Screen:** *Solution Progress* → **Specifications**: a *Solution Setup* part and *Asset Implementation* parts. Expand the agent's entry: each PRD requirement becomes a setup → API specs → implementation sequence.
 - **Read the chat summary:** S/4HANA as the core system (Ariba excluded), the PRD's must-haves and guardrails, and the OData specs downloaded as EDMX files.
 - **MCP servers:** usually 2 to 4, one per API Joule chose (scorecards, operational scores, purchase orders), all read-only.
 - [SAP's screens for step 5 ↗](https://developers.sap.com/tutorials/build-a-supplier-performance-assistant-agent#step-5)
 
-## 36.6 Build the solution (SAP step 6)
+## 33.6 Build the solution (SAP step 6)
 
 - **In the chat's *Message Joule* box:** `execute specification/specification.md` (or "Build the solution"). If it goes quiet, ask "What is the status?". The build takes several minutes.
 - **Screen:** *Solution Artifacts* → the agent: *LLM Configuration* (model and a low creativity setting for repeatable advice) and *Agent Configurations*; defaults are fine.
@@ -148,7 +148,7 @@ flowchart LR
 - **Evaluation:** a new solution shows no evaluations; choose **Generate scenarios** to create a first set.
 - [SAP's screens for step 6 ↗](https://developers.sap.com/tutorials/build-a-supplier-performance-assistant-agent#step-6)
 
-## 36.7 Test and preview (SAP step 7)
+## 33.7 Test and preview (SAP step 7)
 
 - **Tests run by themselves:** content safety, prompt-injection resistance, each MCP server's tools, and the full read → detect → recommend path. All must pass before **Deploy**.
 - **When tests fail:**
@@ -162,14 +162,14 @@ flowchart LR
 - **Traces tab:** shows each reasoning step, which MCP tools ran, what came back, and how it reached its verdict.
 - [SAP's screens for step 7 ↗](https://developers.sap.com/tutorials/build-a-supplier-performance-assistant-agent#step-7)
 
-## 36.8 Deploy to development (SAP step 8)
+## 33.8 Deploy to development (SAP step 8)
 
 - **Screen:** **Deploy** in the top bar, then **Deploy** in the dialog. Agent and MCP servers go to SAP's managed service on the Business AI Platform; `deploy_result.json` gets the endpoint and runtime ID. **GitHub sync** is under **Actions**; production isn't deployed from Joule Studio.
 - **In use:** a manager asks Joule about at-risk suppliers or alternatives, and Joule routes the question to this agent. It reads the sources (carrying on if one fails), classifies, finds approved alternatives, writes the advice with reasons, answers follow-ups from the same context, and logs every step with OpenTelemetry. Any re-sourcing stays the manager's job in standard SAP.
 - **Monitor** it under **Manage**.
 - [SAP's screens for step 8 ↗](https://developers.sap.com/tutorials/build-a-supplier-performance-assistant-agent#step-8)
 
-## 36.9 Pitfalls
+## 33.9 Pitfalls
 
 - **Supplier evaluation must be live** in the S/4HANA tenant, or the scorecard tests fail.
 - **Thresholds live in two places** (PRD and tests); keep them in step.

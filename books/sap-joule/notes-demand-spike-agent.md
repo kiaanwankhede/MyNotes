@@ -7,7 +7,7 @@
 > - **SAP's tutorial:** [Build an Agent to Handle Demand Spikes](https://developers.sap.com/tutorials/build-a-demand-spike-agent) by Martin Plummer · about 20 min · beginner · SAP runs it on a pre-release Joule Studio
 > - **About this page:** *Added by Claude.* Written in my own words from SAP's tutorial, whose text and images may not be copied ([its licence](https://github.com/sap-tutorials/joule-studio/blob/main/LICENSE.txt)). The screen map is my own sketch; each step links to SAP's real screens.
 > - **You need:** Joule Studio, and SAP S/4HANA Cloud Public Edition with the standard demo data
-> - **Builds on:** [The new Joule Studio](joule-studio-intent-based.md) (chapter 4), [the budget variance notes](notes-budget-variance-agent.md) (chapter 30, the same flow)
+> - **Builds on:** [The new Joule Studio](joule-studio-intent-based.md) (chapter 4), [the budget variance notes](notes-budget-variance-agent.md) (chapter 27, the same flow)
 > - **Last checked:** 22 Nov 2026
 
 **After this tutorial you can:**
@@ -16,7 +16,7 @@
 - Check which actions a PRD lets the agent take alone, and which need approval
 - Re-run tests and preview the agent before deploying it
 
-## 34.1 What you build
+## 31.1 What you build
 
 A product suddenly sells far more than planned and stock runs short. Without a rule, planners split the stock by habit and familiarity, which can hurt the most valuable customers and send goods to customers with poor credit. The agent scores and ranks the customers, then proposes how to split the stock.
 
@@ -98,7 +98,7 @@ flowchart LR
 - **4** Requirements · **5** Specification · **6** Type `Build the solution` in the chat
 - **7** Testing → Overview (with **Test Solution**), and Preview · **8** Deploy, then **Manage**
 
-## 34.2 Create the agent and write the intent (SAP step 2)
+## 31.2 Create the agent and write the intent (SAP step 2)
 
 - **Screen:** **Joule Studio** → **Create**.
 - **Name:** `Demand Spike Delivery Prioritization Agent` · **Intent statement:** copy SAP's text from step 2.
@@ -106,13 +106,13 @@ flowchart LR
 - Choose **Quick Create**, **Create**, then confirm the business goals.
 - [SAP's screens for step 2 ↗](https://developers.sap.com/tutorials/build-a-demand-spike-agent#step-2)
 
-## 34.3 Check the intent (SAP step 3)
+## 31.3 Check the intent (SAP step 3)
 
 - **Screen:** **Intent Summary** tab; `intent.md` in the *File tree*.
 - **Read** the summary, *Fit Gap Analysis* and *Recommended Solution* (a Python A2A agent). The **intent fit score** should be 90% or more.
 - [SAP's screens for step 3 ↗](https://developers.sap.com/tutorials/build-a-demand-spike-agent#step-3)
 
-## 34.4 Review the requirements (SAP step 4)
+## 31.4 Review the requirements (SAP step 4)
 
 - **Screen:** *Solution Progress* → **Requirements** (Markdown in the *File tree*). Expand *Requirements* and *Solution Architecture*.
 - **The split to check:**
@@ -125,31 +125,31 @@ flowchart LR
 
 - [SAP's screens for step 4 ↗](https://developers.sap.com/tutorials/build-a-demand-spike-agent#step-4)
 
-## 34.5 Look at the specification (SAP step 5)
+## 31.5 Look at the specification (SAP step 5)
 
 - **Screen:** *Solution Progress* → **Specification**, then the `specification` folder in the *File tree*. Only the blueprint; no code yet.
 - [SAP's screens for step 5 ↗](https://developers.sap.com/tutorials/build-a-demand-spike-agent#step-5)
 
-## 34.6 Build the solution (SAP step 6)
+## 31.6 Build the solution (SAP step 6)
 
 - **Type `Build the solution`** in the chat and wait.
 - The agent appears under **Preview**; open it under **Solution Artifacts** for its LLM, settings and MCP servers. *Evaluation* can generate scenarios (a few minutes).
 - [SAP's screens for step 6 ↗](https://developers.sap.com/tutorials/build-a-demand-spike-agent#step-6)
 
-## 34.7 Test it (SAP step 7)
+## 31.7 Test it (SAP step 7)
 
 - **Testing runs by itself.** Open *Testing* → **Overview** and compare the test areas with the specification.
 - **Test Solution** runs the tests again; a second run sometimes finds something new.
 - **Preview:** ask the agent what it is responsible for or how to test it.
 - [SAP's screens for step 7 ↗](https://developers.sap.com/tutorials/build-a-demand-spike-agent#step-7)
 
-## 34.8 Deploy to development (SAP step 8)
+## 31.8 Deploy to development (SAP step 8)
 
 - **Screen:** **Deploy**, then **Deploy** again. It runs on SAP's managed service on the Business AI Platform; `deploy_result.json` gets the endpoint and runtime ID.
 - Production isn't deployed from Joule Studio. Planners reach the agent through Joule's routing; monitor it under **Manage**.
 - [SAP's screens for step 8 ↗](https://developers.sap.com/tutorials/build-a-demand-spike-agent#step-8)
 
-## 34.9 Pitfalls
+## 31.9 Pitfalls
 
 - **Weights are a business decision.** Changing them per event needs approval; don't let the PRD make that automatic.
 - **Writes to delivery schedules** happen only after approval; check this survived into the PRD and specification.

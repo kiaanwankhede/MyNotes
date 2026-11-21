@@ -1266,4 +1266,4 @@ print(response.final_result.choices[0].message.content)
 
 Adding Grounding significantly enhances the model's ability to provide Accurate and Context-specific responses. Without Grounding, the model generates generic replies, while with grounding, it retrieves precise information from the uploaded document. Screenshots showcasing both responses are provided for comparison.
 
-Previous: [Tutorial: Leveraging Orchestration Capabilities to Enhance Responses](tutorial-ai-core-orchestration-consumption-opt.md) · Next: [Tutorial: Orchestration with Grounding Capabilities in SAP AI Core](tutorial-ai-core-orchestration-grounding.md)
+Previous: [Tutorial: Leveraging Orchestration Capabilities to Enhance Responses (V1, deprecated)](tutorial-ai-core-orchestration-consumption-opt.md) · Next: [Tutorial: Orchestration with Grounding Capabilities in SAP AI Core (V1, deprecated)](tutorial-ai-core-orchestration-grounding.md)

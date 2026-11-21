@@ -932,4 +932,4 @@ While this tutorial used a sentiment analysis use case, the same principles can 
 
 By incorporating these optional modules, you can tailor your Response to meet organizational data security policies and ensure safe, reliable responses for diverse scenarios.
 
-Previous: [Tutorial: Consumption of GenAI models Using Orchestration - A Beginner's Guide](tutorial-ai-core-orchestration-consumption.md) · Next: [Tutorial: Leveraging Orchestration Capabilities to Enhance Responses](tutorial-ai-core-orchestration-consumption-opt.md)
+Previous: [Tutorial: Consumption of GenAI models Using Orchestration - A Beginner's Guide (V1, deprecated)](tutorial-ai-core-orchestration-consumption.md) · Next: [Tutorial: Leveraging Orchestration Capabilities to Enhance Responses (V1, deprecated)](tutorial-ai-core-orchestration-consumption-opt.md)

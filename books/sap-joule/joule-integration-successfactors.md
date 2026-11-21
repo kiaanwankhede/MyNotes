@@ -186,6 +186,12 @@ IPS copies **users** (email, global user ID, group memberships) and **roles as g
 >
 > *Added by Claude*
 
+## 🧪 Try it hands-on
+
+*Added by Claude: SAP's own tutorials in this book that let you try what this chapter teaches.*
+
+- **An agent on SuccessFactors data:** [Build a performance and goals recommendations agent](notes-performance-goals-recommendations-agent.md)
+
 ## Check yourself
 
 <details class="qa"><summary>Why do SuccessFactors roles have to reach SAP Build Work Zone?</summary>

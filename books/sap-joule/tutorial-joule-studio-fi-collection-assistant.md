@@ -4,7 +4,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Use Joule Studio to Create an FI Collection Email Drafting Assistant](https://developers.sap.com/tutorials/joule-studio-fi-collection-assistant) by Ilya Belozerov · about 30 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/sap-build-process-automation](https://github.com/sap-tutorials/sap-build-process-automation/blob/main/tutorials/joule-studio-fi-collection-assistant/)
-> - **Changes for this book:** page layout; steps numbered 23.1 to 23.5; SAP's option tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 20.1 to 20.5; SAP's option tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 Use Joule Studio to create and test an agent for an intelligent finance Assistant
@@ -33,7 +33,7 @@ Use Joule Studio to create and test an agent for an intelligent finance Assistan
 
 Collection's specialists spend significant time manually crafting dunning and collection emails for each customer. Collectors need an agent that reads payment history and open AR items from SAP S/4HANA and generates context-aware, personalized collection emails hence reducing manual effort and improving collection effectiveness. Learn how to create such an intelligent finance assistant in a short time using Joule Studio's **intent-based development**.
 
-## 23.1 Getting Started
+## 20.1 Getting Started
 
 1. Open **Joule Work**
 
@@ -95,7 +95,7 @@ Collection's specialists spend significant time manually crafting dunning and co
 
 </details>
 
-## 23.2 Intent
+## 20.2 Intent
 
 This is where the tool tries to understand your intentions. The tool will attempt to understand your prompt and will likely ask you clarifying questions if you have not chosen quick-create as mentioned above.
 
@@ -118,7 +118,7 @@ Once it decides it understands enough, it will map the challenge to SAP’s Refe
 
 ![Joule generates the PRD](images/joule-studio-fi-collection-assistant/intent_summary_FI.png)
 
-## 23.3 Requirement
+## 20.3 Requirement
 
 When the requirement is ready, you have the opportunity to review and refine it. For this tutorial, you will accept suggested product requirement document without changes. To progress to the next phase, you need to transform the PRD into a technical specification.
 
@@ -132,7 +132,7 @@ Depending on your role in your company, you might be finished at this point and 
 
     ![Architecture](images/joule-studio-fi-collection-assistant/solution_architecture_FI.png)
 
-## 23.4 Specification
+## 20.4 Specification
 
 When the specification is complete you could pass it on to another team to do the implementation. However, here you are going to get the tool to implement the agent. This might happen automatically if you have selected quick-create at the start.
 
@@ -140,7 +140,7 @@ When the specification is complete you could pass it on to another team to do th
 
     ![Generated solution code](images/joule-studio-fi-collection-assistant/specification_FI.png)
 
-## 23.5 Solution
+## 20.5 Solution
 
 Wait until the solution is implemented successfully. You can then try out your agent.
 

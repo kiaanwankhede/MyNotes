@@ -19,7 +19,7 @@
 - Take an idea through all of Joule Studio's phases: intent, requirements, specification, solution, testing, deployment
 - Read what the generated requirements decide: how much runs without a human, what the LLM may do, and the guardrails
 
-## 29.1 What you build
+## 26.1 What you build
 
 An agent that answers **balance confirmation requests**: a customer or vendor asks the company to confirm what is open between them on a given date.
 
@@ -115,7 +115,7 @@ flowchart LR
 
 Today the work is manual: switching between mail, SAP and a word processor, slow look-ups at period-end, letters that vary in wording, a patchy audit trail, and partners chasing late replies.
 
-## 29.2 Create the agent and write the intent (SAP step 2)
+## 26.2 Create the agent and write the intent (SAP step 2)
 
 - **Screen:** *Joule Work → Joule Studio* (left navigation) → **Create**. If you already have a project, use **+ New** in the *Solutions* panel.
 - **In the Create Agent dialog:**
@@ -127,7 +127,7 @@ Today the work is manual: switching between mail, SAP and a word processor, slow
 - **Write the intent as a business outcome, not as technical steps.** Joule Studio designs everything from it. If the result misses your goal, come back and change this text.
 - [SAP's screens for step 2 ↗](https://developers.sap.com/tutorials/balance-confirmation-agent#step-2)
 
-## 29.3 Check how Joule understood you (SAP step 3)
+## 26.3 Check how Joule understood you (SAP step 3)
 
 - **Screen:** the **Intent Summary** tab. The same content is saved as `intent.md` in the *File tree* panel.
 - **Check, in order:**
@@ -137,7 +137,7 @@ Today the work is manual: switching between mail, SAP and a word processor, slow
 - ⚠️ SAP's text for this step mentions a "cutting stock algorithm". That belongs to a different lab (the cable roll optimiser); ignore it here.
 - [SAP's screens for step 3 ↗](https://developers.sap.com/tutorials/balance-confirmation-agent#step-3)
 
-## 29.4 Read the requirements (SAP step 4)
+## 26.4 Read the requirements (SAP step 4)
 
 - **Screen:** *Solution Progress* → **Requirements** (low-code view of the product requirements document, PRD). Wait until it has been generated.
 - **What to check in the PRD:**
@@ -154,7 +154,7 @@ Today the work is manual: switching between mail, SAP and a word processor, slow
 - Your PRD may differ from SAP's. Check that yours matches what you need; the next phase may start on its own.
 - [SAP's screens for step 4 ↗](https://developers.sap.com/tutorials/balance-confirmation-agent#step-4)
 
-## 29.5 Look at the specification (SAP step 5)
+## 26.5 Look at the specification (SAP step 5)
 
 - **Screen:** *Solution Progress* → **Specification**. Nothing here is written by you; it is all generated from the intent and PRD.
 - **Under `assets/` you should find four parts:**
@@ -165,7 +165,7 @@ Today the work is manual: switching between mail, SAP and a word processor, slow
 - **Why one MCP server per API:** each server wraps one SAP OData API and presents it to the LLM as tools it can call. That is the usual pattern when an agent needs several SAP APIs.
 - [SAP's screens for step 5 ↗](https://developers.sap.com/tutorials/balance-confirmation-agent#step-5)
 
-## 29.6 Generate the solution (SAP step 6)
+## 26.6 Generate the solution (SAP step 6)
 
 - **Wait** for the build. If it stops and waits, type `execute specification` in the coding chat.
 - **Screen:** *Solution Artifacts* → the agent. The low-code view shows:
@@ -177,7 +177,7 @@ Today the work is manual: switching between mail, SAP and a word processor, slow
 - ⚠️ SAP's text ends this step with a warning about a "Batch Stock MCP server" and storage locations. That is another leftover from a different lab; this agent has no such server.
 - [SAP's screens for step 6 ↗](https://developers.sap.com/tutorials/balance-confirmation-agent#step-6)
 
-## 29.7 Test it (SAP step 7)
+## 26.7 Test it (SAP step 7)
 
 - **Testing starts by itself** after the build. Wait for it to finish, then open *Testing* → **Overview**.
 - **Check that every test passes** and that the test areas cover your specification. When a test fails, Joule usually fixes it itself; if it gets stuck, ask it in the chat.
@@ -185,14 +185,14 @@ Today the work is manual: switching between mail, SAP and a word processor, slow
 - ⚠️ This preview does not call S/4HANA, so it doesn't prove the connection works.
 - [SAP's screens for step 7 ↗](https://developers.sap.com/tutorials/balance-confirmation-agent#step-7)
 
-## 29.8 Deploy and watch it (SAP step 8)
+## 26.8 Deploy and watch it (SAP step 8)
 
 - **Screen:** **Deploy**, then **Deploy** again to confirm. Joule Studio runs it on SAP's managed service; you set up no infrastructure.
 - **Afterwards,** `specification/deploy_result.json` holds the endpoint URL, runtime ID and deployment time.
 - **Monitor it** in the **Manage** tab: runtime status, deployments, usage and audit logs.
 - [SAP's screens for step 8 ↗](https://developers.sap.com/tutorials/balance-confirmation-agent#step-8)
 
-## 29.9 Pitfalls
+## 26.9 Pitfalls
 
 - **Pre-release:** SAP's lab uses a pre-release Joule Studio, so screen names may change. The step links always open SAP's current screens.
 - **Generated content varies:** your intent summary, PRD and test count can differ from SAP's (SAP reports 42 tests and a 92% intent fit). Judge them against your own goal.

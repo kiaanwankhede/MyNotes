@@ -17,12 +17,12 @@ Pick the path for your role. The numbers are chapters, with the book in front.
 | Role | Read in this order | Skim |
 |---|---|---|
 | **Functional consultant:** advise on Joule and SAP AI | BTP 1, 2, 4 → AI 3, 5 → Joule 1, AI 6, Joule 2 → Joule 4 → Joule 11, 12, 13 | AI 1, AI 4 |
-| **Developer:** build skills, agents and apps | BTP 4, 7, 8 → AI 4, 5 → Joule 3 → Joule 5 to 10 → Joule 4 → Joule 11, 12, 14 → AI 7 to 10 | BTP 2, AI 1 |
-| **Administrator:** set up and integrate Joule | BTP 4, 6, 7, 9, 10 → Joule 1, 2 → Joule 3 (3.2, 3.3) → Joule 5 → Joule 13, 15, 16 | AI 3 to 5 |
-| **C_JSD exam:** Joule Studio developer certification | AI 2 → Joule 2, 3, 4 → Joule 5 to 12 → Joule 17, 18 | Joule 1, AI 6 |
+| **Developer:** build skills, agents and apps | BTP 4, 7, 8 → AI 4, 5 → Joule 3 → Joule 5 to 10 → Joule 4 → Joule 11, 12, 14 → AI 7 to 11 | BTP 2, AI 1 |
+| **Administrator:** set up and integrate Joule | BTP 4, 6, 7, 9, 10 → Joule 1, 2 → Joule 3 (3.2, 3.3) → Joule 5 → Joule 13, 15, 16 | AI 3 to 5, AI 7 |
+| **C_JSD exam:** Joule Studio developer certification | AI 2 → Joule 2, 3, 4 → Joule 5 to 12 → Joule 17, 18 → Joule 29, 28, 36 (the closing advisor agent and its extension) | Joule 1, AI 6 |
 | **Hands-on:** practise BTP in a free trial | The 🧪 lab just before Practice in BTP chapters 1 to 10, in order | The chapter each lab sits in |
 
-* Each book ends with its own glossary and current-facts page; SAP Joule also has a setup building-blocks lookup (Joule 19).
+* Each book ends with its own glossary and current-facts page; SAP Joule also has a setup building-blocks lookup (Joule 38).
 * Chapters are added lecture by lecture, as each one is read in full. A later lecture enriches an existing chapter rather than adding a second one on the same idea.
 * Screenshots come from the recordings and from public SAP pages. Names, emails and account IDs are pixelated. Slides are redrawn as diagrams or tables, not pasted.
 * Anything not taught in the course is labelled **Added by Claude**, and every claim about the current state of an SAP product is web-checked and dated.

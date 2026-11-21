@@ -7,7 +7,7 @@
 > - **SAP's tutorial:** [Optimize Cable Roll Selection for Work Orders with a Custom Joule Agent](https://developers.sap.com/tutorials/cable-roll-optimizer-agent) by Ilya Belozerov · about 30 min · beginner · SAP runs it on a pre-release Joule Studio
 > - **About this page:** *Added by Claude.* Written in my own words from SAP's tutorial, whose text and images may not be copied ([its licence](https://github.com/sap-tutorials/joule-studio/blob/main/LICENSE.txt)). The screen map is my own sketch; each step links to SAP's real screens.
 > - **You need:** Joule Studio, and SAP S/4HANA Cloud with production orders that need cable (PP), batch stock in several storage locations (MM/WM), and stock transfer orders enabled (MM)
-> - **Builds on:** [The new Joule Studio](joule-studio-intent-based.md) (chapter 4), [the balance confirmation notes](notes-balance-confirmation-agent.md) (chapter 29)
+> - **Builds on:** [The new Joule Studio](joule-studio-intent-based.md) (chapter 4), [the balance confirmation notes](notes-balance-confirmation-agent.md) (chapter 26)
 > - **Last checked:** 22 Nov 2026
 
 **After this tutorial you can:**
@@ -16,7 +16,7 @@
 - Read the engine-versus-LLM boundary and the guardrails in a PRD
 - Check that an MCP server's write access is limited to one approved action
 
-## 33.1 What you build
+## 30.1 What you build
 
 An agent for production planners. When a work order needs a length of cable, it chooses the rolls that cover it with the least waste.
 
@@ -103,7 +103,7 @@ flowchart LR
 - **6** Solution Artifacts: the agent and its MCP servers · **7** Testing → Overview, then Preview
 - **8** Deploy, **Actions** for GitHub sync, **Manage** to monitor
 
-## 33.2 Create the agent and write the intent (SAP step 2)
+## 30.2 Create the agent and write the intent (SAP step 2)
 
 - **Screen:** Joule Work → **Joule Studio** in the left navigation → **Create** (or **+ New** in *Solutions*).
 - **Name:** `Cable Roll Optimizer` · **Intent statement:** copy SAP's text from step 2.
@@ -112,13 +112,13 @@ flowchart LR
 - 💡 **Name the objective exactly** ("minimise offcut"), not just "recommend". That is what makes Joule Studio build a deterministic engine instead of letting the LLM choose. A good optimisation intent states the objective, the data, the scenarios and the approval guardrail.
 - [SAP's screens for step 2 ↗](https://developers.sap.com/tutorials/cable-roll-optimizer-agent#step-2)
 
-## 33.3 Check the intent (SAP step 3)
+## 30.3 Check the intent (SAP step 3)
 
 - **Screen:** **Intent Summary** tab; `intent.md` in the *File tree*.
 - **Expect** a Python agent with a separate cutting-stock engine and an LLM that only narrates. Check *Fit Gap Analysis* and *Recommended Solution*.
 - [SAP's screens for step 3 ↗](https://developers.sap.com/tutorials/cable-roll-optimizer-agent#step-3)
 
-## 33.4 Review the requirements (SAP step 4)
+## 30.4 Review the requirements (SAP step 4)
 
 - **Screen:** *Solution Progress* → **Requirements** (Markdown version in the *File tree*). Personas should be the production planner and the warehouse operative.
 - **What to check:**
@@ -132,7 +132,7 @@ flowchart LR
 
 - [SAP's screens for step 4 ↗](https://developers.sap.com/tutorials/cable-roll-optimizer-agent#step-4)
 
-## 33.5 Look at the specification (SAP step 5)
+## 30.5 Look at the specification (SAP step 5)
 
 - **Screen:** *Solution Progress* → **Specification**. Still only the blueprint; no code.
 - **Three parts in `assets/`:**
@@ -142,7 +142,7 @@ flowchart LR
 - 💡 **Why not let the LLM optimise:** choosing rolls is a defined maths problem (one-dimensional cutting stock). An engine gives the same answer for the same input every time, which you can audit; an LLM can't promise that.
 - [SAP's screens for step 5 ↗](https://developers.sap.com/tutorials/cable-roll-optimizer-agent#step-5)
 
-## 33.6 Generate the solution (SAP step 6)
+## 30.6 Generate the solution (SAP step 6)
 
 - **The build starts after the specification;** wait for it. Tests are created and run as part of it.
 - **Screen:** *Solution Artifacts* → the agent: LLM (SAP's example: a Claude Sonnet model), settings (circuit breaker, thread time-to-live, summarisation), and the two MCP servers. *Evaluation* can generate scenarios. Code is in the *File tree*.
@@ -150,7 +150,7 @@ flowchart LR
 - ⚠️ **If you see a Batch Stock scope warning,** the storage location codes in `solution.yaml` probably don't match your plant's locations; stock queries then come back empty.
 - [SAP's screens for step 6 ↗](https://developers.sap.com/tutorials/cable-roll-optimizer-agent#step-6)
 
-## 33.7 Test it (SAP step 7)
+## 30.7 Test it (SAP step 7)
 
 - **Testing runs by itself.** Open *Testing* → **Overview**; all tests should pass.
 - **Preview test without live data:** ask the agent which cable requirements it can help optimise.
@@ -163,14 +163,14 @@ flowchart LR
 
 - [SAP's screens for step 7 ↗](https://developers.sap.com/tutorials/cable-roll-optimizer-agent#step-7)
 
-## 33.8 Deploy to development (SAP step 8)
+## 30.8 Deploy to development (SAP step 8)
 
 - **Screen:** **Deploy**, then **Deploy** again. The agent and both MCP servers go to SAP's managed service on the Business AI Platform; `deploy_result.json` gets the endpoint and runtime ID.
 - **GitHub sync** is under **Actions**. Production isn't deployed from Joule Studio.
 - Planners reach it through Joule's routing; monitor it under **Manage**.
 - [SAP's screens for step 8 ↗](https://developers.sap.com/tutorials/cable-roll-optimizer-agent#step-8)
 
-## 33.9 Pitfalls
+## 30.9 Pitfalls
 
 - **Vague objective → LLM picks rolls.** Say "minimise offcut" in the intent.
 - **Write scope:** only STO creation, only after approval. Check this in the specification and the code.

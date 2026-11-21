@@ -17,7 +17,7 @@
 - Find the model setting, the scoring thresholds, the output labels and the offline test pattern in generated code
 - Deploy in mock-data mode and trace a run milestone by milestone
 
-## 35.1 What you build, and the two ways to use Joule Studio
+## 32.1 What you build, and the two ways to use Joule Studio
 
 | Mode | For | How you work |
 |---|---|---|
@@ -92,7 +92,7 @@ flowchart LR
 - **5–6** Editor: read `intent.md`, the PRD and the specification, then the generated code · **6** Explorer: the generated file structure
 - In the **Joule Studio web UI:** your user icon (bottom left) → *Settings* → *Develop* → *CLI Authorization* for the sign-in URL (step 2), and the **Tracing** tab for debugging (step 8)
 
-## 35.2 Set up VS Code and log in (SAP step 2)
+## 32.2 Set up VS Code and log in (SAP step 2)
 
 - **Screen:** open VS Code, close any welcome page, open the Explorer (Ctrl+Shift+E), **Open Folder**, create a new folder with a unique name on the desktop and open it (trust the authors if asked).
 - **Terminal:** *Terminal → New Terminal* (Ctrl+\`). It should start in your project folder.
@@ -109,7 +109,7 @@ jl login '<your Sign-in URL>'
 - **Which coding agent:** any supported one; `jl init -h` lists them. The steps are the same for all.
 - [SAP's screens for step 2 ↗](https://developers.sap.com/tutorials/build-a-supplier-disruption-response-agent-on-sap#step-2)
 
-## 35.3 Initialise the project and start the coding agent (SAP step 3)
+## 32.3 Initialise the project and start the coding agent (SAP step 3)
 
 ```bash
 jl init opencode
@@ -121,7 +121,7 @@ opencode --auto
 - `--auto` turns on auto-approve, so you don't confirm every step. Only use it if you accept that the agent acts without asking.
 - [SAP's screens for step 3 ↗](https://developers.sap.com/tutorials/build-a-supplier-disruption-response-agent-on-sap#step-3)
 
-## 35.4 Give the intent and answer its questions (SAP step 4)
+## 32.4 Give the intent and answer its questions (SAP step 4)
 
 - **In the coding agent chat,** paste SAP's intent prompt from step 4. In short: a procurement manager on S/4HANA Public Cloud; a Taiwan supplier halted by a fire; retrieve open POs and scheduling agreements for affected suppliers; score each HIGH / MEDIUM / LOW by delivery proximity, open value and geographic overlap; label every output. Adding `FastTrack.` at the end skips the questions.
 - **Answering the questions quickly** (SAP gives a cheat sheet; the gist):
@@ -140,7 +140,7 @@ opencode --auto
 - **Every run differs** (questions, order, documents); judge by the checklists, not by SAP's screenshots.
 - [SAP's screens for step 4 ↗](https://developers.sap.com/tutorials/build-a-supplier-disruption-response-agent-on-sap#step-4)
 
-## 35.5 Review intent, PRD and specification (SAP step 5)
+## 32.5 Review intent, PRD and specification (SAP step 5)
 
 - **Only three APIs exist on the lab tenant:** the two above plus the preferred supplier list `CE_SUPPLIERLIST_0001`. Versions such as `CE_SUPPLIERLIST_0002`, on-premise APIs, the business partner API and the on-premise PO API are **not** available, even if IBD proposes them.
 - **Checklist and the command to move on:**
@@ -155,7 +155,7 @@ opencode --auto
 - **A wrong API in the specification?** Stop and tell the agent to remove it and use only the allowed list.
 - [SAP's screens for step 5 ↗](https://developers.sap.com/tutorials/build-a-supplier-disruption-response-agent-on-sap#step-5)
 
-## 35.6 Let it build, and hunt through the code (SAP step 6)
+## 32.6 Let it build, and hunt through the code (SAP step 6)
 
 - **The build takes 10–20 minutes.** If the agent pauses, type `continue`. Open files by name with Ctrl+P.
 - **Five things to find** (names may differ per run):
@@ -172,7 +172,7 @@ opencode --auto
 - **File structure to check:** `solution.yaml` at the root listing all assets; under `assets/`, the agent (with `asset.yaml`, a mock-data file, `tests/`, `app/`) and one folder per MCP server, each with a `mcp-translation/` folder holding `translation.json` and the API spec. Only registered APIs should have a server folder; ask the agent to remove any other.
 - [SAP's screens for step 6 ↗](https://developers.sap.com/tutorials/build-a-supplier-disruption-response-agent-on-sap#step-6)
 
-## 35.7 Deploy in mock-data mode and say hello (SAP step 7)
+## 32.7 Deploy in mock-data mode and say hello (SAP step 7)
 
 - **Switch on mock data:** in `assets/<your-agent>/asset.yaml`, add this env block *(SAP sample code, Apache 2.0)*:
 
@@ -195,7 +195,7 @@ jl a2a message "hi" --solution <your-solution-id> --asset <your-agent-name>
 
 - [SAP's screens for step 7 ↗](https://developers.sap.com/tutorials/build-a-supplier-disruption-response-agent-on-sap#step-7)
 
-## 35.8 Run the disruption scenario (SAP step 8)
+## 32.8 Run the disruption scenario (SAP step 8)
 
 - **Send SAP's test message** from step 8: a factory fire at a Taiwan supplier, starting on a given date, asking which POs and scheduling agreements are at risk.
 - **Checklist by milestone:**
@@ -206,7 +206,7 @@ jl a2a message "hi" --solution <your-solution-id> --asset <your-agent-name>
 - **A milestone missing?** Open the **Tracing** tab in Joule Studio: each span shows which tool ran, with which inputs, and how long it took.
 - [SAP's screens for step 8 ↗](https://developers.sap.com/tutorials/build-a-supplier-disruption-response-agent-on-sap#step-8)
 
-## 35.9 Pitfalls
+## 32.9 Pitfalls
 
 - **APIs not on the tenant** are the main failure: IBD can propose valid catalogue APIs that your tenant hasn't registered. Check the PRD and specification against the allowed list.
 - **Don't edit the IBD skills;** they control how the solution is deployed.

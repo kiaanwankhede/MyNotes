@@ -359,6 +359,15 @@ print("new student (4 h study, 7 h sleep):", round(predict((4, 7)), 2))
 - Generative AI creates new content; LLMs, diffusion and multimodal models are its families
 - A model is a file of weights, usually pre-trained by someone else and used through an API or run locally
 
+## 🧪 Try it hands-on
+
+*Added by Claude: SAP's own tutorials in this book that let you try what this chapter teaches.*
+
+- **Classic ML, end to end:** [Quick Start for Your First AI Project Using SAP AI Core](tutorial-ai-core-helloworld.md), then the house price series:
+  - [Build a House Price Predictor](tutorial-ai-core-code.md) → [Ingest Live Data](tutorial-ai-core-data.md) → [Make Predictions](tutorial-ai-core-deploy.md) → [Generate Metrics and Compare Models](tutorial-ai-core-metrics.md)
+- **Predict on a table without training a model:** [Strategic Prediction with SAP RPT-1](tutorial-ai-core-genaihub-sap-rpt-model-usage.md)
+- **Multimodal input:** [Using Multimodal inputs with GPT4o for Image Recognition](tutorial-ai-core-gpt4o-consumption.md)
+
 ## Practice
 
 1. Open *Quick, Draw!* and draw six objects. Note which ones it guesses and which it misses, and why that might be.

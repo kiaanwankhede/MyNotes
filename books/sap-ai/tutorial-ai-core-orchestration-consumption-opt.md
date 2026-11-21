@@ -9,6 +9,12 @@
 > - **Changes for this book:** page layout; steps numbered 19.1 to 19.8; SAP's language tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
+> [!WARNING]
+> **⚠️ Older API: orchestration V1**
+> - SAP has deprecated the Orchestration V1 workflow API. It is due to be switched off on **31 December 2026**, a date SAP moved from 31 October 2026 ([What's New for SAP AI Core](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/what-s-new-for-sap-ai-core), entry of 22 Oct 2026, checked 22 Nov 2026).
+> - Learn and build with the V2 version instead: [Leveraging Orchestration(V2) Capabilities to Enhance Responses](tutorial-ai-core-orchestration-consumption-opt-v2.md). Keep this page for reading older code.
+> - *Added by Claude*
+
 ## You will learn
 - Inference of GenAI models using orchestration along with Data Masking, translation and Content Filtering features
 

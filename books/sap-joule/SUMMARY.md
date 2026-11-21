@@ -30,11 +30,6 @@
 * [Practice: 10 Joule skill assignments](practice-joule-skills.md)
 * [Practice: 10 Joule agent assignments](practice-joule-agents.md)
 
-## Reference
-* [Reference: Joule setup building blocks](reference-joule-setup-building-blocks.md)
-* [Reference: Glossary](reference-glossary.md)
-* [Reference: Current facts to re-check](reference-current-facts.md)
-
 ## Joule Studio Tutorials (SAP Developer Center)
 * [Tutorial: Use Joule Studio to Create an AI Assistant for Sales Reps](tutorial-joule-studio-cx-agent-create.md)
 * [Tutorial: Use Joule Studio to Create an FI Collection Email Drafting Assistant](tutorial-joule-studio-fi-collection-assistant.md)
@@ -57,3 +52,8 @@
 * [Tutorial notes: Build a performance and goals recommendations agent](notes-performance-goals-recommendations-agent.md)
 * [Tutorial notes: Extend a standard Joule agent with intent-based development](notes-create-agent-extension.md)
 * [Tutorial notes: Create an invoice exception workflow with n8n in Joule Studio](notes-invoice-exception-agent-n8n.md)
+
+## Reference
+* [Reference: Joule setup building blocks](reference-joule-setup-building-blocks.md)
+* [Reference: Glossary](reference-glossary.md)
+* [Reference: Current facts to re-check](reference-current-facts.md)

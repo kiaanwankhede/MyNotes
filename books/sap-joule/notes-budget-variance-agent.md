@@ -7,7 +7,7 @@
 > - **SAP's tutorial:** [Automate Budget Variance Management for Cost Centers with a Custom Joule Agent](https://developers.sap.com/tutorials/budget-variance-agent) by Martin Plummer · about 20 min · beginner · SAP runs it on a pre-release Joule Studio
 > - **About this page:** *Added by Claude.* Written in my own words from SAP's tutorial, whose text and images may not be copied ([its licence](https://github.com/sap-tutorials/joule-studio/blob/main/LICENSE.txt)). The screen map is my own sketch; each step links to SAP's real screens.
 > - **You need:** Joule Studio, and an SAP S/4HANA Cloud system with financial planning data and a cost center hierarchy
-> - **Builds on:** [The new Joule Studio](joule-studio-intent-based.md) (chapter 4), [the balance confirmation notes](notes-balance-confirmation-agent.md) (chapter 29)
+> - **Builds on:** [The new Joule Studio](joule-studio-intent-based.md) (chapter 4), [the balance confirmation notes](notes-balance-confirmation-agent.md) (chapter 26)
 > - **Last checked:** 22 Nov 2026
 
 **After this tutorial you can:**
@@ -16,7 +16,7 @@
 - Check an intent fit score and a PRD for an agent that **writes** to SAP, not just reads
 - Deploy an agent to the development landscape and know how users then reach it
 
-## 30.1 What you build
+## 27.1 What you build
 
 An agent for the moment a cost shock hits mid-year, for example an energy price rise. It detects the jump, works out which cost centers are affected, recalculates the remaining periods' budget, drafts an approval email with a chart, and writes the new budget back once someone approves.
 
@@ -101,7 +101,7 @@ flowchart LR
 
 **What it replaces:** finance staff watching reports for anomalies by hand, tracing the hierarchy manually, recalculating in spreadsheets, writing approval mails for hours, and posting changes one by one with no linked audit record.
 
-## 30.2 Create the agent and write the intent (SAP step 2)
+## 27.2 Create the agent and write the intent (SAP step 2)
 
 - **Screen:** open **Joule Studio** → **Create** → the Create Agent dialog.
 - **Name:** `Budgeting Agent for Cost Center Increases`
@@ -110,14 +110,14 @@ flowchart LR
 - **What makes a good intent:** it says what the agent does, which data it uses, which decisions it supports and which guardrails it keeps. SAP's statement covers all four; use it as a pattern.
 - [SAP's screens for step 2 ↗](https://developers.sap.com/tutorials/budget-variance-agent#step-2)
 
-## 30.3 Check the intent and its fit score (SAP step 3)
+## 27.3 Check the intent and its fit score (SAP step 3)
 
 - **Screen:** **Intent Summary** tab; `intent.md` is in the *File tree*.
 - **Read, in order:** the summary, the *Fit Gap Analysis*, the *Recommended Solution* (a Python agent that speaks the Agent-to-Agent protocol, A2A).
 - **Intent fit score:** at the bottom of the solution card. 90% or more means the proposal matches your intent closely; lower means rewrite the intent.
 - [SAP's screens for step 3 ↗](https://developers.sap.com/tutorials/budget-variance-agent#step-3)
 
-## 30.4 Review the requirements (SAP step 4)
+## 27.4 Review the requirements (SAP step 4)
 
 - **Screen:** *Solution Progress* → **Requirements**. The same PRD as raw Markdown is in the *File tree*.
 - **Sections to read:**
@@ -128,27 +128,27 @@ flowchart LR
 - **The split to check:** detecting anomalies against thresholds runs alone; writing a revised budget to S/4HANA always needs a person's approval.
 - [SAP's screens for step 4 ↗](https://developers.sap.com/tutorials/budget-variance-agent#step-4)
 
-## 30.5 Look at the specification (SAP step 5)
+## 27.5 Look at the specification (SAP step 5)
 
 - **Screen:** *Solution Progress* → **Specification**, then open the `specification` folder in the *File tree*.
 - It is only the blueprint: files and configuration, no code yet. Everything is readable before anything is deployed.
 - [SAP's screens for step 5 ↗](https://developers.sap.com/tutorials/budget-variance-agent#step-5)
 
-## 30.6 Build the solution (SAP step 6)
+## 27.6 Build the solution (SAP step 6)
 
 - **Start the build yourself:** type `Build the solution` in the Joule chat and wait.
 - **Then:** the agent appears under **Preview**. Open it under **Solution Artifacts** to see its LLM, its settings and its MCP servers.
 - **Evaluation section:** can generate test scenarios from your intent; it takes a few minutes.
 - [SAP's screens for step 6 ↗](https://developers.sap.com/tutorials/budget-variance-agent#step-6)
 
-## 30.7 Test it (SAP step 7)
+## 27.7 Test it (SAP step 7)
 
 - **Testing runs by itself** after the build. Open *Testing* → **Overview** and compare the test areas with your specification.
 - Choose **Test Solution** and make sure everything passes. Joule usually fixes failures itself; if it gets stuck, ask it in the chat.
 - **Chat test:** select the agent under *Preview* and ask what it is responsible for or how to test it.
 - [SAP's screens for step 7 ↗](https://developers.sap.com/tutorials/budget-variance-agent#step-7)
 
-## 30.8 Deploy to development (SAP step 8)
+## 27.8 Deploy to development (SAP step 8)
 
 - **Screen:** **Deploy** (there are two buttons that do the same), then **Deploy** again to confirm.
 - It runs on SAP's managed service on the Business AI Platform. `specification/deploy_result.json` then holds the endpoint, runtime ID and time.
@@ -156,7 +156,7 @@ flowchart LR
 - **How users reach it:** deployed agents are found by Joule automatically. When a user asks something in the agent's area, Joule routes the question to it; users don't need to know the agent exists.
 - [SAP's screens for step 8 ↗](https://developers.sap.com/tutorials/budget-variance-agent#step-8)
 
-## 30.9 Pitfalls
+## 27.9 Pitfalls
 
 - **This agent writes to S/4HANA.** Keep the approval gate in the PRD; if your generated PRD lets it write without approval, fix the intent and regenerate.
 - **Low intent fit** (under 90%) is a signal to rewrite the intent, not to carry on.

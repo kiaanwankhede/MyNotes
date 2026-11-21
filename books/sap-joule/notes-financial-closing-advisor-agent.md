@@ -10,7 +10,7 @@
 >   - Joule Studio
 >   - SAP S/4HANA Cloud with the **Financial Closing Cockpit** set up: a task list for the period, with sequence, dependencies, owners and statuses
 >   - access to the closing postings (depreciation, accruals, GR/IR clearing, revaluation, allocations) and some period-end experience
-> - **Builds on:** [The new Joule Studio](joule-studio-intent-based.md) (chapter 4), [the balance confirmation notes](notes-balance-confirmation-agent.md) (chapter 29)
+> - **Builds on:** [The new Joule Studio](joule-studio-intent-based.md) (chapter 4), [the balance confirmation notes](notes-balance-confirmation-agent.md) (chapter 26)
 > - **Last checked:** 22 Nov 2026
 
 **After this tutorial you can:**
@@ -19,7 +19,7 @@
 - Spot in the specification which MCP server may write and which only reads
 - Keep a stalled build moving, and version the generated code with GitHub sync
 
-## 31.1 What you build
+## 28.1 What you build
 
 A closing advisor for the financial controller. It gives one live view of the closing task list, follows the dependencies, warns early about blocked and at-risk tasks, and recommends the next tasks in the right order with the reason.
 
@@ -106,7 +106,7 @@ flowchart LR
 - **6** The chat (start the build), Solution Artifacts, and `agent.py` in the File tree
 - **7** Testing → Overview, and Preview · **8** Deploy, **Actions** for GitHub sync, then **Manage** to monitor
 
-## 31.2 Create the agent and write the intent (SAP step 2)
+## 28.2 Create the agent and write the intent (SAP step 2)
 
 - **Screen:** in Joule Work, select `<>` (Joule Studio) in the left navigation → **Create**.
 - **In the dialog:** *Solution* **New Solution** · *Name* `Financial Closing Advisor` · *Intent statement*: copy SAP's text from step 2.
@@ -115,14 +115,14 @@ flowchart LR
 - 💡 **Why the intent must mention sequence and reasoning:** reading statuses is easy. Without asking for ordered recommendations with reasons, Joule Studio may build only a status dashboard instead of a dependency engine.
 - [SAP's screens for step 2 ↗](https://developers.sap.com/tutorials/financial-closing-advisor-agent#step-2)
 
-## 31.3 Check the intent (SAP step 3)
+## 28.3 Check the intent (SAP step 3)
 
 - **Screen:** *Solution Progress* → **Intent Summary**. If the middle area is empty, switch to **Develop** in the top bar.
 - **Read:** the summary, *Fit-Gap Analysis*, *Recommended Solution* (a Python A2A agent), and the **intent fit score** at the bottom (aim for 90% or more).
 - **With Fast Track** you can still change the intent: ask Joule in the chat to update it.
 - [SAP's screens for step 3 ↗](https://developers.sap.com/tutorials/financial-closing-advisor-agent#step-3)
 
-## 31.4 Review the requirements (SAP step 4)
+## 28.4 Review the requirements (SAP step 4)
 
 - **Screen:** *Solution Progress* → **Requirements**; the Markdown version is in the *File tree*.
 - **Sections and why they matter:**
@@ -139,7 +139,7 @@ flowchart LR
 
 - [SAP's screens for step 4 ↗](https://developers.sap.com/tutorials/financial-closing-advisor-agent#step-4)
 
-## 31.5 Look at the specification (SAP step 5)
+## 28.5 Look at the specification (SAP step 5)
 
 - **Screen:** *Solution Progress* → **Specifications**; select any file in the tree to read it on the right.
 - **Two MCP servers, two roles:**
@@ -147,7 +147,7 @@ flowchart LR
   - **Financial data server:** read-only, used to find why a task is blocked.
 - [SAP's screens for step 5 ↗](https://developers.sap.com/tutorials/financial-closing-advisor-agent#step-5)
 
-## 31.6 Build the solution (SAP step 6)
+## 28.6 Build the solution (SAP step 6)
 
 - **Start it in the chat:** `execute specification/specification.md` (plain wording such as "Build the solution" also works).
 - **If nothing seems to happen,** ask Joule "What is the status?", then tell it to continue.
@@ -155,13 +155,13 @@ flowchart LR
 - **Screen:** *Solution Artifacts* → the agent: *Tools and Skills* (MCP servers, skills) and *Evaluation*. The Python code is `agent.py` in the *File tree*.
 - [SAP's screens for step 6 ↗](https://developers.sap.com/tutorials/financial-closing-advisor-agent#step-6)
 
-## 31.7 Test it (SAP step 7)
+## 28.7 Test it (SAP step 7)
 
 - **Testing runs by itself.** Open *Testing* → **Overview** and check every test passes; Joule fixes most failures itself.
 - **Preview** the agent and ask what it is responsible for. Before deployment it uses **mock data**, so not everything can be tested here.
 - [SAP's screens for step 7 ↗](https://developers.sap.com/tutorials/financial-closing-advisor-agent#step-7)
 
-## 31.8 Deploy to development (SAP step 8)
+## 28.8 Deploy to development (SAP step 8)
 
 - **Screen:** **Deploy**, then **Deploy** again. Both MCP servers are deployed with the agent to SAP's managed service on the Business AI Platform; `deploy_result.json` gets the endpoint and runtime ID.
 - **GitHub sync:** under **Actions** in the top bar, to version the generated code or work as a team.
@@ -169,7 +169,7 @@ flowchart LR
 - **Users** reach it through Joule, which routes matching questions to it. Monitor it in the **Manage** tab.
 - [SAP's screens for step 8 ↗](https://developers.sap.com/tutorials/financial-closing-advisor-agent#step-8)
 
-## 31.9 Pitfalls
+## 28.9 Pitfalls
 
 - **The LLM explains; the engine decides.** Task state comes from the rule engine. If your PRD lets the LLM judge task state, fix the intent.
 - **One write path only:** status updates in the Cockpit, after the controller confirms. Check the specification keeps the financial data server read-only.

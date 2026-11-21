@@ -52,13 +52,15 @@
       "slug": "sap-btp",
       "title": "SAP BTP",
       "shelf": "SAP",
-      "blurb": "Accounts, entitlements, environments, identity and connectivity on SAP BTP."
+      "blurb": "Accounts, entitlements, environments, identity and connectivity on SAP BTP.",
+      "cards": "all"
     },
     {
       "slug": "sap-ai",
       "title": "SAP AI",
       "shelf": "SAP",
-      "blurb": "SAP's AI landscape, AI basics, responsible AI, and hands-on generative AI hub, Document AI and RAG."
+      "blurb": "SAP's AI landscape, AI basics, responsible AI, and hands-on generative AI hub, Document AI and RAG.",
+      "cards": "all"
     },
     {
       "slug": "sap-joule",

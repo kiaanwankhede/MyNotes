@@ -530,6 +530,14 @@ agent, 1 step: stopped: maximum number of thinking steps reached
 - Agents recover from errors by looping; skills do not
 - Test in your private environment, read the timeline, then release and deploy to a shared environment
 
+## 🧪 Try it hands-on
+
+*Added by Claude: SAP's own tutorials in this book that let you try what this chapter teaches.*
+
+- **In order:** [Set up environments and destinations](tutorial-joule-skill-setup.md) → [Create action projects](tutorial-joule-action-projects.md) → [Create and deploy a Joule skill](tutorial-joule-skill-create.md)
+- **Then:** [Filter an action](tutorial-joule-action-filter.md) → [Run an automated process from a skill](tutorial-joule-skill-process.md) → [Create a Joule agent](tutorial-joule-agent-create.md)
+- **Practise alone:** [10 Joule skill assignments](practice-joule-skills.md) and [10 Joule agent assignments](practice-joule-agents.md)
+
 ## Practice
 
 1. List the subscriptions and licences your company would need for Joule Studio Classic, using 19.2.

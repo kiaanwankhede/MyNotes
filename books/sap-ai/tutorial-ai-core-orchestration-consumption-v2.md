@@ -821,4 +821,4 @@ Data masking and content filtering are available to enhance data privacy and saf
 
 </details>
 
-Previous: [Tutorial: Prompt LLMs in the generative AI hub in SAP AI Core & Launchpad](tutorial-ai-core-generative-ai.md) · Next: [Tutorial: Consumption of GenAI models Using Orchestration - A Beginner's Guide](tutorial-ai-core-orchestration-consumption.md)
+Previous: [Tutorial: Prompt LLMs in the generative AI hub in SAP AI Core & Launchpad](tutorial-ai-core-generative-ai.md) · Next: [Tutorial: Consumption of GenAI models Using Orchestration - A Beginner's Guide (V1, deprecated)](tutorial-ai-core-orchestration-consumption.md)

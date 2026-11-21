@@ -4,7 +4,7 @@
 > **📍 At a glance**
 > - **Source:** SAP Developer Center tutorial [Use Joule Studio to Create an Assistant to Monitor Supplier Risk](https://developers.sap.com/tutorials/joule-studio-spend-supplier-assistant) by Rebecca Yang · about 20 min
 > - **Licence:** © 2026 SAP SE or an SAP affiliate company, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The text and screenshots are SAP's; source on GitHub: [sap-tutorials/sap-build-process-automation](https://github.com/sap-tutorials/sap-build-process-automation/blob/main/tutorials/joule-studio-spend-supplier-assistant/)
-> - **Changes for this book:** page layout; steps numbered 25.1 to 25.7; SAP's option tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
+> - **Changes for this book:** page layout; steps numbered 22.1 to 22.7; SAP's option tabs shown as folding blocks; screenshots wider than 1600 px shrunk and all recompressed; image and file paths changed
 > - **Last checked:** 21 Nov 2026
 
 Use Joule Studio to create and test an Intelligent Procurement Assistant for Spend Management.
@@ -35,7 +35,7 @@ Using Joule Studio's intent-based development, you can create an intelligent age
 
 Joule Studio supports two development modes. **Quick Create** skips clarifying questions and moves through all phases (intent → requirements → specification → solution) automatically. **Ideate and Plan** asks you clarifying questions before generating the intent, and pauses for your confirmation at each phase. Either mode works for this tutorial - pick a tab below and follow it end-to-end.
 
-## 25.1 Get Started
+## 22.1 Get Started
 
 <details class="qa"><summary>Quick Create</summary>
 
@@ -98,7 +98,7 @@ Joule Studio supports two development modes. **Quick Create** skips clarifying q
 
 </details>
 
-## 25.2 Intent
+## 22.2 Intent
 
 <details class="qa"><summary>Quick Create</summary>
 
@@ -130,7 +130,7 @@ If anything doesn't reflect your goal accurately, refine it by continuing the co
 
 </details>
 
-## 25.3 Requirements
+## 22.3 Requirements
 
 <details class="qa"><summary>Quick Create</summary>
 
@@ -164,7 +164,7 @@ When the requirements are ready, review the Product Requirements Document (PRD).
 
 </details>
 
-## 25.4 Specification
+## 22.4 Specification
 
 <details class="qa"><summary>Quick Create</summary>
 
@@ -196,7 +196,7 @@ When the specification is ready, review it in the **Code** tab - you'll find it 
 
 </details>
 
-## 25.5 Solution
+## 22.5 Solution
 
 <details class="qa"><summary>Quick Create</summary>
 
@@ -260,7 +260,7 @@ The agent processes your request and responds. What it can do depends on what wa
 
 </details>
 
-## 25.6 Testing
+## 22.6 Testing
 
 After the solution is built, Joule Studio automatically runs an automated test suite against the generated agent. You don't need to do anything - the tool executes the tests and shows you the results.
 
@@ -270,7 +270,7 @@ Choose the **Testing** tab at the top to see the test overview: total tests, how
 
 If all tests pass, the agent is ready to deploy.
 
-## 25.7 Deployment (optional)
+## 22.7 Deployment (optional)
 
 When you're ready to deploy, you have two options:
 

@@ -345,6 +345,17 @@ Quota Management   = rate limit per scope + model, approved, enforced
 - Store prompts as versioned templates with variables; use the system part for scope and guardrails.
 - Rate limits per resource group stop one team from starving another; AI Launchpad costs a fixed monthly fee, AI Core costs what you use.
 
+## 🧪 Try it hands-on
+
+*Added by Claude: SAP's own tutorials in this book that let you try what this chapter teaches.*
+
+- **Get an environment:** [Setup SAP AI Core Basic Trial](tutorial-teched2026-aicore-basic-trial.md), or on your own account [Use Boosters for SAP AI Core and SAP AI Launchpad](tutorial-ai-core-launchpad-provisioning.md)
+- **Connect and switch on the hub (7.2, 7.3):** [Set Up Tools to Connect With SAP AI Core](tutorial-ai-core-setup.md), then [Set up Generative AI Hub in SAP AI Core](tutorial-ai-core-genaihub-provisioning.md) or [in SAP AI Launchpad](tutorial-ai-launchpad-provisioning.md)
+- **Model library, chat and prompt editor (7.5 to 7.7):** [Prompt LLMs in the generative AI hub in SAP AI Core & Launchpad](tutorial-ai-core-generative-ai.md)
+- **Prompt management (7.8):** [Leveraging Prompt Registry for Seamless Orchestration](tutorial-ai-core-genaihub-prompt-registry.md)
+- **Prompt optimisation (7.9):** [Prompt optimization](tutorial-ai-core-genaihub-prompt-optimization.md)
+- **Orchestration, the next step (7.11):** [Consumption of GenAI models Using Orchestration(V2)](tutorial-ai-core-orchestration-consumption-v2.md)
+
 ## Practice
 
 1. **Map your landscape:** draw one AI Launchpad, one AI Core and three resource groups (`sandbox`, `hr`, `finance`). Write which features and quotas each gets.

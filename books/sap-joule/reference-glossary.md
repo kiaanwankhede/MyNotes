@@ -9,7 +9,7 @@
 > - **Level:** reference
 > - **Last checked:** 21 Nov 2026
 
-## 20.1 Acronyms
+## 39.1 Acronyms
 
 | Term | Meaning | Chapter |
 |---|---|---|
@@ -27,14 +27,14 @@
 | **SAC** | SAP Analytics Cloud | [13](tutorial-joule-sac-analytical-insights.md) |
 | **SKU** | SAP's order number for a product, for example AI units 8019164 | [1](joule-for-consultants.md), [2](joule-family.md) |
 
-## 20.2 Terms
+## 39.2 Terms
 
 | Term | Meaning | Chapter |
 |---|---|---|
 | **Action project** | A set of API calls (OData or REST) that Joule skills and processes can use | [3.4a](joule-studio-classic.md), [6](tutorial-joule-action-projects.md) |
 | **Agent (Joule)** | Plans and calls tools (skills, other agents, MCP servers) until it can answer | [2](joule-family.md), [3](joule-studio-classic.md) |
 | **Assistant (Joule)** | SAP's grouping of agents for one business area, for example Accounts Payable | [2](joule-family.md) |
-| **Content provider** | A Work Zone channel that imports a product's roles and apps | [19.4](reference-joule-setup-building-blocks.md) |
+| **Content provider** | A Work Zone channel that imports a product's roles and apps | [38.4](reference-joule-setup-building-blocks.md) |
 | **Control tower** | Joule Studio's admin area: environments, destinations, settings | [3](joule-studio-classic.md) |
 | **Destination variable** | A placeholder in a skill; the real destination is chosen at test or deploy time | [3](joule-studio-classic.md), [7](tutorial-joule-skill-create.md) |
 | **Document grounding** | Lets Joule answer from your own documents | [16.5](joule-integration-other-sap-solutions.md) |
@@ -46,7 +46,7 @@
 | **Progressive disclosure** | Showing the model only the next level of choices (assistant, agent, skill) to keep context small | [2.4](joule-family.md) |
 | **Service key** | Credentials for a service instance (URL, client ID, secret) | [13](tutorial-joule-sac-analytical-insights.md), [15](joule-integration-successfactors.md) |
 | **Skill (Joule)** | A fixed flow of steps (actions, processes, messages) that Joule can run | [3](joule-studio-classic.md), [7](tutorial-joule-skill-create.md) |
-| **Work Zone** | SAP Build Work Zone: the launchpad service that Joule uses for navigation and roles | [13](tutorial-joule-sac-analytical-insights.md), [19.4](reference-joule-setup-building-blocks.md) |
+| **Work Zone** | SAP Build Work Zone: the launchpad service that Joule uses for navigation and roles | [13](tutorial-joule-sac-analytical-insights.md), [38.4](reference-joule-setup-building-blocks.md) |
 
 ## How this page was built
 

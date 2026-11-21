@@ -16,7 +16,7 @@
 - Check that a write to SuccessFactors only happens after explicit confirmation
 - Test it with mock data and deploy it to development
 
-## 38.1 What you build
+## 35.1 What you build
 
 A goal-setting coach for sales reps. Reps often skip goal setting or copy last quarter's, because the territory data is spread over reports, the CRM and SuccessFactors aren't linked, and goals end up vague and hard to measure. The agent gathers the numbers and walks the rep through choosing goals.
 
@@ -98,7 +98,7 @@ flowchart LR
 - **6** Solution Artifacts: the agent and its MCP servers · **7** Testing → Overview, then *Preview with Mock Data*
 - **8** Deploy; **Git actions** in the top bar for GitHub sync; **Manage** to monitor
 
-## 38.2 Create the agent and write the intent (SAP step 2)
+## 35.2 Create the agent and write the intent (SAP step 2)
 
 - **Screen:** **Joule Studio** → **Create**.
 - **Name:** `Performance and Goals Recommendations` · **Intent:** copy SAP's text from step 2.
@@ -107,24 +107,24 @@ flowchart LR
 - 💡 **A good intent covers four things:** what the agent does, which data, which decisions, which guardrails. This one does, so Joule Studio needs no technical input.
 - [SAP's screens for step 2 ↗](https://developers.sap.com/tutorials/build-performance-goals-recommendations-agent#step-2)
 
-## 38.3 Check the intent (SAP step 3)
+## 35.3 Check the intent (SAP step 3)
 
 - **Screen:** **Intent Summary** tab; `intent.md` in the *File tree*.
 - **Read** the summary, *Fit Gap Analysis* and *Recommended Solution* (a Python A2A agent). The **intent fit score** should be 90% or more.
 - [SAP's screens for step 3 ↗](https://developers.sap.com/tutorials/build-performance-goals-recommendations-agent#step-3)
 
-## 38.4 Review the requirements (SAP step 4)
+## 35.4 Review the requirements (SAP step 4)
 
 - **Screen:** *Solution Progress* → **Requirements** (Markdown in the *File tree*). Personas: the sales rep and the manager.
 - **The split to check:** reading the SuccessFactors profile and existing goals runs alone; **writing any goal to SuccessFactors needs the rep's approval**.
 - [SAP's screens for step 4 ↗](https://developers.sap.com/tutorials/build-performance-goals-recommendations-agent#step-4)
 
-## 38.5 Look at the specification (SAP step 5)
+## 35.5 Look at the specification (SAP step 5)
 
 - **Screen:** *Solution Progress* → **Specification**: read the summary; it is only the blueprint.
 - [SAP's screens for step 5 ↗](https://developers.sap.com/tutorials/build-performance-goals-recommendations-agent#step-5)
 
-## 38.6 Generate the solution (SAP step 6)
+## 35.6 Generate the solution (SAP step 6)
 
 - **The build runs after the specification;** tests are created and run with it.
 - **What gets built:** the agent and MCP servers, the CRM and SuccessFactors Goal Management connections, the LLM link for the conversation, a territory metrics step that turns CRM data into grounded numbers for the LLM, the confirmation gate before any SuccessFactors write, and audit logging.
@@ -133,20 +133,20 @@ flowchart LR
 - ⚠️ SAP's text for this step also mentions an anomaly engine, scenario calculations and charts. That's left over from the budget variance lab; this agent has none of them.
 - [SAP's screens for step 6 ↗](https://developers.sap.com/tutorials/build-performance-goals-recommendations-agent#step-6)
 
-## 38.7 Test it (SAP step 7)
+## 35.7 Test it (SAP step 7)
 
 - **Testing runs by itself.** Open *Testing* → **Overview**; everything should pass (Joule fixes most failures itself).
 - **Screen:** the agent under **Preview with Mock Data**. Ask what it is responsible for: it answers without calling the CRM or SuccessFactors.
 - [SAP's screens for step 7 ↗](https://developers.sap.com/tutorials/build-performance-goals-recommendations-agent#step-7)
 
-## 38.8 Deploy to development (SAP step 8)
+## 35.8 Deploy to development (SAP step 8)
 
 - **Screen:** **Deploy**, then **Deploy** again; `deploy_result.json` gets the endpoint and runtime ID.
 - **GitHub sync** is under **Git actions** in the top bar here (other labs call it *Actions*). Production isn't deployed from Joule Studio.
 - Reps reach it through Joule's routing; monitor it under **Manage**.
 - [SAP's screens for step 8 ↗](https://developers.sap.com/tutorials/build-performance-goals-recommendations-agent#step-8)
 
-## 38.9 Pitfalls
+## 35.9 Pitfalls
 
 - **The write needs confirmation:** check the PRD and specification keep the gate before creating goals.
 - **The SuccessFactors API user** needs both read and write rights on goals, or the write-back tests fail.

@@ -197,4 +197,4 @@ For each agent, keep:
 - SAP Help, *Deploy a Project* (Joule Studio, classic edition): https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/deploy-project
 - SAP Help, *Create a Joule Agent with Vibe Coding*: https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/create-joule-agent-with-vibe-coding
 
-Previous: [Practice: 10 Joule skill assignments](practice-joule-skills.md) · Next: [Reference: Joule setup building blocks](reference-joule-setup-building-blocks.md)
+Previous: [Practice: 10 Joule skill assignments](practice-joule-skills.md) · Next: [Tutorial: Use Joule Studio to Create an AI Assistant for Sales Reps](tutorial-joule-studio-cx-agent-create.md)

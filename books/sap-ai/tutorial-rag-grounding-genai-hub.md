@@ -78,7 +78,7 @@ from dotenv import load_dotenv
 from hdbcli import dbapi
 
 load_dotenv()
-load_aicore_key()                      # from chapter 33: AI Core settings from key.json
+load_aicore_key()                      # from chapter 8: AI Core settings from key.json
 
 connection = dbapi.connect(
     address=os.environ["HANA_HOST"], port=443,
@@ -234,6 +234,15 @@ SAP Help lists these orchestration modules. Each module's output is the next one
 > - Respect document permissions: a retriever returns any chunk in the table, so split tables or filter by metadata per user group.
 >
 > *Added by Claude*
+
+## 🧪 Try it hands-on
+
+*Added by Claude: SAP's own tutorials in this book that let you try what this chapter teaches.*
+
+- **Grounding through orchestration (11.6):** [Orchestration(V2) with Grounding Capabilities](tutorial-ai-core-orchestration-grounding-v2.md)
+- **Your own vector store in SAP HANA Cloud:** [RAG using generative-ai-hub-sdk and HANA vector search](tutorial-ai-core-genai-hana-vector.md)
+- **Check the answers stay grounded:** [GenAI Grounding Evaluations](tutorial-ai-core-genaihub-evaluation-with-grounding.md)
+- **Grounding from ABAP:** [Custom ABAP AI Scenario including Grounding Capabilities](tutorial-abap-islm-orchestration-grounding-consumption.md)
 
 ## Check yourself
 

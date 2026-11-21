@@ -343,6 +343,15 @@ Grounded Q&A  specific SAP terms · context · compare · ask for evidence · it
 - Ask for structured output and validate it; inject documents for private knowledge
 - For grounded assistants such as Joule for Consultants, write prompts that help the search: specific, in domain terms, with context
 
+## 🧪 Try it hands-on
+
+*Added by Claude: SAP's own tutorials in this book that let you try what this chapter teaches.*
+
+- **Write and test prompts:** [Prompt LLMs in the generative AI hub in SAP AI Core & Launchpad](tutorial-ai-core-generative-ai.md)
+- **Save prompts as reusable templates:** [Leveraging Prompt Registry for Seamless Orchestration](tutorial-ai-core-genaihub-prompt-registry.md)
+- **Measure whether a prompt got better:** [Generative AI Custom Evaluation - Quickstart](tutorial-ai-core-genaihub-evaluation.md)
+- **Let SAP refine a prompt for you:** [Prompt optimization](tutorial-ai-core-genaihub-prompt-optimization.md), then [Prompt Optimization with Tool Calling](tutorial-prompt-optimization-tool-calling.md)
+
 ## Practice
 
 1. Ask a chat model "Do a sentiment analysis" on a course review (zero-shot). Then give one example and ask again (one-shot). Compare the outputs.
