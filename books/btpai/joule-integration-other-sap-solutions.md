@@ -290,4 +290,4 @@ July: 15 records = 0.075 AI units; carried forward 10
 - SAP Help, *Set Up Document Grounding*: https://help.sap.com/docs/joule/integrating-joule-with-sap/set-up-document-grounding
 - SAP Help, *Metering and Pricing* (document grounding): https://help.sap.com/docs/joule/integrating-joule-with-sap/metering-and-pricing
 
-Previous: [Joule with SAP SuccessFactors: the integration steps](joule-integration-successfactors.md) · Next: [Reference: Joule setup building blocks](reference-joule-setup-building-blocks.md)
+Previous: [Joule with SAP SuccessFactors: the integration steps](joule-integration-successfactors.md) · Next: [Hands-on: Call LLMs through the generative AI hub from Python](tutorial-genai-hub-python.md)

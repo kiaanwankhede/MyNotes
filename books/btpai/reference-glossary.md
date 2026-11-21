@@ -9,7 +9,7 @@
 > - **Level:** reference
 > - **Last checked:** 21 Nov 2026
 
-## 34.1 Acronyms
+## 37.1 Acronyms
 
 | Term | Meaning | Chapter |
 |---|---|---|
@@ -28,9 +28,10 @@
 | **IaaS / PaaS / SaaS** | Rent the hardware / also the platform / the finished application | [1](cloud-computing-service-models.md) |
 | **IAS** | Identity Authentication: SAP's login service in Cloud Identity Services | [10](btp-identity-trust-federation.md) |
 | **IDS** | Identity Directory: the user store in Cloud Identity Services | [10](btp-identity-trust-federation.md) |
-| **IPS** | Identity Provisioning: copies users and groups from a source system to a target | [10](btp-identity-trust-federation.md), [33.5](reference-joule-setup-building-blocks.md) |
+| **IPS** | Identity Provisioning: copies users and groups from a source system to a target | [10](btp-identity-trust-federation.md), [36.5](reference-joule-setup-building-blocks.md) |
 | **J4C** | Joule for Consultants: answers SAP project questions from curated SAP knowledge | [16](joule-for-consultants.md) |
 | **J4D** | Joule for Developers: Joule in development tools, for example ABAP | [16](joule-for-consultants.md), [18](joule-family.md) |
+| **JWT** | JSON Web Token: the signed token a service returns after sign-in; some APIs need a user-specific one | [35](tutorial-translation-hub-python.md) |
 | **LLM** | Large language model | [14](llm-prompt-to-answer.md) |
 | **MCP** | Model Context Protocol: a standard way to give an AI model tools | [19](joule-studio-classic.md), [20](joule-studio-intent-based.md) |
 | **OIDC** | OpenID Connect: the token-based trust protocol, preferred over SAML for BTP trust | [10](btp-identity-trust-federation.md) |
@@ -47,25 +48,29 @@
 | **SSO** | Single sign-on: one login for many systems | [10](btp-identity-trust-federation.md) |
 | **XSUAA** | SAP Authorization and Trust Management service: issues the tokens that carry a user's roles in a subaccount | [7](btp-users-role-collections.md), [8](btp-subaccount-walkthrough.md) |
 
-## 34.2 Terms
+## 37.2 Terms
 
 | Term | Meaning | Chapter |
 |---|---|---|
 | **Action project** | A set of API calls (OData or REST) that Joule skills and processes can use | [19.4a](joule-studio-classic.md), [22](tutorial-joule-action-projects.md) |
 | **Agent (Joule)** | Plans and calls tools (skills, other agents, MCP servers) until it can answer | [18](joule-family.md), [19](joule-studio-classic.md) |
+| **AI Core** | SAP's BTP service for running AI workloads; its generative AI hub serves LLMs through deployments | [33](tutorial-genai-hub-python.md) |
 | **Assistant (Joule)** | SAP's grouping of agents for one business area, for example Accounts Payable | [18](joule-family.md) |
 | **Booster** | A guided setup wizard in the global account | [6](btp-global-account-tools.md) |
 | **Cloud Connector** | On-premise software that opens a secure tunnel to BTP | [8](btp-subaccount-walkthrough.md) |
-| **Content provider** | A Work Zone channel that imports a product's roles and apps | [33.4](reference-joule-setup-building-blocks.md) |
+| **Content provider** | A Work Zone channel that imports a product's roles and apps | [36.4](reference-joule-setup-building-blocks.md) |
 | **Control tower** | Joule Studio's admin area: environments, destinations, settings | [19](joule-studio-classic.md) |
-| **Destination** | Stored connection details for another system, used by name | [8](btp-subaccount-walkthrough.md), [33.2](reference-joule-setup-building-blocks.md) |
+| **Deployment (AI Core)** | One running instance of a model in SAP AI Core, with its own ID | [33](tutorial-genai-hub-python.md) |
+| **Destination** | Stored connection details for another system, used by name | [8](btp-subaccount-walkthrough.md), [36.2](reference-joule-setup-building-blocks.md) |
 | **Destination variable** | A placeholder in a skill; the real destination is chosen at test or deploy time | [19](joule-studio-classic.md), [23](tutorial-joule-skill-create.md) |
 | **Directory** | A folder of subaccounts in a global account, with its own licences and admins | [9](btp-directories-tiers-commercial-models.md) |
+| **Document AI** | SAP service that extracts fields from business documents; its API was called Document Information Extraction | [34](tutorial-document-ai-python.md) |
 | **Document grounding** | Lets Joule answer from your own documents | [32.5](joule-integration-other-sap-solutions.md) |
 | **Entitlement** | Permission to use a service plan, assigned to a subaccount | [4](btp-account-model-first-subscription.md) |
 | **Environment (BTP)** | A runtime for your own code: Cloud Foundry, Kyma or ABAP | [8](btp-subaccount-walkthrough.md) |
 | **Environment (Joule Studio)** | Where projects run: private, shared or public | [19.3](joule-studio-classic.md) |
 | **Formation** | A group of SAP systems for one scenario, with baseline trust set up by SAP | [6](btp-global-account-tools.md) |
+| **Generative AI hub** | The part of SAP AI Core that gives access to LLMs from several providers with one service key (extended plan) | [33](tutorial-genai-hub-python.md) |
 | **Global account** | Your contract with SAP; holds subaccounts and licences | [4](btp-account-model-first-subscription.md) |
 | **Intent fit** | How closely a proposed solution matches what you asked for, in the new Joule Studio | [20](joule-studio-intent-based.md) |
 | **Just Ask** | SAC's natural-language feature; only models it indexes are visible to Joule | [29](tutorial-joule-sac-analytical-insights.md) |
@@ -73,6 +78,7 @@
 | **n8n** | A workflow tool; the new Joule Studio uses n8n workflows, for example as hooks | [20](joule-studio-intent-based.md), [28](tutorial-joule-studio-agent-extension.md) |
 | **Principal propagation** | Passing the signed-in user's identity to a backend instead of a technical user | [32.2](joule-integration-other-sap-solutions.md) |
 | **Progressive disclosure** | Showing the model only the next level of choices (assistant, agent, skill) to keep context small | [18.4](joule-family.md) |
+| **Resource group** | A partition of an SAP AI Core tenant that holds deployments; the course uses `default` | [33](tutorial-genai-hub-python.md) |
 | **Role collection** | A bundle of roles you assign to users in BTP | [7](btp-users-role-collections.md) |
 | **Service key** | Credentials for a service instance (URL, client ID, secret) | [29](tutorial-joule-sac-analytical-insights.md), [31](joule-integration-successfactors.md) |
 | **Shadow user** | BTP's local copy of a user who logs on through a trusted identity provider | [10](btp-identity-trust-federation.md) |
@@ -80,8 +86,9 @@
 | **Subaccount** | Your working area in one region, inside a global account | [4](btp-account-model-first-subscription.md), [8](btp-subaccount-walkthrough.md) |
 | **Subscription** | Using a SaaS app in a subaccount after it is entitled | [4](btp-account-model-first-subscription.md) |
 | **Token (LLM)** | The piece of text a language model reads and writes; also the unit of cost | [14](llm-prompt-to-answer.md) |
+| **Translation Hub** | SAP service for translating application texts and documents by API | [35](tutorial-translation-hub-python.md) |
 | **Trust configuration** | The link between a subaccount and an identity provider | [10](btp-identity-trust-federation.md) |
-| **Work Zone** | SAP Build Work Zone: the launchpad service that Joule uses for navigation and roles | [29](tutorial-joule-sac-analytical-insights.md), [33.4](reference-joule-setup-building-blocks.md) |
+| **Work Zone** | SAP Build Work Zone: the launchpad service that Joule uses for navigation and roles | [29](tutorial-joule-sac-analytical-insights.md), [36.4](reference-joule-setup-building-blocks.md) |
 
 ## How this page was built
 

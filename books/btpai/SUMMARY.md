@@ -50,6 +50,11 @@
 * [Joule with SAP SuccessFactors: the integration steps](joule-integration-successfactors.md)
 * [Joule with other SAP solutions: S/4HANA, planning and documents](joule-integration-other-sap-solutions.md)
 
+## SAP AI Services: Hands-On
+* [Hands-on: Call LLMs through the generative AI hub from Python](tutorial-genai-hub-python.md)
+* [Hands-on: Extract invoice data with SAP Document AI from Python](tutorial-document-ai-python.md)
+* [Hands-on: Translate text and documents with SAP Translation Hub from Python](tutorial-translation-hub-python.md)
+
 ## Reference
 * [Reference: Joule setup building blocks](reference-joule-setup-building-blocks.md)
 * [Reference: Glossary](reference-glossary.md)

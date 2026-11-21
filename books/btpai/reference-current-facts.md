@@ -9,7 +9,7 @@
 > - **Level:** reference
 > - **Last checked:** 21 Nov 2026
 
-## 35.1 How to re-check
+## 38.1 How to re-check
 
 1. Open the chapter's source for the fact (listed in that chapter's *Sources*).
 2. If the value changed, update the chapter first, then the row here.
@@ -21,7 +21,7 @@
 > - After SAP Sapphire (May) and TechEd (autumn), when SAP announces most changes.
 > - At each AI-unit or BTP contract renewal.
 
-## 35.2 Prices and SKUs
+## 38.2 Prices and SKUs
 
 | Fact | Value | Checked | Chapter |
 |---|---|---|---|
@@ -35,8 +35,9 @@
 | Joule for Developers, ABAP | free licence on request: SKU 8019124 (customers), 8019541 (partners) | 20 Nov 2026 | [18.8](joule-family.md) |
 | Business Application Studio, standard | EUR 28 per user per month (BTPEA list price) | 20 Nov 2026 | [9.6](btp-directories-tiers-commercial-models.md) |
 | Cloud Foundry in consumption accounts | default runtime-memory quota of 200 GB per subaccount; you pay for memory used | 20 Nov 2026 | [8.3](btp-subaccount-walkthrough.md), [9.6](btp-directories-tiers-commercial-models.md) |
+| SAP Document AI, premium edition | sold in blocks of 100 documents; price on request | 21 Nov 2026 | [34.1](tutorial-document-ai-python.md) |
 
-## 35.3 Free offers and end dates
+## 38.3 Free offers and end dates
 
 | Fact | Value | Checked | Chapter |
 |---|---|---|---|
@@ -44,8 +45,9 @@
 | Joule for Developers | free offer; SAP's page shows no end date (the course handbook said Q3 2026) | 20 Nov 2026 | [18.8](joule-family.md) |
 | AI quota in Business Application Studio | free quota in SAP Build Code and SAP Build ends 31 Dec 2026; bring your own key from 1 Jan 2027 | 21 Nov 2026 | [30](tutorial-joule-bas-full-stack-cap.md) |
 | Generative AI features in Joule Studio | deprecated; no longer available from January 2027 | 21 Nov 2026 | [19.1](joule-studio-classic.md) |
+| Generative AI hub | only on the SAP AI Core **extended** plan; upgrading from the free tier costs money | 21 Nov 2026 | [33.1](tutorial-genai-hub-python.md) |
 
-## 35.4 Counts and quotas
+## 38.4 Counts and quotas
 
 | Fact | Value | Checked | Chapter |
 |---|---|---|---|
@@ -56,8 +58,9 @@
 | S/4HANA Public Edition rate limit | 3,000 Joule requests per minute per tenant (SAP's 2024 guide) | 21 Nov 2026 | [32.3](joule-integration-other-sap-solutions.md) |
 | SAP certifications | valid 12 months; *Stay Certified* in the 90 days before expiry adds 12 months | 21 Nov 2026 | [12.2](sap-ai-careers-certifications.md) |
 | Refresh token in a subaccount | default 7 days (604,800 s) | 20 Nov 2026 | [7.5a](btp-users-role-collections.md) |
+| Document Translation limits | sync: 500 MB and 40,000 characters (fewer for ja, zh, ko, th); async: 2,500,000 characters; job results kept 3 days | 21 Nov 2026 | [35.4](tutorial-translation-hub-python.md), [35.5](tutorial-translation-hub-python.md) |
 
-## 35.5 Release changes that alter the steps
+## 38.5 Release changes that alter the steps
 
 | Change | Effect | Checked | Chapter |
 |---|---|---|---|
@@ -68,6 +71,7 @@
 | S/4HANA Public Edition 2602 SP06 | Joule icon role-based by default for new arrangements | 21 Nov 2026 | [32.3](joule-integration-other-sap-solutions.md) |
 | SAML trust in BTP | SAP strongly recommends OIDC; some services refuse SAML | 20 Nov 2026 | [10.5](btp-identity-trust-federation.md) |
 | SuccessFactors API Basic Authentication | deprecated; move to certificates | 21 Nov 2026 | [31.2](joule-integration-successfactors.md) |
+| SAP Cloud SDK for AI (Python) | `sap-ai-sdk-gen` 7.4.1 installed; Responses API since 6.10.0; Gemini needs the `[google]` extra | 21 Nov 2026 | [33.2](tutorial-genai-hub-python.md), [33.4](tutorial-genai-hub-python.md) |
 
 ## How this page was built
 
