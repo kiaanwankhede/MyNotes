@@ -13,5 +13,6 @@ Notes for an SAP consultant or developer on Joule: what it is and how it is lice
   * **Joule Studio: Practice:** 10 graded skill assignments and 10 agent assignments, each with a folded build guide
   * **Reference:** setup building blocks, a glossary, and the current facts (prices, SKUs, dates) to re-check
   * **Joule Studio Tutorials (SAP Developer Center):** seven more of SAP's Joule Studio tutorials, one page each, in SAP's own words and screenshots (CC BY 4.0), chapters 22 to 28
+  * **Joule Studio Tutorials: Notes (own words):** twelve more of SAP's Joule Studio labs, whose licence doesn't allow copying, as my own notes with screen maps and a link to SAP's screens at every step, chapters 29 to 40
 * Reading paths for each role, across all three books, are on the [SAP BTP book's introduction](../sap-btp/README.md).
 * Anything not taught in the course is labelled **Added by Claude**, and every claim about the current state of an SAP product is web-checked and dated.

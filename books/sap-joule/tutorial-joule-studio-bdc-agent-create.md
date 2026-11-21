@@ -114,4 +114,4 @@ The following steps demonstrate how the **Billing Completeness and Revenue Recog
 
 Users can continue the conversation with follow-up analytical questions to further investigate billing gaps, revenue recognition issues, and operational performance across sales organizations, channels, plants, and profit centers.
 
-Previous: [Tutorial: Use Joule Studio to Create an IT Incident Triage and Auto Routing Agent with N8N, SAP Task Center Node and SAP Agent Node](tutorial-joule-studio-n8n-workflow-create.md) · Next: [SAP Joule book introduction](README.md)
+Previous: [Tutorial: Use Joule Studio to Create an IT Incident Triage and Auto Routing Agent with N8N, SAP Task Center Node and SAP Agent Node](tutorial-joule-studio-n8n-workflow-create.md) · Next: [Tutorial notes: Automate balance confirmations with a custom Joule agent](notes-balance-confirmation-agent.md)

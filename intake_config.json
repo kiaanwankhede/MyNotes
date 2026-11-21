@@ -164,7 +164,7 @@
   },
   "SAP Joule": {
    "folder": "books/sap-joule",
-   "sections": ["Joule", "Joule Family and Joule Studio", "Joule Tutorials", "Joule Integrations", "Joule Studio: Practice", "Reference", "Joule Studio Tutorials (SAP Developer Center)"],
+   "sections": ["Joule", "Joule Family and Joule Studio", "Joule Tutorials", "Joule Integrations", "Joule Studio: Practice", "Reference", "Joule Studio Tutorials (SAP Developer Center)", "Joule Studio Tutorials: Notes (own words)"],
    "chapters": [
     "Joule for Consultants: grounded answers, provisioning and AI units",
     "The Joule family: Joule Work, embedded Joule, assistants, agents and skills",
@@ -193,7 +193,19 @@
     "Tutorial: Use Joule Studio to Create an Assistant to Monitor Supplier Risk",
     "Tutorial: Use Joule Studio to Create an Assistant for Equipment Troubleshooting",
     "Tutorial: Use Joule Studio to Create an IT Incident Triage and Auto Routing Agent with N8N, SAP Task Center Node and SAP Agent Node",
-    "Tutorial: Build a Billing Completeness Data Product with Joule Studio"
+    "Tutorial: Build a Billing Completeness Data Product with Joule Studio",
+    "Tutorial notes: Automate balance confirmations with a custom Joule agent",
+    "Tutorial notes: Manage budget variances for cost centers with a custom Joule agent",
+    "Tutorial notes: Guide the financial close with a closing advisor agent",
+    "Tutorial notes: Draft a financial close agent's intent in Joule Work",
+    "Tutorial notes: Optimise cable roll selection with a custom Joule agent",
+    "Tutorial notes: Handle demand spikes with a delivery prioritisation agent",
+    "Tutorial notes: Build a supplier disruption response agent with the Joule Studio CLI",
+    "Tutorial notes: Build a supplier performance assistant with Joule Studio",
+    "Tutorial notes: Build an AI sales assistant for discount decisions",
+    "Tutorial notes: Build a performance and goals recommendations agent",
+    "Tutorial notes: Extend a standard Joule agent with intent-based development",
+    "Tutorial notes: Create an invoice exception workflow with n8n in Joule Studio"
    ]
   }
  }
