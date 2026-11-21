@@ -217,6 +217,20 @@ article table td:first-child strong{white-space:nowrap}
 #hlpanel .raopt label{display:block;font-size:.9rem;color:var(--muted);margin-top:.6em}
 #hlpanel .raopt select{width:100%;font:inherit;font-size:16px;padding:8px 10px;margin:4px 0 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
 @media (max-width:760px){#ra{order:2}#ra .ralbl{display:none}#raplayer button{width:38px;height:38px}}
+.cards{max-width:760px}
+.cdmeta{color:var(--muted);font-size:.95rem;margin-top:0}
+.cdbar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:.9rem;margin:1.2rem 0 .5rem}
+.cdcard{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:18px 20px;min-height:200px}
+.cdtop{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.8rem;color:var(--muted);margin-bottom:8px}
+.cdtype{background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:2px 8px;font-weight:600}
+.cdfront{font-family:var(--font-display);font-size:1.25rem;font-weight:600;line-height:1.45;margin:.2em 0 .6em}
+.cdback{border-top:1px solid var(--line);padding-top:.6em}
+.cdback ul{margin:.2em 0;padding-left:1.2em}
+.cdnote{font-size:.85rem;color:var(--warn);margin:.6em 0 0}
+.cdbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.cdbtns .knew{border-color:var(--accent);color:var(--accent)}
+.cdhint{color:var(--muted);font-size:.85rem}
+@media (max-width:760px){#cards .cdlbl{display:none}.cdhint{display:none}}
 </style>
 </head>
 <body>
@@ -228,6 +242,7 @@ article table td:first-child strong{white-space:nowrap}
   <button id="chbtn" class="icon-btn" aria-haspopup="true" aria-expanded="false" aria-controls="chmenu"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex:none"><path d="M3 5h14M3 10h14M3 15h14"/></svg><span class="lbl" id="chlbl">Chapters</span><svg class="car" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 4l4 4 4-4"/></svg></button>
   <button id="hlt" class="icon-btn" aria-pressed="false">★ Marked only</button>
   <button id="chnote" class="icon-btn" aria-label="Notes for this chapter" hidden>📝 Notes</button>
+  <button id="cards" class="icon-btn" aria-label="Flashcards for this chapter" hidden>🃏<span class="cdlbl"> Cards</span></button>
   <button id="ra" class="icon-btn" aria-label="Read this chapter aloud" hidden>🔊<span class="ralbl"> Listen</span></button>
   <button id="hlset" class="icon-btn" aria-label="Highlights and sync settings">⚙<span class="dot local"></span></button>
   <button id="theme" class="icon-btn" aria-label="Switch colour theme">Dark</button>
@@ -338,6 +353,7 @@ function fixLinks(html){
 }
 function show(){
   if(RA.on) raStop();
+  CARDS.on=false; setCardsBtn(null,null);
   if(location.hash==='#highlights'&&window.HL){
     var my0=++token, b0=bookOf(state.book); renderBooks(); lnApply(document.getElementById('doc'),null);
     document.getElementById('right').innerHTML=''; document.title='My highlights - Study Notes';
@@ -375,8 +391,81 @@ function show(){
     buildToc();
     if(window.HL) HL.apply(b.slug,id);
     setMenu(false);
+    if(c&&c.written) setCardsBtn(b,id);
   });
 }
+/* ---------- flashcards: built live from a chapter's interview Q&As and the glossary/facts rows that point to it ---------- */
+var CARDS={on:false}, CARD_DAYS=[0,1,3,7,21,60], DAY=86400000;
+function cardsOn(b,id){return !!(b&&id&&(b.cards||[]).indexOf(id)>=0)}
+function setCardsBtn(b,id){var k=document.getElementById('cards'); if(k) k.hidden=!cardsOn(b,id);}
+function cdHash(s){var h=0;for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))|0}return 'c'+(h>>>0).toString(36)}
+function cdLoad(key){try{return JSON.parse(localStorage.getItem(key)||'{}')}catch(e){return {}}}
+function cdSave(key,st){try{localStorage.setItem(key,JSON.stringify(st))}catch(e){}}
+function cdCells(line){return line.trim().replace(/^\||\|$/g,'').split('|').map(function(x){return x.trim()})}
+function cdBuild(b,c){
+  var out=[], md=(c.md||'').replace(/\r\n/g,'\n'), re=/<details class="qa"><summary>(\d+)\.\s*([\s\S]*?)<\/summary>([\s\S]*?)<\/details>/g, m, link='('+c.id+'.md)';
+  while((m=re.exec(md))){
+    var hs=md.slice(0,m.index).match(/^##\s+.+$/gm), sec=hs?hs[hs.length-1].replace(/^##\s+/,''):'';
+    out.push({type:'Interview',front:m[2].trim(),back:fixLinks(marked.parse(m[3].trim())),src:(sec?sec+' · ':'')+'Q'+m[1]});
+  }
+  (b.chapters||[]).forEach(function(x){
+    if(!x.md) return;
+    if(x.id==='reference-glossary') x.md.replace(/\r\n/g,'\n').split('\n').forEach(function(l){
+      if(l.indexOf('| **')===0&&l.indexOf(link)>=0){var k=cdCells(l); out.push({type:'Term',front:k[0].replace(/\*\*/g,''),back:fixLinks(marked.parse(k[1])),src:'Glossary'});}
+    });
+    if(x.id==='reference-current-facts') x.md.replace(/\r\n/g,'\n').split('\n').forEach(function(l){
+      if(/^\| [^-|]/.test(l)&&l.indexOf(link)>=0){var k=cdCells(l); out.push({type:'Fact',front:k[0]+'?',back:fixLinks(marked.parse(k[1])),src:'Current facts',note:'Last checked '+k[2]+'. Re-check before you quote it.'});}
+    });
+  });
+  out.forEach(function(x){x.id=cdHash(x.type+'|'+x.front)});
+  return out;
+}
+function cardsOpen(){
+  var b=bookOf(state.book), c=null; (b.chapters||[]).forEach(function(x){if(x.id===state.ch)c=x});
+  if(!c||!cardsOn(b,c.id)) return;
+  if(RA.on) raStop();
+  var key='cards:'+b.slug+':'+c.id, st=cdLoad(key), all=cdBuild(b,c), now=Date.now();
+  CARDS={on:true,b:b,c:c,key:key,st:st,all:all,i:0,knew:0,miss:0,flipped:false,
+    q:all.filter(function(x){var s=st[x.id];return !s||s.due<=now})};
+  document.getElementById('right').innerHTML=''; document.getElementById('main').scrollTop=0;
+  cdRender();
+}
+function cardsAll(){CARDS.q=CARDS.all.slice();CARDS.i=0;CARDS.knew=0;CARDS.miss=0;CARDS.flipped=false;cdRender();}
+function cdRender(){
+  var K=CARDS, doc=document.getElementById('doc'), now=Date.now();
+  var seen=K.all.filter(function(x){return K.st[x.id]}).length;
+  var h='<div class="cards"><h1>Cards: '+esc(K.c.title)+'</h1><p class="cdmeta">'+K.all.length+' cards from this chapter\'s interview questions, glossary and current facts. '+(K.all.length-seen)+' new. Progress is saved in this browser.</p>';
+  if(K.i>=K.q.length){
+    var next=K.all.map(function(x){return K.st[x.id]?K.st[x.id].due:0}).filter(function(d){return d>now}).sort(function(a,b){return a-b})[0];
+    h+='<div class="cdcard"><p class="cdfront">'+(K.q.length?'Done for now.':'Nothing due right now.')+'</p><p>'+(K.q.length?'Knew it: '+K.knew+' · Didn\'t know: '+K.miss+'. ':'')+(next?'Next card due on '+esc(new Date(next).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}))+'.':'')+'</p></div>'+
+       '<div class="cdbtns"><button class="icon-btn" id="cdall">Study all '+K.all.length+' again</button><button class="icon-btn" id="cdclose">Back to chapter</button></div></div>';
+  } else {
+    var x=K.q[K.i];
+    h+='<div class="cdbar"><span>Card '+(K.i+1)+' of '+K.q.length+'</span><span>Knew it: '+K.knew+' · Didn\'t know: '+K.miss+'</span></div>'+
+       '<div class="cdcard"><div class="cdtop"><span class="cdtype">'+(x.type==='Term'?'Term: what does it mean?':x.type)+'</span><span>'+esc(x.src)+'</span></div>'+
+       '<p class="cdfront">'+esc(x.front)+'</p><div class="cdback"'+(K.flipped?'':' hidden')+'>'+x.back+(x.note?'<p class="cdnote">'+esc(x.note)+'</p>':'')+'</div></div>'+
+       '<div class="cdbtns">'+(K.flipped?'<button class="icon-btn" id="cdmiss">✗ Didn\'t know</button><button class="icon-btn knew" id="cdknew">✓ Knew it</button>':'<button class="icon-btn" id="cdflip">Show answer</button>')+
+       '<button class="icon-btn" id="cdclose">Back to chapter</button></div><p class="cdhint">Keys: Space shows the answer, 1 = didn\'t know, 2 = knew it.</p></div>';
+  }
+  doc.innerHTML=h; lnApply(doc,null);
+  var on=function(id,f){var e=document.getElementById(id); if(e) e.onclick=f;};
+  on('cdflip',cdFlip); on('cdmiss',function(){cdRate(false)}); on('cdknew',function(){cdRate(true)});
+  on('cdall',cardsAll); on('cdclose',function(){show()});
+}
+function cdFlip(){CARDS.flipped=true;cdRender();}
+function cdRate(ok){
+  var K=CARDS, x=K.q[K.i], s=K.st[x.id]||{box:0,due:0}, today=new Date(); today.setHours(0,0,0,0);
+  if(ok){ s.box=Math.min(s.box+1,CARD_DAYS.length-1); s.due=today.getTime()+CARD_DAYS[s.box]*DAY; K.knew++; }
+  else { s.box=0; s.due=Date.now(); K.miss++; if(!x.again){x.again=true;K.q.push(x);} }
+  K.st[x.id]=s; cdSave(K.key,K.st); K.i++; K.flipped=false; cdRender();
+}
+document.addEventListener('keydown',function(e){
+  if(!CARDS.on||e.ctrlKey||e.metaKey||e.altKey||/INPUT|TEXTAREA|SELECT/.test((e.target||{}).tagName||'')) return;
+  if(CARDS.i>=CARDS.q.length) return;
+  if(!CARDS.flipped&&(e.key===' '||e.key==='Enter')){e.preventDefault();cdFlip();}
+  else if(CARDS.flipped&&e.key==='1'){cdRate(false);} else if(CARDS.flipped&&e.key==='2'){cdRate(true);}
+});
+document.getElementById('cards').addEventListener('click',cardsOpen);
 var ALERT={note:'📘 Note',tip:'💡 Tip',important:'🏭 In production',warning:'⚠️ Pitfall',caution:'🔒 Security'};
 function callouts(root){
   root.querySelectorAll('blockquote').forEach(function(bq){

@@ -64,7 +64,10 @@
       "slug": "sap-joule",
       "title": "SAP Joule",
       "shelf": "SAP",
-      "blurb": "Joule, Joule Studio, skills, agents, tutorials, integrations and practice."
+      "blurb": "Joule, Joule Studio, skills, agents, tutorials, integrations and practice.",
+      "cards": [
+        "joule-for-consultants"
+      ]
     }
   ]
 }
