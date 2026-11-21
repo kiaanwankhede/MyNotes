@@ -99,7 +99,7 @@
   },
   "SAP AI": {
    "folder": "books/sap-ai",
-   "sections": ["SAP AI", "AI Fundamentals", "Responsible AI", "SAP AI Services: Hands-On", "AI Core Tutorials: Setup", "AI Core Tutorials: Generative AI Hub and Orchestration", "AI Core Tutorials: Evaluation and Prompt Optimization", "AI Core Tutorials: Tabular AI", "AI Core Tutorials: Classic ML on SAP AI Core", "AI Core Tutorials: ABAP and ISLM", "Reference"],
+   "sections": ["SAP AI", "AI Fundamentals", "Responsible AI", "SAP AI Services: Hands-On", "AI Core Tutorials: Setup", "AI Core Tutorials: Generative AI Hub and Orchestration", "AI Core Tutorials: Evaluation and Prompt Optimization", "AI Core Tutorials: Tabular AI", "AI Core Tutorials: Classic ML on SAP AI Core", "AI Core Tutorials: ABAP and ISLM", "AI Launchpad Tutorials", "Reference"],
    "chapters": [
     "The SAP AI landscape: Autonomous Enterprise, AI North Star and the Business AI Platform",
     "SAP AI certifications, roles and staying current",
@@ -156,6 +156,8 @@
     "Tutorial: Implement a Custom ABAP AI Scenario Consuming SAP AI Core Orchestration Service in Your SAP S/4HANA System",
     "Tutorial: Implement a Custom ABAP AI Scenario including Grounding Capabilities in Your SAP S/4HANA System",
     "Tutorial: Enable the ADT MCP Server in ABAP Development Tools for VS Code",
+    "Tutorial: Setup Generative AI Hub in SAP AI Launchpad",
+    "Tutorial: Setup SAP AI Core Basic Trial",
     "Reference: Glossary",
     "Reference: Current facts to re-check"
    ]

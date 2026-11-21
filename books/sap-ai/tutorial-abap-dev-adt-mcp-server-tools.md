@@ -216,4 +216,4 @@ You have successfully:
 
    > ℹ️ **Hint**: To test and learn working with Agentic AI in ADT for VS Code, you can follow the [RAP130 - Build SAP Fiori Apps with ABAP Cloud and SAP Joule for Developers in Visual Studio Code](https://github.com/SAP-samples/abap-platform-rap130) tutorial.
 
-Previous: [Tutorial: Implement a Custom ABAP AI Scenario including Grounding Capabilities in Your SAP S/4HANA System](tutorial-abap-islm-orchestration-grounding-consumption.md) · Next: [Reference: Glossary](reference-glossary.md)
+Previous: [Tutorial: Implement a Custom ABAP AI Scenario including Grounding Capabilities in Your SAP S/4HANA System](tutorial-abap-islm-orchestration-grounding-consumption.md) · Next: [Tutorial: Setup Generative AI Hub in SAP AI Launchpad](tutorial-ai-launchpad-provisioning.md)

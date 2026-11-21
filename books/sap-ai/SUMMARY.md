@@ -77,6 +77,10 @@
 * [Tutorial: Implement a Custom ABAP AI Scenario including Grounding Capabilities in Your SAP S/4HANA System](tutorial-abap-islm-orchestration-grounding-consumption.md)
 * [Tutorial: Enable the ADT MCP Server in ABAP Development Tools for VS Code](tutorial-abap-dev-adt-mcp-server-tools.md)
 
+## AI Launchpad Tutorials
+* [Tutorial: Setup Generative AI Hub in SAP AI Launchpad](tutorial-ai-launchpad-provisioning.md)
+* [Tutorial: Setup SAP AI Core Basic Trial](tutorial-teched2026-aicore-basic-trial.md)
+
 ## Reference
 * [Reference: Glossary](reference-glossary.md)
 * [Reference: Current facts to re-check](reference-current-facts.md)

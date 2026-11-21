@@ -9,7 +9,7 @@
 > - **Level:** reference
 > - **Last checked:** 21 Nov 2026
 
-## 56.1 Acronyms
+## 58.1 Acronyms
 
 | Term | Meaning | Chapter |
 |---|---|---|
@@ -19,7 +19,7 @@
 | **LLM** | Large language model | [4](llm-prompt-to-answer.md) |
 | **RAG** | Retrieval-augmented generation: look up documents, then let the model answer from them | [5](prompt-engineering.md), [SAP Joule 1](../sap-joule/joule-for-consultants.md) |
 
-## 56.2 Terms
+## 58.2 Terms
 
 | Term | Meaning | Chapter |
 |---|---|---|
@@ -44,4 +44,4 @@
 
 - The chapters linked in each row.
 
-Previous: [Tutorial: Enable the ADT MCP Server in ABAP Development Tools for VS Code](tutorial-abap-dev-adt-mcp-server-tools.md) · Next: [Reference: Current facts to re-check](reference-current-facts.md)
+Previous: [Tutorial: Setup SAP AI Core Basic Trial](tutorial-teched2026-aicore-basic-trial.md) · Next: [Reference: Current facts to re-check](reference-current-facts.md)
