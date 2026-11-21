@@ -8,6 +8,7 @@
 > - **You will build:** a service map for a leave-management app, from IDE to dashboard
 > - **Level:** beginner · **Time:** about 25 minutes
 > - **Builds on:** [Global account, subaccount and your first service subscription](btp-account-model-first-subscription.md). **Leads to:** [Global account tools: Resource Providers, Boosters and System Landscape](btp-global-account-tools.md)
+> - **Last checked:** 19 Nov 2026
 
 **After this chapter you can:**
 

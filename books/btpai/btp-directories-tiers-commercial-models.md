@@ -8,6 +8,8 @@
 > - **You will build:** an account model for a company with eight teams: managed directories, directory admins, Dev/Test/Prod subaccounts, and a monthly budget with alerts
 > - **Level:** beginner to intermediate · **Time:** about 40 minutes
 > - **Builds on:** [Users, role collections and access at every level](btp-users-role-collections.md) and [Inside a subaccount](btp-subaccount-walkthrough.md)
+> - **Prices and dates:** re-check them on [Current facts to re-check](reference-current-facts.md)
+> - **Last checked:** 20 Nov 2026
 
 **After this chapter you can:**
 

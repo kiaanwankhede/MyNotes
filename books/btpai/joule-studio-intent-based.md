@@ -13,6 +13,7 @@
 > - **You will build:** a small fit-gap check that sorts needs into standard SAP content and gaps, and scores the fit
 > - **Level:** beginner to intermediate · **Time:** about 40 minutes
 > - **Builds on:** [The Joule family](joule-family.md) and [Joule Studio Classic](joule-studio-classic.md)
+> - **Last checked:** 21 Nov 2026
 
 **After this chapter you can:**
 

@@ -49,3 +49,8 @@
 ## Joule Integrations
 * [Joule with SAP SuccessFactors: the integration steps](joule-integration-successfactors.md)
 * [Joule with other SAP solutions: S/4HANA, planning and documents](joule-integration-other-sap-solutions.md)
+
+## Reference
+* [Reference: Joule setup building blocks](reference-joule-setup-building-blocks.md)
+* [Reference: Glossary](reference-glossary.md)
+* [Reference: Current facts to re-check](reference-current-facts.md)

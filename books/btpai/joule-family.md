@@ -14,6 +14,8 @@
 > - **You will build:** a small router that picks an assistant, then an agent, then a skill, showing only what each step needs
 > - **Level:** beginner · **Time:** about 35 minutes
 > - **Builds on:** [The SAP AI landscape](sap-ai-landscape.md) and [Joule for Consultants](joule-for-consultants.md)
+> - **Prices and dates:** re-check them on [Current facts to re-check](reference-current-facts.md)
+> - **Last checked:** 21 Nov 2026
 
 **After this chapter you can:**
 

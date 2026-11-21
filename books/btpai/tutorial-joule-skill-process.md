@@ -10,6 +10,7 @@
 > - **Level:** beginner · **Time:** about 30 minutes (SAP's estimate)
 > - **Not done in class:** the lecturer skipped it as mostly Process Automation, and left it as optional practice
 > - **Concepts:** [Joule Studio Classic](joule-studio-classic.md), 19.8
+> - **Last checked:** 21 Nov 2026
 
 **After this tutorial you can:**
 

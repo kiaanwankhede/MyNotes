@@ -12,6 +12,7 @@
 > - **You will build:** a one-neuron classifier trained over many epochs, and a confidence threshold that answers "unknown"
 > - **Level:** beginner · **Time:** about 40 minutes
 > - **Builds on:** nothing; this is where the AI fundamentals start. Read it before [The SAP AI landscape](sap-ai-landscape.md) if AI is new to you
+> - **Last checked:** 20 Nov 2026
 
 **After this chapter you can:**
 

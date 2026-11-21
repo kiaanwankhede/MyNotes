@@ -8,6 +8,7 @@
 > - **You will build:** your own Identity Authentication tenant, an OIDC trust from a subaccount, groups that map to role collections at login, and a platform trust for the cockpit
 > - **Level:** intermediate · **Time:** about 45 minutes
 > - **Builds on:** [Users, role collections and access at every level](btp-users-role-collections.md) and [Directories, landscape tiers and commercial models](btp-directories-tiers-commercial-models.md)
+> - **Last checked:** 20 Nov 2026
 
 **After this chapter you can:**
 
@@ -101,7 +102,7 @@ flowchart LR
 > **Three parts or four?**
 > - **The course:** Cloud Identity Services has three components: IAS, IPS and IDS.
 > - **SAP's help:** four, with Authorization Management as the fourth.
-> - This chapter goes deep only on the three the course covers.
+> - This chapter goes deep on IAS, IPS and IDS; Authorization Management is not covered here.
 
 - The admin console's top menu: **Home · Users & Authorizations · Identity Provisioning · Applications & Resources · Identity Providers · Monitoring & Reporting**.
 - People often say "IAS" for the whole service, because trust and login live there.

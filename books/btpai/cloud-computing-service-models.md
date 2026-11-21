@@ -8,6 +8,7 @@
 > - **You will build:** a shared-responsibility table you can draw from memory, and two commands that prove a resource is remote
 > - **Level:** beginner · **Time:** about 20 minutes
 > - **Builds on:** nothing, this is the first chapter. **Leads to:** [SAP's cloud journey and the BTP landscape](sap-cloud-journey-btp-landscape.md)
+> - **Last checked:** 19 Nov 2026
 
 **After this chapter you can:**
 

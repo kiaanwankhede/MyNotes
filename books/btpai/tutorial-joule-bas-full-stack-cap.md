@@ -9,6 +9,7 @@
 > - **You need:** SAP Business Application Studio (BAS) on the *build-code* (SAP Build Code) or *build-default* (SAP Build) plan, or your own model key
 > - **Level:** beginner to intermediate
 > - **Concepts:** [Prompt engineering](prompt-engineering.md), [The Joule family](joule-family.md)
+> - **Last checked:** 21 Nov 2026
 
 > [!WARNING]
 > **The course's SAP tutorial is gone**

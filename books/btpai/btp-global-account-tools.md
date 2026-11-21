@@ -8,6 +8,7 @@
 > - **You will build:** a formation plan for one integration scenario, and the CLI calls that bind a hyperscaler database to an app
 > - **Level:** beginner to intermediate · **Time:** about 30 minutes
 > - **Builds on:** [Choosing BTP services for a requirement](btp-services-for-a-requirement.md) and [the account-model chapter](btp-account-model-first-subscription.md)
+> - **Last checked:** 19 Nov 2026
 
 **After this chapter you can:**
 
@@ -175,7 +176,7 @@ stateDiagram-v2
 
 - In the lecture, a **Disaster Recovery** entry had just appeared in the productive global account, and not in the trial.
 - The lecturer's first reading: it is for high-availability database replicas. For example, HANA Cloud replicas in another region take over if the primary fails.
-- The course promised to cover it once there is a proper use case. Treat this as preliminary: it was not checked against SAP documentation here.
+- Treat this as preliminary: it was not checked against SAP documentation here.
 
 ## 6.6a Usage: what you consumed, where
 

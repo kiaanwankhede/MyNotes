@@ -9,6 +9,7 @@
 > - **You need:** the destinations from [tutorial 21](tutorial-joule-skill-setup.md); developer rights in SAP Build are enough
 > - **Level:** beginner · **Time:** about 20 minutes (SAP's estimate)
 > - **Concepts:** [Joule Studio Classic](joule-studio-classic.md), 19.4a
+> - **Last checked:** 21 Nov 2026
 
 **After this tutorial you can:**
 

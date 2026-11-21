@@ -8,6 +8,7 @@
 > - **You will build:** a typed tool schema with Pydantic, the pattern every pro-code agent uses for its inputs
 > - **Level:** beginner · **Time:** about 30 minutes
 > - **Builds on:** [The SAP AI landscape](sap-ai-landscape.md)
+> - **Last checked:** 21 Nov 2026
 
 **After this chapter you can:**
 

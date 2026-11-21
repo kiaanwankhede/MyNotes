@@ -13,6 +13,7 @@
 > - **You will build:** a small masking step that removes names, contact data and gendered words before a CV reaches an LLM, and restores them afterwards
 > - **Level:** beginner to intermediate · **Time:** about 40 minutes
 > - **Builds on:** [The SAP AI landscape](sap-ai-landscape.md) and [Prompt engineering](prompt-engineering.md)
+> - **Last checked:** 20 Nov 2026
 
 **After this chapter you can:**
 

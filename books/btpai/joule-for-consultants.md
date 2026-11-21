@@ -13,6 +13,8 @@
 > - **You will build:** an AI-unit cost calculator that follows SAP's published rules
 > - **Level:** beginner to intermediate · **Time:** about 45 minutes
 > - **Builds on:** [Identity: Cloud Identity Services, trust and federated authorization](btp-identity-trust-federation.md) and [Prompt engineering](prompt-engineering.md)
+> - **Prices and dates:** re-check them on [Current facts to re-check](reference-current-facts.md)
+> - **Last checked:** 20 Nov 2026
 
 **After this chapter you can:**
 

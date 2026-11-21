@@ -8,6 +8,7 @@
 > - **You will build:** a one-page map from every legacy SAP tool to its cloud successor
 > - **Level:** beginner · **Time:** about 25 minutes
 > - **Builds on:** [Cloud computing and the service models](cloud-computing-service-models.md). **Leads to:** [Inside BTP: Neo, hyperscalers and regions](btp-neo-hyperscalers-regions.md)
+> - **Last checked:** 20 Nov 2026
 
 **After this chapter you can:**
 

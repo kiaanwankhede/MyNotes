@@ -9,6 +9,7 @@
 > - **You need:** Joule Studio Classic; tutorials [21](tutorial-joule-skill-setup.md) to [23](tutorial-joule-skill-create.md) for the basics
 > - **Level:** beginner to intermediate · **Time:** about 30 minutes (SAP's estimate)
 > - **Concepts:** [Joule Studio Classic](joule-studio-classic.md), 19.5 to 19.8
+> - **Last checked:** 21 Nov 2026
 
 **After this tutorial you can:**
 

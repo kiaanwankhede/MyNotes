@@ -10,6 +10,7 @@
 > - **Level:** beginner · **Time:** about 20 minutes (SAP's estimate)
 > - **Course use:** reference only. The class used the C_JSD practice system, and access to the new Studio was limited (Lecture 10)
 > - **Concepts:** [The new Joule Studio](joule-studio-intent-based.md), 20.2 to 20.4
+> - **Last checked:** 21 Nov 2026
 
 **After this tutorial you can:**
 

@@ -8,6 +8,7 @@
 > - **You will build:** a subaccount in AWS US East with Cloud Transport Management subscribed and opened, the same flow as Assignment 1
 > - **Level:** beginner · **Time:** about 30 minutes reading, 20 minutes hands-on in a trial
 > - **Builds on:** [Inside BTP: Neo, hyperscalers and regions](btp-neo-hyperscalers-regions.md). **Leads to:** [Choosing BTP services for a requirement](btp-services-for-a-requirement.md)
+> - **Last checked:** 20 Nov 2026
 
 **After this chapter you can:**
 
@@ -93,7 +94,7 @@ flowchart LR
 - A custom app usually gets one subaccount per landscape tier, such as `LeaveApp-Dev`, `LeaveApp-Test` and `LeaveApp-Prod`.
 - All three need the same services, because it is the same app.
 - Some services are different: Cloud Transport Management is one central instance that moves releases between the dev, test and prod subaccounts. It is never tripled.
-- When to share a subaccount and when to split is an "account model" decision. The course covers it later.
+- When to share a subaccount and when to split is an "account model" decision; see [Directories, landscape tiers and commercial models](btp-directories-tiers-commercial-models.md), 9.1 to 9.5.
 
 **Copy an existing subaccount instead of repeating the entitlements**
 - Real UI path: *Account Explorer → Create*, then the option to create from an existing subaccount. This opens the **Create as New Subaccount** dialog.

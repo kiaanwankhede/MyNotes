@@ -8,6 +8,7 @@
 > - **You will build:** a region decision you can defend in a design review, plus the CLI calls that list regions and create a subaccount in one
 > - **Level:** beginner · **Time:** about 20 minutes
 > - **Builds on:** [SAP's cloud journey and the BTP landscape](sap-cloud-journey-btp-landscape.md). **Leads to:** [Global account, subaccount and your first service subscription](btp-account-model-first-subscription.md)
+> - **Last checked:** 19 Nov 2026
 
 **After this chapter you can:**
 

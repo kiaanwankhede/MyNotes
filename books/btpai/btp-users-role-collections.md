@@ -8,6 +8,7 @@
 > - **You will build:** a custom "landscape admin" role collection and a viewer-only role collection for an app, assigned to the right users
 > - **Level:** beginner to intermediate · **Time:** about 30 minutes
 > - **Builds on:** [Global account tools](btp-global-account-tools.md) and [the account-model chapter](btp-account-model-first-subscription.md)
+> - **Last checked:** 20 Nov 2026
 
 **After this chapter you can:**
 

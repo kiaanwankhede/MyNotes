@@ -9,6 +9,8 @@
 > - **You need:** SAP BTP global account admin rights, Joule entitlements, an SAC tenant with Just Ask switched on and at least three free OAuth client slots, and SAP Cloud Identity Services
 > - **Level:** advanced (administrator)
 > - **Concepts:** [The Joule family](joule-family.md) (the Joule booster), [Identity and trust](btp-identity-trust-federation.md)
+> - **Quick reference:** [Joule setup building blocks](reference-joule-setup-building-blocks.md) (destinations, booster, Work Zone, IPS, AI units)
+> - **Last checked:** 21 Nov 2026
 
 **After this tutorial you can:**
 

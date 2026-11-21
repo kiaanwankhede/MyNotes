@@ -9,6 +9,8 @@
 > - **You need:** a BTP subaccount with Joule and Joule Studio Classic set up; admin rights in the control tower and the cockpit
 > - **Level:** beginner · **Time:** about 20 minutes (SAP's estimate)
 > - **Concepts:** [Joule Studio Classic](joule-studio-classic.md), 19.3
+> - **Quick reference:** [Joule setup building blocks](reference-joule-setup-building-blocks.md) (destinations, booster, Work Zone, IPS, AI units)
+> - **Last checked:** 21 Nov 2026
 
 **After this tutorial you can:**
 

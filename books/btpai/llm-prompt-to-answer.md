@@ -13,6 +13,7 @@
 > - **You will build:** a tokenizer check, a cosine-similarity test, a sampler with temperature, top-k and top-p, a toy generation loop and a cost calculator
 > - **Level:** beginner to intermediate · **Time:** about 50 minutes
 > - **Builds on:** [AI, machine learning, deep learning and generative AI](ai-ml-deep-learning-genai.md)
+> - **Last checked:** 20 Nov 2026
 
 **After this chapter you can:**
 

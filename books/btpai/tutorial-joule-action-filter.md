@@ -9,6 +9,7 @@
 > - **You need:** tutorials [21](tutorial-joule-skill-setup.md) and [22](tutorial-joule-action-projects.md)
 > - **Level:** beginner · **Time:** about 20 minutes (SAP's estimate)
 > - **Concepts:** [Joule Studio Classic](joule-studio-classic.md), 19.4 and 19.4a
+> - **Last checked:** 21 Nov 2026
 
 **After this tutorial you can:**
 

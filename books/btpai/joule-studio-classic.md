@@ -14,6 +14,8 @@
 > - **You will build:** a small simulation of a skill and an agent calling the same API, where only the agent recovers from a failure
 > - **Level:** beginner to intermediate · **Time:** about 45 minutes
 > - **Builds on:** [The Joule family](joule-family.md) and [Inside a subaccount](btp-subaccount-walkthrough.md)
+> - **Quick reference:** [Joule setup building blocks](reference-joule-setup-building-blocks.md) (destinations, booster, Work Zone, IPS, AI units)
+> - **Last checked:** 21 Nov 2026
 
 **After this chapter you can:**
 

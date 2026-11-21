@@ -8,6 +8,7 @@
 > - **You will build:** a Cloud Foundry space with a deployed app bound to an XSUAA instance (Assignment 2, Part 2)
 > - **Level:** intermediate · **Time:** about 40 minutes
 > - **Builds on:** [Users, role collections and access at every level](btp-users-role-collections.md)
+> - **Last checked:** 20 Nov 2026
 
 **After this chapter you can:**
 

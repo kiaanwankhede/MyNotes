@@ -10,6 +10,7 @@
 > - **Level:** beginner · **Time:** about 20 minutes (SAP's estimate)
 > - **Course use:** reference only. The class extended a different SAP assistant in the C_JSD practice system (Lecture 10)
 > - **Concepts:** [The new Joule Studio](joule-studio-intent-based.md), 20.6
+> - **Last checked:** 21 Nov 2026
 
 **After this tutorial you can:**
 

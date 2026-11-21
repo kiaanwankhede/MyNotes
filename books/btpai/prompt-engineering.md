@@ -13,6 +13,7 @@
 > - **You will build:** a one-shot prompt with a system message, and a parser that rejects any reply that is not the JSON you asked for
 > - **Level:** beginner · **Time:** about 35 minutes
 > - **Builds on:** [Inside a large language model](llm-prompt-to-answer.md)
+> - **Last checked:** 20 Nov 2026
 
 **After this chapter you can:**
 

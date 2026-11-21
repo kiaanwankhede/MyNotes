@@ -9,6 +9,7 @@
 > - **Level:** beginner · **Time:** about 40 minutes
 > - **Builds on:** [SAP's cloud journey and the BTP landscape](sap-cloud-journey-btp-landscape.md) (section 2.4a) and [Identity](btp-identity-trust-federation.md)
 >   - New to terms such as LLM, tokens or RAG? Read [AI, ML, deep learning and GenAI](ai-ml-deep-learning-genai.md) and [Inside a large language model](llm-prompt-to-answer.md) first
+> - **Last checked:** 20 Nov 2026
 
 **After this chapter you can:**
 

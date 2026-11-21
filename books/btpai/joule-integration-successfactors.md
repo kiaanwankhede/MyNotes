@@ -9,6 +9,8 @@
 > - **You need:** BTP global account admin, a SuccessFactors company integrated with Identity Authentication (IAS), SAP Build Work Zone with an instance and service key, and IPS admin rights
 > - **Level:** advanced (administrator)
 > - **Concepts:** [The Joule family](joule-family.md), [Customer- vs SAP-managed Joule](joule-studio-intent-based.md), [Tutorial 29](tutorial-joule-sac-analytical-insights.md) for the same Work Zone and IPS pattern
+> - **Quick reference:** [Joule setup building blocks](reference-joule-setup-building-blocks.md) (destinations, booster, Work Zone, IPS, AI units)
+> - **Last checked:** 21 Nov 2026
 
 **After this chapter you can:**
 

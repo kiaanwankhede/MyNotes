@@ -9,6 +9,7 @@
 > - **You need:** the destinations from [tutorial 21](tutorial-joule-skill-setup.md) and the published action projects from [tutorial 22](tutorial-joule-action-projects.md)
 > - **Level:** beginner · **Time:** about 30 minutes (SAP's estimate)
 > - **Concepts:** [Joule Studio Classic](joule-studio-classic.md), 19.4 and 19.8
+> - **Last checked:** 21 Nov 2026
 
 **After this tutorial you can:**
 
