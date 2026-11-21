@@ -38,7 +38,9 @@ flowchart LR
 - **SAP AI Core** runs AI workloads on BTP. Its **generative AI hub** gives you hosted LLMs through **deployments**: one running instance per model, each with an ID.
 - **A resource group** separates deployments within one AI Core tenant. The course uses `default`.
 - **The SDK wraps the providers' own Python SDKs.** You write familiar code (`chat.completions.create`, `client.models.generate_content`), and the SDK handles the token and routes the call through AI Core.
-- **Plan:** the generative AI hub is available only on AI Core's **extended** plan. Upgrading from the free tier keeps your data but costs money (SAP tutorial, checked 21 Nov 2026).
+- **Plan:** the generative AI hub is available only on AI Core's **extended** plan (SAP Help, *Service Plans*).
+  - SAP Help lists two plans today, *standard* and *extended*, both for enterprise accounts. You can upgrade from standard to extended, but not back.
+  - To try the hub first, SAP offers a **30-day basic trial**. SAP's older setup tutorial still mentions a free tier; the *Service Plans* page doesn't (checked 21 Nov 2026).
 
 ## 33.2 Set up
 
@@ -269,6 +271,7 @@ print(len(vector))          # 1536 in the course run
 |---|---|---|
 | *No credentials found in any source* | Clients imported before the settings were loaded | Run `load_aicore_key()` first, then import |
 | *No module named 'google'* | Plain install has no Gemini support | `pip install "sap-ai-sdk-gen[google]"` |
+| *No module named 'botocore'* when importing `gen_ai_hub.proxy.langchain…` | The SDK's LangChain package also loads its Amazon module | `pip install "sap-ai-sdk-gen[all]"` ([chapter 36](tutorial-rag-grounding-genai-hub.md)) |
 | *No module named 'gen_ai_hub'* | Wrong notebook kernel | Select the `.venv` kernel, or run `uv sync` again |
 | *401 Unauthorized* | Expired or wrong service key | Create a new key in the cockpit |
 | *Deployment not found* | An example ID from someone else's tenant | List your deployments (33.3) and use one of yours |
@@ -325,7 +328,10 @@ print(len(vector))          # 1536 in the course run
   - importing before the settings exist fails; the SDK adds `/oauth/token` and `/v2` when they are missing
   - the `load_aicore_key` and tool function snippets ran
 - **Not run:** any call to a model; they need a real AI Core extended-plan tenant.
-- **SAP's docs read on 21 Nov 2026:** the SDK README and release notes (6.10.0 added the Responses API); the provisioning tutorial (pre-read and step 1: extended plan required).
+- **SAP's docs read on 21 Nov 2026:**
+  - the SDK README and release notes (6.10.0 added the Responses API)
+  - the provisioning tutorial (pre-read and step 1: extended plan required)
+  - SAP Help's *Service Plans* page and SAP's AI Core trial page. The 33.1 plan note was corrected to follow them, the same day.
 - **Left out:** the course tenant's deployment IDs, which appear in the notebook's saved outputs.
 
 ## Sources
@@ -334,5 +340,7 @@ print(len(vector))          # 1536 in the course run
 - SAP, *SAP Cloud SDK for AI (Python) - generative*: https://help.sap.com/doc/generative-ai-hub-sdk/CLOUD/en-US/_reference/README_sphynx.html
 - SAP, SDK release notes: https://help.sap.com/doc/generative-ai-hub-sdk/CLOUD/en-US/_reference/RELEASE_NOTES.html
 - SAP Developer Center, *Set up Generative AI Hub in SAP AI Core*: https://developers.sap.com/tutorials/ai-core-genaihub-provisioning.html
+- SAP Help, *Service Plans* (SAP AI Core): https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/service-plans
+- SAP, *SAP AI Core trial*: https://www.sap.com/products/artificial-intelligence/core-ai-trial.html
 
 Previous: [Joule with other SAP solutions: S/4HANA, planning and documents](joule-integration-other-sap-solutions.md) · Next: [Hands-on: Extract invoice data with SAP Document AI from Python](tutorial-document-ai-python.md)

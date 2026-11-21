@@ -54,6 +54,7 @@
 * [Hands-on: Call LLMs through the generative AI hub from Python](tutorial-genai-hub-python.md)
 * [Hands-on: Extract invoice data with SAP Document AI from Python](tutorial-document-ai-python.md)
 * [Hands-on: Translate text and documents with SAP Translation Hub from Python](tutorial-translation-hub-python.md)
+* [Hands-on: RAG and document grounding with the generative AI hub](tutorial-rag-grounding-genai-hub.md)
 
 ## Reference
 * [Reference: Joule setup building blocks](reference-joule-setup-building-blocks.md)

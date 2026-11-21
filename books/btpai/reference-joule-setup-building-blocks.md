@@ -10,7 +10,7 @@
 > - **Builds on:** [Global account tools](btp-global-account-tools.md), [Subaccount walkthrough](btp-subaccount-walkthrough.md), [Identity and trust](btp-identity-trust-federation.md), [Joule for Consultants](joule-for-consultants.md), [The Joule family](joule-family.md)
 > - **Last checked:** 21 Nov 2026
 
-## 36.1 How the blocks fit
+## 37.1 How the blocks fit
 
 ```mermaid
 flowchart LR
@@ -36,7 +36,7 @@ flowchart LR
 8. Permissions for users in the product and in BTP.
 9. Test in Joule from the product.
 
-## 36.2 Destinations
+## 37.2 Destinations
 
 - A **destination** stores how to reach another system: URL, authentication, user or OAuth client ([8.10](btp-subaccount-walkthrough.md)).
 - You create it in the **subaccount**. Joule Studio sees it only after an admin adds it in the **control tower** ([19.3](joule-studio-classic.md)).
@@ -53,7 +53,7 @@ flowchart LR
 | SharePoint destination | Document grounding | `https://graph.microsoft.com`, OAuth2Password, scope `…/.default` | [32.5](joule-integration-other-sap-solutions.md) |
 | `NavigationService` | Older Joule setups | Not needed by hand for setups after 13 Oct 2025 | [29](tutorial-joule-sac-analytical-insights.md) |
 
-## 36.3 Booster and formation
+## 37.3 Booster and formation
 
 - A **booster** is a guided setup wizard in the global account ([6.3](btp-global-account-tools.md)).
 - A **formation** groups SAP systems for one scenario and sets up baseline trust between them ([6.5](btp-global-account-tools.md)).
@@ -64,7 +64,7 @@ flowchart LR
 - **Joule already running?** Do not run the booster again: add the system to the existing formation instead ([29](tutorial-joule-sac-analytical-insights.md), [32.3](joule-integration-other-sap-solutions.md)).
 - **Registering a system** first: *Systems → Add System → Get Token*, then paste the token in the product ([31](joule-integration-successfactors.md) for SuccessFactors, [32.3](joule-integration-other-sap-solutions.md) for S/4HANA Public).
 
-## 36.4 SAP Build Work Zone: the content provider
+## 37.4 SAP Build Work Zone: the content provider
 
 - Work Zone's navigation service decides which apps and content a user may reach through Joule.
 - It needs two inputs: the product's **roles and content** (content provider), and the **users with their roles** (Identity Provisioning).
@@ -73,18 +73,18 @@ flowchart LR
 | Field | Usual value |
 |---|---|
 | Title / ID | `sac.analytics` (SAC), `sfsf` (SuccessFactors), your own ID (S/4HANA) |
-| Design-Time / Runtime Destination | the product's DT and RT destinations (36.2) |
+| Design-Time / Runtime Destination | the product's DT and RT destinations (37.2) |
 | Runtime Destination for Dynamic Data | Use default runtime destination |
 | Automatically add all content items to subaccount | on |
 | Use the Identity Provisioning service to provision user authorizations | on |
 
-- The **service key** of the Work Zone instance feeds the Identity Provisioning target (36.5).
+- The **service key** of the Work Zone instance feeds the Identity Provisioning target (37.5).
 
-## 36.5 Identity Provisioning (IPS)
+## 37.5 Identity Provisioning (IPS)
 
 - IPS copies **users** and their **roles as groups** from a source system to a target system ([10.3](btp-identity-trust-federation.md)).
 - For Joule, the target is **SAP Build Work Zone, standard edition**. Its properties come from the Work Zone service key; [31.2](joule-integration-successfactors.md) has a snippet that builds them.
-- The target's `cflp.providerId` must equal the content provider ID (36.4).
+- The target's `cflp.providerId` must equal the content provider ID (37.4).
 
 | Source | Settings that matter | Chapter |
 |---|---|---|
@@ -95,7 +95,7 @@ flowchart LR
 
 **Jobs, in this order:** *Simulate* → check *Provisioning Logs* → *Read* → check again → *Resync* if roles are missing → **schedule** *Read* at least every 24 hours.
 
-## 36.6 AI units
+## 37.6 AI units
 
 - SAP's currency for **Premium AI**, bought yearly into one pool. Base AI needs none ([16.6](joule-for-consultants.md), [18.8](joule-family.md)).
 
@@ -117,4 +117,4 @@ flowchart LR
 
 - The chapters linked in each section above.
 
-Previous: [Hands-on: Translate text and documents with SAP Translation Hub from Python](tutorial-translation-hub-python.md) · Next: [Reference: Glossary](reference-glossary.md)
+Previous: [Hands-on: RAG and document grounding with the generative AI hub](tutorial-rag-grounding-genai-hub.md) · Next: [Reference: Glossary](reference-glossary.md)

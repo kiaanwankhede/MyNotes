@@ -256,4 +256,4 @@ if info["status"] == "DONE":
 - SAP Help, *User-Specific JSON Web Tokens*: https://help.sap.com/docs/translation-hub/sap-translation-hub/user-specific-json-web-tokens
 - SAP Help, *Testing the API with SAP BTP Free Tier*: https://help.sap.com/docs/translation-hub/sap-translation-hub/testing-api-with-sap-btp-free-tier-account
 
-Previous: [Hands-on: Extract invoice data with SAP Document AI from Python](tutorial-document-ai-python.md) · Next: [Reference: Joule setup building blocks](reference-joule-setup-building-blocks.md)
+Previous: [Hands-on: Extract invoice data with SAP Document AI from Python](tutorial-document-ai-python.md) · Next: [Hands-on: RAG and document grounding with the generative AI hub](tutorial-rag-grounding-genai-hub.md)
