@@ -215,7 +215,7 @@ For each skill, keep three things:
 
 ## Sources
 
-- BTPAI course Drive: *Joule-Skill-Creation-Workbook.pdf* (BT073) and its copy (BT063)
+- Mentors Pool course Drive: *Joule-Skill-Creation-Workbook.pdf* (BT073) and its copy (BT063)
 - SAP Business Accelerator Hub (API names and fields): https://api.sap.com
 
 Previous: [Joule with other SAP solutions: S/4HANA, planning and documents](joule-integration-other-sap-solutions.md) · Next: [Practice: 10 Joule agent assignments](practice-joule-agents.md)

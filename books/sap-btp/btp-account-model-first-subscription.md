@@ -561,9 +561,9 @@ Then, as a stretch: write the btp CLI commands for steps 1, 3 and 4, and compare
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 1 recording, 27 Sep 2026 (BT001); *Day 1 BTP Fundamentals* slides (BT005); *Assignment 1* (BT003); *How to create a sub account and subscribe a service* (BT004); *1. BTP Basics* notes (BT002)
-- BTPAI course, Lecture 2 recording, *BTP capabilities and global account walkthrough* (BT006); *SAP BTP Fundamentals Day 2 Notes* (BT008)
-- BTPAI course, Lecture 4 recording, *Sub Account Walkthrough, Directory Concept, Commercial Model* (BT011)
+- Mentors Pool course, Lecture 1 recording, 27 Sep 2026 (BT001); *Day 1 BTP Fundamentals* slides (BT005); *Assignment 1* (BT003); *How to create a sub account and subscribe a service* (BT004); *1. BTP Basics* notes (BT002)
+- Mentors Pool course, Lecture 2 recording, *BTP capabilities and global account walkthrough* (BT006); *SAP BTP Fundamentals Day 2 Notes* (BT008)
+- Mentors Pool course, Lecture 4 recording, *Sub Account Walkthrough, Directory Concept, Commercial Model* (BT011)
 - SAP Knowledge Base, KBA 3720222 (central vs subaccount audit logs): https://userapps.support.sap.com/sap/support/knowledge/en/3720222
 - SAP Knowledge Base, KBA 3610974 (creating a subaccount from a source subaccount): https://userapps.support.sap.com/sap/support/knowledge/en/3610974
 - SAP, *SAP BTP trial*, FAQ: https://www.sap.com/products/technology-platform/trial.html (read 19 Nov 2026)

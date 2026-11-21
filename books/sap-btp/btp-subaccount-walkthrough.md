@@ -499,11 +499,11 @@ Stretch: deploy any small static app to the space, create an XSUAA instance ther
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 3 recording (BT009); *SAP BTP Fundamentals Day 3 Notes* (BT010); *Assignment 2* (BT007)
+- Mentors Pool course, Lecture 3 recording (BT009); *SAP BTP Fundamentals Day 3 Notes* (BT010); *Assignment 2* (BT007)
 - SAP Developers, *Create service instances in the SAP BTP cockpit*: https://developers.sap.com/tutorials/btp-cockpit-instances.html
 - SAP Community, *Fundamentals of multitenancy in SAP BTP*: https://community.sap.com/t5/technology-blog-posts-by-sap/fundamentals-of-multitenancy-in-sap-btp/ba-p/13527283
 - SAP Learning, *Setting up SAP BTP, Cloud Foundry runtime*: https://learning.sap.com/courses/developing-applications-for-sap-btp-cloud-foundry-runtime/setting-up-sap-btp-cloud-foundry-runtime
-- BTPAI course, Lecture 4 recording (BT011); *SAP BTP Fundamentals Notes* (BT014)
+- Mentors Pool course, Lecture 4 recording (BT011); *SAP BTP Fundamentals Notes* (BT014)
 - SAP Help, *Delete a subaccount*: https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/50-administration-and-ops/delete-a-subaccount-419dc3d.md
 - SAP Help, *Change subaccount details* (Used for production): https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/50-administration-and-ops/change-subaccount-details-567d4a8.md
 - SAP Help, *What is the consumption-based commercial model?* (200 GB default): https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/10-concepts/what-is-the-consumption-based-commercial-model-7047eb4.md

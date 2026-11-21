@@ -336,7 +336,7 @@ print(len(vector))          # 1536 in the course run
 
 ## Sources
 
-- BTPAI course Drive: `aicore` › `aicore-handson` (README, `native-client.ipynb`) (BT052)
+- Mentors Pool course Drive: `aicore` › `aicore-handson` (README, `native-client.ipynb`) (BT052)
 - SAP, *SAP Cloud SDK for AI (Python) - generative*: https://help.sap.com/doc/generative-ai-hub-sdk/CLOUD/en-US/_reference/README_sphynx.html
 - SAP, SDK release notes: https://help.sap.com/doc/generative-ai-hub-sdk/CLOUD/en-US/_reference/RELEASE_NOTES.html
 - SAP Developer Center, *Set up Generative AI Hub in SAP AI Core*: https://developers.sap.com/tutorials/ai-core-genaihub-provisioning.html

@@ -340,6 +340,6 @@ flowchart LR
 - SAP Developer Center, *Use Joule Studio, Classic Edition to Create and Deploy a Joule Skill*: https://developers.sap.com/tutorials/joulestudio-skill-create.html
 - Tutorial source and screenshots: https://github.com/sap-tutorials/sap-build-process-automation (© SAP SE, licensed CC BY 4.0)
 - SAP Help, *Create a Joule Skill*: https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/create-joule-skill
-- BTPAI course, Lecture 11 Part A (BT023) and Lecture 12 (BT025) recordings
+- Mentors Pool course, Lecture 11 Part A (BT023) and Lecture 12 (BT025) recordings
 
 Previous: [Tutorial: Create action projects](tutorial-joule-action-projects.md) · Next: [Tutorial: Filter an action and let Joule write the reply](tutorial-joule-action-filter.md)

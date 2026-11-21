@@ -259,6 +259,6 @@ flowchart LR
 
 - SAP Developer Center, *Create a Filter in an Action Project*: https://developers.sap.com/tutorials/joulestudio-skill-action-filter.html
 - Tutorial source and screenshots: https://github.com/sap-tutorials/sap-build-process-automation (© SAP SE, licensed CC BY 4.0)
-- BTPAI course, Lecture 11 Part A (BT023) and Lecture 12 (BT025) recordings
+- Mentors Pool course, Lecture 11 Part A (BT023) and Lecture 12 (BT025) recordings
 
 Previous: [Tutorial: Create and deploy a Joule skill](tutorial-joule-skill-create.md) · Next: [Tutorial: Run an automated process from a Joule skill](tutorial-joule-skill-process.md)

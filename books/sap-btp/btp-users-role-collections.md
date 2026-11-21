@@ -383,8 +383,8 @@ Assignment 2, Part 1, in your trial:
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 3 recording, *Sub account walkthrough* (BT009); *SAP BTP Fundamentals Day 3 Notes* (BT010); *Assignment 2* (BT007); *1. BTP Basics* notes (BT002)
-- BTPAI course, Lecture 4 recording (BT011); *SAP BTP Fundamentals Notes* (BT014)
+- Mentors Pool course, Lecture 3 recording, *Sub account walkthrough* (BT009); *SAP BTP Fundamentals Day 3 Notes* (BT010); *Assignment 2* (BT007); *1. BTP Basics* notes (BT002)
+- Mentors Pool course, Lecture 4 recording (BT011); *SAP BTP Fundamentals Notes* (BT014)
 - SAP Help, *Configure token policy for SAP Authorization and Trust Management service*: https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/50-administration-and-ops/configure-token-policy-for-sap-authorization-and-trust-management-service-40290a9.md
 - SAP Help, *Application security descriptor configuration syntax* (`oauth2-configuration`): https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/30-development/application-security-descriptor-configuration-syntax-517895a.md
 - SAP Help, *Encryption using customer-managed keys*: https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/30-development/encryption-using-customer-managed-keys-3b9934d.md

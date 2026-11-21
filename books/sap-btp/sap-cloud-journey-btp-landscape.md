@@ -402,7 +402,7 @@ flowchart TB
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 1 recording, 27 Sep 2026 (BT001); *Day 1 BTP Fundamentals* slides (BT005); *1. BTP Basics* notes (BT002)
+- Mentors Pool course, Lecture 1 recording, 27 Sep 2026 (BT001); *Day 1 BTP Fundamentals* slides (BT005); *1. BTP Basics* notes (BT002)
 - SAP Discovery Center, platform service catalogue: https://discovery-center.cloud.sap/servicecatalog (opened 19 Nov 2026)
 - SAP, company history 2011 to 2020 (acquisitions): https://www.sap.com/about/company/history/2011-2020.html
 - SAP News, *SAP and Databricks open a bold new era of data and AI* (Feb 2025): https://news.sap.com/2025/02/sap-databricks-open-bold-new-era-data-ai/

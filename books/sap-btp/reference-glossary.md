@@ -53,7 +53,7 @@
 
 - Compiled on 21 Nov 2026 from the book's chapters: every term with two or more uses was considered, and meaningful ones were kept.
 - No new sources; definitions follow the linked chapters.
-- Split on 21 Nov 2026 from the single BTPAI glossary/facts page: this page keeps the rows whose main chapter is in this book. Links to the other SAP books name the book.
+- Split on 21 Nov 2026 from the single glossary/facts page of the former combined course book: this page keeps the rows whose main chapter is in this book. Links to the other SAP books name the book.
 
 ## Sources
 

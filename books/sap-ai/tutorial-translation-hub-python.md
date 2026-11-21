@@ -250,7 +250,7 @@ if info["status"] == "DONE":
 
 ## Sources
 
-- BTPAI course Drive: `translation-hub` (README, `requirements.txt`, three notebooks, `sample_doc`) (BT059)
+- Mentors Pool course Drive: `translation-hub` (README, `requirements.txt`, three notebooks, `sample_doc`) (BT059)
 - SAP Help, *Synchronous Document Translation API - Process Documentation*: https://help.sap.com/docs/translation-hub/sap-translation-hub/document-translation-api-process-documentation
 - SAP Help, *Asynchronous Document Translation API - Process Documentation*: https://help.sap.com/docs/translation-hub/sap-translation-hub/async-document-translation-api-process-documentation
 - SAP Help, *User-Specific JSON Web Tokens*: https://help.sap.com/docs/translation-hub/sap-translation-hub/user-specific-json-web-tokens

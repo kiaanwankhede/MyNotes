@@ -203,6 +203,6 @@ flowchart LR
 - SAP Developer Center, *Setup Environment and Connectivity for Joule Skills*: https://developers.sap.com/tutorials/joulestudio-skill-environment-setup.html
 - Tutorial source and screenshots: https://github.com/sap-tutorials/sap-build-process-automation (© SAP SE, licensed CC BY 4.0)
 - SAP Developer Center, *Build Your First Joule Skill in Joule Studio, Classic Edition*: https://developers.sap.com/group.joule-studio-first-skill.html
-- BTPAI course, Lecture 11 Part A (BT023) and Lecture 12 (BT025) recordings
+- Mentors Pool course, Lecture 11 Part A (BT023) and Lecture 12 (BT025) recordings
 
 Previous: [The new Joule Studio: intent-based development, agents and extensions](joule-studio-intent-based.md) · Next: [Tutorial: Create action projects](tutorial-joule-action-projects.md)

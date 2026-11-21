@@ -207,6 +207,6 @@ flowchart LR
 
 - SAP Developer Center, *Create Action Projects*: https://developers.sap.com/tutorials/joulestudio-skill-action-create.html
 - Tutorial source and screenshots: https://github.com/sap-tutorials/sap-build-process-automation (© SAP SE, licensed CC BY 4.0)
-- BTPAI course, Lecture 11 Part A (BT023) and Lecture 12 (BT025) recordings
+- Mentors Pool course, Lecture 11 Part A (BT023) and Lecture 12 (BT025) recordings
 
 Previous: [Tutorial: Set up environments and destinations for Joule skills](tutorial-joule-skill-setup.md) · Next: [Tutorial: Create and deploy a Joule skill](tutorial-joule-skill-create.md)

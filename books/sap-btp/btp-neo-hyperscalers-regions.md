@@ -295,7 +295,7 @@ btp create accounts/subaccount --display-name "cTMS" --subdomain "ctms-demo-1234
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 1 recording, 27 Sep 2026 (BT001); *Day 1 BTP Fundamentals* slides (BT005); *1. BTP Basics* notes (BT002)
+- Mentors Pool course, Lecture 1 recording, 27 Sep 2026 (BT001); *Day 1 BTP Fundamentals* slides (BT005); *1. BTP Basics* notes (BT002)
 - SAP Discovery Center, *SAP Cloud Transport Management*, Pricing: https://discovery-center.cloud.sap/serviceCatalog/cloud-transport-management?region=all&tab=service_plan (opened 19 Nov 2026)
 - SAP Community, *Farewell Neo* (June 2023): https://blogs.sap.com/2023/06/14/farewell-neo-sap-btp-multi-cloud-environment-the-deployment-environment-of-choice/
 - SAP, *Migrate from the SAP BTP Neo environment to the multi-cloud foundation*: https://www.sap.com/products/technology-platform/neo-migration.html

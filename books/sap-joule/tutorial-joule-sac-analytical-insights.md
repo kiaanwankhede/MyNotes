@@ -287,7 +287,7 @@ flowchart LR
 
 ## Sources
 
-- BTPAI course Drive: *Joule Integration with SAC Step by Step guide* (BT056) and the destination exports *SAC_SWZ_DT.json* and *SAC_SWZ_RT.json* (BT079, BT080)
+- Mentors Pool course Drive: *Joule Integration with SAC Step by Step guide* (BT056) and the destination exports *SAC_SWZ_DT.json* and *SAC_SWZ_RT.json* (BT079, BT080)
 - SAP Help, *Integration with SAP Analytics Cloud*: https://help.sap.com/docs/joule/integrating-joule-with-sap/integration-with-sap-analytics-cloud
 - SAP Help, *Enable the Analytical Insights Capability in Joule*: https://help.sap.com/docs/joule/integrating-joule-with-sap/enable-analytical-insights-capability-in-joule
 - SAP Help, *Consume Role and Team Definitions Content from SAP Analytics Cloud*: https://help.sap.com/docs/joule/integrating-joule-with-sap/consume-role-definition-content-from-sap-analytics-cloud

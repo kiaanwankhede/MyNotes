@@ -378,7 +378,7 @@ print("new student (4 h study, 7 h sleep):", round(predict((4, 7)), 2))
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 7 recording (BT018); course Drive: *AI ML Presentation* decks (BT051) and *Live Demo Websites AI* (BT060)
+- Mentors Pool course, Lecture 7 recording (BT018); course Drive: *AI ML Presentation* decks (BT051) and *Live Demo Websites AI* (BT060)
 - Google, *Quick, Draw! The Data*: https://quickdraw.withgoogle.com/data
 - Google, *Teachable Machine*: https://teachablemachine.withgoogle.com
 - TensorFlow, *A Neural Network Playground*: https://playground.tensorflow.org

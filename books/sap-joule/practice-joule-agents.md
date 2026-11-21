@@ -193,7 +193,7 @@ For each agent, keep:
 
 ## Sources
 
-- BTPAI course Drive: *Joule-Agent-Creation-Workbook.pdf* (BT072)
+- Mentors Pool course Drive: *Joule-Agent-Creation-Workbook.pdf* (BT072)
 - SAP Help, *Deploy a Project* (Joule Studio, classic edition): https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/deploy-project
 - SAP Help, *Create a Joule Agent with Vibe Coding*: https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/create-joule-agent-with-vibe-coding
 

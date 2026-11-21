@@ -313,6 +313,6 @@ flowchart LR
 
 - SAP Developer Center, *Consume an Automated Process in a Joule Skill*: https://developers.sap.com/tutorials/joulestudio-skill-process.html
 - Tutorial source and screenshots: https://github.com/sap-tutorials/sap-build-process-automation (© SAP SE, licensed CC BY 4.0)
-- BTPAI course, Lecture 12 recording (BT025)
+- Mentors Pool course, Lecture 12 recording (BT025)
 
 Previous: [Tutorial: Filter an action and let Joule write the reply](tutorial-joule-action-filter.md) · Next: [Tutorial: Create a Joule agent in Joule Studio Classic](tutorial-joule-agent-create.md)

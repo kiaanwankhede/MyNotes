@@ -235,6 +235,6 @@ SAP gives three texts to paste on its page. Their content, in short:
 - SAP Developer Center, *Use Joule Studio, Classic Edition to Create an Agent*: https://developers.sap.com/tutorials/joulestudio-agent-create.html
 - Tutorial source and screenshots: https://github.com/sap-tutorials/sap-build-process-automation (© SAP SE, licensed CC BY 4.0)
 - SAP Help, *Create a Joule Agent*: https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/create-joule-agent
-- BTPAI course, Lecture 11 Part A (BT023) and Lecture 12 (BT025) recordings
+- Mentors Pool course, Lecture 11 Part A (BT023) and Lecture 12 (BT025) recordings
 
 Previous: [Tutorial: Run an automated process from a Joule skill](tutorial-joule-skill-process.md) · Next: [Tutorial: Build an HR assistant with intent-based development](tutorial-joule-studio-hr-assistant.md)

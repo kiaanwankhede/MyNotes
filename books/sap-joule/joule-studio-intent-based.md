@@ -305,7 +305,7 @@ GAP       Draft a status email to the customer
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 10 Part A (BT021) and Part B (BT022) recordings
+- Mentors Pool course, Lecture 10 Part A (BT021) and Part B (BT022) recordings
 - SAP Developer Center, *Use Joule Studio to Create an HR Onboarding Assistant*: https://developers.sap.com/tutorials/joule-studio-hr-onboarding-assistant.html
 - SAP Developer Center, *Use Joule Studio to Extend the AP Invoice Agent using Agent Extensions*: https://developers.sap.com/tutorials/joule-studio-agent-extension.html
 - SAP Developer Center, tutorial navigator (search "Joule"): https://developers.sap.com/tutorial-navigator.html

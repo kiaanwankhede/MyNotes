@@ -341,8 +341,8 @@ flowchart TB
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 1 recording, *Introduction to cloud computing and BTP*, 27 Sep 2026 (master row BT001)
-- BTPAI course, *Day 1 BTP Fundamentals* slides (BT005) and *1. BTP Basics: Cloud Computing and Understanding BTP* notes (BT002)
+- Mentors Pool course, Lecture 1 recording, *Introduction to cloud computing and BTP*, 27 Sep 2026 (master row BT001)
+- Mentors Pool course, *Day 1 BTP Fundamentals* slides (BT005) and *1. BTP Basics: Cloud Computing and Understanding BTP* notes (BT002)
 - NIST SP 800-145, *The NIST Definition of Cloud Computing* (2011): https://csrc.nist.gov/pubs/sp/800/145/final
 - AWS, *Amazon EC2 exits beta* (Oct 2008): https://aws.amazon.com/about-aws/whats-new/2008/10/23/amazon-ec2-exits-beta-and-now-offers-a-service-level-agreement
 - DZone, *5 key events in the history of cloud computing* (S3 and EC2 in 2006, Azure GA in 2010): https://dzone.com/articles/5-key-events-history-cloud

@@ -556,7 +556,7 @@ Budgets need a consumption-based global account, so you can't try them in a tria
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 4 recording, *Sub Account Walkthrough, Directory Concept, Commercial Model* (BT011); *SAP BTP Fundamentals Notes* (BT014); *Assignment - 3* course page (BT012)
+- Mentors Pool course, Lecture 4 recording, *Sub Account Walkthrough, Directory Concept, Commercial Model* (BT011); *SAP BTP Fundamentals Notes* (BT014); *Assignment - 3* course page (BT012)
 - SAP Discovery Center, *Business Application Studio, pricing*: https://discovery-center.cloud.sap/serviceCatalog/business-application-studio?region=all&tab=service_plan
 - SAP Help (docs source on GitHub), *Account model*: https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/10-concepts/account-model-8ed4a70.md
 - SAP Help, *Create a directory*: https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/50-administration-and-ops/create-a-directory-b8ef1c4.md

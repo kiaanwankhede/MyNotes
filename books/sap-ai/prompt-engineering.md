@@ -354,7 +354,7 @@ Grounded Q&A  specific SAP terms · context · compare · ask for evidence · it
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 7 recording (BT018); course Drive: *Prompt Engineering* deck (BT051), *Joule for Consultant.pptx* (BT055), *J4C Hands On* (BT069)
+- Mentors Pool course, Lecture 7 recording (BT018); course Drive: *Prompt Engineering* deck (BT051), *Joule for Consultant.pptx* (BT055), *J4C Hands On* (BT069)
 - AI Native Foundation, *Andrej Karpathy's "Software 3.0" vision* (20 Jun 2025): https://ainativefoundation.org/andrej-karpathys-software-3-0-vision-the-definitive-blueprint-for-ai-native-application-modernization/
 - DAIR.AI, *Prompt Engineering Guide*: https://www.promptingguide.ai
 - DAIR.AI, *ReAct Prompting*: https://www.promptingguide.ai/techniques/react

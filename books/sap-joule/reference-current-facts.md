@@ -69,7 +69,7 @@
 
 - Compiled on 21 Nov 2026 by scanning all 32 chapters for prices, SKUs, counts, dates and limits, outside the interview sections.
 - No new sources: every value is copied from its chapter, with the date that chapter checked it.
-- Split on 21 Nov 2026 from the single BTPAI glossary/facts page: this page keeps the rows whose main chapter is in this book. Links to the other SAP books name the book.
+- Split on 21 Nov 2026 from the single glossary/facts page of the former combined course book: this page keeps the rows whose main chapter is in this book. Links to the other SAP books name the book.
 
 ## Sources
 

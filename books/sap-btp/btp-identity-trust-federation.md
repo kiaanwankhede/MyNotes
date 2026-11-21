@@ -551,7 +551,7 @@ Stretch: create the platform trust in your global account, and log on to the coc
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 5 recording, *Introduction to IdP (CIS) and IAS trust with app & platform* (BT015); *SAP BTP Fundamentals Day 5 Notes* (BT016); *Assignment -4* course page, titled Assignment 3 (BT013)
+- Mentors Pool course, Lecture 5 recording, *Introduction to IdP (CIS) and IAS trust with app & platform* (BT015); *SAP BTP Fundamentals Day 5 Notes* (BT016); *Assignment -4* course page, titled Assignment 3 (BT013)
 - SAP Help, *Trust and federation with identity providers*: https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/50-administration-and-ops/trust-and-federation-with-identity-providers-cb1bc8f.md
 - SAP Help, *Establish trust and federation of custom identity providers for platform users*: https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/50-administration-and-ops/establish-trust-and-federation-of-custom-identity-providers-for-platform-users-c368984.md
 - SAP Help, *Establish trust and federation with UAA using any SAML identity provider*: https://github.com/SAP-docs/btp-cloud-platform/blob/main/docs/50-administration-and-ops/establish-trust-and-federation-with-uaa-using-any-saml-identity-provider-2ce3938.md

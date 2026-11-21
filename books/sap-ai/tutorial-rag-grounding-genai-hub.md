@@ -271,7 +271,7 @@ SAP Help lists these orchestration modules. Each module's output is the next one
 
 ## Sources
 
-- BTPAI course Drive:
+- Mentors Pool course Drive:
   - `rag_genaihub.ipynb` (BT078) and its input `policy.pdf` (BT076)
   - *Document Grounding in SAP AI Launchpad* (BT065)
   - *SAP AI Core, Generative AI Hub & AI Launchpad How-To Guide* (BT087)

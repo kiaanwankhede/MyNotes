@@ -493,7 +493,7 @@ choose       context window · speed · cost · risk; pin the version; test on y
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 7 recording (BT018); course Drive: *From Prompt to Answer* deck (BT051) and *Live Demo Websites AI* (BT060)
+- Mentors Pool course, Lecture 7 recording (BT018); course Drive: *From Prompt to Answer* deck (BT051) and *Live Demo Websites AI* (BT060)
 - Vaswani et al., *Attention Is All You Need* (2017): https://arxiv.org/abs/1706.03762
 - Georgia Tech Polo Club, *Transformer Explainer*: https://poloclub.github.io/transformer-explainer/
 - OpenAI, *Tokenizer*: https://platform.openai.com/tokenizer

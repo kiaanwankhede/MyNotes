@@ -558,7 +558,7 @@ agent, 1 step: stopped: maximum number of thinking steps reached
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 9 recording (BT020)
+- Mentors Pool course, Lecture 9 recording (BT020)
 - SAP Help, *What is Joule Studio, classic edition?*: https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/what-is-joule-studio-classic-edition
 - SAP Help, *Initial Setup and Prerequisites*: https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/initial-setup-and-prerequisites
 - SAP Help, *Create a Joule Skill*: https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/create-joule-skill
@@ -568,7 +568,7 @@ agent, 1 step: stopped: maximum number of thinking steps reached
 - SAP Help, *Creating Agents with Vibe Coding: Capabilities and Limitations*: https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/creating-agents-with-vibe-coding-capabilities-and-limitations
 - SAP Help, *Manage Joule Skills and Agents Across Environments*: https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/manage-joule-skills-and-agents-across-environments
 - SAP Help, *Add a Tool*: https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/add-tool
-- BTPAI course, Lecture 11 Part A and Part B (BT023, BT024) and Lecture 12 (BT025) recordings
+- Mentors Pool course, Lecture 11 Part A and Part B (BT023, BT024) and Lecture 12 (BT025) recordings
 - SAP Developer Center, *Build Your First Joule Skill in Joule Studio, Classic Edition* (tutorial group): https://developers.sap.com/group.joule-studio-first-skill.html
 - SAP Help, SAP Build Process Automation, *Environments*: https://help.sap.com/docs/build-process-automation/sap-build-process-automation/environments
 - SAP Architecture Center, *Joule Skills with Joule Studio*: https://architecture.learning.sap.com/docs/golden-path/ai-golden-path/build-and-deliver/joule-skills
@@ -576,6 +576,6 @@ agent, 1 step: stopped: maximum number of thinking steps reached
 - SAP Help, *Authorizations* (Joule Studio, classic edition): https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/authorizations
 - SAP Help, *Deploy a Project* (classic edition): https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/deploy-project
 - SAP Help, *Role Management for Joule Studio*: https://help.sap.com/docs/joule-studio/joule-studio/role-management-for-joule-studio
-- BTPAI course Drive: *Joule-Studio-How-To-Guide.pdf* (BT074)
+- Mentors Pool course Drive: *Joule-Studio-How-To-Guide.pdf* (BT074)
 
 Previous: [The Joule family: Joule Work, embedded Joule, assistants, agents and skills](joule-family.md) · Next: [The new Joule Studio: intent-based development, agents and extensions](joule-studio-intent-based.md)

@@ -318,7 +318,7 @@ resources:
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 2 recording, *BTP capabilities and global account walkthrough* (BT006); *SAP BTP Fundamentals Day 2 Notes* (BT008)
+- Mentors Pool course, Lecture 2 recording, *BTP capabilities and global account walkthrough* (BT006); *SAP BTP Fundamentals Day 2 Notes* (BT008)
 - SAP Discovery Center, service catalogue: https://discovery-center.cloud.sap/servicecatalog (opened 19 Nov 2026)
 - SAP Discovery Center, *SAP Integration Suite, advanced event mesh*: https://discovery-center.cloud.sap/serviceCatalog/advanced-event-mesh (opened 19 Nov 2026)
 - SAP Help Portal, *What's New for SAP Business Technology Platform*: https://help.sap.com/whats-new/cf0cb2cb149647329b5d02aa96303f56

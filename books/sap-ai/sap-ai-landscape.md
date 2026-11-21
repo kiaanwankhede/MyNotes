@@ -669,17 +669,17 @@ print(prompt.splitlines()[1])
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 6 recording, *SAP AI training: course content and Q&A* (BT017)
+- Mentors Pool course, Lecture 6 recording, *SAP AI training: course content and Q&A* (BT017)
 - SAP, *SAP Business AI Platform* product page: https://www.sap.com/products/ai-platform.html
 - SAP user groups, *Welcome to the Autonomous Enterprise* (public slides): https://assets.dm.ux.sap.com/sap-user-groups/pdfs/260605_01_pellegrini_antonomous_enterprise.pdf
 - SAP News, *SAP Unveils the Autonomous Enterprise* (May 2026): https://news.sap.com/?p=242256
 - SAP News, *New Joule Studio for enterprise-scale agentic development* (May 2026): https://news.sap.com/2026/05/new-joule-studio-enterprise-scale-agentic-development/
 - SAP Community, *Jev vs. RPT: The decision layer is here*: https://community.sap.com/t5/technology-blog-posts-by-sap/jev-vs-rpt-the-decision-layer-is-here-and-rpt-already-speaks-its-language/ba-p/14497557
 - SAP, *What is SAP-ABAP-1?*: https://www.sap.com/products/artificial-intelligence/sap-abap.html
-- BTPAI course, Lecture 7 recording (BT018): the Q&A on SAP's own models
+- Mentors Pool course, Lecture 7 recording (BT018): the Q&A on SAP's own models
 - SAP Help, *SAP-RPT-1* (generative AI hub models): https://help.sap.com/docs/sap-ai-core/generative-ai/sap-rpt-1
 - Amit Lal, *Evaluating SAP RPT-1 for Enterprise Business Process Prediction* (arXiv, Feb 2026): https://arxiv.org/abs/2602.19237
-- BTPAI course, Lecture 8 recording (BT019), and the course Drive *SAP BAIP* slides (BT083)
+- Mentors Pool course, Lecture 8 recording (BT019), and the course Drive *SAP BAIP* slides (BT083)
 - SAP Architecture Center, *SAP AI-native North Star Reference Architecture* (updated Oct 2026): https://architecture.learning.sap.com/docs/ai-native-north-star-architecture
 - SAP Architecture Center, *Key Terms*: https://architecture.learning.sap.com/docs/north-star-arch/ai-native-northstar-arch/key-terms
 - SAP, *Autonomous Enterprise*: https://www.sap.com/products/autonomous-enterprise.html

@@ -257,6 +257,6 @@ flowchart LR
 
 - SAP Developer Center, *Use Joule Studio to Create an HR Onboarding Assistant*: https://developers.sap.com/tutorials/joule-studio-hr-onboarding-assistant.html
 - Tutorial source and screenshots: https://github.com/sap-tutorials/sap-build-process-automation (© SAP SE, licensed CC BY 4.0)
-- BTPAI course, Lecture 10 Part B recording (BT022)
+- Mentors Pool course, Lecture 10 Part B recording (BT022)
 
 Previous: [Tutorial: Create a Joule agent in Joule Studio Classic](tutorial-joule-agent-create.md) · Next: [Tutorial: Extend SAP's AP Invoice Agent](tutorial-joule-studio-agent-extension.md)

@@ -297,8 +297,8 @@ flowchart LR
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 6 recording (BT017); course Drive: *joule_python_libraries* and *Perplexity Tasks*
-- BTPAI course, Lecture 8 recording (BT019): forward-deployed teams
+- Mentors Pool course, Lecture 6 recording (BT017); course Drive: *joule_python_libraries* and *Perplexity Tasks*
+- Mentors Pool course, Lecture 8 recording (BT019): forward-deployed teams
 - SAP Learning, *SAP Certified – SAP Generative AI Developer* (C_AIG): https://learning.sap.com/certifications/sap-certified-associate-sap-generative-ai-developer
 - SAP Learning, *SAP Certified – Solution Architect – SAP Business AI Platform* (C_BAIPA): https://learning.sap.com/certifications/sap-certified-solution-architect-sap-business-ai-platform
 - SAP Learning, *SAP Certified – Positioning SAP Business AI Platform* (C_BCAIP): https://learning.sap.com/certifications/sap-certified-positioning-sap-business-ai-platform-1

@@ -410,7 +410,7 @@ print(f"busy month: {busy:,.0f} AI units = EUR {busy * EUR_PER_UNIT:,.0f}")
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 7 recording (BT018); course Drive: *j4c* folder (BT055) and *J4C Hands On* (BT069)
+- Mentors Pool course, Lecture 7 recording (BT018); course Drive: *j4c* folder (BT055) and *J4C Hands On* (BT069)
 - SAP, *SAP Joule for Consultants* (product page and FAQ): https://www.sap.com/products/artificial-intelligence/sap-consulting-capability.html
 - SAP Help, *Onboarding Guide for SAP Joule for Consultants*: https://help.sap.com/docs/joule/serviceguide/provisioning-sap-joule-for-consultants
 - SAP Help, *Web Search Settings*: https://help.sap.com/docs/joule/serviceguide/web-search-settings

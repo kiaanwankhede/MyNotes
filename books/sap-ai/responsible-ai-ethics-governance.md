@@ -436,7 +436,7 @@ flowchart LR
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 8 recording (BT019); course Drive: *SAP AI Ethics Handbook.pdf* (BT081)
+- Mentors Pool course, Lecture 8 recording (BT019); course Drive: *SAP AI Ethics Handbook.pdf* (BT081)
 - SAP, *Responsible AI*: https://www.sap.com/products/artificial-intelligence/ai-ethics.html
 - SAP, *AI Ethics Handbook*: https://www.sap.com/documents/2023/03/7211ee96-647e-0010-bca6-c68f7e60039b.html
 - SAP, *Global AI Ethics Policy*: https://www.sap.com/documents/2022/01/a8431b91-117e-0010-bca6-c68f7e60039b.html

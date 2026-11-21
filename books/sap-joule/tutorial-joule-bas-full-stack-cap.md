@@ -182,7 +182,7 @@ Build each with the same four prompts (starter, model, sample data, rules):
 
 ## Sources
 
-- BTPAI course Drive: *Full stack application with Joule in BAS* (BT067)
+- Mentors Pool course Drive: *Full stack application with Joule in BAS* (BT067)
 - SAP Help, *AI Chat*: https://help.sap.com/docs/bas/sap-business-application-studio/ai-chat
 - SAP Help, *Development Scenarios with AI Chat*: https://help.sap.com/docs/bas/sap-business-application-studio/development-scenarios-with-ai-chat
 - SAP Help, *Generative AI-Powered Development*: https://help.sap.com/docs/bas/sap-business-application-studio/generative-ai-powered-development

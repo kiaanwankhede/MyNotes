@@ -235,7 +235,7 @@ print(to_points({"x": 0.64, "y": 0.12, "w": 0.12, "h": 0.01}, 595, 842))   # A4 
 
 ## Sources
 
-- BTPAI course Drive: `document-ai` (README, `document_ai.py`, `utils.py`, `result.json`) (BT054)
+- Mentors Pool course Drive: `document-ai` (README, `document_ai.py`, `utils.py`, `result.json`) (BT054)
 - SAP, *SAP Document AI*: https://www.sap.com/products/artificial-intelligence/document-ai.html
 - `sap-business-document-processing` 0.4.1, the installed Python library (inspected, not its website); project home: https://github.com/SAP/business-document-processing
 

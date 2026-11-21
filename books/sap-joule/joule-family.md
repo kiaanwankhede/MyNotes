@@ -486,7 +486,7 @@ advanced: 1,500 AI units = EUR 10,500 per month
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 9 recording (BT020); course Drive: *Decoding_All_Things_Joule.pdf* (BT064)
+- Mentors Pool course, Lecture 9 recording (BT020); course Drive: *Decoding_All_Things_Joule.pdf* (BT064)
 - SAP, *SAP AI commercial model and pricing*: https://www.sap.com/products/artificial-intelligence/pricing.html
 - SAP, *Joule Base*: https://www.sap.com/products/artificial-intelligence/joule-base.html
 - SAP, *SAP Joule for Developers*: https://www.sap.com/products/artificial-intelligence/joule-for-developers.html
@@ -494,7 +494,7 @@ advanced: 1,500 AI units = EUR 10,500 per month
 - SAP Discovery Center, *Joule Assistants*: https://discovery-center.cloud.sap/ai-assistants/
 - SAP, *Accounts Payable Assistant* Business Value 3-Pager: https://dam.sap.com/mac/embed/public/pdf/a/JK6wpDj
 - SAP Help, *Integration with SAP SuccessFactors*: https://help.sap.com/docs/joule/integrating-joule-with-sap/integration-with-sap-successfactors
-- BTPAI course, Lecture 10 Part A recording (BT021)
+- Mentors Pool course, Lecture 10 Part A recording (BT021)
 - SAP Learning, *Introducing SAP Joule Core Capabilities*: https://learning.sap.com/courses/implementing-sap-s-4hana-cloud-public-edition-sales-fundamental-business-processes/introducing-sap-joule-core-capabilities_b30625c8-5908-4220-b172-c45d0fa525d5
 
 Previous: [Joule for Consultants: grounded answers, provisioning and AI units](joule-for-consultants.md) · Next: [Joule Studio Classic: setup, skills, agents, testing and deployment](joule-studio-classic.md)

@@ -370,7 +370,7 @@ stateDiagram-v2
 
 ## Sources and further reading
 
-- BTPAI course, Lecture 2 recording (BT006); *SAP BTP Fundamentals Day 2 Notes* (BT008)
+- Mentors Pool course, Lecture 2 recording (BT006); *SAP BTP Fundamentals Day 2 Notes* (BT008)
 - SAP Help Portal, *Automating Integrations Using Formations*: https://help.sap.com/docs/btp/sap-business-technology-platform/including-sap-systems-in-formation (read 19 Nov 2026)
 - SAP, *PostgreSQL on SAP BTP, hyperscaler option*: https://www.sap.com/products/technology-platform/postgresql-on-sap-btp-hyperscaler-option.html
 - SAP Community, *Redis on SAP BTP, hyperscaler option*: https://blogs.sap.com/t5/technology-blogs-by-sap/redis-on-sap-btp-hyperscaler-option-now-available-for-customers-on-btp/ba-p/13656621
