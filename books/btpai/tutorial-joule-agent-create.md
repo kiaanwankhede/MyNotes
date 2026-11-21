@@ -7,7 +7,7 @@
 > - **SAP tutorial:** [Use Joule Studio, Classic Edition to Create an Agent](https://developers.sap.com/tutorials/joulestudio-agent-create.html)
 > - **You will build:** the agent *Maintenance Fulfillment Validator*, using five imported skills, tested in your private environment
 > - **You need:** Joule Studio Classic; tutorials [21](tutorial-joule-skill-setup.md) to [23](tutorial-joule-skill-create.md) for the basics
-> - **Level:** beginner to intermediate
+> - **Level:** beginner to intermediate · **Time:** about 30 minutes (SAP's estimate)
 > - **Concepts:** [Joule Studio Classic](joule-studio-classic.md), 19.5 to 19.8
 
 **After this tutorial you can:**
@@ -30,24 +30,147 @@ flowchart LR
 
 ## 26.2 Steps
 
-1. **Destination from a file:** download SAP's `sample-maintenance-service.json`. Cockpit → *Destinations* → *Create* → *From File* → upload → *Check Connection*.
-2. **Private environment:** Control Tower → *Environments* → *Activate Private Environment*. Then *Destinations* → *Add* → your destination → *All Environments*.
-3. **Import the skills:** download `MaintenanceOrder_SKILLS.mtar`. Lobby → *Import* → upload → *Import*.
-   - The project opens with five skills. A published action project, *Maintenance Fulfillment Agent API*, comes with it.
-4. **Create the agent:** in the project, *Create* → *Joule Agent*. Name *Maintenance Fulfillment Validator*; describe it as checking whether maintenance orders can proceed based on material stock.
-5. **Configure the behaviour.** SAP supplies the texts on its page; their structure:
-   - *Expertise:* one line: validates maintenance orders, checks material stock, recommends actions.
-   - *Instructions*, in order:
-     1. Get the order ID first, and do not continue without it.
-     2. Read the order and all its operations and components.
-     3. Check stock for every component, including reservations, open purchase orders and blocked stock.
-     4. Decide whether the order is ready or blocked.
-     5. If blocked, name each short material (required versus available, and why) and recommend actions: buy, expedite, transfer or substitute.
-     6. Always end with a short summary.
-   - *Additional context:* the tone (clear, professional, supportive) and the audience (maintenance planners).
-6. **Models and tools:** keep the default models. Under *Tools* → *Add Tool* → *Joule Skill*, add all five skills. *Save*.
-7. **Test:** *Test* → your private environment and the destination → ask whether maintenance order 1 can be fulfilled based on current stock.
-   - Open the *Timeline* and click each skill to see its inputs and outputs. *Stop Testing* when done.
+*Steps and screenshots adapted from SAP's tutorial (© SAP SE, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)). Steps reworded; screenshots resized; a user's name and a user ID in the service address blurred.*
+
+- **The scenario:** maintenance planners check by hand, across systems and spreadsheets, whether the materials for a maintenance order are in stock. The agent does that check.
+- **Skills come ready-made:** you import them, because this tutorial is about the agent, not the skills.
+
+### Step 1: Create the destination from a file
+
+1. Download SAP's destination file `sample-maintenance-service.json` (link on SAP's tutorial page).
+2. In the **BTP cockpit**, go to **Connectivity → Destinations**.
+3. Choose **Create → From File → Create**, select the downloaded file, and choose **OK**.
+4. Select the imported destination and choose **Check Connection**.
+   - The destination uses basic authentication with a technical user; the file brings the details, and the password stays hidden.
+   - If SAP's sample service is down, SAP's page points to its source so you can run your own copy.
+
+    ![BTP cockpit: the imported sample-maintenance-service destination and a successful Check Connection (part of the address blurred)](images/t26-01-imported-destination.png)
+
+### Step 2: Activate your private environment and link the destination
+
+- **Private environments** are isolated spaces for trying agents and skills without touching shared or productive environments.
+
+1. In the **lobby**, choose **Control Tower → Environments**, then **Activate Private Environment**.
+   - A new environment, *Private*, appears with you as author.
+
+    ![Control Tower > Environments: a Private environment (author blurred) next to the Public one](images/t26-02-private-environment.png)
+
+2. Choose **Control Tower → Destinations → Add**, select your destination and choose **Next**.
+
+    ![Add Destination: sample-maintenance-service (HTTP, basic authentication) selected; its address is blurred](images/t26-03-select-destination.png)
+
+3. Choose **All Environments** and **Add Destination**.
+   - SAP picks *All Environments* to save clicks while learning.
+
+    ![Associate Environments: All Environments selected, then Add Destination](images/t26-04-associate-environments.png)
+
+4. Refresh the page if the destination does not show yet.
+
+    ![Control Tower > Destinations: sample-maintenance-service with basic authentication, linked to All Environments](images/t26-05-destinations.png)
+
+### Step 3: Import the project with the skills
+
+1. Download SAP's project file `MaintenanceOrder_SKILLS.mtar` (link on SAP's tutorial page).
+2. In the **lobby**, choose **Import**. Upload the file, select it, and choose **Import**.
+
+    ![Import dialog: MaintenanceOrder_SKILLS uploaded, project type Joule Agent and Skill, then Import](images/t26-06-upload-and-import.png)
+
+3. Choose **Close**. The project appears in the lobby.
+
+    ![Lobby: the imported MaintenanceOrder_SKILLS project, type Joule Agent and Skill](images/t26-07-imported-project.png)
+
+4. Open the project. It holds five Joule skills, ready to use:
+   - *Get Maintenance Order Details*, *GetOrderOperations*, *GetOperationComponents*, *GetMaterialDetails*, *GetMaterialStockLevels*
+   - An action project, *Maintenance Fulfillment Agent API*, came with it and is already published (**Connectors → Actions**).
+
+    ![The project overview listing the five imported Joule skills with their descriptions](images/t26-08-five-skills.png)
+
+### Step 4: Create the agent
+
+1. On the project's overview, choose **Create → Joule Agent**.
+
+    ![The Create menu on the project overview: Joule Agent marked, above Joule Skill and Data Type](images/t26-09-create-joule-agent.png)
+
+2. Enter:
+   - **Name:** `Maintenance Fulfillment Validator`
+   - **Description:** "Agent to check if maintenance orders can proceed based on material stock levels."
+   - Shorten the identifier if it is too long, then choose **Create**.
+   - **The description matters**, as for skills: Joule reads it to decide when to call this agent. Make it clear and business-oriented.
+
+    ![Create Joule Agent dialog: name, identifier, the hint to describe capabilities with key words, and the description](images/t26-10-agent-description.png)
+
+3. The agent editor opens. Its tabs: *Expertise and Instructions*, *Model Settings*, *MCP Servers*, *Tools*, *Agent Output*.
+
+    ![The empty agent editor: Expertise and Instructions tab with empty Expertise and Instructions fields](images/t26-11-agent-editor.png)
+
+### Step 5: Configure the agent's behaviour
+
+SAP gives three texts to paste on its page. Their content, in short:
+
+1. **Expertise** (one line): validates maintenance orders, checks material stock, and recommends actions.
+2. **Instructions** (a long text), in this order:
+   1. Get the maintenance order ID first, and do not continue without it.
+   2. Read the order's details and all its operations and components.
+   3. Check stock for every component, including reservations, open purchase orders, blocked stock and batch, shelf-life or quality limits.
+   4. Decide whether every material is available in the required quantity.
+   5. If yes, confirm that the order is ready. If not, name each short material (required versus available, and why).
+   6. Recommend actions: buy, expedite an existing order, transfer stock, or use an approved substitute. Say whether the whole order or only some operations are affected, and how urgent it is.
+   7. Always end with a short summary.
+3. **Additional Context:** a clear, professional and supportive tone, for maintenance planners and operations teams; no vague language.
+
+    ![Expertise, Instructions and Additional Context filled in with SAP's texts](images/t26-12-expertise-instructions-context.png)
+
+4. Open **Model Settings** and keep the defaults for now. What you see there:
+   - **LLM provider**, a **base model** and an **advanced model** (OpenAI, GPT-4o mini and GPT-4o in SAP's screenshot)
+   - an optional **backup LLM provider**
+   - **Agent execution steps:** the maximum number of thinking steps, and pre- and post-processing steps
+   - SAP's note: the pre- and post-processing steps make the agent break down the task, which improves planning and the answer.
+
+    ![Model Settings: provider, base and advanced model, backup provider off, thinking-steps slider, pre- and post-processing ticked](images/t26-13-model.png)
+
+5. Open **Tools** and choose **Add Tool → Joule Skill**. The other tool types are *Calculator* and *Documents*.
+
+    ![Tools tab: the Add Tool menu with Calculator, Documents and Joule Skill (marked)](images/t26-14-add-tool-joule-skill.png)
+
+6. Select all five skills and choose **Add**.
+
+    ![Add Tool dialog: the five available skills selected, then Add](images/t26-15-select-skills.png)
+
+7. Choose **Save**. The agent can now reason over the five skills and call them as it needs.
+
+    ![The Tools tab listing the five skills as tools; Save marked](images/t26-16-save-agent.png)
+
+### Step 6: Test in your private environment
+
+1. Choose **Test** in the agent editor.
+
+    ![The agent editor with the Test button marked](images/t26-17-test.png)
+
+2. Choose your **Private** environment, and for the variable `fullfilmentCAPapp` choose your `sample-maintenance-service` destination. Choose **Continue**.
+
+    ![Test Project: environment Private (name blurred), variable fullfilmentCAPapp set to sample-maintenance-service](images/t26-18-test-parameters.png)
+
+3. A test chat opens, with an empty *Timeline* next to it.
+
+    ![Test chat: the Joule panel and the Timeline (the user's name is blurred in both)](images/t26-19-test-chat-initial.png)
+
+4. Send: *"Hello, I would like to check whether Maintenance Order ID 1 can be fulfilled based on current material availability"*.
+
+    ![The test prompt typed in, with the send button marked](images/t26-20-prompt.png)
+
+5. The agent works through the order step by step and answers:
+   - The order **cannot** be fulfilled: material 1 needs 1.5 and has 0 in stock; materials 2 and 3 are available.
+   - It recommends buying material 1, checking for open purchase orders, a stock transfer or a substitute.
+
+    ![The agent's answer about the material shortage, and a Timeline of its steps (name blurred)](images/t26-21-test-prompt-1.png)
+
+6. In the **Timeline**, expand the nodes. Click a skill name to see its inputs and outputs under *Details*.
+   - For example, *GetMaterialStockLevels* returns the available quantity per warehouse.
+
+    ![Timeline: Agent > Agent Thinking and skill calls; GetMaterialStockLevels selected, with its input and output data](images/t26-22-test-timeline-and-details.png)
+
+7. Choose **Stop Testing**.
+   - Try other prompts or models if you like. When it works in your private environment, you can deploy it to a shared environment.
 
 ## 26.3 Why it works
 
@@ -99,12 +222,17 @@ flowchart LR
 ## How this page was checked
 
 - **SAP tutorial read in full on 21 Nov 2026** (created Dec 2025, last updated by SAP on 21 Aug 2026).
+- **Steps rebuilt on 21 Nov 2026** from the tutorial's source file, with all 22 of its screenshots.
+  - Every screenshot was checked for personal data. Blurred: the user's first name in the test chat (two screenshots), and a user ID inside the sample service's address (two screenshots).
+  - SAP's long instruction texts are summarised, not copied; paste the originals from SAP's page.
+  - SAP's page has a *Test yourself* heading, but its public source contains no questions, so none were taken over.
 - **Lecture 12 recording:** captions 2:12 to 2:31 (import, agent set-up, meta-prompting, test). **Lecture 11:** 2:11 to 2:45 (the Northwind agent).
 - Not run by me: there is no SAP Build tenant in this workspace.
 
 ## Sources
 
 - SAP Developer Center, *Use Joule Studio, Classic Edition to Create an Agent*: https://developers.sap.com/tutorials/joulestudio-agent-create.html
+- Tutorial source and screenshots: https://github.com/sap-tutorials/sap-build-process-automation (© SAP SE, licensed CC BY 4.0)
 - SAP Help, *Create a Joule Agent*: https://help.sap.com/docs/joule-studio-classic/joule-studio-classic-edition/create-joule-agent
 - BTPAI course, Lecture 11 Part A (BT023) and Lecture 12 (BT025) recordings
 
