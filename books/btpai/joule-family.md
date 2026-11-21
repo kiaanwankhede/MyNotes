@@ -495,4 +495,4 @@ advanced: 1,500 AI units = EUR 10,500 per month
 - BTPAI course, Lecture 10 Part A recording (BT021)
 - SAP Learning, *Introducing SAP Joule Core Capabilities*: https://learning.sap.com/courses/implementing-sap-s-4hana-cloud-public-edition-sales-fundamental-business-processes/introducing-sap-joule-core-capabilities_b30625c8-5908-4220-b172-c45d0fa525d5
 
-Previous: [Joule for Consultants: grounded answers, provisioning and AI units](joule-for-consultants.md) · Next: [Joule Studio Classic: setup, skills, agents, testing and deployment](joule-studio-classic.md)
+Previous: [Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms](responsible-ai-ethics-governance.md) · Next: [Joule Studio Classic: setup, skills, agents, testing and deployment](joule-studio-classic.md)

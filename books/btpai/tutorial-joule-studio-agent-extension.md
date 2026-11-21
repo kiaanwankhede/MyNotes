@@ -186,4 +186,4 @@ flowchart LR
 - Tutorial source and screenshots: https://github.com/sap-tutorials/sap-build-process-automation (© SAP SE, licensed CC BY 4.0)
 - BTPAI course, Lecture 10 Part B recording (BT022)
 
-Previous: [Tutorial: Build an HR assistant with intent-based development](tutorial-joule-studio-hr-assistant.md) · Next: [Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms](responsible-ai-ethics-governance.md)
+Previous: [Tutorial: Build an HR assistant with intent-based development](tutorial-joule-studio-hr-assistant.md) · Next: [Tutorial: Bring SAP Analytics Cloud insights into Joule](tutorial-joule-sac-analytical-insights.md)

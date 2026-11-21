@@ -25,6 +25,11 @@
 
 ## Joule
 * [Joule for Consultants: grounded answers, provisioning and AI units](joule-for-consultants.md)
+
+## Responsible AI
+* [Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms](responsible-ai-ethics-governance.md)
+
+## Joule Family and Joule Studio
 * [The Joule family: Joule Work, embedded Joule, assistants, agents and skills](joule-family.md)
 * [Joule Studio Classic: setup, skills, agents, testing and deployment](joule-studio-classic.md)
 * [The new Joule Studio: intent-based development, agents and extensions](joule-studio-intent-based.md)
@@ -38,6 +43,5 @@
 * [Tutorial: Create a Joule agent in Joule Studio Classic](tutorial-joule-agent-create.md)
 * [Tutorial: Build an HR assistant with intent-based development](tutorial-joule-studio-hr-assistant.md)
 * [Tutorial: Extend SAP's AP Invoice Agent](tutorial-joule-studio-agent-extension.md)
-
-## Responsible AI
-* [Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms](responsible-ai-ethics-governance.md)
+* [Tutorial: Bring SAP Analytics Cloud insights into Joule](tutorial-joule-sac-analytical-insights.md)
+* [Tutorial: Build a full-stack CAP app with AI Chat (Joule) in Business Application Studio](tutorial-joule-bas-full-stack-cap.md)

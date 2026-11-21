@@ -447,4 +447,4 @@ flowchart LR
 - SAP Architecture Center, *Integration, Security, Ethics & Governance* (North Star): https://architecture.learning.sap.com/docs/ai-native-north-star-architecture/integration-security-ethics-governance
 - GitHub, *SAP Datasphere MCP server* (community, rahulsethi): https://github.com/rahulsethi/SAPDatasphereMCP
 
-Previous: [Tutorial: Extend SAP's AP Invoice Agent](tutorial-joule-studio-agent-extension.md) · Next: [BTPAI book introduction](README.md)
+Previous: [Joule for Consultants: grounded answers, provisioning and AI units](joule-for-consultants.md) · Next: [The Joule family: Joule Work, embedded Joule, assistants, agents and skills](joule-family.md)

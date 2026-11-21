@@ -192,6 +192,8 @@ article table td:first-child strong{white-space:nowrap}
 .lib h2{font-size:1rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border:0;margin:1.2em 0 .2em}
 /* Line numbers: each block shows the line of the chapter file it starts on. Drawn by CSS, so the page text is unchanged */
 #doc{position:relative}
+/* Long addresses (for example in Sources) wrap instead of running off a phone screen */
+#doc a{overflow-wrap:anywhere}
 #doc.ln{padding-left:64px}
 /* line-height 1lh = the line height of the numbered block, so the number sits on its first line; 30px is the fallback for older browsers */
 #doc.ln [data-line]::before{content:attr(data-line);position:absolute;left:6px;width:42px;margin:0;padding:0;border:0;background:none;text-align:right;font-family:var(--font-mono);font-size:11px;font-weight:500;font-style:normal;line-height:30px;line-height:1lh;letter-spacing:0;text-transform:none;color:var(--muted);opacity:.6;white-space:nowrap;pointer-events:none;-webkit-user-select:none;user-select:none}

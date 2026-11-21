@@ -416,4 +416,4 @@ print(f"busy month: {busy:,.0f} AI units = EUR {busy * EUR_PER_UNIT:,.0f}")
 - SAP Discovery Center, *Enable SAP Joule for Consultants* (mission 4633): https://discovery-center.cloud.sap/missiondetail/4633/
 - SAP Business Accelerator Hub (Joule integration, beta): https://api.sap.com
 
-Previous: [Prompt engineering: from zero-shot to grounded prompts](prompt-engineering.md) · Next: [The Joule family: Joule Work, embedded Joule, assistants, agents and skills](joule-family.md)
+Previous: [Prompt engineering: from zero-shot to grounded prompts](prompt-engineering.md) · Next: [Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms](responsible-ai-ethics-governance.md)
