@@ -49,22 +49,22 @@
       "blurb": "CineBot, Time Tracker, Meridian and AI Updater, ready to talk about."
     },
     {
-      "slug": "sap-joule",
-      "title": "SAP Joule",
+      "slug": "sap-btp",
+      "title": "SAP BTP",
       "shelf": "SAP",
-      "blurb": "Skills, agents, Joule Studio, extensibility, APIs, grounding, integration and testing."
+      "blurb": "Accounts, entitlements, environments, identity and connectivity on SAP BTP."
     },
     {
       "slug": "sap-ai",
       "title": "SAP AI",
       "shelf": "SAP",
-      "blurb": "AI Core, Launchpad, Generative AI hub, orchestration, RAG, agents."
+      "blurb": "SAP's AI landscape, AI basics, responsible AI, and hands-on generative AI hub, Document AI and RAG."
     },
     {
-      "slug": "btpai",
-      "title": "BTPAI",
+      "slug": "sap-joule",
+      "title": "SAP Joule",
       "shelf": "SAP",
-      "blurb": "BTP foundations to SAP Business AI: accounts, entitlements, identity, Joule and agents."
+      "blurb": "Joule, Joule Studio, skills, agents, tutorials, integrations and practice."
     }
   ]
 }

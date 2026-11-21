@@ -79,29 +79,9 @@
     "AI Updater"
    ]
   },
-  "SAP Joule": {
-   "folder": "books/sap-joule",
-   "sections": ["BTP Concepts", "Joule Concepts", "Enabling for SuccessFactors", "Joule Tutorials", "Real-World Use Cases", "Enabling for Other Products"],
-   "chapters": [
-    "Joule's identity and platform foundation",
-    "Extending Joule beyond a single application",
-    "What Joule actually is",
-    "Joule Studio and the agent development lifecycle",
-    "Document grounding, analytics, and developer tooling",
-    "How business users actually use Joule",
-    "Enabling Joule for SAP SuccessFactors",
-    "Extending an SAP-delivered agent",
-    "n8n workflows in Joule Studio",
-    "Enabling Joule for other SAP products"
-   ]
-  },
-  "SAP AI": {
-   "folder": "books/sap-ai",
-   "chapters": []
-  },
-  "BTPAI": {
-   "folder": "books/btpai",
-   "sections": ["BTP Foundations", "SAP AI", "AI Fundamentals", "Joule", "Responsible AI", "Joule Family and Joule Studio", "Joule Tutorials", "Joule Integrations", "SAP AI Services: Hands-On", "Joule Studio: Practice", "Reference"],
+  "SAP BTP": {
+   "folder": "books/sap-btp",
+   "sections": ["BTP Foundations", "Reference"],
    "chapters": [
     "Cloud computing and the service models",
     "SAP's cloud journey and the BTP landscape",
@@ -113,37 +93,53 @@
     "Inside a subaccount: service types, environments and connectivity",
     "Directories, landscape tiers and commercial models",
     "Identity: Cloud Identity Services, trust and federated authorization",
+    "Reference: Glossary",
+    "Reference: Current facts to re-check"
+   ]
+  },
+  "SAP AI": {
+   "folder": "books/sap-ai",
+   "sections": ["SAP AI", "AI Fundamentals", "Responsible AI", "SAP AI Services: Hands-On", "Reference"],
+   "chapters": [
     "The SAP AI landscape: Autonomous Enterprise, AI North Star and the Business AI Platform",
     "SAP AI certifications, roles and staying current",
     "AI, machine learning, deep learning and generative AI",
     "Inside a large language model: from prompt to answer",
     "Prompt engineering: from zero-shot to grounded prompts",
-    "Joule for Consultants: grounded answers, provisioning and AI units",
     "Responsible AI: SAP's ethics policy, the EU AI Act and the AI Terms",
-   "The Joule family: Joule Work, embedded Joule, assistants, agents and skills",
-   "Joule Studio Classic: setup, skills, agents, testing and deployment",
-   "The new Joule Studio: intent-based development, agents and extensions",
-   "Tutorial: Set up environments and destinations for Joule skills",
-   "Tutorial: Create action projects",
-   "Tutorial: Create and deploy a Joule skill",
-   "Tutorial: Filter an action and let Joule write the reply",
-   "Tutorial: Run an automated process from a Joule skill",
-   "Tutorial: Create a Joule agent in Joule Studio Classic",
-   "Tutorial: Build an HR assistant with intent-based development",
-   "Tutorial: Extend SAP's AP Invoice Agent",
-   "Tutorial: Bring SAP Analytics Cloud insights into Joule",
-   "Tutorial: Build a full-stack CAP app with AI Chat (Joule) in Business Application Studio",
-   "Joule with SAP SuccessFactors: the integration steps",
-   "Joule with other SAP solutions: S/4HANA, planning and documents",
-   "Hands-on: Call LLMs through the generative AI hub from Python",
-   "Hands-on: Extract invoice data with SAP Document AI from Python",
-   "Hands-on: Translate text and documents with SAP Translation Hub from Python",
-   "Hands-on: RAG and document grounding with the generative AI hub",
-   "Practice: 10 Joule skill assignments",
-   "Practice: 10 Joule agent assignments",
-   "Reference: Joule setup building blocks",
-   "Reference: Glossary",
-   "Reference: Current facts to re-check"
+    "Hands-on: Call LLMs through the generative AI hub from Python",
+    "Hands-on: Extract invoice data with SAP Document AI from Python",
+    "Hands-on: Translate text and documents with SAP Translation Hub from Python",
+    "Hands-on: RAG and document grounding with the generative AI hub",
+    "Reference: Glossary",
+    "Reference: Current facts to re-check"
+   ]
+  },
+  "SAP Joule": {
+   "folder": "books/sap-joule",
+   "sections": ["Joule", "Joule Family and Joule Studio", "Joule Tutorials", "Joule Integrations", "Joule Studio: Practice", "Reference"],
+   "chapters": [
+    "Joule for Consultants: grounded answers, provisioning and AI units",
+    "The Joule family: Joule Work, embedded Joule, assistants, agents and skills",
+    "Joule Studio Classic: setup, skills, agents, testing and deployment",
+    "The new Joule Studio: intent-based development, agents and extensions",
+    "Tutorial: Set up environments and destinations for Joule skills",
+    "Tutorial: Create action projects",
+    "Tutorial: Create and deploy a Joule skill",
+    "Tutorial: Filter an action and let Joule write the reply",
+    "Tutorial: Run an automated process from a Joule skill",
+    "Tutorial: Create a Joule agent in Joule Studio Classic",
+    "Tutorial: Build an HR assistant with intent-based development",
+    "Tutorial: Extend SAP's AP Invoice Agent",
+    "Tutorial: Bring SAP Analytics Cloud insights into Joule",
+    "Tutorial: Build a full-stack CAP app with AI Chat (Joule) in Business Application Studio",
+    "Joule with SAP SuccessFactors: the integration steps",
+    "Joule with other SAP solutions: S/4HANA, planning and documents",
+    "Practice: 10 Joule skill assignments",
+    "Practice: 10 Joule agent assignments",
+    "Reference: Joule setup building blocks",
+    "Reference: Glossary",
+    "Reference: Current facts to re-check"
    ]
   }
  }

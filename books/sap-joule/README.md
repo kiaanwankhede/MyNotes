@@ -1,8 +1,16 @@
 # SAP Joule
 
-Notes for a GenAI developer building on SAP Joule: skills, agents, Joule Studio, extensibility, APIs, grounding, integration, testing, and the BTP identity/activation architecture underneath it all. Restarted from scratch — the old book was too long and not developer-focused; licensing, change management, and end-user marketing are left out, but platform-level activation (identity, BTP setup, per-product enablement) is in scope as architecture a developer needs to reason about.
+Notes for an SAP consultant or developer on Joule: what it is and how it is licensed, building skills and agents in Joule Studio Classic and the new Joule Studio, SAP's hands-on tutorials, switching Joule on in SAP products, and graded practice.
 
-* Source: your SAP Joule master list (128 items, tracked in `master/master.xlsx` with IDs SJ001 to SJ128).
-* Laid out by topic, not by reading order: **BTP Concepts → Joule Concepts → Enabling for SuccessFactors → Real-World Use Cases → Joule Tutorials → Enabling for Other Products** (Concur, Ariba, Signavio, IBP, IPD, Digital Manufacturing, and more as they're read). Empty categories appear in the chapter menu as a placeholder for what's still to come.
-* 39 chapters are written so far, across BTP Concepts, Joule Concepts, Enabling for SuccessFactors, Joule Tutorials, and Enabling for Other Products — chapters are written one resource at a time and slotted into the right section as they're done. The business-user chapter is a deliberately short, trimmed exception, not a full dev-depth chapter. The Joule Studio Skill-building tutorial is split across 5 linked chapters (one per hands-on tutorial in the source). 22 further chapters (Joule Studio tutorials 6–27) each cover one agent, extension, n8n workflow, data product, or full-stack solution from the SAP Developers tutorial navigator (`product=Joule, type=Tutorial`), every step and image included.
-* Companion book: [SAP AI](../sap-ai/README.md) (AI Core, Launchpad, Generative AI hub).
+* Source: a live course, *BTP Foundation & SAP Artificial Intelligence Training* (Mentors Pool, batch of 27 Sep 2026): recordings, slides, notes and assignments.
+* Every lecture and file is tracked in `master/master.xlsx` with IDs starting `BT`.
+* One of three SAP books made from that course: [SAP BTP](../sap-btp/cloud-computing-service-models.md), [SAP AI](../sap-ai/sap-ai-landscape.md) and **SAP Joule** (this book). A link into another book names it, for example *SAP BTP 8.10*.
+* Laid out by concept, in study order, not by lecture:
+  * **Joule:** Joule for Consultants
+  * **Joule Family and Joule Studio:** the Joule family and its pricing, building skills and agents in Joule Studio Classic, and intent-based development in the new Joule Studio
+  * **Joule Tutorials:** one page per SAP hands-on tutorial used in the course, in our own words, with the mistakes seen in class
+  * **Joule Integrations:** the admin steps to switch Joule on in SAP SuccessFactors, S/4HANA and other SAP products, and document grounding
+  * **Joule Studio: Practice:** 10 graded skill assignments and 10 agent assignments, each with a folded build guide
+  * **Reference:** setup building blocks, a glossary, and the current facts (prices, SKUs, dates) to re-check
+* Reading paths for each role, across all three books, are on the [SAP BTP book's introduction](../sap-btp/README.md).
+* Anything not taught in the course is labelled **Added by Claude**, and every claim about the current state of an SAP product is web-checked and dated.

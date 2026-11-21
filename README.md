@@ -10,5 +10,6 @@ Study notes as separate books. Each book is a folder under `books/` with its own
 * [Langchain](books/langchain/README.md)
 * [MCP](books/mcp/README.md)
 * [Projects](books/projects/README.md)
-* [SAP Joule](books/sap-joule/README.md)
+* [SAP BTP](books/sap-btp/README.md)
 * [SAP AI](books/sap-ai/README.md)
+* [SAP Joule](books/sap-joule/README.md)
