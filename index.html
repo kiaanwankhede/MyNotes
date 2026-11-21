@@ -396,28 +396,46 @@ function show(){
 }
 /* ---------- flashcards: built live from a chapter's interview Q&As and the glossary/facts rows that point to it ---------- */
 var CARDS={on:false}, CARD_DAYS=[0,1,3,7,21,60], DAY=86400000;
-function cardsOn(b,id){return !!(b&&id&&(b.cards||[]).indexOf(id)>=0)}
-function setCardsBtn(b,id){var k=document.getElementById('cards'); if(k) k.hidden=!cardsOn(b,id);}
+function cardsOn(b,id){return !!(b&&id&&(b.cards==='all'||(b.cards||[]).indexOf(id)>=0))}
+function setCardsBtn(b,id){
+  var k=document.getElementById('cards'); if(!k) return;
+  var c=null; if(cardsOn(b,id)) (b.chapters||[]).forEach(function(x){if(x.id===id)c=x});
+  k.hidden=!(c&&cdBuild(b,c).length);
+}
 function cdHash(s){var h=0;for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))|0}return 'c'+(h>>>0).toString(36)}
 function cdLoad(key){try{return JSON.parse(localStorage.getItem(key)||'{}')}catch(e){return {}}}
 function cdSave(key,st){try{localStorage.setItem(key,JSON.stringify(st))}catch(e){}}
 function cdCells(line){return line.trim().replace(/^\||\|$/g,'').split('|').map(function(x){return x.trim()})}
 function cdBuild(b,c){
-  var out=[], md=(c.md||'').replace(/\r\n/g,'\n'), re=/<details class="qa"><summary>(\d+)\.\s*([\s\S]*?)<\/summary>([\s\S]*?)<\/details>/g, m, link='('+c.id+'.md)';
+  if(c._cards) return c._cards;
+  var out=[], md=(c.md||'').replace(/\r\n/g,'\n'), re=/<details class="qa"><summary>([\s\S]*?)<\/summary>([\s\S]*?)<\/details>/g, m, link='('+c.id+'.md)';
+  var secOf=function(i){var hs=md.slice(0,i).match(/^##\s+.+$/gm); return hs?hs[hs.length-1].replace(/^##\s+/,''):''};
   while((m=re.exec(md))){
-    var hs=md.slice(0,m.index).match(/^##\s+.+$/gm), sec=hs?hs[hs.length-1].replace(/^##\s+/,''):'';
-    out.push({type:'Interview',front:m[2].trim(),back:fixLinks(marked.parse(m[3].trim())),src:(sec?sec+' · ':'')+'Q'+m[1]});
+    var s=m[1].trim(), n=s.match(/^(\d+)\.\s*/);
+    if(/^build guide$/i.test(s)||!(n||/\?|\.\s*$/.test(s))) continue;
+    var sec=secOf(m.index);
+    out.push({type:n?'Interview':'Check yourself',front:n?s.slice(n[0].length):s,back:fixLinks(marked.parse(m[2].trim())),src:(sec?sec:'')+(n?' · Q'+n[1]:'')});
   }
+  var hdr=null;
+  md.split('\n').forEach(function(l,i){
+    if(/^\| #\s*\|/.test(l)) hdr=cdCells(l);
+    var a=l.match(/^\| ([SA]\d+) \|/);
+    if(a&&hdr){var k=cdCells(l), back='<ul>'+k.slice(2).map(function(v,j){return '<li><b>'+esc(hdr[j+2]||'')+':</b> '+marked.parseInline(v)+'</li>'}).join('')+'</ul>';
+      out.push({type:'Assignment',front:k[0]+' · '+k[1]+': recall the design',back:back,src:'Assignments table'});}
+  });
   (b.chapters||[]).forEach(function(x){
     if(!x.md) return;
+    var own=(x.id===c.id);
     if(x.id==='reference-glossary') x.md.replace(/\r\n/g,'\n').split('\n').forEach(function(l){
-      if(l.indexOf('| **')===0&&l.indexOf(link)>=0){var k=cdCells(l); out.push({type:'Term',front:k[0].replace(/\*\*/g,''),back:fixLinks(marked.parse(k[1])),src:'Glossary'});}
+      if(l.indexOf('| **')===0&&(own||l.indexOf(link)>=0)){var k=cdCells(l); out.push({type:'Term',front:k[0].replace(/\*\*/g,''),back:fixLinks(marked.parse(k[1])),src:own?secOf(md.indexOf(l)):'Glossary'});}
     });
-    if(x.id==='reference-current-facts') x.md.replace(/\r\n/g,'\n').split('\n').forEach(function(l){
-      if(/^\| [^-|]/.test(l)&&l.indexOf(link)>=0){var k=cdCells(l); out.push({type:'Fact',front:k[0]+'?',back:fixLinks(marked.parse(k[1])),src:'Current facts',note:'Last checked '+k[2]+'. Re-check before you quote it.'});}
-    });
+    if(x.id==='reference-current-facts'){var mode='Fact'; x.md.replace(/\r\n/g,'\n').split('\n').forEach(function(l){
+      var hm=l.match(/^\| (Fact|Change) \|/); if(hm){mode=hm[1];return}
+      if(/^\| [^-|]/.test(l)&&(own||l.indexOf(link)>=0)){var k=cdCells(l); out.push({type:'Fact',front:mode==='Change'?k[0]+': what changes?':k[0]+'?',back:fixLinks(marked.parse(k[1])),src:own?secOf(md.indexOf(l)):'Current facts',note:'Last checked '+k[2]+'. Re-check before you quote it.'});}
+    });}
   });
   out.forEach(function(x){x.id=cdHash(x.type+'|'+x.front)});
+  c._cards=out;
   return out;
 }
 function cardsOpen(){
@@ -434,7 +452,10 @@ function cardsAll(){CARDS.q=CARDS.all.slice();CARDS.i=0;CARDS.knew=0;CARDS.miss=
 function cdRender(){
   var K=CARDS, doc=document.getElementById('doc'), now=Date.now();
   var seen=K.all.filter(function(x){return K.st[x.id]}).length;
-  var h='<div class="cards"><h1>Cards: '+esc(K.c.title)+'</h1><p class="cdmeta">'+K.all.length+' cards from this chapter\'s interview questions, glossary and current facts. '+(K.all.length-seen)+' new. Progress is saved in this browser.</p>';
+  var NAMES={'Interview':'interview questions','Check yourself':'check-yourself questions','Assignment':'assignments','Term':'terms','Fact':'facts'}, cnt={};
+  K.all.forEach(function(x){cnt[x.type]=(cnt[x.type]||0)+1});
+  var parts=Object.keys(NAMES).filter(function(t){return cnt[t]}).map(function(t){return cnt[t]+' '+NAMES[t]});
+  var h='<div class="cards"><h1>Cards: '+esc(K.c.title)+'</h1><p class="cdmeta">'+K.all.length+' cards: '+parts.join(', ')+'. '+(K.all.length-seen)+' new. Progress is saved in this browser.</p>';
   if(K.i>=K.q.length){
     var next=K.all.map(function(x){return K.st[x.id]?K.st[x.id].due:0}).filter(function(d){return d>now}).sort(function(a,b){return a-b})[0];
     h+='<div class="cdcard"><p class="cdfront">'+(K.q.length?'Done for now.':'Nothing due right now.')+'</p><p>'+(K.q.length?'Knew it: '+K.knew+' · Didn\'t know: '+K.miss+'. ':'')+(next?'Next card due on '+esc(new Date(next).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}))+'.':'')+'</p></div>'+
