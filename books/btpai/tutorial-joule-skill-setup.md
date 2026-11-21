@@ -7,7 +7,7 @@
 > - **SAP tutorial:** [Setup Environment and Connectivity for Joule Skills](https://developers.sap.com/tutorials/joulestudio-skill-environment-setup.html) (part 1 of 5 in *Build Your First Joule Skill in Joule Studio, Classic Edition*)
 > - **You will build:** a test environment, and two destinations (`S4HANA_MOCK`, `Badge_Service`) linked to it
 > - **You need:** a BTP subaccount with Joule and Joule Studio Classic set up; admin rights in the control tower and the cockpit
-> - **Level:** beginner
+> - **Level:** beginner · **Time:** about 20 minutes (SAP's estimate)
 > - **Concepts:** [Joule Studio Classic](joule-studio-classic.md), 19.3
 
 **After this tutorial you can:**
@@ -38,17 +38,105 @@ flowchart LR
 
 ## 21.2 Steps
 
-1. **Create an environment for testing** (admin): Lobby → *Control Tower* → *Environments* → *Create*, with a name and description.
-   - Open it and look at the *Joule* tab. It stays empty until a skill is deployed there.
-   - **Without admin rights**, use *Activate Private Environment* on the same page instead. That is what the class did.
-2. **Create the first destination** in the BTP cockpit: *Connectivity* → *Destinations* → *Create* → *From Scratch*.
-   - Name `S4HANA_MOCK`, the URL from SAP's tutorial, no authentication.
-   - Add the three properties: `sap.processautomation.enabled` = `true`, `sap.applicationdevelopment.actions.enabled` = `true`, `sap.build.usage` = `odata_gen`.
-   - *Create*, then *Check Connection*.
-3. **Create the second destination** by *Duplicate*: rename it `Badge_Service` and change only the URL. The properties are copied.
-4. **Link both destinations in the control tower:** Lobby → *Control Tower* → *Destinations* → *Add* → pick the destination → *Next*.
-   - Choose *Specific Environments*, then your environment, and *Add Destination*. Repeat for the second one.
-   - SAP's tutorial also selects the *Public* environment.
+*Steps and screenshots adapted from SAP's tutorial (© SAP SE, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)). Steps reworded; screenshots resized.*
+
+> [!TIP]
+> **Names in the screenshots**
+> - SAP's screenshots show every name with a `tutorial_` prefix, for example `tutorial_S4HANA_MOCK`.
+> - In a shared tenant, add your own prefix the same way, so your objects do not clash with other learners'.
+
+### Step 1: Create an environment for testing Joule skills
+
+1. Open the **SAP Build lobby**, the start page where you create and open all your projects.
+2. In the left menu choose **Control Tower**, then the **Environments** tile.
+
+    ![SAP Build lobby: Control Tower selected in the left menu, with the Environments tile highlighted under Tenant Configuration](images/t21-01-controltower.png)
+
+3. Choose **Create**. In the *Create Environment* dialog:
+   - **Environment Name:** a name of your own, for example `tutorial`. The *Identifier* fills in by itself.
+   - **Description:** what the environment is for, for example "Environment for testing the tutorial for Joule Skills".
+   - Choose **Create**.
+
+    ![Create Environment dialog: name and identifier tutorial, colour Indigo, a description, and the Create button](images/t21-02-environments-create.png)
+
+4. Open your new environment and choose its **Joule** tab.
+   - *Joule Digital Assistant* shows *Standalone*, but the capability list says *No Data*.
+   - That is expected: nothing is deployed yet, so the standalone assistant cannot be launched.
+
+    ![The environment's Joule tab: Joule Digital Assistant (Standalone), a greyed Launch button, and No Data under Environment Capabilities](images/t21-03-environments-joule.png)
+
+> [!TIP]
+> **No admin rights?**
+> - Creating environments needs admin rights in the control tower.
+> - On the same *Environments* page, choose **Activate Private Environment** instead. The class worked this way.
+
+### Step 2: Create the two destinations
+
+1. Open the **SAP BTP cockpit** for the subaccount where SAP Build runs, and go to **Connectivity → Destinations**.
+2. Choose **Create**, then **From Scratch**, then **Create**.
+
+    ![BTP cockpit: Connectivity > Destinations, and the Create New Destination dialog with From Scratch selected](images/t21-04-destinations-s4hanamock-scratch.png)
+
+3. Fill in the main properties:
+
+    | Field | Value |
+    |---|---|
+    | Name | `S4HANA_MOCK` |
+    | Type | HTTP |
+    | Proxy Type | Internet |
+    | Authentication | NoAuthentication |
+    | URL | `https://s4hana-mock.cfapps.eu10.hana.ondemand.com/sap/opu/odata/sap/API_BUSINESS_PARTNER` |
+
+4. Under **Additional Properties**, choose **Add Property** three times and enter:
+
+    | Key | Value |
+    |---|---|
+    | `sap.processautomation.enabled` | `true` |
+    | `sap.applicationdevelopment.actions.enabled` | `true` |
+    | `sap.build.usage` | `odata_gen` |
+
+    ![Create Destination form, numbered: name, URL, three Add Property rows with their values, then Create](images/t21-05-destinations-s4hanamock-create.png)
+
+5. Choose **Create**, then **Check Connection**. The message should say the HTTP request succeeded. Choose **Close**.
+
+    ![The S4HANA_MOCK destination after Check Connection: the request succeeded; Duplicate is marked as the next button](images/t21-06-destinations-s4hanamock-check.png)
+
+6. With `S4HANA_MOCK` still open, choose **Duplicate**. Change only two fields:
+   - **Name:** `Badge_Service`
+   - **URL:** `https://badges.cfapps.eu10.hana.ondemand.com/service/BadgeRequests`
+   - The three additional properties are copied, so leave them.
+
+    ![Duplicated destination: new name and badge-service URL; the three additional properties are already filled in](images/t21-07-destinations-badgeservice.png)
+
+7. Choose **Create**, then **Check Connection**, then **Close**.
+
+    ![The Badge_Service destination: Check Connection reports that the request succeeded](images/t21-08-destinations-badgeservice-check.png)
+
+### Step 3: Link the destinations to your environment
+
+1. Back in the **SAP Build lobby**, choose **Control Tower**, then **Destinations**.
+   - The list is empty: a destination that exists only in the cockpit is not yet visible to SAP Build.
+2. Choose **Add**.
+
+    ![Control Tower > Destinations: No results found, and the Add button](images/t21-09-controltower-destinations.png)
+
+3. In the *Add Destination* wizard, select **Badge_Service** and choose **Next**.
+   - The list shows each destination's type, authentication and URL, so you can check you have the right one.
+
+    ![Add Destination, step 1 Select Destination: Badge_Service selected; S4HANA_MOCK also listed; Next button](images/t21-10-controltower-destinations-select.png)
+
+4. Choose **Specific Environments**, search for your environment and select it.
+
+    ![Add Destination, step 2 Associate Environments: Specific Environments, the search finds tutorial, and it is ticked](images/t21-11-controltower-destinations-associate-environments.png)
+
+5. Search for **Public** and select it as well (see the note in 21.3), then choose **Add Destination**.
+
+    ![Associate Environments: the Public environment ticked as well, then Add Destination](images/t21-12-controltower-destinations-add.png)
+
+6. Repeat steps 2 to 5 for **S4HANA_MOCK**.
+7. Check the result: both destinations show **2 Environments**. Click the link to see *Public* and your own environment.
+
+    ![Control Tower > Destinations: both destinations linked to 2 Environments, Public and tutorial](images/t21-13-controltower-destinations-check.png)
 
 ## 21.3 Why it works
 
@@ -102,12 +190,16 @@ flowchart LR
 ## How this page was checked
 
 - **SAP tutorial read in full on 21 Nov 2026** (last updated by SAP on 21 Aug 2026).
+- **Steps rebuilt on 21 Nov 2026** from the tutorial's source file, with all 13 of its screenshots.
+  - Every screenshot was checked for personal data; none needed blurring.
+  - SAP's page has a *Test yourself* heading, but its public source contains no questions, so none were taken over.
 - **Lecture 12 recording:** captions 0:11 to 0:22 (the lecturer creates both destinations and links them). **Lecture 11:** 0:12 to 0:24 (the Northwind destination).
 - Not run by me: there is no SAP Build tenant in this workspace.
 
 ## Sources
 
 - SAP Developer Center, *Setup Environment and Connectivity for Joule Skills*: https://developers.sap.com/tutorials/joulestudio-skill-environment-setup.html
+- Tutorial source and screenshots: https://github.com/sap-tutorials/sap-build-process-automation (© SAP SE, licensed CC BY 4.0)
 - SAP Developer Center, *Build Your First Joule Skill in Joule Studio, Classic Edition*: https://developers.sap.com/group.joule-studio-first-skill.html
 - BTPAI course, Lecture 11 Part A (BT023) and Lecture 12 (BT025) recordings
 
